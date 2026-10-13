@@ -145,7 +145,8 @@ ConfigContextMenu = {
     },
 
     Menu = {
-        Width = 0.118, -- Largeur du menu
+        Width = 0.118, -- Largeur minimale du menu (il s'élargit seul si un texte est plus long)
+        MaxWidth = 0.3, -- Largeur maximale
         ItemHeight = 0.0255, -- Hauteur d'une ligne
         Font = 0, -- Police GTA : 0 = Chalet London, 1 = House Script, 4 = Chalet Comprime Cologne, 7 = Pricedown
         TextScale = 0.27, -- Taille du texte

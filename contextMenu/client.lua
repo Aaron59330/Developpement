@@ -347,28 +347,12 @@ function Item:Process(cursorPosition)
         textAlpha = 127
     end
     self.text.color = self.enabled and ((self.hovered and Colors.White or self.colors.text):Alpha(textAlpha)) or self.colors.disabledText:Alpha(textAlpha)
-    -- Réduit le texte s'il dépasse du menu (ex : montants d'argent, noms d'entreprise)
-    local baseScale = ConfigContextMenu.Menu.TextScale or 0.34
-    self.text.scale = vector2(baseScale, baseScale)
-    local available = self.parent.width - 0.0075 - ((self.rightSprite or self.sprite) and 0.02 or 0.008)
-    local titleWidth = self.text:GetWidth()
-    if (titleWidth > available and titleWidth > 0) then
-        local factor = math.max(available / titleWidth, 0.55)
-        self.text.scale = vector2(baseScale * factor, baseScale * factor)
-    end
     self.text:Draw()
     if (self.rightText) then
-        -- Réduit le texte de droite (montants, quantités) s'il dépasse du menu
         local baseScale = ConfigContextMenu.Menu.TextScale or 0.34
         self.rightText.scale = vector2(baseScale, baseScale)
-        local available = self.parent.width - self.text:GetWidth() - 0.0075 - 0.012
         local rightWidth = self.rightText:GetWidth()
-        if (rightWidth > available and rightWidth > 0) then
-            local factor = math.max(available / rightWidth, 0.6)
-            self.rightText.scale = vector2(baseScale * factor, baseScale * factor)
-            rightWidth = self.rightText:GetWidth()
-        end
-        local rightY = 0.0035 + (baseScale - self.rightText.scale.y) * 0.012
+        local rightY = 0.0035
         self.rightText.position = self.position + vector2(self.parent.width - rightWidth - 0.006, rightY)
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
@@ -800,6 +784,26 @@ function Menu:RecalculatePosition(position)
     local totalHeight = 0.012 * #self.separators
     for k, item in pairs(self.items) do
         totalHeight = totalHeight + item.height
+    end
+    -- Largeur adaptée au texte le plus long (même taille de texte partout)
+    local baseWidth = ConfigContextMenu.Menu.Width or 0.118
+    local needed = baseWidth
+    for k, item in pairs(self.items) do
+        if item.text.title ~= item._cacheTitle or (item.rightText and item.rightText.title ~= item._cacheRight) then
+            item._cacheTitle = item.text.title
+            item._cacheRight = item.rightText and item.rightText.title or nil
+            item._cacheWidth = item.text:GetWidth() + (item.rightText and (item.rightText:GetWidth() + 0.01) or 0)
+        end
+        local extra = (item.rightSprite or item.sprite) and 0.02 or 0.008
+        needed = math.max(needed, item._cacheWidth + 0.0075 + extra)
+    end
+    self.width = math.min(needed, ConfigContextMenu.Menu.MaxWidth or 0.3)
+    for k, item in pairs(self.items) do
+        item.background.size = vector2(self.width, item.height)
+    end
+    for k, sep in pairs(self.separators) do
+        sep.background.size = vector2(self.width, 0.012)
+        sep.line.size = vector2(self.width - 0.012, sep.line.size.y)
     end
     self.position = position
     self.lowerRight = self.position + vector2(self.width, totalHeight)
