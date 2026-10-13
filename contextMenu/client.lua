@@ -107,6 +107,12 @@ function PlayMenuSound(kind)
     if not cfg or cfg.Enabled == false or not cfg[kind] then return end
     PlaySoundFrontend(-1, cfg[kind][1], cfg[kind][2], true)
 end
+-- Décalage vertical pour centrer un texte (hauteur de ligne GTA ~ 0.08 * échelle) dans la ligne
+local function CenteredTextY(height, scale)
+    return math.max((height - 0.08 * scale) / 2 + 0.0003, 0.0)
+end
+local MENU_PADDING_LEFT  = 0.0075
+local MENU_PADDING_RIGHT = 0.0055
 --Rect.lua
 Rect = {}
 Rect.__index = Rect
@@ -353,7 +359,7 @@ function Item:Process(cursorPosition)
         self.rightText.scale = vector2(baseScale, baseScale)
         local rightWidth = self.rightText:GetWidth()
         local rightY = 0.0035
-        self.rightText.position = self.position + vector2(self.parent.width - rightWidth - 0.006, rightY)
+        self.rightText.position = self.position + vector2(self.parent.width - rightWidth - MENU_PADDING_RIGHT, CenteredTextY(self.height, baseScale))
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
     end
@@ -413,9 +419,11 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(0.0075, 0.0035)
+    self.text.position = self.position + vector2(MENU_PADDING_LEFT, CenteredTextY(self.height, self.text.scale.y))
     if (self.rightSprite) then
-        self.rightSprite:SetPosition(position + vector2(self.parent.width - 0.0125, 0.0035))
+        -- flèche centrée verticalement, alignée sur la marge droite
+        self.rightSprite:SetPosition(position + vector2(self.parent.width - self.rightSprite.size.x - MENU_PADDING_RIGHT,
+            (self.height - self.rightSprite.size.y) / 2))
     end
 end
 function Item:InBounds(position)
@@ -485,7 +493,8 @@ function CheckboxItem:Clicked()
 end
 function CheckboxItem:SetPosition(position)
     Item.SetPosition(self, position)
-    self.sprite:SetPosition(position + vector2(self.parent.width - 0.0195, -0.0035))
+    self.sprite:SetPosition(position + vector2(self.parent.width - self.sprite.size.x - MENU_PADDING_RIGHT,
+        (self.height - self.sprite.size.y) / 2))
 end
 function CheckboxItem:InBounds(position)
     return Item.InBounds(self, position)
@@ -794,8 +803,9 @@ function Menu:RecalculatePosition(position)
             item._cacheRight = item.rightText and item.rightText.title or nil
             item._cacheWidth = item.text:GetWidth() + (item.rightText and (item.rightText:GetWidth() + 0.01) or 0)
         end
-        local extra = (item.rightSprite or item.sprite) and 0.02 or 0.008
-        needed = math.max(needed, item._cacheWidth + 0.0075 + extra)
+        local icon = item.rightSprite or item.sprite
+        local extra = icon and (icon.size.x + MENU_PADDING_RIGHT + 0.006) or (MENU_PADDING_RIGHT + 0.004)
+        needed = math.max(needed, item._cacheWidth + MENU_PADDING_LEFT + extra)
     end
     self.width = math.min(needed, ConfigContextMenu.Menu.MaxWidth or 0.3)
     for k, item in pairs(self.items) do
