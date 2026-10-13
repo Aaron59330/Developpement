@@ -81,7 +81,7 @@
       if (d.head) {
         img.onload = function () { photo.classList.add('has-head'); };
         img.onerror = function () { photo.classList.remove('has-head'); };
-        img.src = d.head;
+        img.src = d.head + (d.head.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now();
       }
 
       holder.className = ''; void holder.offsetWidth; holder.className = 'show';

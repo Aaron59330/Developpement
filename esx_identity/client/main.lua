@@ -50,6 +50,23 @@ local function UpdateHeadshot()
 	end
 end
 
+-- Rafraîchit la photo quand un autre script change l'apparence du joueur (skinchanger, créateur de personnage...)
+-- Utilisable aussi manuellement : TriggerEvent('esx_identity:refreshHead')
+local function RefreshHeadIfOpen()
+	if guiEnabled then
+		Citizen.CreateThread(function()
+			Citizen.Wait(600) -- laisse le ped finir de charger sa nouvelle apparence
+			if guiEnabled then UpdateHeadshot() end
+		end)
+	end
+end
+
+RegisterNetEvent('esx_identity:refreshHead', RefreshHeadIfOpen)
+AddEventHandler('skinchanger:modelLoaded', RefreshHeadIfOpen)
+AddEventHandler('skinchanger:loadSkin', RefreshHeadIfOpen)
+AddEventHandler('skinchanger:loadClothes', RefreshHeadIfOpen)
+AddEventHandler('esx_skin:playerRegistered', RefreshHeadIfOpen)
+
 RegisterNUICallback('requestHead', function(data, cb)
 	if guiEnabled then
 		Citizen.CreateThread(UpdateHeadshot)
