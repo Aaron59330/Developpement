@@ -325,19 +325,34 @@ local function BarDrawText(text, x, y, scale, r, g, b)
     SetTextFont(4)
     SetTextScale(0.0, scale)
     SetTextColour(r, g, b, 255)
+    SetTextDropShadow(1, 0, 0, 0, 220)
+    SetTextOutline()
     BeginTextCommandDisplayText("STRING")
     AddTextComponentSubstringPlayerName(text)
     EndTextCommandDisplayText(x, y)
 end
 
--- items = { {label = "TEXTE", color = {r,g,b}}, {badge = "OFF", label = "NOCLIP", color = {r,g,b}}, ... }
--- Style : [pastille contour couleur + valeur] LIBELLÉ | [pastille] LIBELLÉ | ...
+-- Rectangle à coins légèrement arrondis (coins coupés), x/y = coin haut gauche, tailles en écran 0..1
+local function BarRoundedRect(x, y, w, h, radiusPx, r, g, b, a)
+    local rx, ry = radiusPx / 1920.0, radiusPx / 1080.0
+    DrawRect(x + w / 2, y + h / 2, w, h - ry * 2, r, g, b, a)
+    DrawRect(x + w / 2, y + h / 2, w - rx * 2, h, r, g, b, a)
+    DrawRect(x + rx / 2, y + h / 2, rx, h - ry * 2 + 0.0001, r, g, b, a)
+    DrawRect(x + w - rx / 2, y + h / 2, rx, h - ry * 2 + 0.0001, r, g, b, a)
+end
+
+local function BarBrighten(c, amount)
+    return math.min(255, math.floor(c[1] + (255 - c[1]) * amount)),
+           math.min(255, math.floor(c[2] + (255 - c[2]) * amount)),
+           math.min(255, math.floor(c[3] + (255 - c[3]) * amount))
+end
+
+-- items = { {label = "TEXTE", color = {r,g,b}}, {badge = "15", label = "STAFFS EN LIGNE", color = {r,g,b}}, ... }
+-- Style : [pastille colorée + valeur] LIBELLÉ | [pastille] LIBELLÉ | ...
 local function DrawTopCenterBar(items)
-    local scale, top, padX, padY = 0.255, 0.0125, 0.0055, 0.0045
+    local scale, top, padX, padY = 0.27, 0.012, 0.0048, 0.0042
     local lineHeight = 0.0275 * (scale / 0.3)
-    local badgePadX, gap, sepGap = 0.0032, 0.0035, 0.0058
-    local px = 0.0005          -- épaisseur du contour (horizontal)
-    local py = 0.0009          -- épaisseur du contour (vertical)
+    local badgePadX, gap, sepGap = 0.0030, 0.0030, 0.0068
 
     -- Mesure
     local total = 0
@@ -345,10 +360,9 @@ local function DrawTopCenterBar(items)
         item.w = BarTextWidth(item.label, scale)
         local width = item.w
         if item.badge then
-            item.bw = BarTextWidth(item.badge, scale) + badgePadX * 2
+            item.bw = math.max(BarTextWidth(item.badge, scale) + badgePadX * 2, lineHeight * 0.62)
             width = width + gap + item.bw
         end
-        item.total = width
         total = total + width
         if i < #items then total = total + sepGap * 2 + 0.0006 end
     end
@@ -356,27 +370,29 @@ local function DrawTopCenterBar(items)
     local barWidth, barHeight = total + padX * 2, lineHeight + padY * 2
     local x = 0.5 - barWidth / 2
     local midY = top + barHeight / 2
-    DrawRect(0.5, midY, barWidth, barHeight, 52, 52, 55, 175)
+    BarRoundedRect(x, top, barWidth, barHeight, 4, 38, 38, 40, 150)
 
     x = x + padX
-    local textY = top + padY - 0.0006
+    local textY = top + padY - 0.0008
     for i, item in ipairs(items) do
         local c = item.color or {235, 235, 235}
         if item.badge then
-            -- pastille : contour coloré + fond sombre, valeur colorée
-            local bh = lineHeight - 0.001
-            DrawRect(x + item.bw / 2, midY, item.bw, bh, c[1], c[2], c[3], 230)
-            DrawRect(x + item.bw / 2, midY, item.bw - px * 2, bh - py * 2, 24, 24, 28, 240)
-            BarDrawText(item.badge, x + badgePadX, textY, scale, c[1], c[2], c[3])
+            -- pastille : fond coloré, valeur plus claire
+            local bh = lineHeight - 0.0025
+            local bx, by = x, midY - bh / 2
+            BarRoundedRect(bx, by, item.bw, bh, 2, c[1], c[2], c[3], 215)
+            BarRoundedRect(bx + 0.0004, by + 0.0007, item.bw - 0.0008, bh - 0.0014, 2, math.floor(c[1] * 0.35), math.floor(c[2] * 0.35), math.floor(c[3] * 0.35), 235)
+            local tr, tg, tb = BarBrighten(c, 0.25)
+            BarDrawText(item.badge, bx + (item.bw - BarTextWidth(item.badge, scale)) / 2, textY, scale, tr, tg, tb)
             x = x + item.bw + gap
-            BarDrawText(item.label, x, textY, scale, 235, 235, 235)
+            BarDrawText(item.label, x, textY, scale, 245, 245, 245)
         else
             BarDrawText(item.label, x, textY, scale, c[1], c[2], c[3])
         end
         x = x + item.w
         if i < #items then
             x = x + sepGap
-            DrawRect(x + 0.0003, midY, 0.0006, lineHeight - 0.003, 235, 235, 235, 210)
+            DrawRect(x + 0.0003, midY, 0.0006, lineHeight * 0.62, 240, 240, 240, 225)
             x = x + 0.0006 + sepGap
         end
     end
@@ -402,9 +418,9 @@ local function initializeText()
                 {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
                 {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
                 {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
-                {label = "REPORTS", badge = tostring(barStats.reports), color = {224, 62, 62}},
-                {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {80, 150, 255}},
-                {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {80, 150, 255}},
+                {label = "REPORTS", badge = tostring(barStats.reports), color = {232, 72, 88}},
+                {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {60, 140, 255}},
+                {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {60, 140, 255}},
             })
         end
     end)
