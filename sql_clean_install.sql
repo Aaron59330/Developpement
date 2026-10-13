@@ -5469,4 +5469,12 @@ INSERT INTO `datastore` (`name`, `label`, `shared`) VALUES
 ('user_glasses', 'Glasses', '0'),
 ('user_helmet', 'Helmet', '0'),
 ('user_mask', 'Mask', '0');
+CREATE TABLE IF NOT EXISTS `society_moneywash` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `identifier` varchar(60) NOT NULL,
+  `society` varchar(60) NOT NULL,
+  `amount` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 SET FOREIGN_KEY_CHECKS=1;

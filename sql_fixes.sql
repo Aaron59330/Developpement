@@ -66,3 +66,13 @@ ALTER TABLE `jail` ADD PRIMARY KEY (`identifier`);
 --    Choisis UN format (JJ/MM/AAAA recommandé) ; la fiche à corriger à la main :
 -- ---------------------------------------------------------------------------
 -- SELECT identifier, firstname, lastname, dateofbirth FROM users WHERE dateofbirth REGEXP '^[0-9]{2}/(1[3-9]|2[0-9]|3[01])/';
+
+-- E. Table manquante utilisée par CorePickax/esx/society (blanchiment)
+CREATE TABLE IF NOT EXISTS `society_moneywash` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `identifier` varchar(60) NOT NULL,
+  `society` varchar(60) NOT NULL,
+  `amount` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

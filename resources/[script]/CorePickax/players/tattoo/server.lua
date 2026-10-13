@@ -8,11 +8,11 @@ AddEventHandler("CorePickax:pay", function(price,playerTatoos)
         
         if xMoney >= price then
             RemoveMoneyOnPlayer(_src, price)
-            TriggerClientEvent("CorePickax:buyCallback", _src, true)
+            TriggerClientEvent("CorePickax:buyTattoo", _src, true)
             performDbUpdate(playerTatoos,_src)
 
         else
-            TriggerClientEvent("CorePickax:buyCallback", _src, false)
+            TriggerClientEvent("CorePickax:buyTattoo", _src, false)
         end
     end)
 end)
