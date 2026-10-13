@@ -347,9 +347,29 @@ function Item:Process(cursorPosition)
         textAlpha = 127
     end
     self.text.color = self.enabled and ((self.hovered and Colors.White or self.colors.text):Alpha(textAlpha)) or self.colors.disabledText:Alpha(textAlpha)
+    -- Réduit le texte s'il dépasse du menu (ex : montants d'argent, noms d'entreprise)
+    local baseScale = ConfigContextMenu.Menu.TextScale or 0.34
+    self.text.scale = vector2(baseScale, baseScale)
+    local available = self.parent.width - 0.0075 - ((self.rightSprite or self.sprite) and 0.02 or 0.008)
+    local titleWidth = self.text:GetWidth()
+    if (titleWidth > available and titleWidth > 0) then
+        local factor = math.max(available / titleWidth, 0.55)
+        self.text.scale = vector2(baseScale * factor, baseScale * factor)
+    end
     self.text:Draw()
     if (self.rightText) then
-        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.006, 0.0035)
+        -- Réduit le texte de droite (montants, quantités) s'il dépasse du menu
+        local baseScale = ConfigContextMenu.Menu.TextScale or 0.34
+        self.rightText.scale = vector2(baseScale, baseScale)
+        local available = self.parent.width - self.text:GetWidth() - 0.0075 - 0.012
+        local rightWidth = self.rightText:GetWidth()
+        if (rightWidth > available and rightWidth > 0) then
+            local factor = math.max(available / rightWidth, 0.6)
+            self.rightText.scale = vector2(baseScale * factor, baseScale * factor)
+            rightWidth = self.rightText:GetWidth()
+        end
+        local rightY = 0.0035 + (baseScale - self.rightText.scale.y) * 0.012
+        self.rightText.position = self.position + vector2(self.parent.width - rightWidth - 0.006, rightY)
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
     end
