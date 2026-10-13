@@ -11,3 +11,4 @@ files {
 }
 
 loadscreen 'index.html'
+loadscreen_cursor 'yes'
