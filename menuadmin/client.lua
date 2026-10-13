@@ -388,7 +388,6 @@ local function DrawTopCenterBar(items)
     local scale = 0.27
     local lineH = math.floor(GetTextScaleHeight(scale, 4) * RY + 0.5)   -- hauteur de la ligne de texte (px)
     local padX, padY, gap, sepGap = 10, 7, 6, 13
-    local badgePad = 6
 
     -- Mesure (tout en pixels entiers)
     local total = 0
@@ -397,8 +396,7 @@ local function DrawTopCenterBar(items)
         local width = item.w
         if item.badge then
             item.tw = BarTextWidthPx(item.badge, scale)
-            item.bw = math.max(item.tw + badgePad * 2, lineH)
-            if (item.bw - item.tw) % 2 ~= 0 then item.bw = item.bw + 1 end -- centrage exact du chiffre
+            item.bw = item.tw -- plus de carré derrière la valeur : texte coloré seul
             width = width + gap + item.bw
         end
         total = total + width
@@ -414,20 +412,14 @@ local function DrawTopCenterBar(items)
 
     local midY = barY + barH / 2
     local textY = midY - lineH * BAR_TEXT_CENTER     -- même hauteur pour TOUS les textes
-    local badgeH = lineH - 2
-    if (barH - badgeH) % 2 ~= 0 then badgeH = badgeH + 1 end
-    local badgeY = barY + (barH - badgeH) / 2
 
     local x = barX + padX
     for i, item in ipairs(items) do
         local c = item.color or {235, 235, 235}
         if item.badge then
-            -- pastille : contour de 1 px + fond sombre teinté, valeur centrée
-            BarRoundedRect(x, badgeY, item.bw, badgeH, 3, c[1], c[2], c[3], 220)
-            BarRoundedRect(x + 1, badgeY + 1, item.bw - 2, badgeH - 2, 2,
-                math.floor(c[1] * 0.33), math.floor(c[2] * 0.33), math.floor(c[3] * 0.33), 240)
+            -- valeur colorée (sans fond), puis le libellé
             local tr, tg, tb = BarBrighten(c, 0.25)
-            BarDrawTextPx(item.badge, x + (item.bw - item.tw) / 2, textY, scale, tr, tg, tb)
+            BarDrawTextPx(item.badge, x, textY, scale, tr, tg, tb)
             x = x + item.bw + gap
             BarDrawTextPx(item.label, x, textY, scale, 245, 245, 245)
         else
