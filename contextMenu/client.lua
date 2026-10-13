@@ -253,7 +253,7 @@ function Separator.CreateNew(menu, index, lineColor, bgColor, alpha)
     
     self.position = vector2(0, 0)
     self.background = Rect(vector2(0, 0), vector2(self.parent.width, 0.012))
-    self.line = Rect(vector2(0, 0), vector2(self.parent.width - 0.016, 0.0007 * GetAspectRatio(false)))
+    self.line = Rect(vector2(0, 0), vector2(self.parent.width - 0.012, 0.0006 * GetAspectRatio(false)))
     self.alpha = alpha
     self.colors = {
         -- line = lineColor or Colors.Grey,
@@ -270,7 +270,7 @@ end
 function Separator:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.line.position = self.position + vector2(0.008, 0.0052)
+    self.line.position = self.position + vector2(0.006, 0.0052)
 end
 --Item.lua
 Item = {}
@@ -287,12 +287,12 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.position = vector2(0, 0)
     
-    self.height = 0.034
+    self.height = ConfigContextMenu.Menu.ItemHeight or 0.0255
     self.text = Text(title)
     self.text.scale = vector2(ConfigContextMenu.Menu.TextScale or 0.34, ConfigContextMenu.Menu.TextScale or 0.34)
     self.rightText = nil
     if flecheactive then
-        self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.012, 0.012 * GetAspectRatio(false)))
+        self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.0095, 0.0095 * GetAspectRatio(false)))
     else
         self.rightSprite = nil
     end
@@ -324,7 +324,7 @@ function Item:Process(cursorPosition)
     self.background:Draw((self.hovered and self.enabled) and self.colors.backgroundHovered:Alpha(alpha) or self.colors.background:Alpha(alpha), self.parent)
     if (self.hovered and self.enabled and not menuOverlapped) then
         -- Barre d'accent à gauche de l'élément survolé
-        Rect(self.position + vector2(0.0035, 0.006), vector2(0.0022, self.height - 0.012)):Draw(MenuAccent(255))
+        Rect(self.position + vector2(0.003, 0.0055), vector2(0.0016, self.height - 0.011)):Draw(MenuAccent(255))
     end
     if (self:IsOverlapped()) then
         return
@@ -349,7 +349,7 @@ function Item:Process(cursorPosition)
     self.text.color = self.enabled and ((self.hovered and Colors.White or self.colors.text):Alpha(textAlpha)) or self.colors.disabledText:Alpha(textAlpha)
     self.text:Draw()
     if (self.rightText) then
-        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.008, 0.0045)
+        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.006, 0.0035)
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
     end
@@ -409,9 +409,9 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(0.0095, 0.0045)
+    self.text.position = self.position + vector2(0.0075, 0.0035)
     if (self.rightSprite) then
-        self.rightSprite:SetPosition(position + vector2(self.parent.width - 0.0165, 0.0035))
+        self.rightSprite:SetPosition(position + vector2(self.parent.width - 0.0125, 0.0035))
     end
 end
 function Item:InBounds(position)
@@ -454,9 +454,9 @@ function CheckboxItem:Init(menu, text, value, textColor, disabledTextColor, bgCo
     self.closeMenuOnClick = false
     
     if (self.checked) then
-        self.sprite = Sprite("commonmenu", "shop_box_tick", nil, vector2(0.02, 0.02 * GetAspectRatio(false)))
+        self.sprite = Sprite("commonmenu", "shop_box_tick", nil, vector2(0.016, 0.016 * GetAspectRatio(false)))
     else
-        self.sprite = Sprite("commonmenu", "shop_box_blank", nil, vector2(0.02, 0.02 * GetAspectRatio(false)))
+        self.sprite = Sprite("commonmenu", "shop_box_blank", nil, vector2(0.016, 0.016 * GetAspectRatio(false)))
     end
 end
 function CheckboxItem:Process(cursorPosition)
@@ -481,7 +481,7 @@ function CheckboxItem:Clicked()
 end
 function CheckboxItem:SetPosition(position)
     Item.SetPosition(self, position)
-    self.sprite:SetPosition(position + vector2(self.parent.width - 0.0245, -0.0019))
+    self.sprite:SetPosition(position + vector2(self.parent.width - 0.0195, -0.0035))
 end
 function CheckboxItem:InBounds(position)
     return Item.InBounds(self, position)
@@ -664,7 +664,7 @@ function Menu.CreateNew(pool)
     self.parent = nil
     self.position = vector2(0, 0)
     self.lowerRight = vector2(0, 0)
-    self.width = 0.165
+    self.width = ConfigContextMenu.Menu.Width or 0.118
     self.hoverTimeout = 250
     self.colors = {
         -- background = Colors.DarkGrey,
@@ -677,7 +677,7 @@ function Menu.CreateNew(pool)
         textDisabled = Color(ConfigContextMenu.Color.ColorTextDisable[1], ConfigContextMenu.Color.ColorTextDisable[2], ConfigContextMenu.Color.ColorTextDisable[3]) or Colors.LightGrey
     }
     self.alpha = ConfigContextMenu.Menu.ColorAlpha
-    self.border = Border(nil, nil, 0.001)
+    self.border = Border(nil, nil, 0.0006)
     self.items = {}
     self.separators = {}
     self.OnClosed = function() end

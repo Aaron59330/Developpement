@@ -145,14 +145,16 @@ ConfigContextMenu = {
     },
 
     Menu = {
+        Width = 0.118, -- Largeur du menu
+        ItemHeight = 0.0255, -- Hauteur d'une ligne
         Font = 0, -- Police GTA : 0 = Chalet London, 1 = House Script, 4 = Chalet Comprime Cologne, 7 = Pricedown
-        TextScale = 0.34, -- Taille du texte
+        TextScale = 0.27, -- Taille du texte
         RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut
-        CornerRadius = 10, -- Rayon des coins en pixels (si RoundedCorners = true)
+        CornerRadius = 6, -- Rayon des coins en pixels (si RoundedCorners = true)
         OpenMenu = 25,--Touche pour accéder au entité
         OpenMenuBind = 19,--ALT (ouvrir le menu principale)
         ClickInMenu = 24,--Intéraction (clique gauche)
-        ColorAlpha = 228,--Alpha du menu
+        ColorAlpha = 235,--Alpha du menu
     },
 
     --IMPORTANT POUR VOTRE ARGENT
