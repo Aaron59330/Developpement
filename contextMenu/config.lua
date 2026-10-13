@@ -107,13 +107,13 @@ ButtonContextMenu = {
 
 ConfigContextMenu = {
     Color = {
-        ColorMenu = {12, 15, 22},
-        ColorMenuHovered = {8, 52, 82},
-        ColorText = {226, 232, 242},
-        ColorTextDisable = {98, 106, 120},
-        ColorBorder = {0, 164, 255},
-        ColorSeparator = {0, 164, 255},
-        ColorAccent = {0, 164, 255}
+        ColorMenu = {10, 10, 10},
+        ColorMenuHovered = {38, 38, 38},
+        ColorText = {215, 215, 215},
+        ColorTextDisable = {95, 95, 95},
+        ColorBorder = {255, 255, 255},
+        ColorSeparator = {255, 255, 255},
+        ColorAccent = {255, 255, 255}
     },
 
     Jobs2 = true,
