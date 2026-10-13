@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap');
 
 :root {
-	--accent: #00a4ff; --accent-rgb: 0, 164, 255;
-	--glass: rgba(10, 14, 22, .72); --line: rgba(255,255,255,.12); --line-accent: rgba(0,164,255,.4);
+	--accent: var(--bb-accent, #00a4ff); --accent-rgb: var(--bb-accent-rgb, 0, 164, 255);
+	--glass: rgba(10, 14, 22, .72); --line: rgba(255,255,255,.12); --line-accent: rgba(var(--accent-rgb),.4);
 	--text: #f0f4fa; --text-soft: rgba(240,244,250,.88); --text-dim: rgba(240,244,250,.55);
 	--shadow: 0 24px 64px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.07);
 	--ease: cubic-bezier(.22, 1, .36, 1);

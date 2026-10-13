@@ -65,6 +65,7 @@ button.btn.danger:hover { border-color: #e84858; background: rgba(232,72,88,.14)
   </nav>
   <div class="side-foot">
     <button class="btn primary" id="dlConfig">Télécharger config.json</button>
+    <button class="btn" id="dlTheme">Télécharger theme.css</button>
     <button class="btn" id="dlCfg">Télécharger server.cfg</button>
   </div>
 </aside>
@@ -87,6 +88,13 @@ button.btn.danger:hover { border-color: #e84858; background: rgba(232,72,88,.14)
     <div class="preview" style="margin-top:16px">
       <img id="previewLogo" alt=""><div class="swatch" id="swatch"></div>
       <div class="live"><button class="btn primary" style="pointer-events:none">Bouton</button><span style="color:var(--accent);font-weight:700">Texte accent</span></div>
+    </div>
+  </div>
+  <div class="card"><h2>Liens (loading screen, boutons)</h2>
+    <div class="grid three">
+      <div><label>Discord</label><input type="text" data-path="links.discord"></div>
+      <div><label>Boutique</label><input type="text" data-path="links.boutique"></div>
+      <div><label>Règlement</label><input type="text" data-path="links.reglement"></div>
     </div>
   </div>
 </section>
@@ -152,11 +160,11 @@ button.btn.danger:hover { border-color: #e84858; background: rgba(232,72,88,.14)
   <h1>Export / Import</h1><p class="sub">Les réglages sont aussi gardés dans ce navigateur automatiquement.</p>
   <div class="card"><h2>Appliquer sur le serveur</h2>
     <ol style="margin:0;padding-left:18px;color:var(--dim)">
-      <li>Télécharge <b>config.json</b> et remplace celui de <code>bluebay_config/</code>.</li>
+      <li>Télécharge <b>config.json</b> et <b>theme.css</b> et remplace ceux de <code>bluebay_config/</code>.</li>
       <li>Télécharge <b>server.cfg</b> (bloc généré) et reporte-le dans ton vrai <code>server.cfg</code>.</li>
       <li>Redémarre : <code>restart bluebay_config</code> puis les ressources concernées.</li>
     </ol>
-    <div class="row" style="margin-top:16px"><button class="btn primary" id="dlConfig2">config.json</button><button class="btn" id="dlCfg2">server.cfg</button><button class="btn" id="copyCfg">Copier le bloc server.cfg</button></div>
+    <div class="row" style="margin-top:16px"><button class="btn primary" id="dlConfig2">config.json</button><button class="btn" id="dlTheme2">theme.css</button><button class="btn" id="dlCfg2">server.cfg</button><button class="btn" id="copyCfg">Copier le bloc server.cfg</button></div>
   </div>
   <div class="card"><h2>Importer</h2><input type="file" id="importFile" accept=".json"><div class="hint">Charge un config.json existant pour le modifier.</div></div>
   <div class="card"><h2>Aperçu du bloc server.cfg</h2><textarea id="cfgPreview" readonly style="height:230px;font-family:Consolas,monospace;font-size:12px"></textarea></div>
@@ -169,6 +177,7 @@ button.btn.danger:hover { border-color: #e84858; background: rgba(232,72,88,.14)
 <script>
 const DEFAULTS = {
   brand: { name: "Bluebay Roleplay", logo: "logo.png", accent: "#00a4ff" },
+  links: { discord: "https://discord.gg/JGxkBuckU", boutique: "https://bluebayrp.tebex.io/", reglement: "" },
   server: { hostname: "Bluebay Roleplay", projectName: "Bluebay Roleplay", projectDesc: "Serveur GTA RP francophone", maxClients: 64, licenseKey: "", locale: "fr-FR", tags: "roleplay, rp, esx, fr", onesync: "on", steamWebApiKey: "" },
   markers: { default: { type: 1, sizeX: 1.5, sizeY: 1.5, sizeZ: 0.6, color: "#00a4ff", alpha: 160, bobUpDown: false, rotate: false, drawDistance: 15.0 },
     list: [
@@ -263,6 +272,12 @@ function buildServerCfg() {
 function exportConfigJson() { const c = cleanConfig(); c.server.licenseKey = ''; c.server.steamWebApiKey = ''; return JSON.stringify(c, null, 2); }
 ['dlConfig', 'dlConfig2'].forEach(id => $('#' + id).onclick = () => { download('config.json', exportConfigJson(), 'application/json'); toast('config.json téléchargé'); });
 ['dlCfg', 'dlCfg2'].forEach(id => $('#' + id).onclick = () => { download('server.cfg', buildServerCfg()); toast('server.cfg téléchargé'); });
+
+function buildThemeCss() {
+  const a = cfg.brand.accent, rgb = [1, 3, 5].map(i => parseInt(a.substr(i, 2), 16)).join(', ');
+  return ':root {\n  --bb-accent: ' + a + ';\n  --bb-accent-rgb: ' + rgb + ';\n}\n';
+}
+['dlTheme', 'dlTheme2'].forEach(id => $('#' + id).onclick = () => { download('theme.css', buildThemeCss(), 'text/css'); toast('theme.css téléchargé'); });
 $('#copyCfg').onclick = () => { navigator.clipboard.writeText(buildServerCfg()).then(() => toast('Bloc copié')); };
 $('#importFile').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(txt => { try { cfg = merge(clone(DEFAULTS), JSON.parse(txt)); save(); bind(); renderMarkers(); refreshPreview(); toast('Config importée'); } catch (err) { toast('Fichier invalide'); } }); };
 $('#reset').onclick = () => { if (confirm('Tout remettre par défaut ?')) { cfg = clone(DEFAULTS); save(); bind(); renderMarkers(); toast('Réinitialisé'); } };

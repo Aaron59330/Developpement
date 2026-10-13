@@ -3,9 +3,16 @@
 // ===== Liens des boutons (mets tes URLs https:// complètes) =====
 var LINKS = {
 	reglement: '',
-	discord: '',
-	boutique: ''
+	discord: 'https://discord.gg/JGxkBuckU',
+	boutique: 'https://bluebayrp.tebex.io/'
 };
+
+// Liens centralisés : si bluebay_config est démarré, ses liens (panel) remplacent ceux-ci
+try {
+	fetch('https://cfx-nui-bluebay_config/config.json').then(function (r) { return r.json(); }).then(function (c) {
+		if (c && c.links) { for (var k in c.links) { if (c.links[k]) LINKS[k] = c.links[k]; } }
+	}).catch(function () {});
+} catch (e) {}
 
 (function () {
 	var bars = ['INIT_BEFORE_MAP_LOADED', 'MAP', 'INIT_AFTER_MAP_LOADED', 'INIT_SESSION'];

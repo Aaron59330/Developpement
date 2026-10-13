@@ -5,7 +5,7 @@
 @font-face { font-family: 'CardSign'; src: url('../fonts/JustSignature.woff') format('woff'); }
 
 .idcard {
-	--ink-rgb: 20,21,26; --bg: #e8e4d9; --bg2: #d9d4c5; --ink: #14151a; --soft: rgba(20,21,26,.5); --accent: #00a4ff; --line: rgba(20,21,26,.22);
+	--ink-rgb: 20,21,26; --bg: #e8e4d9; --bg2: #d9d4c5; --ink: #14151a; --soft: rgba(20,21,26,.5); --accent: var(--bb-accent, #00a4ff); --accent-rgb: var(--bb-accent-rgb, 0,164,255); --line: rgba(20,21,26,.22);
 	position: relative; box-sizing: border-box; width: 480px; height: 302px; padding: 16px 20px 14px;
 	border-radius: 16px; overflow: hidden; color: var(--ink);
 	font-family: 'CardFont', 'Segoe UI', Arial, sans-serif;
@@ -16,7 +16,7 @@
 }
 .idcard * { box-sizing: border-box; margin: 0; padding: 0; }
 .idcard.type-driver { --bg: #dfe7ef; --bg2: #c9d6e3; }
-.idcard.type-weapon { --ink-rgb: 241,237,225; --bg: #1d1d21; --bg2: #121215; --ink: #f1ede1; --soft: rgba(241,237,225,.5); --accent: #00a4ff; --line: rgba(241,237,225,.2); }
+.idcard.type-weapon { --ink-rgb: 241,237,225; --bg: #1d1d21; --bg2: #121215; --ink: #f1ede1; --soft: rgba(241,237,225,.5); --accent: var(--bb-accent, #00a4ff); --accent-rgb: var(--bb-accent-rgb, 0,164,255); --line: rgba(241,237,225,.2); }
 
 .guilloche {
 	position: absolute; inset: 0; pointer-events: none; opacity: .55;
@@ -59,7 +59,7 @@
 .cf.active small { color: var(--accent); }
 .cf b { display: block; min-height: 18px; font-size: 14px; font-weight: 700; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .02em; border-radius: 3px; }
 .cf:not(.done) b { background: rgba(var(--ink-rgb), 0.09); }
-.cf.active { background: rgba(0,164,255,.1); border-color: #00a4ff; }
+.cf.active { background: rgba(var(--accent-rgb),.1); border-color: var(--bb-accent, #00a4ff); }
 .cf b.pop { animation: pop2 .35s ease-out; }
 @keyframes pop2 { 0% { transform: translateY(6px); opacity: .2; } 100% { transform: none; opacity: 1; } }
 .cf.hidden { display: none; }

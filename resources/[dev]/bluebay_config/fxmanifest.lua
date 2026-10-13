@@ -9,5 +9,6 @@ shared_script 'loader.lua'
 
 files {
     'config.json',
+    'theme.css',
     'logo.png'
 }
