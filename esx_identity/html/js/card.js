@@ -71,13 +71,14 @@
 		fill("#cDob", "dob", d.length === 10 ? d : "");
 		fill("#cHeight", "height", h ? h + " cm" : "");
 		fill("#cNat", "nat", n);
-		$("#cSex").text(sex === "f" ? "F" : "M"); $("#photoSex").text(sex === "f" ? "F" : "H");
+		$("#cSex").text(sex === "f" ? "F" : "M"); 
 		$("#photo").toggleClass("female", sex === "f");
 		$("#cSign").text(f && l ? f[0].toUpperCase() + ". " + cap(l) : "");
 
+		$("#cNo").text(cardId);
 		var line = "ID" + cardId + "<<" + mrz(l) + "<<" + mrz(f);
-		while (line.length < 30) line += "<";
-		$("#mrz").text(line.slice(0, 30));
+		while (line.length < 60) line += "<";
+		$("#mrz").html(line.slice(0, 30) + "<br>" + (cardId + "<<<" + mrz(f + l)).padEnd(30, "<").slice(0, 30));
 
 		var total = 5, done = [f, l, d.length === 10, h, n].filter(Boolean).length;
 		var pct = Math.round(done / total * 100);
