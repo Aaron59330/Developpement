@@ -304,3 +304,13 @@ b.pop { animation: pop2 .35s ease-out; }
 .bar::before, .bar i { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 calc(10% - 4px), transparent calc(10% - 4px) 10%); mask-image: repeating-linear-gradient(90deg, #000 0 calc(10% - 4px), transparent calc(10% - 4px) 10%); }
 .bar::before { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,.12); }
 .bar i { position: absolute; left: 0; top: 0; background: #fff; border-radius: 0; transition: width .45s steps(10, end); }
+
+/* Logo serveur (recadré sur la zone utile du PNG) */
+.head { position: relative; }
+.server-logo {
+	margin-left: auto; width: 150px; height: 54px; flex-shrink: 0;
+	background: url("../img/logo.png") no-repeat;
+	background-size: 160px 160px; background-position: -5px -51px;
+	filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+	opacity: .95; animation: rise .6s .2s ease-out both;
+}
