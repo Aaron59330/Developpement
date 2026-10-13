@@ -182,7 +182,47 @@ function Text.CreateNew(title, color)
     self.scale = vector2(0.3, 0.3)
     return self
 end
+-- Découpe "Votre argent : ~g~1 234$" en [texte][chiffres] pour réduire uniquement les chiffres d'argent
+local MONEY_DIGITS_SCALE = 0.24
+function Text:SetMoneySegments(title)
+    if type(title) ~= "string" then return end
+    local first, last = title:find("%d[%d%s,%.]*%$")
+    if not first then return end
+
+    local before, money, after = title:sub(1, first - 1), title:sub(first, last), title:sub(last + 1)
+    local activeTag = ""
+    for tag in before:gmatch("~%a~") do activeTag = tag end
+
+    self.segments = {}
+    local trimmed = before:gsub("%s+$", "")
+    if trimmed ~= "" then
+        table.insert(self.segments, { text = trimmed, scale = self.scale.y, dy = 0.0, gap = 0.0015 })
+    end
+    table.insert(self.segments, { text = activeTag .. money, scale = MONEY_DIGITS_SCALE, dy = (self.scale.y - MONEY_DIGITS_SCALE) * 0.04, gap = 0.0 })
+    if after ~= "" then
+        self.segments[#self.segments].gap = 0.0
+        table.insert(self.segments, { text = activeTag .. after, scale = self.scale.y, dy = 0.0, gap = 0.0 })
+    end
+end
 function Text:Draw()
+    if self.segments then
+        local x = self.position.x
+        for _, seg in ipairs(self.segments) do
+            SetTextScale(seg.scale, seg.scale)
+            SetTextColour(self.color.r, self.color.g, self.color.b, self.color.a)
+            BeginTextCommandDisplayText("CELL_EMAIL_BCON")
+            AddTextComponentSubstringPlayerName(seg.text)
+            EndTextCommandDisplayText(x, self.position.y + seg.dy)
+            if not seg.width then
+                BeginTextCommandWidth("CELL_EMAIL_BCON")
+                AddTextComponentSubstringPlayerName(seg.text)
+                SetTextScale(seg.scale, seg.scale)
+                seg.width = EndTextCommandGetWidth(true)
+            end
+            x = x + seg.width + seg.gap
+        end
+        return
+    end
     SetTextScale(self.scale.x, self.scale.y)
     SetTextColour(self.color.r, self.color.g, self.color.b, self.color.a)
     BeginTextCommandDisplayText("CELL_EMAIL_BCON")
@@ -274,11 +314,7 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.height = 0.03
     self.text = Text(title)
-    -- Lignes d'argent (contiennent "$") : texte plus petit
-    self.smallText = type(title) == "string" and title:find("%$") ~= nil
-    if self.smallText then
-        self.text.scale = vector2(0.25, 0.25)
-    end
+    self.text:SetMoneySegments(title)
     self.rightText = nil
     if flecheactive then
         self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.015, 0.015 * GetAspectRatio(false)))
@@ -392,7 +428,7 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(0.002, self.smallText and 0.0038 or 0.003)
+    self.text.position = self.position + vector2(0.002, 0.003)
     if (self.rightSprite) then
         self.rightSprite:SetPosition(position + vector2(0.135, 0.0015))
     end
