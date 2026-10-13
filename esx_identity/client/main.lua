@@ -28,21 +28,34 @@ local function UpdateHeadshot()
 		headHandle = nil
 	end
 
-	local handle = RegisterPedheadshotTransparent(PlayerPedId())
-	local timeout = GetGameTimer() + 3000
+	-- Plusieurs essais : le ped peut ne pas être prêt juste après le spawn
+	for attempt = 1, 3 do
+		local handle = RegisterPedheadshotTransparent(PlayerPedId())
+		local timeout = GetGameTimer() + 4000
 
-	while not IsPedheadshotReady(handle) or not IsPedheadshotValid(handle) do
-		if GetGameTimer() > timeout then
-			UnregisterPedheadshot(handle)
+		while not IsPedheadshotReady(handle) or not IsPedheadshotValid(handle) do
+			if GetGameTimer() > timeout then break end
+			Citizen.Wait(50)
+		end
+
+		if IsPedheadshotReady(handle) and IsPedheadshotValid(handle) then
+			headHandle = handle
+			local txd = GetPedheadshotTxdString(handle)
+			SendNUIMessage({ type = "head", src = "https://nui-img/" .. txd .. "/" .. txd })
 			return
 		end
-		Citizen.Wait(50)
-	end
 
-	headHandle = handle
-	local txd = GetPedheadshotTxdString(handle)
-	SendNUIMessage({ type = "head", src = "https://nui-img/" .. txd .. "/" .. txd })
+		UnregisterPedheadshot(handle)
+		Citizen.Wait(500)
+	end
 end
+
+RegisterNUICallback('requestHead', function(data, cb)
+	if guiEnabled then
+		Citizen.CreateThread(UpdateHeadshot)
+	end
+	cb('ok')
+end)
 
 function EnableGui(state)
 	SetNuiFocus(state, state)

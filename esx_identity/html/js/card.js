@@ -103,10 +103,17 @@
 	/* vraie tête du personnage (envoyée par le client Lua) */
 	window.addEventListener("message", function (e) {
 		if (e.data && e.data.type === "head") {
+			window.headRetries = 0;
 			var img = document.getElementById("headImg");
 			if (e.data.src) {
 				img.onload = function () { $("#photo").addClass("has-head"); };
-				img.onerror = function () { $("#photo").removeClass("has-head"); };
+				img.onerror = function () {
+					$("#photo").removeClass("has-head");
+					// la texture peut ne pas être prête : on redemande (3 fois max)
+					if ((window.headRetries = (window.headRetries || 0) + 1) <= 3) {
+						setTimeout(function () { $.post("http://esx_identity/requestHead", "{}"); }, 800);
+					}
+				};
 				img.src = e.data.src;
 			} else { $("#photo").removeClass("has-head"); }
 		}
