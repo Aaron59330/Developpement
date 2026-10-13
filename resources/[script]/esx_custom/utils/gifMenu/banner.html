@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent !important; }
+img { display: block; width: 100%; height: 114.285714%; object-fit: fill; background: transparent; }
+</style>
+</head>
+<body>
+<img id="banner" alt="">
+<script>
+const source = new URLSearchParams(window.location.search).get('image');
+if (source) document.getElementById('banner').src = source;
+</script>
+</body>
+</html>
