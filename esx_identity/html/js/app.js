@@ -16,6 +16,12 @@ $("#date").focus(function () {
 	$(".date-help").slideUp(500);
 });
 
+$("#nationalite").focus(function () {
+	$(".nat-help").slideDown(500);
+}).blur(function () {
+	$(".nat-help").slideUp(500);
+});
+
 $("#taille").focus(function () {
 	$(".taille-help").slideDown(500);
 }).blur(function () {
@@ -43,7 +49,8 @@ $(function() {
 			lastname: $("#nom").val(),
 			dateofbirth: $("#date").val(),
 			sex: $("input[type='radio'][name='radioFruit']:checked").val(),
-			height: $("#taille").val()
+			height: $("#taille").val(),
+			nationality: $("#nationalite").val() || ""
 		}));
 	});
 });

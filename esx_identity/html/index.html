@@ -9,16 +9,41 @@
 	<body style="display: none">
 		<div class="wrapper">
 			<aside class="side">
-				<div class="profile">
-					<div class="avatar"><span id="initials">?</span></div>
-					<div class="profile-text">
-						<strong id="previewName">Nouveau citoyen</strong>
-						<span>Création en cours</span>
+				<div class="side-title">Carte d'identité</div>
+				<div class="card-scene">
+					<div class="idcard" id="idcard">
+						<div class="shine"></div>
+						<div class="card-top">
+							<span class="card-flag"></span>
+							<div class="card-title"><b>État de San Andreas</b><small>Carte nationale d'identité</small></div>
+							<span class="chip"></span>
+						</div>
+						<div class="card-body">
+							<div class="photo" id="photo">
+								<svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>
+								<em id="photoSex">H</em>
+							</div>
+							<div class="card-fields">
+								<div class="cf" data-f="lastname"><small>Nom</small><b id="cLast">&nbsp;</b></div>
+								<div class="cf" data-f="firstname"><small>Prénom</small><b id="cFirst">&nbsp;</b></div>
+								<div class="cf-row">
+									<div class="cf" data-f="dob"><small>Naissance</small><b id="cDob">&nbsp;</b></div>
+									<div class="cf" data-f="height"><small>Taille</small><b id="cHeight">&nbsp;</b></div>
+								</div>
+								<div class="cf-row">
+									<div class="cf" data-f="sex"><small>Sexe</small><b id="cSex">M</b></div>
+									<div class="cf" data-f="nat"><small>Nationalité</small><b id="cNat">&nbsp;</b></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-sign"><small>Signature</small><span id="cSign"></span></div>
+						<div class="mrz" id="mrz">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
 					</div>
 				</div>
-				<div class="side-title">Étapes</div>
-				<div class="step active"><i></i>Identité</div>
-				<div class="step"><i></i>Apparence</div>
+				<div class="progress">
+					<div class="progress-label"><span>Complétion</span><b id="pct">0%</b></div>
+					<div class="bar"><i id="bar"></i></div>
+				</div>
 				<div class="side-foot">Vérifiez bien vos informations avant de valider : elles ne pourront plus être modifiées.</div>
 			</aside>
 
@@ -56,6 +81,14 @@
 							<input type="text" id="taille" class="text" autocomplete="off" placeholder="140 - 200 cm">
 							<div><p class="taille-help">Entrez la taille de votre personnage.</p></div>
 						</div>
+
+						<div class="field">
+							<label class="pb" for="nationalite">Nationalité</label>
+							<select id="nationalite" class="text">
+								<option value="" selected disabled>Choisir…</option>
+							</select>
+							<div><p class="nat-help">Choisissez la nationalité de votre personnage.</p></div>
+						</div>
 					</div>
 
 					<label class="pb">Sexe</label>
@@ -74,13 +107,6 @@
 		<script src="nui://game/ui/jquery.js" type="text/javascript"></script>
 		<script src="js/main.js"></script>
 		<script src="js/app.js"></script>
-		<script>
-			// Aperçu visuel uniquement (n'affecte pas les données envoyées)
-			$("#prenom, #nom").on("input", function () {
-				var f = $.trim($("#prenom").val()), l = $.trim($("#nom").val());
-				$("#previewName").text((f + " " + l).trim() || "Nouveau citoyen");
-				$("#initials").text(((f[0] || "") + (l[0] || "")).toUpperCase() || "?");
-			});
-		</script>
+		<script src="js/card.js"></script>
 	</body>
 </html>

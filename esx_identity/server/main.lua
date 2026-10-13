@@ -3,7 +3,7 @@ ESX = exports[Config.Framework]:getSharedObject()
 function getIdentity(source, cb)
 	local identifier = ESX.GetIdentifierFromId(source)
 
-	MySQL.Async.fetchAll('SELECT identifier, firstname, lastname, dateofbirth, sex, height FROM `users` WHERE `identifier` = @identifier', {
+	MySQL.Async.fetchAll('SELECT identifier, firstname, lastname, dateofbirth, sex, height, nationality FROM `users` WHERE `identifier` = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 		local data = {}
@@ -16,6 +16,7 @@ function getIdentity(source, cb)
 			data.dateofbirth = result[1].dateofbirth
 			data.sex = result[1].sex
 			data.height = result[1].height
+			data.nationality = result[1].nationality
 		end
 
 		cb(data)
@@ -23,13 +24,14 @@ function getIdentity(source, cb)
 end
 
 function setIdentity(identifier, data, cb)
-	MySQL.Async.execute('UPDATE `users` SET `firstname` = @firstname, `lastname` = @lastname, `dateofbirth` = @dateofbirth, `sex` = @sex, `height` = @height WHERE identifier = @identifier', {
+	MySQL.Async.execute('UPDATE `users` SET `firstname` = @firstname, `lastname` = @lastname, `dateofbirth` = @dateofbirth, `sex` = @sex, `height` = @height, `nationality` = @nationality WHERE identifier = @identifier', {
 		['@identifier'] = identifier,
 		['@firstname'] = data.firstname,
 		['@lastname'] = data.lastname,
 		['@dateofbirth'] = data.dateofbirth,
 		['@sex'] = data.sex,
-		['@height'] = data.height
+		['@height'] = data.height,
+		['@nationality'] = data.nationality
 	}, function(rowsChanged)
 		if cb then
 			cb(true)

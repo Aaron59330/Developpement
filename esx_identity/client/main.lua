@@ -69,6 +69,11 @@ RegisterNUICallback('register', function(myIdentity, cb)
 				reason = "Date de naissance invalide!"
 				break
 			end
+		elseif k == "nationality" then
+			if v == nil or v == "" then
+				reason = "Veuillez choisir une nationalité !"
+				break
+			end
 		elseif k == "height" then
 			local height = tonumber(v)
 
