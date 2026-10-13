@@ -88,6 +88,10 @@
 	$("#prenom, #nom, #date, #taille").on("input keyup", update);
 	$sel.on("change", update);
 	$("input[name='radioFruit']").on("change", update);
+	$("input[name='radioFruit']").on("change", function () {
+		window.headRetries = 0;
+		setTimeout(function () { $.post("http://esx_identity/requestHead", "{}"); }, 400);
+	});
 	update();
 
 	/* focus -> surligne le champ correspondant sur la carte */
@@ -114,7 +118,7 @@
 						setTimeout(function () { $.post("http://esx_identity/requestHead", "{}"); }, 800);
 					}
 				};
-				img.src = e.data.src;
+				img.src = e.data.src + (e.data.src.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
 			} else { $("#photo").removeClass("has-head"); }
 		}
 	});

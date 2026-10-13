@@ -64,6 +64,31 @@ function EnableGui(state)
 	if state then
 		Citizen.CreateThread(UpdateHeadshot)
 
+		-- Rafraîchit la photo dès que l'apparence du ped change (modèle homme/femme, visage, cheveux, tenue...)
+		Citizen.CreateThread(function()
+			local function signature()
+				local ped = PlayerPedId()
+				local sig = tostring(GetEntityModel(ped))
+				for comp = 0, 11 do
+					sig = sig .. ':' .. GetPedDrawableVariation(ped, comp) .. '/' .. GetPedTextureVariation(ped, comp)
+				end
+				for prop = 0, 2 do
+					sig = sig .. ':p' .. GetPedPropIndex(ped, prop)
+				end
+				return sig
+			end
+
+			local last = signature()
+			while guiEnabled do
+				Citizen.Wait(700)
+				local current = signature()
+				if current ~= last then
+					last = current
+					UpdateHeadshot()
+				end
+			end
+		end)
+
 		-- Garde le curseur NUI tant que le menu est ouvert (le loading screen peut le retirer en se fermant)
 		Citizen.CreateThread(function()
 			while guiEnabled do
