@@ -33,6 +33,25 @@ function setIdentity(identifier, data, cb)
 		['@height'] = data.height,
 		['@nationality'] = data.nationality
 	}, function(rowsChanged)
+		-- Met à jour le joueur ESX en mémoire (sans reconnexion) pour que les autres scripts voient les nouvelles infos
+		local xPlayer = ESX.GetPlayerFromIdentifier(identifier)
+
+		if xPlayer then
+			local fullName = data.firstname .. ' ' .. data.lastname
+
+			if xPlayer.setName then xPlayer.setName(fullName) end
+			xPlayer.set('firstName', data.firstname)
+			xPlayer.set('lastName', data.lastname)
+			xPlayer.set('dateofbirth', data.dateofbirth)
+			xPlayer.set('sex', data.sex)
+			xPlayer.set('height', data.height)
+			xPlayer.set('nationality', data.nationality)
+
+			-- Événements utilisables par vos autres scripts
+			TriggerEvent('esx_identity:identityUpdated', xPlayer.source, data)
+			TriggerClientEvent('esx_identity:identityUpdated', xPlayer.source, data)
+		end
+
 		if cb then
 			cb(true)
 		end

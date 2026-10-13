@@ -86,6 +86,19 @@ AddEventHandler('esx_identity:showRegisterIdentity', function()
 	end
 end)
 
+-- Mise à jour du personnage après un /register : synchronise ESX.PlayerData côté client
+RegisterNetEvent('esx_identity:identityUpdated')
+AddEventHandler('esx_identity:identityUpdated', function(data)
+	if ESX and ESX.PlayerData then
+		ESX.PlayerData.firstName = data.firstname
+		ESX.PlayerData.lastName = data.lastname
+		ESX.PlayerData.dateofbirth = data.dateofbirth
+		ESX.PlayerData.sex = data.sex
+		ESX.PlayerData.height = data.height
+		ESX.PlayerData.nationality = data.nationality
+	end
+end)
+
 RegisterNetEvent('esx_identity:identityCheck')
 AddEventHandler('esx_identity:identityCheck', function(identityCheck)
 	hasIdentity = identityCheck
