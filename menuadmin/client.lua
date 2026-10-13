@@ -332,13 +332,48 @@ local function BarDrawText(text, x, y, scale, r, g, b)
     EndTextCommandDisplayText(x, y)
 end
 
--- Rectangle à coins légèrement arrondis (coins coupés), x/y = coin haut gauche, tailles en écran 0..1
+-- Rectangle à coins arrondis lissés (anti-aliasing simulé : pixel de bord à opacité partielle)
+-- x/y = coin haut gauche, w/h en coordonnées écran 0..1, rayon en pixels.
+local barPx, barPy = nil, nil
 local function BarRoundedRect(x, y, w, h, radiusPx, r, g, b, a)
-    local rx, ry = radiusPx / 1920.0, radiusPx / 1080.0
-    DrawRect(x + w / 2, y + h / 2, w, h - ry * 2, r, g, b, a)
-    DrawRect(x + w / 2, y + h / 2, w - rx * 2, h, r, g, b, a)
-    DrawRect(x + rx / 2, y + h / 2, rx, h - ry * 2 + 0.0001, r, g, b, a)
-    DrawRect(x + w - rx / 2, y + h / 2, rx, h - ry * 2 + 0.0001, r, g, b, a)
+    if not barPx then
+        local resX, resY = GetActiveScreenResolution()
+        barPx, barPy = 1.0 / resX, 1.0 / resY
+    end
+    local px, py = barPx, barPy
+    local radius = math.max(0, math.min(radiusPx, math.floor(h / py / 2), math.floor(w / px / 2)))
+
+    if radius == 0 then
+        DrawRect(x + w / 2, y + h / 2, w, h, r, g, b, a)
+        return
+    end
+
+    -- Partie centrale pleine largeur
+    DrawRect(x + w / 2, y + h / 2, w, h - radius * py * 2, r, g, b, a)
+
+    for i = 0, radius - 1 do
+        local dy = radius - (i + 0.5)
+        local inset = radius - math.sqrt(radius * radius - dy * dy) -- décalage exact en pixels
+        local full = math.ceil(inset)
+        local partial = full - inset                                 -- couverture du pixel de bord
+        local rowW = w - full * px * 2
+        local rowTop = y + i * py
+        local rowBottom = y + h - (i + 1) * py
+
+        if rowW > 0 then
+            DrawRect(x + w / 2, rowTop + py / 2, rowW, py, r, g, b, a)
+            DrawRect(x + w / 2, rowBottom + py / 2, rowW, py, r, g, b, a)
+        end
+        if partial > 0.04 and full >= 1 then
+            local alpha = math.floor(a * partial)
+            local leftX = x + (full - 1) * px
+            local rightX = x + w - full * px
+            DrawRect(leftX + px / 2, rowTop + py / 2, px, py, r, g, b, alpha)
+            DrawRect(rightX + px / 2, rowTop + py / 2, px, py, r, g, b, alpha)
+            DrawRect(leftX + px / 2, rowBottom + py / 2, px, py, r, g, b, alpha)
+            DrawRect(rightX + px / 2, rowBottom + py / 2, px, py, r, g, b, alpha)
+        end
+    end
 end
 
 local function BarBrighten(c, amount)
@@ -370,7 +405,7 @@ local function DrawTopCenterBar(items)
     local barWidth, barHeight = total + padX * 2, lineHeight + padY * 2
     local x = 0.5 - barWidth / 2
     local midY = top + barHeight / 2
-    BarRoundedRect(x, top, barWidth, barHeight, 4, 38, 38, 40, 150)
+    BarRoundedRect(x, top, barWidth, barHeight, 6, 38, 38, 40, 150)
 
     x = x + padX
     local textY = top + padY - 0.0008
@@ -380,7 +415,7 @@ local function DrawTopCenterBar(items)
             -- pastille : fond coloré, valeur plus claire
             local bh = lineHeight - 0.0025
             local bx, by = x, midY - bh / 2
-            BarRoundedRect(bx, by, item.bw, bh, 2, c[1], c[2], c[3], 215)
+            BarRoundedRect(bx, by, item.bw, bh, 3, c[1], c[2], c[3], 215)
             BarRoundedRect(bx + 0.0004, by + 0.0007, item.bw - 0.0008, bh - 0.0014, 2, math.floor(c[1] * 0.35), math.floor(c[2] * 0.35), math.floor(c[3] * 0.35), 235)
             local tr, tg, tb = BarBrighten(c, 0.25)
             BarDrawText(item.badge, bx + (item.bw - BarTextWidth(item.badge, scale)) / 2, textY, scale, tr, tg, tb)
