@@ -1,5 +1,8 @@
 -- ============================================================================
---  CORRECTIFS PROPOSÉS pour la base (à lire avant d'exécuter !)
+--  CORRECTIFS PROPOSÉS pour la base EXISTANTE (à lire avant d'exécuter !)
+--  Pour repartir de zéro, utilise plutôt :
+--    * sql_clean_install.sql  -> nouvelle base vide, déjà corrigée (structure + catalogues)
+--    * sql_reset_data.sql     -> vide la base actuelle (joueurs, jobs, logs...)
 --  1) FAIS UNE SAUVEGARDE COMPLÈTE de la base avant toute commande.
 --  2) Exécute les blocs un par un, pas tout d'un coup.
 -- ============================================================================

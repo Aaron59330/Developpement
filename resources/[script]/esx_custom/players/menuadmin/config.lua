@@ -651,28 +651,46 @@ function ReceiveVeh(source, plate, vehicleProps)
     end)
 end
 
+-- Tables contenant des données d'un joueur : { table, colonne }
+-- Chaque suppression est lancée séparément : une table absente n'empêche plus les autres d'être nettoyées.
+local WipeTables = {
+    { 'billing', 'identifier' }, { 'billing', 'sender' },
+    { 'open_car', 'identifier' }, { 'owned_vehicles', 'owner' }, { 'owned_properties', 'owner' },
+    { 'user_licenses', 'owner' }, { 'clothes_player', 'identifier' }, { 'coffre_armeperm', 'identifier' },
+    { 'playerstattoos', 'identifier' }, { 'p_outfits', 'identifier' }, { 'races', 'identifier' },
+    { 'jail', 'identifier' }, { 'leboncoin', 'owner' }, { 'lotery', 'identifier' }, { 'vips', 'identifier' },
+    { 'newplayer_playtime', 'identifier' }, { 'dpkeybinds', 'id' },
+    { 'addon_account_data', 'owner' }, { 'addon_inventory_items', 'owner' }, { 'datastore_data', 'owner' },
+    { 'ox_inventory', 'owner' }, { 'ox_inventory_clothing', 'owner' }, { 'ox_inventory_medical', 'owner' },
+    { 'ox_inventory_outfits', 'owner' }, { 'ox_inventory_placed_items', 'owner' },
+    { 'jobbuilder_bank_clients', 'identifier' }, { 'jobbuilder_bank_loans', 'identifier' },
+    { 'jobbuilder_mission_stats', 'identifier' }, { 'jobbuilder_patients', 'identifier' },
+    { 'jobbuilder_records', 'identifier' }, { 'jobbuilder_property_outfits', 'identifier' },
+    { 'gangbuilder_stats', 'identifier' },
+    { 'worldbuilder_chase_stats', 'identifier' }, { 'worldbuilder_licenses', 'identifier' },
+    { 'worldbuilder_pvp_stats', 'identifier' }, { 'worldbuilder_payouts', 'identifier' },
+    { 'phone_last_phone', 'id' }, { 'phone_backups', 'id' },
+    { 'phone_phones', 'owner_id' },          -- les autres tables du téléphone suivent via ON DELETE CASCADE
+    { 'account_info', 'license' },
+    { 'users', 'identifier' },               -- en dernier
+}
+
 function WipePlayerAdmin(id, target)
     local xPlayer = ESX.GetPlayerFromId(target)
+    if not xPlayer then return end
+
+    local identifier = xPlayer.identifier
 
     DropPlayer(target, "Vous venez de vous faire wipe !")
 
-    MySQL.Async.execute([[ 
-		DELETE FROM billing WHERE identifier = @wipeID;
-		DELETE FROM billing WHERE sender = @wipeID;
-		DELETE FROM open_car WHERE identifier = @wipeID;
-		DELETE FROM owned_vehicles WHERE owner = @wipeID;
-        DELETE FROM user_accessories WHERE identifier = @wipeID;
-        DELETE FROM user_accounts WHERE identifier = @wipeID;
-        DELETE FROM user_licenses WHERE owner = @wipeID;
-        DELETE FROM sim WHERE identifier = @wipeID;
-		DELETE FROM phone_users_contacts WHERE identifier = @wipeID;
-        DELETE FROM owned_properties WHERE owner = @wipeID;
- 		DELETE FROM users WHERE identifier = @wipeID;	]], {
-		['@wipeID'] = xPlayer.identifier,
-    }, function(rowsChanged)
-        print("^5Wipe effectuer ! License :"..xPlayer.identifier.."^0")
-        TriggerClientEvent('esx:showNotification', id, "Effacement du Joueur effectué avec succès")
-    end)
+    for _, entry in ipairs(WipeTables) do
+        MySQL.Async.execute(('DELETE FROM `%s` WHERE `%s` = @wipeID'):format(entry[1], entry[2]), {
+            ['@wipeID'] = identifier,
+        }, function() end)
+    end
+
+    print("^5Wipe effectuer ! License :"..identifier.."^0")
+    TriggerClientEvent('esx:showNotification', id, "Effacement du Joueur effectué avec succès")
 end
 
 ConfigMenuAdministrationAdmin = {

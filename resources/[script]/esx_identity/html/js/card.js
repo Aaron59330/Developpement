@@ -133,7 +133,7 @@
 
 	/* validation visuelle + sons (n'altère pas l'envoi des données) */
 	$("#register").on("submit", function () {
-		var ok = $.trim($("#prenom").val()) && $.trim($("#nom").val()) && $("#date").val().length === 10 && $.trim($("#taille").val()) && $sel.val();
+		var ok = $.trim($("#prenom").val()) && $.trim($("#nom").val()) && validBirthDate($("#date").val()) && $.trim($("#taille").val()) && $sel.val();
 		if (ok) { SFX.success(); $("#idcard").addClass("stamp"); }
 		else {
 			SFX.error();

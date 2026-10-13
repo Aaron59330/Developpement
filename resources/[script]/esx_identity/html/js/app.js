@@ -28,6 +28,17 @@ $("#taille").focus(function () {
 	$(".taille-help").slideUp(500);
 });
 
+// Date de naissance au format JJ/MM/AAAA, réelle, âge entre 16 et 110 ans
+function validBirthDate(value) {
+	var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value || "");
+	if (!m) return false;
+	var d = +m[1], mo = +m[2], y = +m[3];
+	var date = new Date(y, mo - 1, d);
+	if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return false;
+	var age = (new Date().getFullYear()) - y;
+	return age >= 16 && age <= 110;
+}
+
 $(function() {
 	window.addEventListener('message', function(event) {
 		if (event.data.type == "enableui") {
@@ -47,7 +58,7 @@ $(function() {
 		$.post('http://esx_identity/register', JSON.stringify({
 			firstname: $("#prenom").val(),
 			lastname: $("#nom").val(),
-			dateofbirth: $("#date").val(),
+			dateofbirth: validBirthDate($("#date").val()) ? $("#date").val() : "invalid",
 			sex: $("input[type='radio'][name='radioFruit']:checked").val(),
 			height: $("#taille").val(),
 			nationality: $("#nationalite").val() || ""
