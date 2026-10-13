@@ -19,9 +19,41 @@ AddEventHandler('playerSpawned', function()
 	isDead = false
 end)
 
+local headHandle = nil
+
+-- Photo de la tête du joueur (pedheadshot) pour la carte d'identité
+local function UpdateHeadshot()
+	if headHandle then
+		UnregisterPedheadshot(headHandle)
+		headHandle = nil
+	end
+
+	local handle = RegisterPedheadshotTransparent(PlayerPedId())
+	local timeout = GetGameTimer() + 3000
+
+	while not IsPedheadshotReady(handle) or not IsPedheadshotValid(handle) do
+		if GetGameTimer() > timeout then
+			UnregisterPedheadshot(handle)
+			return
+		end
+		Citizen.Wait(50)
+	end
+
+	headHandle = handle
+	local txd = GetPedheadshotTxdString(handle)
+	SendNUIMessage({ type = "head", src = "https://nui-img/" .. txd .. "/" .. txd })
+end
+
 function EnableGui(state)
 	SetNuiFocus(state, state)
 	guiEnabled = state
+
+	if state then
+		Citizen.CreateThread(UpdateHeadshot)
+	elseif headHandle then
+		UnregisterPedheadshot(headHandle)
+		headHandle = nil
+	end
 
 	SendNUIMessage({
 		type = "enableui",

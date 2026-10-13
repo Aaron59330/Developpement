@@ -30,7 +30,7 @@ body {
 
 /* Sidebar */
 .side {
-	width: 540px; flex-shrink: 0; padding: 28px;
+	width: 540px; flex-shrink: 0; padding: 28px 28px 24px;
 	background: rgba(255,255,255,.02);
 	border-right: 1px solid rgba(255,255,255,.07);
 	display: flex; flex-direction: column;
@@ -151,62 +151,6 @@ select {
 select option { background: #151516; color: #fff; }
 .nat-help { display: none; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,.45); }
 
-/* ===== Carte d'identité ===== */
-.side-title { margin-bottom: 14px; }
-.card-scene { perspective: 900px; margin-bottom: 18px; }
-.idcard {
-	position: relative; padding: 14px 16px 12px; border-radius: 16px; overflow: hidden;
-	background: linear-gradient(135deg, #1d1f24 0%, #121316 55%, #1a1c21 100%);
-	border: 1px solid rgba(255,255,255,.14);
-	box-shadow: 0 18px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
-	transition: transform .15s ease-out, box-shadow .4s, border-color .4s;
-	transform-style: preserve-3d;
-	animation: cardIn .6s cubic-bezier(.2,.9,.3,1.2);
-}
-@keyframes cardIn { from { opacity: 0; transform: translateY(20px) rotateX(18deg) scale(.95); } to { opacity: 1; transform: none; } }
-.idcard.complete { border-color: rgba(120,255,170,.55); box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 28px rgba(120,255,170,.18); }
-.idcard.stamp { animation: stamp .45s ease-out; }
-@keyframes stamp { 0% { transform: scale(1); } 40% { transform: scale(.94); } 100% { transform: scale(1); } }
-.shine {
-	position: absolute; inset: 0; pointer-events: none; opacity: .5;
-	background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.12) 48%, transparent 66%);
-	background-size: 250% 100%; background-position: 50% 50%;
-}
-.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.card-flag { width: 26px; height: 18px; border-radius: 3px; background: linear-gradient(90deg, #3b5bdb 0 33%, #f1f3f5 33% 66%, #e03131 66%); }
-.card-title { flex: 1; line-height: 1.2; }
-.card-title b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-.card-title small { font-size: 9px; color: rgba(255,255,255,.45); letter-spacing: .05em; }
-.chip { width: 30px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, #d8c27a, #8d7a3a); opacity: .85; }
-
-.card-body { display: flex; gap: 12px; }
-.photo {
-	position: relative; width: 84px; height: 108px; flex-shrink: 0; border-radius: 10px;
-	display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
-	background: linear-gradient(180deg, #2a3140, #171a21); border: 1px solid rgba(255,255,255,.12);
-}
-.photo svg { width: 78%; fill: rgba(255,255,255,.35); transition: fill .3s; }
-.photo.female { background: linear-gradient(180deg, #402a38, #21171c); }
-.photo em { position: absolute; top: 5px; left: 7px; font-style: normal; font-size: 9px; font-weight: 800; color: rgba(255,255,255,.55); }
-.card-fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
-.cf-row { display: flex; gap: 10px; }
-.cf-row .cf { flex: 1; min-width: 0; }
-.cf { position: relative; padding: 3px 6px; border-radius: 6px; border: 1px solid transparent; transition: background .25s, border-color .25s; }
-.cf small { display: block; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); }
-.cf b { display: block; min-height: 15px; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,.35); }
-.cf.done b { color: #fff; }
-.cf:not(.done) b:empty::after, .cf:not(.done) b { background: linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,.14), rgba(255,255,255,.07)); background-size: 200% 100%; border-radius: 3px; animation: skel 1.6s linear infinite; }
-.cf.done b { background: none; animation: none; }
-@keyframes skel { to { background-position: -200% 0; } }
-.cf.active { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.3); }
-b.pop { animation: pop2 .35s ease-out; }
-@keyframes pop2 { 0% { transform: translateY(6px); opacity: .2; } 100% { transform: none; opacity: 1; } }
-
-.card-sign { margin-top: 10px; display: flex; align-items: flex-end; gap: 8px; padding: 0 4px; }
-.card-sign small { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); }
-.card-sign span { font: italic 600 18px 'Brush Script MT', 'Segoe Script', cursive; color: rgba(255,255,255,.85); min-height: 22px; border-bottom: 1px solid rgba(255,255,255,.15); flex: 1; }
-.mrz { margin-top: 8px; font: 500 10px 'Consolas', 'Courier New', monospace; letter-spacing: .12em; color: rgba(255,255,255,.35); white-space: nowrap; overflow: hidden; }
-
 .progress { margin-bottom: 14px; }
 .progress-label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 7px; }
 .progress-label b { color: #fff; }
@@ -237,64 +181,6 @@ b.pop { animation: pop2 .35s ease-out; }
 .wrapper.shake { animation: shake .4s; }
 @keyframes shake { 0%,100% { transform: translate(-50%,-50%); } 20% { transform: translate(calc(-50% - 8px),-50%); } 40% { transform: translate(calc(-50% + 8px),-50%); } 60% { transform: translate(calc(-50% - 5px),-50%); } 80% { transform: translate(calc(-50% + 5px),-50%); } }
 
-/* ===== v3 : carte réaliste + barre sobre ===== */
-.idcard {
-	padding: 22px 24px 16px; border-radius: 18px;
-	background: #e8e4d9; color: #14151a; border: 1px solid #fff3;
-	box-shadow: 0 24px 50px rgba(0,0,0,.6);
-}
-.idcard.complete { border-color: #fff; box-shadow: 0 24px 50px rgba(0,0,0,.6); }
-.shine { display: none; }
-.guilloche {
-	position: absolute; inset: 0; pointer-events: none; opacity: .5;
-	background:
-		repeating-radial-gradient(circle at 18% 120%, transparent 0 7px, rgba(20,21,26,.07) 7px 8px),
-		repeating-radial-gradient(circle at 92% -20%, transparent 0 9px, rgba(20,21,26,.06) 9px 10px);
-}
-.card-top { position: relative; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #14151a; }
-.card-flag { width: 34px; height: 24px; border-radius: 3px; background: linear-gradient(90deg, #1f3a8a 0 33%, #f4f4f4 33% 66%, #b91c1c 66%); border: 1px solid #0003; }
-.card-title b { font-size: 13px; color: #14151a; }
-.card-title small { font-size: 10px; color: #14151a99; }
-.card-no { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #14151a99; }
-.card-no em { font: 700 13px 'Consolas', monospace; font-style: normal; color: #14151a; letter-spacing: .1em; }
-.chip { display: none; }
-
-.card-body { position: relative; gap: 20px; }
-.photo-col { position: relative; flex-shrink: 0; }
-.photo {
-	width: 130px; height: 164px; border-radius: 6px; background: #c9c5b8; border: 1px solid #14151a40;
-}
-.photo svg { fill: #14151a66; width: 82%; }
-.photo.female { background: #cfc3c3; }
-.holo {
-	position: absolute; right: -8px; bottom: -8px; width: 44px; height: 44px; border-radius: 50%;
-	background: conic-gradient(from 30deg, #cfd8ff, #f3d6ff, #d6fff0, #fff3c9, #cfd8ff);
-	border: 1px solid #14151a30; opacity: .85; animation: holo 6s linear infinite;
-}
-@keyframes holo { to { filter: hue-rotate(360deg); } }
-
-.card-fields { gap: 12px; }
-.cf { padding: 4px 8px; }
-.cf small { font-size: 8.5px; color: #14151a80; }
-.cf b { font-size: 15px; min-height: 20px; color: #14151a; letter-spacing: .02em; }
-.cf:not(.done) b { background: #14151a14; animation: none; border-radius: 3px; }
-.cf.done b { background: none; }
-.cf.active { background: #14151a12; border-color: #14151a66; }
-.cf-row { gap: 14px; }
-
-.card-sign { position: relative; margin-top: 14px; }
-.card-sign small { color: #14151a80; }
-.card-sign span { color: #14151a; border-bottom-color: #14151a40; font-size: 24px; min-height: 30px; }
-.mrz { position: relative; margin-top: 12px; padding-top: 8px; border-top: 1px dashed #14151a40; font-size: 12px; line-height: 1.5; color: #14151aa0; }
-
-.seal {
-	position: absolute; right: 28px; top: 54%; padding: 6px 14px; border: 3px solid #b91c1c; border-radius: 6px;
-	font: 800 20px 'Inter', sans-serif; letter-spacing: .15em; color: #b91c1c;
-	transform: rotate(-14deg) scale(2); opacity: 0; pointer-events: none;
-}
-.idcard.complete .seal { animation: sealIn .5s .1s cubic-bezier(.2,.9,.3,1.1) forwards; }
-@keyframes sealIn { to { opacity: .8; transform: rotate(-14deg) scale(1); } }
-
 /* barre : sobre, plate, segmentée */
 .progress-label { font-size: 11px; }
 .bar {
@@ -314,3 +200,10 @@ b.pop { animation: pop2 .35s ease-out; }
 	filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
 	opacity: .95; animation: rise .6s .2s ease-out both;
 }
+
+.card-scene { perspective: 900px; margin-bottom: 18px; display: flex; justify-content: center; }
+.idcard { transition: transform .15s ease-out; animation: cardIn .6s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(20px) rotateX(18deg) scale(.95); } to { opacity: 1; transform: none; } }
+.idcard.stamp { animation: stamp .45s ease-out; }
+@keyframes stamp { 0% { transform: scale(1); } 40% { transform: scale(.94); } 100% { transform: scale(1); } }
+.side-title { margin-bottom: 14px; }

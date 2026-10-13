@@ -72,7 +72,7 @@
 		fill("#cHeight", "height", h ? h + " cm" : "");
 		fill("#cNat", "nat", n);
 		$("#cSex").text(sex === "f" ? "F" : "M"); 
-		$("#photo").toggleClass("female", sex === "f");
+		
 		$("#cSign").text(f && l ? f[0].toUpperCase() + ". " + cap(l) : "");
 
 		$("#cNo").text(cardId);
@@ -98,6 +98,18 @@
 	}).on("blur", function () { $(".cf").removeClass("active"); });
 	$("input[name='radioFruit']").on("change", function () {
 		$(".cf").removeClass("active"); $(".cf[data-f='sex']").addClass("active");
+	});
+
+	/* vraie tête du personnage (envoyée par le client Lua) */
+	window.addEventListener("message", function (e) {
+		if (e.data && e.data.type === "head") {
+			var img = document.getElementById("headImg");
+			if (e.data.src) {
+				img.onload = function () { $("#photo").addClass("has-head"); };
+				img.onerror = function () { $("#photo").removeClass("has-head"); };
+				img.src = e.data.src;
+			} else { $("#photo").removeClass("has-head"); }
+		}
 	});
 
 	/* inclinaison 3D au survol */

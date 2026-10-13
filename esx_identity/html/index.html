@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="css/card.css">
 		<link rel="stylesheet" href="css/app.css">
 	</head>
 	<body style="display: none">
@@ -11,7 +12,7 @@
 			<aside class="side">
 				<div class="side-title">Carte d'identité</div>
 				<div class="card-scene">
-					<div class="idcard" id="idcard">
+					<div class="idcard type-id" id="idcard">
 						<div class="guilloche"></div>
 						<div class="card-top">
 							<span class="card-flag"></span>
@@ -22,24 +23,27 @@
 							<div class="photo-col">
 								<div class="photo" id="photo">
 									<svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>
+									<img class="head" id="headImg" alt="">
 								</div>
 								<div class="holo"></div>
 							</div>
 							<div class="card-fields">
-								<div class="cf" data-f="lastname"><small>Nom / Surname</small><b id="cLast">&nbsp;</b></div>
-								<div class="cf" data-f="firstname"><small>Prénom / Given name</small><b id="cFirst">&nbsp;</b></div>
+								<div class="cf" data-f="lastname"><small>Nom</small><b id="cLast">&nbsp;</b></div>
+								<div class="cf" data-f="firstname"><small>Prénom</small><b id="cFirst">&nbsp;</b></div>
 								<div class="cf-row">
 									<div class="cf" data-f="sex"><small>Sexe</small><b id="cSex">M</b></div>
 									<div class="cf" data-f="height"><small>Taille</small><b id="cHeight">&nbsp;</b></div>
 								</div>
 								<div class="cf-row">
-									<div class="cf" data-f="dob"><small>Date de naissance</small><b id="cDob">&nbsp;</b></div>
+									<div class="cf" data-f="dob"><small>Naissance</small><b id="cDob">&nbsp;</b></div>
 									<div class="cf" data-f="nat"><small>Nationalité</small><b id="cNat">&nbsp;</b></div>
 								</div>
 							</div>
 						</div>
-						<div class="card-sign"><small>Signature</small><span id="cSign"></span></div>
-						<div class="mrz" id="mrz"></div>
+						<div class="card-foot">
+							<div class="card-sign"><small>Signature</small><span id="cSign"></span></div>
+							<div class="mrz" id="mrz"></div>
+						</div>
 						<div class="seal">VALIDÉ</div>
 					</div>
 				</div>
