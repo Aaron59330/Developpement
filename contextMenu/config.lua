@@ -107,13 +107,12 @@ ButtonContextMenu = {
 
 ConfigContextMenu = {
     Color = {
-        ColorMenu = {10, 10, 10},
-        ColorMenuHovered = {38, 38, 38},
-        ColorText = {215, 215, 215},
-        ColorTextDisable = {95, 95, 95},
-        ColorBorder = {0, 164, 255},
-        ColorSeparator = {0, 164, 255},
-        ColorAccent = {0, 164, 255}
+        ColorMenu = {41, 42, 45},
+        ColorMenuHovered = {131, 131, 131},
+        ColorText = {255, 255, 255},
+        ColorTextDisable = {75, 76, 79},
+        ColorBorder = {0, 168, 255},
+        ColorSeparator = {0, 168, 255}
     },
 
     Jobs2 = true,
@@ -134,28 +133,13 @@ ConfigContextMenu = {
     Jobs2Name = 'unemployed2',
     ItemCrocheter = "lockpick",
 
-    -- Sons du menu (sons natifs GTA, aucun fichier à ajouter)
-    Sounds = {
-        Enabled = true,
-        Hover  = {"NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
-        Click  = {"SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
-        Toggle = {"NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
-        Open   = {"TOGGLE_ON", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
-        Close  = {"BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
-    },
-
     Menu = {
-        Width = 0.118, -- Largeur minimale du menu (il s'élargit seul si un texte est plus long)
-        MaxWidth = 0.3, -- Largeur maximale
-        ItemHeight = 0.0255, -- Hauteur d'une ligne
-        Font = 0, -- Police GTA : 0 = Chalet London, 1 = House Script, 4 = Chalet Comprime Cologne, 7 = Pricedown
-        TextScale = 0.27, -- Taille du texte
         RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut
-        CornerRadius = 6, -- Rayon des coins en pixels (si RoundedCorners = true)
+        CornerRadius = 8, -- Rayon des coins en pixels (si RoundedCorners = true)
         OpenMenu = 25,--Touche pour accéder au entité
         OpenMenuBind = 19,--ALT (ouvrir le menu principale)
         ClickInMenu = 24,--Intéraction (clique gauche)
-        ColorAlpha = 235,--Alpha du menu
+        ColorAlpha = 200,--Alpha du menu
     },
 
     --IMPORTANT POUR VOTRE ARGENT

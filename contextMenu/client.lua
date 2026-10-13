@@ -96,23 +96,6 @@ Colors = setmetatable({
         return table.MISSING_COLOR
     end
 })
--- Couleur d'accent du menu (voir ConfigContextMenu.Color.ColorAccent)
-local function MenuAccent(alpha)
-    local c = ConfigContextMenu.Color.ColorAccent or {0, 164, 255}
-    return Color(c[1], c[2], c[3], alpha or 255)
-end
--- Sons du menu (ConfigContextMenu.Sounds)
-function PlayMenuSound(kind)
-    local cfg = ConfigContextMenu.Sounds
-    if not cfg or cfg.Enabled == false or not cfg[kind] then return end
-    PlaySoundFrontend(-1, cfg[kind][1], cfg[kind][2], true)
-end
--- Décalage vertical pour centrer un texte (hauteur de ligne GTA ~ 0.08 * échelle) dans la ligne
-local function CenteredTextY(height, scale)
-    return math.max((height - 0.08 * scale) / 2 + 0.0003, 0.0)
-end
-local MENU_PADDING_LEFT  = 0.0075
-local MENU_PADDING_RIGHT = 0.0055
 --Rect.lua
 Rect = {}
 Rect.__index = Rect
@@ -200,8 +183,6 @@ function Text.CreateNew(title, color)
     return self
 end
 function Text:Draw()
-    SetTextFont(ConfigContextMenu.Menu.Font or 0)
-    SetTextProportional(true)
     SetTextScale(self.scale.x, self.scale.y)
     SetTextColour(self.color.r, self.color.g, self.color.b, self.color.a)
     BeginTextCommandDisplayText("CELL_EMAIL_BCON")
@@ -209,8 +190,6 @@ function Text:Draw()
     EndTextCommandDisplayText(self.position.x, self.position.y)
 end
 function Text:GetWidth()
-    SetTextFont(ConfigContextMenu.Menu.Font or 0)
-    SetTextProportional(true)
     BeginTextCommandWidth("CELL_EMAIL_BCON")
     AddTextComponentSubstringPlayerName(self.title)
     SetTextScale(self.scale.x, self.scale.y)
@@ -259,7 +238,7 @@ function Separator.CreateNew(menu, index, lineColor, bgColor, alpha)
     
     self.position = vector2(0, 0)
     self.background = Rect(vector2(0, 0), vector2(self.parent.width, 0.012))
-    self.line = Rect(vector2(0, 0), vector2(self.parent.width - 0.012, 0.0006 * GetAspectRatio(false)))
+    self.line = Rect(vector2(0, 0), vector2(self.parent.width - 0.004, 0.001 * GetAspectRatio(false)))
     self.alpha = alpha
     self.colors = {
         -- line = lineColor or Colors.Grey,
@@ -271,12 +250,12 @@ function Separator.CreateNew(menu, index, lineColor, bgColor, alpha)
 end
 function Separator:Process()
     self.background:Draw(Color(self.colors.background.r, self.colors.background.g, self.colors.background.b, self.alpha), self.parent)
-    self.line:Draw(self.colors.line:Alpha(110))
+    self.line:Draw(self.colors.line)
 end
 function Separator:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.line.position = self.position + vector2(0.006, 0.0052)
+    self.line.position = self.position + vector2(0.0025, 0.0045)
 end
 --Item.lua
 Item = {}
@@ -293,12 +272,11 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.position = vector2(0, 0)
     
-    self.height = ConfigContextMenu.Menu.ItemHeight or 0.0255
+    self.height = 0.03
     self.text = Text(title)
-    self.text.scale = vector2(ConfigContextMenu.Menu.TextScale or 0.34, ConfigContextMenu.Menu.TextScale or 0.34)
     self.rightText = nil
     if flecheactive then
-        self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.0095, 0.0095 * GetAspectRatio(false)))
+        self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.015, 0.015 * GetAspectRatio(false)))
     else
         self.rightSprite = nil
     end
@@ -328,10 +306,6 @@ function Item:Process(cursorPosition)
         alpha = math.floor(alpha * 0.5)
     end
     self.background:Draw((self.hovered and self.enabled) and self.colors.backgroundHovered:Alpha(alpha) or self.colors.background:Alpha(alpha), self.parent)
-    if (self.hovered and self.enabled and not menuOverlapped) then
-        -- Barre d'accent à gauche de l'élément survolé
-        Rect(self.position + vector2(0.003, 0.0055), vector2(0.0016, self.height - 0.011)):Draw(MenuAccent(255))
-    end
     if (self:IsOverlapped()) then
         return
     end
@@ -341,7 +315,6 @@ function Item:Process(cursorPosition)
         if (hovered ~= self.hovered) then
             self.hovered = hovered
             if (self.hovered) then
-                PlayMenuSound("Hover")
                 self:OnStartedHovering()
             else
                 self:OnStoppedHovering()
@@ -352,19 +325,15 @@ function Item:Process(cursorPosition)
     if (menuOverlapped) then
         textAlpha = 127
     end
-    self.text.color = self.enabled and ((self.hovered and Colors.White or self.colors.text):Alpha(textAlpha)) or self.colors.disabledText:Alpha(textAlpha)
+    self.text.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
     self.text:Draw()
     if (self.rightText) then
-        local baseScale = ConfigContextMenu.Menu.TextScale or 0.34
-        self.rightText.scale = vector2(baseScale, baseScale)
-        local rightWidth = self.rightText:GetWidth()
-        local rightY = 0.0035
-        self.rightText.position = self.position + vector2(self.parent.width - rightWidth - MENU_PADDING_RIGHT, CenteredTextY(self.height, baseScale))
+        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.004, 0.003)
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
     end
     if (self.rightSprite) then
-        self.rightSprite:Draw(self.enabled and (self.hovered and MenuAccent(textAlpha) or self.colors.text:Alpha(textAlpha)) or self.colors.disabledText:Alpha(textAlpha))
+        self.rightSprite:Draw(self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha))
     end
 end
 function Item:IsOverlapped()
@@ -398,7 +367,6 @@ function Item:Clicked()
         return
     end
     
-    PlayMenuSound("Click")
     Citizen.CreateThread(function()
         self.OnClick()
     end)
@@ -419,11 +387,9 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(MENU_PADDING_LEFT, CenteredTextY(self.height, self.text.scale.y))
+    self.text.position = self.position + vector2(0.002, 0.003)
     if (self.rightSprite) then
-        -- flèche centrée verticalement, alignée sur la marge droite
-        self.rightSprite:SetPosition(position + vector2(self.parent.width - self.rightSprite.size.x - MENU_PADDING_RIGHT,
-            (self.height - self.rightSprite.size.y) / 2))
+        self.rightSprite:SetPosition(position + vector2(0.135, 0.0015))
     end
 end
 function Item:InBounds(position)
@@ -466,9 +432,9 @@ function CheckboxItem:Init(menu, text, value, textColor, disabledTextColor, bgCo
     self.closeMenuOnClick = false
     
     if (self.checked) then
-        self.sprite = Sprite("commonmenu", "shop_box_tick", nil, vector2(0.016, 0.016 * GetAspectRatio(false)))
+        self.sprite = Sprite("commonmenu", "shop_box_tick", nil, vector2(0.02, 0.02 * GetAspectRatio(false)))
     else
-        self.sprite = Sprite("commonmenu", "shop_box_blank", nil, vector2(0.016, 0.016 * GetAspectRatio(false)))
+        self.sprite = Sprite("commonmenu", "shop_box_blank", nil, vector2(0.02, 0.02 * GetAspectRatio(false)))
     end
 end
 function CheckboxItem:Process(cursorPosition)
@@ -479,7 +445,6 @@ function CheckboxItem:Clicked()
     if (not self.enabled) then
         return
     end
-    PlayMenuSound("Toggle")
     self.OnClick()
     self.checked = not self.checked
     
@@ -493,8 +458,7 @@ function CheckboxItem:Clicked()
 end
 function CheckboxItem:SetPosition(position)
     Item.SetPosition(self, position)
-    self.sprite:SetPosition(position + vector2(self.parent.width - self.sprite.size.x - MENU_PADDING_RIGHT,
-        (self.height - self.sprite.size.y) / 2))
+    self.sprite:SetPosition(position + vector2(0.131, -0.0029))
 end
 function CheckboxItem:InBounds(position)
     return Item.InBounds(self, position)
@@ -528,7 +492,6 @@ function SubmenuItem:Clicked()
         return
     end
     
-    PlayMenuSound("Click")
     Citizen.CreateThread(function()
         self.OnClick()
     end)
@@ -617,7 +580,7 @@ function Border.CreateNew(position, size, thickness, color)
     self.thickness = thickness or 0.001
     -- self.color = color or Colors.Grey
     if ConfigContextMenu.Color.ColorBorder ~= nil then
-        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3], 170) or Colors.Grey
+        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3]) or Colors.Grey
     end
     
     self.rects = {}
@@ -677,7 +640,7 @@ function Menu.CreateNew(pool)
     self.parent = nil
     self.position = vector2(0, 0)
     self.lowerRight = vector2(0, 0)
-    self.width = ConfigContextMenu.Menu.Width or 0.118
+    self.width = 0.15
     self.hoverTimeout = 250
     self.colors = {
         -- background = Colors.DarkGrey,
@@ -690,7 +653,7 @@ function Menu.CreateNew(pool)
         textDisabled = Color(ConfigContextMenu.Color.ColorTextDisable[1], ConfigContextMenu.Color.ColorTextDisable[2], ConfigContextMenu.Color.ColorTextDisable[3]) or Colors.LightGrey
     }
     self.alpha = ConfigContextMenu.Menu.ColorAlpha
-    self.border = Border(nil, nil, 0.0006)
+    self.border = Border(nil, nil, 0.001)
     self.items = {}
     self.separators = {}
     self.OnClosed = function() end
@@ -761,12 +724,9 @@ function Menu:Visible(visible)
         return self.visible
     end
     if (visible == false) then
-        if (self.visible and self.parent == nil) then PlayMenuSound("Close") end
         Citizen.CreateThread(function()
             self.OnClosed()
         end)
-    elseif (visible == true and not self.visible and self.parent == nil) then
-        PlayMenuSound("Open")
     end
     self.visible = visible
 end
@@ -793,27 +753,6 @@ function Menu:RecalculatePosition(position)
     local totalHeight = 0.012 * #self.separators
     for k, item in pairs(self.items) do
         totalHeight = totalHeight + item.height
-    end
-    -- Largeur adaptée au texte le plus long (même taille de texte partout)
-    local baseWidth = ConfigContextMenu.Menu.Width or 0.118
-    local needed = baseWidth
-    for k, item in pairs(self.items) do
-        if item.text.title ~= item._cacheTitle or (item.rightText and item.rightText.title ~= item._cacheRight) then
-            item._cacheTitle = item.text.title
-            item._cacheRight = item.rightText and item.rightText.title or nil
-            item._cacheWidth = item.text:GetWidth() + (item.rightText and (item.rightText:GetWidth() + 0.01) or 0)
-        end
-        local icon = item.rightSprite or item.sprite
-        local extra = icon and (icon.size.x + MENU_PADDING_RIGHT + 0.006) or (MENU_PADDING_RIGHT + 0.004)
-        needed = math.max(needed, item._cacheWidth + MENU_PADDING_LEFT + extra)
-    end
-    self.width = math.min(needed, ConfigContextMenu.Menu.MaxWidth or 0.3)
-    for k, item in pairs(self.items) do
-        item.background.size = vector2(self.width, item.height)
-    end
-    for k, sep in pairs(self.separators) do
-        sep.background.size = vector2(self.width, 0.012)
-        sep.line.size = vector2(self.width - 0.012, sep.line.size.y)
     end
     self.position = position
     self.lowerRight = self.position + vector2(self.width, totalHeight)
