@@ -221,3 +221,15 @@ input[type="text"]:focus, select:focus { border-color: var(--accent); box-shadow
 .progress-label b { color: var(--accent); }
 .side-title { color: rgba(0,164,255,.7); }
 .side-foot { border-color: rgba(0,164,255,.25); }
+
+/* ===== Flou du jeu derrière le menu ===== */
+.blur-bg {
+	position: fixed; inset: 0; z-index: 0;
+	background: rgba(8,10,14,.35);
+	-webkit-backdrop-filter: blur(14px) saturate(1.1);
+	backdrop-filter: blur(14px) saturate(1.1);
+	animation: blurIn .6s ease-out both;
+}
+@keyframes blurIn { from { opacity: 0; -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0); } to { opacity: 1; } }
+.wrapper { z-index: 1; }
+body { background: none; }
