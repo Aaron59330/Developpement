@@ -194,9 +194,10 @@ function Text:SetMoneySegments(title)
     for tag in before:gmatch("~%a~") do activeTag = tag end
 
     self.segments = {}
-    local trimmed = before:gsub("%s+$", "")
-    if trimmed ~= "" then
-        table.insert(self.segments, { text = trimmed, scale = self.scale.y, dy = 0.0, gap = 0.0015 })
+    -- Libellé sans espace ni code couleur final : les chiffres se collent juste après les ":"
+    local label = before:gsub("%s*~%a~%s*$", ""):gsub("%s+$", "")
+    if label ~= "" then
+        table.insert(self.segments, { text = label, scale = self.scale.y, dy = 0.0, gap = 0.0 })
     end
     table.insert(self.segments, { text = activeTag .. money, scale = MONEY_DIGITS_SCALE, dy = (self.scale.y - MONEY_DIGITS_SCALE) * 0.04, gap = 0.0 })
     if after ~= "" then

@@ -493,7 +493,7 @@ function _Moi()
                         end
                     },
                     {
-                        "Regarder sa ~b~carte d\'identité", function()
+                        "Voir sa ~b~carte d\'identité", function()
                             TriggerServerEvent("jsfour-idcard:open", ESXCustomFonctionContextMenu:MonID(), ESXCustomFonctionContextMenu:MonID())
                         end
                     },
@@ -508,7 +508,7 @@ function _Moi()
                         end
                     },
                     {
-                        "Regarder son ~g~permis de conduire", function()
+                        "Voir son ~g~permis de conduire", function()
                             TriggerServerEvent("jsfour-idcard:open", ESXCustomFonctionContextMenu:MonID(), ESXCustomFonctionContextMenu:MonID(), 'driver')
                         end
                     },
@@ -523,7 +523,7 @@ function _Moi()
                         end
                     },
                     {
-                        "Regarder son ~r~permis port d\'armes", function()
+                        "Voir son ~r~permis port d\'armes", function()
                             TriggerServerEvent("jsfour-idcard:open", ESXCustomFonctionContextMenu:MonID(), ESXCustomFonctionContextMenu:MonID(), 'weapon')
                         end
                     }
