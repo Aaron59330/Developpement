@@ -101,6 +101,12 @@ local function MenuAccent(alpha)
     local c = ConfigContextMenu.Color.ColorAccent or {0, 164, 255}
     return Color(c[1], c[2], c[3], alpha or 255)
 end
+-- Sons du menu (ConfigContextMenu.Sounds)
+function PlayMenuSound(kind)
+    local cfg = ConfigContextMenu.Sounds
+    if not cfg or cfg.Enabled == false or not cfg[kind] then return end
+    PlaySoundFrontend(-1, cfg[kind][1], cfg[kind][2], true)
+end
 --Rect.lua
 Rect = {}
 Rect.__index = Rect
@@ -188,7 +194,7 @@ function Text.CreateNew(title, color)
     return self
 end
 function Text:Draw()
-    SetTextFont(4)
+    SetTextFont(ConfigContextMenu.Menu.Font or 0)
     SetTextProportional(true)
     SetTextScale(self.scale.x, self.scale.y)
     SetTextColour(self.color.r, self.color.g, self.color.b, self.color.a)
@@ -197,7 +203,7 @@ function Text:Draw()
     EndTextCommandDisplayText(self.position.x, self.position.y)
 end
 function Text:GetWidth()
-    SetTextFont(4)
+    SetTextFont(ConfigContextMenu.Menu.Font or 0)
     SetTextProportional(true)
     BeginTextCommandWidth("CELL_EMAIL_BCON")
     AddTextComponentSubstringPlayerName(self.title)
@@ -283,7 +289,7 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.height = 0.034
     self.text = Text(title)
-    self.text.scale = vector2(0.32, 0.32)
+    self.text.scale = vector2(ConfigContextMenu.Menu.TextScale or 0.34, ConfigContextMenu.Menu.TextScale or 0.34)
     self.rightText = nil
     if flecheactive then
         self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.012, 0.012 * GetAspectRatio(false)))
@@ -329,6 +335,7 @@ function Item:Process(cursorPosition)
         if (hovered ~= self.hovered) then
             self.hovered = hovered
             if (self.hovered) then
+                PlayMenuSound("Hover")
                 self:OnStartedHovering()
             else
                 self:OnStoppedHovering()
@@ -381,6 +388,7 @@ function Item:Clicked()
         return
     end
     
+    PlayMenuSound("Click")
     Citizen.CreateThread(function()
         self.OnClick()
     end)
@@ -459,6 +467,7 @@ function CheckboxItem:Clicked()
     if (not self.enabled) then
         return
     end
+    PlayMenuSound("Toggle")
     self.OnClick()
     self.checked = not self.checked
     
@@ -506,6 +515,7 @@ function SubmenuItem:Clicked()
         return
     end
     
+    PlayMenuSound("Click")
     Citizen.CreateThread(function()
         self.OnClick()
     end)
@@ -738,9 +748,12 @@ function Menu:Visible(visible)
         return self.visible
     end
     if (visible == false) then
+        if (self.visible and self.parent == nil) then PlayMenuSound("Close") end
         Citizen.CreateThread(function()
             self.OnClosed()
         end)
+    elseif (visible == true and not self.visible and self.parent == nil) then
+        PlayMenuSound("Open")
     end
     self.visible = visible
 end

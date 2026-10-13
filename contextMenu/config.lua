@@ -134,7 +134,19 @@ ConfigContextMenu = {
     Jobs2Name = 'unemployed2',
     ItemCrocheter = "lockpick",
 
+    -- Sons du menu (sons natifs GTA, aucun fichier à ajouter)
+    Sounds = {
+        Enabled = true,
+        Hover  = {"NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
+        Click  = {"SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
+        Toggle = {"NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
+        Open   = {"TOGGLE_ON", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
+        Close  = {"BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET"},
+    },
+
     Menu = {
+        Font = 0, -- Police GTA : 0 = Chalet London, 1 = House Script, 4 = Chalet Comprime Cologne, 7 = Pricedown
+        TextScale = 0.34, -- Taille du texte
         RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut
         CornerRadius = 10, -- Rayon des coins en pixels (si RoundedCorners = true)
         OpenMenu = 25,--Touche pour accéder au entité
