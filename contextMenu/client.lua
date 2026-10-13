@@ -274,6 +274,11 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.height = 0.03
     self.text = Text(title)
+    -- Lignes d'argent (contiennent "$") : texte plus petit
+    self.smallText = type(title) == "string" and title:find("%$") ~= nil
+    if self.smallText then
+        self.text.scale = vector2(0.25, 0.25)
+    end
     self.rightText = nil
     if flecheactive then
         self.rightSprite = Sprite("commonmenu", "arrowright", nil, vector2(0.015, 0.015 * GetAspectRatio(false)))
@@ -387,7 +392,7 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(0.002, 0.003)
+    self.text.position = self.position + vector2(0.002, self.smallText and 0.0038 or 0.003)
     if (self.rightSprite) then
         self.rightSprite:SetPosition(position + vector2(0.135, 0.0015))
     end
