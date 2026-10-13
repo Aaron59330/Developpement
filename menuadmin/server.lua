@@ -1535,3 +1535,37 @@ RegisterNetEvent('takeInfo', function(state)
 		TriggerEvent('esx:customDiscordLog', 'Logs staffmode', 'Un staff à désactiver son staffmode.', nil, ConfigSV.Logs["LogsStaffMode"], 'ID : '..source..'\nUtilisateur : '..GetPlayerName(source)..'\nLicense : '..ESX.GetPlayerFromId(source).identifier)
 	end
 end)
+-- ===== Statistiques du bandeau staff (reports / staffs en ligne / staffs en service) =====
+local staffInService = {}
+
+RegisterNetEvent('takeInfo', function(state)
+	staffInService[source] = state == true or nil
+end)
+
+AddEventHandler('playerDropped', function()
+	staffInService[source] = nil
+end)
+
+CreateThread(function()
+	while true do
+		Wait(3000)
+
+		local reports = 0
+		for _ in pairs(reportTable) do reports = reports + 1 end
+
+		local online, service = 0, 0
+		local inService = {}
+		for _, id in ipairs(GetPlayers()) do
+			id = tonumber(id)
+			if getRank(id) then online = online + 1 end
+			if staffInService[id] then
+				service = service + 1
+				inService[#inService + 1] = id
+			end
+		end
+
+		for _, id in ipairs(inService) do
+			TriggerClientEvent('menuadmin:barStats', id, reports, online, service)
+		end
+	end
+end)

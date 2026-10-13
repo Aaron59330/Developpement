@@ -387,6 +387,12 @@ local function BarStateColor(state)
     return {224, 62, 62}
 end
 
+-- Statistiques affichées dans le bandeau (envoyées par le serveur)
+local barStats = {reports = 0, online = 0, service = 0}
+RegisterNetEvent("menuadmin:barStats", function(reports, online, service)
+    barStats.reports, barStats.online, barStats.service = reports or 0, online or 0, service or 0
+end)
+
 local function initializeText()
     Citizen.CreateThread(function()
         while staffService do 
@@ -396,6 +402,9 @@ local function initializeText()
                 {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
                 {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
                 {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
+                {label = "REPORTS", badge = tostring(barStats.reports), color = {224, 62, 62}},
+                {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {80, 150, 255}},
+                {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {80, 150, 255}},
             })
         end
     end)
