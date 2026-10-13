@@ -6,14 +6,14 @@ if Config.Appearance ~= "esx_skin" then
     return
 end
 
--- Compatibilite avec skinchanger integre dans esx_custom.
+-- Compatibilite avec skinchanger integre dans CorePickax.
 local function getCoreSkin()
     local currentSkin
     TriggerEvent('skinchanger:getSkin', function(skin)
         currentSkin = skin
     end)
     if type(currentSkin) ~= 'table' then
-        error('[p_itemclothes] Skin indisponible : verifiez le demarrage de esx_custom avant p_itemclothes.')
+        error('[p_itemclothes] Skin indisponible : verifiez le demarrage de CorePickax avant p_itemclothes.')
     end
     return currentSkin
 end

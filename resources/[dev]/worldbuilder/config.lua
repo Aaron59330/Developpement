@@ -161,11 +161,11 @@ if IsDuplicityVersion() then
     -- Sinon : item ox_inventory avec la plaque en métadonnée (si « Item clé » est défini sur le module), ou le hook client Config.GiveKeys.
     Config.GiveKey = nil
 
-    -- Système de clés existant (ex : ton core `esx_custom` (script véhicule) avec la table open_car et l'export RegisterNewKeys).
+    -- Système de clés existant (ex : ton core `CorePickax` (script véhicule) avec la table open_car et l'export RegisterNewKeys).
     -- resource : nom de la ressource qui exporte RegisterNewKeys(source, plaque, 'no') ('' pour désactiver)
     -- table    : table des clés (colonnes identifier / value = plaque) : sert à DÉTECTER si le joueur a déjà la clé
     -- transferExport : true si tu as ajouté l'export TransferKeys (voir patches/vehicle) : les ventes d'occasion transfèrent alors proprement les clés
-    Config.Keys = { resource = 'esx_custom', table = 'open_car', transferExport = false }
+    Config.Keys = { resource = 'CorePickax', table = 'open_car', transferExport = false }
 
     -- Second métier (job2 / gang) des portes. Par défaut : xPlayer.job2 (ou xPlayer.getJob2()), de la forme { name = 'ballas', grade = 2 }.
     -- Config.GetJob2 = function(xPlayer) return { name = xPlayer.getMeta('gang'), grade = 0 } end

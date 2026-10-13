@@ -18,12 +18,12 @@ local function getPoint(src, pointId, ptype, publicOk)
 end
 
 -- ─────────────────────────────── Société : même système que le reste du serveur ───────────────────────────────
--- L'argent d'un job vit dans le compte partagé `society_<job>` d'esx_addonaccount (ici celui d'esx_custom), qui le garde EN MÉMOIRE
+-- L'argent d'un job vit dans le compte partagé `society_<job>` d'esx_addonaccount (ici celui d'CorePickax), qui le garde EN MÉMOIRE
 -- et le réécrit en base. On passe donc par lui (comme esx_society) pour que tous les scripts voient le même solde, instantanément.
 -- Repli : SQL direct sur addon_account_data (job pas encore connu d'esx_addonaccount : créé en jeu, avant son redémarrage).
 local unknown = {}        -- [compte] = timestamp : compte absent d'esx_addonaccount (évite de relancer sa recherche et ses messages d'erreur)
 local badBackend = false  -- l'API du compte ne se comporte pas comme prévu : on reste sur SQL
-local backendUp = function() return GetResourceState('esx_addonaccount') == 'started' or GetResourceState('esx_custom') == 'started' end
+local backendUp = function() return GetResourceState('esx_addonaccount') == 'started' or GetResourceState('CorePickax') == 'started' end
 
 local function sharedAccount(jobName)
     if badBackend or not backendUp() then return nil end
@@ -37,12 +37,12 @@ local function sharedAccount(jobName)
 end
 
 AddEventHandler('onResourceStart', function(res)
-    if res == 'esx_addonaccount' or res == 'esx_custom' or res == 'esx_society' then unknown, badBackend = {}, false end
+    if res == 'esx_addonaccount' or res == 'CorePickax' or res == 'esx_society' then unknown, badBackend = {}, false end
 end)
 
 -- Applique add/removeMoney et vérifie sur une lecture neuve que le solde a vraiment bougé.
 -- 1) méthodes du compte (esx_society les appelle ainsi) 2) exports « pont » AddSharedMoney / RemoveSharedMoney si le serveur les expose
--- (utile quand esx_custom regroupe addonaccount + society : le compte reçu depuis une autre ressource est alors une simple copie sans méthodes)
+-- (utile quand CorePickax regroupe addonaccount + society : le compte reçu depuis une autre ressource est alors une simple copie sans méthodes)
 local diagShown = false
 local function applyMem(jobName, acc, fn, amount)
     local name = JB.societyAccount(jobName)
@@ -56,7 +56,7 @@ local function applyMem(jobName, acc, fn, amount)
         if pcall(acc[fn], acc, amount) and moved() then return true end
     end
     local bridge = fn == 'addMoney' and 'AddSharedMoney' or 'RemoveSharedMoney'
-    for _, host in ipairs({ 'esx_addonaccount', 'esx_custom' }) do
+    for _, host in ipairs({ 'esx_addonaccount', 'CorePickax' }) do
         if GetResourceState(host) == 'started' then
             if pcall(function() exports[host][bridge](exports[host], name, amount) end) and moved() then return true end
         end
@@ -118,7 +118,7 @@ local function societyAdd(jobName, amount)
         local before = tonumber(acc.money) or 0
         if applyMem(jobName, acc, 'addMoney', amount) then JB.pushMoney(jobName) return true end
         badBackend = true      -- l'appel n'a rien changé : API inattendue, on bascule sur SQL
-        print('^3[jobbuilder] Le compte partagé ne réagit pas à addMoney : repli sur SQL (les autres scripts ne verront le solde qu\'après un restart esx_custom).^0')
+        print('^3[jobbuilder] Le compte partagé ne réagit pas à addMoney : repli sur SQL (les autres scripts ne verront le solde qu\'après un restart CorePickax).^0')
     end
     local ok = sqlMove(jobName, amount, 1)
     if ok then JB.pushMoney(jobName) end
@@ -134,7 +134,7 @@ local function societyRemove(jobName, amount)
         if before < amount then return false end
         if applyMem(jobName, acc, 'removeMoney', amount) then JB.pushMoney(jobName) return true end
         badBackend = true
-        print('^3[jobbuilder] Le compte partagé ne réagit pas à removeMoney : repli sur SQL (les autres scripts ne verront le solde qu\'après un restart esx_custom).^0')
+        print('^3[jobbuilder] Le compte partagé ne réagit pas à removeMoney : repli sur SQL (les autres scripts ne verront le solde qu\'après un restart CorePickax).^0')
     end
     local ok = sqlMove(jobName, amount, -1)
     if ok then JB.pushMoney(jobName) end
@@ -153,7 +153,7 @@ exports('RefreshJob', function(job) return JB.pushMoney(tostring(job)) end)
 RegisterCommand('jobmoney', function(src, args)
     if src ~= 0 and not JB.isDev(src) then return end
     local out = { '^5──────── jobbuilder : trésoreries ────────^0' }
-    out[#out + 1] = backendUp() and ('^2esx_addonaccount détecté^0 (%s) — les soldes passent par lui, en mémoire'):format(GetResourceState('esx_addonaccount') == 'started' and 'esx_addonaccount' or 'esx_custom')
+    out[#out + 1] = backendUp() and ('^2esx_addonaccount détecté^0 (%s) — les soldes passent par lui, en mémoire'):format(GetResourceState('esx_addonaccount') == 'started' and 'esx_addonaccount' or 'CorePickax')
         or '^3esx_addonaccount introuvable : repli SQL direct sur addon_account_data^0'
     if badBackend then out[#out + 1] = '^1API du compte partagé inattendue : repli SQL forcé^0' end
     local names = {}

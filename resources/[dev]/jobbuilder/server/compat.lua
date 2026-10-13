@@ -15,7 +15,7 @@ end
 
 local function accountHost()
     if GetResourceState('esx_addonaccount') == 'started' then return 'esx_addonaccount' end
-    if GetResourceState('esx_custom') == 'started' then return 'esx_custom' end
+    if GetResourceState('CorePickax') == 'started' then return 'CorePickax' end
 end
 
 -- Charge le compte société en mémoire d'esx_addonaccount (export AddSharedAccount), sans perdre le solde
@@ -48,7 +48,7 @@ function JB.registerSociety(name)
     local acc = JB.societyAccount(name)
     pcall(ensureAccountInMemory, name, job)
     -- esx_society : enregistrement (idempotent)
-    if GetResourceState('esx_society') == 'started' or GetResourceState('esx_custom') == 'started' then
+    if GetResourceState('esx_society') == 'started' or GetResourceState('CorePickax') == 'started' then
         pcall(function() TriggerEvent('esx_society:registerSociety', name, job.label, acc, acc, acc, { type = 'private' }) end)
     end
 end
@@ -69,7 +69,7 @@ AddEventHandler('onResourceStart', function(res)
             Wait(3000)
             JB.registerAllSocieties()
         end)
-    elseif res == 'esx_society' or res == 'esx_addonaccount' or res == 'esx_custom' then
+    elseif res == 'esx_society' or res == 'esx_addonaccount' or res == 'CorePickax' then
         noAddShared = {}
         CreateThread(function()
             Wait(5000)

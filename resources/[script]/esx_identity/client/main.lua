@@ -216,7 +216,7 @@ RegisterNUICallback('register', function(myIdentity, cb)
 		if Config.CustomTrigger then
 			CustomEvent(myIdentifiers.id)
 		else
-			TriggerEvent('esx_custom:Creator:openSkinMenu', myIdentifiers.id)
+			TriggerEvent('CorePickax:Creator:openSkinMenu', myIdentifiers.id)
 		end
 	else
 		ESX.ShowNotification(reason)

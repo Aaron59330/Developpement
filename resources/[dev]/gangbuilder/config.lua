@@ -31,7 +31,7 @@ Config.UseGangColor      = true    -- les markers des points prennent la couleur
 Config.Webhook           = ''      -- (optionnel) webhook Discord pour les logs (argent, armurerie, gestion membres)
 
 -- Ressources redémarrées automatiquement après la création / modification / suppression d'un gang.
--- Utile si ta ressource job2 charge la liste des jobs2 au DÉMARRAGE (voir Config.Job2.Refresh* plus bas). Ex : { 'esx_custom' }
+-- Utile si ta ressource job2 charge la liste des jobs2 au DÉMARRAGE (voir Config.Job2.Refresh* plus bas). Ex : { 'CorePickax' }
 Config.RestartResources = {}
 
 -- ─────────────────────────────── Job2 (là où les gangs sont écrits) ───────────────────────────────

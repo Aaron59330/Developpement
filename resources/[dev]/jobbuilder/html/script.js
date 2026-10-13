@@ -19,7 +19,7 @@ async function rpc(name, ...args) {
   } finally { clearTimeout(timer); }
 }
 
-// esx_society / esx_addonaccount (ou esx_custom) chargent les jobs au démarrage : on prévient ou on confirme le redémarrage
+// esx_society / esx_addonaccount (ou CorePickax) chargent les jobs au démarrage : on prévient ou on confirme le redémarrage
 function compatToast(c) {
   if (!c) return;
   if (c.restarted) toast(`Redémarrage de ${c.resources.join(', ')} dans quelques secondes pour prendre en compte le job…`);
@@ -965,7 +965,7 @@ Object.assign(Builder, {
         <div class="grid2 mt">${fld('Permission ACE (optionnel)', `<input data-path="${b}.AcePermission" value="${esc(g.AcePermission || '')}" maxlength="60">`)}
         ${fld('Inventaire', `<select data-path="${b}.Inventory">${['auto', 'ox', 'esx'].map(o => `<option value="${o}" ${g.Inventory === o ? 'selected' : ''}>${o === 'auto' ? 'Automatique' : o === 'ox' ? 'ox_inventory' : 'ESX'}</option>`).join('')}</select>`)}</div>
         <div class="mt">${fld('Webhook Discord (logs)', `<input data-path="${b}.Webhook" value="${esc(g.Webhook || '')}" maxlength="300" placeholder="https://discord.com/api/webhooks/…">`)}</div>
-        <div class="mt">${fld('Ressources à redémarrer après un changement de job (ex : esx_custom)', `<input data-path="${b}.RestartResources" data-t="list" value="${esc((g.RestartResources || []).join(', '))}" placeholder="esx_custom, esx_society, esx_addonaccount">`)}</div>
+        <div class="mt">${fld('Ressources à redémarrer après un changement de job (ex : CorePickax)', `<input data-path="${b}.RestartResources" data-t="list" value="${esc((g.RestartResources || []).join(', '))}" placeholder="CorePickax, esx_society, esx_addonaccount">`)}</div>
         <p class="hint mt">Ton esx_society / esx_addonaccount charge les jobs et les comptes société <b>au démarrage</b> : sans redémarrage, un job créé en jeu provoque « Compte partagé introuvable ». Indique ici la ressource à redémarrer automatiquement. Tu ne peux pas retirer ton propre groupe de la liste. La touche F6 et les noms de commandes se changent dans <b>config.lua</b> (redémarrage requis).</p></div></div>`;
   },
 

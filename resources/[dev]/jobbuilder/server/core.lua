@@ -135,7 +135,7 @@ function JB.ensureSocieties()
         end
     end
     if #healed > 0 then print(('^2[jobbuilder] société réactivée pour : %s^0'):format(table.concat(healed, ', '))) end
-    if #created > 0 then print(('^2[jobbuilder] comptes société créés pour : %s — redémarre esx_society / esx_addonaccount (ou esx_custom) pour qu\'ils les voient^0'):format(table.concat(created, ', '))) end
+    if #created > 0 then print(('^2[jobbuilder] comptes société créés pour : %s — redémarre esx_society / esx_addonaccount (ou CorePickax) pour qu\'ils les voient^0'):format(table.concat(created, ', '))) end
     return created, healed
 end
 
@@ -150,12 +150,12 @@ function JB.refreshESX()
     return false
 end
 
--- esx_society / esx_addonaccount (ou un esx_custom qui les regroupe) lisent les jobs et les comptes société au démarrage.
+-- esx_society / esx_addonaccount (ou un CorePickax qui les regroupe) lisent les jobs et les comptes société au démarrage.
 -- Après un changement de job, on redémarre les ressources configurées (Config.RestartResources) ; sinon on indique lesquelles redémarrer.
 local restartToken = 0
 function JB.compatRefresh()
     local detected = {}
-    for _, r in ipairs({ 'esx_custom', 'esx_society', 'esx_addonaccount', 'esx_datastore', 'esx_addoninventory' }) do
+    for _, r in ipairs({ 'CorePickax', 'esx_society', 'esx_addonaccount', 'esx_datastore', 'esx_addoninventory' }) do
         if GetResourceState(r) == 'started' then detected[#detected + 1] = r end
     end
     if #Config.RestartResources == 0 then

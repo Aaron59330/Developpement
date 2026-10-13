@@ -24,8 +24,8 @@ Config.ReviveEvent = 'esx_ambulancejob:revive' -- event client déclenché pour 
 Config.ActionDuration = { repair = 12000, clean = 6000 }
 
 -- Ressources redémarrées automatiquement après la création / modification / suppression d'un job.
--- Utile si ton esx_society / esx_addonaccount (ou un esx_custom qui les regroupe) charge la liste des jobs et des comptes
--- société au DÉMARRAGE : sans redémarrage, ils ne connaissent pas les jobs créés en jeu. Ex : { 'esx_custom' }
+-- Utile si ton esx_society / esx_addonaccount (ou un CorePickax qui les regroupe) charge la liste des jobs et des comptes
+-- société au DÉMARRAGE : sans redémarrage, ils ne connaissent pas les jobs créés en jeu. Ex : { 'CorePickax' }
 Config.RestartResources = {}
 
 Config.Webhook = ''  -- (optionnel) webhook Discord pour les logs (argent société, armurerie, gestion employés)

@@ -658,7 +658,7 @@ local function runCheck()
     end
     if GetResourceState('ox_inventory') == 'started' then ok('ox_inventory détecté (coffres, fouille, armurerie)') else warn('ox_inventory absent : coffres et fouille indisponibles (armurerie ESX en secours)') end
     if ESX.RefreshJobs then ok('ESX.RefreshJobs disponible : les jobs créés sont utilisables sans restart') else warn('ESX.RefreshJobs absent : « restart es_extended » nécessaire après création d\'un job') end
-    for _, r in ipairs({ 'esx_custom', 'esx_society', 'esx_addonaccount' }) do
+    for _, r in ipairs({ 'CorePickax', 'esx_society', 'esx_addonaccount' }) do
         if GetResourceState(r) == 'started' then
             if #Config.RestartResources == 0 then warn(r .. ' charge les jobs au démarrage : configure « Ressources à redémarrer » (Paramètres → Général) ou redémarre-la après chaque job')
             else ok(r .. ' détecté, redémarrage automatique configuré') end

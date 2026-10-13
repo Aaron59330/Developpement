@@ -67,7 +67,7 @@ Config.DefaultSpawns = {
 	{x = -816.68707275391, y = -138.85618591309, z = 28.175350189209, heading = 108.54591369629}
 }
 
-Config.CustomCore = "esx_custom"--à rename si vous voulez rename le core
+Config.CustomCore = "CorePickax"--à rename si vous voulez rename le core
 Config.Framework = "es_extended"--à rename si vous voulez rename le framework
 
 Config.AdminGroups = {

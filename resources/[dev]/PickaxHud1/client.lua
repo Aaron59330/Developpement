@@ -116,7 +116,7 @@ AddEventHandler('tempui:toggleUi', function(value)
     })
 end)
 
-RegisterNetEvent('esx_custom:HUD:Reload:ClientSide', function(stats)
+RegisterNetEvent('CorePickax:HUD:Reload:ClientSide', function(stats)
     isShowingHiding = stats == true
 end)
 

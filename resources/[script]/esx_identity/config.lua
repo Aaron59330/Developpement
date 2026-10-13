@@ -7,6 +7,6 @@ Config = {
 function CustomEvent(src)
     --Mettre votre trigger ici:
     --[[
-        Exemple : TriggerEvent('esx_custom:Creator:openSkinMenu', src)
+        Exemple : TriggerEvent('CorePickax:Creator:openSkinMenu', src)
     ]]--
 end

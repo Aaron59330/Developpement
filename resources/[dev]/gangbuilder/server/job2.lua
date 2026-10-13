@@ -98,7 +98,7 @@ function GB.setJob2(who, name, grade)
     local prevField = xPlayer[J.PlayerField]
     local data = jobTable(name, grade)
     local last = type(prevField) == 'table' and prevField.name and prevField or jobTable(oldName or J.Default.name, oldGrade or 0, nil)
-    -- les scripts tiers (ex : esx_custom) attendent les DEUX arguments : (nouveau job2, ancien job2)
+    -- les scripts tiers (ex : CorePickax) attendent les DEUX arguments : (nouveau job2, ancien job2)
     TriggerClientEvent(J.ClientEvent, src, data, last)
     TriggerEvent(J.ServerEvent, src, data, last)
     SetTimeout(300, function() GB.syncPlayer(src) end)
