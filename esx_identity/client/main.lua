@@ -64,18 +64,11 @@ function EnableGui(state)
 	if state then
 		Citizen.CreateThread(UpdateHeadshot)
 
-		-- Le loading screen retire le curseur NUI quand il se ferme : on le réapplique
-		-- tant que l'écran de chargement est actif, puis encore quelques instants après.
+		-- Garde le curseur NUI tant que le menu est ouvert (le loading screen peut le retirer en se fermant)
 		Citizen.CreateThread(function()
-			while GetIsLoadingScreenActive() do
-				if not guiEnabled then return end
+			while guiEnabled do
 				SetNuiFocus(true, true)
-				Citizen.Wait(200)
-			end
-			for _ = 1, 12 do
-				Citizen.Wait(300)
-				if not guiEnabled then return end
-				SetNuiFocus(true, true)
+				Citizen.Wait(250)
 			end
 		end)
 	elseif headHandle then
