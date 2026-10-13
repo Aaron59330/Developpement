@@ -1,0 +1,5 @@
+RegisterServerEvent('3dme:shareDisplay')
+AddEventHandler('3dme:shareDisplay', function(text)
+	TriggerClientEvent('3dme:triggerDisplay', -1, text, source)
+	ESXCustom_Function_ServerSide:sendToDiscord("/ME", '[**/ME**] [ __**'..GetPlayerName(source)..'**__ ] **A Dit en /Me : __'..text..'__**', ConfigME.Webhook)
+end)

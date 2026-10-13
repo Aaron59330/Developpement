@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading Screen</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- JS chargé après le DOM -->
+    <script src="index.js" defer></script>
+    <script src="ui.js" defer></script>
+</head>
+
+<body>
+
+    <div id="background"></div>
+    <div id="shade"></div>
+    <div id="grain"></div>
+
+    <div id="logo">
+        <!-- DEBUG -->
+        <div id="debug" class="log log-top-right"></div>
+        <div id="log" class="log log-bottom-left"></div>
+
+        <div class="topbar">
+            <!-- Volume / musique -->
+            <div class="volume-control">
+                <button id="musicBtn" class="volume-icon" type="button" title="Musique (ESPACE)">
+                    <svg id="icOn" viewBox="0 0 24 24"><polygon points="3 9 8 9 13 5 13 19 8 15 3 15"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+                    <svg id="icOff" viewBox="0 0 24 24" style="display:none"><polygon points="3 9 8 9 13 5 13 19 8 15 3 15"/><line x1="17" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="17" y2="15"/></svg>
+                </button>
+                <input id="volume" type="range" min="0" max="100" value="10">
+                <span id="volumeValue" class="volume-value">10%</span>
+            </div>
+
+            <!-- Liens (à renseigner dans ui.js) -->
+            <div class="tabs">
+                <button class="tab" type="button" data-link="reglement"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>Règlement</button>
+                <button class="tab" type="button" data-link="discord"><svg viewBox="0 0 24 24"><path d="M8 8c2.6-1 5.4-1 8 0M7 17c3.3 1.3 6.7 1.3 10 0M8 8l-2 9 2 2M16 8l2 9-2 2"/><circle cx="9.5" cy="13" r="1"/><circle cx="14.5" cy="13" r="1"/></svg>Discord</button>
+                <button class="tab" type="button" data-link="boutique"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>Boutique</button>
+            </div>
+        </div>
+
+        <!-- BARRE DE CHARGEMENT -->
+        <div class="loading-container">
+            <div class="bottom-progress-meta">
+                <span class="loading-status" id="stageText">Initialisation…</span>
+                <span class="progress-percent"><span id="percent">0</span>%</span>
+            </div>
+
+            <div class="loading-bar-container">
+                <div id="INIT_BEFORE_MAP_LOADED-bar" class="loading-bar bgcolor-first"></div>
+                <div id="MAP-bar" class="loading-bar bgcolor-second"></div>
+                <div id="INIT_AFTER_MAP_LOADED-bar" class="loading-bar bgcolor-third"></div>
+                <div id="INIT_SESSION-bar" class="loading-bar bgcolor-fourth"></div>
+            </div>
+
+            <!-- Libellés exigés par index.js (masqués) -->
+            <div class="loading-labels">
+                <div id="INIT_BEFORE_MAP_LOADED-label" class="color-first"></div>
+                <div id="MAP-label" class="color-second"></div>
+                <div id="INIT_AFTER_MAP_LOADED-label" class="color-third"></div>
+                <div id="INIT_SESSION-label" class="color-fourth"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker__item">Bon jeu sur notre serveur 🍹</div>
+            <div class="ticker__item">N'hésitez pas à faire un tour sur notre boutique (F1)</div>
+            <div class="ticker__item">Lisez le règlement pour éviter toute sanction</div>
+            <div class="ticker__item">Merci de nous soutenir chaque jour ❤️</div>
+        </div>
+    </div>
+
+    <!-- MUSIQUE -->
+    <audio id="music" src="music/music.mp3" autoplay loop></audio>
+
+    <!-- CONTROLE MUSIQUE -->
+    <script>
+        let play = true;
+        const myAudio = document.getElementById("music");
+        myAudio.volume = 0.1;
+
+        function toggleMusic() {
+            play ? myAudio.pause() : myAudio.play();
+            play = !play;
+            if (window.onMusicToggle) window.onMusicToggle(play);
+        }
+
+        window.addEventListener("keydown", function (event) {
+            if (event.keyCode === 32) { // ESPACE
+                toggleMusic();
+            }
+        });
+    </script>
+
+</body>
+</html>

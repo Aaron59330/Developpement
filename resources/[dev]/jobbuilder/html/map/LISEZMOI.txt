@@ -1,0 +1,2 @@
+Dépose ici le pack de tuiles "mapStyles" (dossiers styleAtlas, styleSatelite, styleGrid) pour avoir la vraie carte en couleur dans la tablette.
+Chemin attendu : html/map/mapStyles/styleAtlas/{z}/{x}/{y}.jpg - voir README.
