@@ -1,4 +1,5 @@
 local staffService = false
+local showStaffHud = true -- affiche / masque le HUD staff (Paramètres perso)
 local NoClip = false
 local ShowName = false
 local invisible = false
@@ -452,15 +453,17 @@ local function initializeText()
     Citizen.CreateThread(function()
         while staffService do 
             Citizen.Wait(1)
-            DrawTopCenterBar({
-                {label = "MODE ADMINISTRATION ACTIF", color = BAR_TAG_COLORS[colorVar] or {235, 235, 235}},
-                {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
-                {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
-                {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
-                {label = "REPORTS", badge = tostring(barStats.reports), color = {232, 72, 88}},
-                {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {60, 140, 255}},
-                {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {60, 140, 255}},
-            })
+            if showStaffHud then
+                DrawTopCenterBar({
+                    {label = "MODE ADMINISTRATION ACTIF", color = BAR_TAG_COLORS[colorVar] or {235, 235, 235}},
+                    {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
+                    {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
+                    {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
+                    {label = "REPORTS", badge = tostring(barStats.reports), color = {232, 72, 88}},
+                    {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {60, 140, 255}},
+                    {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {60, 140, 255}},
+                })
+            end
         end
     end)
 end
@@ -1722,6 +1725,14 @@ function MenuStaffOpen()
                 for _,v in pairs(GetActivePlayers()) do
                     RemoveMpGamerTag(gamerTags[v])
                 end
+            end)
+
+            RageUI.Checkbox("Afficher le HUD staff", "Active ou désactive le bandeau d'informations en haut de l'écran", showStaffHud, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
+                showStaffHud = Checked
+            end, function()
+                showStaffHud = true
+            end, function()
+                showStaffHud = false
             end)
         end, function()    
         end, 1)
