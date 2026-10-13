@@ -52,6 +52,16 @@ function setIdentity(identifier, data, cb)
 			TriggerClientEvent('esx_identity:identityUpdated', xPlayer.source, data)
 		end
 
+		-- Donne la carte d'identité (item ox_inventory) si le joueur n'en a pas
+		if Config.GiveIdCardItem and xPlayer and GetResourceState('ox_inventory') == 'started' then
+			if exports.ox_inventory:GetItemCount(xPlayer.source, 'id_card') == 0 then
+				exports.ox_inventory:AddItem(xPlayer.source, 'id_card', 1, {
+					identifier = identifier,
+					description = data.firstname .. ' ' .. data.lastname
+				})
+			end
+		end
+
 		if cb then
 			cb(true)
 		end
