@@ -330,11 +330,14 @@ local function BarDrawText(text, x, y, scale, r, g, b)
     EndTextCommandDisplayText(x, y)
 end
 
--- items = { {label = "TEXTE", color = {r,g,b}}, {label = "NOCLIP", badge = "OFF", color = {r,g,b}}, ... }
+-- items = { {label = "TEXTE", color = {r,g,b}}, {badge = "OFF", label = "NOCLIP", color = {r,g,b}}, ... }
+-- Style : [pastille contour couleur + valeur] LIBELLÉ | [pastille] LIBELLÉ | ...
 local function DrawTopCenterBar(items)
-    local scale, top, padX, padY = 0.30, 0.012, 0.007, 0.0055
+    local scale, top, padX, padY = 0.255, 0.0125, 0.0055, 0.0045
     local lineHeight = 0.0275 * (scale / 0.3)
-    local badgePad, gap, sepGap = 0.0035, 0.004, 0.007
+    local badgePadX, gap, sepGap = 0.0032, 0.0035, 0.0058
+    local px = 0.0005          -- épaisseur du contour (horizontal)
+    local py = 0.0009          -- épaisseur du contour (vertical)
 
     -- Mesure
     local total = 0
@@ -342,34 +345,39 @@ local function DrawTopCenterBar(items)
         item.w = BarTextWidth(item.label, scale)
         local width = item.w
         if item.badge then
-            item.bw = BarTextWidth(item.badge, scale) + badgePad * 2
+            item.bw = BarTextWidth(item.badge, scale) + badgePadX * 2
             width = width + gap + item.bw
         end
         item.total = width
         total = total + width
-        if i < #items then total = total + sepGap * 2 + 0.0007 end
+        if i < #items then total = total + sepGap * 2 + 0.0006 end
     end
 
     local barWidth, barHeight = total + padX * 2, lineHeight + padY * 2
     local x = 0.5 - barWidth / 2
-    DrawRect(0.5, top + barHeight / 2, barWidth, barHeight, 30, 30, 32, 195)
+    local midY = top + barHeight / 2
+    DrawRect(0.5, midY, barWidth, barHeight, 52, 52, 55, 175)
 
     x = x + padX
-    local textY = top + padY - 0.001
+    local textY = top + padY - 0.0006
     for i, item in ipairs(items) do
         local c = item.color or {235, 235, 235}
-        BarDrawText(item.label, x, textY, scale, c[1], c[2], c[3])
-        x = x + item.w
         if item.badge then
-            x = x + gap
-            DrawRect(x + item.bw / 2, top + barHeight / 2, item.bw, lineHeight - 0.002, c[1], c[2], c[3], 70)
-            BarDrawText(item.badge, x + badgePad, textY, scale, c[1], c[2], c[3])
-            x = x + item.bw
+            -- pastille : contour coloré + fond sombre, valeur colorée
+            local bh = lineHeight - 0.001
+            DrawRect(x + item.bw / 2, midY, item.bw, bh, c[1], c[2], c[3], 230)
+            DrawRect(x + item.bw / 2, midY, item.bw - px * 2, bh - py * 2, 24, 24, 28, 240)
+            BarDrawText(item.badge, x + badgePadX, textY, scale, c[1], c[2], c[3])
+            x = x + item.bw + gap
+            BarDrawText(item.label, x, textY, scale, 235, 235, 235)
+        else
+            BarDrawText(item.label, x, textY, scale, c[1], c[2], c[3])
         end
+        x = x + item.w
         if i < #items then
             x = x + sepGap
-            DrawRect(x + 0.00035, top + barHeight / 2, 0.0007, lineHeight - 0.004, 150, 150, 155, 200)
-            x = x + 0.0007 + sepGap
+            DrawRect(x + 0.0003, midY, 0.0006, lineHeight - 0.003, 235, 235, 235, 210)
+            x = x + 0.0006 + sepGap
         end
     end
 end
