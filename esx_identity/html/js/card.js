@@ -78,7 +78,7 @@
 		$("#cNo").text(cardId);
 		var line = "ID" + cardId + "<<" + mrz(l) + "<<" + mrz(f);
 		while (line.length < 60) line += "<";
-		$("#mrz").html(line.slice(0, 30) + "<br>" + (cardId + "<<<" + mrz(f + l)).padEnd(30, "<").slice(0, 30));
+		$("#mrz").text(line.slice(0, 30) + "\n" + (cardId + "<<<" + mrz(f + l)).padEnd(30, "<").slice(0, 30));
 
 		var total = 5, done = [f, l, d.length === 10, h, n].filter(Boolean).length;
 		var pct = Math.round(done / total * 100);

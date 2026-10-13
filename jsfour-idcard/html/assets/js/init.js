@@ -46,7 +46,7 @@
       set('cNo', no);
       var l1 = ('ID' + no + '<<' + mrz(user.lastname) + '<<' + mrz(user.firstname) + '<<<<<<<<<<<<<<<<<<<<<<<<<<<<').slice(0, 30);
       var l2 = (no + '<<<' + mrz(user.firstname + user.lastname) + '<<<<<<<<<<<<<<<<<<<<<<<<<<<<').slice(0, 30);
-      $('mrz').innerHTML = l1 + '<br>' + l2;
+      $('mrz').textContent = l1 + '\n' + l2;
 
       // Variantes de carte
       $('cNat').style.display = 'block'; $('licenses').className = 'badges';
