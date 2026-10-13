@@ -41,7 +41,7 @@
 	border: 1px solid var(--line);
 }
 .photo svg { width: 80%; fill: rgba(var(--ink-rgb), 0.4); }
-.photo img.head { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: none; image-rendering: auto; }
+.photo img.head { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; transform: scale(1.3); transform-origin: 50% 38%; display: none; }
 .photo.has-head img.head { display: block; }
 .photo.has-head svg { display: none; }
 .holo {
