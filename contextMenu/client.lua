@@ -271,7 +271,7 @@ function Separator.CreateNew(menu, index, lineColor, bgColor, alpha)
 end
 function Separator:Process()
     self.background:Draw(Color(self.colors.background.r, self.colors.background.g, self.colors.background.b, self.alpha), self.parent)
-    self.line:Draw(self.colors.line:Alpha(45))
+    self.line:Draw(self.colors.line:Alpha(110))
 end
 function Separator:SetPosition(position)
     self.position = position
@@ -617,7 +617,7 @@ function Border.CreateNew(position, size, thickness, color)
     self.thickness = thickness or 0.001
     -- self.color = color or Colors.Grey
     if ConfigContextMenu.Color.ColorBorder ~= nil then
-        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3], 90) or Colors.Grey
+        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3], 170) or Colors.Grey
     end
     
     self.rects = {}

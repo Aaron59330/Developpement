@@ -111,9 +111,9 @@ ConfigContextMenu = {
         ColorMenuHovered = {38, 38, 38},
         ColorText = {215, 215, 215},
         ColorTextDisable = {95, 95, 95},
-        ColorBorder = {255, 255, 255},
-        ColorSeparator = {255, 255, 255},
-        ColorAccent = {255, 255, 255}
+        ColorBorder = {0, 164, 255},
+        ColorSeparator = {0, 164, 255},
+        ColorAccent = {0, 164, 255}
     },
 
     Jobs2 = true,
