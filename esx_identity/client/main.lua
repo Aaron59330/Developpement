@@ -132,6 +132,18 @@ end)
 RegisterNetEvent('esx_identity:showRegisterIdentity')
 AddEventHandler('esx_identity:showRegisterIdentity', function()
 	if not isDead then
+		-- Première connexion : le menu s'ouvre tout seul pendant que le loading screen est encore là.
+		-- On attend la fin du chargement du jeu, puis on ferme la page du loading screen (qui garde le curseur)
+		-- avant d'ouvrir le menu, pour que le curseur soit bien rendu à esx_identity.
+		local waited = 0
+		while GetIsLoadingScreenActive() and waited < 30000 do
+			Citizen.Wait(200)
+			waited = waited + 200
+		end
+
+		ShutdownLoadingScreenNui()
+		Citizen.Wait(500)
+
 		EnableGui(true)
 	end
 end)
