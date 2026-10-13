@@ -184,9 +184,8 @@ files {
     'players/jsfour-idcard/html/index.html',
     'players/jsfour-idcard/html/assets/css/*.css',
     'players/jsfour-idcard/html/assets/js/*.js',
-    'players/jsfour-idcard/html/assets/fonts/roboto/*.woff',
-    'players/jsfour-idcard/html/assets/fonts/roboto/*.woff2',
-    'players/jsfour-idcard/html/assets/fonts/justsignature/JustSignature.woff',
+    'players/jsfour-idcard/html/assets/fonts/*.woff',
+    'players/jsfour-idcard/html/assets/fonts/*.woff2',
     'players/jsfour-idcard/html/assets/images/*.png',
 
     'utils/weapon/weapons.meta'

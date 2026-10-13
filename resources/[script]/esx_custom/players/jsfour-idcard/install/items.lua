@@ -7,7 +7,7 @@
 	stack = false,
 	close = true,
 	description = "Carte nationale d'identité",
-	server = { export = 'jsfour-idcard.id_card' }
+	server = { export = 'esx_custom.id_card' }
 },
 
 ['driver_license'] = {
@@ -16,7 +16,7 @@
 	stack = false,
 	close = true,
 	description = 'Permis de conduire',
-	server = { export = 'jsfour-idcard.driver_license' }
+	server = { export = 'esx_custom.driver_license' }
 },
 
 ['weapon_license'] = {
@@ -25,5 +25,5 @@
 	stack = false,
 	close = true,
 	description = "Permis de port d'arme",
-	server = { export = 'jsfour-idcard.weapon_license' }
+	server = { export = 'esx_custom.weapon_license' }
 },

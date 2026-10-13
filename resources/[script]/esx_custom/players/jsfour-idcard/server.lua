@@ -108,7 +108,7 @@ exports('weapon_license', function(event, item, inventory, slot)
 end)
 
 -- Donne une carte à un joueur (utilisable par vos autres scripts) :
--- exports['jsfour-idcard']:GiveCard(source, 'id_card')
+-- exports['esx_custom']:GiveCard(source, 'id_card')
 exports('GiveCard', function(src, itemName)
 	local xPlayer = ESX.GetPlayerFromId(src)
 	if not xPlayer or not CARD_ITEMS[itemName] then return false end
