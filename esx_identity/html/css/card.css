@@ -41,7 +41,7 @@
 	border: 1px solid var(--line);
 }
 .photo svg { width: 80%; fill: color-mix(in srgb, var(--ink) 40%, transparent); }
-.photo img.head { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: none; }
+.photo img.head { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: none; image-rendering: auto; }
 .photo.has-head img.head { display: block; }
 .photo.has-head svg { display: none; }
 .holo {
