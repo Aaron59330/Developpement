@@ -385,9 +385,9 @@ end
 local BAR_TEXT_CENTER = 0.53 -- position verticale du centre des capitales dans la ligne de texte (réglable)
 local function DrawTopCenterBar(items)
     local RX, RY = BarResolution()
-    local scale = 0.27
+    local scale = 0.32
     local lineH = math.floor(GetTextScaleHeight(scale, 4) * RY + 0.5)   -- hauteur de la ligne de texte (px)
-    local padX, padY, gap, sepGap = 10, 7, 6, 13
+    local padX, padY, gap, sepGap = 12, 8, 7, 15
 
     -- Mesure (tout en pixels entiers)
     local total = 0
