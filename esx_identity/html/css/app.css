@@ -207,3 +207,17 @@ select option { background: #151516; color: #fff; }
 .idcard.stamp { animation: stamp .45s ease-out; }
 @keyframes stamp { 0% { transform: scale(1); } 40% { transform: scale(.94); } 100% { transform: scale(1); } }
 .side-title { margin-bottom: 14px; }
+
+/* ===== Accent bleu #00a4ff (détails) ===== */
+:root { --accent: #00a4ff; }
+.head-icon svg { fill: var(--accent); }
+.head-icon { border-color: rgba(0,164,255,.35); }
+input[type="text"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,164,255,.15); }
+.pb { color: rgba(255,255,255,.45); }
+.field:focus-within .pb { color: var(--accent); transition: color .2s; }
+.radio-toolbar input:checked + label { background: var(--accent); border-color: var(--accent); color: #fff; }
+.submit:hover { background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(0,164,255,.3); }
+.bar i { background: var(--accent); }
+.progress-label b { color: var(--accent); }
+.side-title { color: rgba(0,164,255,.7); }
+.side-foot { border-color: rgba(0,164,255,.25); }

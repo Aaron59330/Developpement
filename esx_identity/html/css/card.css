@@ -5,7 +5,7 @@
 @font-face { font-family: 'CardSign'; src: url('../fonts/JustSignature.woff') format('woff'); }
 
 .idcard {
-	--ink-rgb: 20,21,26; --bg: #e8e4d9; --bg2: #d9d4c5; --ink: #14151a; --soft: rgba(20,21,26,.5); --accent: #1f3a8a; --line: rgba(20,21,26,.22);
+	--ink-rgb: 20,21,26; --bg: #e8e4d9; --bg2: #d9d4c5; --ink: #14151a; --soft: rgba(20,21,26,.5); --accent: #00a4ff; --line: rgba(20,21,26,.22);
 	position: relative; box-sizing: border-box; width: 480px; height: 302px; padding: 16px 20px 14px;
 	border-radius: 16px; overflow: hidden; color: var(--ink);
 	font-family: 'CardFont', 'Segoe UI', Arial, sans-serif;
@@ -15,8 +15,8 @@
 	transform-style: preserve-3d;
 }
 .idcard * { box-sizing: border-box; margin: 0; padding: 0; }
-.idcard.type-driver { --bg: #dfe7ef; --bg2: #c9d6e3; --accent: #0f5ea8; }
-.idcard.type-weapon { --ink-rgb: 241,237,225; --bg: #1d1d21; --bg2: #121215; --ink: #f1ede1; --soft: rgba(241,237,225,.5); --accent: #c9a24a; --line: rgba(241,237,225,.2); }
+.idcard.type-driver { --bg: #dfe7ef; --bg2: #c9d6e3; }
+.idcard.type-weapon { --ink-rgb: 241,237,225; --bg: #1d1d21; --bg2: #121215; --ink: #f1ede1; --soft: rgba(241,237,225,.5); --accent: #00a4ff; --line: rgba(241,237,225,.2); }
 
 .guilloche {
 	position: absolute; inset: 0; pointer-events: none; opacity: .55;
@@ -28,9 +28,9 @@
 .card-flag { width: 30px; height: 21px; border-radius: 3px; flex-shrink: 0; background: linear-gradient(90deg, #1f3a8a 0 33%, #f4f4f4 33% 66%, #b91c1c 66%); border: 1px solid rgba(0,0,0,.2); }
 .card-title { flex: 1; line-height: 1.2; min-width: 0; }
 .card-title b { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.card-title small { font-size: 9px; color: var(--soft); letter-spacing: .06em; text-transform: uppercase; }
+.card-title small { font-size: 9px; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
 .card-no { font-size: 9px; font-weight: 700; letter-spacing: .08em; color: var(--soft); white-space: nowrap; }
-.card-no em { font: 700 12px 'Consolas', monospace; font-style: normal; color: var(--ink); letter-spacing: .1em; }
+.card-no em { font: 700 12px 'Consolas', monospace; font-style: normal; color: var(--accent); letter-spacing: .1em; }
 
 .card-body { position: relative; display: flex; gap: 16px; height: 150px; }
 .photo-col { position: relative; flex-shrink: 0; }
@@ -56,9 +56,10 @@
 .cf-row .cf { flex: 1; min-width: 0; }
 .cf { padding: 2px 6px; border-radius: 6px; border: 1px solid transparent; transition: background .25s, border-color .25s; min-width: 0; }
 .cf small { display: block; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+.cf.active small { color: var(--accent); }
 .cf b { display: block; min-height: 18px; font-size: 14px; font-weight: 700; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .02em; border-radius: 3px; }
 .cf:not(.done) b { background: rgba(var(--ink-rgb), 0.09); }
-.cf.active { background: rgba(var(--ink-rgb), 0.08); border-color: rgba(var(--ink-rgb), 0.4); }
+.cf.active { background: rgba(0,164,255,.1); border-color: #00a4ff; }
 .cf b.pop { animation: pop2 .35s ease-out; }
 @keyframes pop2 { 0% { transform: translateY(6px); opacity: .2; } 100% { transform: none; opacity: 1; } }
 .cf.hidden { display: none; }
