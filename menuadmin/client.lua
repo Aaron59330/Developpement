@@ -307,38 +307,88 @@ local function initializeNames()
     end)
 end
 
--- Bandeau du mode administration : barre sombre translucide en haut au milieu de l'écran
-local function DrawTopCenterBar(message)
-    local scale = 0.30
+-- Bandeau du mode administration : barre sombre translucide en haut au milieu (pastilles colorées + séparateurs)
+local BAR_TAG_COLORS = {
+    ["~r~"] = {224, 62, 62}, ["~g~"] = {92, 214, 120}, ["~b~"] = {88, 170, 240},
+    ["~y~"] = {240, 200, 80}, ["~p~"] = {150, 110, 230}, ["~o~"] = {240, 150, 60},
+}
+
+local function BarTextWidth(text, scale)
     SetTextFont(4)
     SetTextScale(0.0, scale)
     BeginTextCommandGetWidth("STRING")
-    AddTextComponentSubstringPlayerName(message)
-    local textWidth = EndTextCommandGetWidth(true)
+    AddTextComponentSubstringPlayerName(text)
+    return EndTextCommandGetWidth(true)
+end
 
-    local padX, padY = 0.008, 0.006
-    local lineHeight = 0.0275 * (scale / 0.3) + 0.002
-    local barWidth, barHeight = textWidth + padX * 2, lineHeight + padY * 2
-    local centerX, top = 0.5, 0.012
-
-    -- Fond gris foncé translucide + fine ligne de couleur dessous
-    DrawRect(centerX, top + barHeight / 2, barWidth, barHeight, 28, 28, 30, 190)
-    DrawRect(centerX, top + barHeight, barWidth, 0.0012, 0, 164, 255, 220)
-
+local function BarDrawText(text, x, y, scale, r, g, b)
     SetTextFont(4)
     SetTextScale(0.0, scale)
-    SetTextColour(235, 235, 235, 255)
-    SetTextCentre(true)
+    SetTextColour(r, g, b, 255)
     BeginTextCommandDisplayText("STRING")
-    AddTextComponentSubstringPlayerName(message)
-    EndTextCommandDisplayText(centerX, top + padY)
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(x, y)
+end
+
+-- items = { {label = "TEXTE", color = {r,g,b}}, {label = "NOCLIP", badge = "OFF", color = {r,g,b}}, ... }
+local function DrawTopCenterBar(items)
+    local scale, top, padX, padY = 0.30, 0.012, 0.007, 0.0055
+    local lineHeight = 0.0275 * (scale / 0.3)
+    local badgePad, gap, sepGap = 0.0035, 0.004, 0.007
+
+    -- Mesure
+    local total = 0
+    for i, item in ipairs(items) do
+        item.w = BarTextWidth(item.label, scale)
+        local width = item.w
+        if item.badge then
+            item.bw = BarTextWidth(item.badge, scale) + badgePad * 2
+            width = width + gap + item.bw
+        end
+        item.total = width
+        total = total + width
+        if i < #items then total = total + sepGap * 2 + 0.0007 end
+    end
+
+    local barWidth, barHeight = total + padX * 2, lineHeight + padY * 2
+    local x = 0.5 - barWidth / 2
+    DrawRect(0.5, top + barHeight / 2, barWidth, barHeight, 30, 30, 32, 195)
+
+    x = x + padX
+    local textY = top + padY - 0.001
+    for i, item in ipairs(items) do
+        local c = item.color or {235, 235, 235}
+        BarDrawText(item.label, x, textY, scale, c[1], c[2], c[3])
+        x = x + item.w
+        if item.badge then
+            x = x + gap
+            DrawRect(x + item.bw / 2, top + barHeight / 2, item.bw, lineHeight - 0.002, c[1], c[2], c[3], 70)
+            BarDrawText(item.badge, x + badgePad, textY, scale, c[1], c[2], c[3])
+            x = x + item.bw
+        end
+        if i < #items then
+            x = x + sepGap
+            DrawRect(x + 0.00035, top + barHeight / 2, 0.0007, lineHeight - 0.004, 150, 150, 155, 200)
+            x = x + 0.0007 + sepGap
+        end
+    end
+end
+
+local function BarStateColor(state)
+    if state then return {92, 214, 120} end
+    return {224, 62, 62}
 end
 
 local function initializeText()
     Citizen.CreateThread(function()
         while staffService do 
             Citizen.Wait(1)
-            DrawTopCenterBar(colorVar.."MODE ADMINISTRATION ACTIF~s~  |  NOCLIP: "..stringText[NoClip].."  |  INVISIBLE: "..stringText[invisible].."  |  NOMS: "..stringText[ShowName])
+            DrawTopCenterBar({
+                {label = "MODE ADMINISTRATION ACTIF", color = BAR_TAG_COLORS[colorVar] or {235, 235, 235}},
+                {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
+                {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
+                {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
+            })
         end
     end)
 end
