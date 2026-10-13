@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de configuration</title>
+<style>
+:root { --accent: #00a4ff; --accent-rgb: 0,164,255; --bg: #0b0e13; --panel: #11151c; --line: rgba(255,255,255,.09); --text: #e8edf5; --dim: rgba(232,237,245,.55); }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 'Inter','Segoe UI',system-ui,sans-serif; }
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+aside { background: var(--panel); border-right: 1px solid var(--line); padding: 22px 16px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; }
+.brand { display: flex; align-items: center; gap: 12px; padding: 4px 8px 18px; }
+.brand img { height: 38px; max-width: 120px; object-fit: contain; }
+.brand b { font-size: 15px; }
+nav button { display: flex; width: 100%; align-items: center; gap: 10px; padding: 11px 12px; color: var(--dim); background: none; border: 1px solid transparent; border-radius: 9px; font: 600 13px inherit; cursor: pointer; text-align: left; transition: .15s; }
+nav button:hover { color: var(--text); background: rgba(255,255,255,.04); }
+nav button.active { color: var(--text); background: rgba(var(--accent-rgb),.12); border-color: rgba(var(--accent-rgb),.35); }
+nav button.active::before { content:""; width: 3px; height: 16px; background: var(--accent); border-radius: 2px; margin-left: -4px; }
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+main { padding: 34px 44px 90px; max-width: 980px; }
+h1 { margin: 0 0 4px; font-size: 24px; } .sub { color: var(--dim); margin: 0 0 26px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 18px; }
+.card h2 { margin: 0 0 16px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; } .grid.three { grid-template-columns: repeat(3, 1fr); }
+label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+input[type=text], input[type=number], input[type=password], select, textarea { width: 100%; height: 42px; padding: 0 12px; color: var(--text); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 9px; font: inherit; outline: none; transition: .15s; }
+textarea { height: 80px; padding: 10px 12px; resize: vertical; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,164,255,.15); }
+input[type=color] { width: 100%; height: 42px; padding: 3px; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 9px; cursor: pointer; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.hint { font-size: 12px; color: var(--dim); margin-top: 5px; }
+.row { display: flex; align-items: center; gap: 10px; }
+button.btn { height: 40px; padding: 0 16px; font: 700 13px inherit; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 9px; cursor: pointer; transition: .15s; }
+button.btn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb),.12); }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.btn.primary:hover { filter: brightness(1.1); }
+button.btn.danger:hover { border-color: #e84858; background: rgba(232,72,88,.14); }
+.preview { display: flex; align-items: center; gap: 16px; padding: 14px; background: rgba(255,255,255,.03); border: 1px dashed var(--line); border-radius: 10px; }
+.preview img { height: 54px; max-width: 160px; object-fit: contain; }
+.swatch { width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line); }
+.marker { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.marker .head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.marker .head input { max-width: 220px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 500; }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.toast { position: fixed; right: 24px; bottom: 24px; padding: 12px 18px; background: var(--panel); border: 1px solid var(--accent); border-radius: 10px; opacity: 0; transform: translateY(10px); transition: .25s; pointer-events: none; }
+.toast.show { opacity: 1; transform: none; }
+.tab { display: none; } .tab.active { display: block; animation: in .25s ease-out; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.live { display: flex; gap: 14px; align-items: center; }
+@media (max-width: 860px) { .app { grid-template-columns: 1fr; } aside { position: static; height: auto; } .grid, .grid.three { grid-template-columns: 1fr; } main { padding: 22px 16px 80px; } }
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand"><img id="brandLogo" alt=""><b id="brandName">Panel</b></div>
+  <nav id="nav">
+    <button data-tab="brand" class="active">Identité visuelle</button>
+    <button data-tab="server">Serveur</button>
+    <button data-tab="markers">Markers</button>
+    <button data-tab="menus">Menus & interfaces</button>
+    <button data-tab="export">Export / Import</button>
+  </nav>
+  <div class="side-foot">
+    <button class="btn primary" id="dlConfig">Télécharger config.json</button>
+    <button class="btn" id="dlCfg">Télécharger server.cfg</button>
+  </div>
+</aside>
+
+<main>
+<section class="tab active" id="tab-brand">
+  <h1>Identité visuelle</h1><p class="sub">Le nom, le logo et la couleur principale appliqués à toutes les interfaces.</p>
+  <div class="card"><h2>Marque</h2>
+    <div class="grid">
+      <div><label>Nom du serveur</label><input type="text" data-path="brand.name"></div>
+      <div><label>Fichier du logo</label><input type="text" data-path="brand.logo"><div class="hint">Place ce fichier dans <code>bluebay_config/</code> (PNG recommandé).</div></div>
+    </div>
+    <div class="row" style="margin-top:16px"><input type="file" id="logoFile" accept="image/*"><div class="hint">Aperçu seulement : copie ensuite le fichier dans la ressource avec le même nom.</div></div>
+  </div>
+  <div class="card"><h2>Couleur principale</h2>
+    <div class="grid">
+      <div><label>Couleur</label><input type="color" data-path="brand.accent" id="accent"></div>
+      <div><label>Code hexadécimal</label><input type="text" id="accentHex" maxlength="7"></div>
+    </div>
+    <div class="preview" style="margin-top:16px">
+      <img id="previewLogo" alt=""><div class="swatch" id="swatch"></div>
+      <div class="live"><button class="btn primary" style="pointer-events:none">Bouton</button><span style="color:var(--accent);font-weight:700">Texte accent</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="tab" id="tab-server">
+  <h1>Serveur</h1><p class="sub">Génère le bloc à coller dans ton <code>server.cfg</code>. Reste en local : ta clé n'est envoyée nulle part.</p>
+  <div class="card"><h2>Informations</h2>
+    <div class="grid">
+      <div><label>Nom affiché (sv_hostname)</label><input type="text" data-path="server.hostname"></div>
+      <div><label>Nom du projet (sv_projectName)</label><input type="text" data-path="server.projectName"></div>
+      <div style="grid-column:1/-1"><label>Description (sv_projectDesc)</label><input type="text" data-path="server.projectDesc"></div>
+      <div><label>Joueurs max (sv_maxclients)</label><input type="number" min="1" max="2048" data-path="server.maxClients" data-num="1"></div>
+      <div><label>Langue (sets locale)</label><input type="text" data-path="server.locale"></div>
+      <div style="grid-column:1/-1"><label>Tags</label><input type="text" data-path="server.tags"></div>
+      <div><label>OneSync</label><select data-path="server.onesync"><option value="on">on</option><option value="legacy">legacy</option><option value="off">off</option></select></div>
+    </div>
+  </div>
+  <div class="card"><h2>Clés</h2>
+    <div class="grid">
+      <div><label>Clé cfx (sv_licenseKey)</label><input type="password" data-path="server.licenseKey" autocomplete="off"><div class="hint">À récupérer sur keymaster.fivem.net</div></div>
+      <div><label>Clé Steam (steam_webApiKey)</label><input type="password" data-path="server.steamWebApiKey" autocomplete="off"></div>
+    </div>
+    <div class="row" style="margin-top:14px"><label class="check"><input type="checkbox" id="showKeys"> Afficher les clés</label></div>
+    <div class="hint">⚠ Ne partage jamais le fichier server.cfg généré (ni cette page remplie) : il contient tes clés.</div>
+  </div>
+</section>
+
+<section class="tab" id="tab-markers">
+  <h1>Markers</h1><p class="sub">Un marker par type d'endroit. Ils sont dessinés depuis la config avec <code>exports['bluebay_config']:DrawMarker('nom', coords)</code>.</p>
+  <div class="card"><h2>Marker par défaut</h2><div id="markerDefault"></div></div>
+  <div class="card"><h2>Markers nommés</h2><div id="markerList"></div><button class="btn primary" id="addMarker">+ Ajouter un marker</button></div>
+</section>
+
+<section class="tab" id="tab-menus">
+  <h1>Menus & interfaces</h1><p class="sub">Tailles, positions et arrondis des interfaces. Les valeurs sont lues par chaque ressource.</p>
+  <div class="card"><h2>Context menu</h2><div class="grid three">
+    <div><label>Largeur</label><input type="number" step="0.001" data-path="menus.contextMenu.width" data-num="1"></div>
+    <div><label>Hauteur de ligne</label><input type="number" step="0.0005" data-path="menus.contextMenu.itemHeight" data-num="1"></div>
+    <div><label>Taille du texte</label><input type="number" step="0.01" data-path="menus.contextMenu.textScale" data-num="1"></div>
+    <div><label>Police GTA (0,1,4,7)</label><input type="number" data-path="menus.contextMenu.font" data-num="1"></div>
+    <div><label>Arrondi (px)</label><input type="number" data-path="menus.contextMenu.cornerRadius" data-num="1"></div>
+  </div></div>
+  <div class="card"><h2>Notifications</h2><div class="grid three">
+    <div><label>Largeur (CSS)</label><input type="text" data-path="menus.notify.width"></div>
+    <div><label>Hauteur min (px)</label><input type="number" data-path="menus.notify.minHeight" data-num="1"></div>
+    <div><label>Arrondi (px, 0 = carré)</label><input type="number" data-path="menus.notify.borderRadius" data-num="1"></div>
+    <div><label>Position gauche</label><input type="text" data-path="menus.notify.left"></div>
+    <div><label>Position bas</label><input type="text" data-path="menus.notify.bottom"></div>
+    <div><label>Durée (ms)</label><input type="number" data-path="menus.notify.duration" data-num="1"></div>
+  </div></div>
+  <div class="card"><h2>HUD staff</h2><div class="grid">
+    <div><label>Taille du texte</label><input type="number" step="0.01" data-path="menus.adminHud.scale" data-num="1"></div>
+    <div><label>Hauteur depuis le haut</label><input type="number" step="0.001" data-path="menus.adminHud.top" data-num="1"></div>
+  </div></div>
+  <div class="card"><h2>Création de personnage & cartes</h2><div class="grid three">
+    <div><label>Échelle du menu</label><input type="number" step="0.05" data-path="menus.identity.scale" data-num="1"></div>
+    <div><label>Flou du fond (px)</label><input type="number" data-path="menus.identity.blur" data-num="1"></div>
+    <div><label>Échelle des cartes</label><input type="number" step="0.05" data-path="menus.idCards.scale" data-num="1"></div>
+  </div></div>
+</section>
+
+<section class="tab" id="tab-export">
+  <h1>Export / Import</h1><p class="sub">Les réglages sont aussi gardés dans ce navigateur automatiquement.</p>
+  <div class="card"><h2>Appliquer sur le serveur</h2>
+    <ol style="margin:0;padding-left:18px;color:var(--dim)">
+      <li>Télécharge <b>config.json</b> et remplace celui de <code>bluebay_config/</code>.</li>
+      <li>Télécharge <b>server.cfg</b> (bloc généré) et reporte-le dans ton vrai <code>server.cfg</code>.</li>
+      <li>Redémarre : <code>restart bluebay_config</code> puis les ressources concernées.</li>
+    </ol>
+    <div class="row" style="margin-top:16px"><button class="btn primary" id="dlConfig2">config.json</button><button class="btn" id="dlCfg2">server.cfg</button><button class="btn" id="copyCfg">Copier le bloc server.cfg</button></div>
+  </div>
+  <div class="card"><h2>Importer</h2><input type="file" id="importFile" accept=".json"><div class="hint">Charge un config.json existant pour le modifier.</div></div>
+  <div class="card"><h2>Aperçu du bloc server.cfg</h2><textarea id="cfgPreview" readonly style="height:230px;font-family:Consolas,monospace;font-size:12px"></textarea></div>
+  <div class="card"><h2>Réinitialiser</h2><button class="btn danger" id="reset">Revenir aux valeurs par défaut</button></div>
+</section>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULTS = {
+  brand: { name: "Bluebay Roleplay", logo: "logo.png", accent: "#00a4ff" },
+  server: { hostname: "Bluebay Roleplay", projectName: "Bluebay Roleplay", projectDesc: "Serveur GTA RP francophone", maxClients: 64, licenseKey: "", locale: "fr-FR", tags: "roleplay, rp, esx, fr", onesync: "on", steamWebApiKey: "" },
+  markers: { default: { type: 1, sizeX: 1.5, sizeY: 1.5, sizeZ: 0.6, color: "#00a4ff", alpha: 160, bobUpDown: false, rotate: false, drawDistance: 15.0 },
+    list: [
+      { name: "garage", type: 36, sizeX: 0.8, sizeY: 0.8, sizeZ: 0.8, color: "#00a4ff", alpha: 180, bobUpDown: true, rotate: true, drawDistance: 12.0 },
+      { name: "banque", type: 29, sizeX: 0.7, sizeY: 0.7, sizeZ: 0.7, color: "#5cd678", alpha: 180, bobUpDown: true, rotate: true, drawDistance: 12.0 },
+      { name: "job", type: 1, sizeX: 1.2, sizeY: 1.2, sizeZ: 0.5, color: "#f0c850", alpha: 150, bobUpDown: false, rotate: false, drawDistance: 15.0 } ] },
+  menus: { contextMenu: { width: 0.118, itemHeight: 0.0255, textScale: 0.27, font: 0, cornerRadius: 6 },
+    notify: { width: "clamp(270px, 14.2vw, 315px)", minHeight: 65, borderRadius: 0, left: "1.35vw", bottom: "22.5vh", duration: 4500 },
+    adminHud: { scale: 0.32, top: 0.012 }, identity: { scale: 1.0, blur: 5 }, idCards: { scale: 1.0 } }
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const merge = (a, b) => { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) { a[k] = merge(a[k] && typeof a[k] === 'object' ? a[k] : {}, b[k]); } else a[k] = b[k]; } return a; };
+let cfg;
+try { cfg = merge(clone(DEFAULTS), JSON.parse(localStorage.getItem('bluebay_panel') || '{}')); } catch (e) { cfg = clone(DEFAULTS); }
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const get = (p) => p.split('.').reduce((o, k) => o && o[k], cfg);
+const set = (p, v) => { const keys = p.split('.'); const last = keys.pop(); keys.reduce((o, k) => o[k], cfg)[last] = v; };
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+function save() { try { localStorage.setItem('bluebay_panel', JSON.stringify(cfg)); } catch (e) {} refreshPreview(); }
+
+function applyAccent() {
+  const a = cfg.brand.accent;
+  document.documentElement.style.setProperty('--accent', a);
+  document.documentElement.style.setProperty('--accent-rgb', [1,3,5].map(i => parseInt(a.substr(i, 2), 16)).join(','));
+  $('#swatch').style.background = a; $('#accent').value = a; $('#accentHex').value = a;
+}
+let logoUrl = null;
+function refreshPreview() {
+  applyAccent();
+  $('#brandName').textContent = cfg.brand.name || 'Panel';
+  const src = logoUrl || '../' + (cfg.brand.logo || 'logo.png');
+  $('#brandLogo').src = src; $('#previewLogo').src = src;
+  $('#cfgPreview').value = buildServerCfg();
+}
+
+function bind() {
+  $$('[data-path]').forEach(el => {
+    const v = get(el.dataset.path);
+    if (el.type !== 'checkbox') el.value = v ?? '';
+    el.oninput = () => { let val = el.value; if (el.dataset.num) val = val === '' ? 0 : Number(val); set(el.dataset.path, val); save(); };
+  });
+  $('#accentHex').oninput = e => { const v = e.target.value; if (/^#[0-9a-fA-F]{6}$/.test(v)) { cfg.brand.accent = v.toLowerCase(); save(); } };
+  $('#showKeys').onchange = e => $$('[type=password]').forEach(i => i.type = e.target.checked ? 'text' : 'password');
+  $('#showKeys').onchange = e => $$('[data-path^="server."][autocomplete]').forEach(i => i.type = e.target.checked ? 'text' : 'password');
+}
+
+/* Markers */
+function markerFields(m, prefix) {
+  const f = (k, label, type = 'number', step = '0.1') => `<div><label>${label}</label><input type="${type}" step="${step}" data-m="${prefix}" data-k="${k}" value="${m[k]}"></div>`;
+  return `<div class="grid three">
+    ${f('type', 'Type de marker (id)', 'number', '1')}${f('sizeX', 'Taille X')}${f('sizeY', 'Taille Y')}${f('sizeZ', 'Taille Z')}
+    <div><label>Couleur</label><input type="color" data-m="${prefix}" data-k="color" value="${m.color}"></div>
+    ${f('alpha', 'Opacité (0-255)', 'number', '1')}${f('drawDistance', 'Distance d\'affichage')}
+    <div class="row" style="padding-top:22px"><label class="check"><input type="checkbox" data-m="${prefix}" data-k="bobUpDown" ${m.bobUpDown ? 'checked' : ''}> Flotte</label><label class="check"><input type="checkbox" data-m="${prefix}" data-k="rotate" ${m.rotate ? 'checked' : ''}> Tourne</label></div>
+  </div>`;
+}
+function renderMarkers() {
+  $('#markerDefault').innerHTML = markerFields(cfg.markers.default, 'default');
+  $('#markerList').innerHTML = cfg.markers.list.map((m, i) => `<div class="marker"><div class="head"><input type="text" data-m="${i}" data-k="name" value="${m.name}" placeholder="nom"><div class="swatch" style="background:${m.color}"></div><button class="btn danger" data-del="${i}" style="margin-left:auto">Supprimer</button></div>${markerFields(m, i)}</div>`).join('');
+  $$('[data-m]').forEach(el => el.oninput = () => {
+    const target = el.dataset.m === 'default' ? cfg.markers.default : cfg.markers.list[+el.dataset.m];
+    const k = el.dataset.k; target[k] = el.type === 'checkbox' ? el.checked : (el.type === 'number' ? Number(el.value) : el.value);
+    if (k === 'color') renderMarkersSoon(); save();
+  });
+  $$('[data-del]').forEach(b => b.onclick = () => { cfg.markers.list.splice(+b.dataset.del, 1); save(); renderMarkers(); });
+}
+let t; const renderMarkersSoon = () => { clearTimeout(t); t = setTimeout(renderMarkers, 400); };
+$('#addMarker').onclick = () => { cfg.markers.list.push({ ...clone(cfg.markers.default), name: 'nouveau_' + (cfg.markers.list.length + 1) }); save(); renderMarkers(); };
+
+/* Export */
+function download(name, text, type = 'text/plain') { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+function cleanConfig() { const c = clone(cfg); return c; }
+function buildServerCfg() {
+  const s = cfg.server, q = v => String(v).replace(/"/g, '\\"');
+  return [
+    '# ==== Bloc généré par le panel Bluebay ====',
+    `sv_hostname "${q(s.hostname)}"`,
+    `sets sv_projectName "${q(s.projectName)}"`,
+    `sets sv_projectDesc "${q(s.projectDesc)}"`,
+    `sv_maxclients ${s.maxClients}`,
+    `sets locale "${q(s.locale)}"`,
+    `sets tags "${q(s.tags)}"`,
+    `set onesync ${s.onesync}`,
+    `sv_licenseKey "${q(s.licenseKey || 'METTRE_TA_CLE_ICI')}"`,
+    s.steamWebApiKey ? `set steam_webApiKey "${q(s.steamWebApiKey)}"` : '# set steam_webApiKey "..."',
+    '',
+    'ensure bluebay_config'
+  ].join('\n');
+}
+// config.json sans les clés secrètes (elles ne doivent jamais être lues côté client)
+function exportConfigJson() { const c = cleanConfig(); c.server.licenseKey = ''; c.server.steamWebApiKey = ''; return JSON.stringify(c, null, 2); }
+['dlConfig', 'dlConfig2'].forEach(id => $('#' + id).onclick = () => { download('config.json', exportConfigJson(), 'application/json'); toast('config.json téléchargé'); });
+['dlCfg', 'dlCfg2'].forEach(id => $('#' + id).onclick = () => { download('server.cfg', buildServerCfg()); toast('server.cfg téléchargé'); });
+$('#copyCfg').onclick = () => { navigator.clipboard.writeText(buildServerCfg()).then(() => toast('Bloc copié')); };
+$('#importFile').onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(txt => { try { cfg = merge(clone(DEFAULTS), JSON.parse(txt)); save(); bind(); renderMarkers(); refreshPreview(); toast('Config importée'); } catch (err) { toast('Fichier invalide'); } }); };
+$('#reset').onclick = () => { if (confirm('Tout remettre par défaut ?')) { cfg = clone(DEFAULTS); save(); bind(); renderMarkers(); toast('Réinitialisé'); } };
+$('#logoFile').onchange = e => { const f = e.target.files[0]; if (!f) return; logoUrl = URL.createObjectURL(f); if (!cfg.brand.logo) cfg.brand.logo = f.name; refreshPreview(); };
+
+/* Onglets */
+$('#nav').onclick = e => { const b = e.target.closest('button'); if (!b) return; $$('#nav button').forEach(x => x.classList.toggle('active', x === b)); $$('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + b.dataset.tab)); };
+
+bind(); renderMarkers(); refreshPreview();
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "brand": {
+    "name": "Bluebay Roleplay",
+    "logo": "logo.png",
+    "accent": "#00a4ff"
+  },
+  "server": {
+    "hostname": "Bluebay Roleplay",
+    "projectName": "Bluebay Roleplay",
+    "projectDesc": "Serveur GTA RP francophone",
+    "maxClients": 64,
+    "licenseKey": "",
+    "locale": "fr-FR",
+    "tags": "roleplay, rp, esx, fr",
+    "onesync": "on",
+    "steamWebApiKey": ""
+  },
+  "markers": {
+    "default": { "type": 1, "sizeX": 1.5, "sizeY": 1.5, "sizeZ": 0.6, "color": "#00a4ff", "alpha": 160, "bobUpDown": false, "rotate": false, "drawDistance": 15.0 },
+    "list": [
+      { "name": "garage",  "type": 36, "sizeX": 0.8, "sizeY": 0.8, "sizeZ": 0.8, "color": "#00a4ff", "alpha": 180, "bobUpDown": true,  "rotate": true,  "drawDistance": 12.0 },
+      { "name": "banque",  "type": 29, "sizeX": 0.7, "sizeY": 0.7, "sizeZ": 0.7, "color": "#5cd678", "alpha": 180, "bobUpDown": true,  "rotate": true,  "drawDistance": 12.0 },
+      { "name": "job",     "type": 1,  "sizeX": 1.2, "sizeY": 1.2, "sizeZ": 0.5, "color": "#f0c850", "alpha": 150, "bobUpDown": false, "rotate": false, "drawDistance": 15.0 }
+    ]
+  },
+  "menus": {
+    "contextMenu": { "width": 0.118, "itemHeight": 0.0255, "textScale": 0.27, "font": 0, "cornerRadius": 6 },
+    "notify": { "width": "clamp(270px, 14.2vw, 315px)", "minHeight": 65, "borderRadius": 0, "left": "1.35vw", "bottom": "22.5vh", "duration": 4500 },
+    "adminHud": { "scale": 0.32, "top": 0.012 },
+    "identity": { "scale": 1.0, "blur": 5 },
+    "idCards": { "scale": 1.0 }
+  }
+}
