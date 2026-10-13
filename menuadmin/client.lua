@@ -307,23 +307,38 @@ local function initializeNames()
     end)
 end
 
--- Bandeau du mode administration : affiché en haut au milieu de l'écran
-local function DrawTopCenterText(message)
+-- Bandeau du mode administration : barre sombre translucide en haut au milieu de l'écran
+local function DrawTopCenterBar(message)
+    local scale = 0.30
     SetTextFont(4)
-    SetTextScale(0.0, 0.45)
-    SetTextColour(255, 255, 255, 255)
-    SetTextOutline()
+    SetTextScale(0.0, scale)
+    BeginTextCommandGetWidth("STRING")
+    AddTextComponentSubstringPlayerName(message)
+    local textWidth = EndTextCommandGetWidth(true)
+
+    local padX, padY = 0.008, 0.006
+    local lineHeight = 0.0275 * (scale / 0.3) + 0.002
+    local barWidth, barHeight = textWidth + padX * 2, lineHeight + padY * 2
+    local centerX, top = 0.5, 0.012
+
+    -- Fond gris foncé translucide + fine ligne de couleur dessous
+    DrawRect(centerX, top + barHeight / 2, barWidth, barHeight, 28, 28, 30, 190)
+    DrawRect(centerX, top + barHeight, barWidth, 0.0012, 0, 164, 255, 220)
+
+    SetTextFont(4)
+    SetTextScale(0.0, scale)
+    SetTextColour(235, 235, 235, 255)
     SetTextCentre(true)
     BeginTextCommandDisplayText("STRING")
     AddTextComponentSubstringPlayerName(message)
-    EndTextCommandDisplayText(0.5, 0.012)
+    EndTextCommandDisplayText(centerX, top + padY)
 end
 
 local function initializeText()
     Citizen.CreateThread(function()
         while staffService do 
             Citizen.Wait(1)
-            DrawTopCenterText(colorVar.."Mode administration actif~n~~s~Noclip: "..stringText[NoClip].." | Invisible: "..stringText[invisible].." | Noms: "..stringText[ShowName])
+            DrawTopCenterBar(colorVar.."MODE ADMINISTRATION ACTIF~s~  |  NOCLIP: "..stringText[NoClip].."  |  INVISIBLE: "..stringText[invisible].."  |  NOMS: "..stringText[ShowName])
         end
     end)
 end
