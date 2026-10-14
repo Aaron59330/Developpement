@@ -15,7 +15,27 @@ const controls = {
     '~INPUT_ENTER~': 'F',
     '~INPUT_RELOAD~': 'R',
     '~INPUT_CELLPHONE_CANCEL~': 'Retour',
-    '~INPUT_FRONTEND_ACCEPT~': 'Entrée'
+    '~INPUT_FRONTEND_ACCEPT~': 'Entrée',
+    '~INPUT_FRONTEND_RDOWN~': 'Entrée',
+    '~INPUT_FRONTEND_RRIGHT~': 'Retour',
+    '~INPUT_FRONTEND_CANCEL~': 'Retour',
+    '~INPUT_FRONTEND_PAUSE_ALTERNATE~': 'Échap',
+    '~INPUT_VEH_EXIT~': 'F',
+    '~INPUT_VEH_HORN~': 'E',
+    '~INPUT_VEH_HEADLIGHT~': 'H',
+    '~INPUT_VEH_HANDBRAKE~': 'Espace',
+    '~INPUT_VEH_DUCK~': 'X',
+    '~INPUT_JUMP~': 'Espace',
+    '~INPUT_SPRINT~': 'Maj',
+    '~INPUT_DUCK~': 'Ctrl',
+    '~INPUT_DETONATE~': 'G',
+    '~INPUT_THROW_GRENADE~': 'G',
+    '~INPUT_COVER~': 'Q',
+    '~INPUT_CONTEXT_SECONDARY~': 'Q',
+    '~INPUT_ATTACK~': 'Clic gauche',
+    '~INPUT_AIM~': 'Clic droit',
+    '~INPUT_PHONE~': '↑',
+    '~INPUT_MP_TEXT_CHAT_ALL~': 'T'
 };
 
 const notificationStacks = new Map();
@@ -176,6 +196,9 @@ function escapeHtml(value) {
 
 function formatGtaText(value) {
     let text = escapeHtml(value);
+
+    // « Retour ou Retour » : deux touches GTA différentes qui s'affichent pareil -> une seule
+    text = text.replace(/(~INPUT_[A-Z0-9_]+~)(\s*(?:ou|or|\/)\s*)(~INPUT_[A-Z0-9_]+~)/gi, (m, a, sep, b) => (controls[a] && controls[a] === controls[b]) ? a : m);
 
     for (const [token, key] of Object.entries(controls)) {
         text = text.split(token).join(`<span class="key">${key}</span>`);
@@ -386,10 +409,10 @@ function createNotification(data) {
 let helpHideTimer = null;
 function showCenterHelp(data) {
     const el = document.getElementById('helpPrompt');
-    const raw = String(data.message ?? '');
-    const m = raw.match(/^\s*(?:appuy(?:ez|e|er)|press)\s+(?:sur\s+)?(~INPUT_[A-Z_0-9]+~|\S+)\s*(?:pour|to|:|-)?\s*(.+)$/is);
+    const raw = String(data.message ?? '').replace(/(~INPUT_[A-Z0-9_]+~)(\s*(?:ou|or|\/)\s*)(~INPUT_[A-Z0-9_]+~)/gi, (m, a, sep, b) => (controls[a] && controls[a] === controls[b]) ? a : m);
+    const m = raw.match(/^\s*(?:appuy(?:ez|e|er)|press)\s+(?:sur\s+)?(~INPUT_[A-Z_0-9]+~)\s*(?:pour|to|:|-)\s*(.+)$/is);
     let keyHtml = '', label = raw;
-    if (m && controls[m[1]]) {
+    if (m && controls[m[1]] && !/~INPUT_/.test(m[2])) {
         keyHtml = `<span class="hp-key">${escapeHtml(controls[m[1]])}</span>`;
         label = m[2].charAt(0).toUpperCase() + m[2].slice(1);
     }
