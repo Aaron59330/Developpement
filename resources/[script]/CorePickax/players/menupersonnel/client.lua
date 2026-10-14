@@ -238,6 +238,8 @@ end
 
 local function OpenMenu()
 	ESX.PlayerData = ESX.GetPlayerData()
+	local Identity = nil
+	ESX.TriggerServerCallback('CorePickax:GetIdentity', function(id) Identity = id end)
     local mainmenu = RageUI.CreateMenu("Menu Personnel", "Actions disponibles :")
 	local Informations = RageUI.CreateSubMenu(mainmenu, "Informations", "Votre profil et votre portefeuille :")
 	local Docs = RageUI.CreateSubMenu(mainmenu, "Documents officiels", "Carte, permis et port d'armes :")
@@ -347,7 +349,7 @@ local function OpenMenu()
 			end, Facture)
 			do
 				local pd = ESX.GetPlayerData()
-				local name = ((pd.firstName or '') .. ' ' .. (pd.lastName or '')):gsub('^%s+', ''):gsub('%s+$', '')
+				local name = (((Identity and Identity.firstName) or pd.firstName or '') .. ' ' .. ((Identity and Identity.lastName) or pd.lastName or '')):gsub('^%s+', ''):gsub('%s+$', '')
 				if name == '' then name = GetPlayerName(PlayerId()) end
 				local cash, bank, black = 0, 0, 0
 				for _, acc in ipairs(pd.accounts or {}) do
