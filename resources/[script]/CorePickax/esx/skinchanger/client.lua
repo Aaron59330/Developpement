@@ -133,6 +133,15 @@ function RefreshData()
     end)
 end
 
+-- Éléments « vêtements / accessoires » : retirés du menu de création (le joueur ne règle que son apparence ;
+-- la tenue se choisit ensuite parmi les styles de ConfigCreationOutfits)
+CreationClothes = {
+	tshirt_1 = true, tshirt_2 = true, torso_1 = true, torso_2 = true, decals_1 = true, decals_2 = true, arms = true, arms_2 = true,
+	pants_1 = true, pants_2 = true, shoes_1 = true, shoes_2 = true, mask_1 = true, mask_2 = true, bproof_1 = true, bproof_2 = true,
+	chain_1 = true, chain_2 = true, helmet_1 = true, helmet_2 = true, glasses_1 = true, glasses_2 = true, watches_1 = true, watches_2 = true,
+	bracelets_1 = true, bracelets_2 = true, bags_1 = true, bags_2 = true, ears_1 = true, ears_2 = true,
+}
+
 InRegisterMenu = false
 local skinFinished = false   -- vrai dès que le personnage est validé : tous les menus de création (imbriqués) se terminent d'un coup
 function SkinChanger()
@@ -147,7 +156,7 @@ function SkinChanger()
             for k,v in pairs(comp) do
 				zoomOffset = comp[1].zoomOffset
 				camOffset = comp[1].camOffset
-                if v.table[1] ~= nil then
+                if v.table[1] ~= nil and not CreationClothes[v.name] then
 					RageUI.List(v.label, v.table, indexface2[v.name], nil, {}, true, function(Hovered, Active, Selected, Index)
 						indexface2[v.name] = Index;
 						TriggerEvent("skinchanger:change", v.name, Index - 1)
@@ -192,25 +201,18 @@ function openValidate()
     while face and not skinFinished do
         Citizen.Wait(0)
         RageUI.IsVisible(face, true, true, true, function()
-			RageUI.ButtonWithStyle('Continuer de modifier mon personnage', nil, {RightLabel = "→→→"}, true, function(_,_,s)
+			RageUI.ButtonWithStyle('Continuer de modifier mon apparence', nil, {RightLabel = "→→→"}, true, function(_,_,s)
 				if s then
 					RefreshData()
 					SkinChanger()
 				end
 			end)
-			RageUI.ButtonWithStyle('~g~Validé le personnage', nil, {RightLabel = "→→→"}, true, function(_,_,s)
+			RageUI.ButtonWithStyle('~g~Valider mon apparence', nil, {RightLabel = "→→→"}, true, function(_,_,s)
 				if s and not skinFinished then
 					skinFinished = true
-					TriggerEvent('skinchanger:getSkin', function(skin)
-						TriggerServerEvent('esx_skin:save', skin)
-						TriggerEvent('skinchanger:loadSkin', skin)
-						-- Convertir la tenue validee en items equipes dans ox_inventory.
-						TriggerEvent('p_itemclothes/client/updateClothes', skin)
-					end)
 					RageUI.CloseAll()
-					ESX.ShowNotification('Bienvenue sur le Serveur ~n~Bon jeu à vous !')
-					-- Création terminée : esx_identity peut proposer le menu « Destination »
-					TriggerEvent('CorePickax:Creator:finished')
+					-- Étape suivante : choix de la tenue, puis fin de la création
+					Citizen.CreateThread(CreationOutfitFlow)
 				end
 			end)
         end, function()
@@ -221,6 +223,81 @@ function openValidate()
         end
     end
 end
+
+-- Fin de la création : enregistre le skin, donne les vêtements en items (inventaire), prévient esx_identity (menu Destination)
+function CreationFinish()
+	TriggerEvent('skinchanger:getSkin', function(skin)
+		TriggerServerEvent('esx_skin:save', skin)
+		TriggerEvent('skinchanger:loadSkin', skin)
+		-- Convertir la tenue validee en items equipes dans ox_inventory.
+		TriggerEvent('p_itemclothes/client/updateClothes', skin)
+	end)
+	FreezeEntityPosition(PlayerPedId(), false)
+	InRegisterMenu = false
+	ESX.ShowNotification('Bienvenue sur le Serveur ~n~Bon jeu à vous !')
+	-- Création terminée : esx_identity peut proposer le menu « Destination »
+	TriggerEvent('CorePickax:Creator:finished')
+end
+
+-- Choix de la tenue : 3 styles (version homme / femme), aperçu direct sur le personnage, puis validation
+function CreationOutfitFlow()
+	local cfg = ConfigCreationOutfits
+	if not cfg or not cfg.Enabled or not cfg.Styles or #cfg.Styles == 0 or GetResourceState('pickax_ui') ~= 'started' then
+		return CreationFinish()
+	end
+	Citizen.Wait(300)
+
+	-- Caméra face au personnage pendant le choix de la tenue
+	local ped = PlayerPedId()
+	FreezeEntityPosition(ped, true)
+	local cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+	local from = GetOffsetFromEntityInWorldCoords(ped, 0.0, 2.6, 0.5)
+	local target = GetEntityCoords(ped)
+	SetCamCoord(cam, from.x, from.y, from.z)
+	PointCamAtCoord(cam, target.x, target.y, target.z + 0.1)
+	SetCamFov(cam, 45.0)
+	RenderScriptCams(true, true, 700, true, false)
+
+	local options = {}
+	for i, st in ipairs(cfg.Styles) do options[i] = { label = st.label, description = st.description, icon = st.icon } end
+
+	while true do
+		local idx = exports['pickax_ui']:Choose({ title = cfg.Title or 'Ta tenue', hint = cfg.Hint, options = options, cancellable = false, align = 'right' }) or 1
+		local style = cfg.Styles[idx] or cfg.Styles[1]
+		TriggerEvent('skinchanger:getSkin', function(skin)
+			local clothes = (skin.sex == 1) and style.female or style.male
+			if clothes then TriggerEvent('skinchanger:loadClothes', skin, clothes) end
+		end)
+		Citizen.Wait(400)
+		local ok = exports['pickax_ui']:Choose({
+			title = style.label, hint = 'Cette tenue te plaît ?', cancellable = false, align = 'right',
+			options = { { label = 'Valider cette tenue', description = 'Continuer vers la destination.', icon = 'pin' }, { label = 'Choisir une autre tenue', description = 'Revenir au choix des styles.', icon = 'house' } },
+		})
+		if ok == 1 then break end
+	end
+
+	RenderScriptCams(false, true, 700, true, false)
+	Citizen.Wait(700)
+	DestroyCam(cam, false)
+	CreationFinish()
+end
+
+-- /tenueinfo : affiche la tenue actuelle au format de config.lua (pour créer / ajuster tes styles)
+RegisterCommand('tenueinfo', function()
+	local ped = PlayerPedId()
+	local keys = { 'tshirt', 'torso', 'decals', 'pants', 'shoes' }
+	local map = { tshirt = 8, torso = 11, decals = 10, pants = 4, shoes = 6 }
+	local parts = {}
+	for _, k in ipairs(keys) do
+		local id = map[k]
+		parts[#parts + 1] = ('%s_1 = %d, %s_2 = %d'):format(k, GetPedDrawableVariation(ped, id), k, GetPedTextureVariation(ped, id))
+	end
+	parts[#parts + 1] = ('arms = %d'):format(GetPedDrawableVariation(ped, 3))
+	local line = '{ ' .. table.concat(parts, ', ') .. ' }'
+	print('^2[tenueinfo]^0 ' .. line)
+	TriggerEvent('chat:addMessage', { args = { 'tenueinfo', line } })
+	ESX.ShowNotification('Tenue copiable dans la console F8 (~b~/tenueinfo~s~).')
+end, false)
 
 if not Config.DisableMenuskin then
 	RegisterNetEvent('CorePickax:Creator:openSkinMenu')

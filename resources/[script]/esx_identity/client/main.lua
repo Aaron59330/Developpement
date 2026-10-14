@@ -336,6 +336,11 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	end
 
 	local spot = D.Spots[index] or D.Spots[1]
+	-- Cinématique d'arrivée (avion), puis écran noir ~1 s, puis apparition à la destination
+	if Config.Cinematic and Config.Cinematic.Enabled and PlayArrivalCinematic then
+		PlayArrivalCinematic()
+		Citizen.Wait(Config.Cinematic.BlackScreenMs or 1000)
+	end
 	teleportTo(spot)
 	ESX.ShowNotification(('Bienvenue ! Tu arrives à ~b~%s~s~.'):format(spot.label))
 end)

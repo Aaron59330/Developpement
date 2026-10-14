@@ -245,6 +245,7 @@ function chOpenWith(m) {
   $('ch-hint').textContent = d.hint || '';
   var opts = d.options || [];
   chCount = opts.length; chSel = 0; chCancel = d.cancellable === true;
+  $('chwrap').classList.toggle('right', d.align === 'right');
   $('ch-list').innerHTML = opts.map(function (o, i) {
     var ic = CH_ICONS[o.icon] || CH_ICONS.pin;
     return '<div class="ch-item" data-i="' + i + '"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ic + '</svg></span><span class="tx"><b>' + esc(o.label || '') + '</b>' + (o.description ? '<small>' + esc(o.description) + '</small>' : '') + '</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>';

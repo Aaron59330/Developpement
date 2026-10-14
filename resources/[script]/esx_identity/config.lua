@@ -24,3 +24,20 @@ function CustomEvent(src)
         Exemple : TriggerEvent('CorePickax:Creator:openSkinMenu', src)
     ]]--
 end
+
+-- ───────────── Cinématique d'arrivée : un avion atterrit à l'aéroport avec le joueur à bord ─────────────
+-- Jouée après le choix de la destination, avant l'apparition à la destination choisie.
+-- Le joueur descend de l'avion, l'écran reste noir 1 seconde (BlackScreenMs), puis il apparaît à sa destination.
+Config.Cinematic = {
+    Enabled = true,
+    Plane = 'luxor',                         -- modèle de l'avion (jet privé). Autres choix : 'shamal', 'nimbus', 'velum'
+    Touchdown = vector3(-1267.00, -3013.00, 13.94),  -- point où l'avion touche la piste (aéroport de Los Santos)
+    Heading = 330.0,                         -- direction de la piste (cap de l'avion à l'atterrissage)
+    ApproachSeconds = 16,                    -- durée de la descente
+    RolloutSeconds = 7,                      -- durée du roulage jusqu'à l'arrêt
+    ApproachDistance = 1900.0,               -- distance de départ avant la piste (m)
+    StartAltitude = 260.0,                   -- altitude de départ au-dessus de la piste (m)
+    RolloutDistance = 620.0,                 -- distance parcourue sur la piste après l'atterrissage (m)
+    BlackScreenMs = 1000,                    -- écran noir entre la descente de l'avion et l'arrivée à destination
+    AllowSkip = true,                        -- Retour arrière (Backspace) pour passer la cinématique
+}

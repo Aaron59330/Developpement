@@ -139,7 +139,7 @@ exports('Choose', function(opts)
     SetNuiFocus(true, true)
     SendNUIMessage({
         a = 'choose', cfg = settings, v = settings.sound and settings.volume or 0,
-        d = { title = tostring(opts.title or 'Choix'), hint = opts.hint and tostring(opts.hint) or '', options = list, cancellable = opts.cancellable == true },
+        d = { title = tostring(opts.title or 'Choix'), hint = opts.hint and tostring(opts.hint) or '', options = list, cancellable = opts.cancellable == true, align = opts.align == 'right' and 'right' or 'center' },
     })
     local value = Citizen.Await(p)
     choosePromise = nil
