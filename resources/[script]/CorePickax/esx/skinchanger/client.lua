@@ -143,6 +143,7 @@ CreationClothes = {
 }
 
 InRegisterMenu = false
+local sexLocked = false      -- vrai pendant la création : le sexe choisi sur la carte d'identité ne peut plus être changé
 local skinFinished = false   -- vrai dès que le personnage est validé : tous les menus de création (imbriqués) se terminent d'un coup
 function SkinChanger()
     local face = RageUI.CreateMenu("Menu création", "Faite votre personnage")
@@ -156,7 +157,7 @@ function SkinChanger()
             for k,v in pairs(comp) do
 				zoomOffset = comp[1].zoomOffset
 				camOffset = comp[1].camOffset
-                if v.table[1] ~= nil and not CreationClothes[v.name] then
+                if v.table[1] ~= nil and not CreationClothes[v.name] and not (sexLocked and v.name == 'sex') then
 					RageUI.List(v.label, v.table, indexface2[v.name], nil, {}, true, function(Hovered, Active, Selected, Index)
 						indexface2[v.name] = Index;
 						TriggerEvent("skinchanger:change", v.name, Index - 1)
@@ -307,7 +308,8 @@ end, false)
 
 if not Config.DisableMenuskin then
 	RegisterNetEvent('CorePickax:Creator:openSkinMenu')
-	AddEventHandler('CorePickax:Creator:openSkinMenu', function()
+	AddEventHandler('CorePickax:Creator:openSkinMenu', function(lockSex)
+		sexLocked = lockSex == true
 		RefreshData()
 		SkinChanger()
 	end)
