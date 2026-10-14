@@ -24,20 +24,27 @@ Citizen.CreateThread(function()
     TriggerEvent('chat:addSuggestion', '/evening', 'Réglez l\'heure sur 18:00')
     TriggerEvent('chat:addSuggestion', '/night', 'Réglez l\'heure sur 23:00')
     TriggerEvent('chat:addSuggestion', '/blackout', 'Basculer en mode blackout.')
+    local transitionEnd = 0
     while true do
         if lastWeather ~= CurrentWeather then
             lastWeather = CurrentWeather
-            SetWeatherTypeOverTime(CurrentWeather, 15.0)
-            Citizen.Wait(15000)
+            -- transition douce de 6 s ; le client ne reste plus bloqué (l'ancien Wait de 15 s empêchait tout changement visible)
+            ClearOverrideWeather()
+            ClearWeatherTypePersist()
+            SetWeatherTypeOverTime(lastWeather, 6.0)
+            transitionEnd = GetGameTimer() + 6000
+            if Config.Debug then print(('[vsync] nouvelle météo reçue : %s'):format(lastWeather)) end
         end
-        
-        Citizen.Wait(100) -- Wait 0 seconds to prevent crashing.
+
+        Citizen.Wait(100)
         SetBlackout(blackout)
-        ClearOverrideWeather()
-        ClearWeatherTypePersist()
-        SetWeatherTypePersist(lastWeather)
-        SetWeatherTypeNow(lastWeather)
-        SetWeatherTypeNowPersist(lastWeather)
+        if GetGameTimer() >= transitionEnd then
+            ClearOverrideWeather()
+            ClearWeatherTypePersist()
+            SetWeatherTypePersist(lastWeather)
+            SetWeatherTypeNow(lastWeather)
+            SetWeatherTypeNowPersist(lastWeather)
+        end
         if lastWeather == 'XMAS' then
             SetForceVehicleTrails(true)
             SetForcePedFootstepsTracks(true)
@@ -47,6 +54,12 @@ Citizen.CreateThread(function()
         end
     end
 end)
+
+-- /meteoinfo : affiche la météo reçue par ton client (diagnostic)
+RegisterCommand('meteoinfo', function()
+    print(('^2[meteoinfo]^0 serveur -> %s | appliquée -> %s | blackout -> %s'):format(tostring(CurrentWeather), tostring(lastWeather), tostring(blackout)))
+    TriggerEvent('chat:addMessage', { args = { 'meteoinfo', ('reçue : %s | appliquée : %s'):format(tostring(CurrentWeather), tostring(lastWeather)) } })
+end, false)
 
 RegisterNetEvent('DME:updateTime')
 AddEventHandler('DME:updateTime', function(base, offset, freeze)
