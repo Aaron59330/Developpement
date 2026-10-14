@@ -91,3 +91,6 @@
 #snd-btn.off { color: rgba(255, 255, 255, .45); }
 
 @media (prefers-reduced-motion: reduce) { #app.open .panel, #app.open .tenue-row, #app.open .amount-box, #app.open #logo { animation: none; } }
+
+/* Barre de défilement des grilles : décalée de 3 px vers la droite pour être centrée entre les cases et le bord du panneau */
+.grid { width: calc(100% + 9px); padding-right: 2px; }
