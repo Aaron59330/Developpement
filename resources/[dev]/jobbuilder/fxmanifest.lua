@@ -52,7 +52,6 @@ files {
     'html/style.css',
     'html/script.js',
     'html/map/**/*',
-    'sql/install.sql',
 }
 
 dependencies {

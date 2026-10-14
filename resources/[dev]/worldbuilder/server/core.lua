@@ -88,7 +88,7 @@ end
 -- ─────────────────────────────── Base de données ───────────────────────────────
 local function installTables()
     local sql = LoadResourceFile(GetCurrentResourceName(), 'sql/install.sql')
-    if not sql then print('^1[worldbuilder] sql/install.sql introuvable^0') return end
+    if not sql then return end -- tables déjà créées par database.sql
     sql = sql:gsub('%-%-[^\n]*', '')
     for stmt in sql:gmatch('[^;]+') do
         if stmt:match('%S') then MySQL.query.await(stmt) end

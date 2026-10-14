@@ -3,7 +3,7 @@ local function OpenCard(identifier, ID, _source, type)
 	local show       = false
 	local licenses = {}
 
-	-- SELECT * : fonctionne avec ou sans la colonne `nationality` (voir esx_identity/install.sql)
+	-- SELECT * : fonctionne avec ou sans la colonne `nationality`
 	MySQL.Async.fetchAll('SELECT * FROM users WHERE identifier = @identifier', {['@identifier'] = identifier},
 	function (user)
 		if (user[1] ~= nil) then
