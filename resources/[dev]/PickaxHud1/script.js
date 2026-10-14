@@ -1,4 +1,10 @@
 window.addEventListener("message", (event) => {
+    // Masquer / afficher le HUD (menu pause, chargement, inventaire ouvert)
+    if (event.data.action === "hideUi" || event.data.action === "fadeUi") {
+        const container = document.querySelector(".hud-container");
+        if (container) container.style.display = event.data.value === true ? "none" : "";
+        return;
+    }
     if (event.data.action === "updateHud") {
         const { hunger, thirst } = event.data;
 

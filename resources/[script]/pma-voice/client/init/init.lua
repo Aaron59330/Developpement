@@ -40,3 +40,17 @@ AddEventHandler('onClientResourceStart', function(resource)
 	end
 
 end)
+
+
+-- Interface vocale masquée quand l'inventaire est ouvert
+CreateThread(function()
+    local hidden = false
+    while true do
+        Wait(150)
+        local open = LocalPlayer.state.invOpen == true
+        if open ~= hidden then
+            hidden = open
+            sendUIMessage({ uiEnabled = (not open) and GetConvarInt("voice_enableUi", 1) == 1 })
+        end
+    end
+end)
