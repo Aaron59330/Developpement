@@ -49,6 +49,15 @@ var NAMED_ICONS = {
     window.addEventListener('message', function (event) {
         var d = event.data || {};
         switch (d.action) {
+            case 'setConfig': {
+                var c = d.config || {};
+                $('infos').style.display = c.hud === false ? 'none' : '';
+                $('serverCard').style.display = c.server === false ? 'none' : '';
+                $('jobCard').style.display = c.job === false ? 'none' : '';
+                $('moneyCard').style.display = c.money === false ? 'none' : '';
+                if (c.radius != null) document.documentElement.style.setProperty('--r', c.radius + 'px');
+                break;
+            }
             case 'hideUi': ui.style.display = d.value === true ? 'none' : ''; break;
             case 'fadeUi': ui.style.transition = 'opacity .4s'; ui.style.opacity = d.value === true ? '0' : '1'; break;
             case 'hideComponent': { var c = $(d.component); if (c) c.style.display = d.value === true ? 'none' : ''; break; }

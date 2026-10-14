@@ -77,6 +77,21 @@ for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
 local PrefsVolumeNames = {}
 for i = 1, 10 do PrefsVolumeNames[i] = (i * 10) .. ' %' end
 local function PrefsVolumeIndex() return math.max(1, math.min(10, math.floor((tonumber(PrefsCfg.volume) or 60) / 10 + 0.5))) end
+local HudRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' } }
+local HudRadiusNames = {}
+for i, v in ipairs(HudRadius) do HudRadiusNames[i] = v[2] end
+local HudCfg = { hud = true, server = true, job = true, money = true, radius = 6 }
+local function HudCall(name, ...)
+	if GetResourceState('PickaxHud2') ~= 'started' then return nil end
+	return exports['PickaxHud2'][name](exports['PickaxHud2'], ...)
+end
+local function HudRefresh()
+	local c = HudCall('GetSettings')
+	if c then for k, v in pairs(c) do HudCfg[k] = v end end
+end
+local function HudSet(key, value)
+	if HudCall('SetSetting', key, value) then HudCfg[key] = value end
+end
 local PrefsBtnNames, PrefsCardNames = PrefsNames(Prefs.BtnRadius), PrefsNames(Prefs.CardRadius)
 
 local function PrefsStyleIndex(list, id)
@@ -231,6 +246,8 @@ local function OpenMenu()
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
 	local PrefsMenu = RageUI.CreateSubMenu(Parametres, "Apparence des menus", "Apparence de tous les menus :")
+	local HudMenu = RageUI.CreateSubMenu(Parametres, "Affichage du HUD", "Choisissez ce qui s'affiche en haut à droite :")
+	HudRefresh()
 	PrefsRefresh()
 	local PrefsColorLists, PrefsColorSel = {}, {}
 	local function PrefsSyncSel()
@@ -394,6 +411,7 @@ local function OpenMenu()
 		end)
 		RageUI.IsVisible(Parametres, true, true, true, function()
 			RageUI.ButtonWithStyle("Apparence des menus", "Bannière, style, couleurs et forme de tous les menus", {RightLabel = "→→→"}, true, function() end, PrefsMenu)
+			RageUI.ButtonWithStyle("Affichage du HUD", "Activer / désactiver le HUD (serveur, métier, argent) et arrondir les bords", {RightLabel = "→→→"}, true, function() end, HudMenu)
 			RageUI.ButtonWithStyle("Performances (FPS)", "Allégez le rendu du jeu pour gagner des FPS", {RightLabel = "→→→"}, true, function() end, PerfMenu)
 			RageUI.Separator("Jeu")
 			RageUI.Checkbox("Désactiver les coups de crosse", nil, Action.Cross, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
@@ -436,6 +454,40 @@ local function OpenMenu()
             end)
 			RageUI.ButtonWithStyle("Rockstar editor", nil, {RightLabel = "→→→"}, true, function(_, _, s)
 			end, editorMenu)
+		end)
+		RageUI.IsVisible(HudMenu, true, true, true, function()
+			RageUI.Checkbox("Afficher le HUD", "Active ou désactive tout le HUD en haut à droite", HudCfg.hud, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+				HudSet('hud', true)
+			end, function()
+				HudSet('hud', false)
+			end)
+			RageUI.Separator("Parties du HUD")
+			RageUI.Checkbox("Carte serveur", "Nom du serveur, votre ID et le nombre de joueurs", HudCfg.server, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+				HudSet('server', true)
+			end, function()
+				HudSet('server', false)
+			end)
+			RageUI.Checkbox("Carte métier", "Votre métier, votre grade et votre statut", HudCfg.job, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+				HudSet('job', true)
+			end, function()
+				HudSet('job', false)
+			end)
+			RageUI.Checkbox("Carte argent", "Liquide, argent sale et banque", HudCfg.money, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+				HudSet('money', true)
+			end, function()
+				HudSet('money', false)
+			end)
+			RageUI.Separator("Forme")
+			RageUI.List("Bords du HUD", HudRadiusNames, PrefsRadiusIndex(HudRadius, HudCfg.radius), "Carré, arrondi ou très arrondi", {}, true, function() end, function(Index)
+				HudSet('radius', HudRadius[Index][1])
+			end)
+			RageUI.Line()
+			RageUI.ButtonWithStyle("Réinitialiser le HUD", "Affiche tout et remet les bords par défaut", {}, true, function(_, _, s)
+				if s then
+					HudCall('ResetSettings')
+					HudRefresh()
+				end
+			end)
 		end)
 		RageUI.IsVisible(PerfMenu, true, true, true, function()
 			if PickaxPerf then
@@ -673,7 +725,7 @@ local function OpenMenu()
 			end
 		end)
 
-		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
+		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(HudMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
 			mainmenu = RMenu:DeleteType("mainmenu")
 		end
 	end

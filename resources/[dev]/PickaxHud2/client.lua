@@ -1,6 +1,46 @@
 local uiFaded = false
 local ESX = exports["es_extended"]:getSharedObject()
 
+-- ── Réglages du joueur (menu personnel → Préférences → Affichage du HUD) ──
+local KVP = 'pickax_hud2:settings'
+local DEFAULTS = { hud = true, server = true, job = true, money = true, radius = 6 }
+local Settings = {}
+for k, v in pairs(DEFAULTS) do Settings[k] = v end
+
+local function loadSettings()
+    local raw = GetResourceKvpString(KVP)
+    local ok, saved = pcall(json.decode, raw or '')
+    if ok and type(saved) == 'table' then
+        for k, def in pairs(DEFAULTS) do
+            if type(saved[k]) == type(def) then Settings[k] = saved[k] end
+        end
+    end
+end
+
+local function applySettings()
+    SendNUIMessage({ action = 'setConfig', config = Settings })
+end
+
+exports('GetSettings', function() return Settings end)
+
+exports('SetSetting', function(key, value)
+    if DEFAULTS[key] == nil or type(value) ~= type(DEFAULTS[key]) then return false end
+    if key == 'radius' then value = math.max(0, math.min(30, math.floor(value))) end
+    Settings[key] = value
+    SetResourceKvp(KVP, json.encode(Settings))
+    applySettings()
+    return true
+end)
+
+exports('ResetSettings', function()
+    for k, v in pairs(DEFAULTS) do Settings[k] = v end
+    DeleteResourceKvp(KVP)
+    applySettings()
+    return true
+end)
+
+loadSettings()
+
 local function fmtMoney(v)
     return ESX.Math.GroupDigits(v or 0) .. ' $'
 end
@@ -46,6 +86,7 @@ local function pushPlayers()
 end
 
 local function pushAll()
+    applySettings()
     local pd = ESX.GetPlayerData()
     if not pd or not pd.job then return end
     pushAccounts(pd.accounts)
