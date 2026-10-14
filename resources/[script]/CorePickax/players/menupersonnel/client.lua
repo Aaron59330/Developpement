@@ -166,15 +166,68 @@ Citizen.CreateThread(function()
 	end
 end)
 
+
+-- Raccourcis clavier réels (lus dans les configs des modules)
+local function CfgGet(fn)
+	local ok, v = pcall(fn)
+	if ok and v ~= nil and v ~= '' then return v end
+	return nil
+end
+
+local function MenuKeys()
+	local list = {
+		{ "Menu personnel", CfgGet(function() return ConfigMenuF5.Commande.Bind end) },
+		{ "Menu des emotes", CfgGet(function() return ConfigMenuEmote.MenuKeybind end) },
+		{ "Annuler une emote", CfgGet(function() return ConfigMenuEmote.CancelEmoteKey end) },
+		{ "Mains en l'air", CfgGet(function() return ConfigMenuEmote.HandsupKeybind end) },
+		{ "Pointer du doigt", CfgGet(function() return ConfigMenuEmote.PointingKeybind end) },
+		{ "S'accroupir", CfgGet(function() return ConfigMenuEmote.CrouchKeybind end) },
+		{ "Ramper", CfgGet(function() return ConfigMenuEmote.CrawlKeybind end) },
+		{ "S'endormir / se réveiller", CfgGet(function() return ConfigRagdoll.Commande.Bind end) },
+		{ "Boutique", CfgGet(function() return ConfigBoutique.Commande.Bind end) },
+		{ "Radio", CfgGet(function() return ConfigRadio.Commande.Bind end) },
+		{ "Clés du véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind end) },
+		{ "Ouvrir / fermer le véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind2 end) },
+		{ "Coffre du véhicule", "L" },
+		{ "Verrouiller une porte", "E" },
+	}
+	local out = {}
+	for _, k in ipairs(list) do if k[2] then out[#out + 1] = k end end
+	return out
+end
+
+-- Commandes joueurs (les commandes staff ne sont pas listées)
+local function MenuCommands()
+	local list = {
+		{ "me", "Écrire une action RP au-dessus de la tête" },
+		{ "e", "Jouer une emote (ex : /e dance)" },
+		{ "emotes", "Voir la liste des emotes" },
+		{ "walk", "Changer sa démarche" },
+		{ "porter", "Porter la personne la plus proche" },
+		{ "otage", "Prendre une personne en otage" },
+		{ "id", "Afficher votre ID" },
+		{ "register", "Recréer votre personnage" },
+		{ "coffre", "Ouvrir le coffre du véhicule proche" },
+		{ "hidehud", "Afficher / masquer l'affichage d'argent" },
+	}
+	local boutique = CfgGet(function() return ConfigBoutique.Commande.CommandeName end)
+	if boutique then list[#list + 1] = { boutique, "Ouvrir la boutique" } end
+	return list
+end
+
 local function OpenMenu()
 	ESX.PlayerData = ESX.GetPlayerData()
     local mainmenu = RageUI.CreateMenu("Menu Personnel", "Actions disponibles :")
-	local Informations = RageUI.CreateSubMenu(mainmenu, "Mon portefeuille", "Informations :")
-	local Parametres = RageUI.CreateSubMenu(mainmenu, "Paramètres", "Paramètres disponibles :")
+	local Informations = RageUI.CreateSubMenu(mainmenu, "Informations", "Votre profil et votre portefeuille :")
+	local Docs = RageUI.CreateSubMenu(mainmenu, "Documents officiels", "Carte, permis et port d'armes :")
+	local Parametres = RageUI.CreateSubMenu(mainmenu, "Préférences", "Réglages de votre jeu :")
+	local PerfMenu = RageUI.CreateSubMenu(Parametres, "Performances (FPS)", "Allégez le rendu du jeu :")
+	local KeysMenu = RageUI.CreateSubMenu(mainmenu, "Touches du serveur", "Raccourcis clavier :")
+	local CmdsMenu = RageUI.CreateSubMenu(mainmenu, "Commandes du serveur", "Commandes utiles :")
 	local editorMenu = RageUI.CreateSubMenu(Parametres, "Rockstar editor", "Que voulez-vous faire ?")
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
-	local PrefsMenu = RageUI.CreateSubMenu(mainmenu, "Préférences d'affichage", "Apparence de tous les menus :")
+	local PrefsMenu = RageUI.CreateSubMenu(Parametres, "Apparence des menus", "Apparence de tous les menus :")
 	PrefsRefresh()
 	local PrefsColorLists, PrefsColorSel = {}, {}
 	local function PrefsSyncSel()
@@ -188,17 +241,21 @@ local function OpenMenu()
 	while mainmenu do
 		Wait(0)
 		RageUI.IsVisible(mainmenu, true, true, true, function()
-			RageUI.Separator("Connecte en tant qu'id [~p~"..GetPlayerServerId(PlayerId()).."~s~].")
-			RageUI.ButtonWithStyle("Mon portefeuille", "Accéder à votre portefeuille", {RightLabel = "→→→"}, true, function(_, _, s)
-			end, Informations)
-			RageUI.ButtonWithStyle("Mes paramètres", "Accéder à votre paramètres", {RightLabel = "→→→"}, true, function(_, _, s)
-			end, Parametres)
-			RageUI.ButtonWithStyle("Préférences d'affichage", "Bannière, style, taille et couleur des menus", {RightLabel = "→→→"}, true, function(_, _, s)
-			end, PrefsMenu)
-			if IsPedInAnyVehicle(PlayerPedId(), false) then
-				RageUI.ButtonWithStyle("Gestion véhicule", "Accéder à la gestion du véhicule", {RightLabel = "→→→"}, true, function(_, _, s)
-				end, MenuVehicle)
-			end
+			RageUI.Separator("Connecté en tant qu'id [~p~"..GetPlayerServerId(PlayerId()).."~s~]")
+			RageUI.ButtonWithStyle("Informations", "Votre profil, votre argent et vos factures", {RightLabel = "→→→"}, true, function() end, Informations)
+			RageUI.ButtonWithStyle("Documents officiels", "Carte d'identité, permis de conduire et port d'armes", {RightLabel = "→→→"}, true, function() end, Docs)
+			local inVeh = IsPedInAnyVehicle(PlayerPedId(), false)
+			RageUI.ButtonWithStyle("Véhicule", inVeh and "Portes, fenêtres et limiteur de vitesse" or "Vous devez être dans un véhicule", {RightLabel = "→→→"}, inVeh, function() end, MenuVehicle)
+			RageUI.ButtonWithStyle("Préférences", "Réglages du jeu, apparence des menus et performances", {RightLabel = "→→→"}, true, function() end, Parametres)
+			RageUI.Separator("Serveur")
+			RageUI.ButtonWithStyle("Touches du serveur", "La liste des raccourcis clavier", {RightLabel = "→→→"}, true, function() end, KeysMenu)
+			RageUI.ButtonWithStyle("Commandes du serveur", "Les commandes utiles pour les joueurs", {RightLabel = "→→→"}, true, function() end, CmdsMenu)
+			RageUI.ButtonWithStyle("Serveur Discord", "Ouvre le lien du Discord dans votre navigateur", {RightLabel = "↗"}, true, function(_, _, s)
+				if s then PrefsCall('OpenUrl', ConfigMenuF5.Links.Discord) end
+			end)
+			RageUI.ButtonWithStyle("Boutique du serveur", "Ouvre la boutique dans votre navigateur", {RightLabel = "↗"}, true, function(_, _, s)
+				if s then PrefsCall('OpenUrl', ConfigMenuF5.Links.Boutique) end
+			end)
 		end)
 		RageUI.IsVisible(PrefsMenu, true, true, true, function()
 			RageUI.Separator("Apparence")
@@ -255,6 +312,21 @@ local function OpenMenu()
                     end)
 				end
 			end, Facture)
+			do
+				local pd = ESX.GetPlayerData()
+				local name = ((pd.firstName or '') .. ' ' .. (pd.lastName or '')):gsub('^%s+', ''):gsub('%s+$', '')
+				if name == '' then name = GetPlayerName(PlayerId()) end
+				local cash, bank, black = 0, 0, 0
+				for _, acc in ipairs(pd.accounts or {}) do
+					if acc.name == 'money' then cash = acc.money elseif acc.name == 'bank' then bank = acc.money elseif acc.name == 'black_money' then black = acc.money end
+				end
+				local job = pd.job and ((pd.job.label or pd.job.name or '-') .. (pd.job.grade_label and (' - ' .. pd.job.grade_label) or '')) or '-'
+				local labels = { 'Nom', 'ID', 'Métier', 'Liquide', 'Banque', 'Argent sale' }
+				local values = { name, tostring(GetPlayerServerId(PlayerId())), job, '~g~' .. ESX.Math.GroupDigits(cash) .. '$~s~', '~b~' .. ESX.Math.GroupDigits(bank) .. '$~s~', '~r~' .. ESX.Math.GroupDigits(black) .. '$~s~' }
+				RageUI.Info('Mon profil', labels, values)
+			end
+		end)
+		RageUI.IsVisible(Docs, true, true, true, function()
 			RageUI.Separator("~p~↓ Carte d'identité ↓~s~")
 			RageUI.ButtonWithStyle("Montrer sa carte d'identité", nil, {RightLabel = "→→→"}, true, function(_, _, s)
 				if s then
@@ -308,6 +380,9 @@ local function OpenMenu()
 			end)
 		end)
 		RageUI.IsVisible(Parametres, true, true, true, function()
+			RageUI.ButtonWithStyle("Apparence des menus", "Bannière, style, couleurs et forme de tous les menus", {RightLabel = "→→→"}, true, function() end, PrefsMenu)
+			RageUI.ButtonWithStyle("Performances (FPS)", "Allégez le rendu du jeu pour gagner des FPS", {RightLabel = "→→→"}, true, function() end, PerfMenu)
+			RageUI.Separator("Jeu")
 			RageUI.Checkbox("Désactiver les coups de crosse", nil, Action.Cross, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
                 Action.Cross = Checked;
             end, function()
@@ -348,6 +423,34 @@ local function OpenMenu()
             end)
 			RageUI.ButtonWithStyle("Rockstar editor", nil, {RightLabel = "→→→"}, true, function(_, _, s)
 			end, editorMenu)
+		end)
+		RageUI.IsVisible(PerfMenu, true, true, true, function()
+			if PickaxPerf then
+				local perf = PickaxPerf.Get()
+				local names = {}
+				for i, p in ipairs(PickaxPerf.Presets) do names[i] = p.name end
+				local idx = PickaxPerf.PresetIndex()
+				RageUI.List("Mode", names, idx, PickaxPerf.Presets[idx].desc, {}, true, function() end, function(Index)
+					PickaxPerf.SetPreset(PickaxPerf.Presets[Index].id)
+				end)
+				RageUI.Checkbox("Afficher le compteur de FPS", "Affiche vos FPS en haut à droite de l'écran", perf.fps, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+					PickaxPerf.SetFps(true)
+				end, function()
+					PickaxPerf.SetFps(false)
+				end)
+			else
+				RageUI.Separator("~r~Module de performances indisponible")
+			end
+		end)
+		RageUI.IsVisible(KeysMenu, true, true, true, function()
+			for _, k in ipairs(MenuKeys()) do
+				RageUI.ButtonWithStyle(k[1], nil, {RightLabel = "~b~[" .. string.upper(tostring(k[2])) .. "]~s~"}, true, function() end)
+			end
+		end)
+		RageUI.IsVisible(CmdsMenu, true, true, true, function()
+			for _, c in ipairs(MenuCommands()) do
+				RageUI.ButtonWithStyle(c[2], nil, {RightLabel = "~b~/" .. c[1] .. "~s~"}, true, function() end)
+			end
 		end)
 		RageUI.IsVisible(editorMenu, true, true, true, function()
 			RageUI.ButtonWithStyle("Lancer Record", nil, {RightLabel = "→→→"}, true, function(_, _, s)
@@ -557,7 +660,7 @@ local function OpenMenu()
 			end
 		end)
 
-		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
+		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
 			mainmenu = RMenu:DeleteType("mainmenu")
 		end
 	end

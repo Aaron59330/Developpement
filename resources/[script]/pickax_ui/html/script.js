@@ -134,6 +134,8 @@ window.addEventListener('message', function (e) {
     var w = $('wrap');
     if (w.classList.contains('hidden')) w.classList.remove('hidden');
     render(m.d || {});
+  } else if (m.a === 'url') {
+    if (window.invokeNative) window.invokeNative('openUrl', m.u);
   } else if (m.a === 'hide') {
     $('wrap').classList.add('hidden');
   }

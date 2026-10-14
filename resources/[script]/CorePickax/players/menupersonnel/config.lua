@@ -42,3 +42,9 @@ function DisplayHideHud(stats)
 		TriggerEvent("tempui:toggleUi", false)
 	end
 end
+
+-- Liens ouverts depuis le menu personnel (https uniquement)
+ConfigMenuF5.Links = {
+	Discord = "https://discord.gg/bluebayrp",
+	Boutique = "https://bluebayrp.tebex.io/",
+}

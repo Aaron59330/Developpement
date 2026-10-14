@@ -83,6 +83,13 @@ exports('ResetSettings', function()
     push()
 end)
 
+-- Ouvre un lien (https uniquement) dans le navigateur du joueur
+exports('OpenUrl', function(url)
+    if type(url) ~= 'string' or not url:match('^https://[%w%.%-/_%?=&%%#:~+]+$') then return false end
+    SendNUIMessage({ a = 'url', u = url })
+    return true
+end)
+
 AddEventHandler('onResourceStop', function(res)
     if res == GetCurrentResourceName() then SetNuiFocus(false, false) end
 end)
