@@ -216,9 +216,8 @@ function ESXCustom_Function_ClientSide:GetPlayerHandsup(hitEntity, configChecker
 end
 
 function ESXCustom_Function_ClientSide:ShowHelp(text, n)
-    local msg = GetLabelText(text)
-    if msg == 'NULL' then msg = text end
-    ESX.ShowHelpNotification(msg)
+    BeginTextCommandDisplayHelp(text)
+    EndTextCommandDisplayHelp(n or 0, false, true, -1)
 end
 
 function ESXCustom_Function_ClientSide:ShowFloatingHelp(text, pos)

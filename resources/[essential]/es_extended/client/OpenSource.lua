@@ -16,7 +16,6 @@ function ESX.ShowAdvancedNotification(title, subject, msg, icon, iconType, hudCo
 end
 
 function ESX.ShowHelpNotification(msg)
-    if pickax() then return exports['pickax_notify']:ShowHelpNotification(msg) end
     AddTextEntry('esxHelpNotification', msg)
     BeginTextCommandDisplayHelp('esxHelpNotification')
     EndTextCommandDisplayHelp(0, false, true, -1)
