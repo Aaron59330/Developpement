@@ -5,6 +5,7 @@ local timeOffset = 0
 local timer = 0
 local freezeTime = false
 local blackout = false
+local manualTime = false   -- heure réglée à la main par un staff (/time, /morning…)
 
 if Config.Snow == false then
     RegisterNetEvent('DME:updateWeather')
@@ -62,7 +63,8 @@ RegisterCommand('meteoinfo', function()
 end, false)
 
 RegisterNetEvent('DME:updateTime')
-AddEventHandler('DME:updateTime', function(base, offset, freeze)
+AddEventHandler('DME:updateTime', function(base, offset, freeze, manual)
+    manualTime = manual == true
     freezeTime = freeze
     timeOffset = offset
     baseTime = base
@@ -84,7 +86,7 @@ Citizen.CreateThread(function()
         baseTime = newBaseTime
         hour = math.floor(((baseTime+timeOffset)/60)%24)
         minute = math.floor((baseTime+timeOffset)%60)
-        if not Config.SynchroRealTime then
+        if not Config.SynchroRealTime or manualTime then
             NetworkOverrideClockTime(hour, minute, 0)
         end
     end
@@ -93,9 +95,13 @@ end)
 if Config.SynchroRealTime then
     Citizen.CreateThread(function()
         while true do
-            local _, _, _, hour, minute = GetUtcTime()
-            NetworkOverrideClockTime(hour, minute, 0)
-            Citizen.Wait(60000)
+            if not manualTime then
+                local _, _, _, hour, minute = GetUtcTime()
+                -- GetUtcTime est en UTC : décalage vers l'heure locale du serveur (Config.RealTimeUtcOffset, 2 = France en été, 1 = en hiver)
+                hour = (hour + (Config.RealTimeUtcOffset or 0)) % 24
+                NetworkOverrideClockTime(hour, minute, 0)
+            end
+            Citizen.Wait(manualTime and 1000 or 15000)
         end
     end)
 end

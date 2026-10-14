@@ -40,7 +40,8 @@ Config = {
 	HaveJob2SQL = true,--a mettre sur true si vous avez une base possdent le jobs2 & jobs2_grades sql
 	Debug = false,
 	Snow = false,--Mettre true si vous voulez mettre la neige
-	SynchroRealTime = true,--Mettre true si vous voulez lheure de IRL
+	SynchroRealTime = true,--Mettre true si vous voulez lheure de IRL (les commandes /time, /morning, /noon… la suspendent ; /realtime la rétablit)
+	RealTimeUtcOffset = 2,--Décalage horaire de l'heure réelle par rapport à UTC (France : 2 en été, 1 en hiver)
 
     Licensestaff = {--License pour allow la météo et les acces au maintenance
         ["license:0155311d5350cbfe73f6d33c117fd0b8675be1e8"] = true

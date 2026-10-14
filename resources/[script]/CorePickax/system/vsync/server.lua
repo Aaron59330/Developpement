@@ -20,6 +20,7 @@ CurrentWeather = "EXTRASUNNY"
 local baseTime = 0
 local timeOffset = 0
 local freezeTime = false
+local manualTime = false   -- vrai dès qu'un staff règle l'heure à la main : l'heure réelle est alors suspendue (retour avec /realtime)
 local blackout = false
 local newWeatherTimer = 10
 
@@ -28,7 +29,7 @@ AddEventHandler('DME:requestSync', function()
     if Config.Snow == false then
         TriggerClientEvent('DME:updateWeather', -1, CurrentWeather, blackout)
     end
-    TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime)
+    TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime, manualTime)
 end)
 
 function isAllowedToChange(player)
@@ -211,10 +212,12 @@ RegisterCommand('night', function(source)
 end)
 
 function ShiftToMinute(minute)
+    manualTime = true
     timeOffset = timeOffset - ( ( (baseTime+timeOffset) % 60 ) - minute )
 end
 
 function ShiftToHour(hour)
+    manualTime = true
     timeOffset = timeOffset - ( ( ((baseTime+timeOffset)/60) % 24 ) - hour ) * 60
 end
 
@@ -286,7 +289,7 @@ end)
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(5000)
-        TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime)
+        TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime, manualTime)
     end
 end)
 
@@ -341,3 +344,16 @@ function NextWeatherStage()
     TriggerEvent("DME:requestSync")
 end
 
+
+
+-- /realtime : revient à l'heure réelle (si Config.SynchroRealTime est activé)
+RegisterCommand('realtime', function(source)
+    if source ~= 0 and not isAllowedToChange(source) then return end
+    manualTime = false
+    TriggerEvent('DME:requestSync')
+    if source ~= 0 then
+        TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'L\'heure suit de nouveau l\'~b~heure réelle~s~.')
+    else
+        print("L'heure suit de nouveau l'heure réelle.")
+    end
+end, false)
