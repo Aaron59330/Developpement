@@ -173,7 +173,7 @@ RegisterCommand('jobmoney', function(src, args)
         end
     end
     for _, l in ipairs(out) do print(l) end
-    if src ~= 0 then TriggerClientEvent('esx:showNotification', src, 'Diagnostic des trésoreries dans la console serveur.') end
+    if src ~= 0 then JBNotifyClient( src, 'Diagnostic des trésoreries dans la console serveur.') end
 end, false)
 
 local function pay(xPlayer, amount)
@@ -458,7 +458,7 @@ ESX.RegisterServerCallback('jobbuilder:boss:recruit', function(src, cb, pointId,
     if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(target.source))) > Config.TargetDistance + 2.0 then return cb(fail('Le joueur est trop loin')) end
     if target.job.name == job.name then return cb(fail('Déjà dans ce job')) end
     target.setJob(job.name, 0)
-    TriggerClientEvent('esx:showNotification', target.source, ('Tu as été recruté chez ~b~%s'):format(job.label))
+    JBNotifyClient( target.source, ('Tu as été recruté chez ~b~%s'):format(job.label))
     JB.log(job.name, xPlayer, 'recruit', JB.playerName(target))
     cb(bossReply(job))
 end)
@@ -495,7 +495,7 @@ ESX.RegisterServerCallback('jobbuilder:boss:fire', function(src, cb, pointId, id
     if current >= job.boss_grade then return cb(fail('Tu ne peux pas virer un autre membre de la direction')) end
     if xTarget then
         xTarget.setJob('unemployed', 0)
-        TriggerClientEvent('esx:showNotification', xTarget.source, ('Tu as été viré de ~r~%s'):format(job.label))
+        JBNotifyClient( xTarget.source, ('Tu as été viré de ~r~%s'):format(job.label))
     else
         MySQL.update.await("UPDATE users SET job = 'unemployed', job_grade = 0 WHERE identifier = ? AND job = ?", { identifier, job.name })
     end
@@ -603,34 +603,34 @@ RegisterNetEvent('jobbuilder:server:invoiceAnswer', function(id, accepted)
         if inv.hooks and inv.hooks[name] then pcall(inv.hooks[name], ...) end
     end
     if not accepted then
-        if issuer then TriggerClientEvent('esx:showNotification', inv.from, '~r~La facture a été refusée.') end
+        if issuer then JBNotifyClient( inv.from, '~r~La facture a été refusée.') end
         return hook('onRefused', 'refused')
     end
     if inv.hooks and inv.hooks.offer then           -- proposition (prêt, dépôt, retrait…) : ni objet ni paiement, le module décide
-        if issuer and not playersClose(inv.from, src) then return TriggerClientEvent('esx:showNotification', src, '~r~Le conseiller n\'est plus à côté de toi.') end
+        if issuer and not playersClose(inv.from, src) then return JBNotifyClient( src, '~r~Le conseiller n\'est plus à côté de toi.') end
         return hook('onAccept', payer, issuer)
     end
     local item = inv.item
     if item then
         if not issuer or not playersClose(inv.from, src) then
-            return TriggerClientEvent('esx:showNotification', src, '~r~Le vendeur n\'est plus à côté de toi.')
+            return JBNotifyClient( src, '~r~Le vendeur n\'est plus à côté de toi.')
         end
         if JB.itemCount(inv.from, issuer, item.name) < item.count then
-            TriggerClientEvent('esx:showNotification', src, '~r~Le vendeur n\'a plus ce produit.')
-            return TriggerClientEvent('esx:showNotification', inv.from, '~r~Tu n\'as plus le produit à vendre.')
+            JBNotifyClient( src, '~r~Le vendeur n\'a plus ce produit.')
+            return JBNotifyClient( inv.from, '~r~Tu n\'as plus le produit à vendre.')
         end
         if not JB.canCarry(src, payer, item.name, item.count) then
-            TriggerClientEvent('esx:showNotification', inv.from, '~r~Le client ne peut pas porter ça.')
-            return TriggerClientEvent('esx:showNotification', src, '~r~Tu ne peux pas porter ça.')
+            JBNotifyClient( inv.from, '~r~Le client ne peut pas porter ça.')
+            return JBNotifyClient( src, '~r~Tu ne peux pas porter ça.')
         end
         if not JB.takeItem(inv.from, issuer, item.name, item.count) then
-            return TriggerClientEvent('esx:showNotification', src, '~r~Le vendeur n\'a plus ce produit.')
+            return JBNotifyClient( src, '~r~Le vendeur n\'a plus ce produit.')
         end
     end
     if not pay(payer, inv.amount) then
         if item then JB.giveItem(inv.from, issuer, item.name, item.count) end
-        TriggerClientEvent('esx:showNotification', src, '~r~Tu n\'as pas assez d\'argent.')
-        if issuer then TriggerClientEvent('esx:showNotification', inv.from, '~r~Le client n\'a pas assez d\'argent.') end
+        JBNotifyClient( src, '~r~Tu n\'as pas assez d\'argent.')
+        if issuer then JBNotifyClient( inv.from, '~r~Le client n\'a pas assez d\'argent.') end
         return hook('onRefused', 'unpaid')
     end
     if item then JB.giveItem(src, payer, item.name, item.count) end
@@ -642,9 +642,9 @@ RegisterNetEvent('jobbuilder:server:invoiceAnswer', function(id, accepted)
     elseif issuer then
         issuer.addAccountMoney('bank', inv.amount)
     end
-    TriggerClientEvent('esx:showNotification', src, ('Facture payée : ~g%d$'):format(inv.amount))
+    JBNotifyClient( src, ('Facture payée : ~g%d$'):format(inv.amount))
     if issuer then
-        TriggerClientEvent('esx:showNotification', inv.from, ('Facture payée : ~g+%d$'):format(inv.amount))
+        JBNotifyClient( inv.from, ('Facture payée : ~g+%d$'):format(inv.amount))
         JB.log(inv.job, issuer, 'invoice_paid', ('%s : %d$ (%s)'):format(JB.playerName(payer), inv.amount, inv.label))
     end
 end)

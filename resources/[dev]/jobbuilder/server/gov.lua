@@ -141,7 +141,7 @@ ESX.RegisterServerCallback('jobbuilder:gov:prime', function(src, cb, targetId, a
     if not JB.societyRemove(job.name, amount) then return cb(fail('Fonds insuffisants dans le trésor')) end
     t.addAccountMoney('bank', amount)
     local why = tostring(reason or ''):gsub('%c', ''):sub(1, 120)
-    TriggerClientEvent('esx:showNotification', t.source, ('Prime du gouvernement : ~g+%d$~s~ %s'):format(amount, why))
+    JBNotifyClient( t.source, ('Prime du gouvernement : ~g+%d$~s~ %s'):format(amount, why))
     treasuryLog('prime', JB.playerName(t), JB.playerName(x), why, -amount)
     JB.log(job.name, x, 'prime', ('%d$ → %s'):format(amount, JB.playerName(t)))
     cb(data(x, job))

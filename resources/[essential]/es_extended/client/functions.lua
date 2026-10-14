@@ -1328,8 +1328,8 @@ function ESX.ShowInventory()
 end
 
 RegisterNetEvent('esx:showNotification')
-AddEventHandler('esx:showNotification', function(msg, type, length)
-    ESX.ShowNotification(msg, type, length)
+AddEventHandler('esx:showNotification', function(msg, type, length, icon)
+    ESX.ShowNotification(msg, type, length, icon)
 end)
 
 RegisterNetEvent('esx:showAdvancedNotification')

@@ -124,7 +124,7 @@ local function openPoint(point)
         opening = false
         if uiOpen then return end
         if not res or not res.ok then
-            ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur'))
+            JBNotify('~r~' .. ((res and res.error) or 'Erreur'))
             return
         end
         if res.kind == 'stash' then
@@ -190,7 +190,7 @@ end)
 local function openJobMenu()
     local jc = State.jobConfig
     if not jc or #(jc.actions or {}) == 0 then
-        ESX.ShowNotification('~r~Aucune action disponible pour ton métier.')
+        JBNotify('~r~Aucune action disponible pour ton métier.')
         return
     end
     local actions = {}
@@ -241,17 +241,17 @@ end
 returnVehicle = function(point)
     local ped = PlayerPedId()
     local veh = GetVehiclePedIsIn(ped, false)
-    if veh == 0 or GetPedInVehicleSeat(veh, -1) ~= ped then return ESX.ShowNotification('~r~Tu dois être au volant du véhicule à ranger.') end
+    if veh == 0 or GetPedInVehicleSeat(veh, -1) ~= ped then return JBNotify('~r~Tu dois être au volant du véhicule à ranger.') end
     local want = point.kind or 'car'
     if vehicleKind(veh) ~= want then
-        return ESX.ShowNotification(('~r~Ce point ne range que : %s'):format((Config.GarageKinds[want] or Config.GarageKinds.car).label:lower()))
+        return JBNotify(('~r~Ce point ne range que : %s'):format((Config.GarageKinds[want] or Config.GarageKinds.car).label:lower()))
     end
     ESX.TriggerServerCallback('jobbuilder:garage:return', function(res)
         if res and res.ok then
             ESX.Game.DeleteVehicle(veh)
-            ESX.ShowNotification('~g~Véhicule rangé.')
+            JBNotify('~g~Véhicule rangé.')
         else
-            ESX.ShowNotification('~r~' .. ((res and res.error) or 'Impossible de ranger ce véhicule'))
+            JBNotify('~r~' .. ((res and res.error) or 'Impossible de ranger ce véhicule'))
         end
     end, point.id, GetVehicleNumberPlateText(veh))
 end
@@ -432,3 +432,4 @@ CreateThread(function()
 end)
 
 function GetJobConfig() return State.jobConfig end
+exports('GetJobType', function() return State.jobConfig and State.jobConfig.type or nil end)

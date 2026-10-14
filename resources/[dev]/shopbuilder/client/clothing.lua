@@ -175,10 +175,10 @@ end
 
 local function notifyBought(res)
     if res.outfit then
-        return ESX.ShowNotification(('~g~Tenue achetée pour %s%s — glisse-la sur la case Tenue de ton inventaire pour la porter'):format(res.paid, Config.Currency))
+        return ESX.ShowNotification(('~g~Tenue achetée pour %s%s — glisse-la sur la case Tenue de ton inventaire pour la porter'):format(res.paid, Config.Currency), nil, nil, 'shop')
     end
     local extra = (res.items and res.items > 0) and (' — %d vêtement(s) ajouté(s) à ton inventaire'):format(res.items) or ''
-    ESX.ShowNotification(('~g~Tenue achetée pour %s%s%s'):format(res.paid, Config.Currency, extra))
+    ESX.ShowNotification(('~g~Tenue achetée pour %s%s%s'):format(res.paid, Config.Currency, extra), nil, nil, 'shop')
 end
 
 function CabinConfirm(cb)
@@ -203,7 +203,7 @@ end
 function StartClothing(cur, method)
     local done = false
     if not cur.restrict or #cur.restrict == 0 then
-        ESX.ShowNotification('~r~Cette boutique n\'a aucune partie de vêtements activée (builder → Général → Cabine d\'essayage).')
+        ESX.ShowNotification('~r~Cette boutique n\'a aucune partie de vêtements activée (builder → Général → Cabine d\'essayage).', nil, nil, 'shop')
         return
     end
     TriggerEvent('skinchanger:getSkin', function(before)
@@ -213,7 +213,7 @@ function StartClothing(cur, method)
             purchaseItems(before, cur.restrict, function(items)
                 if not items then
                     Config.RestoreSkin()
-                    return ESX.ShowNotification('~r~Aucun vêtement modifié : rien à acheter')
+                    return ESX.ShowNotification('~r~Aucun vêtement modifié : rien à acheter', nil, nil, 'shop')
                 end
                 ESX.TriggerServerCallback('shopbuilder:clothing:pay', function(res)
                     if res and res.ok then
@@ -222,7 +222,7 @@ function StartClothing(cur, method)
                         notifyBought(res)
                     else
                         Config.RestoreSkin()
-                        ESX.ShowNotification('~r~' .. ((res and res.error) or 'Paiement refusé'))
+                        ESX.ShowNotification('~r~' .. ((res and res.error) or 'Paiement refusé'), nil, nil, 'shop')
                     end
                 end, cur.id, cur.locIdx, method, items)
             end)

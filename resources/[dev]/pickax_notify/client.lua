@@ -108,18 +108,60 @@ local function sendNotification(data)
     SendNUIMessage(data)
 end
 
+-- Logo d'un métier : par type de job (jobbuilder) puis par mots-clés du nom du job
+local JOB_ICON_BY_TYPE = { police = 'police', ems = 'ems', mecano = 'mecano', taxi = 'taxi', bank = 'bank', government = 'government', realestate = 'realestate', bar = 'bar', dealer = 'dealer', custom = 'job' }
+local JOB_ICON_KEYWORDS = {
+    { 'police', { 'police', 'lspd', 'lssd', 'sheriff', 'gendarm', 'bcso', 'swat', 'fib', 'cops' } },
+    { 'ems', { 'ambulance', 'ems', 'sams', 'medic', 'doctor', 'hopital', 'hospital', 'samu', 'pompier', 'fire' } },
+    { 'mecano', { 'mecano', 'mechanic', 'benny', 'garage', 'bennys', 'tow', 'depann', 'carshop' } },
+    { 'taxi', { 'taxi', 'uber', 'vtc' } },
+    { 'bank', { 'bank', 'banque', 'fleeca', 'maze' } },
+    { 'government', { 'gouv', 'gov', 'mairie', 'mayor', 'justice', 'juge', 'avocat', 'lawyer' } },
+    { 'realestate', { 'immo', 'realestate', 'agent' } },
+    { 'bar', { 'bar', 'club', 'tequila', 'vanilla', 'pub', 'restaurant', 'burger', 'cafe' } },
+    { 'dealer', { 'dealer', 'concess', 'cardealer', 'vehicle' } },
+}
+
+local function jobIcon(jobName, jobType)
+    if jobType and JOB_ICON_BY_TYPE[jobType] then return JOB_ICON_BY_TYPE[jobType] end
+    local n = tostring(jobName or ''):lower()
+    for _, e in ipairs(JOB_ICON_KEYWORDS) do
+        for _, kw in ipairs(e[2]) do
+            if n:find(kw, 1, true) then return e[1] end
+        end
+    end
+    return 'job'
+end
+
+-- Résout `icon` : nom de logo direct, '@job' = métier actuel du joueur
+local function resolveIcon(icon)
+    if icon ~= '@job' then return icon end
+    local name, jtype
+    local ok, ESX = pcall(function() return exports['es_extended']:getSharedObject() end)
+    if ok and ESX and ESX.GetPlayerData then
+        local pd = ESX.GetPlayerData()
+        name = pd and pd.job and pd.job.name
+    end
+    if GetResourceState('jobbuilder') == 'started' then
+        local ok2, t = pcall(function() return exports['jobbuilder']:GetJobType() end)
+        if ok2 then jtype = t end
+    end
+    return jobIcon(name, jtype)
+end
+
 local function toneOf(t)
     if t == 'success' or t == 'error' or t == 'warning' then return t end
 end
 
 -- Même signature que ESX.ShowNotification(msg, type, length) ; `type` peut aussi être l'ancien hudColorIndex (ignoré)
-local function ShowNotification(msg, typeOrColor, length)
+local function ShowNotification(msg, typeOrColor, length, icon)
     local tone = toneOf(typeOrColor)
     sendNotification({
         kind = 'info',
         title = (tone == 'success' and 'Succès') or (tone == 'error' and 'Erreur') or (tone == 'warning' and 'Attention') or 'Information',
         message = msg,
         tone = tone,
+        icon = resolveIcon(icon),
         hudColorIndex = (type(typeOrColor) == 'number') and typeOrColor or nil,
         duration = getNumber(length, getNumber(Config.NotificationDuration, 4500))
     })
@@ -134,6 +176,7 @@ local function Notify(data)
         title = data.title or ((tone == 'success' and 'Succès') or (tone == 'error' and 'Erreur') or (tone == 'warning' and 'Attention') or 'Information'),
         message = data.description or data.message or '',
         tone = tone,
+        icon = resolveIcon(data.icon),
         duration = getNumber(data.duration, getNumber(Config.NotificationDuration, 4500))
     })
 end
@@ -171,6 +214,7 @@ end
 
 exports('ShowNotification', ShowNotification)
 exports('Notify', Notify)
+exports('GetJobIcon', jobIcon)
 exports('ShowAdvancedNotification', ShowAdvancedNotification)
 exports('ShowHelpNotification', ShowHelpNotification)
 

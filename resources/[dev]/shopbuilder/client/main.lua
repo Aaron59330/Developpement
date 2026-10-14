@@ -103,7 +103,7 @@ local function openShop(shop, locIdx)
         opening = false
         if uiOpen then return end
         if not res or not res.ok then
-            ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur'))
+            ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur'), nil, nil, 'shop')
             return
         end
         current = { id = shop.id, locIdx = locIdx, restrict = res.restrict }

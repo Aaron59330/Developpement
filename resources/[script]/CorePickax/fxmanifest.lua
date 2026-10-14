@@ -11,6 +11,7 @@ shared_scripts {
     '@es_extended/imports.lua',
 
     'init/shared/mute.lua',
+    'esx/notify.lua',
     'init/shared/init.lua',
 
     'system/**/config.lua',

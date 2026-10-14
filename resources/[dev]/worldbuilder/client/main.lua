@@ -11,8 +11,12 @@ local blipHandles, peds, targetZones, Nodes = {}, {}, {}, {}
 Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 
 -- ─────────────────────────────── Utilitaires ───────────────────────────────
+-- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
+local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano',
+    bank = 'bank', driving = 'school', drug = 'drug', robbery = 'robbery', doorlock = 'world', pvp = 'gang', chase = 'police' }
 function Notify(msg, kind)
-    ESX.ShowNotification(msg, kind or 'info')
+    local t = Ctx and Ctx.type
+    ESX.ShowNotification(msg, kind or 'info', nil, WB_ICON[t] or 'world')
 end
 
 RegisterNetEvent('worldbuilder:client:notify', function(msg, kind) Notify(msg, kind) end)

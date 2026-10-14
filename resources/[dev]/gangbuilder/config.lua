@@ -295,12 +295,12 @@ Config.Hooks = {}
 if IsDuplicityVersion() then
     -- Notification serveur → joueur (remplace par ox_lib / ton système si tu veux)
     Config.Hooks.Notify = function(src, message)
-        TriggerClientEvent('esx:showNotification', src, message)
+        TriggerClientEvent('pickax_notify:notify', src, { description = message, icon = 'gang' })
     end
 else
     -- Notification client (ex : exports['ox_lib']:notify({ description = message }))
     Config.Hooks.Notify = function(message)
-        ESX.ShowNotification(message)
+        ESX.ShowNotification(message, nil, nil, 'gang')
     end
 
     -- Alerte police lors d'une vente (si Activities.PoliceAlert) : coords = position du joueur

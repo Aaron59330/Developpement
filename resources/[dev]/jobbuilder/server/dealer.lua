@@ -296,7 +296,7 @@ local function completeSale(job, v, buyer, seller)
     end
     if seller and commission > 0 then
         seller.addAccountMoney('bank', commission)
-        TriggerClientEvent('esx:showNotification', seller.source, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
+        JBNotifyClient( seller.source, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
     end
     if v.stock > 0 then MySQL.update.await('UPDATE jobbuilder_dealer_vehicles SET stock = stock - 1 WHERE job_name = ? AND LOWER(model) = ? AND stock > 0', { job.name, tostring(v.model):lower() }) end
 
@@ -309,7 +309,7 @@ local function completeSale(job, v, buyer, seller)
         Pending[buyer.source][plate] = now() + 240
         TriggerClientEvent('jobbuilder:client:dealerDeliver', buyer.source, { model = v.model, plate = plate, spawn = spawnPoint, label = v.label })
     else
-        TriggerClientEvent('esx:showNotification', buyer.source, ('~g%s~s~ (%s) t\'attend dans ton garage.'):format(v.label, plate))
+        JBNotifyClient( buyer.source, ('~g%s~s~ (%s) t\'attend dans ton garage.'):format(v.label, plate))
     end
     return true
 end
@@ -342,7 +342,7 @@ RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes)
     local seller = ESX.GetPlayerFromId(o.from)
     if o.exp < now() then return end
     if not yes then
-        if seller then TriggerClientEvent('esx:showNotification', o.from, '~r~Le client a refusé l\'offre.') end
+        if seller then JBNotifyClient( o.from, '~r~Le client a refusé l\'offre.') end
         return
     end
     local buyer, job = ESX.GetPlayerFromId(src), dealerJob(o.job)
@@ -350,8 +350,8 @@ RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes)
     if not buyer or not v then return end
     local ok, e = completeSale(job, v, buyer, seller)
     if not ok then
-        TriggerClientEvent('esx:showNotification', src, '~r~' .. e)
-        if seller then TriggerClientEvent('esx:showNotification', o.from, '~r~' .. e) end
+        JBNotifyClient( src, '~r~' .. e)
+        if seller then JBNotifyClient( o.from, '~r~' .. e) end
     end
 end)
 

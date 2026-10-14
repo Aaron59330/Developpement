@@ -178,7 +178,7 @@ local function resetProp(p, reason, actor)
     MySQL.update.await('DELETE FROM jobbuilder_property_outfits WHERE property_id = ?', { p.id })
     MySQL.update.await("UPDATE jobbuilder_properties SET status = 'available', owner = NULL, owner_name = NULL, rent_until = NULL, key_holders = '[]', sold_at = NULL WHERE id = ?", { p.id })
     local ownerX = p.owner and ESX.GetPlayerFromIdentifier(p.owner)
-    if ownerX then TriggerClientEvent('esx:showNotification', ownerX.source, ('~r~Tu n\'as plus accès à ~s~%s (%s)'):format(p.label, reason)) end
+    if ownerX then JBNotifyClient( ownerX.source, ('~r~Tu n\'as plus accès à ~s~%s (%s)'):format(p.label, reason)) end
     p.status, p.owner, p.owner_name, p.rent_until, p.key_holders = 'available', nil, nil, nil, {}
     history(p, p.job_name, 'reset', actor, reason, 0)
     JB.syncPropsAll()
@@ -283,7 +283,7 @@ RegisterNetEvent('jobbuilder:server:ringAnswer', function(ringer, id, yes)
         Allowed[ringer] = { prop = p.id, exp = now() + 60 }
         TriggerClientEvent('jobbuilder:client:ringAccepted', ringer, p.id)
     else
-        TriggerClientEvent('esx:showNotification', ringer, '~r~Personne ne t\'ouvre.')
+        JBNotifyClient( ringer, '~r~Personne ne t\'ouvre.')
     end
 end)
 
@@ -371,7 +371,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:giveKey', function(src, cb, id, targ
     if accessRole(t, p) then return cb(fail('Ce joueur a déjà accès')) end
     p.key_holders[#p.key_holders + 1] = { identifier = t.identifier, name = JB.playerName(t) }
     saveKeys(p)
-    TriggerClientEvent('esx:showNotification', t.source, ('Tu as reçu un double des clés de ~b~%s'):format(p.label))
+    JBNotifyClient( t.source, ('Tu as reçu un double des clés de ~b~%s'):format(p.label))
     cb({ ok = true, keys = p.key_holders })
 end)
 
@@ -613,23 +613,23 @@ RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
     local agent = ESX.GetPlayerFromId(o.from)
     if o.exp < now() then return end
     if not yes then
-        if agent then TriggerClientEvent('esx:showNotification', o.from, '~r~Le client a refusé l\'offre.') end
+        if agent then JBNotifyClient( o.from, '~r~Le client a refusé l\'offre.') end
         return
     end
     local buyer, p = ESX.GetPlayerFromId(src), Props[o.prop]
     if not buyer or not p or p.status ~= 'available' then
-        TriggerClientEvent('esx:showNotification', src, '~r~Ce bien n\'est plus disponible.')
+        JBNotifyClient( src, '~r~Ce bien n\'est plus disponible.')
         return
     end
     local owned = 0
     for _, q in pairs(Props) do if q.owner == buyer.identifier then owned = owned + 1 end end
     if owned >= R.MaxPerPlayer then
-        TriggerClientEvent('esx:showNotification', src, '~r~Tu possèdes déjà trop de propriétés.')
+        JBNotifyClient( src, '~r~Tu possèdes déjà trop de propriétés.')
         return
     end
     if not JB.pay(buyer, p.price) then
-        TriggerClientEvent('esx:showNotification', src, '~r~Tu n\'as pas assez d\'argent.')
-        if agent then TriggerClientEvent('esx:showNotification', o.from, '~r~Le client n\'a pas assez d\'argent.') end
+        JBNotifyClient( src, '~r~Tu n\'as pas assez d\'argent.')
+        if agent then JBNotifyClient( o.from, '~r~Le client n\'a pas assez d\'argent.') end
         return
     end
 
@@ -647,7 +647,7 @@ RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
     end
     if agent and commission > 0 then
         agent.addAccountMoney('bank', commission)
-        TriggerClientEvent('esx:showNotification', o.from, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
+        JBNotifyClient( o.from, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
     end
 
     local rentUntil = p.deal == 'rent' and (now() + R.RentDays * 86400) or nil
@@ -656,6 +656,6 @@ RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
     p.status, p.owner, p.owner_name, p.rent_until, p.key_holders = 'owned', buyer.identifier, JB.playerName(buyer), rentUntil, {}
     history(p, p.job_name, p.deal == 'rent' and 'rented' or 'sold', agent and JB.playerName(agent) or 'agence',
         ('%s → %s'):format(p.label, JB.playerName(buyer)), p.price)
-    TriggerClientEvent('esx:showNotification', src, ('Félicitations ! ~b~%s~s~ est à toi.'):format(p.label))
+    JBNotifyClient( src, ('Félicitations ! ~b~%s~s~ est à toi.'):format(p.label))
     JB.syncPropsAll()
 end)

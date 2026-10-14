@@ -150,10 +150,10 @@ local function reviveLocal(coords, pct, fade)
         local shore = nearestShore(c.x, c.y, c.z)
         if shore then
             c = { x = shore.x, y = shore.y, z = shore.z, h = c.h }
-            ESX.ShowNotification('~b~Tu as été ramené sur la rive.')
+            JBNotify('~b~Tu as été ramené sur la rive.')
         else
             local h = nearestHospital(c)
-            if h then c = { x = h[2], y = h[3], z = h[4], h = h[5] } ESX.ShowNotification('~b~Tu as été transporté à l\'hôpital.') end
+            if h then c = { x = h[2], y = h[3], z = h[4], h = h[5] } JBNotify('~b~Tu as été transporté à l\'hôpital.') end
         end
     end
     graceUntil = GetGameTimer() + 8000
@@ -170,7 +170,7 @@ local function reviveLocal(coords, pct, fade)
         if best then
             print('^1[jobbuilder] résurrection impossible à cet endroit : repli à ' .. best[1] .. '^0')
             resurrect({ x = best[2], y = best[3], z = best[4], h = best[5] }, hp)
-            ESX.ShowNotification('~r~Tu as été transporté à l\'hôpital.')
+            JBNotify('~r~Tu as été transporté à l\'hôpital.')
         end
     end
     -- Vérification : si le joueur est de nouveau mort dans les 2 s qui suivent, on recommence à l'hôpital le plus proche
@@ -220,7 +220,7 @@ RegisterNetEvent('jobbuilder:client:revive', function(pct, force)
             SetEntityHealth(ped, GetEntityMaxHealth(ped))
             ClearPedBloodDamage(ped)
             restoreNeeds(true)
-            ESX.ShowNotification('~g~Tu as été soigné (vie, faim, soif).')
+            JBNotify('~g~Tu as été soigné (vie, faim, soif).')
         end
         return
     end
@@ -229,7 +229,7 @@ RegisterNetEvent('jobbuilder:client:revive', function(pct, force)
     dead, hold = false, 0.0
     hideUI()
     if force then restoreNeeds(true) end                -- /revive : vie, faim et soif à 100 %
-    ESX.ShowNotification(force and '~g~Tu as été réanimé et soigné (vie, faim, soif).' or '~g~Tu as été réanimé.')
+    JBNotify(force and '~g~Tu as été réanimé et soigné (vie, faim, soif).' or '~g~Tu as été réanimé.')
 end)
 
 local CAUSES = { 'WEAPON_DROWNING', 'WEAPON_DROWNING_IN_VEHICLE', 'WEAPON_FALL', 'WEAPON_EXPLOSION', 'WEAPON_FIRE', 'WEAPON_RUN_OVER_BY_CAR', 'WEAPON_BLEEDING', 'WEAPON_EXHAUSTION', 'WEAPON_ELECTRIC_FENCE' }
@@ -261,10 +261,10 @@ end
 local function callEms()
     ESX.TriggerServerCallback('jobbuilder:death:call', function(r)
         if r and r.ok then
-            ESX.ShowNotification(('~g~Les EMS ont été prévenus (%d en service).'):format(r.ems))
+            JBNotify(('~g~Les EMS ont été prévenus (%d en service).'):format(r.ems))
             refreshState()
         else
-            ESX.ShowNotification('~r~' .. ((r and r.error) or 'Appel impossible'))
+            JBNotify('~r~' .. ((r and r.error) or 'Appel impossible'))
         end
     end)
 end
@@ -302,12 +302,12 @@ end
 
 local function respawn()
     ESX.TriggerServerCallback('jobbuilder:death:respawn', function(r)
-        if not r or not r.ok then hold = 0.0 return ESX.ShowNotification('~r~' .. ((r and r.error) or 'Impossible')) end
+        if not r or not r.ok then hold = 0.0 return JBNotify('~r~' .. ((r and r.error) or 'Impossible')) end
         local ok, err = pcall(reviveLocal, { x = r.x, y = r.y, z = r.z, h = r.h }, r.health, true)
         if not ok then print('^1[jobbuilder] erreur pendant la réanimation : ' .. tostring(err) .. '^0') end
         finishUi()                                        -- l'écran de mort disparaît quoi qu'il arrive
         if r.restore then restoreNeeds((r.health or 0) >= 100) end
-        ESX.ShowNotification(('Soins complets à l\'%s%s.%s'):format(r.label or 'hôpital', r.restore and ' (vie, faim, soif)' or '', (r.paid or 0) > 0 and (' Facture : ~r~' .. r.paid .. ' $') or ''))
+        JBNotify(('Soins complets à l\'%s%s.%s'):format(r.label or 'hôpital', r.restore and ' (vie, faim, soif)' or '', (r.paid or 0) > 0 and (' Facture : ~r~' .. r.paid .. ' $') or ''))
     end)
 end
 
@@ -371,7 +371,7 @@ local function removeBlip(id)
 end
 
 RegisterNetEvent('jobbuilder:client:emsCall', function(c)
-    ESX.ShowNotification(('~r~[URGENCE]~s~ %s est inconscient.\nAppuie sur ~INPUT_REPLAY_SHOWHOTKEY~ (Y) pour prendre l\'appel.'):format(c.name or 'Un patient'))
+    JBNotify(('~r~[URGENCE]~s~ %s est inconscient.\nAppuie sur ~INPUT_REPLAY_SHOWHOTKEY~ (Y) pour prendre l\'appel.'):format(c.name or 'Un patient'))
     PlaySoundFrontend(-1, 'Beep_Red', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
     removeBlip(c.id)
     local b = AddBlipForCoord(c.x + 0.0, c.y + 0.0, c.z + 0.0)
@@ -390,12 +390,12 @@ RegisterNetEvent('jobbuilder:client:emsCallEnd', function(id) removeBlip(id) end
 RegisterCommand('jbems_accept', function()
     if dead then return end
     ESX.TriggerServerCallback('jobbuilder:ems:take', function(r)
-        if not r or not r.ok then return ESX.ShowNotification('~r~' .. ((r and r.error) or 'Aucun appel en cours')) end
+        if not r or not r.ok then return JBNotify('~r~' .. ((r and r.error) or 'Aucun appel en cours')) end
         if r.joined then
             SetNewWaypoint(r.x + 0.0, r.y + 0.0)
-            ESX.ShowNotification(('~g~Appel pris : %s. GPS défini.'):format(r.name or 'patient'))
+            JBNotify(('~g~Appel pris : %s. GPS défini.'):format(r.name or 'patient'))
         else
-            ESX.ShowNotification('Tu as quitté cet appel.')
+            JBNotify('Tu as quitté cet appel.')
         end
     end, 0)
 end, false)
@@ -429,7 +429,7 @@ RegisterNetEvent('jobbuilder:client:cpr', function(target, secs)
         ClearPedTasks(ped)
         if cancelled then
             TriggerServerEvent('jobbuilder:server:cprCancel')
-            ESX.ShowNotification('~r~Réanimation interrompue.')
+            JBNotify('~r~Réanimation interrompue.')
         else
             TriggerServerEvent('jobbuilder:server:cprDone')
         end

@@ -11,6 +11,7 @@ shared_scripts {
 }
 
 server_scripts {
+    'server/notify.lua',
     '@oxmysql/lib/MySQL.lua',
     'server/core.lua',
     'server/builder.lua',
@@ -31,6 +32,7 @@ server_scripts {
 }
 
 client_scripts {
+    'client/notify.lua',
     'client/bb_map.lua',
     'client/main.lua',
     'client/actions.lua',

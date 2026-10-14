@@ -32,11 +32,11 @@ local function runWork(res, pointId)
         if cancelled then
             TriggerServerEvent('jobbuilder:kitchen:cancel')
             working = false
-            return ESX.ShowNotification('~r~Travail annulé.')
+            return JBNotify('~r~Travail annulé.')
         end
         ESX.TriggerServerCallback('jobbuilder:kitchen:finish', function(r)
             working = false
-            if r and r.ok then ESX.ShowNotification(r.msg) else ESX.ShowNotification('~r~' .. ((r and r.error) or 'Erreur')) end
+            if r and r.ok then JBNotify(r.msg) else JBNotify('~r~' .. ((r and r.error) or 'Erreur')) end
             ReopenPoint(pointId)
         end)
     end)

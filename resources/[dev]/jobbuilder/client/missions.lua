@@ -260,7 +260,7 @@ local function stepInteract(step, mid)
                         clearBlip()
                         return true
                     end
-                    if not aborted(mid) then ESX.ShowNotification('~r~Action interrompue : reste sur place jusqu\'à la fin.') end
+                    if not aborted(mid) then JBNotify('~r~Action interrompue : reste sur place jusqu\'à la fin.') end
                 end
             end
         end
@@ -346,14 +346,14 @@ local function run(mid)
             local msg = M.error or (IsEntityDead(PlayerPedId()) and 'Mission échouée : tu es mort.' or 'Mission annulée.')
             srv('cancel')
             cleanup(0)
-            ESX.ShowNotification('~r~' .. msg)
+            JBNotify('~r~' .. msg)
             return
         end
         local r = srv('step', mid, M.idx)
         if not r or not r.ok then
             srv('cancel')
             cleanup(0)
-            ESX.ShowNotification('~r~' .. ((r and r.error) or 'Étape refusée par le serveur.'))
+            JBNotify('~r~' .. ((r and r.error) or 'Étape refusée par le serveur.'))
             return
         end
         M.idx = M.idx + 1
@@ -364,21 +364,21 @@ local function run(mid)
     local r = srv('complete', mid, health)
     if r and r.ok then
         PlaySoundFrontend(-1, 'Mission_Pass_Notify', 'DLC_HEISTS_GENERAL_FRONTEND_SOUNDS', true)
-        ESX.ShowNotification(('~g~Mission terminée !~s~ %s~n~Récompense : ~g+%d$%s'):format(M.label, r.reward or 0, (r.bonus and r.bonus > 0) and (' ~s~(dont bonus ~y+' .. r.bonus .. '$~s~)') or ''))
-        if r.note then ESX.ShowNotification('~y~' .. r.note) end
+        JBNotify(('~g~Mission terminée !~s~ %s~n~Récompense : ~g+%d$%s'):format(M.label, r.reward or 0, (r.bonus and r.bonus > 0) and (' ~s~(dont bonus ~y+' .. r.bonus .. '$~s~)') or ''))
+        if r.note then JBNotify('~y~' .. r.note) end
     else
-        ESX.ShowNotification('~r~' .. ((r and r.error) or 'Mission non validée.'))
+        JBNotify('~r~' .. ((r and r.error) or 'Mission non validée.'))
     end
     cleanup(2500)
 end
 
 function StartMission(m)
-    if M then return ESX.ShowNotification('~r~Tu as déjà une mission en cours.') end
+    if M then return JBNotify('~r~Tu as déjà une mission en cours.') end
     M = {
         id = m.id, label = m.label, steps = m.steps, idx = 1, vehicleInfo = m.vehicle, peds = (m.peds and #m.peds > 0) and m.peds or { 'a_m_y_business_01' },
         timeLimit = m.timeLimit, started = GetGameTimer(), vehicles = {}, peds_spawned = {},
     }
-    ESX.ShowNotification(('~y~Mission : ~s~%s'):format(m.label))
+    JBNotify(('~y~Mission : ~s~%s'):format(m.label))
     CreateThread(function() run(m.id) end)
 end
 
@@ -387,12 +387,12 @@ function CancelMission(msg)
     M.cancel = true
     ESX.TriggerServerCallback('jobbuilder:missions:cancel', function() end)
     cleanup(0)
-    ESX.ShowNotification(msg or '~y~Mission annulée.')
+    JBNotify(msg or '~y~Mission annulée.')
 end
 
 RegisterNetEvent('jobbuilder:client:missionCancel', function(msg)
     if M then M.cancel = true cleanup(0) end
-    if msg then ESX.ShowNotification('~r~' .. msg) end
+    if msg then JBNotify('~r~' .. msg) end
 end)
 
 RegisterCommand('missionstop', function() CancelMission() end, false)
@@ -420,7 +420,7 @@ end
 
 function OpenMissionStatus()
     ESX.TriggerServerCallback('jobbuilder:missions:status', function(res)
-        if not res or not res.ok then return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+        if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         OpenUI({ action = 'open', kind = 'missionStatus', data = res })
     end)
 end

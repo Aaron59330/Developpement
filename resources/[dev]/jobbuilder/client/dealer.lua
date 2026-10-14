@@ -3,7 +3,7 @@ for _, n in ipairs({ 'dealer:manage', 'dealer:saveCatalog', 'dealer:offer', 'dea
 
 function OpenDealerPanel()
     ESX.TriggerServerCallback('jobbuilder:dealer:manage', function(res)
-        if not res or not res.ok then return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+        if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         OpenUI({ action = 'open', kind = 'dealer', data = res })
     end)
 end
@@ -32,7 +32,7 @@ end
 RegisterNetEvent('jobbuilder:client:dealerDeliver', function(d)
     CreateThread(function()
         local hash = loadModel(d.model)
-        if not hash then return ESX.ShowNotification('~r~Modèle introuvable, contacte le staff.') end
+        if not hash then return JBNotify('~r~Modèle introuvable, contacte le staff.') end
         local c = d.spawn
         local veh = CreateVehicle(hash, c.x + 0.0, c.y + 0.0, c.z + 0.0, (c.h or 0.0) + 0.0, true, false)
         SetModelAsNoLongerNeeded(hash)
@@ -41,7 +41,7 @@ RegisterNetEvent('jobbuilder:client:dealerDeliver', function(d)
         SetVehicleFuelLevel(veh, 100.0)
         TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
         Config.OnVehicleSpawned(veh, d.plate)
-        ESX.ShowNotification(('~g%s~s~ livré ! Plaque : ~b%s'):format(d.label or 'Véhicule', d.plate))
+        JBNotify(('~g%s~s~ livré ! Plaque : ~b%s'):format(d.label or 'Véhicule', d.plate))
         Wait(1500)
         local props = ESX.Game.GetVehicleProperties(veh)
         if props then TriggerServerEvent('jobbuilder:server:dealerProps', d.plate, props) end
@@ -64,7 +64,7 @@ NuiLocal['dealer:test'] = function(args, cb)
             local hash = loadModel(res.model)
             if not hash then
                 TriggerServerEvent('jobbuilder:server:testEnd')
-                return ESX.ShowNotification('~r~Modèle introuvable.')
+                return JBNotify('~r~Modèle introuvable.')
             end
             testing = true
             local c = res.spawn
@@ -93,7 +93,7 @@ NuiLocal['dealer:test'] = function(args, cb)
             SetEntityHeading(PlayerPedId(), originH)
             testing = false
             TriggerServerEvent('jobbuilder:server:testEnd')
-            ESX.ShowNotification('Essai terminé.')
+            JBNotify('Essai terminé.')
         end)
     end, args[1], args[2])
 end

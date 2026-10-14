@@ -639,7 +639,7 @@ ESX.RegisterServerCallback('jobbuilder:isDev', function(src, cb) cb(JB.isDev(src
 RegisterCommand(Config.Command, function(src)
     if src == 0 then return end
     if not JB.isDev(src) then
-        TriggerClientEvent('esx:showNotification', src, '~r~Tu n\'as pas la permission d\'utiliser le Job Builder.')
+        JBNotifyClient( src, '~r~Tu n\'as pas la permission d\'utiliser le Job Builder.')
         return
     end
     TriggerClientEvent('jobbuilder:client:openBuilder', src)
@@ -746,5 +746,5 @@ RegisterCommand('jbcheck', function(src)
     local lines = runCheck()
     print('^5──────── jobbuilder : diagnostic ────────^0')
     for _, l in ipairs(lines) do print(l) end
-    if src ~= 0 then TriggerClientEvent('esx:showNotification', src, 'Diagnostic jobbuilder affiché dans la console serveur.') end
+    if src ~= 0 then JBNotifyClient( src, 'Diagnostic jobbuilder affiché dans la console serveur.') end
 end, false)

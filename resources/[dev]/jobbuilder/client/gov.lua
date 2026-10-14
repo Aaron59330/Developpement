@@ -3,7 +3,7 @@ for _, n in ipairs({ 'gov:manage', 'gov:money', 'gov:setTaxes', 'gov:grant', 'go
 
 function OpenGovPanel()
     ESX.TriggerServerCallback('jobbuilder:gov:manage', function(res)
-        if not res or not res.ok then return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+        if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         OpenUI({ action = 'open', kind = 'gov', data = res })
     end)
 end

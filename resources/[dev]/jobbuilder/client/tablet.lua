@@ -6,7 +6,7 @@ for _, n in ipairs({ 'tablet:open', 'tablet:live', 'records:search', 'records:ge
 -- ── Alerte dispatch : notification, son, blip temporaire sur la carte du jeu ──
 RegisterNetEvent('jobbuilder:client:dispatchAlert', function(a)
     local tag = ({ panic = '~r~[PANIQUE]~s~', pursuit = '~o~[POURSUITE]~s~', citizen = '~b~[APPEL]~s~', officer = '~b~[DISPATCH]~s~' })[a.kind] or '~b~[DISPATCH]~s~'
-    ESX.ShowNotification(('%s ~h~%s~h~\n%s'):format(tag, a.title or '', a.message or ''))
+    JBNotify(('%s ~h~%s~h~\n%s'):format(tag, a.title or '', a.message or ''))
     PlaySoundFrontend(-1, a.kind == 'panic' and 'Beep_Red' or 'Menu_Accept', a.kind == 'panic' and 'DLC_HEIST_HACKING_SNAKE_SOUNDS' or 'Phone_SoundSet_Default', true)
     if a.x and a.y and (a.x ~= 0.0 or a.y ~= 0.0) then
         local blip = AddBlipForCoord(a.x + 0.0, a.y + 0.0, (a.z or 0.0) + 0.0)
@@ -52,7 +52,7 @@ end)
 RegisterCommand(Config.Announce.ToggleCommand, function()
     local hide = not announcesHidden()
     SetResourceKvpInt('jobbuilder_hide_announces', hide and 1 or 0)
-    ESX.ShowNotification(hide and 'Annonces d\'entreprise ~r~masquées~s~.' or 'Annonces d\'entreprise ~g~affichées~s~.')
+    JBNotify(hide and 'Annonces d\'entreprise ~r~masquées~s~.' or 'Annonces d\'entreprise ~g~affichées~s~.')
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/' .. Config.Police.CallCommand, 'Appeler les forces de l\'ordre', { { name = 'message', help = 'Décris la situation' } })

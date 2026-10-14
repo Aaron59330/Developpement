@@ -65,7 +65,7 @@ end
 
 local function enterProperty(id, cb)
     if IsPedInAnyVehicle(PlayerPedId(), false) then
-        ESX.ShowNotification('~r~Descends de ton véhicule.')
+        JBNotify('~r~Descends de ton véhicule.')
         return cb and cb({ ok = false, error = 'Descends de ton véhicule.' })
     end
     ESX.TriggerServerCallback('jobbuilder:prop:enter', function(res)
@@ -84,7 +84,7 @@ local function leaveProperty()
             Inside = nil
             CreateThread(function() teleportTo(res.entrance) end)
         else
-            ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur'))
+            JBNotify('~r~' .. ((res and res.error) or 'Erreur'))
         end
     end)
 end
@@ -93,7 +93,7 @@ RegisterNetEvent('jobbuilder:client:propKick', function(entrance)
     Inside = nil
     CloseUI()
     CreateThread(function() teleportTo(entrance) end)
-    ESX.ShowNotification('Tu as été invité à quitter la propriété.')
+    JBNotify('Tu as été invité à quitter la propriété.')
 end)
 
 -- ─────────────────────────────── Handlers NUI ───────────────────────────────
@@ -136,7 +136,7 @@ RegisterNetEvent('jobbuilder:client:ringPrompt', function(ringer, propId, name)
 end)
 
 RegisterNetEvent('jobbuilder:client:ringAccepted', function(propId)
-    ESX.ShowNotification('~g~On t\'ouvre la porte.')
+    JBNotify('~g~On t\'ouvre la porte.')
     enterProperty(propId)
 end)
 
@@ -148,7 +148,7 @@ end)
 function OpenAgencyPanel()
     ESX.TriggerServerCallback('jobbuilder:prop:manage', function(res)
         if not res or not res.ok then
-            return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur'))
+            return JBNotify('~r~' .. ((res and res.error) or 'Erreur'))
         end
         OpenUI({ action = 'open', kind = 'agency', data = res })
     end)
@@ -157,14 +157,14 @@ end
 -- ─────────────────────────────── Interactions : portes, sortie, points ───────────────────────────────
 local function openDoor(p)
     ESX.TriggerServerCallback('jobbuilder:prop:door', function(res)
-        if not res or not res.ok then return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+        if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         OpenUI({ action = 'open', kind = 'door', data = res })
     end, p.id)
 end
 
 local function openInteriorPoint(pt)
     ESX.TriggerServerCallback('jobbuilder:prop:openPoint', function(res)
-        if not res or not res.ok then return ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+        if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         if res.kind == 'stash' then
             exports.ox_inventory:openInventory('stash', res.stash)
         else

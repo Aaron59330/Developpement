@@ -78,7 +78,7 @@ local function members(jobName)
     return ok and list or {}
 end
 
-local function notify(src, msg) if src then TriggerClientEvent('esx:showNotification', src, msg) end end
+local function notify(src, msg) if src then JBNotifyClient( src, msg) end end
 local function money(n) return tostring(math.floor(n)):reverse():gsub('(%d%d%d)', '%1 '):reverse():gsub('^ ', '') .. ' $' end
 
 local function ratingLimit(rating, max)

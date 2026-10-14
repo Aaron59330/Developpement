@@ -137,9 +137,9 @@ local lastCall = {}   -- [src] = os.time()
 RegisterCommand(P.CallCommand, function(src, args)
     if src == 0 then return end
     local msg = str(table.concat(args, ' '), 200)
-    if #msg < 3 then return TriggerClientEvent('esx:showNotification', src, ('~r~Utilisation : /%s <ton message>'):format(P.CallCommand)) end
+    if #msg < 3 then return JBNotifyClient( src, ('~r~Utilisation : /%s <ton message>'):format(P.CallCommand)) end
     if lastCall[src] and os.time() - lastCall[src] < P.CallCooldown then
-        return TriggerClientEvent('esx:showNotification', src, '~r~Patiente un instant avant de rappeler.')
+        return JBNotifyClient( src, '~r~Patiente un instant avant de rappeler.')
     end
     local x = ESX.GetPlayerFromId(src)
     local c = GetEntityCoords(GetPlayerPed(src))
@@ -151,16 +151,16 @@ RegisterCommand(P.CallCommand, function(src, args)
         end
     end
     lastCall[src] = os.time()
-    TriggerClientEvent('esx:showNotification', src, sent > 0 and '~g~Appel transmis aux unités.' or '~r~Aucune unité n\'est disponible pour le moment.')
+    JBNotifyClient( src, sent > 0 and '~g~Appel transmis aux unités.' or '~r~Aucune unité n\'est disponible pour le moment.')
 end, false)
 
 RegisterCommand(P.PanicCommand, function(src)
     if src == 0 then return end
     local x, job, s, err = ctx(src, 'dispatch')
-    if not x then return TriggerClientEvent('esx:showNotification', src, '~r~' .. (err or 'Action impossible')) end
+    if not x then return JBNotifyClient( src, '~r~' .. (err or 'Action impossible')) end
     local c = GetEntityCoords(GetPlayerPed(src))
     addCall(job.name, { title = 'Officier en difficulté', message = JB.playerName(x) .. ' demande des renforts immédiats !', kind = 'panic', x = c.x, y = c.y, z = c.z, by = JB.playerName(x) })
-    TriggerClientEvent('esx:showNotification', src, '~g~Appel à l\'aide envoyé à tes collègues.')
+    JBNotifyClient( src, '~g~Appel à l\'aide envoyé à tes collègues.')
     JB.log(job.name, x, 'panic')
 end, false)
 
@@ -195,7 +195,7 @@ local function endPursuit(jobName, reason)
     if call then call.status = 'closed' call.closedAt = os.time() end
     for _, m in ipairs(jobMembers(jobName)) do
         TriggerClientEvent('jobbuilder:client:pursuit', m.source, { active = false })
-        TriggerClientEvent('esx:showNotification', m.source, ('Poursuite terminée : %s (%s)'):format(p.name, reason))
+        JBNotifyClient( m.source, ('Poursuite terminée : %s (%s)'):format(p.name, reason))
     end
 end
 

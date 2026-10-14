@@ -136,7 +136,7 @@ end
 
 function OpenTuning(point, res)
     local veh = findVehicle(point.coords, res.radius)
-    if not veh or veh == 0 then return ESX.ShowNotification('~r~Aucun véhicule à customiser dans l\'atelier : gare-le sur le marker.') end
+    if not veh or veh == 0 then return JBNotify('~r~Aucun véhicule à customiser dans l\'atelier : gare-le sur le marker.') end
     local tries = 0
     while not NetworkHasControlOfEntity(veh) and tries < 30 do NetworkRequestControlOfEntity(veh) tries = tries + 1 Wait(30) end
     local state = readState(veh)
@@ -199,7 +199,7 @@ end
 NuiLocal['tuning:finish'] = function(_, cb)
     closeTuning(false)
     CloseUI()
-    ESX.ShowNotification('~g~Customisation terminée.')
+    JBNotify('~g~Customisation terminée.')
     cb({ ok = true })
 end
 
@@ -208,7 +208,7 @@ local baseClose = NuiLocal.close
 NuiLocal.close = function(a, cb)
     if active then
         if active.waiting then
-            ESX.ShowNotification('Attends la réponse du client avant de fermer la tablette.')
+            JBNotify('Attends la réponse du client avant de fermer la tablette.')
             return cb({ ok = false })
         end
         closeTuning(true)
@@ -218,7 +218,7 @@ end
 
 RegisterNetEvent('jobbuilder:client:tuningResult', function(r)
     local a = active
-    ESX.ShowNotification((r.ok and '~g~' or '~r~') .. (r.msg or ''))
+    JBNotify((r.ok and '~g~' or '~r~') .. (r.msg or ''))
     if not a then return end
     a.waiting = false
     if r.ok then

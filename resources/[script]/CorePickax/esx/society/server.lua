@@ -97,9 +97,9 @@ AddEventHandler('esx_society:withdrawMoney1', function(society, amount)
 			if amount > 0 and account.money >= amount then
 				account.removeMoney(amount)
 				AddMoney(_src, amount)
-				TriggerClientEvent(Config.Trigger.TriggerNotification, _src, ('Vous avez retiré ~g~%s$~s~'):format(ESX.Math.GroupDigits(amount)))
+				JobNotifyClient( _src, ('Vous avez retiré ~g~%s$~s~'):format(ESX.Math.GroupDigits(amount)))
 			else
-				TriggerClientEvent(Config.Trigger.TriggerNotification, _src, ('montant invalide'))
+				JobNotifyClient( _src, ('montant invalide'))
 			end
 		end)
 	else
@@ -119,9 +119,9 @@ AddEventHandler('esx_society:withdrawMoney2', function(society, amount)
 			if amount > 0 and account.money >= amount then
 				account.removeMoney(amount)
 				AddBlackMoneyOnPlayer(source, amount)
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez retiré ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+				JobNotifyClient( source, ('Vous avez retiré ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 			else
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('montant invalide'))
+				JobNotifyClient( source, ('montant invalide'))
 			end
 		end)
 	else
@@ -144,9 +144,9 @@ AddEventHandler('esx_society:depositMoney1', function(society, amount)
 				account.addMoney(amount)
 			end)
 
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez déposé ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+			JobNotifyClient( source, ('Vous avez déposé ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 		else
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('montant invalide'))
+			JobNotifyClient( source, ('montant invalide'))
 		end
 	else
 		print(('esx_society: %s attempted to call depositMoney!'):format(xPlayer.identifier))
@@ -167,9 +167,9 @@ AddEventHandler('esx_society:depositMoney2', function(society, amount)
 				account.addMoney(amount)
 			end)
 
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('vous avez déposé ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+			JobNotifyClient( source, ('vous avez déposé ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 		else
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('montant invalide'))
+			JobNotifyClient( source, ('montant invalide'))
 		end
 	else
 		print(('esx_society: %s attempted to call depositMoney!'):format(xPlayer.identifier))
@@ -192,10 +192,10 @@ AddEventHandler('esx_society:washMoney1', function(society, amount)
 				['@society']    = society,
 				['@amount']     = amount
 			}, function(rowsChanged)
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('vous avez ~g~$%s~s~ en attente de ~r~blanchiement~s~ (24h).'):format(ESX.Math.GroupDigits(amount)))
+				JobNotifyClient( source, ('vous avez ~g~$%s~s~ en attente de ~r~blanchiement~s~ (24h).'):format(ESX.Math.GroupDigits(amount)))
 			end)
 		else
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('montant invalide'))
+			JobNotifyClient( source, ('montant invalide'))
 		end
 	else
 		print(('esx_society: %s attempted to call washMoney!'):format(xPlayer.identifier))
@@ -365,11 +365,11 @@ ESX.RegisterServerCallback('esx_society:setJob', function(source, cb, identifier
 			xTarget.setJob(job, grade)
 
 			if type == 'hire' then
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez été recruté dans la société %s'):format(job))
+				JobNotifyClient( source, ('Vous avez été recruté dans la société %s'):format(job))
 			elseif type == 'promote' then
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez été promu'))
+				JobNotifyClient( source, ('Vous avez été promu'))
 			elseif type == 'fire' then
-				TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez été viré de la société %s'):format(xTarget.getJob().label))
+				JobNotifyClient( source, ('Vous avez été viré de la société %s'):format(xTarget.getJob().label))
 			end
 
 			cb()
@@ -415,11 +415,11 @@ ESX.RegisterServerCallback('esx_society:setJob2', function(source, cb, identifie
 		xTarget.setJob2(job, grade)
 
 		if type == 'hire' then
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez été recruté dans le gang %s'):format(job))
+			JobNotifyClient( source, ('Vous avez été recruté dans le gang %s'):format(job))
 		elseif type == 'promote' then
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'Vous avez été promu')
+			JobNotifyClient( source, 'Vous avez été promu')
 		elseif type == 'fire' then
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez été viré du gang %s'):format(previousJob2))
+			JobNotifyClient( source, ('Vous avez été viré du gang %s'):format(previousJob2))
 		end
 
 		cb(true)
@@ -569,7 +569,7 @@ AddEventHandler("CorePickax_Society:recruit", function(job, target)
 		if xTarget.getJob().name ~= job then
 			TriggerClientEvent("CorePickax_Society:recruit", target, source, job)
 		else
-			TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'La personne est déjà dans votre entreprise.')
+			JobNotifyClient( source, 'La personne est déjà dans votre entreprise.')
 		end
     end
 end)
@@ -584,14 +584,14 @@ AddEventHandler("CorePickax_Society:recruit2", function(type, job, target)
 	if (xTarget.getJob().name) == job and (xTarget.getJob().grade_name) == "boss" then
 		if type == "accept" then
 			xPlayer.setJob(job, 0)
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, 'La personne à été recruté.')
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xPlayer.source, ('Vous avez été recruté en tant que %s'):format(job))
+			JobNotifyClient( xTarget.source, 'La personne à été recruté.')
+			JobNotifyClient( xPlayer.source, ('Vous avez été recruté en tant que %s'):format(job))
 		elseif type == "decline" then
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, 'La personne n\'a pas été recruté car il a refuser')
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xPlayer.source, 'Vous n\'avez pas été recruté car vous avez refusé')
+			JobNotifyClient( xTarget.source, 'La personne n\'a pas été recruté car il a refuser')
+			JobNotifyClient( xPlayer.source, 'Vous n\'avez pas été recruté car vous avez refusé')
 		elseif type == "passed" then 
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, 'La personne n\'a pas été recruté a cause du temps imparti.')
-			TriggerClientEvent(Config.Trigger.TriggerNotification, xPlayer.source, 'Vous n\'avez pas été recruté a cause du temps imparti')
+			JobNotifyClient( xTarget.source, 'La personne n\'a pas été recruté a cause du temps imparti.')
+			JobNotifyClient( xPlayer.source, 'Vous n\'avez pas été recruté a cause du temps imparti')
 		end
 	end
 end)

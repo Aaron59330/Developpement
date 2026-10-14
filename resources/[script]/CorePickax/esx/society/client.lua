@@ -138,37 +138,37 @@ function OpenBossMenuSociety(society, close, options)
 							local check, amount = ESXCustom_Function_ClientSide:CheckQuantity(ESXCustom_Function_ClientSide:KeyboardInput("Combien voulez-vous déposer ?", 10))
 							if check then
 								if tonumber(amount) > Account then
-									ESX.ShowNotification("Pas assez d'argent dans l'entreprise.")
+									JobNotify("Pas assez d'argent dans l'entreprise.")
 								else
 									TriggerServerEvent('esx_society:withdrawMoney1', society, tonumber(amount))
 									RageUI.CloseAll()
 								end
 							else
-								ESX.ShowNotification("Montant invalide.")
+								JobNotify("Montant invalide.")
 							end
 						elseif v.value == "deposit_money" then
 							local check, amount = ESXCustom_Function_ClientSide:CheckQuantity(ESXCustom_Function_ClientSide:KeyboardInput("Combien voulez-vous déposer ?", 10))
 							if check then
 								-- if tonumber(amount) > Account then
-								-- 	ESX.ShowNotification("~r~Vous n'avez pas les fonds nécéssaires.~s~")
+								-- 	JobNotify("~r~Vous n'avez pas les fonds nécéssaires.~s~")
 								-- else
 									TriggerServerEvent('esx_society:depositMoney1', society, tonumber(amount))
 									RageUI.CloseAll()
 								-- end
 							else
-								ESX.ShowNotification("Montant invalide.")
+								JobNotify("Montant invalide.")
 							end
 						elseif v.value == "wash_money" then
 							local check, amount = ESXCustom_Function_ClientSide:CheckQuantity(ESXCustom_Function_ClientSide:KeyboardInput("Combien voulez-vous déposer ?", 10))
 							if check then
 								if tonumber(amount) > Account then
-									ESX.ShowNotification("~r~Vous n'avez pas les fonds nécéssaires.~s~")
+									JobNotify("~r~Vous n'avez pas les fonds nécéssaires.~s~")
 								else
 									TriggerServerEvent('esx_society:washMoney1', society, tonumber(amount))
 									RageUI.CloseAll()
 								end
 							else
-								ESX.ShowNotification("Montant invalide.")
+								JobNotify("Montant invalide.")
 							end
 						elseif v.value == "manage_employees" then
 							RageUI.CloseAll()
@@ -237,7 +237,7 @@ function OpenEmployeeList(society)
 						if Index == 1 then
 							OpenPromoteMenu(society, employeesL[i])
 						elseif Index == 2 then
-							ESX.ShowNotification(('Vous avez viré %s'):format(employeesL[i].name))
+							JobNotify(('Vous avez viré %s'):format(employeesL[i].name))
 							ESX.TriggerServerCallback('esx_society:setJob', function()
 							end, employeesL[i].identifier, 'unemployed', 0, 'fire')
 							RageUI.CloseAll()
@@ -275,7 +275,7 @@ function OpenPromoteMenu(society, employee)
 				for k, v in pairs(elements) do
 					RageUI.ButtonWithStyle(v.label, nil, { RightLabel = "→→→" }, true, function(_,_,s)
 						if s then
-							ESX.ShowNotification(('Vous avez promu %s en tant que %s'):format(employee.name, v.label))
+							JobNotify(('Vous avez promu %s en tant que %s'):format(employee.name, v.label))
 							ESX.TriggerServerCallback('esx_society:setJob', function()
 								OpenEmployeeList(society)
 							end, employee.identifier, society, v.value, 'promote')
@@ -308,9 +308,9 @@ function OpenManageGradesMenu(society)
 
 							amount = tonumber(amount)
 							if amount == nil then
-								ESX.ShowNotification('Montant invalide')
+								JobNotify('Montant invalide')
 							elseif amount > Config.MaxSalary then
-								ESX.ShowNotification('Ce salaire n\'est pas autorisé')
+								JobNotify('Ce salaire n\'est pas autorisé')
 							else
 								RageUI.CloseAll()
 								ESX.TriggerServerCallback('esx_society:setJobSalary', function()
@@ -347,9 +347,9 @@ function OpenManageGradesMenu(society)
 	-- 		}, function(data2, menu2)
 	-- 			local amount = tonumber(data2.value)
 	-- 			if amount == nil then
-	-- 				ESX.ShowNotification('Montant invalide')
+	-- 				JobNotify('Montant invalide')
 	-- 			elseif amount > Config.MaxSalary then
-	-- 				ESX.ShowNotification('Ce salaire n\'est pas autorisé')
+	-- 				JobNotify('Ce salaire n\'est pas autorisé')
 	-- 			else
 	-- 				menu2.close()
 	-- 				ESX.TriggerServerCallback('esx_society:setJobSalary', function()
@@ -435,7 +435,7 @@ end)
 					menu.close()
 					OpenPromoteMenu2(society, employee)
 				elseif data.value == 'fire' then
-					ESX.ShowNotification(('Vous avez viré %s'):format(employee.name))
+					JobNotify(('Vous avez viré %s'):format(employee.name))
 
 					ESX.TriggerServerCallback('esx_society:setJob2', function()
 						OpenEmployeeList2(society)
@@ -465,7 +465,7 @@ end)
 				elements = elements
 			}, function(data, menu)
 				menu.close()
-				ESX.ShowNotification(('Vous avez promu %s en tant que %s'):format(employee.name, data.current.label))
+				JobNotify(('Vous avez promu %s en tant que %s'):format(employee.name, data.current.label))
 				ESX.TriggerServerCallback('esx_society:setJob2', function()
 					OpenEmployeeList2(society)
 				end, employee.identifier, society, data.current.value, 'promote')
@@ -519,7 +519,7 @@ end)
 				}, function(data, menu)
 					local amount = tonumber(data.value)
 					if amount == nil then
-						ESX.ShowNotification('Montant invalide')
+						JobNotify('Montant invalide')
 					else
 						menu.close()
 						TriggerServerEvent('esx_society:withdrawMoney2', society, amount)
@@ -533,7 +533,7 @@ end)
 				}, function(data, menu)
 					local amount = tonumber(data.value)
 					if amount == nil then
-						ESX.ShowNotification('Montant invalide')
+						JobNotify('Montant invalide')
 					else
 						menu.close()
 						TriggerServerEvent('esx_society:depositMoney2', society, amount)
@@ -554,7 +554,7 @@ end)
 
 RegisterNetEvent("CorePickax_Society:recruit")
 AddEventHandler("CorePickax_Society:recruit", function(sender, job)
-	ESX.ShowNotification("Vous avez été invité à rejoindre l'entreprise ~b~"..job.."~s~.\n\nApppuyez sur ~g~Y~s~ pour accepter.\nAppuyez sur ~r~N~s~ pour refuser.")
+	JobNotify("Vous avez été invité à rejoindre l'entreprise ~b~"..job.."~s~.\n\nApppuyez sur ~g~Y~s~ pour accepter.\nAppuyez sur ~r~N~s~ pour refuser.")
 
     local time = 0
     activeMess = true

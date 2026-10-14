@@ -31,7 +31,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 						['@label'] = label,
 						['@amount'] = amount
 					}, function(rowsChanged)
-						TriggerClientEvent(Config.Trigger.TriggerNotification, playerId, 'Vous avez ~r~reçu~s~ une facture')
+						JobNotifyClient( playerId, 'Vous avez ~r~reçu~s~ une facture')
 					end)
 					TriggerEvent('esx:customDiscordLog', 'Logs facture', 'Logs facture', nil, ConfigSV.Logs["LogsFacture"], '**Informations du joueur ayant envoyer la facture :**\nID : '.._SRC..'\nUtilisateur : '..GetPlayerName(_SRC)..'\nLicense : '..ESX.GetPlayerFromId(_SRC).identifier.."\n\n**Informations du joueur ayant reçu la facture :**\nID : "..playerId.."\nUtilisateur : "..GetPlayerName(playerId).."\nLicense : "..ESX.GetPlayerFromId(playerId).identifier)
 				
@@ -40,7 +40,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					-- une facture joueur : sinon le paiement n'alimente pas le compte entreprise.
 					if type(sharedAccountName) == 'string' and string.sub(sharedAccountName, 1, 8) == 'society_' then
 						print(('[esx_billing] Compte société introuvable, facture annulée : %s'):format(tostring(sharedAccountName)))
-						TriggerClientEvent(Config.Trigger.TriggerNotification, _SRC, ('~r~Erreur : compte entreprise introuvable (%s)'):format(tostring(sharedAccountName)))
+						JobNotifyClient( _SRC, ('~r~Erreur : compte entreprise introuvable (%s)'):format(tostring(sharedAccountName)))
 						return
 					end
 
@@ -52,7 +52,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 						['@label'] = label,
 						['@amount'] = amount
 					}, function(rowsChanged)
-						TriggerClientEvent(Config.Trigger.TriggerNotification, playerId, 'Vous avez ~r~reçu~s~ une facture')
+						JobNotifyClient( playerId, 'Vous avez ~r~reçu~s~ une facture')
 						TriggerEvent('esx:customDiscordLog', 'Logs facture', 'Logs facture', nil, ConfigSV.Logs["LogsFacture"], '**Informations du joueur ayant envoyer la facture :**\nID : '.._SRC..'\nUtilisateur : '..GetPlayerName(_SRC)..'\nLicense : '..ESX.GetPlayerFromId(_SRC).identifier.."\n\n**Informations du joueur ayant reçu la facture :**\nID : "..playerId.."\nUtilisateur : "..GetPlayerName(playerId).."\nLicense : "..ESX.GetPlayerFromId(playerId).identifier)
 					end)
 				end
@@ -105,8 +105,8 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								RemoveMoneyOnPlayer(source, amount)
 								AddMoney(result[1].sender, amount)
 
-								TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
-								TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, ('vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( source, ('vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( xTarget.source, ('vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 							end
 
 							cb()
@@ -119,26 +119,26 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								RemoveMoneyOnBanque(source, amount)
 								AddMoneyOnBanque(result[1].sender, amount)
 
-								TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
-								TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 							end
 
 							cb()
 						end)
 					else
-						TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'Vous n\'avez pas assez d\'argent pour payer cette facture')
-						TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, 'Le joueur ~r~n\'a pas ~s~assez d\'argent pour payer la facture!')
+						JobNotifyClient( source, 'Vous n\'avez pas assez d\'argent pour payer cette facture')
+						JobNotifyClient( xTarget.source, 'Le joueur ~r~n\'a pas ~s~assez d\'argent pour payer la facture!')
 						cb()
 					end
 				else
-					TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'Le joueur n\'est pas connecté')
+					JobNotifyClient( source, 'Le joueur n\'est pas connecté')
 					cb()
 				end
 			else
 				TriggerEvent('esx_addonaccount:getSharedAccount', result[1].target, function(account)
 					if not account then
 						print(('[esx_billing] Paiement impossible, compte société introuvable : %s'):format(tostring(result[1].target)))
-						TriggerClientEvent(Config.Trigger.TriggerNotification, source, '~r~Erreur : compte entreprise introuvable. La facture n\'a pas été débitée.')
+						JobNotifyClient( source, '~r~Erreur : compte entreprise introuvable. La facture n\'a pas été débitée.')
 						cb()
 						return
 					end
@@ -151,9 +151,9 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								RemoveMoneyOnPlayer(source, amount)
 								account.addMoney(amount)
 
-								TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 								if xTarget then
-									TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+									JobNotifyClient( xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 								end
 							end
 
@@ -166,10 +166,10 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 							if rowsChanged == 1 then
 								RemoveMoneyOnBanque(source, amount)
 								account.addMoney(amount)
-								TriggerClientEvent(Config.Trigger.TriggerNotification, source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+								JobNotifyClient( source, ('Vous avez ~g~payé~s~ une facture de ~r~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 
 								if xTarget then
-									TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
+									JobNotifyClient( xTarget.source, ('Vous avez ~g~reçu~s~ un paiement de ~g~$%s~s~'):format(ESX.Math.GroupDigits(amount)))
 								end
 							end
 
@@ -177,10 +177,10 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 						end)
 					else
 						if xTarget then
-							TriggerClientEvent(Config.Trigger.TriggerNotification, xTarget.source, 'le joueur ~r~n\'a pas ~s~assez d\'argent pour payer la facture !')
+							JobNotifyClient( xTarget.source, 'le joueur ~r~n\'a pas ~s~assez d\'argent pour payer la facture !')
 						end
 
-						TriggerClientEvent(Config.Trigger.TriggerNotification, source, 'Vous n\'avez pas assez d\'argent pour payer cette facture')
+						JobNotifyClient( source, 'Vous n\'avez pas assez d\'argent pour payer cette facture')
 						cb()
 					end
 				end)

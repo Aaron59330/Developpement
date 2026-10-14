@@ -193,7 +193,7 @@ end
 
 local function notifyPatient(patient)
     local c = calls[patient]
-    if c and type(patient) == 'number' then TriggerClientEvent('esx:showNotification', patient, ('~g~%d médecin(s) en route.'):format(unitCount(c))) end
+    if c and type(patient) == 'number' then JBNotifyClient( patient, ('~g~%d médecin(s) en route.'):format(unitCount(c))) end
 end
 
 -- id de l'appel (0 = dernier appel reçu, pour la touche Y)
@@ -239,7 +239,7 @@ RegisterNetEvent('jobbuilder:server:cprDone', function()
     TriggerClientEvent('jobbuilder:client:revive', c.target, D.ReviveHealth)
     if D.RevivePay > 0 then x.addAccountMoney('bank', D.RevivePay) end
     JB.log(x.job.name, x, 'revive', JB.playerName(t))
-    TriggerClientEvent('esx:showNotification', src, '~g~Patient réanimé.')
+    JBNotifyClient( src, '~g~Patient réanimé.')
 end)
 
 RegisterNetEvent('jobbuilder:server:cprCancel', function() cpr[source] = nil end)
@@ -255,7 +255,7 @@ end
 
 RegisterCommand(D.ReviveCommand or 'revive', function(src, args)
     local function say(msg)
-        if src == 0 then print('[jobbuilder] ' .. msg:gsub('~%a~', '')) else TriggerClientEvent('esx:showNotification', src, msg) end
+        if src == 0 then print('[jobbuilder] ' .. msg:gsub('~%a~', '')) else JBNotifyClient( src, msg) end
     end
     if not canRevive(src) then return say('~r~Tu n\'as pas la permission d\'utiliser /' .. (D.ReviveCommand or 'revive')) end
     local target = tonumber(args[1]) or (src ~= 0 and src or nil)

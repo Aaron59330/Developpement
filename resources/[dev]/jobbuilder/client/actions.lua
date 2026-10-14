@@ -31,16 +31,16 @@ end
 
 local function vehicleWork(scenario, duration, done)
     local veh = closestVehicle(4.0)
-    if not veh then return ESX.ShowNotification('~r~Aucun véhicule à proximité.') end
+    if not veh then return JBNotify('~r~Aucun véhicule à proximité.') end
     local ped = PlayerPedId()
-    if GetVehiclePedIsIn(ped, false) ~= 0 then return ESX.ShowNotification('~r~Sors du véhicule d\'abord.') end
+    if GetVehiclePedIsIn(ped, false) ~= 0 then return JBNotify('~r~Sors du véhicule d\'abord.') end
     TaskStartScenarioInPlace(ped, scenario, 0, true)
     local start, startPos = GetGameTimer(), GetEntityCoords(ped)
     while GetGameTimer() - start < duration do
         Wait(250)
         if #(GetEntityCoords(ped) - startPos) > 1.5 or IsEntityDead(ped) then
             ClearPedTasks(ped)
-            return ESX.ShowNotification('~r~Action annulée.')
+            return JBNotify('~r~Action annulée.')
         end
     end
     ClearPedTasks(ped)
@@ -49,25 +49,25 @@ end
 
 -- Appelée par le NUI (Local.doAction)
 function RunAction(id, label, amount)
-    if not hasAction(id) then return ESX.ShowNotification('~r~Action non autorisée.') end
+    if not hasAction(id) then return JBNotify('~r~Action non autorisée.') end
     local cfg = Config.Actions[id]
 
     if id == 'missions' then
-        if not OpenMissionStatus then return ESX.ShowNotification('~r~client/missions.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
+        if not OpenMissionStatus then return JBNotify('~r~client/missions.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
         return OpenMissionStatus()
     end
     if id == 'dealership' then
-        if not OpenDealerPanel then return ESX.ShowNotification('~r~client/dealer.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
+        if not OpenDealerPanel then return JBNotify('~r~client/dealer.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
         return OpenDealerPanel()
     end
     if id == 'government' then
-        if not OpenGovPanel then return ESX.ShowNotification('~r~client/gov.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
+        if not OpenGovPanel then return JBNotify('~r~client/gov.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder') end
         return OpenGovPanel()
     end
 
     if id == 'properties' then
         if not OpenAgencyPanel then
-            return ESX.ShowNotification('~r~client/property.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder~r~ (vérifie qu\'il est bien dans fxmanifest.lua).')
+            return JBNotify('~r~client/property.lua non chargé : fais ~s~refresh~r~ puis ~s~restart jobbuilder~r~ (vérifie qu\'il est bien dans fxmanifest.lua).')
         end
         return OpenAgencyPanel()
     end
@@ -78,27 +78,27 @@ function RunAction(id, label, amount)
             SetVehicleDeformationFixed(veh)
             SetVehicleEngineHealth(veh, 1000.0)
             SetVehicleUndriveable(veh, false)
-            ESX.ShowNotification('~g~Véhicule réparé.')
+            JBNotify('~g~Véhicule réparé.')
         end)
     elseif id == 'clean' then
         return vehicleWork('WORLD_HUMAN_MAID_CLEAN', Config.ActionDuration.clean, function(veh)
             SetVehicleDirtLevel(veh, 0.0)
-            ESX.ShowNotification('~g~Véhicule nettoyé.')
+            JBNotify('~g~Véhicule nettoyé.')
         end)
     end
 
     if cfg and cfg.target then
         local target = GetNearestPlayerId()
-        if not target then return ESX.ShowNotification('~r~Aucun joueur à proximité.') end
+        if not target then return JBNotify('~r~Aucun joueur à proximité.') end
         if id == 'invoice' then
             ESX.TriggerServerCallback('jobbuilder:invoice:send', function(res)
-                if res and res.ok then ESX.ShowNotification('~g~Facture envoyée.')
-                else ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+                if res and res.ok then JBNotify('~g~Facture envoyée.')
+                else JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
             end, target, label, amount)
             return
         end
         ESX.TriggerServerCallback('jobbuilder:action', function(res)
-            if not (res and res.ok) then ESX.ShowNotification('~r~' .. ((res and res.error) or 'Erreur')) end
+            if not (res and res.ok) then JBNotify('~r~' .. ((res and res.error) or 'Erreur')) end
         end, id, target)
     end
 end
@@ -112,7 +112,7 @@ RegisterNetEvent('jobbuilder:client:cuff', function()
         loadAnim('mp_arresting')
         SetEnableHandcuffs(ped, true)
         TaskPlayAnim(ped, 'mp_arresting', 'idle', 8.0, -8.0, -1, 49, 0.0, false, false, false)
-        ESX.ShowNotification('Tu as été ~r~menotté~s~.')
+        JBNotify('Tu as été ~r~menotté~s~.')
     else
         SetEnableHandcuffs(ped, false)
         ClearPedSecondaryTask(ped)
@@ -120,7 +120,7 @@ RegisterNetEvent('jobbuilder:client:cuff', function()
             DetachEntity(ped, true, false)
             draggedBy = nil
         end
-        ESX.ShowNotification('Tu as été ~g~démenotté~s~.')
+        JBNotify('Tu as été ~g~démenotté~s~.')
     end
 end)
 
@@ -178,7 +178,7 @@ end)
 RegisterNetEvent('jobbuilder:client:heal', function()
     local ped = PlayerPedId()
     SetEntityHealth(ped, GetEntityMaxHealth(ped))
-    ESX.ShowNotification('~g~Tu as été soigné.')
+    JBNotify('~g~Tu as été soigné.')
 end)
 
 -- ─────────────────────────────── Facture reçue ───────────────────────────────
