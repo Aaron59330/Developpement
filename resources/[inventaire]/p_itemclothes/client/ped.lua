@@ -117,8 +117,14 @@ function Ped.toggle(self, enabled)
             Ped:update()
             self.loading = false
 
+            -- Le menu pause (qui affiche le personnage) réagit au mouvement de la souris : on bloque ses entrées curseur / frontend
+            -- tant que l'inventaire est ouvert, sinon l'écran se met à « flouter » quand on déplace la souris.
+            local frontendInputs = { 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 237, 238, 239, 240, 241, 242 }
             while self.ped == previewPed do
                 SetMouseCursorVisible(false)
+                for i = 1, #frontendInputs do
+                    DisableControlAction(2, frontendInputs[i], true)
+                end
                 Wait(0)
             end
         end)
