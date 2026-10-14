@@ -52,7 +52,23 @@ function item(it) {
   return h + '</div>';
 }
 
+function hexRgb(h) {
+  var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || '');
+  return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : '0,164,255';
+}
+
+function applyCfg(c) {
+  if (!c) return;
+  var w = $('wrap');
+  w.setAttribute('data-style', c.style || 'noir');
+  w.setAttribute('data-size', c.size || 'md');
+  w.style.setProperty('--accent', c.accent || '#00a4ff');
+  w.style.setProperty('--accent-rgb', hexRgb(c.accent));
+  $('banner').classList.toggle('hidden', c.banner === false);
+}
+
 function render(d) {
+  applyCfg(d.cfg);
   $('title').innerHTML = gta(d.t);
   $('sub').innerHTML = gta(d.s);
   $('count').textContent = d.c || '';

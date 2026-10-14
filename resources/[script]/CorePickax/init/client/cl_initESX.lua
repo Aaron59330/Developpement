@@ -36,8 +36,6 @@ function LoadESX()
 		end
     end
 
-    print(ESXCustomPrefixes.dev..' ESX STARTED')
-	
 	ESXCustom.load("Initialisation - Lancement.")
     Citizen.Wait(1500)
 	ESXCustom.load("Initialisation - Lancement..")

@@ -10,6 +10,7 @@ version '1.0'
 shared_scripts {
     '@es_extended/imports.lua',
 
+    'init/shared/mute.lua',
     'init/shared/init.lua',
 
     'system/**/config.lua',

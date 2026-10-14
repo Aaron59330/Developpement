@@ -24,6 +24,37 @@ local Action = {
 	LimitateurIndex = 1
 }
 
+local Prefs = {
+	Styles = {
+		{ id = 'noir', name = 'Noir' }, { id = 'verre', name = 'Verre' }, { id = 'clair', name = 'Clair' },
+		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Bleu BlueBay' },
+	},
+	Sizes = { { id = 'sm', name = 'Petit' }, { id = 'md', name = 'Moyen' }, { id = 'lg', name = 'Grand' } },
+	Colors = {
+		{ id = '#00a4ff', name = 'Bleu BlueBay' }, { id = '#ef4444', name = 'Rouge' }, { id = '#22c55e', name = 'Vert' },
+		{ id = '#a855f7', name = 'Violet' }, { id = '#f97316', name = 'Orange' }, { id = '#ec4899', name = 'Rose' },
+		{ id = '#eab308', name = 'Jaune' }, { id = '#f4f4f5', name = 'Blanc' },
+	},
+}
+
+local function PrefsCall(name, ...)
+	if GetResourceState('pickax_ui') ~= 'started' then return nil end
+	return exports['pickax_ui'][name](exports['pickax_ui'], ...)
+end
+
+local function PrefsIndex(list, id)
+	for i = 1, #list do if list[i].id == id then return i end end
+	return 1
+end
+
+local function PrefsNames(list)
+	local t = {}
+	for i = 1, #list do t[i] = list[i].name end
+	return t
+end
+
+local PrefsStyleNames, PrefsSizeNames, PrefsColorNames = PrefsNames(Prefs.Styles), PrefsNames(Prefs.Sizes), PrefsNames(Prefs.Colors)
+
 local BillData = {}
 local Breakable = false
 
@@ -72,6 +103,10 @@ local function OpenMenu()
 	local editorMenu = RageUI.CreateSubMenu(Parametres, "Rockstar editor", "Que voulez-vous faire ?")
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
+	local PrefsMenu = RageUI.CreateSubMenu(mainmenu, "Préférences d'affichage", "Apparence de tous les menus :")
+	local cfg = PrefsCall('GetSettings') or { banner = true, style = 'noir', size = 'md', accent = '#00a4ff' }
+	local pBanner = cfg.banner
+	local pStyle, pSize, pColor = PrefsIndex(Prefs.Styles, cfg.style), PrefsIndex(Prefs.Sizes, cfg.size), PrefsIndex(Prefs.Colors, cfg.accent)
 
 	RageUI.Visible(mainmenu, not RageUI.Visible(mainmenu))
 
@@ -83,10 +118,48 @@ local function OpenMenu()
 			end, Informations)
 			RageUI.ButtonWithStyle("Mes paramètres", "Accéder à votre paramètres", {RightLabel = "→→→"}, true, function(_, _, s)
 			end, Parametres)
+			RageUI.ButtonWithStyle("Préférences d'affichage", "Bannière, style, taille et couleur des menus", {RightLabel = "→→→"}, true, function(_, _, s)
+			end, PrefsMenu)
 			if IsPedInAnyVehicle(PlayerPedId(), false) then
 				RageUI.ButtonWithStyle("Gestion véhicule", "Accéder à la gestion du véhicule", {RightLabel = "→→→"}, true, function(_, _, s)
 				end, MenuVehicle)
 			end
+		end)
+		RageUI.IsVisible(PrefsMenu, true, true, true, function()
+			RageUI.Separator("Apparence")
+			RageUI.Checkbox("Afficher la bannière", "Affiche ou masque la bannière en haut des menus", pBanner, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
+				pBanner = Checked
+			end, function()
+				PrefsCall('SetSetting', 'banner', true)
+			end, function()
+				PrefsCall('SetSetting', 'banner', false)
+			end)
+			RageUI.List("Style", PrefsStyleNames, pStyle, "Change le design de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
+				pStyle = Index
+			end, function(Index)
+				PrefsCall('SetSetting', 'style', Prefs.Styles[Index].id)
+			end)
+			RageUI.List("Taille", PrefsSizeNames, pSize, "Change la taille de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
+				pSize = Index
+			end, function(Index)
+				PrefsCall('SetSetting', 'size', Prefs.Sizes[Index].id)
+			end)
+			RageUI.List("Couleur", PrefsColorNames, pColor, "Change la couleur principale de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
+				pColor = Index
+			end, function(Index)
+				PrefsCall('SetSetting', 'accent', Prefs.Colors[Index].id)
+			end)
+			RageUI.Line()
+			RageUI.ButtonWithStyle("Réinitialiser l'apparence", "Revient au style par défaut", {}, true, function(_, _, s)
+				if s then
+					PrefsCall('ResetSettings')
+					local c = PrefsCall('GetSettings')
+					if c then
+						pBanner = c.banner
+						pStyle, pSize, pColor = PrefsIndex(Prefs.Styles, c.style), PrefsIndex(Prefs.Sizes, c.size), PrefsIndex(Prefs.Colors, c.accent)
+					end
+				end
+			end)
 		end)
 		RageUI.IsVisible(Informations, true, true, true, function()
 			RageUI.ButtonWithStyle("Mes factures", nil, {RightLabel = "→→→"}, true, function(_, _, s)
@@ -399,7 +472,7 @@ local function OpenMenu()
 			end
 		end)
 
-		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
+		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
 			mainmenu = RMenu:DeleteType("mainmenu")
 		end
 	end
