@@ -39,3 +39,27 @@ RegisterCommand('skin', function(source, args, user)
 		end
 	end
 end, false)
+
+-- Création du personnage : le style de tenue choisi est donné comme tenue complète (item « Tenue » de p_outfits) et déjà portée.
+-- Le serveur lit lui-même le style dans ConfigCreationOutfits (le client n'envoie que son numéro) ; une seule fois par joueur et par session.
+local creationOutfitGiven = {}
+
+RegisterServerEvent('CorePickax:creation:giveOutfit')
+AddEventHandler('CorePickax:creation:giveOutfit', function(styleIndex)
+	local src = source
+	local xPlayer = ESX.GetPlayerFromId(src)
+	local cfg = ConfigCreationOutfits
+	if not xPlayer or not cfg or not cfg.Enabled or GetResourceState('p_outfits') ~= 'started' or GetResourceState('ox_inventory') ~= 'started' then return end
+	if creationOutfitGiven[xPlayer.identifier] then return end
+
+	local style = cfg.Styles and cfg.Styles[tonumber(styleIndex) or 0]
+	if not style then return end
+	local ped = GetPlayerPed(src)
+	local male = ped and ped ~= 0 and GetEntityModel(ped) == 1885233650
+	local outfit = male and style.male or style.female
+	if not outfit then return end
+
+	creationOutfitGiven[xPlayer.identifier] = true
+	local ok = exports.p_outfits:giveEquipped(src, outfit, ('Tenue — %s'):format(style.label or 'Départ'))
+	if not ok then print(('^3[CorePickax] tenue de départ non équipée pour %s (case Tenue / p_outfits indisponible)^0'):format(xPlayer.identifier)) end
+end)

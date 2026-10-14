@@ -229,9 +229,15 @@ function CreationFinish()
 	TriggerEvent('skinchanger:getSkin', function(skin)
 		TriggerServerEvent('esx_skin:save', skin)
 		TriggerEvent('skinchanger:loadSkin', skin)
-		-- Convertir la tenue validee en items equipes dans ox_inventory.
-		TriggerEvent('p_itemclothes/client/updateClothes', skin)
+		if CreationChosenStyle and GetResourceState('p_outfits') == 'started' then
+			-- Le style choisi est donné comme tenue complète (item Tenue) et déjà portée : le serveur équipe les 14 pièces
+			TriggerServerEvent('CorePickax:creation:giveOutfit', CreationChosenStyle)
+		else
+			-- Convertir la tenue validee en items equipes dans ox_inventory.
+			TriggerEvent('p_itemclothes/client/updateClothes', skin)
+		end
 	end)
+	CreationChosenStyle = nil
 	FreezeEntityPosition(PlayerPedId(), false)
 	InRegisterMenu = false
 	ESX.ShowNotification('Bienvenue sur le Serveur ~n~Bon jeu à vous !')
@@ -273,7 +279,7 @@ function CreationOutfitFlow()
 			title = style.label, hint = 'Cette tenue te plaît ?', cancellable = false, align = 'right',
 			options = { { label = 'Valider cette tenue', description = 'Continuer vers la destination.', icon = 'pin' }, { label = 'Choisir une autre tenue', description = 'Revenir au choix des styles.', icon = 'house' } },
 		})
-		if ok == 1 then break end
+		if ok == 1 then CreationChosenStyle = idx break end
 	end
 
 	RenderScriptCams(false, true, 700, true, false)

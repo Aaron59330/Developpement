@@ -135,6 +135,28 @@ local function applyChange(src, old, new)
     end
 end
 
+--- Donne une tenue complète au joueur ET l'équipe tout de suite : l'item Tenue est placé sur la case Tenue et les 14 pièces sont portées.
+--- Utilisé à la création du personnage. Renvoie true si la tenue est équipée.
+exports('giveEquipped', function(src, skin, label)
+    local clean = sanitize(skin)
+    if not clean then return false end
+    local sex = sexOf(src)
+    local meta = {
+        label = label or 'Tenue',
+        description = 'Tenue complete. Tu peux la retirer ou la remplacer depuis la case Tenue de ton inventaire.',
+        skin = clean,
+        sex = sex,
+    }
+    local tenue = getOutfitSlot()
+    local ok = tenue and exports.ox_inventory:AddItem(src, ITEM, 1, meta, tenue)
+    if not ok then
+        exports.ox_inventory:AddItem(src, ITEM, 1, meta)   -- case Tenue indisponible : l'item est donné dans l'inventaire (non porté)
+        return false
+    end
+    applyChange(src, nil, clean)
+    return true
+end)
+
 local function slotNumber(v)
     return type(v) == 'table' and v.slot or tonumber(v)
 end
