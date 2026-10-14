@@ -121,7 +121,7 @@ end
 CreateThread(function()
     while true do
         Wait(60)
-        if shown and GetGameTimer() - lastFrame > 120 then hide() end
+        if shown and GetGameTimer() - lastFrame > 450 then hide() end   -- tolérance : un chargement de skin/modèle peut bloquer le menu quelques frames (évite le clignotement)
     end
 end)
 
