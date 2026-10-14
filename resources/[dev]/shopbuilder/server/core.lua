@@ -180,7 +180,7 @@ end)
 RegisterCommand(Config.Command, function(src)
     if src == 0 then print('[shopbuilder] commande disponible en jeu uniquement') return end
     if not SB.isAdmin(src) then
-        TriggerClientEvent('esx:showNotification', src, '~r~Tu n\'as pas la permission d\'utiliser le Shop Builder.')
+        TriggerClientEvent('esx:showNotification', src, '~r~Tu n\'as pas la permission d\'utiliser le Shop Builder.', nil, nil, 'shop')
         return
     end
     TriggerClientEvent('shopbuilder:client:openBuilder', src)

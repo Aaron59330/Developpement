@@ -123,7 +123,7 @@ Config.ShopTypes = {
         items = {
             { 'WEAPON_PISTOL', 'Pistolet', 2500, 'Armes de poing', 'weapon' }, { 'WEAPON_COMBATPISTOL', 'Pistolet de combat', 3200, 'Armes de poing', 'weapon' },
             { 'WEAPON_KNIFE', 'Couteau', 150, 'Armes blanches' }, { 'WEAPON_BAT', 'Batte', 120, 'Armes blanches' }, { 'WEAPON_FLASHLIGHT', 'Lampe torche', 60, 'Accessoires' },
-            { 'ammo-9', 'Munitions 9mm', 2, 'Munitions', 'weapon' }, { 'armour', 'Gilet pare-balles', 900, 'Accessoires', 'weapon' },
+            { 'ammo-9', 'Munitions 9mm', 2, 'Munitions', 'weapon' }, { 'armor', 'Gilet pare-balles', 900, 'Accessoires', 'weapon' },
         },
     },
     clothing = {

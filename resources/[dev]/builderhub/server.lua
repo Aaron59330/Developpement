@@ -51,8 +51,12 @@ RegisterNetEvent('builderhub:launch', function(id)
     local src = source
     if not allowed(src) then return end
     for _, b in ipairs(Config.Builders) do
-        if b.id == id and GetResourceState(b.resource) == 'started' then
-            TriggerClientEvent('builderhub:run', src, b.command)
+        if b.id == id then
+            if GetResourceState(b.resource) == 'started' then
+                TriggerClientEvent('builderhub:run', src, b.command)
+            else
+                TriggerClientEvent('esx:showNotification', src, ('~r~%s est arrêté~s~ : ensure %s'):format(b.label, b.resource))
+            end
             return
         end
     end

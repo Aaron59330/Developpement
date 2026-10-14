@@ -361,4 +361,13 @@ return {
     ['drill'] = { label = 'Perceuse', weight = 3000, stack = true, close = true },
     ['thermite'] = { label = 'Thermite', weight = 500, stack = true, close = true },
     ['clothes_helmet'] = { label = 'Casque / chapeau', weight = 200, stack = true, close = true },
+    ['sandwich'] = { label = 'Sandwich', weight = 200, stack = true, close = true },
+    ['chips'] = { label = 'Chips', weight = 100, stack = true, close = true },
+    ['coffee'] = { label = 'Café', weight = 150, stack = true, close = true },
+    ['painkillers'] = { label = 'Antidouleurs', weight = 100, stack = true, close = true },
+    ['pizza'] = { label = 'Pizza', weight = 400, stack = true, close = true },
+    ['jerrycan'] = { label = 'Jerrican', weight = 4000, stack = true, close = true },
+    ['rope'] = { label = 'Corde', weight = 500, stack = true, close = true },
+    ['tablet'] = { label = 'Tablette', weight = 600, stack = true, close = true },
+    ['powerbank'] = { label = 'Batterie externe', weight = 300, stack = true, close = true },
 }

@@ -198,6 +198,11 @@ local function doBuy(src, shopId, locIdx, cart, method)
         total = total + unit * qty
     end
 
+    -- Le stock a pu bouger pendant une vérification asynchrone (licence) : on le revalide juste avant de prélever
+    for _, l in ipairs(lines) do
+        local it = shop.items[l.idx]
+        if it.stock >= 0 and l.qty > it.stock then return fail(('Stock insuffisant pour « %s »'):format(l.label)) end
+    end
     if not charge(xPlayer, method, total) then return fail('Pas assez d\'argent') end
 
     -- Remise des articles ; ce qui ne peut pas être donné est remboursé
@@ -274,8 +279,11 @@ local function cleanClothingItems(shop, list)
     return out
 end
 
-ESX.RegisterServerCallback('shopbuilder:clothing:pay', function(src, cb, shopId, locIdx, method, items)
-    if busy[src] then return cb(fail('Une transaction est déjà en cours')) end
+ESX.RegisterServerCallback('shopbuilder:clothing:pay', function(src, cb0, shopId, locIdx, method, items)
+    if busy[src] then return cb0(fail('Une transaction est déjà en cours')) end
+    local function cb(r) busy[src] = nil cb0(r) end
+    busy[src] = true      -- verrou posé avant tout appel asynchrone (licence) : pas de double paiement
+    SetTimeout(15000, function() busy[src] = nil end)      -- filet : jamais bloqué si une erreur survient avant la fin
     local shop, xPlayer, _, err = access(src, shopId, locIdx)
     if not shop then return cb(fail(err)) end
     if shop.settings.mode ~= 'clothing' then return cb(fail('Cette boutique ne vend pas de vêtements')) end
@@ -305,7 +313,6 @@ ESX.RegisterServerCallback('shopbuilder:clothing:pay', function(src, cb, shopId,
         if not exports.ox_inventory:CanCarryItem(src, e.name, 1, e.metadata) then return cb(fail('Pas assez de place ou de poids dans ton inventaire')) end
     end
     local price = finalPrice({ price = (shop.settings.clothing and shop.settings.clothing.price) or 0, promo = 0 }, discountFor(shop, xPlayer))
-    busy[src] = true
     local ok, res = pcall(function()
         if not charge(xPlayer, method, price) then return fail('Pas assez d\'argent') end
         local added = {}
