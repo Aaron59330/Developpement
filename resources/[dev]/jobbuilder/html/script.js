@@ -345,7 +345,7 @@ const Builder = {
     const c = document.getElementById('confirm');
     c.innerHTML = `<div class="box" style="width:700px"><h2>Nouveau job</h2><p>Choisis un modèle : grades, blip et actions sont pré-remplis, tout reste modifiable.</p>
       <div class="grid4" style="margin-bottom:18px">${Object.entries(types).map(([k, t]) => `<div class="tpl ${k === this.draftType ? 'sel' : ''}" data-type="${k}">${tile(TYPE_ICON[k] || 'briefcase')}${esc(t.label)}</div>`).join('')}</div>
-      <div class="grid2">${fld('Nom interne', '<input id="nj-name" placeholder="ex: lspd2, taxi_ls" maxlength="31">')}${fld('Label affiché', '<input id="nj-label" placeholder="Los Santos Police" maxlength="50">')}</div>
+      <div class="grid2">${fld('Nom interne', '<input id="nj-name" placeholder="ex: lspd2, taxi_ls" maxlength="20">')}${fld('Label affiché', '<input id="nj-label" placeholder="Los Santos Police" maxlength="50">')}</div>
       <div class="row" style="margin-top:22px"><span class="spacer"></span><button id="nj-no">Annuler</button><button class="primary" id="nj-yes">Créer le brouillon</button></div></div>`;
     c.classList.remove('hidden');
     const closeDlg = () => { c.classList.add('hidden'); c.innerHTML = ''; };
@@ -354,7 +354,7 @@ const Builder = {
     document.getElementById('nj-yes').onclick = () => {
       const name = document.getElementById('nj-name').value.trim().toLowerCase();
       const label = document.getElementById('nj-label').value.trim();
-      if (!/^[a-z][a-z0-9_]{1,30}$/.test(name)) return toast('Nom invalide : minuscules, chiffres, _ (2-31), commence par une lettre', 'err');
+      if (!/^[a-z][a-z0-9_]{1,19}$/.test(name)) return toast('Nom invalide : minuscules, chiffres, _ (2-20), commence par une lettre', 'err');
       if (!label) return toast('Label obligatoire', 'err');
       if (this.jobs.some(j => j.name === name)) return toast('Ce job existe déjà', 'err');
       closeDlg();

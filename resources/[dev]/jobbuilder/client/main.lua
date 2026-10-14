@@ -228,6 +228,14 @@ local function spawnVehicle(res)
         SetVehicleNumberPlateText(veh, res.plate)
         SetVehicleFuelLevel(veh, 100.0)
         if res.color then SetVehicleColours(veh, res.color, res.color) end
+        if res.job then       -- marque le véhicule comme véhicule de service du job (CorePickax : anti-conduite des véhicules police par les civils)
+            pcall(function()
+                local st = Entity(veh).state
+                st:set('jobbuilderVehicle', true, true)
+                st:set('jobbuilderJob', res.job, true)
+                st:set('jobbuilderAllowedGrades', res.grades or {}, true)
+            end)
+        end
         TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
         Config.OnVehicleSpawned(veh, res.plate)
     end)
@@ -321,8 +329,6 @@ NuiLocal.cloakCivil = function(_, cb)
     cb({ ok = true })
 end
 
-NuiLocal.mySex = function(_, cb) cb({ sex = pedSex() }) end
-
 NuiLocal['garage:spawn'] = function(args, cb)
     local point = findPoint(args[1])
     if point and point.spawn then
@@ -402,8 +408,6 @@ NuiLocal.placement = function(args, cb)
     end
     cb({ ok = true })
 end
-
-NuiLocal.nearestPlayer = function(_, cb) cb({ id = GetNearestPlayerId() }) end
 
 RegisterNUICallback('rpc', function(body, cb)
     local name, args = body.name, body.args or {}

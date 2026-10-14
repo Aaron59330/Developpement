@@ -93,7 +93,10 @@ ESX.RegisterServerCallback('jobbuilder:gov:money', function(src, cb, mode, amoun
     if mode == 'deposit' then
         if x.getAccount('money').money < amount then return cb(fail('Pas assez d\'argent liquide')) end
         x.removeAccountMoney('money', amount)
-        JB.societyAdd(job.name, amount)
+        if not JB.societyAdd(job.name, amount) then
+            x.addAccountMoney('money', amount)
+            return cb(fail('Dépôt impossible : compte du trésor inaccessible (voir /jobmoney)'))
+        end
         treasuryLog('deposit', nil, JB.playerName(x), nil, amount)
     elseif mode == 'withdraw' then
         if not JB.societyRemove(job.name, amount) then return cb(fail('Fonds insuffisants dans le trésor')) end
@@ -124,7 +127,10 @@ ESX.RegisterServerCallback('jobbuilder:gov:grant', function(src, cb, target, amo
     if not tj or not tj.society or tj.name == job.name then return cb(fail('Société invalide')) end
     if amount < 1 or amount > G.GrantMax then return cb(fail(('Montant invalide (1 à %d)'):format(G.GrantMax))) end
     if not JB.societyRemove(job.name, amount) then return cb(fail('Fonds insuffisants dans le trésor')) end
-    JB.societyAdd(tj.name, amount)
+    if not JB.societyAdd(tj.name, amount) then
+        JB.societyAdd(job.name, amount)
+        return cb(fail('Subvention impossible : compte de la société inaccessible (voir /jobmoney)'))
+    end
     treasuryLog('grant', tj.name, JB.playerName(x), tostring(reason or ''):gsub('%c', ''):sub(1, 120), -amount)
     JB.log(job.name, x, 'grant', ('%d$ → %s'):format(amount, tj.name))
     cb(data(x, job))
@@ -141,7 +147,7 @@ ESX.RegisterServerCallback('jobbuilder:gov:prime', function(src, cb, targetId, a
     if not JB.societyRemove(job.name, amount) then return cb(fail('Fonds insuffisants dans le trésor')) end
     t.addAccountMoney('bank', amount)
     local why = tostring(reason or ''):gsub('%c', ''):sub(1, 120)
-    JBNotifyClient( t.source, ('Prime du gouvernement : ~g+%d$~s~ %s'):format(amount, why))
+    JBNotifyClient( t.source, ('Prime du gouvernement : ~g~+%d$~s~ %s'):format(amount, why))
     treasuryLog('prime', JB.playerName(t), JB.playerName(x), why, -amount)
     JB.log(job.name, x, 'prime', ('%d$ → %s'):format(amount, JB.playerName(t)))
     cb(data(x, job))

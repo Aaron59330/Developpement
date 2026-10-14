@@ -15,6 +15,7 @@ Config.TargetDistance   = 4.0    -- distance max joueur -> joueur (menottes, soi
 Config.MaxGrades = 20
 Config.MaxPoints = 80
 Config.MaxItemsPerPoint = 100
+Config.MaxBossSalary = 5000      -- salaire maximum qu'un patron peut fixer en jeu (même plafond que Config.MaxSalary de CorePickax / esx_society)
 
 Config.SocietyPrefix = 'society_'  -- compte société = society_<nomdujob> (compatible esx_society / esx_addonaccount)
 Config.Inventory     = 'auto'      -- 'auto' | 'ox' | 'esx'

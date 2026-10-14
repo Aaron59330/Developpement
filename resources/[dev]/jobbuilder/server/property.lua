@@ -215,7 +215,7 @@ end
 local function resetProp(p, reason, actor)
     kickAll(p)
     for _, pt in ipairs(p.points) do
-        if pt.type == 'stash' and JB.inventory() == 'ox' then
+        if (pt.type == 'stash' or pt.type == 'safe') and JB.inventory() == 'ox' then
             pcall(function() exports.ox_inventory:ClearInventory(stashId(p, pt)) end)
         end
     end
@@ -684,6 +684,7 @@ RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
         if agent then JBNotifyClient( o.from, '~r~Le client n\'a pas assez d\'argent.') end
         return
     end
+    p.status, p.owner = 'owned', buyer.identifier      -- réservé tout de suite : deux offres acceptées en même temps ne vendent pas le bien deux fois
 
     -- Répartition : commission à l'agent (s'il est en ligne), le reste à la société de l'agence
     local job = JB.Jobs[p.job_name]
@@ -699,7 +700,7 @@ RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
     end
     if agent and commission > 0 then
         agent.addAccountMoney('bank', commission)
-        JBNotifyClient( o.from, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
+        JBNotifyClient( o.from, ('Vente conclue ! Commission : ~g~+%d$'):format(commission))
     end
 
     local rentUntil = p.deal == 'rent' and (now() + R.RentDays * 86400) or nil

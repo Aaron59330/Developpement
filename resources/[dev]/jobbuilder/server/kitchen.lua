@@ -110,7 +110,7 @@ ESX.RegisterServerCallback('jobbuilder:kitchen:finish', function(src, cb)
         if not JB.canCarry(src, xPlayer, d.name, d.count) then return cb(fail('Tu ne peux plus porter ça')) end
         JB.giveItem(src, xPlayer, d.name, d.count)
         JB.log(point.job_name, xPlayer, 'harvest', ('%d× %s'):format(d.count, d.label))
-        return cb({ ok = true, msg = ('~g+%d× %s'):format(d.count, d.label) })
+        return cb({ ok = true, msg = ('~g~+%d× %s'):format(d.count, d.label) })
     end
 
     local r = d.recipes[job.idx]
@@ -131,7 +131,7 @@ ESX.RegisterServerCallback('jobbuilder:kitchen:finish', function(src, cb)
     end
     JB.giveItem(src, xPlayer, r.output.name, out)
     JB.log(point.job_name, xPlayer, 'cook', ('%d× %s'):format(out, r.output.label))
-    cb({ ok = true, msg = ('~g+%d× %s'):format(out, r.output.label) })
+    cb({ ok = true, msg = ('~g~+%d× %s'):format(out, r.output.label) })
 end)
 
 RegisterNetEvent('jobbuilder:kitchen:cancel', function() pending[source] = nil end)

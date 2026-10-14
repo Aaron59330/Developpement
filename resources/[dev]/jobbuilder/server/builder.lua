@@ -209,9 +209,9 @@ end
 local function cleanJob(payload)
     if type(payload) ~= 'table' or type(payload.job) ~= 'table' then return nil, 'Données invalides' end
     local j = payload.job
-    local name = str(j.name, 31):lower()
+    local name = str(j.name, 20):lower()   -- users.job est un varchar(20)
     if not name:match('^[a-z][a-z0-9_]+$') or #name < 2 then
-        return nil, 'Nom du job invalide (lettres minuscules, chiffres et _ ; 2 à 31 caractères, commence par une lettre)'
+        return nil, 'Nom du job invalide (lettres minuscules, chiffres et _ ; 2 à 20 caractères, commence par une lettre)'
     end
     if not Config.JobTypes[j.type] then return nil, 'Type de job invalide' end
     local label = str(j.label, 50)

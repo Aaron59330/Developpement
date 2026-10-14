@@ -302,7 +302,10 @@ ESX.RegisterServerCallback('jobbuilder:garage:spawn', function(src, cb, pointId,
     local digits = 8 - #prefix
     local plate = prefix .. ('%0' .. digits .. 'd'):format(math.floor(math.random(0, math.floor(10 ^ digits) - 1)))
     JB.log(point.job_name, xPlayer, 'vehicle_out', ('%s (%s)'):format(v.label, plate))
-    cb({ ok = true, model = v.model, plate = plate, spawn = point.data.spawn, color = v.color })
+    -- Grades autorisés au volant (lus par CorePickax : sans cela un véhicule de classe « police » du job est refusé à ses propres employés)
+    local grades = {}
+    for g = math.max(v.min_grade, point.min_grade or 0), #job.grades - 1 do grades[tostring(g)] = true end
+    cb({ ok = true, model = v.model, plate = plate, spawn = point.data.spawn, color = v.color, job = point.job_name, grades = grades })
 end)
 
 -- Point « Rangement véhicule » : ranger un véhicule du service sans passer par le menu du garage.
@@ -334,11 +337,6 @@ ESX.RegisterServerCallback('jobbuilder:garage:return', function(src, cb, pointId
     end
     JB.log(point.job_name, xPlayer, 'vehicle_in', plate)
     cb({ ok = true })
-end)
-
--- Le rangement par le menu du garage n'existe plus : il faut passer par le point de rangement du garage.
-ESX.RegisterServerCallback('jobbuilder:garage:store', function(src, cb)
-    cb(fail('Utilise le point de rangement du garage'))
 end)
 
 -- ─────────────────────────────── Vestiaire ───────────────────────────────
@@ -476,6 +474,7 @@ ESX.RegisterServerCallback('jobbuilder:boss:setGrade', function(src, cb, pointId
     if not point then return cb(fail(err)) end
     grade = math.floor(tonumber(grade) or -1)
     if grade < 0 or grade > #job.grades - 1 then return cb(fail('Grade invalide')) end
+    if grade > xPlayer.job.grade then return cb(fail('Tu ne peux pas promouvoir au-dessus de ton propre grade')) end
     if identifier == xPlayer.identifier then return cb(fail('Tu ne peux pas modifier ton propre grade')) end
     local current, xTarget = targetGrade(identifier, job.name)
     if not current then return cb(fail('Cet employé n\'est pas dans ton job')) end
@@ -508,7 +507,8 @@ ESX.RegisterServerCallback('jobbuilder:boss:salary', function(src, cb, pointId, 
     if not point then return cb(fail(err)) end
     grade = math.floor(tonumber(grade) or -1)
     salary = math.floor(tonumber(salary) or -1)
-    if grade < 0 or grade > #job.grades - 1 or salary < 0 or salary > 1000000 then return cb(fail('Valeur invalide')) end
+    if grade < 0 or grade > #job.grades - 1 or salary < 0 then return cb(fail('Valeur invalide')) end
+    if salary > Config.MaxBossSalary then return cb(fail(('Salaire maximum fixé par un patron : %d $'):format(Config.MaxBossSalary))) end
     MySQL.update.await('UPDATE job_grades SET salary = ? WHERE job_name = ? AND grade = ?', { salary, job.name, grade })
     job.grades[grade + 1].salary = salary
     JB.refreshESX()
@@ -642,9 +642,9 @@ RegisterNetEvent('jobbuilder:server:invoiceAnswer', function(id, accepted)
     elseif issuer then
         issuer.addAccountMoney('bank', inv.amount)
     end
-    JBNotifyClient( src, ('Facture payée : ~g%d$'):format(inv.amount))
+    JBNotifyClient( src, ('Facture payée : ~g~%d$'):format(inv.amount))
     if issuer then
-        JBNotifyClient( inv.from, ('Facture payée : ~g+%d$'):format(inv.amount))
+        JBNotifyClient( inv.from, ('Facture payée : ~g~+%d$'):format(inv.amount))
         JB.log(inv.job, issuer, 'invoice_paid', ('%s : %d$ (%s)'):format(JB.playerName(payer), inv.amount, inv.label))
     end
 end)

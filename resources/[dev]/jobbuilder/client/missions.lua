@@ -364,7 +364,7 @@ local function run(mid)
     local r = srv('complete', mid, health)
     if r and r.ok then
         PlaySoundFrontend(-1, 'Mission_Pass_Notify', 'DLC_HEISTS_GENERAL_FRONTEND_SOUNDS', true)
-        JBNotify(('~g~Mission terminée !~s~ %s~n~Récompense : ~g+%d$%s'):format(M.label, r.reward or 0, (r.bonus and r.bonus > 0) and (' ~s~(dont bonus ~y+' .. r.bonus .. '$~s~)') or ''))
+        JBNotify(('~g~Mission terminée !~s~ %s~n~Récompense : ~g~+%d$%s'):format(M.label, r.reward or 0, (r.bonus and r.bonus > 0) and (' ~s~(dont bonus ~y~+' .. r.bonus .. '$~s~)') or ''))
         if r.note then JBNotify('~y~' .. r.note) end
     else
         JBNotify('~r~' .. ((r and r.error) or 'Mission non validée.'))

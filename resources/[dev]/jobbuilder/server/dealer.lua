@@ -296,7 +296,7 @@ local function completeSale(job, v, buyer, seller)
     end
     if seller and commission > 0 then
         seller.addAccountMoney('bank', commission)
-        JBNotifyClient( seller.source, ('Vente conclue ! Commission : ~g+%d$'):format(commission))
+        JBNotifyClient( seller.source, ('Vente conclue ! Commission : ~g~+%d$'):format(commission))
     end
     if v.stock > 0 then MySQL.update.await('UPDATE jobbuilder_dealer_vehicles SET stock = stock - 1 WHERE job_name = ? AND LOWER(model) = ? AND stock > 0', { job.name, tostring(v.model):lower() }) end
 
@@ -309,7 +309,7 @@ local function completeSale(job, v, buyer, seller)
         Pending[buyer.source][plate] = now() + 240
         TriggerClientEvent('jobbuilder:client:dealerDeliver', buyer.source, { model = v.model, plate = plate, spawn = spawnPoint, label = v.label })
     else
-        JBNotifyClient( buyer.source, ('~g%s~s~ (%s) t\'attend dans ton garage.'):format(v.label, plate))
+        JBNotifyClient( buyer.source, ('~g~%s~s~ (%s) t\'attend dans ton garage.'):format(v.label, plate))
     end
     return true
 end

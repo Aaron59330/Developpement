@@ -19,14 +19,9 @@ local function rebuildBlips()
     for _, p in ipairs(Props) do
         if p.status == 'available' then
             local cfg = R.Blips[p.deal] or R.Blips.sale
-            local blip = AddBlipForCoord(p.entrance.x, p.entrance.y, p.entrance.z)
-            SetBlipSprite(blip, (R.Categories[p.category or 'house'] or {}).sprite or cfg.sprite)
-            SetBlipColour(blip, cfg.color)
-            SetBlipScale(blip, cfg.scale + 0.0)
-            SetBlipAsShortRange(blip, true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName(((R.Categories[p.category or 'house'] or {}).label or 'Bien') .. (p.deal == 'rent' and ' à louer : ' or ' à vendre : ') .. p.label)
-            EndTextCommandSetBlipName(blip)
+            local cat = R.Categories[p.category or 'house'] or {}
+            local blip = BB.Blip(p.entrance, { sprite = cat.sprite or cfg.sprite, color = cfg.color, scale = cfg.scale, shortRange = true,
+                label = (cat.label or 'Bien') .. (p.deal == 'rent' and ' à louer : ' or ' à vendre : ') .. p.label }, { label = 'Bien immobilier', category = 'realestate' })
             propBlips[#propBlips + 1] = blip
         end
     end
