@@ -21,7 +21,6 @@ shared_scripts {
     'utils/**/config.lua',
     'players/**/config.lua',
     'players/menuemote/animation.lua',
-    'jobs/**/config.lua'
 }
 
 server_scripts {
@@ -36,7 +35,6 @@ server_scripts {
 
     'system/**/server.lua',
     'esx/**/server.lua',
-    'jobs/**/server.lua',
     'functions/server.lua',
     'players/**/server.lua',
     'utils/**/server.lua',
@@ -173,8 +171,6 @@ client_scripts {
     'players/**/client.lua',
     'players/contextMenu/function.lua',
 
-    -- JOBS
-    'jobs/**/client.lua',
 
     -- OX INVENTORY
     'compat/ox_client.lua'
@@ -205,7 +201,6 @@ escrow_ignore {
     'players/**/config.lua',
     'players/menuemote/animation.lua',
     'players/contextMenu/function.lua',
-    'jobs/**/config.lua',
 
     'players/wipe/function_sv.lua',
 
