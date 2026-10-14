@@ -91,7 +91,7 @@ function render(d) {
   $('count').classList.toggle('hidden', !d.c);
   $('items').innerHTML = (d.i || []).map(item).join('');
   var ds = $('desc');
-  if (d.ds) { ds.innerHTML = gta(d.ds); ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
+  if (d.ds) { ds.innerHTML = '<span class="dt">' + gta(d.ds) + '</span>'; ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
   var inf = $('info');
   if (d.inf) { inf.innerHTML = infoHtml(d.inf); inf.classList.remove('hidden'); } else { inf.classList.add('hidden'); }
 }
