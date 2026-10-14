@@ -112,6 +112,28 @@ function RageUI.IsVisible(menu, header, glare, instructional, items, panels)
     end
 end
 
+-- Fermeture immédiate : dès qu'un menu est fermé (Retour, Échap, CloseAll…) et qu'aucun autre menu ne prend le relais,
+-- l'affichage NUI disparaît à la frame suivante (au lieu d'attendre le délai de sécurité ci-dessous).
+local closeCheck = false
+local _Visible = RageUI.Visible
+function RageUI.Visible(Menu, Value)
+    local r = _Visible(Menu, Value)
+    if Value == false and shown then closeCheck = true end
+    return r
+end
+
+CreateThread(function()
+    while true do
+        if closeCheck then
+            closeCheck = false
+            Wait(0)
+            if shown and RageUI.CurrentMenu == nil then hide() end
+        else
+            Wait(0)
+        end
+    end
+end)
+
 local _CloseAll = RageUI.CloseAll
 function RageUI.CloseAll()
     _CloseAll()
