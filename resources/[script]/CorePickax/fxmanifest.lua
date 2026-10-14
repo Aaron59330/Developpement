@@ -55,6 +55,7 @@ client_scripts {
     'menu/RageUI/menu/items/*.lua',
     'menu/RageUI/menu/panels/*.lua',
     'menu/RageUI/menu/windows/*.lua',
+    'menu/RageUI/nui.lua',
 
     -- Bob74 IPL
     'dlc/bob74_ipl/lib/common.lua',
@@ -229,5 +230,6 @@ dependencies {
     'es_extended',
     'oxmysql',
     'ox_lib',
-    'ox_inventory'
+    'ox_inventory',
+    'pickax_ui'
 }
