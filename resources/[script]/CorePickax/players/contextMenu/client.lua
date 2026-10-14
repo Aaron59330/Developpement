@@ -3321,6 +3321,13 @@ function ESXCustomFonctionContextMenu:GiveItems(Item, Count, NomItem, LastEntity
 end
 
 function ESXCustomFonctionContextMenu:KeyboardInput(TextEntry, ExampleText, MaxStringLenght)
+    if GetResourceState('pickax_ui') == 'started' then
+        blockinput = true
+        local result = exports['pickax_ui']:Input({ title = TextEntry, default = ExampleText, max = MaxStringLenght })
+        Citizen.Wait(200)
+        blockinput = false
+        return result
+    end
     AddTextEntry('FMMC_KEY_TIP1', TextEntry) 
     DisplayOnscreenKeyboard(1, "FMMC_KEY_TIP1", "", ExampleText, "", "", "", MaxStringLenght)
     blockinput = true

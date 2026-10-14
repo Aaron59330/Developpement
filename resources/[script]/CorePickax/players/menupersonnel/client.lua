@@ -128,15 +128,21 @@ end
 
 local function PrefsAskHex(key)
 	CreateThread(function()
-		AddTextEntry('PICKAX_HEX', 'Couleur au format #RRGGBB (ex : #00a4ff)')
 		local cur = PrefsCfg[key] or ''
-		DisplayOnscreenKeyboard(1, 'PICKAX_HEX', '', cur ~= '' and cur or '#', '', '', '', 7)
-		while UpdateOnscreenKeyboard() == 0 do
-			DisableAllControlActions(0)
-			Wait(0)
+		local typed
+		if GetResourceState('pickax_ui') == 'started' then
+			typed = exports['pickax_ui']:Input({ title = 'Couleur personnalisée', hint = 'Format #RRGGBB', placeholder = '#00a4ff', default = cur ~= '' and cur or '#', max = 7 })
+		else
+			AddTextEntry('PICKAX_HEX', 'Couleur au format #RRGGBB (ex : #00a4ff)')
+			DisplayOnscreenKeyboard(1, 'PICKAX_HEX', '', cur ~= '' and cur or '#', '', '', '', 7)
+			while UpdateOnscreenKeyboard() == 0 do
+				DisableAllControlActions(0)
+				Wait(0)
+			end
+			if UpdateOnscreenKeyboard() == 1 then typed = GetOnscreenKeyboardResult() end
 		end
-		if UpdateOnscreenKeyboard() == 1 then
-			local r = (GetOnscreenKeyboardResult() or ''):gsub('%s', '')
+		if typed then
+			local r = (typed or ''):gsub('%s', '')
 			if r:match('^%x%x%x%x%x%x$') then r = '#' .. r end
 			if r:match('^#%x%x%x%x%x%x$') then
 				PrefsSet(key, r:lower())

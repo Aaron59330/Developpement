@@ -1,4 +1,4 @@
--- Affichage seul : aucune prise de focus NUI, le clavier reste géré par RageUI (CorePickax).
+-- Affichage des menus (aucune prise de focus NUI) + fenêtre de saisie exports.pickax_ui:Input (seul moment où le focus est pris).
 local KVP = 'pickax_ui:settings2'
 local DEFAULTS = {
     banner = true, style = 'noir', size = 'md',
@@ -98,6 +98,40 @@ exports('OpenUrl', function(url)
     return true
 end)
 
+-- Fenêtre de saisie : remplace le clavier natif. Bloque le thread appelant jusqu'à la réponse ; retourne le texte saisi, ou nil si annulé.
+-- opts = { title, hint, placeholder, default, max, numeric }
+local inputPromise = nil
+
+exports('Input', function(opts)
+    if inputPromise then return nil end
+    opts = type(opts) == 'table' and opts or {}
+    local p = promise.new()
+    inputPromise = p
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        a = 'input', cfg = settings, v = settings.sound and settings.volume or 0,
+        d = {
+            title = tostring(opts.title or 'Saisie'), hint = opts.hint and tostring(opts.hint) or '',
+            placeholder = opts.placeholder and tostring(opts.placeholder) or '', default = opts.default and tostring(opts.default) or '',
+            max = math.max(1, math.min(200, tonumber(opts.max) or 60)), numeric = opts.numeric == true,
+        },
+    })
+    local value = Citizen.Await(p)
+    inputPromise = nil
+    SetNuiFocus(false, false)
+    return value
+end)
+
+RegisterNUICallback('inputDone', function(data, cb)
+    cb('ok')
+    if inputPromise then
+        local v = data and data.value
+        inputPromise:resolve(type(v) == 'string' and v or nil)
+    end
+end)
+
 AddEventHandler('onResourceStop', function(res)
-    if res == GetCurrentResourceName() then SetNuiFocus(false, false) end
+    if res ~= GetCurrentResourceName() then return end
+    SetNuiFocus(false, false)
+    if inputPromise then inputPromise:resolve(nil) end
 end)

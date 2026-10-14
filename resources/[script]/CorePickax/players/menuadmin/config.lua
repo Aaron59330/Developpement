@@ -697,6 +697,10 @@ ConfigMenuAdministrationAdmin = {
     utils = {
         keyboard = function(title,mess, maxamount)
             if maxamount == nil then maxamount = 30 end
+            if GetResourceState('pickax_ui') == 'started' then
+                -- Fenêtre de saisie NUI (pickax_ui) ; nil si annulé
+                return exports['pickax_ui']:Input({ title = title, placeholder = mess, max = maxamount })
+            end
             AddTextEntry("FMMC_MPM_NA", title)
             DisplayOnscreenKeyboard(1, "FMMC_MPM_NA", mess, "", "", "", "", maxamount)
             while (UpdateOnscreenKeyboard() == 0) do

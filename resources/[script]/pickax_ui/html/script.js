@@ -77,7 +77,12 @@ var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--ac
 
 function applyCfg(c) {
   if (!c) return;
-  var w = $('wrap'), st = w.style;
+  [$('wrap'), $('dlgwrap')].forEach(function (w) { applyCfgTo(w, c); });
+  $('banner').classList.toggle('hidden', c.banner === false);
+}
+
+function applyCfgTo(w, c) {
+  var st = w.style;
   w.setAttribute('data-style', c.style || 'noir');
   w.setAttribute('data-size', c.size || 'md');
   st.setProperty('--accent', c.accent || '#00a4ff');
@@ -95,7 +100,6 @@ function applyCfg(c) {
   if (c.selborder) st.setProperty('--act-border', c.selborder);
   if (c.btnRadius !== undefined) st.setProperty('--r-btn', c.btnRadius + 'px');
   if (c.cardRadius !== undefined) st.setProperty('--r-card', c.cardRadius + 'px');
-  $('banner').classList.toggle('hidden', c.banner === false);
 }
 
 function render(d) {
@@ -154,4 +158,61 @@ window.addEventListener('message', function (e) {
   } else if (m.a === 'hide') {
     $('wrap').classList.add('hidden');
   }
+});
+
+
+/* ===== Fenêtre de saisie ===== */
+var dlgOpen = false;
+function nuiPost(name, body) {
+  try { fetch('https://' + (window.GetParentResourceName ? GetParentResourceName() : 'pickax_ui') + '/' + name, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }); } catch (e) {}
+}
+function dlgSound(n) { window.postMessage({ a: 'snd', n: n, v: window.__vol || 60 }, '*'); }
+function dlgClose(value) {
+  if (!dlgOpen) return;
+  dlgOpen = false;
+  $('dlgwrap').classList.add('hidden');
+  nuiPost('inputDone', { value: value });
+}
+function dlgOpenWith(m) {
+  var d = m.d || {};
+  window.__vol = m.v;
+  applyCfg(m.cfg || {});
+  $('dl-title').textContent = d.title || 'Saisie';
+  $('dl-hint').textContent = d.hint || '';
+  var inp = $('dl-input');
+  inp.value = d.default || '';
+  inp.placeholder = d.placeholder || '';
+  inp.maxLength = d.max || 60;
+  inp.setAttribute('inputmode', d.numeric ? 'numeric' : 'text');
+  dlgOpen = true;
+  $('dl-err').classList.add('hidden');
+  dlgCount();
+  $('dlgwrap').classList.remove('hidden');
+  dlgSound('open');
+  setTimeout(function () { inp.focus(); inp.select(); }, 30);
+}
+function dlgCount() {
+  var inp = $('dl-input');
+  $('dl-count').textContent = inp.value.length + '/' + inp.maxLength;
+}
+function dlgSubmit() {
+  var inp = $('dl-input'), v = inp.value;
+  if (inp.getAttribute('inputmode') === 'numeric' && v !== '' && !/^-?\d+$/.test(v)) {
+    var e = $('dl-err'); e.textContent = 'Saisis uniquement des chiffres.'; e.classList.remove('hidden'); dlgSound('error'); return;
+  }
+  dlgSound('confirm');
+  dlgClose(v);
+}
+$('dl-input').addEventListener('input', function () { dlgCount(); $('dl-err').classList.add('hidden'); });
+$('dl-ok').addEventListener('click', dlgSubmit);
+$('dl-cancel').addEventListener('click', function () { dlgSound('close'); dlgClose(null); });
+document.addEventListener('keydown', function (e) {
+  if (!dlgOpen) return;
+  if (e.key === 'Enter') { e.preventDefault(); dlgSubmit(); }
+  else if (e.key === 'Escape') { e.preventDefault(); dlgSound('close'); dlgClose(null); }
+});
+window.addEventListener('message', function (e) {
+  var m = e.data || {};
+  if (m.a === 'input') dlgOpenWith(m);
+  else if (m.a === 'inputClose' && dlgOpen) { dlgOpen = false; $('dlgwrap').classList.add('hidden'); }
 });

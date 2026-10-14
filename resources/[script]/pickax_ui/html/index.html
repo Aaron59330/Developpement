@@ -21,6 +21,20 @@
   </div>
   <div id="info" class="card info hidden"></div>
 </div>
+<div id="dlgwrap" class="hidden" data-style="noir" data-size="md">
+  <div id="dlg" class="card">
+    <div class="dl-head">
+      <span class="dl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14.5 7.5l3 3"/></svg></span>
+      <div class="dl-ttl"><h2 id="dl-title"></h2><p id="dl-hint"></p></div>
+    </div>
+    <div class="dl-field"><input id="dl-input" type="text" autocomplete="off" spellcheck="false"><span id="dl-count"></span></div>
+    <div id="dl-err" class="dl-err hidden"></div>
+    <div class="dl-actions">
+      <button id="dl-cancel" type="button"><kbd>Échap</kbd> Annuler</button>
+      <button id="dl-ok" type="button" class="primary"><kbd>Entrée</kbd> Valider</button>
+    </div>
+  </div>
+</div>
 <script src="snd.js"></script>
 <script src="script.js"></script>
 </body>

@@ -21,6 +21,13 @@ function ESXCustom_Function_ClientSide:SpawnPNJ(PedType, PedName, Position, head
 end
 
 function ESXCustom_Function_ClientSide:KeyboardInput(TextEntry, MaxStringLenght)
+    if GetResourceState('pickax_ui') == 'started' then
+        blockinput = true
+        local result = exports['pickax_ui']:Input({ title = TextEntry, max = MaxStringLenght })
+        Citizen.Wait(200)
+        blockinput = false
+        return result
+    end
     AddTextEntry('FMMC_KEY_TIP1', TextEntry) 
     DisplayOnscreenKeyboard(1, "FMMC_KEY_TIP1", "", "", "", "", "", MaxStringLenght)
     blockinput = true
