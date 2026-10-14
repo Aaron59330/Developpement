@@ -136,12 +136,16 @@ CreateThread(function()
     local inFrontend = false
     SendNUIMessage({ action = 'hideUi', value = false })
 
+    local lastSent = 0
     while true do
-        Wait(150)
+        Wait(100)
         if not uiFaded then
-            local hide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true   -- masqué aussi quand l'inventaire est ouvert
-            if hide ~= inFrontend then
+            -- masqué : menu pause / carte (Échap), changement de personnage, inventaire ouvert
+            local hide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true
+            -- l'ordre est ré-envoyé toutes les secondes : un message perdu ne laisse jamais le HUD affiché derrière la carte
+            if hide ~= inFrontend or GetGameTimer() - lastSent > 1000 then
                 inFrontend = hide
+                lastSent = GetGameTimer()
                 SendNUIMessage({ action = 'hideUi', value = hide })
             end
         end

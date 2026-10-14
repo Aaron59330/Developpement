@@ -62,7 +62,7 @@ CreateThread(function()
     local hiddenByInv = false
     while true do
         Wait(150)
-        local open = LocalPlayer.state.invOpen == true
+        local open = LocalPlayer.state.invOpen == true or IsPauseMenuActive()
         if open and not hiddenByInv then
             hiddenByInv = true
             toggleNuiFrame(false)

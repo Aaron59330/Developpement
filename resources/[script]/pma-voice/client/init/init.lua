@@ -47,7 +47,7 @@ CreateThread(function()
     local hidden = false
     while true do
         Wait(150)
-        local open = LocalPlayer.state.invOpen == true
+        local open = LocalPlayer.state.invOpen == true or IsPauseMenuActive()
         if open ~= hidden then
             hidden = open
             sendUIMessage({ uiEnabled = (not open) and GetConvarInt("voice_enableUi", 1) == 1 })

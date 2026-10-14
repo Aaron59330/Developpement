@@ -5,6 +5,7 @@ local STATUS_UPDATE_INTERVAL = 500
 local HIDE_DEFAULT_HUD = true
 local FRAMEWORK_RESOURCE = 'es_extended'
 local uiFaded = false
+local lastHudSend = 0
 local isShowingHiding = false
 local hunger = 0
 local thirst = 0
@@ -183,12 +184,11 @@ CreateThread(function()
         if not uiFaded then
             local shouldHide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true   -- masqué aussi quand l'inventaire est ouvert
 
-            if shouldHide and not inFrontend then
-                inFrontend = true
-                SendNUIMessage({ action = 'hideUi', value = true })
-            elseif not shouldHide and inFrontend then
-                inFrontend = false
-                SendNUIMessage({ action = 'hideUi', value = false })
+            -- ordre ré-envoyé toutes les secondes : un message perdu ne laisse jamais le HUD affiché derrière la carte
+            if shouldHide ~= inFrontend or GetGameTimer() - (lastHudSend or 0) > 1000 then
+                inFrontend = shouldHide
+                lastHudSend = GetGameTimer()
+                SendNUIMessage({ action = 'hideUi', value = shouldHide })
             end
         end
     end
