@@ -36,6 +36,7 @@ html, body { height: 100%; background: transparent; color: var(--text); font-fam
 @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.985); } }
 
 .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--r-card); box-shadow: var(--card-shadow); color: var(--text); }
+#col { display: flex; flex-direction: column; gap: 8px; width: 400px; flex-shrink: 0; }
 #menu { width: 400px; padding: 0 12px 12px; overflow: hidden; }
 #banner { display: block; width: calc(100% + 24px); margin: 0 -12px 8px; height: auto; clip-path: inset(0 0 4px 0); }
 
@@ -78,7 +79,7 @@ html, body { height: 100%; background: transparent; color: var(--text); font-fam
 .badge.star { color: #fbbf24; }
 .it.act .badge { color: var(--act-text); }
 
-.desc { position: relative; overflow: hidden; margin: 8px 4px 2px; padding: 11px 14px 14px; border-radius: min(var(--r-btn), 22px); border: 1px solid var(--line); background: var(--surface); color: var(--text-2); font-size: 12px; line-height: 1.5; }
+.desc { position: relative; overflow: hidden; margin: 0; padding: 12px 16px 15px; border-radius: min(var(--r-card), 18px); border: 1px solid var(--card-border); background: var(--card-bg); box-shadow: var(--card-shadow); color: var(--text-2); font-size: 12px; line-height: 1.5; }
 .desc::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); }
 
 .keys { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin: 10px 4px 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 10px; color: var(--muted); }
