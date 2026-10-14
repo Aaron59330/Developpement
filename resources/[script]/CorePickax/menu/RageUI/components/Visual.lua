@@ -29,8 +29,16 @@ end
 ---@param array table
 ---@public
 function RageUI.Text(array)
-    if (array.message == nil) then error("Missing arguments, message") end
-    exports['pickax_notify']:ShowNotification(tostring(array.message), nil, array.time_display and math.ceil(tonumber(array.time_display) * 1000) or nil)
+    -- Texte d'état affiché en bas de l'écran (sous-titre natif) : volontairement PAS une notification,
+    -- car il est rappelé en continu (ex : « Vous êtes protégé par la zone safe »).
+    ClearPrints()
+    SetTextEntry_2("STRING")
+    if (array.message ~= nil) then
+        AddTextComponentString(tostring(array.message))
+    else
+        error("Missing arguments, message")
+    end
+    DrawSubtitleTimed(tonumber(array.time_display) or 10, 1)
     if (array.sound ~= nil and array.sound.audio_name ~= nil and array.sound.audio_ref ~= nil) then
         PlaySoundFrontend(-1, array.sound.audio_name, array.sound.audio_ref, true)
     end
