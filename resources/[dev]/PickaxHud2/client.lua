@@ -147,3 +147,10 @@ CreateThread(function()
         end
     end
 end)
+
+
+-- Signal direct de l'inventaire (ox_inventory) : masque / réaffiche le HUD immédiatement, sans attendre le test périodique
+AddEventHandler('pickax:inventory', function(open)
+    if uiFaded then return end
+    SendNUIMessage({ action = 'hideUi', value = open == true })
+end)

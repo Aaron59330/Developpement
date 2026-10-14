@@ -283,6 +283,7 @@ function client.openInventory(inv, data)
 
     invOpen = true
     plyState:set('invOpen', true, true)
+    TriggerEvent('pickax:inventory', true)
 
     SetInterval(client.interval, 100)
     SetNuiFocus(true, true)
@@ -373,6 +374,7 @@ RegisterNetEvent('ox_inventory:forceOpenInventory', function(left, right)
 
 	invOpen = true
 	plyState:set('invOpen', true, true)
+    TriggerEvent('pickax:inventory', true)
 
 	SetInterval(client.interval, 100)
 	SetNuiFocus(true, true)
@@ -1038,6 +1040,7 @@ function client.closeInventory(server)
 	if invOpen then
 		invOpen = nil
 		invClosing = true
+		TriggerEvent('pickax:inventory', false)
 		SetNuiFocus(false, false)
 		SetNuiFocusKeepInput(false)
 		Utils.blurOut()
@@ -1753,6 +1756,7 @@ RegisterNetEvent('ox_inventory:viewInventory', function(left, right)
 
 	invOpen = true
 	plyState:set('invOpen', true, true)
+    TriggerEvent('pickax:inventory', true)
 
 	SetInterval(client.interval, 100)
 	SetNuiFocus(true, true)
