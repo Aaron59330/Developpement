@@ -49,10 +49,13 @@ local function announce(msg)
 end
 
 -- ─────────────────────────────── Envoi de l'état aux clients ───────────────────────────────
-local function pushState()
+-- throttle : le porteur reçoit l'état chaque seconde, les autres seulement toutes les RevealInterval secondes
+local function pushState(throttle)
     if not O then return end
     local carried = O.carrier ~= nil
+    local tick = os.time() % math.max(1, math.floor(tonumber(Config.Objectives.RevealInterval) or 5)) == 0
     for _, src in ipairs(allMembers()) do
+      if not throttle or tick or O.carrier == src then
         local g = GB.PlayerGang[src]
         local d = {
             active = true, label = O.label, zone = O.zone, radius = O.radius, phase = O.phase,
@@ -72,6 +75,7 @@ local function pushState()
             d.reveal = O.lastPos
         end
         TriggerClientEvent('gangbuilder:client:obj', src, d)
+      end
     end
 end
 
@@ -86,6 +90,7 @@ end
 -- ─────────────────────────────── Démarrage ───────────────────────────────
 local function startMission(zone)
     local C = Config.Objectives
+    if not C.Enabled then return false, 'Les missions colis sont désactivées' end
     if O then return false, 'Une mission est déjà en cours' end
     local hold = math.floor(tonumber(zone.hold) or C.Hold)
     O = {
@@ -106,7 +111,7 @@ local function dropCarrier(reason)
     O.carrier, O.carrierGang, O.outside = nil, nil, 0
     if O.phase == 'hold' and not inZone(pos) then pos = O.zone end   -- hors zone : retour au centre
     O.pos = vec(pos)
-    if src then GB.notify(src, reason or '~r~Vous avez perdu le colis.') end
+    if src and reason then GB.notify(src, reason) end   -- reason = nil : porteur déconnecté
     announce(('Le colis est tombé à ~b~%s~s~ : il peut être ramassé !'):format(O.label))
 end
 
@@ -114,10 +119,12 @@ local function deliver(src, g)
     local C = Config.Objectives
     local reward = O.reward
     local account = C.RewardAccount == 'money' and 'money' or 'dirty'
-    GB.treasuryAdd(g.name, account, reward)
+    if not GB.treasuryAdd(g.name, account, reward) and reward > 0 then   -- gang supprimé entre-temps : pas de livraison
+        return dropCarrier('~r~Votre gang n\'existe plus : livraison impossible.')
+    end
     GB.addRep(g.name, C.RewardRep)
     GB.log(g.name, ESX.GetPlayerFromId(src), 'objective_delivered', ('%s : %d$'):format(O.label, reward))
-    stop(('~g%s~s~ a livré le colis ~b~%s~s~ à son coffre (~g+%d$~s~).'):format(label(g.name), O.label, reward))
+    stop(('~g~%s~s~ a livré le colis ~b~%s~s~ à son coffre (~g~+%d$~s~).'):format(label(g.name), O.label, reward))
 end
 
 -- ─────────────────────────────── Ramasser le colis ───────────────────────────────
@@ -140,7 +147,7 @@ ESX.RegisterServerCallback('gangbuilder:obj:pickup', function(src, cb)
     if O.phase == 'hold' then
         GB.notify(src, ('Restez dans la zone ~y~%d s~s~ avec le colis.'):format(O.holdLeft))
     else
-        GB.notify(src, '~g Ramenez le colis à votre coffre de gang !')
+        GB.notify(src, '~g~ Ramenez le colis à votre coffre de gang !')
     end
     pushState()
     cb({ ok = true })
@@ -160,7 +167,7 @@ CreateThread(function()
             elseif O.carrier then
                 local src = O.carrier
                 local g, ped = GB.PlayerGang[src], pedOf(src)
-                if not g or g.name ~= O.carrierGang or not ped then
+                if not g or not GB.Gangs[g.name] or g.name ~= O.carrierGang or not ped then
                     dropCarrier('~r~Vous avez perdu le colis.')
                 elseif GetEntityHealth(ped) <= 0 then
                     local c = GetEntityCoords(ped)
@@ -175,7 +182,7 @@ CreateThread(function()
                             O.holdLeft = O.holdLeft - 1
                             if O.holdLeft <= 0 then
                                 O.phase = 'deliver'
-                                GB.notify(src, '~g Zone tenue ! Ramenez maintenant le colis à votre coffre de gang.')
+                                GB.notify(src, '~g~ Zone tenue ! Ramenez maintenant le colis à votre coffre de gang.')
                                 announce(('~r~%s~s~ a tenu la zone ~b~%s~s~ et file vers son coffre : arrêtez-les !'):format(label(O.carrierGang), O.label))
                             end
                         else
@@ -195,7 +202,7 @@ CreateThread(function()
                         end
                     end
                 end
-                if O then pushState() end
+                if O then pushState(true) end
             else
                 if now % 5 == 0 then pushState() end
             end

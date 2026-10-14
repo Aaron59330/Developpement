@@ -46,7 +46,7 @@ local function cleanField(f, v, src)
     local cur = GBGetPath(f.key)
     if f.t == 'int' then return int(v, f.min, f.max, cur)
     elseif f.t == 'num' then return num(v, f.min, f.max, cur)
-    elseif f.t == 'bool' then return v == true
+    elseif f.t == 'bool' then if v == nil then return cur end return v == true   -- champ absent (réglage ajouté après la sauvegarde) : valeur actuelle
     elseif f.t == 'str' then return str(v, f.max or 100, '')
     elseif f.t == 'color' then return color(v, cur or { 255, 255, 255 })
     elseif f.t == 'enum' then

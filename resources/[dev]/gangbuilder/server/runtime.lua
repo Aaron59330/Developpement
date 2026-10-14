@@ -396,14 +396,14 @@ CreateThread(function()
                             for _, p in ipairs(payees) do
                                 if GB.treasuryRemove(name, 'money', p.salary) then
                                     p.x.addAccountMoney(S.Account, p.salary)
-                                    GB.notify(p.x.source, ('Salaire du gang : ~g$%d'):format(p.salary))
+                                    GB.notify(p.x.source, ('Salaire du gang : ~g~$%d'):format(p.salary))
                                 end
                             end
                         end
                     else
                         for _, p in ipairs(payees) do
                             p.x.addAccountMoney(S.Account, p.salary)
-                            GB.notify(p.x.source, ('Salaire du gang : ~g$%d'):format(p.salary))
+                            GB.notify(p.x.source, ('Salaire du gang : ~g~$%d'):format(p.salary))
                         end
                     end
                 end

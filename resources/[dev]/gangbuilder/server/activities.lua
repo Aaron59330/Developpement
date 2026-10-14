@@ -147,7 +147,7 @@ ESX.RegisterServerCallback('gangbuilder:act:finish', function(src, cb)
         GB.addRep(gang.name, Config.Rep.PerHarvest)
         GB.log(gang.name, xPlayer, 'harvest', ('%dx %s'):format(d.count, d.label))
         if GB.onIllegalActivity then GB.onIllegalActivity(src, 'harvest', point) end
-        return cb({ ok = true, message = ('Tu as récolté ~g%dx %s'):format(d.count, d.label) })
+        return cb({ ok = true, message = ('Tu as récolté ~g~%dx %s'):format(d.count, d.label) })
 
     elseif act.kind == 'process' then
         local r = d.recipes[act.idx or 0]
@@ -168,7 +168,7 @@ ESX.RegisterServerCallback('gangbuilder:act:finish', function(src, cb)
         GB.log(gang.name, xPlayer, 'process', ('%dx %s (%d/%d réussi)'):format(r.output.count * ok, r.output.label, ok, act.qty))
         if GB.onIllegalActivity then GB.onIllegalActivity(src, 'process', point) end
         if ok == 0 then return cb({ ok = true, message = '~r~Le traitement a échoué : les ingrédients sont perdus.' }) end
-        return cb({ ok = true, message = ('Tu as produit ~g%dx %s%s'):format(r.output.count * ok, r.output.label, ok < act.qty and ('~s~ (%d/%d réussis)'):format(ok, act.qty) or '') })
+        return cb({ ok = true, message = ('Tu as produit ~g~%dx %s%s'):format(r.output.count * ok, r.output.label, ok < act.qty and ('~s~ (%d/%d réussis)'):format(ok, act.qty) or '') })
 
     elseif act.kind == 'laundry' then
         local c = launderCfg(point)
@@ -182,7 +182,7 @@ ESX.RegisterServerCallback('gangbuilder:act:finish', function(src, cb)
         GB.stat(xPlayer.identifier, gang.name, 'laundered', act.amount)
         GB.addRep(gang.name, math.floor(act.amount / 1000) * Config.Rep.PerLaunderThousand)
         GB.log(gang.name, xPlayer, 'launder', ('%d$ sale -> %d$ propre (commission %d$)'):format(act.amount, clean, fee))
-        return cb({ ok = true, message = ('Blanchiment terminé : ~g%d$~s~ propres (commission %d$)'):format(clean, fee) })
+        return cb({ ok = true, message = ('Blanchiment terminé : ~g~%d$~s~ propres (commission %d$)'):format(clean, fee) })
     end
     cb(fail('Activité inconnue'))
 end)

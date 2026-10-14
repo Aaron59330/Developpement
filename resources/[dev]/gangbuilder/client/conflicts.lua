@@ -27,7 +27,10 @@ RegisterNetEvent('gangbuilder:client:conflict', function(d)
     BeginTextCommandSetBlipName('STRING')
     AddTextComponentSubstringPlayerName(('Affrontement — %s'):format(d.label or 'Territoire'))
     EndTextCommandSetBlipName(icon)
-    conflictBlips[d.id] = { radius, icon }
+    local mine = { radius, icon }
+    conflictBlips[d.id] = mine
+    -- filet de sécurité : si conflictEnd n'arrive jamais (changement de gang…), les blips disparaissent à la fin prévue
+    SetTimeout(((tonumber(d.left) or 300) + 10) * 1000, function() if conflictBlips[d.id] == mine then clearConflict(d.id) end end)
     if d.role == 'owner' then SetNewWaypoint(c.x + 0.0, c.y + 0.0) end
     local seconds = tonumber(d.blip) or 90
     SetTimeout(seconds * 1000, function()

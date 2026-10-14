@@ -69,7 +69,7 @@ end
 -- Appelé après une activité illégale réussie (récolte, traitement, vente)
 function GB.onIllegalActivity(src, kind, point)
     local C = Config.Conflicts
-    if not C.Enabled or not (C.Kinds or {})[kind] then return end
+    if not C.Enabled or not Config.Territories.Enabled or not (C.Kinds or {})[kind] then return end
     local g = GB.PlayerGang[src]
     local ped = GetPlayerPed(src)
     if not g or not ped or ped == 0 then return end
@@ -88,11 +88,18 @@ local function removeRep(name, amount)
     end
 end
 
+local function endFor(c)
+    for _, s in ipairs(GB.onlineMembers(c.owner)) do TriggerClientEvent('gangbuilder:client:conflictEnd', s, c.id) end
+    for _, s in ipairs(GB.onlineMembers(c.intruder)) do TriggerClientEvent('gangbuilder:client:conflictEnd', s, c.id) end
+end
+
 local function resolve(c)
     local C, T = Config.Conflicts, Config.Territories
     local t = GB.Territories[c.id]
     Conf[c.id] = nil
     cool[c.id .. ':' .. c.intruder] = os.time() + C.Cooldown
+    -- un des deux gangs a été supprimé pendant l'affrontement : on l'arrête sans récompense ni capture
+    if not GB.Gangs[c.owner] or not GB.Gangs[c.intruder] then return endFor(c) end
     local so, si = c.scores[c.owner] or 0, c.scores[c.intruder] or 0
     local intruderWins = si >= C.MinKillsToWin and si > so
     local winner, loser = intruderWins and c.intruder or c.owner, intruderWins and c.owner or c.intruder
@@ -105,7 +112,7 @@ local function resolve(c)
             GB.captureTerritory(t, c.intruder)
         end
     end
-    GB.addRep(winner, C.RepWin)
+    if (intruderWins and si or so) > 0 then GB.addRep(winner, C.RepWin) end   -- pas de réputation sur un 0-0 (anti-farm)
     removeRep(loser, C.RepLoss)
     GB.log(winner, nil, 'conflict_win', ('%s : %d - %d contre %s'):format(name, intruderWins and si or so, intruderWins and so or si, loser))
 
@@ -115,23 +122,28 @@ local function resolve(c)
     for _, s in ipairs(GB.onlineMembers(loser)) do
         GB.notify(s, ('~r~Défaite~s~ sur ~y~%s~s~ (%d - %d).'):format(name, intruderWins and so or si, intruderWins and si or so))
     end
-    for _, s in ipairs(GB.onlineMembers(c.owner)) do TriggerClientEvent('gangbuilder:client:conflictEnd', s, c.id) end
-    for _, s in ipairs(GB.onlineMembers(c.intruder)) do TriggerClientEvent('gangbuilder:client:conflictEnd', s, c.id) end
+    endFor(c)
 end
 
 -- Kills : esx:onPlayerDeath (côté serveur) contient le tueur ; on ne compte que les kills dans la zone, entre les deux gangs
+-- L'event vient du client de la victime (non fiable) : on vérifie côté serveur que les deux joueurs sont dans la zone et on ignore les doublons
+local lastDeath = {}   -- [victime] = os.time() du dernier kill compté
+AddEventHandler('playerDropped', function() lastDeath[source] = nil end)
+
 RegisterNetEvent('esx:onPlayerDeath', function(data)
     local victim = source
     if type(data) ~= 'table' or not data.killedByPlayer then return end
     local killer = tonumber(data.killerServerId)
     local vg, kg = GB.PlayerGang[victim], killer and GB.PlayerGang[killer]
     if not vg or not kg or vg.name == kg.name or killer == victim then return end
-    local ped = GetPlayerPed(victim)
-    if not ped or ped == 0 then return end
-    local pos = GetEntityCoords(ped)
+    if next(Conf) == nil or (lastDeath[victim] or 0) + 10 > os.time() then return end
+    local ped, kped = GetPlayerPed(victim), GetPlayerPed(killer)
+    if not ped or ped == 0 or not kped or kped == 0 then return end
+    local pos, kpos = GetEntityCoords(ped), GetEntityCoords(kped)
     for id, c in pairs(Conf) do
         local t = GB.Territories[id]
-        if t and c.scores[vg.name] and c.scores[kg.name] and inTerritory(t, pos) then
+        if t and c.scores[vg.name] and c.scores[kg.name] and inTerritory(t, pos) and inTerritory(t, kpos) then
+            lastDeath[victim] = os.time()
             c.scores[kg.name] = c.scores[kg.name] + 1
             push(c)
             return
@@ -144,7 +156,7 @@ CreateThread(function()
         Wait(1000)
         local now = os.time()
         for id, c in pairs(Conf) do
-            if not GB.Territories[id] or c.endsAt <= now then
+            if not GB.Territories[id] or c.endsAt <= now or not GB.Gangs[c.owner] or not GB.Gangs[c.intruder] then
                 local ok, err = pcall(resolve, c)
                 if not ok then Conf[id] = nil print(('^1[gangbuilder] erreur affrontement : %s^0'):format(tostring(err))) end
             end

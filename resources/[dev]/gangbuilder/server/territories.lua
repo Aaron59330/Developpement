@@ -69,7 +69,7 @@ local function capture(t, gangName)
     GB.addRep(gangName, Config.Rep.PerCapture)
     GB.log(gangName, nil, 'territory_captured', ('%s%s'):format(t.label, previous and (' (pris à ' .. previous .. ')') or ''))
     if T.AnnounceCapture then
-        notifyGang(gangName, ('~g%s~s~ est à vous !'):format(t.label))
+        notifyGang(gangName, ('~g~%s~s~ est à vous !'):format(t.label))
         if previous and previous ~= gangName then notifyGang(previous, ('~r~%s a été perdu : %s l\'a capturé.'):format(t.label, GB.Gangs[gangName].label)) end
     end
     GB.syncTerritories()
@@ -184,7 +184,7 @@ CreateThread(function()
                         if reward > 0 and GB.treasuryAdd(t.owner, T.RewardAccount == 'money' and 'money' or 'dirty', reward) then
                             GB.addRep(t.owner, Config.Rep.PerIncome)
                             GB.log(t.owner, nil, 'territory_income', ('%s : %d$'):format(t.label, reward))
-                            notifyGang(t.owner, ('Revenu de ~g%s~s~ : ~g+%d$'):format(t.label, reward))
+                            notifyGang(t.owner, ('Revenu de ~g~%s~s~ : ~g~+%d$'):format(t.label, reward))
                         end
                     end
                 end

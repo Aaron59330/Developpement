@@ -109,7 +109,6 @@ Config.Salary = {
     SkipIfBroke     = true,        -- trésorerie insuffisante : personne n'est payé (sinon : payé partiellement dans l'ordre)
 }
 
--- ─────────────────────────────── Réputation ───────────────────────────────
 -- ─────────────────────────────── Affrontements de territoire ───────────────────────────────
 -- Quand un gang fait une activité illégale (récolte, traitement, vente) sur le territoire d'un AUTRE gang, le propriétaire est
 -- prévenu (notification + alerte sur la carte) et un affrontement commence : chaque kill dans la zone rapporte un point.
@@ -147,13 +146,15 @@ Config.Objectives = {
     RewardRep       = 40,
     Model           = 'prop_box_wood02a_pu',   -- objet affiché au sol
     -- Zones possibles (une au hasard par mission automatique ; /gbobjective <nom> pour en lancer une précise)
+    -- `hold` et `reward` sont facultatifs par zone : sans eux, les réglages Hold / Reward ci-dessus (modifiables en jeu) s'appliquent.
     Zones = {
-        { name = 'port',      label = 'Cargaison du port',      coords = vector3(1210.0, -3050.0, 5.9),  radius = 40.0, hold = 180, reward = 6000 },
-        { name = 'aerodrome', label = 'Largage de l\'aérodrome', coords = vector3(1740.0, 3290.0, 41.1),  radius = 45.0, hold = 150, reward = 5000 },
-        { name = 'entrepot',  label = 'Entrepôt abandonné',     coords = vector3(1000.0, -2180.0, 30.5), radius = 35.0, hold = 120, reward = 4000 },
+        { name = 'port',      label = 'Cargaison du port',      coords = vector3(1210.0, -3050.0, 5.9),  radius = 40.0 },
+        { name = 'aerodrome', label = 'Largage de l\'aérodrome', coords = vector3(1740.0, 3290.0, 41.1),  radius = 45.0 },
+        { name = 'entrepot',  label = 'Entrepôt abandonné',     coords = vector3(1000.0, -2180.0, 30.5), radius = 35.0 },
     },
 }
 
+-- ─────────────────────────────── Réputation ───────────────────────────────
 Config.Rep = {
     Enabled         = true,
     PerCapture      = 25,    -- territoire capturé
