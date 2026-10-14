@@ -30,6 +30,7 @@ server_scripts {
 }
 
 client_scripts {
+    'client/bb_map.lua',
     'client/main.lua',
     'client/garage.lua',
     'client/rental.lua',

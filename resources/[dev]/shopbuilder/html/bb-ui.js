@@ -172,3 +172,56 @@
   }
   if (document.body) boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
+
+/* ───────────────────────── BBMap : cartes « Blip » et « Marker » communes à tous les builders ─────────────────────────
+   Même mise en page, mêmes champs, mêmes valeurs par défaut partout (Job, Gang, Shop, World).
+   Utilise les helpers globaux de chaque builder : fld(), ic(). Les champs utilisent data-path / data-t (supportés par tous). */
+(function () {
+  'use strict';
+  var TYPES = [[0, 'Cône inversé'], [1, 'Cylindre'], [2, 'Chevron épais'], [3, 'Chevron fin'], [4, 'Drapeau à damier'], [5, 'Drapeau à damier (rond)'], [6, 'Cercle vertical'], [7, 'Avion'],
+    [20, 'Chevron ×1'], [21, 'Chevron ×2'], [22, 'Chevron ×3'], [23, 'Cercle épais'], [24, 'Icône replay'], [25, 'Cercle fin'], [26, 'Cercle fin + flèche'], [27, 'Cercle + flèches'], [28, 'Sphère'],
+    [29, 'Symbole dollar'], [30, 'Barres horizontales'], [31, 'Tête de loup'], [32, "Point d'interrogation"], [33, 'Symbole avion'], [34, 'Symbole hélico'], [35, 'Symbole bateau'], [36, 'Symbole voiture'],
+    [37, 'Symbole moto'], [38, 'Symbole vélo'], [39, 'Symbole camion'], [40, 'Symbole parachute'], [41, 'Lame de scie']];
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function val(v) { return v === undefined || v === null ? '' : esc(v); }
+  function num(path, v, extra, ph) { return '<input type="number" data-path="' + path + '" data-t="n" value="' + val(v) + '"' + (ph !== undefined ? ' placeholder="' + esc(ph) + '"' : '') + ' ' + (extra || '') + '>'; }
+  function chk(path, label, on, rerender) { return '<label class="chk"><input type="checkbox" data-path="' + path + '" data-t="b"' + (rerender ? ' data-r="1"' : '') + (on ? ' checked' : '') + '> ' + label + '</label>'; }
+
+  /* Carte « Blip sur la carte » : o = { base, b, title, labelHint, hint, extra } */
+  function blipCard(o) {
+    var b = o.b || {}, p = o.base;
+    return '<div class="card"><div class="card-h"><div class="t">' + ic('pin', 17) + ' ' + (o.title || 'Blip sur la carte') + '</div>' + chk(p + '.enabled', 'Afficher', b.enabled, true) + '</div>' +
+      '<div class="grid4">' +
+      fld('Sprite', num(p + '.sprite', b.sprite, 'min="0" max="900"', o.defSprite)) +
+      fld('Couleur', num(p + '.color', b.color, 'min="0" max="85"', o.defColor)) +
+      fld('Taille', num(p + '.scale', b.scale, 'step="0.1" min="0.1" max="3"', o.defScale || 0.8)) +
+      fld('Nom du blip', '<input data-path="' + p + '.label" value="' + val(b.label) + '" maxlength="60" placeholder="' + esc(o.labelHint || 'Par défaut : nom du module') + '">') +
+      '</div><div class="row mt-s" style="gap:22px;flex-wrap:wrap">' + chk(p + '.shortRange', 'Visible uniquement à proximité', b.shortRange !== false) +
+      (o.hint ? '<span class="hint">' + o.hint + '</span>' : '') + '</div>' + (o.extra || '') + '</div>';
+  }
+
+  /* Carte « Marker au sol » : o = { base, m, typeKey ('type' | 'marker'), colorHtml, title, withEnabled, inherit } — champs vides = hérités du style commun */
+  function markerCard(o) {
+    var m = o.m || {}, p = o.base, tk = o.typeKey || 'type', inh = o.inherit || {}, isc = inh.scale || {}, sc = m.scale || {};
+    var t = Number(m[tk] != null ? m[tk] : inh[tk]);
+    if (isNaN(t)) t = o.defType != null ? o.defType : 25;
+    var known = TYPES.some(function (x) { return x[0] === t; });
+    var sel = '<select data-path="' + p + '.' + tk + '" data-t="n">' + TYPES.map(function (x) { return '<option value="' + x[0] + '"' + (t === x[0] ? ' selected' : '') + '>' + x[0] + ' · ' + x[1] + '</option>'; }).join('') +
+      (known || isNaN(t) ? '' : '<option value="' + t + '" selected>' + t + ' · (personnalisé)</option>') + '</select>';
+    var d = function (v, def) { return v !== undefined && v !== null ? v : def; };
+    return '<div class="card"><div class="card-h"><div class="t">' + ic('target', 17) + ' ' + (o.title || 'Marker au sol') + '</div>' +
+      '<button class="sm" data-a="bbPreview" data-v="' + p + '">' + ic('target', 14) + ' Aperçu en jeu</button>' +
+      (o.withEnabled === false ? '' : '<span style="margin-left:12px">' + chk(p + '.enabled', 'Afficher', m.enabled !== false, true) + '</span>') + '</div>' +
+      '<div class="grid4">' + fld('Forme du marker', sel) + (o.colorHtml ? o.colorHtml : '<div></div>') +
+      fld('Opacité (0-255)', num(p + '.alpha', m.alpha, 'min="0" max="255"', d(inh.alpha, 140))) +
+      fld('Décalage vertical', num(p + '.offset', m.offset, 'step="0.05"', d(inh.offset, -0.95))) + '</div>' +
+      '<div class="grid4 mt">' +
+      fld('Taille X', num(p + '.scale.x', sc.x, 'step="0.05" min="0.05"', d(isc.x, 0.9))) +
+      fld('Taille Y', num(p + '.scale.y', sc.y, 'step="0.05" min="0.05"', d(isc.y, 0.9))) +
+      fld('Hauteur (Z)', num(p + '.scale.z', sc.z, 'step="0.05" min="0.05"', d(isc.z, 0.6))) +
+      '<div class="row" style="align-items:flex-end;gap:22px;flex-wrap:wrap">' + chk(p + '.bob', 'Rebond', m.bob === true) + chk(p + '.rotate', 'Rotation', m.rotate === true) + '</div></div>' +
+      '<div class="hint mt-s">Les champs vides reprennent le style commun (Paramètres → Marker). Même éditeur dans tous les builders.</div></div>';
+  }
+
+  window.BBMap = { markerTypes: TYPES, blipCard: blipCard, markerCard: markerCard };
+})();

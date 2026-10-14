@@ -677,10 +677,9 @@ const Builder = {
         <div class="lbl" style="margin-bottom:10px">Couleur générale (interface d'achat + marker au sol)</div>
         <div class="row wrap">${SWATCHES.map(sw => `<button class="swatch-pick ${s.color && sw.join() === s.color.join() ? 'on' : ''}" style="background:rgb(${sw.join(',')})" data-a="shopSwatch" data-v="${sw.join(',')}"></button>`).join('')}
           <input type="color" data-path="__shopcolor" value="${'#' + (s.color || this.cat.accent || [239, 68, 68]).map(n => Math.round(n).toString(16).padStart(2, '0')).join('')}" style="width:60px">${s.color ? '' : '<span class="hint">Couleur globale du serveur utilisée</span>'}</div>
-        <div class="grid2 mt">${this.chk('settings.marker.enabled', 'Afficher le marker au sol', (s.marker || {}).enabled !== false, true)}${(s.marker || {}).enabled !== false ? fld('Type de marker', this.inp('settings.marker.type', (s.marker || {}).type, { t: 'n', type: 'number', extra: 'min="0" max="43"' })) : '<div></div>'}</div></div>
-      <div class="card"><div class="card-h"><div class="t">${ic('pin', 17)} Blip sur la carte</div>${this.chk('settings.blip.enabled', 'Afficher', b.enabled, true)}</div>
-        ${b.enabled ? `<div class="grid4">${fld('Sprite', this.inp('settings.blip.sprite', b.sprite, { t: 'n', type: 'number' }))}${fld('Couleur', this.inp('settings.blip.color', b.color, { t: 'n', type: 'number' }))}${fld('Taille', this.inp('settings.blip.scale', b.scale, { t: 'n', type: 'number', extra: 'step="0.1"' }))}${fld('Nom du blip', this.inp('settings.blip.label', b.label, { ph: 'Par défaut : nom de la boutique' }))}</div>
-        <div class="mt-s">${this.chk('settings.blip.shortRange', 'Visible uniquement à proximité', b.shortRange !== false)}</div>` : '<div class="hint">Le blip est affiché à chaque emplacement de la boutique.</div>'}</div>
+        </div>
+      ${BBMap.markerCard({ base: 'settings.marker', m: s.marker || {}, typeKey: 'type' })}
+      ${BBMap.blipCard({ base: 'settings.blip', b, labelHint: 'Par défaut : nom de la boutique', hint: 'Le blip est affiché à chaque emplacement de la boutique.', defSprite: 52 })}
       <div class="card"><div class="card-h"><div class="t">${ic('user', 17)} Vendeur (PNJ)</div>${this.chk('settings.ped.enabled', 'Afficher un vendeur', p.enabled, true)}</div>
         ${p.enabled ? `<div class="grid2">${fld('Modèle du PNJ', `<div class="row">${this.inp('settings.ped.model', p.model, { ph: 'ex : mp_m_shopkeep_01' })}<button data-a="checkPed">Vérifier</button></div>`)}${fld('Animation', this.sel('settings.ped.scenario', this.cat.scenarios.map(x => [x.id, x.label]), p.scenario || ''))}</div>
         <div class="hint mt-s">Le vendeur apparaît à chaque emplacement, dans la direction du « Cap » enregistré.</div>` : '<div class="hint">Sans vendeur, seul le marker au sol est affiché.</div>'}</div>
@@ -902,6 +901,7 @@ const Builder = {
         this.cur = clone(r.shop); this.view = 'shop'; this.tab = 'locations'; this.dirty = false; this.openItems = {}; this.itemQ = ''; this.logs = null;
         this.render(true); return;
       }
+      case 'bbPreview': { await rpc('previewMarker', Object.assign({}, getPath(this.cur, v), { color: this.cur.settings.color })); toast('Aperçu affiché devant toi (8 s)'); return; }
       case 'swatch': this.accentDraft = v.split(',').map(Number); applyTheme(this.accentDraft); this.render(); return;
       case 'saveAccent': {
         const r = await rpc('settings:save', this.accentDraft || this.cat.accent);

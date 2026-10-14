@@ -35,9 +35,7 @@ end
 
 -- ─────────────────────────────── Markers (réglages éditables en jeu) ───────────────────────────────
 function DrawGBMarker(d, c, color)
-    local sc, col = d.scale or { x = 0.9, y = 0.9, z = 0.6 }, color or d.color or { 255, 255, 255 }
-    DrawMarker(d.marker or 1, c.x, c.y, c.z + (d.offset or -0.95), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        sc.x + 0.0, sc.y + 0.0, sc.z + 0.0, col[1], col[2], col[3], d.alpha or 140, d.bob == true, true, 2, d.rotate == true, nil, nil, false)
+    BB.DrawMarker(d, c, color)
 end
 
 -- Config poussée par le serveur (modifiée en jeu via /gangbuilder → Paramètres)
@@ -54,16 +52,7 @@ local function rebuildBlips(list)
     for _, b in ipairs(list or {}) do
         -- un blip invalide ne doit jamais empêcher les suivants de s'afficher
         pcall(function()
-            local blip = AddBlipForCoord(b.coords.x + 0.0, b.coords.y + 0.0, b.coords.z + 0.0)
-            SetBlipSprite(blip, tonumber(b.sprite) or 1)
-            SetBlipColour(blip, tonumber(b.color) or 0)
-            SetBlipScale(blip, (tonumber(b.scale) or 0.9) + 0.0)
-            SetBlipDisplay(blip, 4)
-            SetBlipAsShortRange(blip, b.shortRange == true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName(tostring(b.label or 'Gang'))
-            EndTextCommandSetBlipName(blip)
-            blipHandles[#blipHandles + 1] = blip
+            blipHandles[#blipHandles + 1] = BB.Blip(b.coords, b, { label = 'Gang', category = b.category })
         end)
     end
 end

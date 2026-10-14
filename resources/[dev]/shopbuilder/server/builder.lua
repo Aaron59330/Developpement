@@ -174,6 +174,18 @@ local function cleanSettings(s, old)
     if type(col) == 'table' and #col == 3 then out.color = { int(col[1], 0, 255, 239), int(col[2], 0, 255, 68), int(col[3], 0, 255, 68) } end
     local mk = type(s.marker) == 'table' and s.marker or {}
     out.marker = { enabled = mk.enabled ~= false, type = int(mk.type, 0, 43, Config.Marker.type) }
+    -- style complet commun aux builders (champs optionnels : absent = hérite du marker commun)
+    if tonumber(mk.alpha) then out.marker.alpha = int(mk.alpha, 0, 255, 140) end
+    if tonumber(mk.offset) then out.marker.offset = math.max(-10.0, math.min(10.0, tonumber(mk.offset))) end
+    if mk.bob ~= nil then out.marker.bob = mk.bob == true end
+    if mk.rotate ~= nil then out.marker.rotate = mk.rotate == true end
+    if type(mk.scale) == 'table' then
+        local sc = {}
+        for _, k in ipairs({ 'x', 'y', 'z' }) do
+            if tonumber(mk.scale[k]) then sc[k] = math.max(0.05, math.min(20.0, tonumber(mk.scale[k]))) end
+        end
+        if next(sc) then out.marker.scale = sc end
+    end
     return out
 end
 

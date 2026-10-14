@@ -469,17 +469,11 @@ const Builder = {
 
   tab_blip() {
     const b = this.cur.gang.blip;
-    return `<div class="card"><div class="card-h"><div class="t">${ic('pin', 16)} Blip du gang sur la carte (QG)</div></div>
-      <div class="row wrap" style="margin-bottom:16px;gap:26px"><label class="chk"><input type="checkbox" data-path="gang.blip.enabled" data-t="b" ${b.enabled ? 'checked' : ''}> Afficher le blip (visible par tous les joueurs)</label>
-        <label class="chk"><input type="checkbox" data-path="gang.blip.shortRange" data-t="b" ${b.shortRange ? 'checked' : ''}> Visible sur le radar uniquement à proximité</label>
-        ${b.enabled && !(b.coords && b.coords.x != null) ? chip('⚠ position manquante : le blip ne s\'affichera pas', 'bad nodot') : (b.enabled ? chip('Blip actif', 'ok') : chip('Désactivé', 'mute'))}</div>
-      <div class="grid4">${fld('Nom du blip', `<input data-path="gang.blip.label" value="${esc(b.label || '')}" maxlength="40">`)}
-      ${fld('Sprite', `<input type="number" data-path="gang.blip.sprite" data-t="n" value="${b.sprite ?? 310}">`)}
-      ${fld('Couleur', `<input type="number" data-path="gang.blip.color" data-t="n" value="${b.color ?? 0}">`)}
-      ${fld('Taille', `<input type="number" step="0.1" data-path="gang.blip.scale" data-t="n" value="${b.scale ?? 0.9}">`)}</div>
-      <p class="hint mt">La couleur du blip est aussi celle de la zone sur la carte quand le gang détient un territoire.</p>
-      <div class="mt">${coordField('gang.blip.coords', b.coords, { tp: true })}</div></div>`;
+    const status = b.enabled && !(b.coords && b.coords.x != null) ? chip('⚠ position manquante : le blip ne s\'affichera pas', 'bad nodot') : (b.enabled ? chip('Blip actif', 'ok') : chip('Désactivé', 'mute'));
+    return BBMap.blipCard({ base: 'gang.blip', b, title: 'Blip du gang sur la carte (QG)', labelHint: 'Par défaut : nom du gang', hint: status, defSprite: 310,
+      extra: `<p class="hint mt">La couleur du blip est aussi celle de la zone sur la carte quand le gang détient un territoire.</p><div class="mt">${coordField('gang.blip.coords', b.coords, { tp: true })}</div>` });
   },
+
 
   tab_points() {
     const pts = this.cur.points, types = this.catalog.pointTypes, sel = pts[this.activePoint];

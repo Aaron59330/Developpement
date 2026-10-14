@@ -1112,9 +1112,7 @@ const Builder = {
   },
 
   blipCard() {
-    return `<div class="card"><div class="card-h"><div class="t">${ic('map', 17)} Blip sur la carte</div>${this.fC('Afficher', 'settings.blip.enabled', { r: 1 })}</div>
-      <div class="grid4">${this.fN('Sprite', 'settings.blip.sprite', { min: 0, max: 900 })}${this.fN('Couleur', 'settings.blip.color', { min: 0, max: 85 })}${this.fN('Taille', 'settings.blip.scale', { min: 0.1, max: 3, step: 0.1 })}${this.fS('Nom (vide = nom du module)', 'settings.blip.label', { max: 60 })}</div>
-      <div class="row mt-s">${this.fC('Visible uniquement à proximité', 'settings.blip.shortRange')}<span class="hint">Chaque point choisit lui-même s'il affiche un blip (onglet Points).</span></div></div>`;
+    return BBMap.blipCard({ base: 'settings.blip', b: this.v('settings.blip') || {}, hint: "Chaque point choisit lui-même s'il affiche un blip (onglet Points)." });
   },
 
   /* ── Onglet Général ── */
@@ -1125,9 +1123,7 @@ const Builder = {
         <div class="hint mt-s">Type : <b>${esc(this.type(c.type).one)}</b>. Un module désactivé est invisible pour les joueurs.</div></div>
       ${this.blipCard()}
       ${this.uiColorCard()}
-      <div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Marker au sol</div>${this.fC('Afficher', 'settings.marker.enabled')}</div>
-        <div class="grid3">${this.fN('Type de marker', 'settings.marker.type', { min: 0, max: 43 })}
-        ${fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${hex}" style="width:60px"><span class="muted sm-t">${col ? 'personnalisée' : 'couleur par défaut'}</span>${col ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`)}</div></div>`;
+      ${BBMap.markerCard({ base: 'settings.marker', m: this.v('settings.marker') || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${hex}" style="width:60px"><span class="muted sm-t">${col ? 'personnalisée' : 'couleur par défaut'}</span>${col ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) })}`;
   },
 
   /* ── Couleur des menus (par module) ── */
@@ -1513,6 +1509,7 @@ const Builder = {
         return this.markDirty();
       }
       case 'doorPick': DoorPick.start(this, v); return;
+      case 'bbPreview': { await rpc('previewMarker', Object.assign({}, getPath(this.cur, v), { color: this.cur.settings.color })); toast('Aperçu affiché devant toi (8 s)'); return; }
       case 'colorReset': this.delPath('settings.color'); this.markDirty(); return this.render();
       case 'swatch': this.accentDraft = v.split(',').map(Number); applyTheme(this.accentDraft); return this.render();
       case 'saveAccent': {

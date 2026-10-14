@@ -185,8 +185,8 @@ function JB.publicBlips()
         local b = job.blip or {}
         if b.enabled and b.coords then
             list[#list + 1] = {
-                job = name, label = (b.label and b.label ~= '') and b.label or job.label, sprite = b.sprite or 478, color = b.color or 0,
-                scale = b.scale or 0.9, coords = b.coords, shortRange = b.shortRange == true,
+                job = name, label = (b.label and b.label ~= '') and b.label or job.label, sprite = b.sprite, color = b.color, category = job.type,
+                scale = b.scale, coords = b.coords, shortRange = b.shortRange ~= false,
             }
         end
     end

@@ -38,7 +38,7 @@ end
 local function copy(t) return json.decode(json.encode(t)) end
 
 -- ─────────────────────────────── Nettoyeur à schéma ───────────────────────────────
--- Nœuds : { 's', max, def } texte · { 'n', min, max, def } nombre · { 'b', def } booléen · { 'i' } nom d'item · { 'm' } nom de modèle
+-- Nœuds : { 'on', min, max } nombre optionnel · { 'ob' } booléen optionnel · { 's', max, def } texte · { 'n', min, max, def } nombre · { 'b', def } booléen · { 'i' } nom d'item · { 'm' } nom de modèle
 --         { 'c' } coordonnées (nil si absentes) · { 'rgb' } couleur · { 'j' } métiers {nom = grade} · { 'p' } moyens de paiement
 --         { 'e', {valeurs}, def } énumération · { 'o', {champs} } objet · { 'a', nœud, max, filtre } tableau
 local clean
@@ -64,6 +64,12 @@ function clean(node, v)
         if s == '' or #s > 60 or not s:match('^[%w_]+$') then return '' end
         return s
     elseif t == 'c' then return coord(v)
+    elseif t == 'on' then        -- nombre optionnel : absent = hérite du style commun
+        if tonumber(v) == nil then return nil end
+        return num(v, node[2], node[3])
+    elseif t == 'ob' then        -- booléen optionnel
+        if v == nil then return nil end
+        return v == true
     elseif t == 'rgb' then
         if type(v) == 'table' and #v == 3 then return { int(v[1], 0, 255, 239), int(v[2], 0, 255, 68), int(v[3], 0, 255, 68) } end
         return nil
@@ -133,7 +139,8 @@ local COMMON = {
     access = obj({ jobs = { 'j' }, item = ITEM }),
     color = { 'rgb' },
     uiColor = { 'rgb' },
-    marker = obj({ enabled = { 'b', true }, type = { 'n', 0, 43, 25 } }),
+    marker = obj({ enabled = { 'b', true }, type = { 'n', 0, 43, 25 }, alpha = { 'on', 0, 255 }, offset = { 'on', -10, 10 }, bob = { 'ob' }, rotate = { 'ob' },
+        scale = obj({ x = { 'on', 0.05, 20 }, y = { 'on', 0.05, 20 }, z = { 'on', 0.05, 20 } }) }),
     note = { 's', 200, '' },
 }
 

@@ -34,17 +34,7 @@ local function rebuildBlips()
         if b and b.enabled then
             for _, loc in ipairs(shop.locations or {}) do
                 pcall(function()
-                    local c = loc.coords
-                    local blip = AddBlipForCoord(c.x + 0.0, c.y + 0.0, c.z + 0.0)
-                    SetBlipSprite(blip, tonumber(b.sprite) or 52)
-                    SetBlipColour(blip, tonumber(b.color) or 0)
-                    SetBlipScale(blip, (tonumber(b.scale) or 0.8) + 0.0)
-                    SetBlipDisplay(blip, 4)
-                    SetBlipAsShortRange(blip, b.shortRange ~= false)
-                    BeginTextCommandSetBlipName('STRING')
-                    AddTextComponentSubstringPlayerName(tostring((b.label and b.label ~= '') and b.label or shop.label))
-                    EndTextCommandSetBlipName(blip)
-                    blipHandles[#blipHandles + 1] = blip
+                    blipHandles[#blipHandles + 1] = BB.Blip(loc.coords, b, { label = shop.label, category = shop.type })
                 end)
             end
         end
@@ -188,10 +178,8 @@ end, false)
 
 -- ─────────────────────────────── Markers & interaction ───────────────────────────────
 local function drawMarker(c, shop)
-    local m = Config.Marker or {}
-    local sc, col = m.scale or { x = 0.9, y = 0.9, z = 0.6 }, shop.color or m.color or { 64, 224, 208 }   -- couleur propre à la boutique
-    DrawMarker((shop.marker and shop.marker.type) or m.type or 25, c.x, c.y, c.z + (m.offset or -0.95), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        sc.x + 0.0, sc.y + 0.0, sc.z + 0.0, col[1], col[2], col[3], m.alpha or 140, false, true, 2, false, nil, nil, false)
+    -- couches : marker commun (Config.Marker) → marker de la boutique ; couleur : propre à la boutique
+    BB.DrawMarker(BB.Style(Config.Marker, shop.marker), c, shop.color)
 end
 
 CreateThread(function()
@@ -234,6 +222,12 @@ local NuiRemote = {
 local NuiLocal = {}
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end
+
+-- Aperçu du marker (éditeur commun BBMap) : affiché devant le joueur pendant 8 secondes
+NuiLocal.previewMarker = function(args, cb)
+    if type(args[1]) == 'table' then BB.Preview(BB.Style(Config.Marker, args[1]), 8) end
+    cb({ ok = true })
+end
 
 -- Retour au panel central (builderhub) : ferme ce builder puis ouvre /builders
 NuiLocal.bbHub = function(_, cb)
