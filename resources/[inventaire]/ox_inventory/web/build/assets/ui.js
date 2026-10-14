@@ -116,6 +116,8 @@
 
   const clothIcon = key => `../clothes/${CLOTH_ICON[key] || 'xmark'}.svg`;
   const XMARK = '../clothes/xmark.svg';
+  // objet sans image : image par défaut (même style) plutôt qu'une croix
+  const noImg = () => `${state.imagepath}/_default.png`;
 
   async function ensureItemData(name) {
     if (!name || state.itemData[name]) return;
@@ -394,7 +396,7 @@
     el._label = el.querySelector('.label');
     el._rar = el.querySelector('.rar');
     el._dur = el.querySelector('.dur i');
-    el._pic.onerror = () => { if (!el._pic.src.endsWith('xmark.svg')) el._pic.src = XMARK; };
+    el._pic.onerror = () => { if (!el._pic.src.endsWith('_default.png') && !el._pic.src.endsWith('xmark.svg')) el._pic.src = noImg(); else if (el._pic.src.endsWith('_default.png')) el._pic.src = XMARK; };
     return el;
   }
 
@@ -997,7 +999,7 @@
       else if (it.metadata && it.metadata.type) h += `<p>${esc(it.metadata.type)}</p>`;
       if (invType === 'shop' && it.price !== undefined && it.price > 0) h += `<p>${money}${it.price.toLocaleString('en-us')}</p>`;
       h += '</div>';
-      h += `<div class="t-body"><img src="${esc(imageOf(it.name))}" onerror="this.src='${XMARK}'" alt=""><div><div class="t-name">${esc((it.metadata && it.metadata.label) || data.label || it.name)}</div><div class="t-desc">${md(desc || L('ui_no_description_item', "Aucune description de l'objet"))}</div></div></div>`;
+      h += `<div class="t-body"><img src="${esc(imageOf(it.name))}" onerror="this.onerror=null;this.src='${noImg()}'" alt=""><div><div class="t-name">${esc((it.metadata && it.metadata.label) || data.label || it.name)}</div><div class="t-desc">${md(desc || L('ui_no_description_item', "Aucune description de l'objet"))}</div></div></div>`;
 
       const meta = [];
       if (invType !== 'crafting') {
@@ -1170,7 +1172,7 @@
     const text = count ? `${base} ${Number(count).toLocaleString('en-us')}${item.name === 'money' ? (state.locale.$ || '$') : 'x'}` : base;
     const el = document.createElement('div');
     el.className = `notif ${cls}`;
-    el.innerHTML = `<img src="${esc(imageOf(item))}" onerror="this.src='${XMARK}'" alt=""><div><div class="n-name">${esc((item.metadata && item.metadata.label) || (state.itemData[item.name] && state.itemData[item.name].label) || item.name)}</div><div class="n-text">${esc(text)}</div></div>`;
+    el.innerHTML = `<img src="${esc(imageOf(item))}" onerror="this.onerror=null;this.src='${noImg()}'" alt=""><div><div class="n-name">${esc((item.metadata && item.metadata.label) || (state.itemData[item.name] && state.itemData[item.name].label) || item.name)}</div><div class="n-text">${esc(text)}</div></div>`;
     ui.notifs.appendChild(el);
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
     setTimeout(() => el.classList.remove('in'), 2500);
