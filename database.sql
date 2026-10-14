@@ -664,6 +664,9 @@ CREATE TABLE `jobbuilder_properties` (
   `interior` varchar(40) NOT NULL DEFAULT 'custom',
   `entrance` longtext NOT NULL,
   `exit_coords` longtext DEFAULT NULL,
+  `category` varchar(20) NOT NULL DEFAULT 'house',
+  `description` varchar(300) NOT NULL DEFAULT '',
+  `ipl` varchar(300) NOT NULL DEFAULT '',
   `created_by` varchar(80) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `sold_at` timestamp NULL DEFAULT NULL

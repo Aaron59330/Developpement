@@ -146,7 +146,12 @@ S.interiors = function(v)
         if not exit then return nil, ('Intérieur « %s » : position de sortie manquante'):format(key) end
         n = n + 1
         if n > 30 then return nil, 'Maximum 30 intérieurs' end
-        out[key] = { label = str(i.label, 60, key), exit = exit }
+        local cat = tostring(i.cat or '')
+        local ipl = {}
+        for _, nme in ipairs(type(i.ipl) == 'table' and i.ipl or {}) do
+            if type(nme) == 'string' and nme:match('^[%w_]+$') and #ipl < 8 then ipl[#ipl + 1] = nme:sub(1, 90) end
+        end
+        out[key] = { label = str(i.label, 60, key), exit = exit, cat = Config.Real.Categories[cat] and cat or 'other', ipl = #ipl > 0 and ipl or nil }
     end
     for key in pairs(Config.Real.Interiors) do
         if not out[key] then

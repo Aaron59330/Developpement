@@ -58,6 +58,26 @@ end
 
 local function isAgent(x, p) return x.job.name == p.job_name and agencyJob(p.job_name) ~= nil end
 
+-- IPL à charger côté client pour entrer (préréglage de l'intérieur ou liste saisie pour un intérieur personnalisé)
+local function interiorIpl(p)
+    if p.interior == 'custom' then
+        local list = {}
+        for name in tostring(p.ipl or ''):gmatch('[%w_]+') do list[#list + 1] = name end
+        return list
+    end
+    local i = R.Interiors[p.interior]
+    return i and i.ipl or {}
+end
+
+local function cleanIpl(v)
+    local list = {}
+    for name in tostring(v or ''):gmatch('[%w_]+') do
+        if #list >= 8 then break end
+        list[#list + 1] = name:sub(1, 90)
+    end
+    return table.concat(list, ',')
+end
+
 local function interiorExit(p)
     if p.interior == 'custom' then return p.exit end
     local i = R.Interiors[p.interior]
@@ -72,7 +92,7 @@ end
 local function stashId(p, pt) return ('jbprop_%d_%d'):format(p.id, pt.id) end
 
 local function registerPropStash(p, pt)
-    if JB.inventory() ~= 'ox' or pt.type ~= 'stash' then return end
+    if JB.inventory() ~= 'ox' or (pt.type ~= 'stash' and pt.type ~= 'safe') then return end
     pcall(function()
         exports.ox_inventory:RegisterStash(stashId(p, pt), pt.label ~= '' and pt.label or p.label,
             tonumber(pt.data.slots) or 50, (tonumber(pt.data.weight) or 100) * 1000, false)
@@ -88,12 +108,36 @@ local function registerHook()
             if not pid then return end
             local p, x = Props[pid], ESX.GetPlayerFromId(payload.source)
             if not p or not x or Inside[payload.source] ~= pid or not accessRole(x, p) then return false end
+            -- Coffre-fort : propriétaire / locataire uniquement (pas les détenteurs de clés)
+            local ptid = tonumber(tostring(payload.inventoryId):match('^jbprop_%d+_(%d+)$'))
+            for _, pt in ipairs(p.points) do
+                if pt.id == ptid and pt.type == 'safe' and accessRole(x, p) ~= 'owner' then return false end
+            end
         end, { inventoryFilter = { '^jbprop_%d+_%d+$' } })
     end)
 end
 
 -- ─────────────────────────────── Chargement / sync ───────────────────────────────
+local migrated = false
+local function migrate()
+    if migrated then return end
+    migrated = true
+    local cols = {
+        { 'category', "varchar(20) NOT NULL DEFAULT 'house'" },
+        { 'description', "varchar(300) NOT NULL DEFAULT ''" },
+        { 'ipl', "varchar(300) NOT NULL DEFAULT ''" },
+    }
+    for _, c in ipairs(cols) do
+        local has = MySQL.scalar.await("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'jobbuilder_properties' AND COLUMN_NAME = ?", { c[1] }) or 0
+        if has == 0 then
+            local ok, err = pcall(MySQL.update.await, ('ALTER TABLE jobbuilder_properties ADD COLUMN `%s` %s'):format(c[1], c[2]))
+            if not ok then print(('^1[jobbuilder] migration colonne %s : %s^0'):format(c[1], tostring(err))) end
+        end
+    end
+end
+
 function JB.loadProps()
+    migrate()
     for k in pairs(Props) do Props[k] = nil end
     for _, r in ipairs(MySQL.query.await('SELECT * FROM jobbuilder_properties') or {}) do
         r.entrance = JB.decode(r.entrance, { x = 0, y = 0, z = 0, h = 0 })
@@ -115,7 +159,7 @@ end
 
 local function publicProp(p, x)
     return {
-        id = p.id, label = p.label, address = p.address, deal = p.deal, price = p.price, status = p.status,
+        id = p.id, label = p.label, address = p.address, deal = p.deal, price = p.price, status = p.status, category = p.category or 'house',
         job = p.job_name, entrance = p.entrance, access = (x and accessRole(x, p)) and true or false,
     }
 end
@@ -205,6 +249,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:door', function(src, cb, id)
     local job = JB.Jobs[p.job_name]
     cb({
         ok = true, id = p.id, label = p.label, address = p.address, deal = p.deal, price = p.price, status = p.status,
+        category = p.category or 'house', categoryLabel = (R.Categories[p.category or 'house'] or R.Categories.other).label, description = p.description or '',
         jobLabel = job and job.label or '', role = role, rent_until = p.rent_until, rent_days = R.RentDays,
         keys = role == 'owner' and p.key_holders or nil, maxKeys = R.MaxKeys,
         canVisit = role == 'agent' and p.status == 'available',
@@ -235,7 +280,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:enter', function(src, cb, id)
     SetPlayerRoutingBucket(src, R.BucketBase + p.id)
     local pts = {}
     for _, pt in ipairs(p.points) do pts[#pts + 1] = { id = pt.id, type = pt.type, label = pt.label, coords = pt.coords } end
-    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts })
+    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts, ipl = interiorIpl(p) })
 end)
 
 ESX.RegisterServerCallback('jobbuilder:prop:leave', function(src, cb)
@@ -316,7 +361,8 @@ end
 ESX.RegisterServerCallback('jobbuilder:prop:openPoint', function(src, cb, propId, pointId)
     local p, point, x, err = pointCtx(src, propId, pointId)
     if not p then return cb(fail(err)) end
-    if point.type == 'stash' then
+    if point.type == 'stash' or point.type == 'safe' then
+        if point.type == 'safe' and accessRole(x, p) ~= 'owner' then return cb(fail('Réservé au propriétaire')) end
         if JB.inventory() ~= 'ox' then return cb(fail('Les coffres nécessitent ox_inventory')) end
         cb({ ok = true, kind = 'stash', stash = stashId(p, point) })
     else
@@ -440,6 +486,7 @@ local function agencyData(x, job)
             list[#list + 1] = {
                 id = p.id, label = p.label, address = p.address, deal = p.deal, price = p.price, status = p.status,
                 owner_name = p.owner_name, rent_until = p.rent_until, interior = p.interior, entrance = p.entrance,
+                category = p.category or 'house', description = p.description or '', ipl = p.ipl or '',
                 exit = p.interior == 'custom' and p.exit or nil, hasExit = ex ~= nil, keys = #p.key_holders, points = pts,
             }
             stats.total = stats.total + 1
@@ -454,13 +501,15 @@ local function agencyData(x, job)
         FROM jobbuilder_property_history h LEFT JOIN jobbuilder_properties p ON p.id = h.property_id
         WHERE h.job_name = ? ORDER BY h.id DESC LIMIT 40]], { job.name }) or {}
     local interiors = {}
-    for k, i in pairs(R.Interiors) do interiors[#interiors + 1] = { key = k, label = i.label } end
-    table.sort(interiors, function(a, b) return a.key < b.key end)
-    interiors[#interiors + 1] = { key = 'custom', label = 'Intérieur personnalisé (MLO / shell)' }
+    for k, i in pairs(R.Interiors) do interiors[#interiors + 1] = { key = k, label = i.label, cat = i.cat or 'other' } end
+    table.sort(interiors, function(a, b) return a.cat == b.cat and a.key < b.key or a.cat < b.cat end)
+    interiors[#interiors + 1] = { key = 'custom', label = 'Intérieur personnalisé (MLO / shell)', cat = 'custom' }
+    local cats = {}
+    for _, k in ipairs(R.CategoryOrder) do if R.Categories[k] then cats[#cats + 1] = { key = k, label = R.Categories[k].label } end end
     return {
         ok = true, job = job.name, jobLabel = job.label, agent = JB.playerName(x), gradeLabel = x.job.grade_label,
         commission = s.commission or R.DefaultCommission, admin = x.job.grade >= (s.prop_admin_grade or job.boss_grade),
-        props = list, stats = stats, history = hist, interiors = interiors, maxPoints = R.MaxPointsPerProp, rentDays = R.RentDays,
+        props = list, stats = stats, history = hist, interiors = interiors, categories = cats, maxPoints = R.MaxPointsPerProp, rentDays = R.RentDays,
     }
 end
 
@@ -474,12 +523,15 @@ local function cleanProperty(d, existing)
     if type(d) ~= 'table' then return nil, 'Données invalides' end
     local out = { label = str(d.label, 80), address = str(d.address, 120) }
     if out.label == '' then return nil, 'Le nom de la propriété est obligatoire' end
+    out.category = R.Categories[tostring(d.category or '')] and tostring(d.category) or 'house'
+    out.description = str(d.description, 300)
+    out.ipl = cleanIpl(d.ipl)
     out.entrance = coords(d.entrance)
     if not out.entrance then return nil, 'Position de l\'entrée manquante' end
 
     local owned = existing and existing.status == 'owned'
     if owned then
-        out.deal, out.price, out.interior, out.exit = existing.deal, existing.price, existing.interior, existing.exit
+        out.deal, out.price, out.interior, out.exit, out.ipl = existing.deal, existing.price, existing.interior, existing.exit, existing.ipl or ''
     else
         out.deal = d.deal == 'rent' and 'rent' or 'sale'
         out.price = math.floor(num(d.price, 0, 1000000000, 0))
@@ -503,7 +555,7 @@ local function cleanProperty(d, existing)
         local c = coords(p.coords)
         if not c then return nil, ('Point « %s » : position manquante (visite la propriété puis « Ma position »)'):format(str(p.label, 40, R.PointTypes[p.type].label)) end
         local pd = {}
-        if p.type == 'stash' then
+        if p.type == 'stash' or p.type == 'safe' then
             local dd = type(p.data) == 'table' and p.data or {}
             pd.slots = math.floor(num(dd.slots, 5, 200, 50))
             pd.weight = math.floor(num(dd.weight, 1, 2000, 100))
@@ -524,11 +576,11 @@ ESX.RegisterServerCallback('jobbuilder:prop:save', function(src, cb, d)
     local id
     if existing then
         id = existing.id
-        MySQL.update.await('UPDATE jobbuilder_properties SET label = ?, address = ?, deal = ?, price = ?, interior = ?, entrance = ?, exit_coords = ? WHERE id = ? AND job_name = ?',
-            { prop.label, prop.address, prop.deal, prop.price, prop.interior, json.encode(prop.entrance), prop.exit and json.encode(prop.exit) or nil, id, job.name })
+        MySQL.update.await('UPDATE jobbuilder_properties SET label = ?, address = ?, deal = ?, price = ?, interior = ?, entrance = ?, exit_coords = ?, category = ?, description = ?, ipl = ? WHERE id = ? AND job_name = ?',
+            { prop.label, prop.address, prop.deal, prop.price, prop.interior, json.encode(prop.entrance), prop.exit and json.encode(prop.exit) or nil, prop.category, prop.description, prop.ipl, id, job.name })
     else
-        id = MySQL.insert.await('INSERT INTO jobbuilder_properties (job_name, label, address, deal, price, interior, entrance, exit_coords, key_holders, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            { job.name, prop.label, prop.address, prop.deal, prop.price, prop.interior, json.encode(prop.entrance), prop.exit and json.encode(prop.exit) or nil, '[]', x.identifier })
+        id = MySQL.insert.await('INSERT INTO jobbuilder_properties (job_name, label, address, deal, price, interior, entrance, exit_coords, category, description, ipl, key_holders, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            { job.name, prop.label, prop.address, prop.deal, prop.price, prop.interior, json.encode(prop.entrance), prop.exit and json.encode(prop.exit) or nil, prop.category, prop.description, prop.ipl, '[]', x.identifier })
     end
     if not id then return cb(fail('Erreur SQL')) end
 

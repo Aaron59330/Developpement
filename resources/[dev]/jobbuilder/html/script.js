@@ -116,7 +116,8 @@ const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${
 
 const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car', realestate: 'home', dealer: 'car', government: 'landmark', bank: 'landmark', bar: 'utensils', custom: 'briefcase' };
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
-const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
+const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
+const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
 const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
@@ -1127,7 +1128,7 @@ Object.assign(Builder, {
     const I = this.S.draft.interiors, keys = Object.keys(I).sort();
     return `<div class="card"><div class="card-h"><div class="t">${ic('building', 16)} Intérieurs disponibles pour les propriétés</div><button class="sm" data-a="placeStart">${ic('pin', 14)} Mode placement</button></div>
       <p class="hint" style="margin-bottom:14px">Position de <b>sortie</b> de chaque intérieur (où le joueur apparaît et où se trouve la porte). Place-toi à l'intérieur (ex : après un TP) puis « Ma position ». « Intérieur personnalisé » est toujours disponible dans le panel agence pour les MLO.</p>
-      ${keys.map(k => `<div class="card" style="padding:14px;margin-bottom:10px"><div class="row" style="margin-bottom:12px"><div class="grow" style="flex:1"><div class="grid2">${fld('Clé', `<input value="${esc(k)}" disabled>`)}${fld('Nom affiché', `<input data-path="S.draft.interiors.${k}.label" value="${esc(I[k].label)}" maxlength="60">`)}</div></div><button class="icon danger" data-a="intDel" data-v="${esc(k)}">${ic('trash', 15)}</button></div>${coordField(`S.draft.interiors.${k}.exit`, I[k].exit, { tp: true })}</div>`).join('')}
+      ${keys.map(k => `<div class="card" style="padding:14px;margin-bottom:10px"><div class="row" style="margin-bottom:12px"><div class="grow" style="flex:1"><div class="grid2">${fld('Clé', `<input value="${esc(k)}" disabled>`)}${fld('Nom affiché', `<input data-path="S.draft.interiors.${k}.label" value="${esc(I[k].label)}" maxlength="60">`)}</div><div class="grid2 mt">${fld('Catégorie', `<select data-path="S.draft.interiors.${k}.cat">${Object.entries(PROP_CATS).map(([ck, cl]) => `<option value="${ck}" ${(I[k].cat || 'other') === ck ? 'selected' : ''}>${esc(cl)}</option>`).join('')}</select>`)}${fld('IPL à charger (virgules)', `<input data-path="S.draft.interiors.${k}.ipl" data-t="list" value="${esc((I[k].ipl || []).join(', '))}" placeholder="facultatif">`)}</div></div><button class="icon danger" data-a="intDel" data-v="${esc(k)}">${ic('trash', 15)}</button></div>${coordField(`S.draft.interiors.${k}.exit`, I[k].exit, { tp: true })}</div>`).join('')}
       <div class="row mt"><input id="int-key" placeholder="nouvelle clé (ex: loft2)" maxlength="20" style="max-width:260px"><button data-a="intAdd">${ic('plus', 15)} Ajouter un intérieur</button></div></div>`;
   },
 
@@ -1230,7 +1231,7 @@ Object.assign(Builder, {
 
 /* ════════════════════════════ AGENCE IMMOBILIÈRE ════════════════════════════ */
 const Agency = {
-  d: null, view: 'home', sel: null, form: null, q: '', filter: 'all',
+  d: null, cat: 'all', view: 'home', sel: null, form: null, q: '', filter: 'all',
 
   open(data) {
     this.d = data;
@@ -1239,12 +1240,17 @@ const Agency = {
   },
 
   prop(id) { return this.d.props.find(p => p.id === id); },
+  catLabel(k) { return ((this.d.categories || []).find(c => c.key === k) || {}).label || 'Maison'; },
   placementTargets() {
     const f = this.form; if (this.view !== 'form' || !f) return [];
     const out = [{ root: this, path: 'form.entrance', label: 'Entrée du bien' }];
     if (f.interior === 'custom' && f.status !== 'owned') out.push({ root: this, path: 'form.exit', label: 'Sortie de l\'intérieur' });
-    f.points.forEach((p, i) => out.push({ root: this, path: `form.points.${i}.coords`, label: `${p.label || (p.type === 'stash' ? 'Coffre' : 'Penderie')} — position` }));
+    f.points.forEach((p, i) => out.push({ root: this, path: `form.points.${i}.coords`, label: `${p.label || ({ stash: 'Coffre', safe: 'Coffre-fort' }[p.type] || 'Penderie')} — position` }));
     return out;
+  },
+  interiorOptions(f) {
+    const d = this.d, cats = [...(d.categories || []).map(c => [c.key, c.label]), ['other', 'Autres'], ['custom', 'Personnalisé']];
+    return cats.map(([k, l]) => { const items = d.interiors.filter(i => (i.cat === k) || (k === 'other' && !(d.categories || []).some(c => c.key === i.cat) && i.cat !== 'custom')); return items.length ? `<optgroup label="${esc(l)}">${items.map(i => `<option value="${i.key}" ${f.interior === i.key ? 'selected' : ''}>${esc(i.label)}</option>`).join('')}</optgroup>` : ''; }).join('');
   },
   statusChip(p) {
     if (p.status === 'available') return chip('Disponible', 'ok');
@@ -1298,13 +1304,14 @@ const Agency = {
 
   view_list() {
     const q = this.q.toLowerCase();
-    const list = this.d.props.filter(p => (this.filter === 'all' || (this.filter === 'available' ? p.status === 'available' : p.status === 'owned' && p.deal === this.filter))
+    const list = this.d.props.filter(p => (this.cat === 'all' || p.category === this.cat) && (this.filter === 'all' || (this.filter === 'available' ? p.status === 'available' : p.status === 'owned' && p.deal === this.filter))
       && (!q || (p.label + ' ' + p.address + ' ' + (p.owner_name || '')).toLowerCase().includes(q)));
     return {
       head: { icon: 'building', title: 'Propriétés', sub: `${this.d.stats.total} bien(s) · ${this.d.stats.available} disponible(s)`, acts: `<button class="primary" data-a="nav" data-v="new">${ic('plus', 16)} Nouvelle propriété</button>` },
       body: `<div class="row" style="margin-bottom:16px"><div style="flex:1;position:relative"><input data-path="q" placeholder="Rechercher un bien, une adresse, un propriétaire…" value="${esc(this.q)}" style="padding-left:38px"><span style="position:absolute;left:12px;top:10px;color:var(--muted)">${ic('search', 16)}</span></div>
+        <select data-path="cat" style="width:190px"><option value="all" ${this.cat === 'all' ? 'selected' : ''}>Toutes catégories</option>${(this.d.categories || []).map(c => `<option value="${c.key}" ${this.cat === c.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>
         <select data-path="filter" style="width:180px"><option value="all" ${this.filter === 'all' ? 'selected' : ''}>Tous</option><option value="available" ${this.filter === 'available' ? 'selected' : ''}>Disponibles</option><option value="sale" ${this.filter === 'sale' ? 'selected' : ''}>Vendus</option><option value="rent" ${this.filter === 'rent' ? 'selected' : ''}>Loués</option></select></div>
-        ${list.map(p => `<div class="item click" data-a="open" data-v="${p.id}">${tile(p.status === 'available' ? 'home' : 'key')}<div class="grow"><b>${esc(p.label)}</b><small>${esc(p.address || 'Sans adresse')} · ${this.dealLabel(p)}${p.owner_name ? ' · ' + esc(p.owner_name) : ''}</small></div>
+        ${list.map(p => `<div class="item click" data-a="open" data-v="${p.id}">${tile(p.status === 'available' ? 'home' : 'key')}<div class="grow"><b>${esc(p.label)}</b><small>${esc(this.catLabel(p.category))} · ${esc(p.address || 'Sans adresse')} · ${this.dealLabel(p)}${p.owner_name ? ' · ' + esc(p.owner_name) : ''}</small></div>
           <span class="price">${this.priceLabel(p)}</span>${this.statusChip(p)}<span class="chev">${ic('chevron', 16)}</span></div>`).join('')
         || emptyState('building', 'Aucune propriété', 'Crée ta première propriété avec « Nouvelle propriété ».')}`,
     };
@@ -1323,44 +1330,49 @@ const Agency = {
         <div><div class="card"><div class="card-h"><div class="t">${ic('file', 16)} Informations</div>${this.statusChip(p)}</div>
           <div class="kv"><span>Type</span><span>${this.dealLabel(p)}</span></div>
           <div class="kv"><span>${p.deal === 'rent' ? 'Loyer (par semaine)' : 'Prix'}</span><span><b>${money(p.price)}</b></span></div>
+          <div class="kv"><span>Catégorie</span><span>${esc(this.catLabel(p.category))}</span></div>
           <div class="kv"><span>Intérieur</span><span>${esc((d.interiors.find(i => i.key === p.interior) || {}).label || p.interior)}</span></div>
+          ${p.description ? `<p class="hint" style="margin-top:10px">${esc(p.description)}</p>` : ''}
           ${avail ? '' : `<div class="kv"><span>${p.deal === 'rent' ? 'Locataire' : 'Propriétaire'}</span><span>${esc(p.owner_name || '—')}</span></div>
           ${p.deal === 'rent' && p.rent_until ? `<div class="kv"><span>Loyer payé jusqu'au</span><span>${fmtDate(p.rent_until)}</span></div>` : ''}
           <div class="kv"><span>Doubles de clés</span><span>${p.keys}</span></div>`}</div>
           <div class="card"><div class="card-h"><div class="t">${ic('box', 16)} Points intérieurs · ${p.points.length}</div></div>
-            ${p.points.map(pt => `<div class="item">${tile(POINT_ICON[pt.type])}<div class="grow"><b>${esc(pt.label)}</b><small>${pt.type === 'stash' ? `Coffre · ${pt.data.slots} empl. · ${pt.data.weight} kg` : 'Penderie'}</small></div></div>`).join('') || '<p class="hint">Aucun coffre ni penderie. Utilise « Modifier » pour en ajouter.</p>'}</div></div>
+            ${p.points.map(pt => `<div class="item">${tile(POINT_ICON[pt.type])}<div class="grow"><b>${esc(pt.label)}</b><small>${pt.type === 'stash' || pt.type === 'safe' ? `${pt.type === 'safe' ? 'Coffre-fort' : 'Coffre'} · ${pt.data.slots} empl. · ${pt.data.weight} kg` : 'Penderie'}</small></div></div>`).join('') || '<p class="hint">Aucun coffre ni penderie. Utilise « Modifier » pour en ajouter.</p>'}</div></div>
         <div><div class="card"><div class="card-h"><div class="t">Actions</div></div><div style="display:flex;flex-direction:column;gap:10px">${actions}
           <button data-a="edit" data-v="${p.id}">${ic('edit', 16)} Modifier</button>
+          <button data-a="clone" data-v="${p.id}">${ic('plus', 16)} Dupliquer (autre appartement, même immeuble)</button>
           ${d.admin ? (avail ? `<button class="danger" data-a="del" data-v="${p.id}">${ic('trash', 16)} Supprimer</button>` : `<button class="danger" data-a="reset" data-v="${p.id}">Remettre en vente / expulser</button>`) : ''}</div>
           ${avail ? `<p class="hint mt">Le client doit se trouver à côté de toi : il reçoit l'offre à l'écran et paie directement. ${d.commission}% de commission pour toi.</p>` : ''}</div></div></div>`,
     };
   },
 
   blankForm() {
-    return { id: null, label: '', address: '', deal: 'sale', price: 150000, interior: this.d.interiors[0].key, entrance: null, exit: null, status: 'available', points: [] };
+    return { id: null, label: '', address: '', description: '', category: 'house', ipl: '', deal: 'sale', price: 150000, interior: this.d.interiors[0].key, entrance: null, exit: null, status: 'available', points: [] };
   },
 
   view_new() { this.form = this.blankForm(); this.view = 'form'; return this.view_form(); },
 
   view_form() {
     const f = this.form, d = this.d, locked = f.status === 'owned', isNew = !f.id;
-    const pt = (p, i) => `<div class="card" style="padding:14px"><div class="row" style="margin-bottom:12px">${tile(POINT_ICON[p.type])}<b style="flex:1">${p.type === 'stash' ? 'Coffre' : 'Penderie'}</b><button class="icon danger" data-a="delPt" data-v="${i}">${ic('trash', 15)}</button></div>
-      <div class="${p.type === 'stash' ? 'grid3' : ''}">${fld('Nom', `<input data-path="form.points.${i}.label" value="${esc(p.label)}" maxlength="60">`)}
-      ${p.type === 'stash' ? fld('Emplacements', `<input type="number" min="5" max="200" data-path="form.points.${i}.data.slots" data-t="n" value="${p.data.slots ?? 50}">`) + fld('Poids max (kg)', `<input type="number" min="1" data-path="form.points.${i}.data.weight" data-t="n" value="${p.data.weight ?? 100}">`) : ''}</div>
+    const pt = (p, i) => `<div class="card" style="padding:14px"><div class="row" style="margin-bottom:12px">${tile(POINT_ICON[p.type])}<b style="flex:1">${{ stash: 'Coffre', safe: 'Coffre-fort' }[p.type] || 'Penderie'}</b><button class="icon danger" data-a="delPt" data-v="${i}">${ic('trash', 15)}</button></div>
+      <div class="${p.type === 'stash' || p.type === 'safe' ? 'grid3' : ''}">${fld('Nom', `<input data-path="form.points.${i}.label" value="${esc(p.label)}" maxlength="60">`)}
+      ${p.type === 'stash' || p.type === 'safe' ? fld('Emplacements', `<input type="number" min="5" max="200" data-path="form.points.${i}.data.slots" data-t="n" value="${p.data.slots ?? 50}">`) + fld('Poids max (kg)', `<input type="number" min="1" data-path="form.points.${i}.data.weight" data-t="n" value="${p.data.weight ?? 100}">`) : ''}</div>
       <div class="mt-s">${coordField(`form.points.${i}.coords`, p.coords)}</div></div>`;
     return {
       head: { icon: isNew ? 'plus' : 'edit', title: isNew ? 'Nouvelle propriété' : `Modifier · ${f.label}`, sub: 'Renseigne le bien, l\'intérieur et les points (coffres, penderies)',
         acts: `<button data-a="${isNew ? 'nav' : 'open'}" data-v="${isNew ? 'list' : f.id}">Annuler</button><button class="primary" data-a="saveProp" style="height:38px">${isNew ? 'Créer la propriété' : 'Enregistrer'}</button>` },
       body: `<div class="grid2"><div class="card"><div class="card-h"><div class="t">${ic('file', 16)} Le bien</div></div>
           <div class="grid2">${fld('Nom', `<input data-path="form.label" value="${esc(f.label)}" maxlength="80" placeholder="Villa Vinewood Hills">`)}${fld('Adresse', `<input data-path="form.address" value="${esc(f.address)}" maxlength="120" placeholder="12 Vinewood Hills Dr">`)}</div>
+          <div class="grid2 mt">${fld('Catégorie du bien', `<select data-path="form.category">${(d.categories || []).map(c => `<option value="${c.key}" ${f.category === c.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>`)}${fld('Description', `<input data-path="form.description" value="${esc(f.description || '')}" maxlength="300" placeholder="3 chambres, piscine, vue sur la mer…">`)}</div>
           <div class="grid2 mt">${fld('Type', `<select data-path="form.deal" ${locked ? 'disabled' : ''}><option value="sale" ${f.deal === 'sale' ? 'selected' : ''}>Vente</option><option value="rent" ${f.deal === 'rent' ? 'selected' : ''}>Location (loyer / semaine)</option></select>`)}
           ${fld(f.deal === 'rent' ? 'Loyer ($ / semaine)' : 'Prix ($)', `<input type="number" min="1" data-path="form.price" data-t="n" value="${f.price ?? ''}" ${locked ? 'disabled' : ''}>`)}</div>
-          <div class="mt">${fld('Intérieur', `<select data-path="form.interior" ${locked ? 'disabled' : ''}>${d.interiors.map(i => `<option value="${i.key}" ${f.interior === i.key ? 'selected' : ''}>${esc(i.label)}</option>`).join('')}</select>`)}</div>
+          <div class="mt">${fld('Intérieur', `<select data-path="form.interior" ${locked ? 'disabled' : ''}>${this.interiorOptions(f)}</select>`)}</div>
           ${locked ? '<p class="hint mt">Bien occupé : type, prix et intérieur sont verrouillés.</p>' : ''}</div>
         <div class="card"><div class="card-h"><div class="t">${ic('pin', 16)} Entrée</div></div><p class="hint" style="margin-bottom:12px">Place-toi devant la porte du bien (à l'extérieur) puis clique « Ma position ».</p>${coordField('form.entrance', f.entrance)}
-          ${f.interior === 'custom' && !locked ? `<div class="lbl mt" style="margin-bottom:6px">Sortie de l'intérieur personnalisé</div><p class="hint" style="margin-bottom:12px">Place-toi à l'intérieur (MLO / shell), devant la porte, puis « Ma position ».</p>${coordField('form.exit', f.exit)}` : ''}</div></div>
+          ${f.interior === 'custom' && !locked ? `<div class="lbl mt" style="margin-bottom:6px">Sortie de l'intérieur personnalisé</div><p class="hint" style="margin-bottom:12px">Place-toi à l'intérieur (MLO / shell), devant la porte, puis « Ma position ».</p>${coordField('form.exit', f.exit)}
+          ${fld('IPL à charger (facultatif, séparés par des virgules)', `<input data-path="form.ipl" value="${esc(f.ipl || '')}" maxlength="300" placeholder="nom_ipl_1, nom_ipl_2">`)}` : ''}</div></div>
         <div class="card"><div class="card-h"><div class="t">${ic('box', 16)} Points intérieurs · ${f.points.length}/${d.maxPoints}</div>
-          <button class="sm" data-a="placeStart">${ic('pin', 14)} Mode placement</button><button class="sm" data-a="addPt" data-v="stash">${ic('plus', 14)} Coffre</button><button class="sm" data-a="addPt" data-v="wardrobe">${ic('plus', 14)} Penderie</button></div>
+          <button class="sm" data-a="placeStart">${ic('pin', 14)} Mode placement</button><button class="sm" data-a="addPt" data-v="stash">${ic('plus', 14)} Coffre</button><button class="sm" data-a="addPt" data-v="safe">${ic('plus', 14)} Coffre-fort</button><button class="sm" data-a="addPt" data-v="wardrobe">${ic('plus', 14)} Penderie</button></div>
           <p class="hint" style="margin-bottom:14px">Les positions se prennent <b>à l'intérieur</b> : enregistre le bien, clique <b>Visiter</b>, puis rouvre le menu F6 → <b>Modifier</b> et utilise « Ma position » pour chaque coffre / penderie. Ton brouillon est conservé quand tu fermes avec Échap.</p>
           ${f.points.map(pt).join('') || '<p class="hint">Aucun point pour l\'instant.</p>'}</div>`,
     };
@@ -1375,9 +1387,10 @@ const Agency = {
         else { this.view = v; if (v !== 'form') this.form = null; }
         return this.render();
       case 'open': this.sel = Number(v); this.view = 'detail'; this.form = null; return this.render();
-      case 'edit': { const p = this.prop(Number(v)); this.form = JSON.parse(JSON.stringify({ id: p.id, label: p.label, address: p.address, deal: p.deal, price: p.price, interior: p.interior, entrance: p.entrance, exit: p.exit, status: p.status, points: p.points })); this.view = 'form'; return this.render(); }
+      case 'edit': { const p = this.prop(Number(v)); this.form = JSON.parse(JSON.stringify({ id: p.id, label: p.label, address: p.address, description: p.description || '', category: p.category || 'house', ipl: p.ipl || '', deal: p.deal, price: p.price, interior: p.interior, entrance: p.entrance, exit: p.exit, status: p.status, points: p.points })); this.view = 'form'; return this.render(); }
+      case 'clone': { const p = this.prop(Number(v)); this.form = JSON.parse(JSON.stringify({ id: null, label: p.label + ' (copie)', address: p.address, description: p.description || '', category: p.category || 'house', ipl: p.ipl || '', deal: p.deal, price: p.price, interior: p.interior, entrance: null, exit: p.exit, status: 'available', points: (p.points || []).map(pt => ({ type: pt.type, label: pt.label, coords: pt.coords, data: pt.data })) })); this.view = 'form'; toast('Copie créée : place la nouvelle entrée puis enregistre', ''); return this.render(); }
       case 'coords': await grabCoords(this, v); return this.render();
-      case 'addPt': if (f.points.length >= this.d.maxPoints) return toast('Maximum de points atteint', 'err'); f.points.push({ type: v, label: v === 'stash' ? 'Coffre' : 'Penderie', coords: null, data: v === 'stash' ? { slots: 50, weight: 100 } : {} }); return this.render();
+      case 'addPt': if (f.points.length >= this.d.maxPoints) return toast('Maximum de points atteint', 'err'); f.points.push({ type: v, label: { stash: 'Coffre', safe: 'Coffre-fort' }[v] || 'Penderie', coords: null, data: v === 'stash' ? { slots: 50, weight: 100 } : v === 'safe' ? { slots: 20, weight: 50 } : {} }); return this.render();
       case 'delPt': f.points.splice(+v, 1); return this.render();
       case 'saveProp': {
         const r = await rpc('prop:save', f);
@@ -1400,7 +1413,7 @@ const Agency = {
     if (el.dataset.t === 'n') val = val === '' ? null : Number(val);
     setPath(this, path, val);
     if (path === 'q') return;                       // la recherche se met à jour à chaque frappe sans perdre le focus ci-dessous
-    if (isChange && (path === 'form.deal' || path === 'form.interior' || path === 'filter')) this.render();
+    if (isChange && (path === 'form.deal' || path === 'form.interior' || path === 'form.category' || path === 'filter' || path === 'cat')) this.render();
   },
 };
 // recherche live : on ne re-render que la liste pour garder le focus
@@ -2595,7 +2608,9 @@ const Runtime = {
   renderDoor() {
     const d = this.data, avail = d.status === 'available', owner = d.role === 'owner';
     const info = `<div class="card"><div class="card-h"><div class="t">${esc(d.address || 'Propriété')}</div>${avail ? chip('Disponible', 'ok') : (owner ? chip('Ta propriété', 'info') : d.role === 'key' ? chip('Tu as les clés', 'info') : chip('Occupée', 'mute'))}</div>
+      <div class="kv"><span>Catégorie</span><span>${esc(d.categoryLabel || '')}</span></div>
       <div class="kv"><span>Agence</span><span>${esc(d.jobLabel)}</span></div>
+      ${d.description ? `<p class="hint" style="margin:10px 0">${esc(d.description)}</p>` : ''}
       ${avail || owner ? `<div class="kv"><span>${d.deal === 'rent' ? 'Loyer / semaine' : 'Prix'}</span><span><b>${money(d.price)}</b></span></div>` : ''}
       ${owner && d.deal === 'rent' && d.rent_until ? `<div class="kv"><span>Loyer payé jusqu'au</span><span>${fmtDate(d.rent_until)}</span></div>` : ''}</div>`;
     let acts = '';

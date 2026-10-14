@@ -493,17 +493,45 @@ Config.Real = {
         noaccess  = { marker = 25, color = { 64, 224, 208 } },  -- propriété occupée (visiteur)
         exit      = { marker = 25,  color = { 64, 224, 208 } },  -- sortie de l'intérieur
     },
+    -- Types de biens (catégorie affichée dans le panel agence, filtres et blips)
+    Categories = {
+        house     = { label = 'Maison',           sprite = 40 },
+        apartment = { label = 'Appartement',      sprite = 40 },
+        villa     = { label = 'Villa',            sprite = 40 },
+        lab       = { label = 'Laboratoire',      sprite = 473 },
+        garage    = { label = 'Garage',           sprite = 357 },
+        warehouse = { label = 'Entrepôt',         sprite = 473 },
+        office    = { label = 'Bureau',           sprite = 475 },
+        shop      = { label = 'Local commercial', sprite = 52 },
+        hotel     = { label = 'Hôtel / Motel',    sprite = 40 },
+        other     = { label = 'Autre',            sprite = 374 },
+    },
+    CategoryOrder = { 'house', 'apartment', 'villa', 'lab', 'garage', 'warehouse', 'office', 'shop', 'hotel', 'other' },
     PointTypes = {
         stash    = { label = 'Coffre',   marker = 25, color = { 64, 224, 208 } },
+        safe     = { label = 'Coffre-fort', marker = 25, color = { 64, 224, 208 } },   -- réservé au propriétaire (pas aux détenteurs de clés)
         wardrobe = { label = 'Penderie', marker = 25, color = { 64, 224, 208 } },
     },
     -- Intérieurs prêts à l'emploi (TP). Coordonnées de sortie = où le joueur apparaît / où se trouve la porte.
     -- Vérifie-les en jeu ; "Intérieur personnalisé" te permet d'utiliser n'importe quel MLO / shell.
     Interiors = {
-        low     = { label = 'Appartement Low End',    exit = { x = 261.4586, y = -998.8196, z = -99.0086, h = 0.0 } },
-        medium  = { label = 'Appartement Medium End', exit = { x = 346.6677, y = -1013.1306, z = -99.1999, h = 0.0 } },
-        modern1 = { label = 'Appartement Modern 1',   exit = { x = -786.8663, y = 315.7642, z = 217.6385, h = 0.0 } },
-        modern2 = { label = 'Appartement Modern 2',   exit = { x = -774.0126, y = 342.0428, z = 196.6864, h = 0.0 } },
+        -- Appartements
+        low     = { cat = 'apartment', label = 'Appartement Low End',    exit = { x = 261.4586, y = -998.8196, z = -99.0086, h = 0.0 } },
+        medium  = { cat = 'apartment', label = 'Appartement Medium End', exit = { x = 346.6677, y = -1013.1306, z = -99.1999, h = 0.0 } },
+        modern1 = { cat = 'apartment', label = 'Appartement Modern 1',   exit = { x = -786.8663, y = 315.7642, z = 217.6385, h = 0.0 } },
+        modern2 = { cat = 'apartment', label = 'Appartement Modern 2',   exit = { x = -774.0126, y = 342.0428, z = 196.6864, h = 0.0 } },
+        -- Garages
+        garage2  = { cat = 'garage', label = 'Garage 2 places',  exit = { x = 173.2903, y = -1003.6001, z = -99.6586, h = 0.0 } },
+        garage6  = { cat = 'garage', label = 'Garage 6 places',  exit = { x = 197.8153, y = -1002.2930, z = -99.6586, h = 0.0 } },
+        garage10 = { cat = 'garage', label = 'Garage 10 places', exit = { x = 229.9559, y = -981.7928, z = -99.6586, h = 0.0 } },
+        -- Bureaux
+        office1 = { cat = 'office', label = 'Bureau Arcadius (exécutif)', exit = { x = -141.1987, y = -620.9130, z = 168.8205, h = 0.0 } },
+        -- Laboratoires / entrepôts DLC « Biker » (IPL chargés à l'entrée) : vérifie la position en jeu avec « Visiter »
+        lab_meth    = { cat = 'lab', label = 'Laboratoire de méthamphétamine', exit = { x = 1009.5, y = -3196.6, z = -38.99, h = 0.0 }, ipl = { 'bkr_biker_interior_placement_interior_2_biker_dlc_int_ware01_milo' } },
+        lab_weed    = { cat = 'lab', label = 'Ferme de cannabis',              exit = { x = 1066.0, y = -3183.4, z = -39.16, h = 0.0 }, ipl = { 'bkr_biker_interior_placement_interior_3_biker_dlc_int_ware02_milo' } },
+        lab_cocaine = { cat = 'lab', label = 'Laboratoire de cocaïne',         exit = { x = 1093.6, y = -3196.6, z = -38.99, h = 0.0 }, ipl = { 'bkr_biker_interior_placement_interior_4_biker_dlc_int_ware03_milo' } },
+        lab_fake    = { cat = 'lab', label = 'Atelier de faux billets',        exit = { x = 1121.9, y = -3195.3, z = -40.4,  h = 0.0 }, ipl = { 'bkr_biker_interior_placement_interior_5_biker_dlc_int_ware04_milo' } },
+        lab_docs    = { cat = 'lab', label = 'Atelier de faux papiers',        exit = { x = 1165.0, y = -3196.6, z = -39.0,  h = 0.0 }, ipl = { 'bkr_biker_interior_placement_interior_6_biker_dlc_int_ware05_milo' } },
     },
 }
 
@@ -741,9 +769,23 @@ function JBSet(section, v)
         for _, k in ipairs(JB_REAL_KEYS) do if v[k] ~= nil then Config.Real[k] = v[k] end end
         if v.Blips then replace(Config.Real.Blips, v.Blips) end
         if v.PointTypes then replace(Config.Real.PointTypes, v.PointTypes) end
+        for k, base in pairs(JBDefaults and JBDefaults.real and JBDefaults.real.PointTypes or {}) do    -- nouveaux types de points (ex : coffre-fort)
+            if Config.Real.PointTypes[k] == nil then Config.Real.PointTypes[k] = deepcopy(base) end
+        end
         if v.Markers then replace(Config.Real.Markers, v.Markers) end
     elseif section == 'interiors' then
         replace(Config.Real.Interiors, v)
+        -- Anciennes sauvegardes (sans catégorie) : on récupère catégorie / IPL des préréglages, et on ajoute les nouveaux préréglages
+        local legacy = true
+        for _, i in pairs(Config.Real.Interiors) do if i.cat then legacy = false end end
+        for k, base in pairs(JBDefaults and JBDefaults.interiors or {}) do
+            local cur = Config.Real.Interiors[k]
+            if cur then
+                cur.cat, cur.ipl = cur.cat or base.cat, cur.ipl or base.ipl
+            elseif legacy then
+                Config.Real.Interiors[k] = deepcopy(base)
+            end
+        end
     elseif section == 'jobTypes' then
         replace(Config.JobTypes, v)
     elseif section == 'ui' then

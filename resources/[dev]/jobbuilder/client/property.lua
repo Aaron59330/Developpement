@@ -20,12 +20,12 @@ local function rebuildBlips()
         if p.status == 'available' then
             local cfg = R.Blips[p.deal] or R.Blips.sale
             local blip = AddBlipForCoord(p.entrance.x, p.entrance.y, p.entrance.z)
-            SetBlipSprite(blip, cfg.sprite)
+            SetBlipSprite(blip, (R.Categories[p.category or 'house'] or {}).sprite or cfg.sprite)
             SetBlipColour(blip, cfg.color)
             SetBlipScale(blip, cfg.scale + 0.0)
             SetBlipAsShortRange(blip, true)
             BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName((p.deal == 'rent' and 'À louer : ' or 'À vendre : ') .. p.label)
+            AddTextComponentSubstringPlayerName(((R.Categories[p.category or 'house'] or {}).label or 'Bien') .. (p.deal == 'rent' and ' à louer : ' or ' à vendre : ') .. p.label)
             EndTextCommandSetBlipName(blip)
             propBlips[#propBlips + 1] = blip
         end
@@ -70,6 +70,7 @@ local function enterProperty(id, cb)
     end
     ESX.TriggerServerCallback('jobbuilder:prop:enter', function(res)
         if res and res.ok then
+            for _, name in ipairs(res.ipl or {}) do RequestIpl(name) end
             Inside = res
             CloseUI()
             CreateThread(function() teleportTo(res.exit) end)

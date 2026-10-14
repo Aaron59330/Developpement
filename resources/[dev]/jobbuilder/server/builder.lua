@@ -552,7 +552,7 @@ ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
     for id, p in pairs(JB.Points) do
         if p.job_name == name and p.type == 'stash' then stashes[#stashes + 1] = ('jobbuilder_%d'):format(id) end
     end
-    for _, r in ipairs(MySQL.query.await('SELECT pt.id AS ptid, pt.property_id AS pid FROM jobbuilder_property_points pt JOIN jobbuilder_properties p ON p.id = pt.property_id WHERE p.job_name = ? AND pt.type = ?', { name, 'stash' }) or {}) do
+    for _, r in ipairs(MySQL.query.await('SELECT pt.id AS ptid, pt.property_id AS pid FROM jobbuilder_property_points pt JOIN jobbuilder_properties p ON p.id = pt.property_id WHERE p.job_name = ? AND pt.type IN (?, ?)', { name, 'stash', 'safe' }) or {}) do
         stashes[#stashes + 1] = ('jbprop_%d_%d'):format(r.pid, r.ptid)
     end
 

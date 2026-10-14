@@ -252,3 +252,11 @@ Nouveau modèle de job **Banque** (blip, grades Stagiaire → Directeur, points 
 Réglages par job (builder → job → Général → carte « Banque ») : tablette on/off, prêts on/off, guichet on/off, grades (ouvrir / accorder un prêt / guichet & frais / annuler & supprimer), prêt maximum, intérêts min/max, origine de l'argent prêté, catalogue des frais. Réglages globaux (intervalle, pénalité, défaut, durées proposées, cotes…) : `Config.Bank` dans `config.lua`. Les prêts exigent un **compte société** (job créé avec la société activée).
 
 Tables créées automatiquement : `jobbuilder_bank_clients`, `jobbuilder_bank_entries`, `jobbuilder_bank_loans`. Missions PNJ de banque incluses (transport de fonds, visite client).
+
+## Agent immobilier — gestion complète des biens
+- **10 catégories de biens** : maison, appartement, villa, laboratoire, garage, entrepôt, bureau, local commercial, hôtel/motel, autre (`Config.Real.Categories`). Filtre par catégorie dans la liste, badge dans les fiches, icône de blip selon la catégorie, catégorie et description visibles sur le panneau de la porte.
+- **Catalogue d'intérieurs** classés par catégorie : 4 appartements, 3 garages (2/6/10 places), un bureau exécutif et 5 laboratoires/entrepôts « Biker » (méthamphétamine, cannabis, cocaïne, faux billets, faux papiers). Les labos chargent leurs **IPL** à l'entrée. ⚠ Vérifie leur position avec « Visiter » : les coordonnées des intérieurs DLC dépendent de ta version du jeu (réglables dans `/jobbuilder` → Paramètres → Intérieurs).
+- **N'importe quel intérieur** : ajoute tes propres intérieurs dans Paramètres → Intérieurs (clé, nom, catégorie, position de sortie, IPL) ou choisis **« Intérieur personnalisé »** directement sur le bien (position de sortie + liste d'IPL facultative) : MLO, shell, appartement d'un pack de mapping, etc.
+- **Points intérieurs** : coffre, **coffre-fort** (réservé au propriétaire / locataire, pas aux détenteurs de clés) et penderie.
+- **Dupliquer** un bien (même immeuble, plusieurs appartements identiques) : copie type, prix, intérieur et points ; il ne reste qu'à placer la nouvelle entrée.
+- Mise à jour automatique de la base : les colonnes `category`, `description` et `ipl` de `jobbuilder_properties` sont ajoutées au démarrage si elles manquent.
