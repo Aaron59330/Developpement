@@ -63,7 +63,7 @@
     top: 50%;
     width: 4px;
     height: 20px;
-    background-color: var(--bb-accent, #00a4ff) ;
+    background-color: #00a4ff ;
     transform: translateY(-50%);
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -108,7 +108,7 @@
     top: 50%; 
     width: 4px;
     height: 30px; 
-    background-color: var(--bb-accent, #00a4ff) ;
+    background-color: #00a4ff ;
     transform: translateY(-50%);
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -201,9 +201,9 @@
 	font-weight: 500px;
 	font-size: 28px;
 	font-family: Teko, sans-serif;
-	color: var(--bb-accent, #00a4ff) ;
+	color: #00a4ff ;
 	text-shadow: 0 .0925925926vh 4px rgba(0, 0, 0, .67),
-	0 0 8px var(--bb-accent, #00a4ff) ;
+	0 0 8px #00a4ff ;
 }
 .countgg{
 	position:absolute;

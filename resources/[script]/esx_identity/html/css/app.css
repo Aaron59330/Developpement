@@ -208,8 +208,8 @@ select option { background: #151516; color: #fff; }
 @keyframes stamp { 0% { transform: scale(1); } 40% { transform: scale(.94); } 100% { transform: scale(1); } }
 .side-title { margin-bottom: 14px; }
 
-/* ===== Accent bleu var(--bb-accent, #00a4ff) (détails) ===== */
-:root { --accent: var(--bb-accent, #00a4ff); --accent-rgb: var(--bb-accent-rgb, 0,164,255); }
+/* ===== Accent bleu #00a4ff (détails) ===== */
+:root { --accent: #00a4ff; --accent-rgb: 0,164,255; }
 .head-icon svg { fill: var(--accent); }
 .head-icon { border-color: rgba(var(--accent-rgb),.35); }
 input[type="text"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.15); }

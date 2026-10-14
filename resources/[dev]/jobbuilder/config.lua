@@ -468,15 +468,7 @@ Config.Gov = {
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
 -- Couleur d'accentuation de toute l'interface (boutons, onglet actif, pastilles, icônes, bordures teintées).
 -- Modifiable en direct par les _dev : /jobbuilder → Paramètres → Apparence (appliquée à tous les joueurs).
--- Couleur d'accentuation centrale (bluebay_config / panel) ; bleu #00a4ff par défaut
-local function BluebayAccent()
-    if GetResourceState('bluebay_config') == 'started' then
-        local ok, r, g, b = pcall(function() return exports['bluebay_config']:GetAccentRGB() end)
-        if ok and r then return { r, g, b } end
-    end
-    return { 0, 164, 255 }
-end
-Config.UI = { Accent = BluebayAccent() }   -- rouge par défaut
+Config.UI = { Accent = { 0, 164, 255 } }   -- bleu #00a4ff (modifiable en jeu)
 
 -- ─────────────────────────────── Immobilier ───────────────────────────────
 Config.Real = {

@@ -36,15 +36,7 @@ Config.Payments = {
 -- ─────────────────────────────── Apparence des points ───────────────────────────────
 Config.Marker = { type = 25, color = { 64, 224, 208 }, alpha = 140, scale = { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95 }
 
--- Couleur d'accentuation centrale (bluebay_config / panel) ; bleu #00a4ff par défaut
-local function BluebayAccent()
-    if GetResourceState('bluebay_config') == 'started' then
-        local ok, r, g, b = pcall(function() return exports['bluebay_config']:GetAccentRGB() end)
-        if ok and r then return { r, g, b } end
-    end
-    return { 0, 164, 255 }
-end
-Config.UI = { Accent = BluebayAccent() }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
+Config.UI = { Accent = { 0, 164, 255 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Vendeurs (PNJ) ───────────────────────────────
 Config.PedScenarios = {

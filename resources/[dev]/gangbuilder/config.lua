@@ -218,15 +218,7 @@ Config.ActionRules = {
 }
 
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
--- Couleur d'accentuation centrale (bluebay_config / panel) ; bleu #00a4ff par défaut
-local function BluebayAccent()
-    if GetResourceState('bluebay_config') == 'started' then
-        local ok, r, g, b = pcall(function() return exports['bluebay_config']:GetAccentRGB() end)
-        if ok and r then return { r, g, b } end
-    end
-    return { 0, 164, 255 }
-end
-Config.UI = { Accent = BluebayAccent() }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
+Config.UI = { Accent = { 0, 164, 255 } }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
 
 -- ─────────────────────────────── Modèles de gangs ───────────────────────────────
 -- Chaque modèle pré-remplit le builder (grades, blip, actions, points suggérés). Tout reste modifiable dans l'UI et ici.

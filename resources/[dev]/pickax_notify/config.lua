@@ -83,30 +83,3 @@ Config.NotificationDuration = 4500
 Config.AdvancedNotificationDuration = 5500
 Config.HelpNotificationDuration = 5000
 
-
--- ============================================================
---  RÉGLAGES CENTRAUX (bluebay_config / panel) : écrasent les valeurs ci-dessus si la ressource tourne
--- ============================================================
-if GetResourceState('bluebay_config') == 'started' then
-    local ok, central = pcall(function() return exports['bluebay_config']:GetConfig() end)
-
-    if ok and central then
-        if central.brand and central.brand.accent then
-            Config.MainColor = central.brand.accent
-        end
-
-        local n = central.menus and central.menus.notify
-        if n then
-            if n.width ~= nil then Config.Width = n.width end
-            if n.minHeight ~= nil then Config.MinHeight = n.minHeight end
-            if n.borderRadius ~= nil then
-                Config.BorderRadius = n.borderRadius
-                Config.IconRadius = n.borderRadius
-                Config.CounterRadius = n.borderRadius
-            end
-            if n.left ~= nil then Config.PositionLeft = n.left end
-            if n.bottom ~= nil then Config.PositionBottom = n.bottom end
-            if n.duration ~= nil then Config.NotificationDuration = n.duration end
-        end
-    end
-end
