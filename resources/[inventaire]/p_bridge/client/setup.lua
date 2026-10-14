@@ -27,7 +27,7 @@ Bridge.Setup.Point = function()
             Citizen.Wait(0)
             DisableControlAction(0, 24, true)
             if currentCoords then
-                DisplayHelpTextThisFrame("pBridgeHelpNotification", false)
+                exports["pickax_notify"]:ShowHelpNotification(GetLabelText("pBridgeHelpNotification"))
                 DrawMarker(
                     28, currentCoords.x, currentCoords.y, currentCoords.z, 
                     0.0, 0.0, 0.0, 
@@ -81,7 +81,7 @@ Bridge.Setup.Ped = function()
             Citizen.Wait(0)
             DisableControlAction(0, 24, true)
             if currentCoords then
-                DisplayHelpTextThisFrame("pBridgeHelpNotification", false)
+                exports["pickax_notify"]:ShowHelpNotification(GetLabelText("pBridgeHelpNotification"))
                 SetEntityCoordsNoOffset(currentPed, currentCoords.x, currentCoords.y, currentCoords.z + 1.0, true, true, true)
                 DrawMarker(
                     28, currentCoords.x, currentCoords.y, currentCoords.z, 
@@ -142,7 +142,7 @@ Bridge.Setup.Prop = function(propModel)
             Citizen.Wait(0)
             DisableControlAction(0, 24, true)
             if currentCoords then
-                DisplayHelpTextThisFrame("pBridgeHelpNotification", false)
+                exports["pickax_notify"]:ShowHelpNotification(GetLabelText("pBridgeHelpNotification"))
                 SetEntityCoordsNoOffset(currentProp, currentCoords.x, currentCoords.y, currentCoords.z + 1.0, true, true, true)
                 DrawMarker(
                     28, currentCoords.x, currentCoords.y, currentCoords.z, 

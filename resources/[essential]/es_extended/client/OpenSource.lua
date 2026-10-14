@@ -1,8 +1,8 @@
 -- Toutes les notifications ESX passent par pickax_notify (repli natif GTA seulement si la ressource est arrêtée)
 local function pickax() return GetResourceState('pickax_notify') == 'started' end
 
-function ESX.ShowNotification(msg, type, length, icon)
-    if pickax() then return exports['pickax_notify']:ShowNotification(msg, type, length, icon) end
+function ESX.ShowNotification(msg, type, length)
+    if pickax() then return exports['pickax_notify']:ShowNotification(msg, type, length) end
     BeginTextCommandThefeedPost('STRING')
     AddTextComponentSubstringPlayerName(tostring(msg))
     EndTextCommandThefeedPostTicker(false, true)
@@ -16,6 +16,7 @@ function ESX.ShowAdvancedNotification(title, subject, msg, icon, iconType, hudCo
 end
 
 function ESX.ShowHelpNotification(msg)
+    if pickax() then return exports['pickax_notify']:ShowHelpNotification(msg) end
     AddTextEntry('esxHelpNotification', msg)
     BeginTextCommandDisplayHelp('esxHelpNotification')
     EndTextCommandDisplayHelp(0, false, true, -1)
