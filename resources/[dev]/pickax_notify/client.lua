@@ -254,3 +254,17 @@ end, false)
 RegisterCommand('testhelpnotif', function()
     ShowHelpNotification('Appuyez sur ~INPUT_CONTEXT~ pour interagir.')
 end, false)
+
+
+-- Notifications, aides et messages masqués tant que l'inventaire est ouvert
+CreateThread(function()
+    local hidden = false
+    while true do
+        Wait(150)
+        local open = LocalPlayer.state.invOpen == true
+        if open ~= hidden then
+            hidden = open
+            SendNUIMessage({ action = 'hideAll', value = open })
+        end
+    end
+end)

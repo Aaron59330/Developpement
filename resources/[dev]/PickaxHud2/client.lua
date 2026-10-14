@@ -137,9 +137,9 @@ CreateThread(function()
     SendNUIMessage({ action = 'hideUi', value = false })
 
     while true do
-        Wait(250)
+        Wait(150)
         if not uiFaded then
-            local hide = IsPauseMenuActive() or IsPlayerSwitchInProgress()
+            local hide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true   -- masqué aussi quand l'inventaire est ouvert
             if hide ~= inFrontend then
                 inFrontend = hide
                 SendNUIMessage({ action = 'hideUi', value = hide })

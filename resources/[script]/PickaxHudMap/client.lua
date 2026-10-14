@@ -36,3 +36,17 @@ CreateThread(function()
 end)
 
 
+
+
+-- Minimap masquée quand l'inventaire est ouvert
+CreateThread(function()
+    local hidden = false
+    while true do
+        Wait(150)
+        local open = LocalPlayer.state.invOpen == true
+        if open ~= hidden then
+            hidden = open
+            DisplayRadar(not open)
+        end
+    end
+end)

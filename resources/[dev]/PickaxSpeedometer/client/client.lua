@@ -55,3 +55,20 @@ CreateThread(function()
 end)
 
 
+
+
+-- Masque le compteur quand l'inventaire est ouvert, le réaffiche à la fermeture (si on conduit toujours)
+CreateThread(function()
+    local hiddenByInv = false
+    while true do
+        Wait(150)
+        local open = LocalPlayer.state.invOpen == true
+        if open and not hiddenByInv then
+            hiddenByInv = true
+            toggleNuiFrame(false)
+        elseif not open and hiddenByInv then
+            hiddenByInv = false
+            if isShowing then toggleNuiFrame(true) end
+        end
+    end
+end)

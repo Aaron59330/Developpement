@@ -426,6 +426,11 @@ function showCenterHelp(data) {
 window.addEventListener('message', (event) => {
     const data = event.data || {};
 
+    if (data.action === 'hideAll') {
+        document.body.classList.toggle('inv-hidden', data.value === true);
+        return;
+    }
+
     if (data.action === 'config') {
         applyConfig(data.config || {});
         return;

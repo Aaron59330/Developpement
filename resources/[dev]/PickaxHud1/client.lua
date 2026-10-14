@@ -181,7 +181,7 @@ CreateThread(function()
         end
 
         if not uiFaded then
-            local shouldHide = IsPauseMenuActive() or IsPlayerSwitchInProgress()
+            local shouldHide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true   -- masqué aussi quand l'inventaire est ouvert
 
             if shouldHide and not inFrontend then
                 inFrontend = true
