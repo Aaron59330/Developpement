@@ -1,3 +1,17 @@
+-- Détection fiable : inventaire (signal direct + état du joueur) et menu pause / carte (plusieurs méthodes)
+local invFlag = false
+AddEventHandler('pickax:inventory', function(open) invFlag = open == true end)
+
+local function inventoryOpen()
+    return invFlag or LocalPlayer.state.invOpen == true
+end
+
+local function pauseOpen()
+    if IsPauseMenuActive() then return true end
+    local state = Citizen.InvokeNative(0x272ACD84970869C5, Citizen.ResultAsInteger())   -- état du menu pause (0 = fermé)
+    return state ~= nil and state ~= 0
+end
+
 local uiFaded = false
 local ESX = exports["es_extended"]:getSharedObject()
 
@@ -141,7 +155,7 @@ CreateThread(function()
         Wait(100)
         if not uiFaded then
             -- masqué : menu pause / carte (Échap), changement de personnage, inventaire ouvert
-            local hide = IsPauseMenuActive() or IsPlayerSwitchInProgress() or LocalPlayer.state.invOpen == true
+            local hide = pauseOpen() or IsPlayerSwitchInProgress() or inventoryOpen()
             -- l'ordre est ré-envoyé toutes les secondes : un message perdu ne laisse jamais le HUD affiché derrière la carte
             if hide ~= inFrontend or GetGameTimer() - lastSent > 1000 then
                 inFrontend = hide

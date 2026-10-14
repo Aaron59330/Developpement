@@ -42,12 +42,26 @@ AddEventHandler('onClientResourceStart', function(resource)
 end)
 
 
+-- Détection fiable : inventaire (signal direct + état du joueur) et menu pause / carte (plusieurs méthodes)
+local invFlag = false
+AddEventHandler('pickax:inventory', function(open) invFlag = open == true end)
+
+local function inventoryOpen()
+    return invFlag or LocalPlayer.state.invOpen == true
+end
+
+local function pauseOpen()
+    if IsPauseMenuActive() then return true end
+    local state = Citizen.InvokeNative(0x272ACD84970869C5, Citizen.ResultAsInteger())   -- état du menu pause (0 = fermé)
+    return state ~= nil and state ~= 0
+end
+
 -- Interface vocale masquée quand l'inventaire est ouvert
 CreateThread(function()
     local hidden = false
     while true do
         Wait(150)
-        local open = LocalPlayer.state.invOpen == true or IsPauseMenuActive()
+        local open = inventoryOpen() or pauseOpen()
         if open ~= hidden then
             hidden = open
             sendUIMessage({ uiEnabled = (not open) and GetConvarInt("voice_enableUi", 1) == 1 })

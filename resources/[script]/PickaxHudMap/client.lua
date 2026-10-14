@@ -39,11 +39,13 @@ end)
 
 
 -- Minimap masquée quand l'inventaire est ouvert
+local invFlag = false
+AddEventHandler('pickax:inventory', function(o) invFlag = o == true end)
 CreateThread(function()
     local hidden = false
     while true do
         Wait(150)
-        local open = LocalPlayer.state.invOpen == true
+        local open = invFlag or LocalPlayer.state.invOpen == true
         if open ~= hidden then
             hidden = open
             DisplayRadar(not open)
