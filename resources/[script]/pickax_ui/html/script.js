@@ -93,11 +93,39 @@ function render(d) {
   var ds = $('desc');
   if (d.ds) { ds.innerHTML = gta(d.ds); ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
   var inf = $('info');
-  if (d.inf) {
-    var h = d.inf.t ? '<h2>' + gta(d.inf.t) + '</h2>' : '';
-    (d.inf.r || []).forEach(function (r) { h += '<div class="row"><span>' + gta(r[0]) + '</span><span>' + gta(r[1]) + '</span></div>'; });
-    inf.innerHTML = h; inf.classList.remove('hidden');
-  } else { inf.classList.add('hidden'); }
+  if (d.inf) { inf.innerHTML = infoHtml(d.inf); inf.classList.remove('hidden'); } else { inf.classList.add('hidden'); }
+}
+
+// Panneau d'infos : "Libellé : valeur" -> ligne libellé / valeur ; "Titre :" -> intitulé ; reste -> paragraphe
+function infoHtml(inf) {
+  var out = inf.t ? '<h2>' + gta(inf.t) + '</h2>' : '';
+  var body = '', gap = false;
+  (inf.r || []).forEach(function (r) {
+    var raw = String(r[0] == null ? '' : r[0]).replace(/~n~/g, '\n');
+    var val = String(r[1] == null ? '' : r[1]).trim();
+    var lines = raw.split(/\r?\n/);
+    var filled = lines.filter(function (l) { return l.trim() !== ''; });
+    if (val && filled.length <= 1) {
+      body += '<div class="irow"><span class="k">' + gta(filled[0] || '') + '</span><span class="v">' + gta(val) + '</span></div>';
+      gap = false;
+      return;
+    }
+    lines.forEach(function (ln) {
+      ln = ln.trim();
+      if (!ln) { gap = true; return; }
+      var cls = gap ? ' gap' : '';
+      gap = false;
+      var m = /^(.*?)\s*:\s*(.+)$/.exec(ln);
+      if (m && m[1].replace(/~[A-Za-z_0-9]+~/g, '').trim() !== '') {
+        body += '<div class="irow' + cls + '"><span class="k">' + gta(m[1]) + '</span><span class="v">' + gta(m[2].replace(/\.\s*$/, '')) + '</span></div>';
+      } else if (/:\s*$/.test(ln)) {
+        body += '<div class="ih' + cls + '">' + gta(ln.replace(/\s*:\s*$/, '')) + '</div>';
+      } else {
+        body += '<p class="ip' + cls + '">' + gta(ln) + '</p>';
+      }
+    });
+  });
+  return out + body;
 }
 
 window.addEventListener('message', function (e) {

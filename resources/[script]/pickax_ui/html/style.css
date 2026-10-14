@@ -84,10 +84,14 @@ html, body { height: 100%; background: transparent; color: var(--text); font-fam
 .keys { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin: 10px 4px 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 10px; color: var(--muted); }
 .keys b { color: var(--text-2); font-weight: 600; margin-right: 3px; }
 
-.info { width: 340px; padding: 14px 16px 12px; }
-.info h2 { font-size: 15px; font-weight: 700; padding-bottom: 12px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
-.info .row { display: flex; justify-content: space-between; gap: 14px; padding: 7px 0; font-size: 13px; }
-.info .row span:first-child { color: var(--muted); }
-.info .row span:last-child { color: var(--text); font-weight: 600; text-align: right; }
-
-#wrap[data-style="clair"] .ttl h1, #wrap[data-style="clair"] .info .row span:last-child { color: var(--text); }
+.info { width: 350px; padding: 16px 18px 12px; }
+.info h2 { font-size: 15px; font-weight: 700; padding-bottom: 12px; margin-bottom: 6px; border-bottom: 1px solid var(--line); position: relative; }
+.info h2::after { content: ''; position: absolute; left: 0; bottom: -1px; width: 34px; height: 2px; background: var(--accent); border-radius: 2px; }
+.irow { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.35; }
+h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
+.irow.gap { margin-top: 6px; }
+.irow .k { color: var(--muted); flex-shrink: 0; max-width: 52%; }
+.irow .v { color: var(--text); font-weight: 600; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.ih { font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 700; padding: 10px 0 6px; }
+.ip { font-size: 12.5px; line-height: 1.55; color: var(--text-2); padding: 3px 0; }
+.gap { margin-top: 8px; }
