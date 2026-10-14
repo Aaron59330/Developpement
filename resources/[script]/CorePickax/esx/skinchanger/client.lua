@@ -171,6 +171,10 @@ function SkinChanger()
         if not RageUI.Visible(face) then
 			FreezeEntityPosition(GetPlayerPed(-1), false)
 			InRegisterMenu = false
+			if not skinFinished then
+				-- Menu fermé sans « Valider » : on enregistre quand même l'apparence en cours (rien n'est perdu à la reconnexion)
+				TriggerEvent('skinchanger:getSkin', function(skin) TriggerServerEvent('esx_skin:save', skin) end)
+			end
             face = RMenu:DeleteType('face', true)
         end
     end
@@ -245,8 +249,20 @@ AddEventHandler('playerSpawned', function()
 end)
 
 RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(xPlayer)
+AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, savedSkin)
 	PlayerLoaded = true
+
+	-- Filet de sécurité : à la reconnexion, on réapplique le skin enregistré (envoyé par es_extended) même si l'événement
+	-- « playerSpawned » n'a pas été déclenché ou est arrivé trop tôt. (Nouveau personnage : le menu de création s'en occupe.)
+	if not isNew and type(savedSkin) == 'table' and next(savedSkin) ~= nil and FirstSpawn then
+		Citizen.CreateThread(function()
+			Citizen.Wait(2500)
+			if FirstSpawn then
+				TriggerEvent('skinchanger:loadSkin', savedSkin)
+				FirstSpawn = false
+			end
+		end)
+	end
 end)
 
 AddEventHandler('esx_skin:getLastSkin', function(cb)
