@@ -787,11 +787,6 @@ function MenuStaffOpen()
                 end, ReportInfoMain)
                 RageUI.ButtonWithStyle("Interactions véhicules", "Intéragir avec les véhicules du serveur", { RightLabel = "→→" }, hasAdminPermission("section_vehicle"), function()
                 end, MenuAdminVehicule)
-                RageUI.ButtonWithStyle("Ouvrir les builders", "Panel regroupant le Job, Gang, Shop et World Builder", { RightLabel = "→→" }, true, function(_, _, Selected)
-                    if Selected then
-                        ExecuteCommand("builders")
-                    end
-                end)
 
             end
         end, function()    
