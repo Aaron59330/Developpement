@@ -31,6 +31,8 @@ end
 Config.Cinematic = {
     Enabled = true,
     Plane = 'luxor',                         -- modèle de l'avion (jet privé). Autres choix : 'shamal', 'nimbus', 'velum'
+    -- ⚠ PISTE : ces deux valeurs sont à régler sur TA piste. Place-toi en jeu SUR la piste de l'aéroport, au point où l'avion doit toucher le sol,
+    -- face à la direction dans laquelle il doit rouler, puis tape /pisteavion (admin) : copie ici les valeurs affichées dans la console F8.
     Touchdown = vector3(-1267.00, -3013.00, 13.94),  -- point où l'avion touche la piste (aéroport de Los Santos)
     Heading = 330.0,                         -- direction de la piste (cap de l'avion à l'atterrissage)
     ApproachSeconds = 16,                    -- durée de la descente

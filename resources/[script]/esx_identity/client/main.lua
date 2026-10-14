@@ -325,6 +325,7 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	local D = Config.Destinations
 	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
 
+	if PreloadArrivalCinematic then PreloadArrivalCinematic() end
 	Citizen.Wait(600)
 	local index = 1
 	if GetResourceState('pickax_ui') == 'started' and #D.Spots > 1 then

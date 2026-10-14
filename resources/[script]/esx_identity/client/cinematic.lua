@@ -27,6 +27,31 @@ local function switchCam(cam, ms)
 	RenderScriptCams(true, ms and ms > 0, ms or 0, true, false)
 end
 
+-- Précharge l'avion pendant que le joueur choisit sa destination : la cinématique démarre ensuite instantanément
+function PreloadArrivalCinematic()
+	local C = Config.Cinematic
+	if not C or not C.Enabled then return end
+	Citizen.CreateThread(function()
+		loadModel(C.Plane or 'luxor')
+		loadModel('s_m_m_pilot_01')
+		RequestCollisionAtCoord(C.Touchdown.x, C.Touchdown.y, C.Touchdown.z)
+	end)
+end
+
+-- /pisteavion : place-toi SUR la piste, au point où l'avion doit toucher le sol, face à la direction d'atterrissage, puis tape la commande :
+-- elle affiche les valeurs Touchdown et Heading à copier dans config.lua (réservé aux admins).
+RegisterCommand('pisteavion', function()
+	local group = ESX and ESX.GetPlayerData() and ESX.GetPlayerData().group
+	if group ~= 'admin' and group ~= 'superadmin' and group ~= '_dev' then return end
+	local ped = PlayerPedId()
+	local c = GetEntityCoords(ped)
+	local h = GetEntityHeading(ped)
+	local line = ('Touchdown = vector3(%.2f, %.2f, %.2f),  Heading = %.1f,'):format(c.x, c.y, c.z, h)
+	print('^2[pisteavion]^0 ' .. line)
+	TriggerEvent('chat:addMessage', { args = { 'pisteavion', line } })
+	ESX.ShowNotification('Valeurs copiables dans la console F8 : ~b~Touchdown~s~ et ~b~Heading~s~ (config.lua).')
+end, false)
+
 function PlayArrivalCinematic()
 	local C = Config.Cinematic
 	if not C or not C.Enabled then return end
@@ -48,7 +73,7 @@ function PlayArrivalCinematic()
 	HideHudAndRadarThisFrame()
 	TriggerEvent('tempui:toggleUi', true)
 	DisplayRadar(false)
-	fadeOut(600)
+	fadeOut(250)
 
 	-- Entités locales
 	RequestCollisionAtCoord(touch.x, touch.y, touch.z)
@@ -88,8 +113,7 @@ function PlayArrivalCinematic()
 	PointCamAtEntity(cam1, plane, 0.0, 0.0, 0.0, true)
 	switchCam(cam1, 0)
 	place(startPos, C.StartAltitude, -3.0)
-	Citizen.Wait(300)
-	DoScreenFadeIn(900)
+	DoScreenFadeIn(500)
 
 	local skip = false
 	local function checkSkip()
