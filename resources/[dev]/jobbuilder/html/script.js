@@ -811,7 +811,7 @@ const Builder = {
       case 'styleOn': {      // initialise le style avec les valeurs actuelles du type de point (ou d'un marker standard pour un job)
         const ty = path => path.startsWith('points.') ? this.cur.points[+path.split('.')[1]].type : null, t = ty(v);
         const baseSt = (t && (this.catalog.pointTypes || {})[t]) || Object.values(this.catalog.pointTypes || {})[0] || {};
-        setPath(this.cur, v, { marker: baseSt.marker ?? 25, color: [...(baseSt.color || [64, 224, 208])], alpha: baseSt.alpha ?? 140, scale: { ...(baseSt.scale || { x: 0.9, y: 0.9, z: 0.6 }) }, offset: baseSt.offset ?? -0.95, bob: !!baseSt.bob, rotate: !!baseSt.rotate });
+        setPath(this.cur, v, { marker: baseSt.marker ?? 25, color: [...(baseSt.color || [64, 224, 208])], alpha: baseSt.alpha ?? 140, scale: { ...(baseSt.scale || { x: 0.9, y: 0.9, z: 0.6 }) }, offset: baseSt.offset ?? -0.95, bob: !!baseSt.bob, rotate: !!baseSt.rotate, help: baseSt.help !== false });
         return this.render();
       }
       case 'storeOn': { const p = c.points[+v]; p.data.store = { coords: null, radius: 5, any: false }; return this.render(); }
@@ -939,7 +939,7 @@ Object.assign(Builder, {
         ${opts.noColor ? '<div></div>' : fld('Couleur', `<input type="color" data-path="${path}.color" data-t="c" value="${hex}">`)}
         ${num(path + '.alpha', 'Opacité (0-255)', d.alpha ?? 140, 'min="0" max="255"')}</div>
       <div class="grid4 mt">${num(path + '.scale.x', 'Taille X', sc.x, 'step="0.05" min="0.05"')}${num(path + '.scale.y', 'Taille Y', sc.y, 'step="0.05" min="0.05"')}${num(path + '.scale.z', 'Hauteur (Z)', sc.z, 'step="0.05" min="0.05"')}${num(path + '.offset', 'Décalage vertical', d.offset ?? -0.95, 'step="0.05"')}</div>
-      <div class="row mt" style="gap:26px"><label class="chk"><input type="checkbox" data-path="${path}.bob" data-t="b" ${d.bob ? 'checked' : ''}> Rebond (monte et descend)</label><label class="chk"><input type="checkbox" data-path="${path}.rotate" data-t="b" ${d.rotate ? 'checked' : ''}> Rotation</label></div>`;
+      <div class="row mt" style="gap:26px"><label class="chk"><input type="checkbox" data-path="${path}.bob" data-t="b" ${d.bob ? 'checked' : ''}> Rebond (monte et descend)</label><label class="chk"><input type="checkbox" data-path="${path}.rotate" data-t="b" ${d.rotate ? 'checked' : ''}> Rotation</label><label class="chk"><input type="checkbox" data-path="${path}.help" data-t="b" ${d.help !== false ? 'checked' : ''}> Aide « E »</label></div>`;
     return opts.bare ? head + inner : `<div class="card">${head}${inner}</div>`;
   },
 

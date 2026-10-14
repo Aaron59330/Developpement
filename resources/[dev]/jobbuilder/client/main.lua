@@ -169,7 +169,9 @@ CreateThread(function()
             end
             if nearest then
                 local t = Config.PointTypes[(nearest.type == 'garage' and nearest.kind and nearest.kind ~= 'car') and ('garage_' .. nearest.kind) or nearest.type] or Config.PointTypes[nearest.type]
-                if nearest.type == 'garage_return' then
+                local helpOn = BB.HelpEnabled(t, nearest.style)
+                if not helpOn then
+                elseif nearest.type == 'garage_return' then
                     local inVeh = GetVehiclePedIsIn(PlayerPedId(), false) ~= 0
                     ESX.ShowHelpNotification(inVeh and 'Appuie sur ~INPUT_CONTEXT~ : ranger le véhicule' or 'Reviens au volant d\'un véhicule du service pour le ranger')
                 elseif nearest.label == t.label or nearest.label == '' then

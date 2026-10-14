@@ -35,6 +35,7 @@ local function markerDef(d, base)
         offset = num(d.offset, -10, 10, base.offset or -0.95),
         bob = d.bob == true,
         rotate = d.rotate == true,
+        help = d.help ~= false,
     }
 end
 

@@ -204,7 +204,7 @@ CreateThread(function()
             if nearShop then
                 local label = nearShop.locations[nearIdx].label
                 local name = (label and label ~= '') and ('%s — %s'):format(nearShop.label, label) or nearShop.label
-                ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(name))
+                BB.ShowHelp(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(name), Config.Marker, nearShop.marker)
                 if IsControlJustReleased(0, Config.InteractKey or 38) then openShop(nearShop, nearIdx) end
             end
         end

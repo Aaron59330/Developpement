@@ -179,6 +179,7 @@ local function cleanSettings(s, old)
     if tonumber(mk.offset) then out.marker.offset = math.max(-10.0, math.min(10.0, tonumber(mk.offset))) end
     if mk.bob ~= nil then out.marker.bob = mk.bob == true end
     if mk.rotate ~= nil then out.marker.rotate = mk.rotate == true end
+    if mk.help ~= nil then out.marker.help = mk.help ~= false end
     if type(mk.scale) == 'table' then
         local sc = {}
         for _, k in ipairs({ 'x', 'y', 'z' }) do

@@ -181,7 +181,7 @@ CreateThread(function()
         local sleep = 1000
         if not IsUIOpen() then
             local pos = GetEntityCoords(PlayerPedId())
-            local nearest, nearestLabel, nearestFn
+            local nearest, nearestLabel, nearestFn, nearestHelp
 
             if Inside then
                 sleep = 0
@@ -213,13 +213,14 @@ CreateThread(function()
                         if d < Config.InteractDistance then
                             local txt = p.status == 'available' and ((p.deal == 'rent' and 'À louer : ' or 'À vendre : ') .. p.label) or p.label
                             nearest, nearestLabel, nearestFn = true, txt, function() openDoor(p) end
+                            nearestHelp = BB.HelpEnabled(p.status == 'available' and R.Markers.available or (p.access and R.Markers.access or R.Markers.noaccess))
                         end
                     end
                 end
             end
 
             if nearest then
-                ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(nearestLabel))
+                if nearestHelp ~= false then ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(nearestLabel)) end
                 if IsControlJustReleased(0, 38) then nearestFn() end
             end
         end

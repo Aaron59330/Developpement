@@ -139,7 +139,7 @@ local COMMON = {
     access = obj({ jobs = { 'j' }, item = ITEM }),
     color = { 'rgb' },
     uiColor = { 'rgb' },
-    marker = obj({ enabled = { 'b', true }, type = { 'n', 0, 43, 25 }, alpha = { 'on', 0, 255 }, offset = { 'on', -10, 10 }, bob = { 'ob' }, rotate = { 'ob' },
+    marker = obj({ enabled = { 'b', true }, type = { 'n', 0, 43, 25 }, alpha = { 'on', 0, 255 }, offset = { 'on', -10, 10 }, bob = { 'ob' }, rotate = { 'ob' }, help = { 'ob' },
         scale = obj({ x = { 'on', 0.05, 20 }, y = { 'on', 0.05, 20 }, z = { 'on', 0.05, 20 } }) }),
     note = { 's', 200, '' },
 }

@@ -377,7 +377,7 @@ CreateThread(function()
             end
             if near and Config.Target ~= 'ox_target' then
                 local label = (near.label and near.label ~= '' and near.kind ~= 'store' and near.kind ~= 'return' and near.kind ~= 'exit') and (' — ' .. near.label) or ''
-                ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s%s'):format(near.text, label))
+                BB.ShowHelp(('Appuie sur ~INPUT_CONTEXT~ : %s%s'):format(near.text, label), Config.Marker, near.entity.marker)
                 if IsControlJustReleased(0, Config.InteractKey or 38) then interact(near) end
             end
         end

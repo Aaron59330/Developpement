@@ -154,7 +154,8 @@ CreateThread(function()
             end
             if nearest then
                 local t = pointType(nearest)
-                if nearest.label == t.label or nearest.label == '' then
+                if not BB.HelpEnabled(t, nearest.style) then
+                elseif nearest.label == t.label or nearest.label == '' then
                     ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(t.label))
                 else
                     ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s (%s)'):format(nearest.label, t.label))

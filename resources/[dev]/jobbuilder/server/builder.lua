@@ -56,6 +56,7 @@ local function cleanStyle(s)
     if tonumber(s.offset) then out.offset = num(s.offset, -10, 10, -0.95) n = n + 1 end
     if s.bob ~= nil then out.bob = s.bob == true n = n + 1 end
     if s.rotate ~= nil then out.rotate = s.rotate == true n = n + 1 end
+    if s.help ~= nil then out.help = s.help ~= false n = n + 1 end
     return n > 0 and out or nil
 end
 

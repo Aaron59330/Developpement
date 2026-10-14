@@ -43,7 +43,7 @@ BB.Alias = { driving = 'school', carlot = 'dealer', general = 'shop', custom = '
     cars = 'rental', lot = 'dealer', doorlock = 'default', garage_bike = 'garage', garage_boat = 'garage', garage_aircraft = 'garage' }
 
 -- Marker par défaut commun (peut être remplacé par Config.Marker du builder, éditable en jeu)
-BB.Marker = { marker = 25, color = { 64, 224, 208 }, alpha = 140, scale = { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95, bob = false, rotate = false }
+BB.Marker = { marker = 25, color = { 64, 224, 208 }, alpha = 140, scale = { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95, bob = false, rotate = false, help = true }
 
 local function cleanColor(c)
     if type(c) == 'table' and tonumber(c[1]) and tonumber(c[2]) and tonumber(c[3]) then return c end
@@ -69,9 +69,20 @@ function BB.Style(...)
             if tonumber(layer.offset) then out.offset = tonumber(layer.offset) end
             if layer.bob ~= nil then out.bob = layer.bob == true end
             if layer.rotate ~= nil then out.rotate = layer.rotate == true end
+            if layer.help ~= nil then out.help = layer.help ~= false end
         end
     end
     return out
+end
+
+-- Aide « Appuie sur E » du marker : activable / désactivable par marker (réglage admin dans les builders, vrai par défaut)
+function BB.HelpEnabled(...)
+    return BB.Style(...).help ~= false
+end
+
+-- Affiche l'aide de la touche E seulement si elle est activée pour ce marker (le style suit les mêmes couches que BB.Style)
+function BB.ShowHelp(msg, ...)
+    if BB.HelpEnabled(...) then ESX.ShowHelpNotification(msg) end
 end
 
 -- Dessine un marker avec un style (voir BB.Style). `color` force la couleur (ex : couleur d'un gang / d'un module).

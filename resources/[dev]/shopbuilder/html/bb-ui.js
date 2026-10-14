@@ -233,7 +233,7 @@
       fld('Taille X', num(p + '.scale.x', sc.x, 'step="0.05" min="0.05"', d(isc.x, 0.9))) +
       fld('Taille Y', num(p + '.scale.y', sc.y, 'step="0.05" min="0.05"', d(isc.y, 0.9))) +
       fld('Hauteur (Z)', num(p + '.scale.z', sc.z, 'step="0.05" min="0.05"', d(isc.z, 0.6))) +
-      '<div class="row" style="align-items:flex-end;gap:22px;flex-wrap:wrap">' + chk(p + '.bob', 'Rebond', m.bob === true) + chk(p + '.rotate', 'Rotation', m.rotate === true) + '</div></div>' +
+      '<div class="row" style="align-items:flex-end;gap:22px;flex-wrap:wrap">' + chk(p + '.bob', 'Rebond', m.bob === true) + chk(p + '.rotate', 'Rotation', m.rotate === true) + chk(p + '.help', 'Aide « E »', m.help !== false) + '</div></div>' +
       '<div class="hint mt-s">Les champs vides reprennent le style commun (Paramètres → Marker). Même éditeur dans tous les builders.</div></div>';
   }
 

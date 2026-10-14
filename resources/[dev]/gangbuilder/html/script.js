@@ -805,7 +805,7 @@ Object.assign(Builder, {
         ${fld('Couleur', `<input type="color" data-path="${path}.color" data-t="c" value="${hex}">`)}
         ${num(path + '.alpha', 'Opacité (0-255)', d.alpha ?? 140, 'min="0" max="255"')}</div>
       <div class="grid4 mt">${num(path + '.scale.x', 'Taille X', sc.x, 'step="0.05" min="0.05"')}${num(path + '.scale.y', 'Taille Y', sc.y, 'step="0.05" min="0.05"')}${num(path + '.scale.z', 'Hauteur (Z)', sc.z, 'step="0.05" min="0.05"')}${num(path + '.offset', 'Décalage vertical', d.offset ?? -0.95, 'step="0.05"')}</div>
-      <div class="row mt" style="gap:26px"><label class="chk"><input type="checkbox" data-path="${path}.bob" data-t="b" ${d.bob ? 'checked' : ''}> Rebond (monte et descend)</label><label class="chk"><input type="checkbox" data-path="${path}.rotate" data-t="b" ${d.rotate ? 'checked' : ''}> Rotation</label></div></div>`;
+      <div class="row mt" style="gap:26px"><label class="chk"><input type="checkbox" data-path="${path}.bob" data-t="b" ${d.bob ? 'checked' : ''}> Rebond (monte et descend)</label><label class="chk"><input type="checkbox" data-path="${path}.rotate" data-t="b" ${d.rotate ? 'checked' : ''}> Rotation</label><label class="chk"><input type="checkbox" data-path="${path}.help" data-t="b" ${d.help !== false ? 'checked' : ''}> Aide « E »</label></div></div>`;
   },
 
   set_pointTypes() {
