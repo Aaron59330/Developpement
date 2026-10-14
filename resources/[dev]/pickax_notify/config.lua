@@ -81,5 +81,5 @@ Config.MaxVisibleNotifications = 4
 -- Durée des notifications en millisecondes
 Config.NotificationDuration = 4500
 Config.AdvancedNotificationDuration = 5500
-Config.HelpNotificationDuration = 5000
+Config.HelpNotificationDuration = 1200   -- l'aide se rafraîchit tant que le script l'appelle ; elle disparaît 1,2 s après
 

@@ -108,14 +108,33 @@ local function sendNotification(data)
     SendNUIMessage(data)
 end
 
--- Même signature que ESX.ShowNotification(msg, hudColorIndex)
-local function ShowNotification(msg, hudColorIndex)
+local function toneOf(t)
+    if t == 'success' or t == 'error' or t == 'warning' then return t end
+end
+
+-- Même signature que ESX.ShowNotification(msg, type, length) ; `type` peut aussi être l'ancien hudColorIndex (ignoré)
+local function ShowNotification(msg, typeOrColor, length)
+    local tone = toneOf(typeOrColor)
     sendNotification({
         kind = 'info',
-        title = 'Information',
+        title = (tone == 'success' and 'Succès') or (tone == 'error' and 'Erreur') or (tone == 'warning' and 'Attention') or 'Information',
         message = msg,
-        hudColorIndex = hudColorIndex,
-        duration = getNumber(Config.NotificationDuration, 4500)
+        tone = tone,
+        hudColorIndex = (type(typeOrColor) == 'number') and typeOrColor or nil,
+        duration = getNumber(length, getNumber(Config.NotificationDuration, 4500))
+    })
+end
+
+-- Notification riche (ox_lib / scripts modernes) : { title, description, type, duration }
+local function Notify(data)
+    data = type(data) == 'table' and data or { description = tostring(data) }
+    local tone = toneOf(data.type)
+    sendNotification({
+        kind = 'info',
+        title = data.title or ((tone == 'success' and 'Succès') or (tone == 'error' and 'Erreur') or (tone == 'warning' and 'Attention') or 'Information'),
+        message = data.description or data.message or '',
+        tone = tone,
+        duration = getNumber(data.duration, getNumber(Config.NotificationDuration, 4500))
     })
 end
 
@@ -133,21 +152,30 @@ local function ShowAdvancedNotification(title, subject, msg, icon, iconType, hud
     })
 end
 
--- Même signature que ESX.ShowHelpNotification(msg)
+-- Aide contextuelle (« Appuie sur E… ») : souvent appelée à chaque frame par les scripts.
+-- Même texte = on rafraîchit seulement (aucun compteur, aucune pile) ; l'aide disparaît dès que le script cesse de l'appeler.
+local lastHelp, lastHelpAt = nil, 0
 local function ShowHelpNotification(msg)
+    msg = normalizeText(msg)
+    local now = GetGameTimer()
+    if msg == lastHelp and now - lastHelpAt < 250 then return end
+    lastHelp, lastHelpAt = msg, now
     sendNotification({
         kind = 'help',
         title = 'Aide',
         message = msg,
-        duration = getNumber(Config.HelpNotificationDuration, 5000)
+        noCounter = true,
+        duration = getNumber(Config.HelpNotificationDuration, 1200)
     })
 end
 
 exports('ShowNotification', ShowNotification)
+exports('Notify', Notify)
 exports('ShowAdvancedNotification', ShowAdvancedNotification)
 exports('ShowHelpNotification', ShowHelpNotification)
 
 RegisterNetEvent('pickax_notify:showNotification', ShowNotification)
+RegisterNetEvent('pickax_notify:notify', Notify)
 RegisterNetEvent('pickax_notify:showAdvancedNotification', ShowAdvancedNotification)
 RegisterNetEvent('pickax_notify:showHelpNotification', ShowHelpNotification)
 

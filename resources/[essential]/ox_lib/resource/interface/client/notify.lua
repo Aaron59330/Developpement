@@ -31,6 +31,12 @@ local settings = require 'resource.settings'
 ---@param data NotifyProps
 ---@diagnostic disable-next-line: duplicate-set-field
 function lib.notify(data)
+    -- Toutes les notifications ox_lib passent par pickax_notify (retour au rendu ox_lib si la ressource est arrêtée)
+    if GetResourceState('pickax_notify') == 'started' then
+        exports['pickax_notify']:Notify(data)
+        return
+    end
+
     local sound = settings.notification_audio and data.sound
     local payload = table.clone(data)
     payload.sound = nil

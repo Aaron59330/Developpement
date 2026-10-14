@@ -831,11 +831,7 @@ end)
 
 -- Custom Notifications
 ESX.ShowAdvancedColoredNotification = function(title, subject, msg, icon, iconType, color)
-	SetNotificationBackgroundColor(color)
-	SetNotificationTextEntry('STRING')
-	AddTextComponentSubstringPlayerName(msg)
-	SetNotificationMessage(icon, icon, false, iconType, title, subject)
-	DrawNotification(false, false)
+	ESX.ShowAdvancedNotification(title, subject, msg, icon, iconType, color)
 end
 
 RegisterNetEvent('esx:showAdvancedColoredNotification')

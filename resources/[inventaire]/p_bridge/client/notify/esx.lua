@@ -15,5 +15,5 @@ local ESX = exports['es_extended']:getSharedObject()
 Bridge.Notify = {}
 
 Bridge.Notify.showNotify = function(message, type)
-    ESX.ShowNotification(message, 5000, type)
+    ESX.ShowNotification(message, type, 5000)
 end

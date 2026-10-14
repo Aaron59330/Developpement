@@ -270,11 +270,11 @@ function createNotification(data) {
         existing.el.isConnected &&
         !existing.el.classList.contains('closing')
     ) {
-        existing.repeatCount += 1;
+        if (!data.noCounter) existing.repeatCount += 1;
         existing.lastReceivedAt = now;
 
         if (data.config) applyConfigToNotification(existing.el, data.config);
-        if (uiSettings.counterEnabled) existing.el.classList.add('repeated');
+        if (uiSettings.counterEnabled && !data.noCounter) existing.el.classList.add('repeated');
         existing.el.querySelector('.notify-repeat').textContent = String(existing.repeatCount);
 
         // Chaque répétition relance la durée d'affichage de la carte.
@@ -310,6 +310,14 @@ function createNotification(data) {
     `;
 
     applyConfigToNotification(el, data.config || {});
+    // Teinte selon le type (succès / erreur / attention)
+    const cfg = data.config || {};
+    const toneColor = { success: cfg.successColor, error: cfg.errorColor, warning: cfg.warningColor }[data.tone];
+    if (toneColor) {
+        const rgb = hexToRgb(toneColor);
+        el.style.setProperty('--accent', normalizeHexColor(toneColor));
+        el.style.setProperty('--accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    }
     container.appendChild(el);
 
     const record = {
