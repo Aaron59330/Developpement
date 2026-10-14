@@ -787,6 +787,11 @@ function MenuStaffOpen()
                 end, ReportInfoMain)
                 RageUI.ButtonWithStyle("Interactions véhicules", "Intéragir avec les véhicules du serveur", { RightLabel = "→→" }, hasAdminPermission("section_vehicle"), function()
                 end, MenuAdminVehicule)
+                RageUI.ButtonWithStyle("Ouvrir les builders", "Panel regroupant le Job, Gang, Shop et World Builder", { RightLabel = "→→" }, true, function(_, _, Selected)
+                    if Selected then
+                        ExecuteCommand("builders")
+                    end
+                end)
 
             end
         end, function()    
@@ -1255,51 +1260,23 @@ function MenuStaffOpen()
         end, 1)
 
         RageUI.IsVisible(Menu_Builder,true,true,true, function()
-            RageUI.ButtonWithStyle("MecanoBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
+            RageUI.ButtonWithStyle("Ouvrir le panel des builders", "Tous les builders au même endroit (job, gang, boutique, monde)", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then
-                    ExecuteCommand(ConfigMecanoBuilder.Commande.CommandeCreate)
-                end
-            end)
-            RageUI.ButtonWithStyle("BarBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigBarBuilder.Commande.CommandOpenBar)
-                end
-            end)
-            RageUI.ButtonWithStyle("DoorBuilders", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand("createdoor")
-                end
-            end)
-            RageUI.ButtonWithStyle("DrugsBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand("drugsbuilder")
-                end
-            end)
-            RageUI.ButtonWithStyle("GangsBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigGangsBuilder.Commande.gangsbuilder)
-                end
-            end)
-            RageUI.ButtonWithStyle("GarageBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigGarage.CommandName)
-                end
-            end)
-            RageUI.ButtonWithStyle("FourrièreBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigFourriere.CommandName)
+                    ExecuteCommand("builders")
                 end
             end)
             RageUI.Line()
-            RageUI.ButtonWithStyle("Gestion MecanoBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigMecanoBuilder.Commande.CommandeGestion)
-                end
+            RageUI.ButtonWithStyle("Job Builder", "Jobs, grades, points, agence immobilière, concession…", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("jobbuilder") end
             end)
-            RageUI.ButtonWithStyle("Gestion GangsBuilder", "Si un menu ne s'ouvre pas, n'oublier pas que vous devez vous WL dans le config du script.", {RightLabel = "→→"}, true, function(_,a,s)
-                if s then
-                    ExecuteCommand(ConfigGangsBuilder.Commande.gestiongangs)
-                end
+            RageUI.ButtonWithStyle("Gang Builder", "Gangs, territoires, activités illégales", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("gangbuilder") end
+            end)
+            RageUI.ButtonWithStyle("Shop Builder", "Boutiques, catalogues, vêtements", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("shopbuilder") end
+            end)
+            RageUI.ButtonWithStyle("World Builder", "Garages, locations, stations, banques, portes…", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("worldbuilder") end
             end)
         end)
 
