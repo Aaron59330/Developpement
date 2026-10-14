@@ -89,3 +89,23 @@ Le script ne présuppose rien de précis : tout est dans `Config.Job2` et `serve
 - **Points invisibles** : `/gbdebug` (gang détecté ? points reçus ?). Un joueur sans job2 de gang ne voit que les boutiques publiques.
 - **Markers pas aux couleurs de config.lua** : des markers enregistrés en base (Paramètres) priment ; `/gbcheck` les signale → « Réinitialiser cette section ».
 - **Doublon de salaires** : si ton ES paie déjà `job2`, laisse `Salary.Enabled = false`.
+
+
+## Affrontements et missions entre gangs
+
+### Affrontement de territoire (`Config.Conflicts`)
+- Un gang qui fait une **activité illégale** (récolte, traitement, vente) sur le **territoire d'un autre gang** déclenche un affrontement : le propriétaire reçoit une notification, la zone **clignote en rouge sur la carte** (GPS posé pour le propriétaire) et le gang intrus est prévenu qu'il a été repéré.
+- Pendant `Duration` secondes, chaque **kill entre les deux gangs dans la zone** rapporte 1 point (le score s'affiche dans le HUD de zone et par notification).
+- À la fin : le gang qui a le plus de points gagne (`RepWin` de réputation). Si c'est l'intrus (au moins `MinKillsToWin` kills d'avance) et que le territoire n'est pas protégé, il le **capture** (`WinnerCaptures`).
+- Pas d'affrontement si personne du gang propriétaire n'est connecté ; délai `Cooldown` entre deux affrontements du même gang sur la même zone.
+- Test staff : `/gbconflict <id territoire> <gang intrus>`.
+
+### Missions « colis » (`Config.Objectives`)
+1. Un colis apparaît dans une zone (annonce à tous les gangs connectés, zone jaune sur la carte). Lancement automatique toutes les `Interval` minutes (si `MinGangsOnline` gangs sont connectés) ou à la main : `/gbobjective [zone]`, arrêt : `/gbobjstop`.
+2. Le **premier gang** qui prend le colis (touche E) doit **rester dans la zone `hold` secondes**. Le compteur avance **même si aucun gang adverse ne vient**. Si le porteur sort plus de `LeaveGrace` secondes, ou meurt hors zone, le colis retourne au centre ; s'il meurt dans la zone, il tombe sur place. Un autre gang qui le reprend doit refaire tout le temps de zone.
+3. Temps écoulé : le porteur doit **ramener le colis à SON coffre de gang** (point « Coffre » du gang, GPS posé, position du porteur visible par les autres gangs si `RevealCarrier`). S'il meurt en route, le colis tombe : n'importe quel gang peut le prendre et doit le livrer à son propre coffre.
+4. Livraison (automatique à `DeliverDistance` du coffre) : `Reward` dans la trésorerie du gang (`RewardAccount`) + `RewardRep` de réputation.
+- Les zones sont dans `Config.Objectives.Zones` (nom, label, coords, rayon, temps à tenir, récompense) : adapte-les à ta map.
+- Un gang **sans coffre** ne peut pas prendre le colis. Tout est calculé côté serveur (positions, temps, livraison).
+- Réglages en jeu : `/gangbuilder` → Paramètres → **Affrontements** et **Missions colis**.
+- Export serveur : `exports.gangbuilder:StartObjective('port')`, `exports.gangbuilder:GetObjective()`.

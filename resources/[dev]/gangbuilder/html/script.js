@@ -210,6 +210,29 @@ const Hud = {
     el.innerHTML = `<div class="eyebrow">Territoire</div><b>${esc(d.label)}</b><small>${d.owner ? 'Propriétaire : ' + esc(d.owner) : 'Aucun propriétaire'}${d.attacker ? ' · Attaquant : ' + esc(d.attacker) : ''}</small>
       <div class="bar"><i style="width:${Math.min(100, d.progress || 0)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:8px">${chip(status[0], status[1])}<span class="muted sm-t">${Math.floor(d.progress || 0)} %</span></div>`;
     el.classList.remove('hidden');
+    if (d.conflict) {
+      const c = d.conflict, m = Math.floor(c.left / 60), sec = String(c.left % 60).padStart(2, '0');
+      el.insertAdjacentHTML('beforeend', `<div class="conf"><span>⚔ Affrontement · ${esc(c.ownerLabel)} <b>${c.owner}</b> – <b>${c.intruder}</b> ${esc(c.intruderLabel)}</span><span><b>${m}:${sec}</b></span></div>`);
+    }
+  },
+  objective(d) {
+    const el = document.getElementById('objhud');
+    if (!d) { el.classList.add('hidden'); return; }
+    const t = (n) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
+    let title, sub, pct = 0, warn = false;
+    if (!d.carried) { title = 'Colis au sol'; sub = d.phase === 'deliver' ? 'Prends-le puis livre-le à ton coffre de gang' : `Prends-le puis tiens la zone ${t(d.holdTotal)}`; pct = 0; }
+    else if (d.phase === 'hold') {
+      pct = 100 - (d.holdLeft / Math.max(1, d.holdTotal)) * 100;
+      if (d.me) { title = 'Restez dans la zone'; sub = d.outside > 0 ? `Hors zone ! Retourne vite (${Math.max(0, d.leaveGrace - d.outside)} s)` : `Encore ${t(d.holdLeft)} avec le colis`; warn = d.outside > 0; }
+      else { title = `${esc(d.carrierGang)} tient la zone`; sub = `Encore ${t(d.holdLeft)} — élimine le porteur !`; }
+    } else {
+      pct = 100;
+      if (d.me) { title = 'Livrez le colis'; sub = 'Ramène-le à ton coffre de gang (suis le GPS)'; }
+      else { title = `${esc(d.carrierGang)} file vers son coffre`; sub = 'Stoppe le porteur avant la livraison !'; warn = true; }
+    }
+    el.classList.toggle('warn', warn);
+    el.innerHTML = `<div class="eyebrow">Mission colis · ${esc(d.label)}</div><b>${title}</b><small>${sub}</small><div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:8px"><span class="muted sm-t">Fin de mission</span><span class="muted sm-t">${t(d.left || 0)}</span></div>`;
+    el.classList.remove('hidden');
   },
 };
 
@@ -287,6 +310,7 @@ window.addEventListener('message', e => {
   if (d.action === 'theme') return applyTheme(d.accent);
   if (d.action === 'progress') return Hud.progress(d);
   if (d.action === 'zone') return Hud.zone(d.data);
+  if (d.action === 'objective') return Hud.objective(d.data);
   if (d.action !== 'open') return;
   if (d.theme) applyTheme(d.theme);
   window.GBBackFromMenu = !!d.back;

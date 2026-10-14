@@ -75,6 +75,8 @@ local function capture(t, gangName)
     GB.syncTerritories()
 end
 
+GB.captureTerritory = capture
+
 -- ─────────────────────────────── Calcul de la capture ───────────────────────────────
 local function tick()
     local T, now = Config.Territories, os.time()
@@ -143,6 +145,7 @@ local function tick()
                 id = id, label = t.label, progress = math.floor(st.progress * 10) / 10, status = status,
                 owner = o and o.label or nil, attacker = a and a.label or nil, color = a and a.color or (o and o.color or nil),
                 protectedLeft = protected and (t.protected_until - now) or 0,
+                conflict = GB.conflictInfo and GB.conflictInfo(id) or nil,
             })
         end
     end

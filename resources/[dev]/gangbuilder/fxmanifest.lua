@@ -18,6 +18,8 @@ server_scripts {
     'server/runtime.lua',
     'server/activities.lua',
     'server/territories.lua',
+    'server/conflicts.lua',
+    'server/objectives.lua',
     'server/settings.lua',
 }
 
@@ -27,6 +29,8 @@ client_scripts {
     'client/actions.lua',
     'client/activities.lua',
     'client/territories.lua',
+    'client/conflicts.lua',
+    'client/objectives.lua',
 }
 
 ui_page 'html/index.html'

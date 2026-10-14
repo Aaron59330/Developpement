@@ -146,6 +146,7 @@ ESX.RegisterServerCallback('gangbuilder:act:finish', function(src, cb)
         GB.stat(xPlayer.identifier, gang.name, 'harvested', d.count)
         GB.addRep(gang.name, Config.Rep.PerHarvest)
         GB.log(gang.name, xPlayer, 'harvest', ('%dx %s'):format(d.count, d.label))
+        if GB.onIllegalActivity then GB.onIllegalActivity(src, 'harvest', point) end
         return cb({ ok = true, message = ('Tu as récolté ~g%dx %s'):format(d.count, d.label) })
 
     elseif act.kind == 'process' then
@@ -165,6 +166,7 @@ ESX.RegisterServerCallback('gangbuilder:act:finish', function(src, cb)
         GB.stat(xPlayer.identifier, gang.name, 'processed', ok)
         GB.addRep(gang.name, Config.Rep.PerProcess * ok)
         GB.log(gang.name, xPlayer, 'process', ('%dx %s (%d/%d réussi)'):format(r.output.count * ok, r.output.label, ok, act.qty))
+        if GB.onIllegalActivity then GB.onIllegalActivity(src, 'process', point) end
         if ok == 0 then return cb({ ok = true, message = '~r~Le traitement a échoué : les ingrédients sont perdus.' }) end
         return cb({ ok = true, message = ('Tu as produit ~g%dx %s%s'):format(r.output.count * ok, r.output.label, ok < act.qty and ('~s~ (%d/%d réussis)'):format(ok, act.qty) or '') })
 
@@ -213,5 +215,6 @@ ESX.RegisterServerCallback('gangbuilder:sell:do', function(src, cb, pointId, idx
     GB.stat(xPlayer.identifier, gang.name, 'sold', total)
     GB.addRep(gang.name, math.floor(total / 1000) * Config.Rep.PerSaleThousand)
     GB.log(gang.name, xPlayer, 'sell', ('%dx %s pour %d$ (gang : %d$)'):format(qty, it.label, total, cut))
+    if GB.onIllegalActivity then GB.onIllegalActivity(src, 'sell', point) end
     cb({ ok = true, total = total, paid = total - cut, cut = cut, alert = A.PoliceAlert and math.random(100) <= A.PoliceAlertChance })
 end)

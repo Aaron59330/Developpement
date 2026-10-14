@@ -272,3 +272,11 @@ kbd { border-color: var(--accent-line); }
 #zonehud b { display: block; font-size: 16px; margin: 8px 0 2px; letter-spacing: -.01em; }
 #zonehud small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 12px; }
 #zonehud .bar > i { background: var(--zone, var(--accent)); transition: width .8s linear; }
+#objhud { position: fixed; right: 22px; top: 50%; transform: translateY(-50%); width: min(300px, 80vw); z-index: 90; background: rgba(11, 11, 12, .94); border: 1px solid #f5b50a; border-radius: 16px; padding: 14px 18px; box-shadow: 0 20px 60px rgba(0, 0, 0, .6); animation: pop .15s; }
+#objhud b { display: block; font-size: 15px; margin: 6px 0 2px; letter-spacing: -.01em; }
+#objhud small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+#objhud .bar > i { background: #f5b50a; transition: width .8s linear; }
+#objhud.warn { border-color: #ef4444; }
+#objhud.warn .bar > i { background: #ef4444; }
+#zonehud .conf { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .08); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+#zonehud .conf b { display: inline; font-size: 13px; margin: 0; color: #fff; }

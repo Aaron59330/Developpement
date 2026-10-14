@@ -110,6 +110,50 @@ Config.Salary = {
 }
 
 -- ─────────────────────────────── Réputation ───────────────────────────────
+-- ─────────────────────────────── Affrontements de territoire ───────────────────────────────
+-- Quand un gang fait une activité illégale (récolte, traitement, vente) sur le territoire d'un AUTRE gang, le propriétaire est
+-- prévenu (notification + alerte sur la carte) et un affrontement commence : chaque kill dans la zone rapporte un point.
+-- À la fin, le gang qui a le plus de points gagne ; s'il s'agit de l'intrus, il capture le territoire (WinnerCaptures).
+Config.Conflicts = {
+    Enabled         = true,
+    Kinds           = { harvest = true, process = true, sell = true },   -- activités qui déclenchent un affrontement
+    Duration        = 300,     -- durée d'un affrontement (s)
+    Cooldown        = 900,     -- délai avant qu'un même gang puisse en redéclencher un sur le même territoire (s)
+    WinnerCaptures  = true,    -- l'intrus qui gagne (au moins 1 kill de plus) capture le territoire
+    MinKillsToWin   = 1,       -- kills minimum pour gagner
+    RepWin          = 20,      -- réputation du gagnant
+    RepLoss         = 0,       -- réputation retirée au perdant (0 = rien)
+    AlertBlipSeconds = 90,     -- durée du clignotement de la zone sur la carte pour les deux gangs
+}
+
+-- ─────────────────────────────── Missions « colis » entre gangs ───────────────────────────────
+-- Un colis apparaît dans une zone. Le premier gang qui le prend doit RESTER dans la zone `Hold` secondes avec le colis
+-- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
+-- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
+Config.Objectives = {
+    Enabled         = true,
+    AutoStart       = true,    -- lance une mission automatiquement
+    Interval        = 45,      -- minutes entre deux missions automatiques
+    MinGangsOnline  = 2,       -- gangs ayant au moins 1 membre connecté pour lancer une mission automatique
+    Duration        = 40,      -- durée maximale d'une mission (min)
+    Hold            = 180,     -- secondes à tenir dans la zone avec le colis (valeur par défaut)
+    LeaveGrace      = 25,      -- secondes tolérées hors zone avant que le colis ne retourne au centre
+    PickupDistance  = 3.0,     -- distance pour ramasser le colis
+    DeliverDistance = 4.0,     -- distance au coffre du gang pour livrer
+    RevealCarrier   = true,    -- les autres gangs voient le porteur sur la carte pendant la livraison
+    RevealInterval  = 5,       -- secondes entre deux mises à jour de sa position
+    RewardAccount   = 'dirty', -- 'dirty' | 'money'
+    Reward          = 5000,    -- récompense versée à la trésorerie du gang (par défaut, modifiable par zone)
+    RewardRep       = 40,
+    Model           = 'prop_box_wood02a_pu',   -- objet affiché au sol
+    -- Zones possibles (une au hasard par mission automatique ; /gbobjective <nom> pour en lancer une précise)
+    Zones = {
+        { name = 'port',      label = 'Cargaison du port',      coords = vector3(1210.0, -3050.0, 5.9),  radius = 40.0, hold = 180, reward = 6000 },
+        { name = 'aerodrome', label = 'Largage de l\'aérodrome', coords = vector3(1740.0, 3290.0, 41.1),  radius = 45.0, hold = 150, reward = 5000 },
+        { name = 'entrepot',  label = 'Entrepôt abandonné',     coords = vector3(1000.0, -2180.0, 30.5), radius = 35.0, hold = 120, reward = 4000 },
+    },
+}
+
 Config.Rep = {
     Enabled         = true,
     PerCapture      = 25,    -- territoire capturé
@@ -415,6 +459,28 @@ Config.Schema = {
         { key = 'Territories.BlipAlpha', label = 'Transparence de la zone sur la carte', t = 'int', min = 0, max = 255 },
         { key = 'Territories.DrawZone', label = 'Dessiner la zone au sol', t = 'bool' },
         { key = 'Territories.ZoneAlpha', label = 'Transparence de la zone au sol', t = 'int', min = 0, max = 255 },
+    } },
+    { id = 'conflicts', label = 'Affrontements', fields = {
+        { key = 'Conflicts.Enabled', label = 'Affrontements activés', t = 'bool', server = true },
+        { key = 'Conflicts.Duration', label = 'Durée d\'un affrontement (s)', t = 'int', min = 30, max = 3600, server = true },
+        { key = 'Conflicts.Cooldown', label = 'Délai avant un nouvel affrontement (s)', t = 'int', min = 0, max = 86400, server = true },
+        { key = 'Conflicts.WinnerCaptures', label = 'L\'intrus vainqueur capture le territoire', t = 'bool', server = true },
+        { key = 'Conflicts.MinKillsToWin', label = 'Kills minimum pour gagner', t = 'int', min = 1, max = 100, server = true },
+        { key = 'Conflicts.RepWin', label = 'Réputation du gagnant', t = 'int', min = 0, max = 100000, server = true },
+        { key = 'Conflicts.RepLoss', label = 'Réputation perdue par le perdant', t = 'int', min = 0, max = 100000, server = true },
+    } },
+    { id = 'objectives', label = 'Missions colis', fields = {
+        { key = 'Objectives.Enabled', label = 'Missions activées', t = 'bool', server = true },
+        { key = 'Objectives.AutoStart', label = 'Lancement automatique', t = 'bool', server = true },
+        { key = 'Objectives.Interval', label = 'Intervalle entre deux missions (min)', t = 'int', min = 5, max = 1440, server = true },
+        { key = 'Objectives.MinGangsOnline', label = 'Gangs connectés requis', t = 'int', min = 1, max = 20, server = true },
+        { key = 'Objectives.Duration', label = 'Durée maximale (min)', t = 'int', min = 5, max = 240, server = true },
+        { key = 'Objectives.Hold', label = 'Temps à tenir dans la zone (s)', t = 'int', min = 10, max = 3600, server = true },
+        { key = 'Objectives.LeaveGrace', label = 'Tolérance hors zone (s)', t = 'int', min = 0, max = 300, server = true },
+        { key = 'Objectives.RevealCarrier', label = 'Montrer le porteur aux autres gangs', t = 'bool', server = true },
+        { key = 'Objectives.RewardAccount', label = 'Compte crédité', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale du gang' }, { 'money', 'Argent propre du gang' }) },
+        { key = 'Objectives.Reward', label = 'Récompense ($)', t = 'int', min = 0, max = 100000000, server = true },
+        { key = 'Objectives.RewardRep', label = 'Réputation gagnée', t = 'int', min = 0, max = 100000, server = true },
     } },
     { id = 'activities', label = 'Activités', fields = {
         { key = 'Activities.Grace', label = 'Part de la durée à respecter (anti-triche, 0-1)', t = 'num', min = 0.3, max = 1, server = true },
