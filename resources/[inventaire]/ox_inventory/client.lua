@@ -289,22 +289,21 @@ function client.openInventory(inv, data)
     SetNuiFocusKeepInput(true)
     closeTrunk()
 
+    -- Flou plein écran : appliqué IMMÉDIATEMENT à l'ouverture (avant même l'affichage du personnage)
+    if client.screenblur then
+        if client.blurstrength > 0 then Utils.fullBlurIn() else Utils.blurIn() end
+    end
+
     SetTimeout(150, function()
-        if GetResourceState('p_itemclothes') == 'started' then
+        if invOpen == true and GetResourceState('p_itemclothes') == 'started' then
             TriggerEvent('p_itemclothes:togglePed', true)
-        elseif client.screenblur then
-            Utils.blurIn()
         end
     end)
 
-    if client.screenblur and GetResourceState('p_itemclothes') ~= 'started' then
-        Utils.blurIn()
-    end
-
-    -- p_itemclothes retire tout flou a l'ouverture : on applique le flou plein ecran APRES, quand le personnage est affiche
+    -- Filet de sécurité : si l'activation du personnage (p_itemclothes) a touché au flou, on le réapplique sans clignotement
     if client.screenblur and client.blurstrength > 0 and GetResourceState('p_itemclothes') == 'started' then
         SetTimeout(client.blurdelay, function()
-            if invOpen == true then Utils.fullBlurIn() end
+            if invOpen == true then Utils.keepBlur() end
         end)
     end
 

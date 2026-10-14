@@ -59,10 +59,8 @@ end)
 local pauseMenuName = 'FE_MENU_VERSION_EMPTY_NO_BACKGROUND'
 local pauseMenuHash = joaat(pauseMenuName)
 
+-- Le flou plein écran de l'inventaire n'est plus retiré ici : il reste actif en continu (ouverture immédiate sans clignotement)
 local function clearScreenBlur()
-    if IsScreenblurFadeRunning() then
-        TriggerScreenblurFadeOut(0)
-    end
     ClearTimecycleModifier()
 end
 

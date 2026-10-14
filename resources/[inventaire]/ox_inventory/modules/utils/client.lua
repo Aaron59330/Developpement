@@ -229,7 +229,7 @@ function Utils.blurIn()
         DisableScreenblurFade()
     end
 
-    TriggerScreenblurFadeIn(100)
+    TriggerScreenblurFadeIn((client and client.blurfade) or 100)
 end
 
 -- flou plein ecran : meme flou que le menu pause, le personnage du menu reste net.
@@ -241,7 +241,13 @@ function Utils.fullBlurIn()
         DisableScreenblurFade()
     end
 
-    TriggerScreenblurFadeIn(300)
+    TriggerScreenblurFadeIn((client and client.blurfade) or 100)
+end
+
+-- Réapplique le flou SANS le remettre à zéro (aucun clignotement si le flou est déjà actif)
+function Utils.keepBlur()
+    Utils.fullBlur = true
+    TriggerScreenblurFadeIn((client and client.blurfade) or 100)
 end
 
 function Utils.blurOut()
