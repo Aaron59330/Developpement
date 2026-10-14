@@ -77,7 +77,7 @@ var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--ac
 
 function applyCfg(c) {
   if (!c) return;
-  [$('wrap'), $('dlgwrap')].forEach(function (w) { applyCfgTo(w, c); });
+  [$('wrap'), $('dlgwrap'), $('chwrap')].forEach(function (w) { applyCfgTo(w, c); });
   $('banner').classList.toggle('hidden', c.banner === false);
 }
 
@@ -215,4 +215,57 @@ window.addEventListener('message', function (e) {
   var m = e.data || {};
   if (m.a === 'input') dlgOpenWith(m);
   else if (m.a === 'inputClose' && dlgOpen) { dlgOpen = false; $('dlgwrap').classList.add('hidden'); }
+});
+
+
+/* ===== Menu de choix ===== */
+var CH_ICONS = {
+  plane: '<path d="M10 14l-6.5 2.5v-2L10 11V5.5a2 2 0 0 1 4 0V11l6.5 3.5v2L14 14v4l2 1.5V21l-4-1-4 1v-1.5L10 18z"/>',
+  city: '<path d="M4 21V9l6-3v15M10 21V4l6 2v15M16 21v-9l4 1.5V21M3 21h18"/>',
+  beach: '<path d="M3 20h18M12 20V9M12 9c-3-4.5-7-3.5-8-2 3-1 5 0 8 2zM12 9c3-4.5 7-3.5 8-2-3-1-5 0-8 2z"/>',
+  house: '<path d="M4 11l8-6.5 8 6.5M6 10v9.5h12V10M10 19.5v-5h4v5"/>',
+  pin: '<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>'
+};
+var chOpen = false, chSel = 0, chCount = 0, chCancel = false;
+function chRender() {
+  var items = document.querySelectorAll('.ch-item');
+  for (var i = 0; i < items.length; i++) items[i].classList.toggle('act', i === chSel);
+}
+function chClose(index) {
+  if (!chOpen) return;
+  chOpen = false;
+  $('chwrap').classList.add('hidden');
+  nuiPost('chooseDone', { index: index });
+}
+function chOpenWith(m) {
+  var d = m.d || {};
+  window.__vol = m.v;
+  applyCfg(m.cfg || {});
+  $('ch-title').textContent = d.title || 'Choix';
+  $('ch-hint').textContent = d.hint || '';
+  var opts = d.options || [];
+  chCount = opts.length; chSel = 0; chCancel = d.cancellable === true;
+  $('ch-list').innerHTML = opts.map(function (o, i) {
+    var ic = CH_ICONS[o.icon] || CH_ICONS.pin;
+    return '<div class="ch-item" data-i="' + i + '"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ic + '</svg></span><span class="tx"><b>' + esc(o.label || '') + '</b>' + (o.description ? '<small>' + esc(o.description) + '</small>' : '') + '</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.ch-item'), function (el) {
+    el.addEventListener('mouseenter', function () { var i = +el.dataset.i; if (i !== chSel) { chSel = i; chRender(); dlgSound('hover'); } });
+    el.addEventListener('click', function () { dlgSound('confirm'); chClose(+el.dataset.i + 1); });
+  });
+  chOpen = true;
+  chRender();
+  $('chwrap').classList.remove('hidden');
+  dlgSound('open');
+}
+document.addEventListener('keydown', function (e) {
+  if (!chOpen) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); chSel = (chSel + 1) % chCount; chRender(); dlgSound('hover'); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); chSel = (chSel - 1 + chCount) % chCount; chRender(); dlgSound('hover'); }
+  else if (e.key === 'Enter') { e.preventDefault(); dlgSound('confirm'); chClose(chSel + 1); }
+  else if (e.key === 'Escape' && chCancel) { e.preventDefault(); dlgSound('close'); chClose(null); }
+});
+window.addEventListener('message', function (e) {
+  var m = e.data || {};
+  if (m.a === 'choose') chOpenWith(m);
 });

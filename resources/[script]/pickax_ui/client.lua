@@ -122,6 +122,39 @@ exports('Input', function(opts)
     return value
 end)
 
+-- Menu de choix (cartes) : retourne l'index (1-based) de l'option choisie, ou nil si annulé (seulement si opts.cancellable)
+-- opts = { title, hint, cancellable, options = { { label, description, icon }, ... } }
+local choosePromise = nil
+
+exports('Choose', function(opts)
+    if choosePromise or inputPromise then return nil end
+    opts = type(opts) == 'table' and opts or {}
+    local list = {}
+    for i, o in ipairs(type(opts.options) == 'table' and opts.options or {}) do
+        list[i] = { label = tostring(o.label or ('Choix ' .. i)), description = o.description and tostring(o.description) or '', icon = o.icon and tostring(o.icon) or nil }
+    end
+    if #list == 0 then return nil end
+    local p = promise.new()
+    choosePromise = p
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        a = 'choose', cfg = settings, v = settings.sound and settings.volume or 0,
+        d = { title = tostring(opts.title or 'Choix'), hint = opts.hint and tostring(opts.hint) or '', options = list, cancellable = opts.cancellable == true },
+    })
+    local value = Citizen.Await(p)
+    choosePromise = nil
+    SetNuiFocus(false, false)
+    return value
+end)
+
+RegisterNUICallback('chooseDone', function(data, cb)
+    cb('ok')
+    if choosePromise then
+        local i = data and tonumber(data.index)
+        choosePromise:resolve(i and math.floor(i) or nil)
+    end
+end)
+
 RegisterNUICallback('inputDone', function(data, cb)
     cb('ok')
     if inputPromise then
@@ -134,4 +167,5 @@ AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     SetNuiFocus(false, false)
     if inputPromise then inputPromise:resolve(nil) end
+    if choosePromise then choosePromise:resolve(nil) end
 end)

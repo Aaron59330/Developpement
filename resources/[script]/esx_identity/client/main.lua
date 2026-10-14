@@ -3,6 +3,7 @@ local myIdentity = {}
 local myIdentifiers = {}
 local hasIdentity = false
 local isDead = false
+local awaitingDestination = false   -- vrai entre la validation de l'identité et le choix de la destination
 
 ESX = exports[Config.Framework]:getSharedObject()
 Citizen.CreateThread(function()
@@ -213,6 +214,15 @@ RegisterNUICallback('register', function(myIdentity, cb)
 		TriggerServerEvent('esx_identity:setIdentity', myIdentity)
 		EnableGui(false)
 		Citizen.Wait(500)
+
+		-- Le sexe choisi dans l'identité devient le « sexe » du menu de création (Homme = 0, Femme = 1)
+		local sex = (myIdentity.sex == 'f' or myIdentity.sex == 'F') and 1 or 0
+		local applied = false
+		TriggerEvent('skinchanger:loadSkin', { sex = sex }, function() applied = true end)
+		local untilT = GetGameTimer() + 6000
+		while not applied and GetGameTimer() < untilT do Citizen.Wait(50) end
+
+		awaitingDestination = Config.Destinations and Config.Destinations.Enabled == true
 		if Config.CustomTrigger then
 			CustomEvent(myIdentifiers.id)
 		else
@@ -289,3 +299,43 @@ function verifyName(name)
 
 	return
 end
+
+-- ─────────────────────────────── Menu « Destination » ───────────────────────────────
+local function teleportTo(spot)
+	local c = spot.coords
+	local ped = PlayerPedId()
+	DoScreenFadeOut(600)
+	while not IsScreenFadedOut() do Citizen.Wait(10) end
+	FreezeEntityPosition(ped, true)
+	RequestCollisionAtCoord(c.x + 0.0, c.y + 0.0, c.z + 0.0)
+	SetEntityCoordsNoOffset(ped, c.x + 0.0, c.y + 0.0, c.z + 0.0, false, false, false)
+	SetEntityHeading(ped, (c.w or 0.0) + 0.0)
+	local t = GetGameTimer()
+	while not HasCollisionLoadedAroundEntity(ped) and GetGameTimer() - t < 4000 do Citizen.Wait(50) end
+	FreezeEntityPosition(ped, false)
+	Citizen.Wait(300)
+	DoScreenFadeIn(800)
+end
+
+-- Appelé par CorePickax (skinchanger) quand le joueur valide son personnage
+AddEventHandler('CorePickax:Creator:finished', function()
+	if not awaitingDestination then return end
+	awaitingDestination = false
+
+	local D = Config.Destinations
+	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
+
+	Citizen.Wait(600)
+	local index = 1
+	if GetResourceState('pickax_ui') == 'started' and #D.Spots > 1 then
+		local options = {}
+		for i, spot in ipairs(D.Spots) do
+			options[i] = { label = spot.label, description = spot.description, icon = spot.icon }
+		end
+		index = exports['pickax_ui']:Choose({ title = D.Title or 'Destination', hint = D.Hint, options = options, cancellable = false }) or 1
+	end
+
+	local spot = D.Spots[index] or D.Spots[1]
+	teleportTo(spot)
+	ESX.ShowNotification(('Bienvenue ! Tu arrives à ~b~%s~s~.'):format(spot.label))
+end)

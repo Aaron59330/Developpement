@@ -209,6 +209,8 @@ function openValidate()
 					end)
 					RageUI.CloseAll()
 					ESX.ShowNotification('Bienvenue sur le Serveur ~n~Bon jeu à vous !')
+					-- Création terminée : esx_identity peut proposer le menu « Destination »
+					TriggerEvent('CorePickax:Creator:finished')
 				end
 			end)
         end, function()
