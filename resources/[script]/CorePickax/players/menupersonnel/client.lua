@@ -30,30 +30,101 @@ local Prefs = {
 		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Bleu BlueBay' },
 	},
 	Sizes = { { id = 'sm', name = 'Petit' }, { id = 'md', name = 'Moyen' }, { id = 'lg', name = 'Grand' } },
+	-- Couleurs : liste de préréglages + "Personnalisé" (Entrée = saisir un code #RRGGBB au clavier)
 	Colors = {
-		{ id = '#00a4ff', name = 'Bleu BlueBay' }, { id = '#ef4444', name = 'Rouge' }, { id = '#22c55e', name = 'Vert' },
-		{ id = '#a855f7', name = 'Violet' }, { id = '#f97316', name = 'Orange' }, { id = '#ec4899', name = 'Rose' },
-		{ id = '#eab308', name = 'Jaune' }, { id = '#f4f4f5', name = 'Blanc' },
+		{ key = 'accent', label = 'Couleur principale', desc = 'Barre, détails et accents des menus', noDefault = true, presets = {
+			{ '#00a4ff', 'Bleu BlueBay' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
+			{ '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
+		{ key = 'bg', label = 'Fond du menu', desc = 'Couleur de fond des menus', presets = {
+			{ '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' },
+			{ '#0d1f17', 'Vert foncé' }, { '#2a0f14', 'Bordeaux' }, { '#f7f7f5', 'Blanc' } } },
+		{ key = 'text', label = 'Texte', desc = 'Couleur du texte des menus', presets = {
+			{ '#f4f4f5', 'Blanc' }, { '#c9c9ce', 'Gris clair' }, { '#111114', 'Noir' }, { '#cfe6ff', 'Bleu clair' }, { '#fde68a', 'Doré' } } },
+		{ key = 'selbg', label = 'Bouton sélectionné (fond)', desc = 'Fond du bouton survolé', presets = {
+			{ '#00a4ff', 'Bleu' }, { '#ffffff', 'Blanc' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
+		{ key = 'selborder', label = 'Bouton sélectionné (bordure)', desc = 'Bordure du bouton survolé', presets = {
+			{ '#ffffff', 'Blanc' }, { '#00a4ff', 'Bleu' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
 	},
+	BtnRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } },
+	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
+
+local PrefsCfg = { banner = true, style = 'noir', size = 'md', accent = '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end
 	return exports['pickax_ui'][name](exports['pickax_ui'], ...)
 end
 
-local function PrefsIndex(list, id)
+local function PrefsRefresh()
+	local c = PrefsCall('GetSettings')
+	if c then for k, v in pairs(c) do PrefsCfg[k] = v end end
+end
+
+local function PrefsSet(key, value)
+	if PrefsCall('SetSetting', key, value) then PrefsCfg[key] = value end
+end
+
+local function PrefsNames(list, nameIdx)
+	local t = {}
+	for i = 1, #list do t[i] = list[i][nameIdx or 2] or list[i].name end
+	return t
+end
+
+local PrefsStyleNames, PrefsSizeNames = {}, {}
+for i, v in ipairs(Prefs.Styles) do PrefsStyleNames[i] = v.name end
+for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
+local PrefsBtnNames, PrefsCardNames = PrefsNames(Prefs.BtnRadius), PrefsNames(Prefs.CardRadius)
+
+local function PrefsStyleIndex(list, id)
 	for i = 1, #list do if list[i].id == id then return i end end
 	return 1
 end
 
-local function PrefsNames(list)
+local function PrefsRadiusIndex(list, v)
+	for i = 1, #list do if list[i][1] == v then return i end end
+	return 1
+end
+
+-- Liste d'une couleur : [Défaut] + préréglages + [Personnalisé]
+local function PrefsColorItems(def)
 	local t = {}
-	for i = 1, #list do t[i] = list[i].name end
+	if not def.noDefault then t[#t + 1] = 'Défaut' end
+	for i = 1, #def.presets do t[#t + 1] = def.presets[i][2] end
+	t[#t + 1] = 'Personnalisé (Entrée)'
 	return t
 end
 
-local PrefsStyleNames, PrefsSizeNames, PrefsColorNames = PrefsNames(Prefs.Styles), PrefsNames(Prefs.Sizes), PrefsNames(Prefs.Colors)
+local function PrefsColorIndex(def, items)
+	local cur = PrefsCfg[def.key] or ''
+	if cur == '' and not def.noDefault then return 1 end
+	local off = def.noDefault and 0 or 1
+	for i = 1, #def.presets do
+		if def.presets[i][1] == cur then return i + off end
+	end
+	return #items
+end
+
+local function PrefsAskHex(key)
+	CreateThread(function()
+		AddTextEntry('PICKAX_HEX', 'Couleur au format #RRGGBB (ex : #00a4ff)')
+		local cur = PrefsCfg[key] or ''
+		DisplayOnscreenKeyboard(1, 'PICKAX_HEX', '', cur ~= '' and cur or '#', '', '', '', 7)
+		while UpdateOnscreenKeyboard() == 0 do
+			DisableAllControlActions(0)
+			Wait(0)
+		end
+		if UpdateOnscreenKeyboard() == 1 then
+			local r = (GetOnscreenKeyboardResult() or ''):gsub('%s', '')
+			if r:match('^%x%x%x%x%x%x$') then r = '#' .. r end
+			if r:match('^#%x%x%x%x%x%x$') then
+				PrefsSet(key, r:lower())
+			else
+				ESX.ShowNotification('~r~Couleur invalide~s~ (format #RRGGBB)')
+			end
+		end
+	end)
+end
 
 local BillData = {}
 local Breakable = false
@@ -104,9 +175,13 @@ local function OpenMenu()
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
 	local PrefsMenu = RageUI.CreateSubMenu(mainmenu, "Préférences d'affichage", "Apparence de tous les menus :")
-	local cfg = PrefsCall('GetSettings') or { banner = true, style = 'noir', size = 'md', accent = '#00a4ff' }
-	local pBanner = cfg.banner
-	local pStyle, pSize, pColor = PrefsIndex(Prefs.Styles, cfg.style), PrefsIndex(Prefs.Sizes, cfg.size), PrefsIndex(Prefs.Colors, cfg.accent)
+	PrefsRefresh()
+	local PrefsColorLists, PrefsColorSel = {}, {}
+	local function PrefsSyncSel()
+		for i, def in ipairs(Prefs.Colors) do PrefsColorSel[i] = PrefsColorIndex(def, PrefsColorLists[i]) end
+	end
+	for i, def in ipairs(Prefs.Colors) do PrefsColorLists[i] = PrefsColorItems(def) end
+	PrefsSyncSel()
 
 	RageUI.Visible(mainmenu, not RageUI.Visible(mainmenu))
 
@@ -127,37 +202,47 @@ local function OpenMenu()
 		end)
 		RageUI.IsVisible(PrefsMenu, true, true, true, function()
 			RageUI.Separator("Apparence")
-			RageUI.Checkbox("Afficher la bannière", "Affiche ou masque la bannière en haut des menus", pBanner, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
-				pBanner = Checked
+			RageUI.Checkbox("Afficher la bannière", "Affiche ou masque la bannière en haut des menus", PrefsCfg.banner, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
 			end, function()
-				PrefsCall('SetSetting', 'banner', true)
+				PrefsSet('banner', true)
 			end, function()
-				PrefsCall('SetSetting', 'banner', false)
+				PrefsSet('banner', false)
 			end)
-			RageUI.List("Style", PrefsStyleNames, pStyle, "Change le design de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
-				pStyle = Index
-			end, function(Index)
-				PrefsCall('SetSetting', 'style', Prefs.Styles[Index].id)
+			RageUI.List("Style", PrefsStyleNames, PrefsStyleIndex(Prefs.Styles, PrefsCfg.style), "Change le design de tous les menus", {}, true, function() end, function(Index)
+				PrefsSet('style', Prefs.Styles[Index].id)
 			end)
-			RageUI.List("Taille", PrefsSizeNames, pSize, "Change la taille de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
-				pSize = Index
-			end, function(Index)
-				PrefsCall('SetSetting', 'size', Prefs.Sizes[Index].id)
+			RageUI.List("Taille", PrefsSizeNames, PrefsStyleIndex(Prefs.Sizes, PrefsCfg.size), "Change la taille de tous les menus", {}, true, function() end, function(Index)
+				PrefsSet('size', Prefs.Sizes[Index].id)
 			end)
-			RageUI.List("Couleur", PrefsColorNames, pColor, "Change la couleur principale de tous les menus", {}, true, function(Hovered, Active, Selected, Index)
-				pColor = Index
-			end, function(Index)
-				PrefsCall('SetSetting', 'accent', Prefs.Colors[Index].id)
+			RageUI.Separator("Couleurs")
+			for i, def in ipairs(Prefs.Colors) do
+				local items = PrefsColorLists[i]
+				local off = def.noDefault and 0 or 1
+				RageUI.List(def.label, items, PrefsColorSel[i], def.desc .. " - Entrée sur « Personnalisé » pour saisir un code #RRGGBB", {}, true, function(Hovered, Active, Selected, Index)
+					PrefsColorSel[i] = Index
+					if Selected and Index == #items then PrefsAskHex(def.key) end
+				end, function(Index)
+					if Index == #items then return end
+					if not def.noDefault and Index == 1 then
+						PrefsSet(def.key, '')
+					else
+						PrefsSet(def.key, def.presets[Index - off][1])
+					end
+				end)
+			end
+			RageUI.Separator("Forme")
+			RageUI.List("Bords des boutons", PrefsBtnNames, PrefsRadiusIndex(Prefs.BtnRadius, PrefsCfg.btnRadius), "Carré, arrondi ou rond", {}, true, function() end, function(Index)
+				PrefsSet('btnRadius', Prefs.BtnRadius[Index][1])
+			end)
+			RageUI.List("Bords du menu", PrefsCardNames, PrefsRadiusIndex(Prefs.CardRadius, PrefsCfg.cardRadius), "Arrondi du cadre des menus", {}, true, function() end, function(Index)
+				PrefsSet('cardRadius', Prefs.CardRadius[Index][1])
 			end)
 			RageUI.Line()
 			RageUI.ButtonWithStyle("Réinitialiser l'apparence", "Revient au style par défaut", {}, true, function(_, _, s)
 				if s then
 					PrefsCall('ResetSettings')
-					local c = PrefsCall('GetSettings')
-					if c then
-						pBanner = c.banner
-						pStyle, pSize, pColor = PrefsIndex(Prefs.Styles, c.style), PrefsIndex(Prefs.Sizes, c.size), PrefsIndex(Prefs.Colors, c.accent)
-					end
+					PrefsRefresh()
+					PrefsSyncSel()
 				end
 			end)
 		end)
