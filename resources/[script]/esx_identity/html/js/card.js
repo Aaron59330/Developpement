@@ -90,7 +90,9 @@
 	$("input[name='radioFruit']").on("change", update);
 	$("input[name='radioFruit']").on("change", function () {
 		window.headRetries = 0;
-		setTimeout(function () { $.post("http://esx_identity/requestHead", "{}"); }, 400);
+		// le personnage prend tout de suite le ped Homme / Femme choisi (la photo de la carte est mise à jour par le client)
+		$.post("http://esx_identity/setSex", JSON.stringify({ sex: $("input[name='radioFruit']:checked").val() }));
+		setTimeout(function () { $.post("http://esx_identity/requestHead", "{}"); }, 1500);
 	});
 	update();
 

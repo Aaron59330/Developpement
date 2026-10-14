@@ -68,6 +68,23 @@ AddEventHandler('skinchanger:loadSkin', RefreshHeadIfOpen)
 AddEventHandler('skinchanger:loadClothes', RefreshHeadIfOpen)
 AddEventHandler('esx_skin:playerRegistered', RefreshHeadIfOpen)
 
+-- Choix Homme / Femme dans le formulaire : le personnage change tout de suite de modèle (homme = sexe 0, femme = sexe 1)
+-- et la photo de la carte d'identité se met à jour avec le bon ped.
+RegisterNUICallback('setSex', function(data, cb)
+	cb('ok')
+	local wantFemale = data and (data.sex == 'f' or data.sex == 'F')
+	local isFemale = GetEntityModel(PlayerPedId()) == `mp_f_freemode_01`
+	if wantFemale == isFemale then return end
+	Citizen.CreateThread(function()
+		local applied = false
+		TriggerEvent('skinchanger:loadSkin', { sex = wantFemale and 1 or 0 }, function() applied = true end)
+		local untilT = GetGameTimer() + 5000
+		while not applied and GetGameTimer() < untilT do Citizen.Wait(50) end
+		Citizen.Wait(300)
+		if guiEnabled then UpdateHeadshot() end
+	end)
+end)
+
 RegisterNUICallback('requestHead', function(data, cb)
 	if guiEnabled then
 		Citizen.CreateThread(UpdateHeadshot)
@@ -325,7 +342,6 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	local D = Config.Destinations
 	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
 
-	if PreloadArrivalCinematic then PreloadArrivalCinematic() end
 	Citizen.Wait(600)
 	local index = 1
 	if GetResourceState('pickax_ui') == 'started' and #D.Spots > 1 then
@@ -337,11 +353,6 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	end
 
 	local spot = D.Spots[index] or D.Spots[1]
-	-- Cinématique d'arrivée (avion), puis écran noir ~1 s, puis apparition à la destination
-	if Config.Cinematic and Config.Cinematic.Enabled and PlayArrivalCinematic then
-		PlayArrivalCinematic()
-		Citizen.Wait(Config.Cinematic.BlackScreenMs or 1000)
-	end
 	teleportTo(spot)
 	ESX.ShowNotification(('Bienvenue ! Tu arrives à ~b~%s~s~.'):format(spot.label))
 end)

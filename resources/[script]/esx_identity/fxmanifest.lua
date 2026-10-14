@@ -12,8 +12,7 @@ server_scripts {
 }
 
 client_scripts {
-	'client/main.lua',
-	'client/cinematic.lua'
+	'client/main.lua'
 }
 
 ui_page('html/index.html')
