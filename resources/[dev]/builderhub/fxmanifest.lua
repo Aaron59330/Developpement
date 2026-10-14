@@ -21,6 +21,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
+    'html/bb-ui.js',
 }
 
 dependencies { 'es_extended', 'oxmysql' }

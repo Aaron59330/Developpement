@@ -247,6 +247,13 @@ NuiLocal = {}
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end
 
+-- Retour au panel central (builderhub) : ferme ce builder puis ouvre /builders
+NuiLocal.bbHub = function(_, cb)
+    cb({ ok = true })
+    NuiLocal.close({}, function() end)
+    SetTimeout(250, function() ExecuteCommand('builders') end)
+end
+
 NuiLocal.getCoords = function(_, cb)
     local ped = PlayerPedId()
     local c = GetEntityCoords(ped)

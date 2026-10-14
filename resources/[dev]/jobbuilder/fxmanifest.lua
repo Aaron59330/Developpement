@@ -51,6 +51,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
+    'html/bb-ui.js',
     'html/map/**/*',
 }
 
