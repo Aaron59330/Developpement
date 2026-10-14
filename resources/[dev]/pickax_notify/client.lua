@@ -11,8 +11,12 @@ local function getBool(value, fallback)
     return value == true
 end
 
+-- Réglage du joueur (menu personnel → Préférences) : arrondi des notifications, mémorisé sur son poste
+local KVP_RADIUS = 'pickax_notify:radius'
+local playerRadius = tonumber(GetResourceKvpString(KVP_RADIUS) or '')
+
 local function getUiConfig()
-    return {
+    local cfg = {
         mainColor = Config.MainColor or '#00a4ff',
         backgroundColor = Config.BackgroundColor or '#070c12',
         backgroundTransparency = getNumber(Config.BackgroundTransparency, 0.68),
@@ -73,6 +77,11 @@ local function getUiConfig()
 
         maxVisibleNotifications = math.max(1, math.floor(getNumber(Config.MaxVisibleNotifications, 4)))
     }
+    if playerRadius ~= nil then
+        cfg.borderRadius = playerRadius
+        cfg.iconRadius = math.min(playerRadius * 0.65, 11)
+    end
+    return cfg
 end
 
 RegisterNUICallback('getConfig', function(_, cb)
@@ -211,6 +220,17 @@ local function ShowHelpNotification(msg)
         duration = getNumber(Config.HelpNotificationDuration, 1200)
     })
 end
+
+exports('GetRadius', function() return playerRadius end)
+
+-- radius = nombre (0 à 30) ou nil pour revenir à la valeur du serveur (Config.BorderRadius)
+exports('SetRadius', function(radius)
+    radius = tonumber(radius)
+    if radius ~= nil then radius = math.max(0, math.min(30, math.floor(radius))) end
+    playerRadius = radius
+    if radius == nil then DeleteResourceKvp(KVP_RADIUS) else SetResourceKvp(KVP_RADIUS, tostring(radius)) end
+    return true
+end)
 
 exports('ShowNotification', ShowNotification)
 exports('Notify', Notify)

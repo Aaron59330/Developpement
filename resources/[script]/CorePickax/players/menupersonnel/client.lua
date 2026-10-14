@@ -83,6 +83,18 @@ for i, v in ipairs(HudRadius) do HudRadiusNames[i] = v[2] end
 local HudScale = { { 70, 'Très petit' }, { 85, 'Petit' }, { 100, 'Normal' }, { 115, 'Grand' }, { 130, 'Très grand' } }
 local HudScaleNames = {}
 for i, v in ipairs(HudScale) do HudScaleNames[i] = v[2] end
+local NotifyRadius = { { -1, 'Par défaut' }, { 0, 'Carré' }, { 6, 'Léger' }, { 11, 'Arrondi' }, { 18, 'Très arrondi' }, { 26, 'Fort arrondi' } }
+local NotifyRadiusNames = {}
+for i, v in ipairs(NotifyRadius) do NotifyRadiusNames[i] = v[2] end
+local function NotifyGetRadius()
+	if GetResourceState('pickax_notify') ~= 'started' then return -1 end
+	return exports['pickax_notify']:GetRadius() or -1
+end
+local function NotifySetRadius(v)
+	if GetResourceState('pickax_notify') ~= 'started' then return end
+	exports['pickax_notify']:SetRadius(v >= 0 and v or nil)
+	exports['pickax_notify']:ShowNotification('Aperçu : voici le nouvel arrondi des notifications.', 'success')
+end
 local HudCfg = { hud = true, server = true, job = true, money = true, radius = 6, scale = 100 }
 local function HudCall(name, ...)
 	if GetResourceState('PickaxHud2') ~= 'started' then return nil end
@@ -331,6 +343,9 @@ local function OpenMenu()
 			RageUI.Separator("Forme")
 			RageUI.List("Bords des boutons", PrefsBtnNames, PrefsRadiusIndex(Prefs.BtnRadius, PrefsCfg.btnRadius), "Carré, arrondi ou rond", {}, true, function() end, function(Index)
 				PrefsSet('btnRadius', Prefs.BtnRadius[Index][1])
+			end)
+			RageUI.List("Bords des notifications", NotifyRadiusNames, PrefsRadiusIndex(NotifyRadius, NotifyGetRadius()), "Carré, arrondi ou très arrondi (s'applique à toutes vos notifications)", {}, true, function() end, function(Index)
+				NotifySetRadius(NotifyRadius[Index][1])
 			end)
 			RageUI.List("Bords du menu", PrefsCardNames, PrefsRadiusIndex(Prefs.CardRadius, PrefsCfg.cardRadius), "Arrondi du cadre des menus", {}, true, function() end, function(Index)
 				PrefsSet('cardRadius', Prefs.CardRadius[Index][1])
