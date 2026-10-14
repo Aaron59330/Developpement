@@ -1,80 +1,45 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>Pickax HUD</title>
     <link rel="stylesheet" href="css/css.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <script src="https://kit.fontawesome.com/20f4f1f631.js" crossorigin="anonymous"></script>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
-
-    <link href="css/animate.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 </head>
 <body>
     <div id="ui">
         <div id="infos">
-            <div class="info-server" >
-                <div class="linetop">
-                <div class="container-server">
-                    <div class="g1">
-                        <div class="g1-content">
-                            <img class="imagegroup" src="">
-                            <span class="countgg" id=""></span><span class=""></span>
-                        </div>
-                    </div>
-                    </div>
-                    <div class="g2">
-                        <div class="g2-content">
-                            <img class="imageplayer" src="">
-                            <span class="" id=""></span>
-                        </div>
-                    </div>
-                    <div class="g3">
-                        <div class="g3-content">
-                            <span class="server" id="servername">BLUEBAY</span>
-                            <span class="discordgg" id="discord">DISCORD.GG/BLUEBAYRP</span>
-                        </div>
-                    </div>
-                    <div class="g4">
-                        <div class="g4-content">
-                            <img class="logo" src="img/logo.png">
-                        </div>
-                    </div>
+            <!-- Serveur -->
+            <section class="card" id="serverCard">
+                <img class="logo" src="img/logo.png" alt="">
+                <div class="srv">
+                    <span class="server" id="servername">BLUEBAY</span>
+                    <span class="discord" id="discord">DISCORD.GG/BLUEBAYRP</span>
                 </div>
-            </div>
-            <div class="info">
-                <div class="linecash">
-                <div class="container">
-                    <img class="imagecash" src="img/money.png">
-                    <!-- <span class="state" id="money">0</span> -->
-                    <span class="state" id="money">0$</span>
+                <div class="chips">
+                    <span class="chip" title="Votre ID"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-4 3.1-6.5 7-6.5s7 2.5 7 6.5"></path></svg><b id="playerId">0</b></span>
+                    <span class="chip" title="Joueurs connectés"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"></circle><circle cx="17" cy="10" r="2.4"></circle><path d="M3 19c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4M15.5 14c3 0 5.5 1.7 5.5 4.6"></path></svg><b id="players">0</b></span>
                 </div>
-                </div>
-            </div>
-            <div class="info">
-                <div class="lineblack">
-                <div class="container">
-                    <img class="imageblack" src="img/black_money.png">
-                    <!-- <span class="state" id="black_money">0</span> -->
-                    <span class="state" id="black_money">0$</span>
-                </div>
-                </div>
-            </div>
-            <div class="info">
-                <div class="linebank">
-                <div class="container">
-                    <img class="imagebank" src="img/bank.png">
-                    <!-- <span class="state" id="bank">0</span> -->
-                    <span class="state" id="bank">0$</span>
-                </div>
-            </div>
-            </div>
-    </div>
-    <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
-    <script src="js/main.js"></script>
+            </section>
 
-    <div id="app"></div>
-    </body>
+            <!-- Métier -->
+            <section class="card" id="jobCard">
+                <div class="jobicon" id="jobIcon"></div>
+                <div class="jobtxt">
+                    <span class="jobname" id="jobName">Chômeur</span>
+                    <span class="jobgrade" id="jobGrade">Sans emploi</span>
+                </div>
+                <span class="tag" id="jobTag">Civil</span>
+            </section>
+
+            <!-- Argent -->
+            <section class="card money" id="moneyCard">
+                <div class="row cash"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2"></rect><circle cx="12" cy="12" r="2.6"></circle><path d="M6.5 9.5v.01M17.5 14.5v.01"></path></svg></span><span class="lbl">Liquide</span><span class="state" id="money">0 $</span></div>
+                <div class="row black"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3.5l7.5 3v5.2c0 4.4-3.1 7.7-7.5 9-4.4-1.3-7.5-4.6-7.5-9V6.5z"></path><path d="M9.5 12h5M12 9.5v5"></path></svg></span><span class="lbl">Sale</span><span class="state" id="black_money">0 $</span></div>
+                <div class="row bank"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"></rect><path d="M3 10h18M7 15h4"></path></svg></span><span class="lbl">Banque</span><span class="state" id="bank">0 $</span></div>
+            </section>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
 </html>

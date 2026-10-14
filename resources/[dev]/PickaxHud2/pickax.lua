@@ -25,3 +25,12 @@ RegisterCommand('smsg', function(source, args)
         TriggerClientEvent("esx:showNotification", _src, "Vous n'avez pas la permission d'envoyer ce message.")
     end
 end)
+
+-- Nombre de joueurs connectés (affiché dans le HUD)
+CreateThread(function()
+    GlobalState.pickaxMaxPlayers = GetConvarInt('sv_maxclients', 64)
+    while true do
+        GlobalState.pickaxPlayers = GetNumPlayerIndices()
+        Wait(10000)
+    end
+end)
