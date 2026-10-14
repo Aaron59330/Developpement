@@ -31,6 +31,21 @@ var ICONS = {
 };
 var CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
 
+// Flèches « → / →→ / →→→ / ↗ » des boutons : remplacées par une icône (chevron dans un rond, ou lien externe)
+var ARROW_RE = /\s*(→+|⇒|▶|►|>>)\s*$/;
+var ICON_ARROW = '<span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
+var ICON_EXT = '<span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>';
+function rightLabel(r) {
+  var plain = String(r).replace(/~[a-zA-Z]~/g, '').trim();
+  if (plain === '↗') return ICON_EXT;
+  if (/^(→+|⇒|▶|►|>>)$/.test(plain)) return ICON_ARROW;
+  if (ARROW_RE.test(plain)) {
+    var text = String(r).replace(/\s*(→+|⇒|▶|►|>>)\s*$/, '');
+    return '<span class="rt">' + gta(text) + '</span>' + ICON_ARROW;
+  }
+  return '<span class="rt">' + gta(r) + '</span>';
+}
+
 function badge(name) { return name ? (ICONS[name] || ICONS.dot) : ''; }
 
 function item(it) {
@@ -44,7 +59,7 @@ function item(it) {
   h += badge(it.lb);
   h += '<span class="lb">' + gta(it.l) + '</span>';
   if (it.k === 'l') h += '<span class="lst"><i>‹</i>' + gta(it.v) + '<i>›</i></span>';
-  if (it.r) h += '<span class="rt">' + gta(it.r) + '</span>';
+  if (it.r) h += rightLabel(it.r);
   if (it.k === 'c') h += '<span class="box' + (it.ck ? ' on' : '') + (it.cs === 'cross' ? ' x' : '') + '"></span>';
   if (it.rb) h += badge(it.rb);
   if (it.en === false && !it.rb) h += ICONS.lock;

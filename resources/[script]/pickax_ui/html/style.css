@@ -96,3 +96,8 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 .ih { font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 700; padding: 10px 0 6px; }
 .ip { font-size: 12.5px; line-height: 1.55; color: var(--text-2); padding: 3px 0; }
 .gap { margin-top: 8px; }
+
+/* Icône de flèche des boutons (remplace → / →→ / →→→) */
+.arr { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.07); color: var(--muted); flex-shrink: 0; transition: background .12s, color .12s, transform .12s; }
+.arr svg { width: 13px; height: 13px; }
+.it.act .arr { background: rgba(255,255,255,.2); color: var(--act-text); transform: translateX(2px); }
