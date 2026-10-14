@@ -3,7 +3,7 @@ local ESX = exports["es_extended"]:getSharedObject()
 
 -- ── Réglages du joueur (menu personnel → Préférences → Affichage du HUD) ──
 local KVP = 'pickax_hud2:settings'
-local DEFAULTS = { hud = true, server = true, job = true, money = true, radius = 6 }
+local DEFAULTS = { hud = true, server = true, job = true, money = true, radius = 6, scale = 100 }
 local Settings = {}
 for k, v in pairs(DEFAULTS) do Settings[k] = v end
 
@@ -26,6 +26,7 @@ exports('GetSettings', function() return Settings end)
 exports('SetSetting', function(key, value)
     if DEFAULTS[key] == nil or type(value) ~= type(DEFAULTS[key]) then return false end
     if key == 'radius' then value = math.max(0, math.min(30, math.floor(value))) end
+    if key == 'scale' then value = math.max(60, math.min(150, math.floor(value))) end
     Settings[key] = value
     SetResourceKvp(KVP, json.encode(Settings))
     applySettings()

@@ -3,7 +3,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: Teko, sans-serif; }
 html, body { background: transparent; overflow: hidden; }
 
-#infos { position: fixed; top: 2.4vh; right: 1.35vw; width: 292px; display: flex; flex-direction: column; gap: 8px; }
+#infos { position: fixed; top: 2.4vh; right: 1.35vw; width: 292px; display: flex; flex-direction: column; gap: 8px; transform: scale(var(--s, 1)); transform-origin: top right; }
 
 .card { position: relative; display: flex; align-items: center; gap: 12px; padding: 9px 18px 9px 12px; background: var(--bg); color: var(--text); border-radius: var(--r, 6px); }
 .card::after { content: ""; position: absolute; right: 0; top: 50%; width: 4px; height: 60%; transform: translateY(-50%); background: var(--main); border-radius: min(var(--r, 6px), 4px) 0 0 min(var(--r, 6px), 4px); box-shadow: 0 0 8px var(--main); }

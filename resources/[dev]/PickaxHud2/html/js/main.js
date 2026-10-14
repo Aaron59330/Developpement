@@ -56,6 +56,7 @@ var NAMED_ICONS = {
                 $('jobCard').style.display = c.job === false ? 'none' : '';
                 $('moneyCard').style.display = c.money === false ? 'none' : '';
                 if (c.radius != null) document.documentElement.style.setProperty('--r', c.radius + 'px');
+                if (c.scale != null) document.documentElement.style.setProperty('--s', String(c.scale / 100));
                 break;
             }
             case 'hideUi': ui.style.display = d.value === true ? 'none' : ''; break;

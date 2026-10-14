@@ -80,7 +80,10 @@ local function PrefsVolumeIndex() return math.max(1, math.min(10, math.floor((to
 local HudRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' } }
 local HudRadiusNames = {}
 for i, v in ipairs(HudRadius) do HudRadiusNames[i] = v[2] end
-local HudCfg = { hud = true, server = true, job = true, money = true, radius = 6 }
+local HudScale = { { 70, 'Très petit' }, { 85, 'Petit' }, { 100, 'Normal' }, { 115, 'Grand' }, { 130, 'Très grand' } }
+local HudScaleNames = {}
+for i, v in ipairs(HudScale) do HudScaleNames[i] = v[2] end
+local HudCfg = { hud = true, server = true, job = true, money = true, radius = 6, scale = 100 }
 local function HudCall(name, ...)
 	if GetResourceState('PickaxHud2') ~= 'started' then return nil end
 	return exports['PickaxHud2'][name](exports['PickaxHud2'], ...)
@@ -478,6 +481,9 @@ local function OpenMenu()
 				HudSet('money', false)
 			end)
 			RageUI.Separator("Forme")
+			RageUI.List("Taille du HUD", HudScaleNames, PrefsRadiusIndex(HudScale, HudCfg.scale), "Agrandit ou réduit tout le HUD", {}, true, function() end, function(Index)
+				HudSet('scale', HudScale[Index][1])
+			end)
 			RageUI.List("Bords du HUD", HudRadiusNames, PrefsRadiusIndex(HudRadius, HudCfg.radius), "Carré, arrondi ou très arrondi", {}, true, function() end, function(Index)
 				HudSet('radius', HudRadius[Index][1])
 			end)
