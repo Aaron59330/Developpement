@@ -167,7 +167,7 @@ function PlayArrivalCinematic()
 
 	-- Fondu au noir (l'écran reste noir pendant BlackScreenMs, géré par main.lua) puis nettoyage
 	fadeOut(600)
-	ClearPedTasksImmediate(ped)
+	ClearPedTasksImmediately(ped)
 	if IsPedInAnyVehicle(ped, false) then
 		TaskLeaveVehicle(ped, plane, 16)
 		Citizen.Wait(200)
