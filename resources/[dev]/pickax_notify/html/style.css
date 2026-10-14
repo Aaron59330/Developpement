@@ -260,3 +260,10 @@ html, body, #notifications {
         padding: 10px 12px 11px 14px;
     }
 }
+
+/* Aide centrée « Appuyez sur E » */
+.help-prompt { position: fixed; left: 50%; top: 68%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 12px; opacity: 0; transition: opacity .15s ease; pointer-events: none; color: #fff; font-weight: 600; font-size: 17px; text-shadow: 0 1px 4px rgba(0,0,0,.85); white-space: nowrap; }
+.help-prompt.show { opacity: 1; }
+.help-prompt .hp-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 0 4px rgba(0,0,0,.6); }
+.help-prompt .hp-key { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(40,44,50,.55); border: 1px solid rgba(255,255,255,.28); font-size: 15px; box-shadow: 0 0 8px rgba(0,0,0,.35); }
+.help-prompt .key { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 50%; background: rgba(40,44,50,.55); border: 1px solid rgba(255,255,255,.28); font-size: 13px; }

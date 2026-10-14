@@ -382,11 +382,34 @@ function createNotification(data) {
     }
 }
 
+// Aide « Appuyez sur E » : prompt centré à l'écran (point · touche ronde · action), sans cadre
+let helpHideTimer = null;
+function showCenterHelp(data) {
+    const el = document.getElementById('helpPrompt');
+    const raw = String(data.message ?? '');
+    const m = raw.match(/^\s*(?:appuy(?:ez|e|er)|press)\s+(?:sur\s+)?(~INPUT_[A-Z_0-9]+~|\S+)\s*(?:pour|to|:|-)?\s*(.+)$/is);
+    let keyHtml = '', label = raw;
+    if (m && controls[m[1]]) {
+        keyHtml = `<span class="hp-key">${escapeHtml(controls[m[1]])}</span>`;
+        label = m[2].charAt(0).toUpperCase() + m[2].slice(1);
+    }
+    const html = `<span class="hp-dot"></span>${keyHtml}<span class="hp-text">${formatGtaText(label)}</span>`;
+    if (el.dataset.html !== html) { el.innerHTML = html; el.dataset.html = html; }
+    el.classList.add('show');
+    clearTimeout(helpHideTimer);
+    helpHideTimer = setTimeout(() => el.classList.remove('show'), Number(data.duration) || 1200);
+}
+
 window.addEventListener('message', (event) => {
     const data = event.data || {};
 
     if (data.action === 'config') {
         applyConfig(data.config || {});
+        return;
+    }
+
+    if (data.action === 'notify' && data.kind === 'help') {
+        showCenterHelp(data);
         return;
     }
 
