@@ -49,7 +49,7 @@ local Prefs = {
 	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
 
-local PrefsCfg = { banner = true, style = 'noir', size = 'md', accent = '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
+local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end
@@ -74,6 +74,9 @@ end
 local PrefsStyleNames, PrefsSizeNames = {}, {}
 for i, v in ipairs(Prefs.Styles) do PrefsStyleNames[i] = v.name end
 for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
+local PrefsVolumeNames = {}
+for i = 1, 10 do PrefsVolumeNames[i] = (i * 10) .. ' %' end
+local function PrefsVolumeIndex() return math.max(1, math.min(10, math.floor((tonumber(PrefsCfg.volume) or 60) / 10 + 0.5))) end
 local PrefsBtnNames, PrefsCardNames = PrefsNames(Prefs.BtnRadius), PrefsNames(Prefs.CardRadius)
 
 local function PrefsStyleIndex(list, id)
@@ -270,6 +273,16 @@ local function OpenMenu()
 			end)
 			RageUI.List("Taille", PrefsSizeNames, PrefsStyleIndex(Prefs.Sizes, PrefsCfg.size), "Change la taille de tous les menus", {}, true, function() end, function(Index)
 				PrefsSet('size', Prefs.Sizes[Index].id)
+			end)
+			RageUI.Separator("Sons")
+			RageUI.Checkbox("Sons des menus", "Active ou désactive les sons des menus (clic, navigation, validation)", PrefsCfg.sound, { Style = RageUI.CheckboxStyle.Tick }, function() end, function()
+				PrefsSet('sound', true)
+			end, function()
+				PrefsSet('sound', false)
+			end)
+			RageUI.List("Volume des sons", PrefsVolumeNames, PrefsVolumeIndex(), "Volume des sons des menus", {}, true, function() end, function(Index)
+				PrefsSet('volume', Index * 10)
+				PrefsCall('Sound', 'click')
 			end)
 			RageUI.Separator("Couleurs")
 			for i, def in ipairs(Prefs.Colors) do

@@ -45,24 +45,38 @@
   function play(name) { if (cfg.sound && SND[name]) { try { SND[name](); } catch (e) {} } }
   window.BBUI = { play: play, settings: cfg };
 
-  var CLICKABLE = 'button, .nav-item, .card, .tab, [data-a], [data-open], [role=button], label.chk, select, input[type=checkbox]';
+  // Tout élément cliquable (builder ET menus créés pour les joueurs) : bouton, lien, champ de choix, ou tout ce qui affiche un curseur « main »
+  var NATIVE = 'button, select, a[href], label, input[type=checkbox], input[type=radio], [role=button], [data-a], [data-open], .nav-item, .tab, .card.click, .click';
+  function interactive(el) {
+    for (var n = el, i = 0; n && n.nodeType === 1 && n !== document.body && i < 8; n = n.parentElement, i++) {
+      if (n.id === 'bbdock') return null;
+      if (n.disabled || n.classList.contains('off')) return null;
+      if (n.matches(NATIVE)) return n;
+      try { if (getComputedStyle(n).cursor === 'pointer') return n; } catch (e) {}
+    }
+    return null;
+  }
+  var lastHoverEl = null;
   document.addEventListener('mouseover', function (e) {
-    var t = e.target.closest && e.target.closest('button, .nav-item, .card, .tab, [data-a]');
-    if (!t || t.disabled) return;
+    var t = interactive(e.target);
+    if (!t) { lastHoverEl = null; return; }
+    if (t === lastHoverEl) return;
+    lastHoverEl = t;
     var now = Date.now();
     if (now - lastHover < 70) return;
-    if (e.relatedTarget && t.contains(e.relatedTarget)) return;
     lastHover = now;
     play('hover');
   }, true);
   document.addEventListener('click', function (e) {
-    var t = e.target.closest && e.target.closest(CLICKABLE);
-    if (!t || t.disabled) return;
-    if (t.closest('#bbdock')) { if (t.matches('[data-bb=snd]')) return; play('click'); return; }
-    if (t.matches('input[type=checkbox]')) { play(t.checked ? 'on' : 'off'); return; }
-    if (t.matches('.nav-item, .tab')) { play('tab'); return; }
+    var raw = e.target.closest && e.target.closest('#bbdock');
+    if (raw) { var s = e.target.closest('[data-bb]'); if (s && s.matches('[data-bb=snd]')) return; play('click'); return; }
+    var t = interactive(e.target);
+    if (!t) return;
+    var cb = t.matches('input[type=checkbox]') ? t : t.querySelector && t.querySelector('input[type=checkbox]');
+    if (cb && (t.matches('label') || t === cb)) { play(cb.checked ? 'on' : 'off'); return; }
+    if (t.matches('.nav-item, .tab, [role=tab]')) { play('tab'); return; }
     if (t.matches('button.danger, .danger')) { play('warn'); return; }
-    if (t.matches('button.primary')) { play('confirm'); return; }
+    if (t.matches('button.primary, .primary')) { play('confirm'); return; }
     play('click');
   }, true);
 

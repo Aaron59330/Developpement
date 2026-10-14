@@ -41,6 +41,17 @@ local function audio(name)
     RageUI.PlaySound(a[a.Use][name].audioName, a[a.Use][name].audioRef)
 end
 
+-- Sons motion design : les sons natifs de RageUI sont remplacés par ceux de pickax_ui (réglage « Sons des menus »)
+local NATIVE_TO_UI = { NAV_UP_DOWN = 'tab', NAV_LEFT_RIGHT = 'tab', SELECT = 'confirm', BACK = 'close', ERROR = 'error' }
+local _PlaySound = RageUI.PlaySound
+local function uiSound(name)
+    if GetResourceState(UI) == 'started' then exports[UI]:Sound(name) return true end
+    return false
+end
+function RageUI.PlaySound(Library, Sound, IsLooped)
+    if IsLooped or not uiSound(NATIVE_TO_UI[Sound] or 'click') then return _PlaySound(Library, Sound, IsLooped) end
+end
+
 -- Saute les séparateurs pendant la navigation (comme RageUI d'origine)
 local function skipIndex(menu, Option)
     if menu.Index == Option then
@@ -277,8 +288,8 @@ local function checkbox(Label, Description, Checked, Style, Callback, onChecked,
 
             if Selected and menu.Controls.Select.Active then
                 if enabled then
-                    audio('Select')
                     Checked = not Checked
+                    if not uiSound(Checked and 'on' or 'off') then audio('Select') end
                 else
                     audio('Error')
                     Checked = false

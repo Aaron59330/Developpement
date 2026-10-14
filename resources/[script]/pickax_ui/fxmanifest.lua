@@ -14,5 +14,6 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
+    'html/snd.js',
     'html/banner.jpg',
 }

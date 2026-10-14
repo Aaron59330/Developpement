@@ -4,6 +4,7 @@ local DEFAULTS = {
     banner = true, style = 'noir', size = 'md',
     accent = '#00a4ff', bg = '', text = '', selbg = '', selborder = '',
     btnRadius = 12, cardRadius = 18,
+    sound = true, volume = 60,
 }
 local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true }
 local SIZES = { sm = true, md = true, lg = true }
@@ -17,7 +18,8 @@ local function isHex(v) return type(v) == 'string' and v:match('^#%x%x%x%x%x%x$'
 local function inList(list, v) for i = 1, #list do if list[i] == v then return true end end return false end
 
 local function validate(key, value)
-    if key == 'banner' then return true, value and true or false end
+    if key == 'banner' or key == 'sound' then return true, value and true or false end
+    if key == 'volume' then value = tonumber(value) return value ~= nil and value >= 10 and value <= 100, value and math.floor(value / 10 + 0.5) * 10 end
     if key == 'style' then return STYLES[value] == true, value end
     if key == 'size' then return SIZES[value] == true, value end
     if COLOR_KEYS[key] then
@@ -54,6 +56,12 @@ local function save() SetResourceKvp(KVP, json.encode(settings)) end
 exports('Update', function(data)
     shown, last = true, data
     push()
+end)
+
+-- Son motion design d'un menu (click, confirm, tab, on, off, close, error…) ; respecte le réglage « Sons des menus »
+exports('Sound', function(name)
+    if not settings.sound or type(name) ~= 'string' then return end
+    SendNUIMessage({ a = 'snd', n = name, v = settings.volume })
 end)
 
 exports('Hide', function()
