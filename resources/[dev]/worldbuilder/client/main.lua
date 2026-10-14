@@ -14,9 +14,16 @@ Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 -- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
 local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano',
     bank = 'bank', driving = 'school', drug = 'drug', robbery = 'robbery', doorlock = 'world', pvp = 'gang', chase = 'police' }
+local LastType = nil   -- dernier module utilisé (logo des notifications hors panneau)
 function Notify(msg, kind)
-    local t = Ctx and Ctx.type
-    ESX.ShowNotification(msg, kind or 'info', nil, WB_ICON[t] or 'world')
+    local t = (Ctx and Ctx.type) or LastType
+    local icon = WB_ICON[t] or 'world'
+    -- ESX.ShowNotification (es_extended) ne transmet pas l'icône : appel direct à pickax_notify (repli : ESX)
+    if GetResourceState('pickax_notify') == 'started' then
+        local ok = pcall(function() exports['pickax_notify']:ShowNotification(msg, kind or 'info', nil, icon) end)
+        if ok then return end
+    end
+    ESX.ShowNotification(msg, kind or 'info', nil, icon)
 end
 
 RegisterNetEvent('worldbuilder:client:notify', function(msg, kind) Notify(msg, kind) end)
@@ -272,6 +279,7 @@ end
 
 local function interact(n)
     if Busy or uiOpen then return end
+    LastType = n.type
     local h = Handlers[n.type]
     if not h then return Notify(('Module « %s » non géré par le client (fichiers à jour ? refresh + restart worldbuilder)'):format(n.type), 'error') end
     local ok, err = pcall(h, n)

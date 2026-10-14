@@ -31,7 +31,7 @@ Interface au même style que le Shop Builder, réservée aux groupes ESX (`_dev`
    ensure ox_lib         # optionnel : mini-jeux (perçage, piratage…)
    ensure worldbuilder
    ```
-3. Les tables `worldbuilder_*` se créent **toutes seules** (ou importe `sql/install.sql`).
+3. Les tables `worldbuilder_*` sont dans `database.sql` à la racine du serveur (importe-le) ; si `sql/install.sql` existe dans la ressource, elles se créent aussi toutes seules au démarrage.
 4. **OneSync activé** (nécessaire pour la gestion serveur des véhicules).
 5. En jeu : `/worldbuilder`.
 

@@ -42,7 +42,7 @@ Config.Vehicles = {
     owner  = 'owner',
     plate  = 'plate',
     props  = 'vehicle',      -- JSON des propriétés (ESX.Game.GetVehicleProperties)
-    stored = 'stored',       -- 1 = garage, 0 = sorti, 2 = fourrière
+    stored = 'state',        -- 1 = garage, 0 = sorti, 2 = fourrière (colonne `state` d'owned_vehicles, comme CorePickax)
     forSale = 3,             -- valeur de `stored` d'un véhicule mis en vente (module Occasion) : ni garage ni fourrière
     type   = 'type',         -- 'car', 'boat', 'aircraft', 'bike'...
 }
@@ -157,7 +157,7 @@ if IsDuplicityVersion() then
     -- resource : nom de la ressource qui exporte RegisterNewKeys(source, plaque, 'no') ('' pour désactiver)
     -- table    : table des clés (colonnes identifier / value = plaque) : sert à DÉTECTER si le joueur a déjà la clé
     -- transferExport : true si tu as ajouté l'export TransferKeys (voir patches/vehicle) : les ventes d'occasion transfèrent alors proprement les clés
-    Config.Keys = { resource = 'CorePickax', table = 'open_car', transferExport = false }
+    Config.Keys = { resource = 'CorePickax', table = 'open_car', transferExport = true }
 
     -- Second métier (job2 / gang) des portes. Par défaut : xPlayer.job2 (ou xPlayer.getJob2()), de la forme { name = 'ballas', grade = 2 }.
     -- Config.GetJob2 = function(xPlayer) return { name = xPlayer.getMeta('gang'), grade = 0 } end
@@ -168,10 +168,10 @@ if IsDuplicityVersion() then
 
     -- Vérifie une licence (non utilisé par défaut ; hook disponible pour tes extensions)
     Config.HasLicense = function(src, license)
-        if GetResourceState('esx_license') ~= 'started' then return true end
+        if GetResourceState('esx_license') ~= 'started' and GetResourceState('CorePickax') ~= 'started' then return true end
         local p = promise.new()
         TriggerEvent('esx_license:checkLicense', src, license, function(has) p:resolve(has == true) end)
-        SetTimeout(2500, function() p:resolve(false) end)
+        SetTimeout(500, function() p:resolve(false) end)
         return Citizen.Await(p)
     end
 end
@@ -421,9 +421,9 @@ Config.Templates.driving = {
         settings = { payments = { cash = true, bank = true }, society = '', cooldown = 5,
             blip = { enabled = true, sprite = 225, color = 3, scale = 0.8, label = 'Auto-école', shortRange = true },
             licenses = {
-                license('dmv', 'Code de la route', '', 200, 0, true, nil),
-                license('drive', 'Permis B (voiture)', 'dmv', 0, 500, false, 'blista', 80),
-                license('drive_bike', 'Permis moto', 'dmv', 0, 400, false, 'sanchez', 80),
+                license('code', 'Code de la route', '', 200, 0, true, nil),
+                license('drive', 'Permis B (voiture)', 'code', 0, 500, false, 'blista', 80),
+                license('drive_bike', 'Permis moto', 'code', 0, 400, false, 'sanchez', 80),
                 license('drive_truck', 'Permis poids lourd', 'drive', 0, 900, false, 'mule', 70),
             } },
         points = { { kind = 'desk', label = 'Accueil', blip = true, ped = ped('a_f_y_business_01', 'WORLD_HUMAN_CLIPBOARD') },

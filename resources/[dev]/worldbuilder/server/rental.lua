@@ -36,7 +36,7 @@ ESX.RegisterServerCallback('worldbuilder:rental:rent', function(src, cb, eid, pi
     if not p.spawns or not p.spawns[spawnIdx] then return cb({ ok = false, error = 'Aucune place de sortie configurée' }) end
     if Rentals[xPlayer.identifier] then return cb({ ok = false, error = 'Tu as déjà un véhicule en location' }) end
     local f = (s.fleet or {})[tonumber(idx) or 0]
-    if not f then return cb({ ok = false, error = 'Véhicule indisponible' }) end
+    if not f or (f.minGrade or 0) > xPlayer.job.grade then return cb({ ok = false, error = 'Véhicule indisponible' }) end
     local total = (f.price or 0) + (f.deposit or 0)
     local okp, err = WB.charge(xPlayer, s.payments, method, total, 'Location : ' .. e.label)
     if not okp then return cb({ ok = false, error = err }) end
@@ -56,16 +56,19 @@ RegisterNetEvent('worldbuilder:server:rentalSpawned', function(netId)
 end)
 
 RegisterNetEvent('worldbuilder:server:rentalFailed', function()
-    local x = ESX.GetPlayerFromId(source)
-    local r = x and Rentals[x.identifier]
-    if not r or r.netId then return end
-    local e = WB.Entities[r.eid]
-    local back = (e and WB.balance(x, r.method) >= 0) and r.method or 'cash'
-    local p = Config.Payments[back] or Config.Payments.cash
-    local f
-    if e then for _, it in ipairs(e.settings.fleet or {}) do if it.model == r.model then f = it end end end
-    WB.pay(x, p.account, (f and f.price or 0) + r.deposit, 'Remboursement location')
-    Rentals[x.identifier] = nil
+    local src = source
+    SetTimeout(2500, function()
+        local x = ESX.GetPlayerFromId(src)
+        local r = x and Rentals[x.identifier]
+        if not r or r.netId or WB.plateInWorld(r.plate) then return end   -- refusé si le véhicule existe (remboursement + véhicule gardé)
+        local e = WB.Entities[r.eid]
+        local back = (e and WB.balance(x, r.method) >= 0) and r.method or 'cash'
+        local p = Config.Payments[back] or Config.Payments.cash
+        local f
+        if e then for _, it in ipairs(e.settings.fleet or {}) do if it.model == r.model then f = it end end end
+        WB.pay(x, p.account, (f and f.price or 0) + r.deposit, 'Remboursement location')
+        Rentals[x.identifier] = nil
+    end)
 end)
 
 -- Retour : le véhicule doit être celui loué, près du point de retour. Caution rendue (proportionnelle à l'état si activé).

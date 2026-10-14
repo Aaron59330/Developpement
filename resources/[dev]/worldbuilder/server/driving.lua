@@ -1,24 +1,33 @@
 -- ─────────────────────────────── Auto-écoles : code (QCM) + conduite (parcours) ───────────────────────────────
 local Exams = {}      -- [src] = examen en cours { kind = 'theory' | 'practical', ... }
 
--- Permis : esx_license si démarré, sinon table worldbuilder_licenses (toujours alimentée)
+-- Permis : esx_license (ou CorePickax, qui expose les mêmes événements esx_license:*) si démarré, sinon table worldbuilder_licenses (toujours alimentée)
+local function licenseSystem() return GetResourceState('esx_license') == 'started' or GetResourceState('CorePickax') == 'started' end
+
+local ExtCache = {}   -- [src:id] = { v, at } : le système externe peut ne jamais répondre (CorePickax) → délai court + cache
+
 function WB.hasLicense(src, id)
     local x = ESX.GetPlayerFromId(src)
     if not x then return false end
-    if GetResourceState('esx_license') == 'started' then
-        local p = promise.new()
-        TriggerEvent('esx_license:checkLicense', src, id, function(has) p:resolve(has == true) end)
-        SetTimeout(2500, function() p:resolve(false) end)
-        if Citizen.Await(p) then return true end
-    end
-    return MySQL.scalar.await('SELECT 1 FROM worldbuilder_licenses WHERE identifier = ? AND license = ?', { x.identifier, id }) ~= nil
+    if MySQL.scalar.await('SELECT 1 FROM worldbuilder_licenses WHERE identifier = ? AND license = ?', { x.identifier, id }) ~= nil then return true end
+    if not licenseSystem() then return false end
+    local k = src .. ':' .. id
+    local c = ExtCache[k]
+    if c and GetGameTimer() - c.at < 20000 then return c.v end
+    local p = promise.new()
+    TriggerEvent('esx_license:checkLicense', src, id, function(has) p:resolve(has == true) end)
+    SetTimeout(500, function() p:resolve(false) end)
+    local has = Citizen.Await(p)
+    ExtCache[k] = { v = has, at = GetGameTimer() }
+    return has
 end
 
 function WB.giveLicense(src, id)
     local x = ESX.GetPlayerFromId(src)
     if not x then return end
     MySQL.update.await('INSERT IGNORE INTO worldbuilder_licenses (identifier, license) VALUES (?, ?)', { x.identifier, id })
-    if GetResourceState('esx_license') == 'started' then TriggerEvent('esx_license:addLicense', src, id) end
+    ExtCache[src .. ':' .. id] = nil
+    if licenseSystem() then TriggerEvent('esx_license:addLicense', src, id) end
 end
 
 local function licenseOf(e, id)

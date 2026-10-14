@@ -1,6 +1,6 @@
 -- ─────────────────────────────── Zones PVP (intégration de pickax_pvp) ───────────────────────────────
 -- Dans une zone : armes données à l'entrée (retirées à la sortie), revive automatique, kill-feed, récompense par kill, classement.
-local playerZone, streaks, deathCd, respawnCd = {}, {}, {}, {}   -- playerZone[src] = { eid, pi }
+local playerZone, streaks, deathCd, respawnCd, rewardCd = {}, {}, {}, {}, {}   -- playerZone[src] = { eid, pi }
 local statsCache = {}
 local lb = { at = -999999, rows = {} }
 
@@ -180,7 +180,11 @@ RegisterNetEvent('worldbuilder:pvp:died', function(killerSrc)
             if streaks[killerSrc] > killer.best then killer.best = streaks[killerSrc] end
             killer.dirty = true
         end
-        if (p.killReward or 0) > 0 then
+        -- anti-abus (kill déclaré par le client) : récompense seulement si le tueur est près de la victime et pas plus d'une fois / 6 s par victime
+        local vp, kp = GetPlayerPed(src), GetPlayerPed(killerSrc)
+        local near = vp and kp and vp ~= 0 and kp ~= 0 and #(GetEntityCoords(vp) - GetEntityCoords(kp)) <= 300.0
+        if (p.killReward or 0) > 0 and near and (not rewardCd[src] or now - rewardCd[src] >= 6000) then
+            rewardCd[src] = now
             local xk = ESX.GetPlayerFromId(killerSrc)
             if xk then xk.addAccountMoney((Config.Payments[e.settings.rewardAccount] or Config.Payments.bank).account, p.killReward) end
         end
@@ -199,7 +203,7 @@ AddEventHandler('playerDropped', function()
     local src = source
     local x = ESX.GetPlayerFromId(src)
     if playerZone[src] then oxClear(src) end
-    playerZone[src], streaks[src], deathCd[src], respawnCd[src] = nil, nil, nil, nil
+    playerZone[src], streaks[src], deathCd[src], respawnCd[src], rewardCd[src] = nil, nil, nil, nil, nil
     if x then flushStats(x.identifier) end
 end)
 

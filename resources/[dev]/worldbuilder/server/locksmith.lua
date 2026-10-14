@@ -106,10 +106,10 @@ ESX.RegisterServerCallback('worldbuilder:locksmith:make', function(src, cb, eid,
     if (s.cooldown or 0) > 0 then
         local c = WB.counter(('key:%s:%s'):format(x.identifier, plate), s.cooldown)
         if c.n > 0 then return cb({ ok = false, error = 'Une clé vient déjà d\'être faite pour ce véhicule' }) end
-        c.n = 1
     end
     local okp, err = WB.charge(x, s.payments, method, s.price, 'Serrurier : ' .. e.label)
     if not okp then return cb({ ok = false, error = err }) end
+    if (s.cooldown or 0) > 0 then WB.counter(('key:%s:%s'):format(x.identifier, plate), s.cooldown).n = 1 end
     if not WB.giveKey(src, exact, s) then
         x.addAccountMoney((Config.Payments[method] or Config.Payments.cash).account, math.floor(s.price or 0), 'Remboursement serrurier')
         return cb({ ok = false, error = 'Impossible de te donner la clé (inventaire plein ?) — remboursé' })

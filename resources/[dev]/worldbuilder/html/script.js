@@ -17,7 +17,7 @@ async function rpc(name, ...args) {
     const r = await fetch(`https://${resName()}/rpc`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, args }), signal: ctl.signal });
     return await r.json();
   } catch (e) {
-    return { ok: false, error: ctl.signal.aborted ? `Le serveur ne répond pas à « ${name} » : vérifie que les fichiers sont à jour (refresh + restart shopbuilder)` : 'Erreur de communication' };
+    return { ok: false, error: ctl.signal.aborted ? `Le serveur ne répond pas à « ${name} » : vérifie que les fichiers sont à jour (refresh + restart worldbuilder)` : 'Erreur de communication' };
   } finally { clearTimeout(timer); }
 }
 
@@ -1242,14 +1242,14 @@ const Builder = {
         <div class="grid3">${this.fN('Délai avant de repasser un examen raté (minutes)', 'settings.cooldown', { min: 0 })}${this.fItem('Compte société crédité', 'settings.society')}</div>
         <div class="mt">${this.payChecks('settings.payments')}</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('key', 17)} Permis (${lics.length})</div><button class="sm" data-a="rowAdd" data-v="settings.licenses|license">${ic('plus', 14)} Permis</button></div>${rows}
-        <div class="hint mt-s">Le <b>nom technique</b> est celui d'esx_license (<code>dmv</code>, <code>drive</code>, <code>drive_bike</code>, <code>drive_truck</code>…). Sans esx_license, les permis sont stockés par ce script. Un permis peut exiger un autre permis (ex : conduite après le code).</div></div>`;
+        <div class="hint mt-s">Le <b>nom technique</b> est celui d'esx_license (<code>code</code>, <code>drive</code>, <code>drive_bike</code>, <code>drive_truck</code>…). Sans esx_license, les permis sont stockés par ce script. Un permis peut exiger un autre permis (ex : conduite après le code).</div></div>`;
   },
 
   licenseEditor(path, l, i) {
     const open = this.rows[path] !== false;
     const qs = (l.theory && l.theory.questions) || [];
     return `<div class="rcp"><div class="row"><b class="grow-i">${esc(l.label || l.id || 'Permis ' + (i + 1))}</b><button class="sm" data-a="toggleRow" data-v="${path}">${open ? 'Replier' : 'Déplier'}</button><button class="icon danger" data-a="rowDel" data-v="settings.licenses|${i}">${ic('trash', 14)}</button></div>
-      ${open ? `<div class="grid3 mt-s">${this.fS('Nom affiché', `${path}.label`, { max: 60 })}${this.fS('Nom technique (esx_license)', `${path}.id`, { max: 40, ph: 'drive' })}${this.fS('Permis requis avant (optionnel)', `${path}.requires`, { max: 40, ph: 'dmv' })}</div>
+      ${open ? `<div class="grid3 mt-s">${this.fS('Nom affiché', `${path}.label`, { max: 60 })}${this.fS('Nom technique (esx_license)', `${path}.id`, { max: 40, ph: 'drive' })}${this.fS('Permis requis avant (optionnel)', `${path}.requires`, { max: 40, ph: 'code' })}</div>
       <div class="card mt"><div class="card-h"><div class="t">${ic('list', 17)} Code de la route (QCM)</div>${this.fC('Activé', `${path}.theory.enabled`, { r: 1 })}</div>
         ${l.theory.enabled ? `<div class="grid3">${this.fN(`Prix (${CUR})`, `${path}.theoryPrice`, { min: 0 })}${this.fN('Questions posées', `${path}.theory.count`, { min: 1, max: 50 })}${this.fN('Réussite (% de bonnes réponses)', `${path}.theory.passPercent`, { min: 1, max: 100 })}</div>
         <div class="lbl" style="margin-top:14px">Banque de questions (${qs.length}) — tirées au hasard, réponses mélangées</div>

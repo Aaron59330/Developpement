@@ -57,6 +57,15 @@ function WB.near(src, c, extra)
     return c and c.x ~= nil and WB.distanceTo(src, c) <= (Config.ServerDistance + (extra or 0))
 end
 
+-- Un véhicule portant cette plaque existe-t-il dans le monde ? (anti-abus des événements « échec de sortie »)
+function WB.plateInWorld(plate)
+    plate = tostring(plate or ''):gsub('^%s+', ''):gsub('%s+$', '')
+    for _, veh in ipairs(GetAllVehicles()) do
+        if DoesEntityExist(veh) and tostring(GetVehicleNumberPlateText(veh) or ''):gsub('^%s+', ''):gsub('%s+$', '') == plate then return true end
+    end
+    return false
+end
+
 function WB.entityCount()
     local n = 0
     for _ in pairs(WB.Entities) do n = n + 1 end
@@ -254,10 +263,22 @@ function WB.pay(xPlayer, account, amount, reason)
     if amount > 0 then xPlayer.addAccountMoney(account, amount, reason) end
 end
 
+-- Crédite un compte société (esx_addonaccount ou CorePickax, qui le fournit sur ce serveur). 1) pont AddSharedMoney (solde en mémoire partagé avec esx_society / jobbuilder)
+-- 2) événement esx_addonaccount:getSharedAccount 3) repli SQL direct sur addon_account_data
 function WB.society(name, amount)
     amount = math.floor(tonumber(amount) or 0)
-    if not name or name == '' or amount <= 0 or GetResourceState('esx_addonaccount') ~= 'started' then return end
-    TriggerEvent('esx_addonaccount:getSharedAccount', name, function(acc) if acc then acc.addMoney(amount) end end)
+    if not name or name == '' or amount <= 0 then return end
+    for _, host in ipairs({ 'CorePickax', 'esx_addonaccount' }) do
+        if GetResourceState(host) == 'started' then
+            local ok, res = pcall(function() return exports[host]:AddSharedMoney(name, amount) end)
+            if ok and res then return true end
+        end
+    end
+    local done = false
+    pcall(function() TriggerEvent('esx_addonaccount:getSharedAccount', name, function(acc) if acc and acc.addMoney then acc.addMoney(amount) done = true end end) end)
+    if done then return true end
+    MySQL.update('UPDATE addon_account_data SET money = money + ? WHERE account_name = ? AND owner IS NULL', { amount, name })
+    return true
 end
 
 function WB.paymentsList(allowed, xPlayer)
@@ -301,6 +322,10 @@ end
 
 function WB.alertPolice(coords, title, message)
     if Config.AlertHook and Config.AlertHook(coords, title, message) then return end
+    -- tablette police du jobbuilder (dispatch) : en plus du blip d'alerte ci-dessous
+    if GetResourceState('jobbuilder') == 'started' then
+        pcall(function() exports.jobbuilder:SendDispatch('police', title, message, coords, 'alert') end)
+    end
     for _, id in ipairs(GetPlayers()) do
         local x = ESX.GetPlayerFromId(tonumber(id))
         if x and WB.isPoliceJob(x.job.name) then

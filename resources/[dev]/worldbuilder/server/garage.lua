@@ -57,12 +57,15 @@ end)
 RegisterNetEvent('worldbuilder:server:vehicleFailed', function(plate)
     local src = source
     plate = trimPlate(plate)
-    local o = Out[plate]
-    local xPlayer = ESX.GetPlayerFromId(src)
-    if o and o.src == src and not o.netId and xPlayer then
-        MySQL.update(('UPDATE %s SET %s = 1 WHERE %s = ? AND TRIM(%s) = ?'):format(T, col(V.stored), col(V.owner), col(V.plate)), { xPlayer.identifier, plate })
-        Out[plate] = nil
-    end
+    SetTimeout(2500, function()
+        local o = Out[plate]
+        local xPlayer = ESX.GetPlayerFromId(src)
+        -- refusé si le véhicule existe bel et bien (sinon le joueur le garderait ET le retrouverait au garage)
+        if o and o.src == src and not o.netId and xPlayer and not WB.plateInWorld(plate) then
+            MySQL.update(('UPDATE %s SET %s = 1 WHERE %s = ? AND TRIM(%s) = ?'):format(T, col(V.stored), col(V.owner), col(V.plate)), { xPlayer.identifier, plate })
+            Out[plate] = nil
+        end
+    end)
 end)
 
 -- Un véhicule « sorti » existe-t-il encore dans le monde ?

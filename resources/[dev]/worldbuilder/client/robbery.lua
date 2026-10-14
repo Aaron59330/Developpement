@@ -13,7 +13,7 @@ local TARGETS = { register = true, safe = true, vault = true, loot = true }
 
 NodeFilter.robbery = function(n)
     local st = States[n.eid]
-    if n.kind == 'start' then return st == nil end
+    if n.kind == 'start' then return st == nil and n.entity.trigger == 'interact' end   -- en mode « en joue », le départ se fait sur le vendeur (point clerk)
     if not TARGETS[n.kind] then return false end
     if not st or st.done[n.pi] then return false end
     return st.owner == myServerId() or st.coop
