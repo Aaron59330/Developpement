@@ -134,12 +134,14 @@ function RefreshData()
 end
 
 InRegisterMenu = false
+local skinFinished = false   -- vrai dès que le personnage est validé : tous les menus de création (imbriqués) se terminent d'un coup
 function SkinChanger()
     local face = RageUI.CreateMenu("Menu création", "Faite votre personnage")
     RageUI.Visible(face, not RageUI.Visible(face))
 	FreezeEntityPosition(GetPlayerPed(-1), true)
 	InRegisterMenu = true
-    while face do
+	skinFinished = false
+    while face and not skinFinished do
         Citizen.Wait(0)
         RageUI.IsVisible(face, true, true, true, function()
             for k,v in pairs(comp) do
@@ -158,7 +160,7 @@ function SkinChanger()
                             camOffset = comp[k].camOffset
 						end
 
-						if Selected then
+						if Selected and not skinFinished then
 							openValidate()
 						end
 					end)
@@ -172,12 +174,18 @@ function SkinChanger()
             face = RMenu:DeleteType('face', true)
         end
     end
+	-- Personnage validé : on ferme proprement le menu de création (un seul appui sur « Valider » suffit)
+	if skinFinished then
+		RageUI.CloseAll()
+		FreezeEntityPosition(GetPlayerPed(-1), false)
+		InRegisterMenu = false
+	end
 end
 
 function openValidate()
     local face = RageUI.CreateMenu("Menu création", "Faite votre personnage")
     RageUI.Visible(face, not RageUI.Visible(face))
-    while face do
+    while face and not skinFinished do
         Citizen.Wait(0)
         RageUI.IsVisible(face, true, true, true, function()
 			RageUI.ButtonWithStyle('Continuer de modifier mon personnage', nil, {RightLabel = "→→→"}, true, function(_,_,s)
@@ -187,7 +195,8 @@ function openValidate()
 				end
 			end)
 			RageUI.ButtonWithStyle('~g~Validé le personnage', nil, {RightLabel = "→→→"}, true, function(_,_,s)
-				if s then
+				if s and not skinFinished then
+					skinFinished = true
 					TriggerEvent('skinchanger:getSkin', function(skin)
 						TriggerServerEvent('esx_skin:save', skin)
 						TriggerEvent('skinchanger:loadSkin', skin)
