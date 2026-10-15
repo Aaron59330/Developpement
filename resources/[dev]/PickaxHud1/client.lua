@@ -207,3 +207,41 @@ CreateThread(function()
         end
     end
 end)
+
+-- ── Barre de vie (et armure) sous la minimap : réglages dans config.lua → Config.Health ──
+local function sendHealthConfig()
+    SendNUIMessage({ action = 'setHealthConfig', config = Config.Health or {} })
+end
+
+CreateThread(function()
+    Wait(1500)
+    sendHealthConfig()
+    Wait(4000)
+    sendHealthConfig()        -- renvoi : le NUI peut ne pas être prêt au premier envoi
+end)
+
+AddEventHandler('onClientResourceStart', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        Wait(800)
+        sendHealthConfig()
+    end
+end)
+
+CreateThread(function()
+    local lastHealth, lastArmor, lastSend = -1, -1, 0
+    while true do
+        Wait(200)
+        local ped = PlayerPedId()
+        local health, armor = 0, 0
+        if not IsEntityDead(ped) then
+            local maxHealth = math.max(1, GetEntityMaxHealth(ped) - 100)
+            health = clamp(math.floor((GetEntityHealth(ped) - 100) / maxHealth * 100 + 0.5), 0, 100)
+            armor = clamp(GetPedArmour(ped), 0, 100)
+        end
+        -- envoi seulement si la valeur change (et un rappel toutes les 3 s au cas où un message se perdrait)
+        if health ~= lastHealth or armor ~= lastArmor or GetGameTimer() - lastSend > 3000 then
+            lastHealth, lastArmor, lastSend = health, armor, GetGameTimer()
+            SendNUIMessage({ action = 'updateHealth', health = health, armor = armor })
+        end
+    end
+end)
