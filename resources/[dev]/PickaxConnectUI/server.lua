@@ -1,7 +1,29 @@
 local connectingPlayers = {}
 local refreshLoopRunning = false
 
+
+-- Réglages du panel web (ressource pickax_panel, facultative) : surchargent Config en direct ; retirer le réglage rend la valeur du fichier
+local PANEL_KEYS = { name = 'ServerName', sec = 'SecondsPerPlayer', none = 'NoPlayerText', discord = 'DiscordURL', shop = 'ShopURL' }
+local panelBase = {}
+local function applyPanel()
+    if GetResourceState('pickax_panel') ~= 'started' then return end
+    local ok, o = pcall(function() return exports.pickax_panel:Get('connect') end)
+    if not ok or type(o) ~= 'table' then return end
+    for pk, key in pairs(PANEL_KEYS) do
+        if o[pk] ~= nil then
+            if panelBase[key] == nil then panelBase[key] = { Config[key] } end
+            Config[key] = o[pk]
+        elseif panelBase[key] ~= nil then
+            Config[key] = panelBase[key][1]
+            panelBase[key] = nil
+        end
+    end
+    Config.Buttons.discord.url = Config.DiscordURL
+    Config.Buttons.shop.url = Config.ShopURL
+end
+
 local function buildCard()
+    applyPanel()
     local maxClients = GetConvarInt(Config.MaxClientsConvar, 48)
     local playerNames = {}
     local count = 0

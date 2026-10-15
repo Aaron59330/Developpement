@@ -1,7 +1,10 @@
 -- Catalogue des réglages que le panel sait lire / modifier dans TES fichiers existants.
 -- Rien à changer dans tes scripts : chaque réglage pointe vers la ligne déjà présente dans ton config.lua / style.css / index.html...
 -- Pour ajouter un réglage : copier une ligne F{...} (id unique, type, fichier, repère `anchor` + nom `key` de la valeur).
--- Types : bool, number, color (#rrggbb), rgba ({r,g,b,a}), text, css (valeur CSS), url, items (liste de lignes).
+-- Types : bool, number, color (#rrggbb), rgba ({r,g,b,a}), text, css (valeur CSS), url, select (liste fermée), items (liste de lignes).
+-- Groupes `live = true` : appliqués EN DIRECT chez les joueurs (aucune écriture de fichier : marche sur un hébergeur verrouillé).
+--   La valeur du fichier sert de valeur par défaut ; les scripts lisent le réglage via exports.pickax_panel:Get('<groupe>').
+-- Groupes sans `live` : écrits dans les fichiers (nécessite que le serveur ait le droit d'écriture).
 
 PanelSchema = {}
 
@@ -10,6 +13,8 @@ local function group(def)
     PanelSchema[#PanelSchema + 1] = def
     return function(f)
         f.group = def.id
+        f.live = def.live
+        f.rkey = f.rkey or f.id:match('^[^.]+%.(.+)$')
         f.resource = f.resource or def.resource
         f.loc = { anchor = f.anchor, key = f.key, sep = f.sep, to = f.to, open = f.open, close = f.close }
         f.anchor, f.key, f.sep, f.to, f.open, f.close = nil, nil, nil, nil, nil, nil
@@ -39,7 +44,7 @@ end
 -- ───────────────────────────── Écran de chargement ─────────────────────────────
 do
     local F = group { id = 'loading', label = 'Écran de chargement', icon = 'loading', resource = 'PickaxLoading',
-        desc = 'Page affichée pendant la connexion. Appliqué à la prochaine connexion après redémarrage de PickaxLoading.' }
+        desc = 'Page affichée pendant la connexion. Nécessite que le serveur puisse modifier ses fichiers (indisponible sur certains hébergeurs).' }
     F { section = 'Apparence', id = 'loading.accent', label = 'Couleur principale', type = 'color', file = 'style.css',
         anchor = ':root', key = '--accent', to = ';', hint = 'Barre de progression, boutons, pourcentage.',
         also = { { file = 'style.css', anchor = ':root', key = '--accent-rgb', to = ';', xform = 'rgbcsv' } } }
@@ -54,48 +59,33 @@ do
         anchor = '<div class="ticker">', open = '<div class="ticker__item">', close = '</div>' }
 end
 
--- ───────────────────────────── Menus RageUI ─────────────────────────────
+-- ───────────────────────────── Menus (RageUI en NUI) ─────────────────────────────
 do
-    local F = group { id = 'rageui', label = 'Menus RageUI & bannière', icon = 'menu', resource = 'CorePickax',
-        desc = 'Couleurs de tous les menus RageUI et bannière du menu F5. Redémarrer CorePickax pour appliquer.' }
-    local nextSection
-    local function color(id, key, label, hint)
-        F { section = nextSection, id = 'rageui.' .. id, label = label, hint = hint, type = 'rgba', file = 'config.lua', anchor = 'RageUIStyle = {', key = key }
-        nextSection = nil
-    end
-    F { section = 'Bannière', id = 'rageui.bannerOn', label = 'Bannière personnalisée activée', type = 'bool', file = 'utils/gifMenu/config.lua',
-        anchor = 'ConfigMenuGIF = {', key = 'Active', hint = 'Remplace l\'image de bannière des menus.' }
-    F { id = 'rageui.bannerLink', label = 'Image de la bannière (lien)', type = 'url', max = 400, file = 'utils/gifMenu/config.lua',
-        anchor = 'AllTexture', key = 'link', hint = 'Image 512×128 (png / gif) hébergée en ligne.' }
-    F { id = 'rageui.hideTitle', label = 'Masquer le titre sur la bannière', type = 'bool', file = 'config.lua',
-        anchor = 'Config = {', key = 'DisableTitle', hint = 'À activer quand la bannière contient déjà le nom.' }
-    F { section = 'Options', id = 'rageui.glare', label = 'Reflet GTA au-dessus de la bannière', type = 'bool', file = 'config.lua', anchor = 'RageUIStyle = {', key = 'BannerGlare' }
-    F { id = 'rageui.keepCodes', label = 'Garder les couleurs ~r~ ~b~ des scripts', type = 'bool', file = 'config.lua', anchor = 'RageUIStyle = {', key = 'KeepTextCodes' }
-    nextSection = 'Couleurs du menu'
-    color('background', 'Background', 'Fond du menu')
-    color('shadow', 'Shadow', 'Ombre')
-    color('button', 'Button', 'Bouton sélectionné')
-    color('text', 'Text', 'Texte des boutons')
-    color('selectedText', 'SelectedText', 'Texte sélectionné')
-    color('disabledText', 'DisabledText', 'Texte désactivé')
-    color('subtitle', 'Subtitle', 'Sous-titre')
-    color('counterBg', 'CounterBackground', 'Fond du compteur')
-    color('counterText', 'CounterText', 'Texte du compteur')
-    color('separator', 'Separator', 'Lignes et accents')
-    color('separatorText', 'SeparatorText', 'Titres des catégories')
-    nextSection = 'Description et panneau d\'infos'
-    color('descBg', 'DescriptionBackground', 'Fond de la description')
-    color('descText', 'DescriptionText', 'Texte de la description')
-    color('infoBg', 'InfoBackground', 'Fond du panneau de droite')
-    color('infoTitle', 'InfoTitle', 'Titre du panneau de droite')
-    color('infoLabel', 'InfoLabel', 'Libellés du panneau de droite')
-    color('infoValue', 'InfoValue', 'Valeurs du panneau de droite')
+    local F = group { id = 'rageui', label = 'Menus RageUI', icon = 'menu', resource = 'pickax_ui', live = true,
+        desc = 'Apparence par défaut de tous les menus (couleur, style, arrondis, sons). Chaque joueur peut ensuite personnaliser la sienne depuis son menu personnel. Appliqué en direct.' }
+    local DEF = { file = 'client.lua', anchor = 'local DEFAULTS = {' }
+    local function d(f) for k, v in pairs(DEF) do f[k] = v end F(f) end
+    d { section = 'Style', id = 'rageui.style', label = 'Style des menus', type = 'select', key = 'style',
+        options = { { 'noir', 'Noir' }, { 'verre', 'Verre' }, { 'clair', 'Clair' }, { 'neon', 'Néon' }, { 'bleu', 'Bleu' } } }
+    d { id = 'rageui.size', label = 'Taille', type = 'select', key = 'size', options = { { 'sm', 'Petite' }, { 'md', 'Moyenne' }, { 'lg', 'Grande' } } }
+    d { id = 'rageui.banner', label = 'Afficher la bannière', type = 'bool', key = 'banner' }
+    d { id = 'rageui.btnRadius', label = 'Arrondi des boutons (px)', type = 'select', key = 'btnRadius', hint = '0 = carré, 999 = pilule.',
+        options = { { 0, '0' }, { 6, '6' }, { 12, '12' }, { 18, '18' }, { 24, '24' }, { 999, 'Pilule' } } }
+    d { id = 'rageui.cardRadius', label = 'Arrondi des cartes (px)', type = 'select', key = 'cardRadius',
+        options = { { 0, '0' }, { 8, '8' }, { 14, '14' }, { 18, '18' }, { 24, '24' }, { 28, '28' } } }
+    d { section = 'Couleurs', id = 'rageui.accent', label = 'Couleur principale', type = 'color', key = 'accent' }
+    d { id = 'rageui.bg', label = 'Fond des cartes', type = 'color', optional = true, key = 'bg', hint = 'Vide = couleur du style choisi.' }
+    d { id = 'rageui.text', label = 'Texte', type = 'color', optional = true, key = 'text', hint = 'Vide = couleur du style choisi.' }
+    d { id = 'rageui.selbg', label = 'Fond de la ligne sélectionnée', type = 'color', optional = true, key = 'selbg' }
+    d { id = 'rageui.selborder', label = 'Bordure de la ligne sélectionnée', type = 'color', optional = true, key = 'selborder' }
+    d { section = 'Sons', id = 'rageui.sound', label = 'Sons des menus', type = 'bool', key = 'sound' }
+    d { id = 'rageui.volume', label = 'Volume des sons (%)', type = 'number', min = 10, max = 100, int = true, key = 'volume' }
 end
 
 -- ───────────────────────────── Markers ─────────────────────────────
 do
-    local F = group { id = 'markers', label = 'Markers', icon = 'marker', resource = 'CorePickax',
-        desc = 'Style commun de tous les markers au sol (Config.GlobalMarker). Redémarrer CorePickax pour appliquer.' }
+    local F = group { id = 'markers', live = true, label = 'Markers', icon = 'marker', resource = 'CorePickax',
+        desc = 'Style commun de tous les markers au sol (Config.GlobalMarker). Appliqué en direct.' }
     F { section = 'Style des markers', id = 'markers.enabled', label = 'Markers activés', type = 'bool', file = 'config.lua', anchor = 'Config.GlobalMarker = {', key = 'Enabled' }
     F { id = 'markers.type', label = 'Type de marker', type = 'number', min = 0, max = 43, int = true, file = 'config.lua',
         anchor = 'Config.GlobalMarker = {', key = 'Type', hint = '23 = cercle plat au sol.' }
@@ -107,8 +97,8 @@ end
 
 -- ───────────────────────────── HUD infos joueur (haut droite) ─────────────────────────────
 do
-    local F = group { id = 'hud2', label = 'HUD infos (haut droite)', icon = 'hud', resource = 'PickaxHud2',
-        desc = 'Cartes serveur / métier / argent. Les joueurs gardent leurs propres préférences (menu personnel). Redémarrer PickaxHud2.' }
+    local F = group { id = 'hud2', live = true, label = 'HUD infos (haut droite)', icon = 'hud', resource = 'PickaxHud2',
+        desc = 'Cartes serveur / métier / argent. Les joueurs gardent leurs propres préférences (menu personnel). Appliqué en direct.' }
     F { section = 'Textes', id = 'hud2.server', label = 'Nom du serveur', type = 'text', max = 24, escape = 'html', file = 'html/index.html', anchor = 'id="servername"', key = '>', sep = false, to = '<' }
     F { id = 'hud2.discord', label = 'Texte du lien Discord', type = 'text', max = 40, escape = 'html', file = 'html/index.html', anchor = 'id="discord"', key = '>', sep = false, to = '<' }
     F { section = 'Couleurs', id = 'hud2.main', label = 'Couleur principale', type = 'color', file = 'html/css/css.css', anchor = ':root', key = '--main', to = ';' }
@@ -126,8 +116,8 @@ end
 
 -- ───────────────────────────── HUD faim / soif ─────────────────────────────
 do
-    local F = group { id = 'hud1', label = 'HUD faim / soif', icon = 'status', resource = 'PickaxHud1',
-        desc = 'Jauges rondes faim et soif. Redémarrer PickaxHud1 pour appliquer.' }
+    local F = group { id = 'hud1', live = true, label = 'HUD faim / soif', icon = 'status', resource = 'PickaxHud1',
+        desc = 'Jauges rondes faim et soif. Appliqué en direct.' }
     F { section = 'Position et fond', id = 'hud1.bottom', label = 'Distance du bas (px)', type = 'number', unit = 'px', min = 0, max = 600, int = true, file = 'style.css', anchor = '.hud-container {', key = 'bottom' }
     F { id = 'hud1.left', label = 'Distance de la gauche (px)', type = 'number', unit = 'px', min = 0, max = 1200, int = true, file = 'style.css', anchor = '.hud-container {', key = 'left' }
     F { id = 'hud1.gap', label = 'Espace entre les jauges (px)', type = 'number', unit = 'px', min = 0, max = 40, int = true, file = 'style.css', anchor = '.hud-container {', key = 'gap' }
@@ -138,8 +128,8 @@ end
 
 -- ───────────────────────────── Notifications ─────────────────────────────
 do
-    local F = group { id = 'notify', label = 'Notifications', icon = 'bell', resource = 'pickax_notify',
-        desc = 'Notifications, aide « Appuyer sur E » et logos de métier. Redémarrer pickax_notify pour appliquer.' }
+    local F = group { id = 'notify', live = true, label = 'Notifications', icon = 'bell', resource = 'pickax_notify',
+        desc = 'Notifications, aide « Appuyer sur E » et logos de métier. Appliqué en direct.' }
     local nextSection
     local function take() local t = nextSection nextSection = nil return t end
     local function c(name, label) F { section = take(), id = 'notify.' .. name, label = label, type = 'color', file = 'config.lua', key = 'Config.' .. name } end
@@ -176,8 +166,8 @@ end
 
 -- ───────────────────────────── File d'attente / connexion ─────────────────────────────
 do
-    local F = group { id = 'connect', label = 'File d\'attente', icon = 'queue', resource = 'PickaxConnectUI',
-        desc = 'Carte d\'attente affichée avant de rejoindre le serveur. Redémarrer PickaxConnectUI pour appliquer.' }
+    local F = group { id = 'connect', live = true, label = 'File d\'attente', icon = 'queue', resource = 'PickaxConnectUI',
+        desc = 'Carte d\'attente affichée avant de rejoindre le serveur. Appliqué en direct.' }
     F { section = 'Textes et liens', id = 'connect.name', label = 'Titre', type = 'text', max = 80, file = 'config.lua', key = 'Config.ServerName' }
     F { id = 'connect.sec', label = 'Secondes d\'attente estimées par joueur', type = 'number', min = 0, max = 120, int = true, file = 'config.lua', key = 'Config.SecondsPerPlayer' }
     F { id = 'connect.none', label = 'Texte « personne en attente »', type = 'text', max = 80, file = 'config.lua', key = 'Config.NoPlayerText' }

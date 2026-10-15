@@ -41,13 +41,13 @@ Limites : le PC et le tunnel doivent rester allumés (sinon le serveur apparaît
 
 ## Fonctionnement
 
-* À chaque appel, le serveur envoie la liste des réglages de **tes scripts** (lus dans tes fichiers existants : `config.lua`, `style.css`, `index.html`…) avec leur valeur actuelle : le panel s'adapte donc à ta configuration, sans rien modifier dans tes scripts.
-* Quand tu enregistres, le panel garde la valeur ; le serveur la reçoit, la remplace **sur place** dans le fichier (commentaires conservés) et affiche « appliqué ».
-* « Enregistrer et appliquer » redémarre aussi les ressources modifiées ; « Enregistrer » seul les met en attente (bandeau jaune avec bouton **Redémarrer**).
+* À chaque appel, le serveur envoie la liste des réglages de **tes scripts** avec leur valeur actuelle (lue dans tes fichiers) : le panel s'adapte à ta configuration.
+* **Réglages « en direct »** (notifications, HUD, menus RageUI, markers, file d'attente) : le serveur ne touche **à aucun fichier**. La valeur du panel est diffusée aux joueurs (`GlobalState.pickaxPanel`) et lue par les scripts via `exports.pickax_panel:Get('<groupe>')`. Ça marche sur un hébergeur qui interdit l'écriture (VibeGames…) et sans redémarrage. Le fichier garde la valeur par défaut ; « ↶ » ou « Restaurer » la rétablit. Le serveur garde un cache local : si le panel est hors ligne au démarrage, les derniers réglages restent appliqués.
+* **Section Général** (nom, description, tags, locale, bannières…) : variables du serveur appliquées en direct.
+* **Réglages « fichiers »** (écran de chargement, page web chargée avant le jeu) : écrits dans les fichiers de la ressource. Le serveur teste au démarrage s'il a le droit d'écrire ; sinon la section est affichée « verrouillée ».
+* Les joueurs gardent leurs préférences personnelles (menu personnel) ; le panel règle les valeurs par défaut.
 * Serveur hors ligne : les modifications sont gardées et appliquées à sa reconnexion.
-* Les réglages sont **réappliqués à chaque démarrage** : un `git pull` qui écrase un config ne fait rien perdre.
-* La section **Général** (nom, description, tags, locale, bannières…) s'applique en direct, sans redémarrage.
-* Le serveur de jeu ne peut écrire que dans les lignes déclarées dans `resources/[dev]/pickax_panel/schema.lua` : même si le panel était compromis, il ne peut pas faire exécuter de code ni écrire ailleurs.
+* Le serveur de jeu ne peut appliquer que les réglages déclarés dans `resources/[dev]/pickax_panel/schema.lua` : même si le panel était compromis, il ne peut ni exécuter de code ni écrire ailleurs.
 
 ## Sécurité
 

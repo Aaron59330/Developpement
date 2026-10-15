@@ -25,11 +25,27 @@ local function getBool(value, fallback)
     return value == true
 end
 
+-- Réglages du panel web (ressource pickax_panel, facultative) : surchargent Config en direct ; retirer le réglage rend la valeur du fichier
+local panelBase = {}
+local function applyPanel()
+    if GetResourceState('pickax_panel') ~= 'started' then return end
+    local ok, o = pcall(function() return exports.pickax_panel:Get('notify') end)
+    if not ok or type(o) ~= 'table' then return end
+    for k, v in pairs(o) do
+        if panelBase[k] == nil then panelBase[k] = { Config[k] } end
+        Config[k] = v
+    end
+    for k, b in pairs(panelBase) do
+        if o[k] == nil then Config[k] = b[1] panelBase[k] = nil end
+    end
+end
+
 -- Réglage du joueur (menu personnel → Préférences) : arrondi des notifications, mémorisé sur son poste
 local KVP_RADIUS = 'pickax_notify:radius'
 local playerRadius = tonumber(GetResourceKvpString(KVP_RADIUS) or '')
 
 local function getUiConfig()
+    applyPanel()
     local cfg = {
         mainColor = Config.MainColor or '#00a4ff',
         backgroundColor = Config.BackgroundColor or '#070c12',
@@ -117,6 +133,8 @@ end)
 RegisterNetEvent('pickax_notify:refreshConfig', function()
     sendUiConfig()
 end)
+
+AddEventHandler('pickax_panel:changed', function() sendUiConfig() end)
 
 local function normalizeText(text)
     if text == nil then return '' end

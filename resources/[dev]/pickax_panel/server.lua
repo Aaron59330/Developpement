@@ -14,6 +14,43 @@ if URL then URL = URL:gsub('/+$', '') end
 
 local function log(msg) print(('^5[pickax_panel]^7 %s'):format(msg)) end
 
+-- ───────────── Réglages « en direct » (aucune écriture de fichier) ─────────────
+-- Les scripts (notifications, HUD, menus, markers...) lisent ces valeurs via exports.pickax_panel:Get('<groupe>') ;
+-- elles sont aussi diffusées aux joueurs par GlobalState.pickaxPanel et gardées en cache local (KVP) si le panel est hors ligne.
+local liveState = {}
+do
+    local raw = GetResourceKvpString('live')
+    if raw and raw ~= '' then
+        local ok, t = pcall(json.decode, raw)
+        if ok and type(t) == 'table' then liveState = t end
+    end
+end
+
+local function publish()
+    local enc = json.encode(liveState)
+    SetResourceKvp('live', enc)
+    GlobalState.pickaxPanel = enc
+end
+publish()
+
+exports('Get', function(group) return liveState[group] or {} end)
+
+local function toRuntime(f, v)
+    if f.type == 'rgba' and f.named and type(v) == 'table' then return { r = v[1], g = v[2], b = v[3], a = v[4] } end
+    return v
+end
+local function fromRuntime(f, v)
+    if f.type == 'rgba' and f.named and type(v) == 'table' and v.r then return { v.r, v.g, v.b, v.a } end
+    return v
+end
+
+-- Le serveur a-t-il le droit d'écrire dans les fichiers de ses ressources ? (réécrit un fichier à l'identique)
+local WRITABLE = false
+do
+    local c = LoadResourceFile(RES, 'schema.lua')
+    WRITABLE = c ~= nil and SaveResourceFile(RES, 'schema.lua', c, #c) == true
+end
+
 if not URL or #LICENSE < 16 then
     log('^1Clé de liaison absente ou invalide.^7 Dans le panel : Mes serveurs → ton serveur → copie la ligne  set pickax_panel_key "..."  dans server.cfg.')
     return
@@ -21,7 +58,7 @@ end
 
 -- ───────────── Lecture de l'état actuel ─────────────
 local function readAll()
-    local cache, values, status = {}, {}, {}
+    local cache, values, status, defaults = {}, {}, {}, {}
     for id, f in pairs(PanelFields) do
         if f.convar then
             values[id] = GetConvar(f.convar, '')
@@ -32,11 +69,20 @@ local function readAll()
                 status[id] = 'fichier introuvable (' .. key .. ')'
             else
                 local v, err = Patcher.read(cache[key], f)
-                if v == nil then status[id] = err or 'valeur introuvable' else values[id] = v end
+                if v == nil then
+                    status[id] = err or 'valeur introuvable'
+                else
+                    values[id] = v
+                    defaults[id] = v
+                    if f.live then
+                        local o = liveState[f.group] and liveState[f.group][f.rkey]
+                        if o ~= nil then values[id] = fromRuntime(f, o) end
+                    end
+                end
             end
         end
     end
-    return values, status
+    return values, status, defaults
 end
 
 -- Remplace des valeurs dans les fichiers (en mémoire) ; renvoie les fichiers modifiés ou nil, erreur
@@ -103,8 +149,8 @@ end
 local acks = {}   -- accusés envoyés au panel à la prochaine synchronisation
 
 local function applyDesired(desired, boot)
-    local current, status = readAll()
-    local files, convars, want = {}, {}, {}
+    local current, status, defaults = readAll()
+    local files, convars, want, lives = {}, {}, {}, {}
     local touchedIds = 0
     for id, d in pairs(desired) do
         local f = PanelFields[id]
@@ -121,12 +167,29 @@ local function applyDesired(desired, boot)
                 if needAck then acks[id] = { ok = true, value = v } end
             elseif f.convar then
                 convars[id] = v
+            elseif f.live then
+                lives[id] = v
+            elseif not WRITABLE then
+                acks[id] = { err = 'écriture impossible : l\'hébergeur ne permet pas au serveur de modifier les fichiers de ses ressources', value = v }
             else
                 files[id] = v
                 if d.restart then want[f.resource] = true end
             end
         end
     end
+
+    local liveChanged = false
+    for id, v in pairs(lives) do
+        local f = PanelFields[id]
+        local g = liveState[f.group] or {}
+        if Patcher.equal(v, defaults[id]) then g[f.rkey] = nil else g[f.rkey] = toRuntime(f, v) end
+        liveState[f.group] = next(g) and g or nil
+        acks[id] = { ok = true, value = v }
+        touchedIds = touchedIds + 1
+        liveChanged = true
+        log(('%s appliqué en direct'):format(id))
+    end
+    if liveChanged then publish() end
 
     for id, v in pairs(convars) do
         local f = PanelFields[id]
@@ -167,12 +230,16 @@ end
 local function exportGroups(values, status)
     local groups = {}
     for _, g in ipairs(PanelSchema) do
-        local out = { id = g.id, label = g.label, icon = g.icon, resource = g.resource, desc = g.desc, fields = {} }
+        local hasFile = false
+        for _, f in ipairs(g.fields) do if not f.convar then hasFile = true end end
+        local out = { id = g.id, label = g.label, icon = g.icon, resource = g.resource, desc = g.desc, live = g.live, fields = {},
+            locked = hasFile and not g.live and not WRITABLE or nil }
         if g.resource then out.state = GetResourceState(g.resource) end
         for _, f in ipairs(g.fields) do
             local o = {
                 id = f.id, section = f.section, label = f.label, hint = f.hint, type = f.type, min = f.min, max = f.max,
-                unit = f.unit, int = f.int, named = f.named, value = values[f.id], error = status[f.id],
+                unit = f.unit, int = f.int, named = f.named, optional = f.optional, options = f.options,
+                value = values[f.id], error = status[f.id],
             }
             if f.type == 'rgba' and values[f.id] then o.alpha = #values[f.id] >= 4 end
             out.fields[#out.fields + 1] = o

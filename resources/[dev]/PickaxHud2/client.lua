@@ -19,21 +19,51 @@ local ESX = exports["es_extended"]:getSharedObject()
 local KVP = 'pickax_hud2:settings'
 local DEFAULTS = { hud = true, server = true, job = true, money = true, radius = 6, scale = 100 }
 local Settings = {}
-for k, v in pairs(DEFAULTS) do Settings[k] = v end
+local BASE, playerSet = {}, {}   -- BASE : valeurs du fichier ; playerSet : réglages personnalisés par le joueur
+for k, v in pairs(DEFAULTS) do Settings[k] = v BASE[k] = v end
+
+-- Valeurs par défaut du panel web (ressource pickax_panel, facultative) : thème, textes et réglages de départ
+local PANEL_KEYS = { radius = 'radius', scale = 'scale', showServer = 'server', showJob = 'job', showMoney = 'money' }
+local function panelGroup()
+    if GetResourceState('pickax_panel') ~= 'started' then return {} end
+    local ok, o = pcall(function() return exports.pickax_panel:Get('hud2') end)
+    return (ok and type(o) == 'table') and o or {}
+end
+
+local function applyDefaults()
+    local o = panelGroup()
+    for pk, k in pairs(PANEL_KEYS) do
+        if not playerSet[k] then
+            local v = o[pk]
+            if v ~= nil and type(v) == type(BASE[k]) then Settings[k] = v else Settings[k] = BASE[k] end
+        end
+    end
+end
 
 local function loadSettings()
     local raw = GetResourceKvpString(KVP)
     local ok, saved = pcall(json.decode, raw or '')
     if ok and type(saved) == 'table' then
         for k, def in pairs(DEFAULTS) do
-            if type(saved[k]) == type(def) then Settings[k] = saved[k] end
+            if type(saved[k]) == type(def) then
+                Settings[k] = saved[k]
+                if saved[k] ~= BASE[k] then playerSet[k] = true end
+            end
         end
     end
+    applyDefaults()
 end
 
 local function applySettings()
     SendNUIMessage({ action = 'setConfig', config = Settings })
+    local o = panelGroup()
+    SendNUIMessage({ action = 'setTheme', theme = { server = o.server, discord = o.discord, main = o.main, bg = o.bg, text = o.text, muted = o.muted, ok = o.ok, bad = o.bad } })
 end
+
+AddEventHandler('pickax_panel:changed', function()
+    applyDefaults()
+    applySettings()
+end)
 
 exports('GetSettings', function() return Settings end)
 
@@ -42,13 +72,17 @@ exports('SetSetting', function(key, value)
     if key == 'radius' then value = math.max(0, math.min(30, math.floor(value))) end
     if key == 'scale' then value = math.max(60, math.min(150, math.floor(value))) end
     Settings[key] = value
-    SetResourceKvp(KVP, json.encode(Settings))
+    playerSet[key] = true
+    local t = {}
+    for k in pairs(playerSet) do t[k] = Settings[k] end
+    SetResourceKvp(KVP, json.encode(t))
     applySettings()
     return true
 end)
 
 exports('ResetSettings', function()
-    for k, v in pairs(DEFAULTS) do Settings[k] = v end
+    playerSet = {}
+    applyDefaults()
     DeleteResourceKvp(KVP)
     applySettings()
     return true

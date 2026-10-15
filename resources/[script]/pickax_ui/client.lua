@@ -12,7 +12,8 @@ local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selbor
 local RADIUS = { btnRadius = { 0, 6, 12, 18, 24, 999 }, cardRadius = { 0, 8, 14, 18, 24, 28 } }
 
 local settings = {}
-for k, v in pairs(DEFAULTS) do settings[k] = v end
+local BASE, playerSet = {}, {}   -- BASE : valeurs du fichier ; playerSet : réglages personnalisés par le joueur
+for k, v in pairs(DEFAULTS) do settings[k] = v BASE[k] = v end
 
 local function isHex(v) return type(v) == 'string' and v:match('^#%x%x%x%x%x%x$') ~= nil end
 local function inList(list, v) for i = 1, #list do if list[i] == v then return true end end return false end
@@ -31,16 +32,44 @@ local function validate(key, value)
     return false
 end
 
+-- Valeurs par défaut du panel web (ressource pickax_panel, facultative), sinon celles du fichier
+local function effectiveDefaults()
+    local d = {}
+    for k, v in pairs(BASE) do d[k] = v end
+    if GetResourceState('pickax_panel') == 'started' then
+        local ok, o = pcall(function() return exports.pickax_panel:Get('rageui') end)
+        if ok and type(o) == 'table' then
+            for k in pairs(BASE) do
+                if o[k] ~= nil then
+                    local good, v = validate(k, o[k])
+                    if good then d[k] = v end
+                end
+            end
+        end
+    end
+    return d
+end
+
+local function applyDefaults()
+    for k, v in pairs(effectiveDefaults()) do
+        if not playerSet[k] then settings[k] = v end
+    end
+end
+
 local saved = GetResourceKvpString(KVP)
 if saved and saved ~= '' then
     local ok, t = pcall(json.decode, saved)
     if ok and type(t) == 'table' then
         for k in pairs(DEFAULTS) do
             local good, v = validate(k, t[k])
-            if good then settings[k] = v end
+            if good then
+                settings[k] = v
+                if v ~= BASE[k] then playerSet[k] = true end
+            end
         end
     end
 end
+applyDefaults()
 
 local shown, last = false, nil
 
@@ -51,7 +80,16 @@ local function push()
     end
 end
 
-local function save() SetResourceKvp(KVP, json.encode(settings)) end
+local function save()
+    local t = {}
+    for k in pairs(playerSet) do t[k] = settings[k] end
+    SetResourceKvp(KVP, json.encode(t))
+end
+
+AddEventHandler('pickax_panel:changed', function()
+    applyDefaults()
+    push()
+end)
 
 exports('Update', function(data)
     shown, last = true, data
@@ -80,13 +118,15 @@ exports('SetSetting', function(key, value)
     local good, v = validate(key, value)
     if not good then return false end
     settings[key] = v
+    playerSet[key] = true
     save()
     push()
     return true
 end)
 
 exports('ResetSettings', function()
-    for k, v in pairs(DEFAULTS) do settings[k] = v end
+    playerSet = {}
+    applyDefaults()
     save()
     push()
 end)

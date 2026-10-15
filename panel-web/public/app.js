@@ -123,11 +123,20 @@ function control(f) {
     num.addEventListener('input', function () { if (num.value === '') return; if (sl) sl.value = num.value; set(Number(num.value)); });
     wrap.appendChild(num);
     if (f.unit) wrap.appendChild(h('span', { class: 'sub', text: f.unit }));
+  } else if (f.type === 'select') {
+    var sel = h('select');
+    (f.options || []).forEach(function (o) { sel.appendChild(h('option', { value: String(o[0]), text: String(o[1]) })); });
+    sel.value = String(v);
+    sel.addEventListener('change', function () { var o = (f.options || []).filter(function (x) { return String(x[0]) === sel.value; })[0]; set(o ? o[0] : sel.value); });
+    wrap.appendChild(sel);
   } else if (f.type === 'color') {
-    var pick = h('input', { type: 'color' }); pick.value = v;
-    var hx = h('input', { type: 'text', class: 'hex', maxlength: 7 }); hx.value = v;
+    var pick = h('input', { type: 'color' }); pick.value = v || '#000000';
+    var hx = h('input', { type: 'text', class: 'hex', maxlength: 7, placeholder: f.optional ? 'aucune' : '' }); hx.value = v;
     pick.addEventListener('input', function () { hx.value = pick.value; set(pick.value); });
-    hx.addEventListener('input', function () { if (/^#[0-9a-fA-F]{6}$/.test(hx.value)) { pick.value = hx.value; set(hx.value.toLowerCase()); } });
+    hx.addEventListener('input', function () {
+      if (/^#[0-9a-fA-F]{6}$/.test(hx.value)) { pick.value = hx.value; set(hx.value.toLowerCase()); }
+      else if (f.optional && hx.value === '') set('');
+    });
     wrap.append(pick, hx);
   } else if (f.type === 'rgba') {
     var sw = h('div', { class: 'sw' }, h('i', { style: 'background:' + rgba(v) }));
@@ -184,18 +193,24 @@ var PREVIEW = {
       h('div', { class: 'tick', text: tick }));
   },
   rageui: function () {
-    var on = V('rageui.bannerOn', false), link = V('rageui.bannerLink', '');
-    var ban = h('div', { class: 'ban', style: on && link ? "background-image:url('" + link.replace(/'/g, '%27') + "')" : '' }, V('rageui.hideTitle', false) && on ? '' : 'MENU');
-    var c = function (k) { return rgba(V('rageui.' + k, [255, 255, 255, 255])); };
-    return h('div', { class: 'pv-menu', style: 'background:' + c('background') + ';box-shadow:0 8px 30px ' + c('shadow') + ';color:' + c('text') },
-      ban, h('div', { class: 'sub', style: 'color:' + c('subtitle') }, h('span', { text: 'Sous-titre' }), h('span', { text: '2 / 5', style: 'background:' + c('counterBg') + ';color:' + c('counterText') + ';padding:0 6px;border-radius:4px' })),
-      h('div', { class: 'sep', style: 'color:' + c('separatorText') + ';border-color:' + c('separator') }, 'Catégorie'),
-      h('div', { class: 'it', style: 'background:' + c('button') + ';color:' + c('selectedText') }, h('span', { text: 'Option sélectionnée' }), h('span', { text: '›' })),
-      h('div', { class: 'it' }, h('span', { text: 'Option normale' })),
-      h('div', { class: 'it', style: 'color:' + c('disabledText') }, h('span', { text: 'Option désactivée' })),
-      h('div', { class: 'ds', style: 'background:' + c('descBg') + ';color:' + c('descText') }, 'Description de l\'option sélectionnée.'),
-      h('div', { class: 'ds', style: 'background:' + c('infoBg') }, h('b', { style: 'color:' + c('infoTitle'), text: 'Informations' }),
-        h('div', { class: 'nfo' }, h('span', { style: 'color:' + c('infoLabel'), text: 'Nom' }), h('span', { style: 'color:' + c('infoValue'), text: 'John Doe' }))));
+    var g = function (k, d) { return V('rageui.' + k, d); };
+    var style = g('style', 'noir'), acc = g('accent', '#00a4ff'), light = style === 'clair';
+    var bgs = { noir: 'rgba(11,11,12,.94)', verre: 'rgba(14,18,26,.62)', clair: 'rgba(247,247,245,.97)', neon: 'rgba(5,9,22,.95)', bleu: 'rgba(10,28,66,.96)' };
+    var bg = g('bg', '') ? 'rgba(' + hex2rgb(g('bg')).join(',') + ',.94)' : bgs[style];
+    var text = g('text', '') || (light ? '#111114' : '#f4f4f5');
+    var selbg = g('selbg', '') ? 'rgba(' + hex2rgb(g('selbg')).join(',') + ',.3)' : (light ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.07)');
+    var selbd = g('selborder', '') || (light ? '#111114' : 'rgba(255,255,255,.85)');
+    var rc = g('cardRadius', 18), rb = g('btnRadius', 12), sc = { sm: .86, md: 1, lg: 1.16 }[g('size', 'md')] || 1;
+    var border = style === 'neon' ? 'rgba(' + hex2rgb(acc).join(',') + ',.55)' : (light ? 'rgba(0,0,0,.1)' : 'rgba(255,255,255,.1)');
+    var row = function (label, sel, extra) {
+      return h('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:9px 12px;margin:3px 0;border-radius:' + rb + 'px;font-size:12.5px;' +
+        (sel ? 'background:' + selbg + ';box-shadow:inset 0 0 0 1px ' + selbd + ';' : '') }, h('span', { text: label }), h('span', { style: 'opacity:.6', text: extra || '' }));
+    };
+    var card = h('div', { style: 'width:260px;padding:0 10px 10px;border-radius:' + rc + 'px;background:' + bg + ';color:' + text + ';border:1px solid ' + border + ';box-shadow:0 20px 60px rgba(0,0,0,.5);transform:scale(' + sc + ');transform-origin:top center' },
+      g('banner', true) ? h('div', { style: 'height:54px;margin:0 -10px 10px;border-radius:' + rc + 'px ' + rc + 'px 0 0;background:linear-gradient(135deg,' + acc + ',#0a1a33);display:grid;place-items:center;font-weight:800;letter-spacing:1px;color:#fff', text: 'MENU' }) : h('div', { style: 'height:10px' }),
+      h('div', { style: 'display:flex;justify-content:space-between;padding:0 6px 8px;font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em' }, h('span', { text: 'Sous-titre' }), h('span', { style: 'color:' + acc, text: '2 / 5' })),
+      row('Option normale', false, '›'), row('Option sélectionnée', true, '›'), row('Autre option', false), row('Case à cocher', false, '✓'));
+    return card;
   },
   hud2: function () {
     var st = 'color:' + V('hud2.text', '#fff') + ';background:' + V('hud2.bg', 'rgba(0,0,0,.6)') + ';border-radius:' + V('hud2.radius', 6) + 'px';
@@ -341,13 +356,14 @@ function showLog() {
 
 // ───────────── Rendu : serveur ─────────────
 function fieldRow(f, showGroup) {
-  var broken = f.error || S.vals[f.id] === undefined;
+  var lockedGroup = !!(groupOf(f.group) && groupOf(f.group).locked);
+  var broken = f.error || S.vals[f.id] === undefined || lockedGroup;
   var tags = [];
   if (showGroup) tags.push(h('span', { class: 'tag', text: groupOf(f.group).label }));
   if (f.modified && f.status === 'pending') tags.push(h('span', { class: 'tag warn', text: 'en attente du serveur' }));
   else if (f.modified && f.status === 'error') tags.push(h('span', { class: 'tag bad', text: 'refusé : ' + (f.statusError || 'erreur') }));
   else if (f.modified) tags.push(h('span', { class: 'tag ok', text: 'appliqué' }));
-  if (broken) tags.push(h('span', { class: 'tag bad', text: f.error || 'introuvable dans le fichier' }));
+  if (broken) tags.push(h('span', { class: 'tag bad', text: lockedGroup ? 'verrouillé par l\'hébergeur' : (f.error || 'introuvable dans le fichier') }));
   var lb = h('div', { class: 'lb' }, h('b', { text: f.label }), f.hint ? h('small', { text: f.hint }) : null, h('div', { class: 'tags' }, tags));
   var ctl = h('div', { class: 'ctl' });
   if (!broken) {
@@ -431,7 +447,8 @@ function renderApp() {
     });
     previewHost = h('div', { class: 'stage' });
     main = h('div', { class: 'content' },
-      h('div', { class: 'col' }, h('p', { class: 'desc', text: g.desc }), cards),
+      h('div', { class: 'col' }, h('p', { class: 'desc', text: g.desc }),
+        g.locked ? h('div', { class: 'banner off', style: 'margin:0' }, h('span', { text: 'Section indisponible : l\'hébergeur ne permet pas au serveur de modifier les fichiers de ses ressources. Les autres sections (appliquées en direct) fonctionnent normalement.' })) : null, cards),
       h('div', { class: 'preview' }, h('div', { class: 'card' }, h('div', { class: 'hd' }, 'Aperçu', h('small', { text: 'approximatif' })), previewHost)));
   }
 

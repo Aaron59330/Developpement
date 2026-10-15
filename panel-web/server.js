@@ -105,7 +105,13 @@ function validate(f, v) {
       if (f.max != null && v > f.max) return bad('maximum ' + f.max);
       return { v: f.int ? Math.round(v) : v };
     }
-    case 'color': return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? { v: v.toLowerCase() } : bad('couleur #RRGGBB attendue');
+    case 'select': {
+      const o = (f.options || []).find(function (x) { return String(x[0]) === String(v); });
+      return o ? { v: o[0] } : bad('choix invalide');
+    }
+    case 'color':
+      if (v === '' && f.optional) return { v: '' };
+      return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? { v: v.toLowerCase() } : bad('couleur #RRGGBB attendue');
     case 'rgba': {
       if (!Array.isArray(v)) return bad('couleur attendue');
       const n = f.alpha === false ? 3 : 4, out = [];
@@ -142,7 +148,7 @@ function logAdd(s, who, field, label, from, to, source) {
 }
 function fieldIndex(s) {
   const idx = {};
-  (s.catalog && s.catalog.groups || []).forEach(function (g) { g.fields.forEach(function (f) { idx[f.id] = f; f.group = g.id; }); });
+  (s.catalog && s.catalog.groups || []).forEach(function (g) { g.fields.forEach(function (f) { idx[f.id] = f; f.group = g.id; f.locked = !!g.locked; }); });
   return idx;
 }
 function summary(s) {
@@ -276,6 +282,7 @@ async function api(req, res, url) {
       for (const id of Object.keys(b.changes)) {
         const f = idx[id];
         if (!f) return json(res, 400, { error: 'Réglage inconnu : ' + id });
+        if (f.locked) return json(res, 400, { error: f.label + ' : section indisponible (le serveur ne peut pas modifier ses fichiers)' });
         if (f.error) return json(res, 400, { error: f.label + ' : ' + f.error });
         const r = validate(f, b.changes[id]);
         if (r.err) return json(res, 400, { error: f.label + ' : ' + r.err });

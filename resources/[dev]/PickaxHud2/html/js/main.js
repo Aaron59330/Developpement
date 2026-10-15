@@ -59,6 +59,14 @@ var NAMED_ICONS = {
                 if (c.scale != null) document.documentElement.style.setProperty('--s', String(c.scale / 100));
                 break;
             }
+            case 'setTheme': {
+                var t = d.theme || {}, root = document.documentElement.style;
+                var vars = { main: '--main', bg: '--bg', text: '--text', muted: '--muted', ok: '--ok', bad: '--bad' };
+                Object.keys(vars).forEach(function (k) { if (t[k]) root.setProperty(vars[k], t[k]); else root.removeProperty(vars[k]); });
+                if (t.server) $('servername').textContent = t.server;
+                if (t.discord) $('discord').textContent = t.discord;
+                break;
+            }
             case 'hideUi': ui.style.display = d.value === true ? 'none' : ''; break;
             case 'fadeUi': ui.style.transition = 'opacity .4s'; ui.style.opacity = d.value === true ? '0' : '1'; break;
             case 'hideComponent': { var c = $(d.component); if (c) c.style.display = d.value === true ? 'none' : ''; break; }

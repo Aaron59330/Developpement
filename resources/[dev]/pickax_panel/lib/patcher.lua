@@ -133,6 +133,10 @@ function Patcher.parse(field, raw)
         local s = unquote(raw)
         if field.unit and s:sub(-#field.unit) == field.unit then s = s:sub(1, -#field.unit - 1) end
         return tonumber(s)
+    elseif t == 'select' then
+        local v, q = unquote(raw)
+        if q then return v end
+        return tonumber(v) or v
     elseif t == 'bool' then
         if raw == 'true' then return true elseif raw == 'false' then return false end
         return nil
@@ -161,6 +165,11 @@ function Patcher.format(field, value, raw)
         local out = trimNum(value) .. (field.unit or '')
         if q then out = q .. out .. q end
         return out
+    elseif t == 'select' then
+        if type(value) == 'number' then return trimNum(value) end
+        local _, q = unquote(raw)
+        q = q or "'"
+        return q .. tostring(value):gsub('\\', '\\\\'):gsub(q, '\\' .. q) .. q
     elseif t == 'bool' then
         return value and 'true' or 'false'
     elseif t == 'rgba' then
@@ -189,7 +198,13 @@ function Patcher.validate(field, v, curLen)
         if field.max and v > field.max then return nil, 'maximum ' .. field.max end
         if field.int then v = math.floor(v + 0.5) end
         return v
+    elseif t == 'select' then
+        for _, o in ipairs(field.options or {}) do
+            if tostring(o[1]) == tostring(v) then return o[1] end
+        end
+        return nil, 'choix invalide'
     elseif t == 'color' then
+        if v == '' and field.optional then return '' end
         if type(v) ~= 'string' or not v:match('^#%x%x%x%x%x%x$') then return nil, 'couleur #RRGGBB attendue' end
         return v:lower()
     elseif t == 'rgba' then
