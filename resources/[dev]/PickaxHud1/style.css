@@ -116,7 +116,7 @@ body {
 /* armure : fine ligne bleue en haut de la barre */
 .hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(255, 255, 255, 0.15); }
 .hh-armor.on { display: block; }
-.hh-armor-fill { height: 100%; width: 100%; background: #4aa8ff; box-shadow: 0 0 6px #4aa8ff; transition: width 0.25s ease; }
+.hh-armor-fill { height: 100%; width: 100%; background: #00a4ff; box-shadow: 0 0 6px #00a4ff; transition: width 0.25s ease; }
 
 /* ===== Bandeau HUD staff (haut centre) ===== */
 .staff-bar {

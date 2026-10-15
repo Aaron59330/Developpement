@@ -1,6 +1,6 @@
 'use strict';
 var $ = function (id) { return document.getElementById(id); };
-var COLORS = { r: '#f87171', g: '#4ade80', b: '#60a5fa', y: '#fbbf24', o: '#fb923c', p: '#c084fc', c: '#9ca3af', m: '#6b7280', u: '#000', w: '#fff', q: '#f472b6' };
+var COLORS = { r: '#f87171', g: '#4ade80', b: '#00a4ff', y: '#fbbf24', o: '#fb923c', p: '#c084fc', c: '#9ca3af', m: '#6b7280', u: '#000', w: '#fff', q: '#f472b6' };
 
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 

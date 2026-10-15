@@ -17,7 +17,7 @@ Config.SmallTextColor = '#b7b6c1'         -- Petit texte / subject
 Config.SuccessColor = '#5be39a'           -- ~g~
 Config.ErrorColor = '#ff7373'             -- ~r~
 Config.WarningColor = '#ffd86a'           -- ~y~
-Config.BlueTextColor = '#74b7ff'          -- ~b~
+Config.BlueTextColor = '#00a4ff'          -- ~b~
 
 -- FORME / TAILLE ---------------------------------------------
 Config.Width = 'clamp(270px, 14.2vw, 315px)' -- Largeur comme avant (accepte aussi 300 ou '300px')

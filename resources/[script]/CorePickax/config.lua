@@ -103,7 +103,7 @@ Config.GlobalMarker = {
     Enabled = true,
     Type = 23,
     Size = { x = 1.0, y = 1.0, z = 0.5 },
-    Color = { r = 0, g = 150, b = 255, a = 150 },
+    Color = { r = 0, g = 164, b = 255, a = 150 },
     BobUpAndDown = false,
     FaceCamera = false,
     Rotate = false,

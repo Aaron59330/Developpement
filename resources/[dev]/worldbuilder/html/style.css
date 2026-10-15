@@ -10,7 +10,8 @@
   --ok: #4ade80;
   --warn: #fbbf24;
   --danger: #f87171;
-  --accent: #60a5fa;
+  --accent: #00a4ff;
+  --accent-rgb: 0, 164, 255;
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -240,7 +241,7 @@ input[type=checkbox]:checked::after { border-color: var(--on-accent); }
 .chip.ok { color: var(--ok); background: rgba(74, 222, 128, .1); border-color: rgba(74, 222, 128, .35); }
 .chip.warn { color: var(--warn); background: rgba(251, 191, 36, .1); border-color: rgba(251, 191, 36, .35); }
 .chip.bad { color: var(--danger); background: rgba(248, 113, 113, .1); border-color: rgba(248, 113, 113, .35); }
-.chip.info { color: #60a5fa; background: rgba(96, 165, 250, .1); border-color: rgba(96, 165, 250, .35); }
+.chip.info { color: #00a4ff; background: rgba(0, 164, 255, .1); border-color: rgba(0, 164, 255, .35); }
 .chip.mute { color: var(--muted); background: rgba(255, 255, 255, .04); border-color: var(--line); }
 #placement, #announce { border-color: var(--accent-line); }
 #placement .dots i.cur { outline-color: var(--accent); }
@@ -401,7 +402,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 
 /* ── Course poursuite : HUD, compte à rebours, résultat ── */
 #chasehud { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); width: 320px; z-index: 92; padding: 12px 16px; border-radius: 16px; background: rgba(11, 11, 12, .92); border: 1px solid var(--accent-line); box-shadow: 0 16px 50px rgba(0, 0, 0, .55); pointer-events: none; }
-#chasehud.chase-runner { border-color: rgba(255, 122, 69, .6); } #chasehud.chase-chaser { border-color: rgba(56, 189, 248, .6); }
+#chasehud.chase-runner { border-color: rgba(255, 122, 69, .6); } #chasehud.chase-chaser { border-color: rgba(0, 164, 255, .6); }
 #chasehud .ch-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; } #chasehud .ch-head b { font-size: 12px; letter-spacing: .14em; } #chasehud .ch-head span { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
 #chasehud .ch-msg { font-size: 12px; color: var(--text-2); min-height: 16px; margin-bottom: 8px; }
 #chasehud .ch-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); } #chasehud .ch-row b { color: var(--text); }
@@ -409,7 +410,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 #chasehud .ch-bar i.warm { background: var(--warn); } #chasehud .ch-bar i.hot { background: var(--danger); }
 #chasecount { position: fixed; inset: 0; z-index: 93; display: grid; place-items: center; pointer-events: none; }
 #chasecount .cc { text-align: center; text-shadow: 0 8px 40px rgba(0, 0, 0, .7); } #chasecount .cc b { display: block; font-size: 150px; line-height: 1; font-weight: 900; letter-spacing: -.04em; } #chasecount .cc small { font-size: 16px; text-transform: uppercase; letter-spacing: .2em; color: var(--text-2); }
-#chasecount .cc.runner b { color: #ff7a45; } #chasecount .cc.chaser b { color: #38bdf8; }
+#chasecount .cc.runner b { color: #ff7a45; } #chasecount .cc.chaser b { color: #00a4ff; }
 #chaseresult { position: fixed; inset: 0; z-index: 94; display: grid; place-items: center; background: rgba(0, 0, 0, .55); pointer-events: none; }
 #chaseresult .cr { text-align: center; padding: 30px 44px; border-radius: 22px; background: rgba(11, 11, 12, .96); border: 1px solid var(--line-2); animation: pop .25s; min-width: 380px; }
 #chaseresult .cr b { display: block; font-size: 56px; font-weight: 900; letter-spacing: -.03em; margin: 6px 0; } #chaseresult .cr.won b { color: var(--ok); } #chaseresult .cr.lost b { color: var(--danger); }

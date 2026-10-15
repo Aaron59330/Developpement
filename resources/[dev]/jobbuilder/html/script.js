@@ -1878,7 +1878,7 @@ const Tablet = {
     // appels
     if (M.layers.calls) (L.calls || []).filter(c => c.status !== 'closed').forEach(c => {
       const px = sx(c.x), py = sy(c.y), pulse = c.kind === 'panic' ? 8 + 5 * Math.abs(Math.sin(Date.now() / 250)) : 8;
-      g.fillStyle = c.kind === 'panic' ? '#ef4444' : c.kind === 'pursuit' ? '#f59e0b' : '#60a5fa'; g.globalAlpha = .9; g.beginPath(); g.arc(px, py, pulse, 0, 7); g.fill(); g.globalAlpha = 1;
+      g.fillStyle = c.kind === 'panic' ? '#ef4444' : c.kind === 'pursuit' ? '#f59e0b' : '#00a4ff'; g.globalAlpha = .9; g.beginPath(); g.arc(px, py, pulse, 0, 7); g.fill(); g.globalAlpha = 1;
       g.fillStyle = '#000'; g.font = 'bold 10px sans-serif'; g.textAlign = 'center'; g.fillText('#' + c.id, px, py + 3.5);
     });
     // traînée + fugitif
