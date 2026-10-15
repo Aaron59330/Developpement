@@ -215,7 +215,15 @@ sync = function()
         if not ok or type(data) ~= 'table' then
             -- on garde les accusés pour le prochain essai
             for id, a in pairs(sending) do if not acks[id] then acks[id] = a end end
-            local why = code == 401 and 'licence refusée (clé régénérée ou supprimée ?)' or ('panel injoignable (code ' .. tostring(code) .. ')')
+            local why
+            if code == 401 then
+                why = 'licence refusée (clé régénérée ou supprimée ?)'
+            else
+                why = ('panel injoignable (code %s) : %s — vérifie que le panel est lancé, que cette adresse est joignable DEPUIS ce serveur et que son port est ouvert.'):format(tostring(code), URL)
+                if URL:find('//localhost') or URL:find('//127%.') or URL:find('//192%.168%.') then
+                    why = why .. ' ⚠ localhost / adresse locale = ce serveur lui-même : mets l\'adresse PUBLIQUE du panel dans la clé (panel → Mes serveurs → Régénérer la clé).'
+                end
+            end
             if lastError ~= why then log('^1' .. why) lastError = why end
             connected = false
             return schedule(30000)

@@ -249,7 +249,7 @@ async function api(req, res, url) {
       const secret = rid(20);
       const s = { id: rid(6), name: name, keyHash: sha(secret), createdAt: Date.now(), overrides: {}, log: [], restartQueue: [] };
       db.servers.push(s); save();
-      return json(res, 200, { id: s.id, line: 'set pickax_panel_key "' + baseUrl(req) + '|' + secret + '"' });
+      return json(res, 200, { id: s.id, secret: secret, url: baseUrl(req) });
     }
   }
   if (parts[0] === 'servers' && parts[1]) {
@@ -261,7 +261,7 @@ async function api(req, res, url) {
     if (!act && method === 'DELETE') { db.servers = db.servers.filter(function (x) { return x !== s; }); save(); return json(res, 200, { ok: true }); }
     if (act === 'regenerate' && method === 'POST') {
       const secret = rid(20); s.keyHash = sha(secret); s.lastSeen = null; save();
-      return json(res, 200, { line: 'set pickax_panel_key "' + baseUrl(req) + '|' + secret + '"' });
+      return json(res, 200, { secret: secret, url: baseUrl(req) });
     }
     if (act === 'rename' && method === 'POST') {
       const b = await readBody(req, 4096); const n = String(b.name || '').trim().slice(0, 60);

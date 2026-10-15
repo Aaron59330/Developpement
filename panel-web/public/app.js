@@ -286,14 +286,27 @@ function modal(title, kids, onClose) {
     h('div', { class: 'card box' }, h('div', { class: 'hd' }, title), h('div', { class: 'mbody' }, kids)));
   document.body.appendChild(m); return m;
 }
-function keyModal(line, title) {
+function keyModal(secret, url, title) {
+  var addr = h('input', { type: 'text', value: url, spellcheck: 'false' });
+  var code = h('pre', { class: 'code' });
+  var warn = h('p', { class: 'mp warn' });
+  function line() { return 'set pickax_panel_key "' + addr.value.trim().replace(/\/+$/, '') + '|' + secret + '"'; }
+  function upd() {
+    code.textContent = line();
+    var local = /^https?:\/\/(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|\[?::1)/i.test(addr.value.trim());
+    warn.textContent = local ? '⚠ Cette adresse (localhost / réseau local) n\'est visible que depuis la machine du panel. Si ton serveur de jeu est sur un VPS, mets ici l\'adresse PUBLIQUE du panel (IP du VPS ou nom de domaine, avec le port, ex : http://123.45.67.89:3000) et ouvre ce port dans le pare-feu.' : '';
+    warn.style.display = local ? '' : 'none';
+  }
+  addr.addEventListener('input', upd); upd();
   var btn = h('button', { class: 'btn primary', text: 'Copier la ligne' });
-  btn.addEventListener('click', function () { copy(line, btn); });
+  btn.addEventListener('click', function () { copy(line(), btn); });
   var m = modal(title, [
-    h('p', { class: 'mp', text: '1. Colle cette ligne dans le server.cfg de ton serveur de jeu (une seule ligne, aucune autre modification).' }),
-    h('pre', { class: 'code', text: line }),
-    h('p', { class: 'mp', text: '2. Redémarre le serveur (ou  restart pickax_panel). Il apparaît « en ligne » ici en quelques secondes.' }),
-    h('p', { class: 'mp warn', text: 'Cette clé ne sera plus affichée : garde-la précieusement. Tu peux en régénérer une à tout moment.' }),
+    h('p', { class: 'mp', text: '1. Adresse du panel, telle que ton serveur de jeu doit l\'appeler :' }),
+    h('div', { class: 'mfield' }, addr),
+    h('p', { class: 'mp', text: '2. Colle cette ligne dans le server.cfg de ton serveur de jeu (une seule ligne, aucune autre modification) :' }),
+    code, warn,
+    h('p', { class: 'mp', text: '3. Redémarre le serveur (ou  restart pickax_panel). Il apparaît « en ligne » ici en quelques secondes.' }),
+    h('p', { class: 'mp dim', text: 'Cette clé ne sera plus affichée : garde-la. Tu peux en régénérer une à tout moment.' }),
     h('div', { class: 'mact' }, btn, h('button', { class: 'btn', text: 'Fermer', onclick: function () { m.remove(); } }))
   ]);
 }
@@ -361,7 +374,7 @@ function renderHome() {
         api(base() + '/rename', { name: n }).then(function () { return load(); }).then(renderApp).catch(function (e) { toast(e.message, 'bad'); }); } }),
       h('button', { class: 'btn sm', text: 'Régénérer la clé de liaison', onclick: function () {
         if (!confirm('Régénérer la clé ? L\'ancienne cessera de fonctionner : il faudra remplacer la ligne dans le server.cfg.')) return;
-        api(base() + '/regenerate', {}).then(function (r) { keyModal(r.line, 'Nouvelle clé de liaison'); return load().then(renderApp); }).catch(function (e) { toast(e.message, 'bad'); }); } }),
+        api(base() + '/regenerate', {}).then(function (r) { keyModal(r.secret, r.url, 'Nouvelle clé de liaison'); return load().then(renderApp); }).catch(function (e) { toast(e.message, 'bad'); }); } }),
       h('button', { class: 'btn sm danger', text: 'Supprimer ce serveur', onclick: function () {
         if (!confirm('Supprimer « ' + st.name + ' » du panel ? (les fichiers du serveur ne sont pas modifiés)')) return;
         api(base(), null, 'DELETE').then(function () { S.view = 'servers'; return loadServers(); }).then(renderServers).catch(function (e) { toast(e.message, 'bad'); }); } })));
@@ -483,7 +496,7 @@ function addServer() {
   var m = modal('Ajouter un serveur', [h('p', { class: 'mp', text: 'Donne un nom à ce serveur : une clé de liaison unique est générée.' }), h('div', { class: 'mfield' }, input), h('div', { class: 'mact' }, go)]);
   function create() {
     if (!input.value.trim()) return;
-    api('servers', { name: input.value.trim() }).then(function (r) { m.remove(); keyModal(r.line, 'Clé de liaison — ' + input.value.trim()); return loadServers(); }).then(renderServers).catch(function (e) { toast(e.message, 'bad'); });
+    api('servers', { name: input.value.trim() }).then(function (r) { m.remove(); keyModal(r.secret, r.url, 'Clé de liaison — ' + input.value.trim()); return loadServers(); }).then(renderServers).catch(function (e) { toast(e.message, 'bad'); });
   }
   go.addEventListener('click', create); input.addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
   setTimeout(function () { input.focus(); }, 30);

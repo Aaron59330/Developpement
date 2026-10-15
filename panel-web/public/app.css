@@ -275,3 +275,4 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
 .mfield input { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line2); background: #0c121b; outline: none; margin-bottom: 14px; } .mfield input:focus { border-color: var(--accent); }
 .mact { display: flex; gap: 10px; justify-content: flex-end; }
 .modal .box { width: min(640px, 100%); }
+.mp.dim { color: var(--dim); font-size: 12.5px; }

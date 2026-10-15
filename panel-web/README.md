@@ -24,6 +24,8 @@ Variables optionnelles : `PORT` (3000), `HOST` (0.0.0.0), `DATA_DIR`, `PUBLIC_UR
    ```
 3. Redémarre le serveur (la ressource `pickax_panel` est lancée par `ensure [dev]`). Il passe « en ligne » dans le panel.
 
+**L'adresse dans la clé doit être joignable depuis le serveur de jeu.** `localhost` = la machine du serveur lui-même : si le panel est sur ton PC et le jeu sur un VPS, ça ne marche pas. Deux solutions : héberger le panel sur le VPS (adresse `http://IP_DU_VPS:3000`, port 3000 ouvert dans le pare-feu) ou l'exposer avec un nom de domaine / reverse proxy. L'adresse est modifiable dans la fenêtre de la clé avant de copier la ligne.
+
 Le serveur **appelle** le panel toutes les 15 secondes (connexion sortante : aucun port à ouvrir côté jeu, le serveur de jeu peut être sur un VPS et le panel n'importe où, y compris sur ton PC si le VPS peut l'atteindre).
 
 ## Fonctionnement
