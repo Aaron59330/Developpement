@@ -245,3 +245,8 @@ CreateThread(function()
         end
     end
 end)
+
+-- Bandeau du HUD staff (appelé par le menu admin) : exports.PickaxHud1:StaffBar({ tag, items = { { n, u, x } }, flags = { { t, c } } }) ou { hidden = true }
+exports('StaffBar', function(data)
+    SendNUIMessage({ action = 'staffBar', data = data })
+end)

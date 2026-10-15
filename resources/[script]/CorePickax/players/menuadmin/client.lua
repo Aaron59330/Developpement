@@ -444,26 +444,60 @@ local function BarStateColor(state)
 end
 
 -- Statistiques affichées dans le bandeau (envoyées par le serveur)
-local barStats = {reports = 0, online = 0, service = 0}
-RegisterNetEvent("menuadmin:barStats", function(reports, online, service)
-    barStats.reports, barStats.online, barStats.service = reports or 0, online or 0, service or 0
+local barStats = {reports = 0, online = 0, service = 0, players = 0}
+RegisterNetEvent("menuadmin:barStats", function(reports, online, service, players)
+    barStats.reports, barStats.online, barStats.service, barStats.players = reports or 0, online or 0, service or 0, players or 0
 end)
+
+-- Données du bandeau NUI (PickaxHud1) : « Staff | N reports | N joueurs | N staff (N en service) » + modes actifs (noclip, invisible, noms)
+local function staffBarData()
+    local flags = {}
+    if NoClip then flags[#flags + 1] = {t = "Noclip", c = "#5cd678"} end
+    if invisible then flags[#flags + 1] = {t = "Invisible", c = "#5cd678"} end
+    if ShowName then flags[#flags + 1] = {t = "Noms", c = "#5cd678"} end
+    return {
+        tag = "Staff",
+        items = {
+            {n = tostring(barStats.reports), u = "reports"},
+            {n = tostring(barStats.players), u = "joueurs"},
+            {n = tostring(barStats.online), u = "staff", x = ("(%d en service)"):format(barStats.service)},
+        },
+        flags = flags,
+    }
+end
 
 local function initializeText()
     Citizen.CreateThread(function()
-        while staffService do 
-            Citizen.Wait(1)
-            if showStaffHud then
-                DrawTopCenterBar({
-                    {label = "MODE ADMINISTRATION ACTIF", color = BAR_TAG_COLORS[colorVar] or {235, 235, 235}},
-                    {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
-                    {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
-                    {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
-                    {label = "REPORTS", badge = tostring(barStats.reports), color = {232, 72, 88}},
-                    {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {60, 140, 255}},
-                    {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {60, 140, 255}},
-                })
+        local nuiUsed, lastJson, lastSend = false, nil, 0
+        while staffService do
+            if GetResourceState('PickaxHud1') == 'started' then
+                -- Bandeau NUI (design du HUD) : mis à jour seulement quand une valeur change (+ rappel toutes les 3 s)
+                Citizen.Wait(400)
+                local data = showStaffHud and staffBarData() or {hidden = true}
+                local enc = json.encode(data)
+                if enc ~= lastJson or GetGameTimer() - lastSend > 3000 then
+                    lastJson, lastSend = enc, GetGameTimer()
+                    pcall(function() exports['PickaxHud1']:StaffBar(data) end)
+                end
+                nuiUsed = true
+            else
+                -- Ancien bandeau dessiné en natif (si PickaxHud1 n'est pas démarré)
+                Citizen.Wait(1)
+                if showStaffHud then
+                    DrawTopCenterBar({
+                        {label = "MODE ADMINISTRATION ACTIF", color = BAR_TAG_COLORS[colorVar] or {235, 235, 235}},
+                        {label = "NOCLIP", badge = NoClip and "ON" or "OFF", color = BarStateColor(NoClip)},
+                        {label = "INVISIBLE", badge = invisible and "ON" or "OFF", color = BarStateColor(invisible)},
+                        {label = "NOMS", badge = ShowName and "ON" or "OFF", color = BarStateColor(ShowName)},
+                        {label = "REPORTS", badge = tostring(barStats.reports), color = {232, 72, 88}},
+                        {label = "STAFFS EN LIGNE", badge = tostring(barStats.online), color = {60, 140, 255}},
+                        {label = "STAFFS EN SERVICE", badge = tostring(barStats.service), color = {60, 140, 255}},
+                    })
+                end
             end
+        end
+        if nuiUsed and GetResourceState('PickaxHud1') == 'started' then
+            pcall(function() exports['PickaxHud1']:StaffBar({hidden = true}) end)
         end
     end)
 end

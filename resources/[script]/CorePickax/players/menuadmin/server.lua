@@ -1565,7 +1565,7 @@ CreateThread(function()
 		end
 
 		for _, id in ipairs(inService) do
-			TriggerClientEvent('menuadmin:barStats', id, reports, online, service)
+			TriggerClientEvent('menuadmin:barStats', id, reports, online, service, GetNumPlayerIndices())
 		end
 	end
 end)

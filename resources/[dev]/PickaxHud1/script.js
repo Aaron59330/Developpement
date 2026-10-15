@@ -5,6 +5,34 @@ window.addEventListener("message", (event) => {
         if (container) container.style.display = event.data.value === true ? "none" : "";
         const hh = document.getElementById("healthHud");
         if (hh) hh.style.visibility = event.data.value === true ? "hidden" : "";
+        const sb = document.getElementById("staffBar");
+        if (sb) sb.style.visibility = event.data.value === true ? "hidden" : "";
+        return;
+    }
+    // Bandeau HUD staff : { tag, items: [{ n, u, x }], flags: [{ t, c }] } ou { hidden: true }
+    if (event.data.action === "staffBar") {
+        const bar = document.getElementById("staffBar");
+        const d = event.data.data || {};
+        if (!bar) return;
+        if (d.hidden) { bar.classList.remove("on"); bar.textContent = ""; return; }
+        const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+        const sep = () => el("span", "sb-sep");
+        bar.textContent = "";
+        bar.appendChild(el("span", "sb-tag", d.tag || "Staff"));
+        (d.items || []).forEach((it) => {
+            bar.appendChild(sep());
+            const seg = el("span", "sb-seg");
+            seg.appendChild(el("b", null, it.n));
+            seg.appendChild(document.createTextNode(it.u + (it.x ? " " + it.x : "")));
+            bar.appendChild(seg);
+        });
+        (d.flags || []).forEach((f) => {
+            bar.appendChild(sep());
+            const fl = el("span", "sb-flag", f.t);
+            if (f.c) fl.style.color = f.c;
+            bar.appendChild(fl);
+        });
+        bar.classList.add("on");
         return;
     }
     // Barre de vie : réglages (position, taille, activation)
