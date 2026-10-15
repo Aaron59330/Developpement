@@ -15,7 +15,7 @@ body {
 	transform: translate(-50%, -50%);
 	width: 1360px; max-width: 96vw; height: 760px; max-height: 94vh;
 	display: flex; gap: 0;
-	background: rgba(12,12,13,.94);
+	background: rgba(22, 23, 28,.94);
 	border: 1px solid rgba(255,255,255,.08);
 	border-radius: 18px;
 	box-shadow: 0 30px 80px rgba(0,0,0,.7);
@@ -46,7 +46,7 @@ body {
 .avatar {
 	width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
 	display: flex; align-items: center; justify-content: center;
-	background: #1c1c1e; border: 1px solid rgba(255,255,255,.1);
+	background: #1d1e24; border: 1px solid rgba(255,255,255,.1);
 	font-weight: 800; font-size: 14px;
 }
 .profile-text { min-width: 0; }
@@ -129,14 +129,14 @@ input[type="text"]:focus, select:focus {
 }
 .radio-toolbar label:hover { background: rgba(255,255,255,.07); color: #fff; }
 .radio-toolbar input:checked + label {
-	color: #0b0b0c; background: #fff; border-color: #fff;
+	color: #16171c; background: #fff; border-color: #fff;
 }
 
 /* Bouton */
 .submit {
 	margin-top: auto; width: 100%; height: 58px;
 	font: 700 13px 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase;
-	color: #0b0b0c; background: #fff; border: none; border-radius: 12px;
+	color: #16171c; background: #fff; border: none; border-radius: 12px;
 	cursor: pointer; transition: transform .15s, box-shadow .2s, background .2s;
 }
 .submit:hover { background: #e9e9ea; box-shadow: 0 8px 24px rgba(255,255,255,.12); transform: translateY(-1px); }

@@ -1,5 +1,5 @@
 :root {
-  --card-bg: rgba(11, 11, 12, .94);
+  --card-bg: rgba(22, 23, 28, .94);
   --card-border: rgba(255, 255, 255, .08);
   --card-shadow: 0 30px 90px rgba(0, 0, 0, .55);
   --r-btn: 12px;
@@ -15,7 +15,7 @@
   --act-border: rgba(255, 255, 255, .85);
   --act-text: #fff;
   --box-on: #fff;
-  --box-tick: #0b0b0c;
+  --box-tick: #16171c;
   --accent: #00a4ff;
   --accent-rgb: 0, 164, 255;
   --zoom: 1;

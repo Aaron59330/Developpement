@@ -86,10 +86,10 @@
     'body.bb-sq *:not(#bbdock):not(#bbdock *) { border-radius: 0 !important; }' +
     '#bbdock { position: fixed; right: 12px; bottom: 8px; z-index: 99999; font-family: "Inter","Segoe UI",system-ui,sans-serif; font-size: 12px; color: #f4f4f5; }' +
     '#bbdock.hidden { display: none; }' +
-    '#bbdock .bb-fab { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(11,11,12,.92); color: #f4f4f5; cursor: pointer; font: inherit; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.45); }' +
+    '#bbdock .bb-fab { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(22, 23, 28,.92); color: #f4f4f5; cursor: pointer; font: inherit; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.45); }' +
     '#bbdock .bb-fab:hover { background: rgba(30,30,33,.96); }' +
     '#bbdock svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }' +
-    '#bbdock .bb-pop { position: absolute; right: 0; bottom: 40px; width: 250px; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(11,11,12,.97); box-shadow: 0 24px 60px rgba(0,0,0,.6); display: none; }' +
+    '#bbdock .bb-pop { position: absolute; right: 0; bottom: 40px; width: 250px; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(22, 23, 28,.97); box-shadow: 0 24px 60px rgba(0,0,0,.6); display: none; }' +
     '#bbdock.open .bb-pop { display: block; animation: bbpop .14s ease-out; }' +
     '@keyframes bbpop { from { opacity: 0; transform: translateY(6px); } }' +
     '#bbdock .bb-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 0; }' +
@@ -97,13 +97,13 @@
     '#bbdock .bb-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #7d7d85; font-weight: 700; }' +
     '#bbdock .bb-seg { display: inline-flex; border: 1px solid rgba(255,255,255,.14); border-radius: 9px; overflow: hidden; }' +
     '#bbdock .bb-seg button { all: unset; cursor: pointer; padding: 5px 9px; font-size: 11px; color: #c9c9ce; }' +
-    '#bbdock .bb-seg button.on { background: #fff; color: #0b0b0c; font-weight: 700; }' +
+    '#bbdock .bb-seg button.on { background: #fff; color: #16171c; font-weight: 700; }' +
     '#bbdock .bb-sw { width: 38px; height: 22px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: transparent; position: relative; cursor: pointer; }' +
     '#bbdock .bb-sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #7d7d85; transition: transform .14s, background .14s; }' +
     '#bbdock .bb-sw.on { background: #fff; border-color: #fff; }' +
-    '#bbdock .bb-sw.on::after { transform: translateX(16px); background: #0b0b0c; }' +
+    '#bbdock .bb-sw.on::after { transform: translateX(16px); background: #16171c; }' +
     '#bbdock input[type=range] { width: 120px; accent-color: #fff; height: 4px; }' +
-    '#bbdock .bb-hub { width: 100%; margin-top: 8px; height: 34px; border-radius: 10px; border: 1px solid #fff; background: #fff; color: #0b0b0c; font: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }' +
+    '#bbdock .bb-hub { width: 100%; margin-top: 8px; height: 34px; border-radius: 10px; border: 1px solid #fff; background: #fff; color: #16171c; font: inherit; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }' +
     '#bbdock .bb-hub:hover { background: #e7e7ea; }';
   document.head.appendChild(style);
 

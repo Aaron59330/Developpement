@@ -9,8 +9,8 @@ Config = {}
 
 -- COULEURS ---------------------------------------------------
 Config.MainColor = '#00a4ff'              -- Couleur principale (ligne, titre, icône, compteur)
-Config.BackgroundColor = '#070707'        -- Couleur du fond de la notification
-Config.BackgroundTransparency = 0.40      -- 0.0 = invisible / 1.0 = opaque
+Config.BackgroundColor = '#16171c'        -- Couleur du fond de la notification
+Config.BackgroundTransparency = 0.82      -- 0.0 = invisible / 1.0 = opaque
 
 Config.TextColor = '#f7f7fb'              -- Texte principal du message
 Config.SmallTextColor = '#b7b6c1'         -- Petit texte / subject

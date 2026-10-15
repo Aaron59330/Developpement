@@ -100,7 +100,7 @@ function applyTheme(rgb) {
   const [r, g, b] = rgb.map(n => Math.max(0, Math.min(255, Math.round(Number(n) || 0))));
   const st = document.documentElement.style;
   st.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
-  st.setProperty('--on-accent', (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#0b0b0c' : '#ffffff');
+  st.setProperty('--on-accent', (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#16171c' : '#ffffff');
 }
 
 /* ── Gabarits de coque ── */
