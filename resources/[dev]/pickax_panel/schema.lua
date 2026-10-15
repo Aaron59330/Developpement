@@ -17,6 +17,25 @@ local function group(def)
     end
 end
 
+-- ───────────────────────────── Général (variables du serveur, appliquées en direct) ─────────────────────────────
+do
+    local F = group { id = 'general', label = 'Général', icon = 'server', resource = nil,
+        desc = 'Nom, description et identité publique du serveur. Appliqué immédiatement dans la liste des serveurs, et réappliqué à chaque démarrage.' }
+    local function v(id, label, name, extra)
+        local f = { id = 'general.' .. id, label = label, type = 'text', convar = name, info = true, max = 300 }
+        for k, x in pairs(extra or {}) do f[k] = x end
+        F(f)
+    end
+    v('name', 'Nom du projet', 'sv_projectName', { section = 'Identité', max = 120, hint = 'Codes couleur ^4 ^7 acceptés.' })
+    v('desc', 'Description', 'sv_projectDesc', { max = 250 })
+    v('hostname', 'Hostname', 'sv_hostname', { info = false, max = 120, hint = 'Nom affiché dans la liste des serveurs.' })
+    v('tags', 'Tags', 'tags', { max = 250, hint = 'Séparés par des virgules.' })
+    v('locale', 'Locale', 'locale', { max = 12, hint = 'ex : fr-FR' })
+    v('discord', 'Discord', 'discord', { section = 'Liens et bannières', max = 80 })
+    v('bannerDetail', 'Bannière (fiche du serveur)', 'banner_detail', { type = 'url', max = 400 })
+    v('bannerConnecting', 'Bannière (connexion)', 'banner_connecting', { type = 'url', max = 400 })
+end
+
 -- ───────────────────────────── Écran de chargement ─────────────────────────────
 do
     local F = group { id = 'loading', label = 'Écran de chargement', icon = 'loading', resource = 'PickaxLoading',

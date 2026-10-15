@@ -1,36 +1,18 @@
-# pickax_panel — panel web de configuration
+# pickax_panel — agent de liaison avec le panel web
 
-Modifie depuis un site : écran de chargement, couleurs / bannière des menus RageUI, markers, HUD, notifications, file d'attente.
-
-## Installation (1 ligne dans `server.cfg`)
+Cette ressource relie le serveur de jeu au panel web (`panel-web/` à la racine du dépôt) avec **une seule ligne dans `server.cfg`** :
 
 ```
-set pickax_panel_key "UneCleLongueEtSecrete123"
+set pickax_panel_key "https://ton-panel|CLE_SECRETE"
 ```
 
-La ressource est lancée par `ensure [dev]` (déjà présent dans `resources.cfg`). Clé : **12 caractères minimum**, sinon le panel reste désactivé.
+La ligne (clé comprise) est générée par le panel : **Mes serveurs → Ajouter un serveur**. Sans clé valide, la ressource reste inactive.
 
-Ouvrir ensuite : `http://IP_DU_SERVEUR:30120/pickax_panel/` puis saisir la clé.
-(Le panel utilise le port du serveur de jeu, aucun autre port à ouvrir. Pour du HTTPS, le placer derrière un reverse proxy.)
-
-## Utiliser le panel depuis ton PC (serveur sur un VPS)
-
-Voir `panel-local/README.md` à la racine du dépôt : `lancer-panel.bat` ouvre http://localhost:8080, tu saisis `http://IP_DU_VPS:30120` + la clé ; tout est écrit sur le VPS (fichiers + base). Option : `set pickax_panel_origin "http://localhost:8080"` dans le server.cfg du VPS pour n'accepter que ce panel.
-
-## Comment ça marche
-
-* Le panel **lit directement tes fichiers existants** (`CorePickax/config.lua`, `pickax_notify/config.lua`, `PickaxLoading/style.css`, `PickaxHud2/html/css/css.css`...). Aucun script n'est à modifier.
-* À l'enregistrement, la valeur est remplacée **sur place** dans le fichier (commentaires et mise en forme conservés) **et** sauvegardée dans la base (`pickax_panel_settings`).
-* Au démarrage du serveur, les réglages de la base sont **réappliqués** : un `git pull` qui écrase un config ne fait donc rien perdre. Si un fichier a été écrasé, la ressource concernée est redémarrée automatiquement.
-* « Enregistrer et appliquer » redémarre les ressources modifiées ; « Enregistrer » seul les met en attente (bandeau jaune).
-* L'icône ↶ à côté d'un réglage restaure la valeur d'origine du script. L'historique liste toutes les modifications (`pickax_panel_log`).
+* Le serveur appelle le panel toutes les 15 s (sortant, rien à ouvrir) : il envoie les réglages de tes scripts + leurs valeurs, et applique ceux enregistrés sur le site.
+* Les valeurs sont écrites **sur place** dans tes fichiers existants (`schema.lua` décrit les lignes concernées, `lib/patcher.lua` fait le remplacement). Rien à modifier dans tes scripts.
+* Réappliqué à chaque démarrage (un `git pull` qui écrase un config ne fait rien perdre) ; la ressource concernée est alors redémarrée automatiquement.
+* Section « Général » : variables du serveur (`sv_projectName`, `tags`, `locale`, bannières…) appliquées en direct.
 
 ## Ajouter un réglage
 
-Dans `schema.lua`, copier une ligne `F { ... }` : `file` (chemin dans la ressource), `anchor` (texte qui précède, ex. `RageUIStyle = {`), `key` (nom de la valeur) et `type` (`bool`, `number`, `color`, `rgba`, `text`, `css`, `url`, `items`).
-Un réglage dont la ligne est introuvable est affiché en rouge dans le panel (le fichier a changé de forme).
-
-## Sécurité
-
-* Toutes les routes `/api/*` exigent la clé (en-tête `X-Panel-Key`), comparaison en temps constant, blocage 10 min après 6 essais ratés.
-* Le panel ne peut écrire que dans les fichiers / lignes déclarés dans `schema.lua`, avec valeurs validées par type (pas de code, pas de caractères de contrôle).
+Dans `schema.lua`, copier une ligne `F { ... }` : `file` (chemin dans la ressource), `anchor` (texte qui précède, ex. `RageUIStyle = {`), `key` (nom de la valeur), `type` (`bool`, `number`, `color`, `rgba`, `text`, `css`, `url`, `items`). Il apparaît tout seul dans le panel à la prochaine synchronisation. Un réglage dont la ligne est introuvable est signalé en rouge.

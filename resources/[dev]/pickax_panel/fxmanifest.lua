@@ -3,11 +3,10 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_panel'
-description 'Panel web de configuration (loading screen, menus RageUI, HUD, notifications...) relié à la base de données'
-version '1.0.0'
+description 'Agent de liaison avec le panel web de configuration (clé unique dans server.cfg)'
+version '2.0.0'
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
     'lib/patcher.lua',
     'schema.lua',
     'server.lua',

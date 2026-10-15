@@ -3,10 +3,6 @@
 
 // ───────────── Utilitaires ─────────────
 var app = document.getElementById('app');
-var KEY = '', SERVER = '';
-var meta = document.querySelector('meta[name=panel-remote]');
-var REMOTE = !!meta && meta.content === 'yes';   // panel lancé en local (serve.py) : il parle à un serveur distant
-try { KEY = sessionStorage.getItem('pxkey') || ''; SERVER = REMOTE ? (localStorage.getItem('pxserver') || '') : ''; } catch (e) {}
 
 function h(tag, attrs) {
   var el = document.createElement(tag);
@@ -45,6 +41,8 @@ var ICONS = {
   undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
   plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  server: '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
   home: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
   out: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
 };
@@ -71,11 +69,25 @@ function api(path, body) {
 }
 
 // ───────────── État ─────────────
-var S = { groups: [], pending: [], vals: {}, base: {}, fields: {}, cur: 'home', q: '', server: '', players: 0 };
+var S = { view: 'servers', sid: null, servers: [], groups: [], pending: [], vals: {}, base: {}, fields: {}, cur: 'home', q: '', st: null, user: null };
+
+function api(path, body, method) {
+  return fetch('/api/' + path, {
+    method: method || (body ? 'POST' : 'GET'), credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'px' },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function (r) {
+    return r.json().then(function (j) {
+      if (r.status === 401 && S.user && path !== 'login') { S.user = null; renderLogin('Session expirée, reconnecte-toi.'); }
+      if (!r.ok) throw new Error(j.error || ('Erreur ' + r.status));
+      return j;
+    });
+  });
+}
 
 function load() {
-  return api('state').then(function (st) {
-    S.groups = st.groups; S.pending = st.pending; S.server = st.server; S.players = st.players;
+  return api('servers/' + S.sid).then(function (st) {
+    S.st = st; S.groups = st.groups; S.pending = st.pendingRestart || [];
     S.vals = {}; S.base = {}; S.fields = {};
     st.groups.forEach(function (g) { g.fields.forEach(function (f) {
       S.fields[f.id] = f; f.group = g.id;
@@ -86,29 +98,8 @@ function load() {
 }
 function dirtyIds(groupId) {
   return Object.keys(S.vals).filter(function (id) {
-    return (!groupId || S.fields[id].group === groupId) && !same(S.vals[id], S.base[id]);
+    return S.fields[id] && (!groupId || S.fields[id].group === groupId) && !same(S.vals[id], S.base[id]);
   });
-}
-
-// ───────────── Connexion ─────────────
-function renderLogin(msg) {
-  var input = h('input', { type: 'password', placeholder: 'Clé du panel', autocomplete: 'off', autofocus: true });
-  var err = h('div', { class: 'err', text: msg || '' });
-  var srv = REMOTE ? h('input', { type: 'text', placeholder: 'Adresse du serveur  ex : http://123.45.67.89:30120', value: SERVER, style: 'margin-bottom:10px' }) : null;
-  function go() {
-    KEY = input.value.trim();
-    if (REMOTE) {
-      SERVER = srv.value.trim().replace(/\/+$/, '').replace(/\/pickax_panel$/, '');
-      if (!/^https?:\/\/[^\s]+$/.test(SERVER)) { err.textContent = 'Adresse du serveur invalide (http://IP:30120).'; return; }
-    }
-    load().then(function () { try { sessionStorage.setItem('pxkey', KEY); if (REMOTE) localStorage.setItem('pxserver', SERVER); } catch (e) {} renderApp(); })
-      .catch(function (e) { err.textContent = e.message === 'Failed to fetch' ? 'Serveur injoignable (adresse, port 30120 ouvert, ressource pickax_panel démarrée ?)' : e.message; });
-  }
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
-  app.replaceChildren(h('div', { class: 'login' }, h('div', { class: 'login-card' },
-    h('div', { class: 'logo' }, h('i', {}, icon('logo')), 'Pickax Panel'),
-    h('p', { text: REMOTE ? 'Saisis l\'adresse de ton serveur et la clé définie dans son server.cfg (pickax_panel_key).' : 'Saisis la clé définie dans le server.cfg (pickax_panel_key).' }), srv, input,
-    h('button', { class: 'btn primary', onclick: go, text: 'Se connecter' }), err)));
 }
 
 // ───────────── Contrôles ─────────────
@@ -175,6 +166,15 @@ function control(f) {
 // ───────────── Aperçus ─────────────
 var V = function (id, d) { var x = S.vals[id]; return x === undefined ? d : x; };
 var PREVIEW = {
+  general: function () {
+    var g = function (k, d) { return V('general.' + k, d); };
+    var ban = g('bannerDetail', '');
+    return h('div', { class: 'pv-q', style: 'text-align:left;width:300px;padding:0;overflow:hidden' },
+      h('div', { style: 'height:70px;background:#1b6fb0 center/cover' + (ban ? ";background-image:url('" + ban.replace(/'/g, '%27') + "')" : '') }),
+      h('div', { style: 'padding:12px 14px' }, h('b', { text: String(g('name', '')).replace(/\^\d/g, '') }),
+        h('div', { class: 'sub', style: 'margin:4px 0 8px;font-size:12px', text: String(g('desc', '')).slice(0, 120) }),
+        h('div', { style: 'font-size:11px;color:#6fc8ff', text: String(g('tags', '')).split(',').slice(0, 6).join(' · ') })));
+  },
   loading: function () {
     var acc = V('loading.accent', '#00a4ff'), tick = V('loading.ticker', [])[0] || '';
     return h('div', { class: 'pv-loading', style: '--pv-accent:' + acc },
@@ -267,45 +267,75 @@ function updateBar() {
     if (badge) { if (d) badge.textContent = d; else badge.remove(); }
   });
 }
+function ago(ts) {
+  if (!ts) return 'jamais';
+  var s = Math.round((Date.now() - ts) / 1000);
+  if (s < 10) return 'à l\'instant';
+  if (s < 90) return 'il y a ' + s + ' s';
+  if (s < 5400) return 'il y a ' + Math.round(s / 60) + ' min';
+  if (s < 129600) return 'il y a ' + Math.round(s / 3600) + ' h';
+  return 'il y a ' + Math.round(s / 86400) + ' j';
+}
+function copy(text, btn) {
+  function done() { var old = btn.textContent; btn.textContent = 'Copié ✓'; setTimeout(function () { btn.textContent = old; }, 1500); }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, function () {});
+  else { var t = h('textarea', { style: 'position:fixed;opacity:0' }); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) {} t.remove(); }
+}
+function modal(title, kids, onClose) {
+  var m = h('div', { class: 'modal', onclick: function (e) { if (e.target === m) { m.remove(); if (onClose) onClose(); } } },
+    h('div', { class: 'card box' }, h('div', { class: 'hd' }, title), h('div', { class: 'mbody' }, kids)));
+  document.body.appendChild(m); return m;
+}
+function keyModal(line, title) {
+  var btn = h('button', { class: 'btn primary', text: 'Copier la ligne' });
+  btn.addEventListener('click', function () { copy(line, btn); });
+  var m = modal(title, [
+    h('p', { class: 'mp', text: '1. Colle cette ligne dans le server.cfg de ton serveur de jeu (une seule ligne, aucune autre modification).' }),
+    h('pre', { class: 'code', text: line }),
+    h('p', { class: 'mp', text: '2. Redémarre le serveur (ou  restart pickax_panel). Il apparaît « en ligne » ici en quelques secondes.' }),
+    h('p', { class: 'mp warn', text: 'Cette clé ne sera plus affichée : garde-la précieusement. Tu peux en régénérer une à tout moment.' }),
+    h('div', { class: 'mact' }, btn, h('button', { class: 'btn', text: 'Fermer', onclick: function () { m.remove(); } }))
+  ]);
+}
 
-// ───────────── Actions ─────────────
+// ───────────── Actions (serveur sélectionné) ─────────────
+var base = function () { return 'servers/' + S.sid; };
 function doSave(apply) {
   var changes = {}; dirtyIds().forEach(function (id) { changes[id] = S.vals[id]; });
   if (!Object.keys(changes).length) return;
-  api('save', { changes: changes, apply: apply }).then(function (r) {
-    toast(r.saved + ' réglage(s) enregistré(s)' + (r.restarted && r.restarted.length ? ' · redémarrage : ' + r.restarted.join(', ') : ''), 'ok');
+  api(base() + '/save', { changes: changes, apply: apply }).then(function (r) {
+    toast(r.saved + ' réglage(s) enregistré(s) — appliqué(s) sur le serveur sous ~15 s' + (apply ? ' (avec redémarrage des ressources)' : ''), 'ok');
     return load().then(renderApp);
   }).catch(function (e) { toast(e.message, 'bad'); });
 }
 function doCancel() { load().then(renderApp); }
 function doReset(f) {
   if (!confirm('Restaurer la valeur d\'origine du script pour « ' + f.label + ' » ?')) return;
-  api('reset', { ids: [f.id], apply: false }).then(function () { toast('Valeur d\'origine restaurée', 'ok'); return load().then(renderApp); })
+  api(base() + '/reset', { ids: [f.id], apply: false }).then(function () { toast('Valeur d\'origine envoyée au serveur', 'ok'); return load().then(renderApp); })
     .catch(function (e) { toast(e.message, 'bad'); });
 }
 function doRestart(name) {
-  api('restart', { resource: name }).then(function () { toast(name + ' redémarré', 'ok'); return load().then(renderApp); })
+  api(base() + '/restart', { resource: name }).then(function () { toast(name + ' : redémarrage demandé au serveur', 'ok'); return load().then(renderApp); })
     .catch(function (e) { toast(e.message, 'bad'); });
 }
 function showLog() {
-  api('log').then(function (r) {
-    var rows = r.log.map(function (l) {
-      return h('div', { class: 'log-row' }, h('span', { text: new Date(l.at * 1000).toLocaleString('fr-FR') }),
-        h('span', { text: (S.fields[l.field] ? S.fields[l.field].label : l.field) + ' (' + l.source + ')' }), h('code', { text: (l.old_value || '') + '  →  ' + (l.new_value || '') }));
-    });
-    var m = h('div', { class: 'modal', onclick: function (e) { if (e.target === m) m.remove(); } },
-      h('div', { class: 'card box' }, h('div', { class: 'hd' }, 'Historique des modifications', h('small', { text: '60 dernières' })), rows.length ? rows : h('div', { class: 'field', text: 'Aucune modification pour le moment.' })));
-    document.body.appendChild(m);
-  }).catch(function (e) { toast(e.message, 'bad'); });
+  var rows = (S.st.log || []).map(function (l) {
+    return h('div', { class: 'log-row' }, h('span', { text: new Date(l.at).toLocaleString('fr-FR') }),
+      h('span', { text: l.label + ' (' + l.who + ')' }), h('code', { text: JSON.stringify(l.from) + '  →  ' + JSON.stringify(l.to) }));
+  });
+  modal('Historique des modifications', rows.length ? rows : h('div', { class: 'empty', text: 'Aucune modification pour le moment.' }));
 }
 
-// ───────────── Rendu ─────────────
+// ───────────── Rendu : serveur ─────────────
 function fieldRow(f, showGroup) {
   var broken = f.error || S.vals[f.id] === undefined;
-  var lb = h('div', { class: 'lb' }, h('b', { text: f.label }), f.hint ? h('small', { text: f.hint }) : null,
-    h('div', { class: 'tags' }, showGroup ? h('span', { class: 'tag', text: groupOf(f.group).label }) : null,
-      f.modified ? h('span', { class: 'tag ok', text: 'modifié via le panel' }) : null,
-      broken ? h('span', { class: 'tag bad', text: f.error || 'introuvable dans le fichier' }) : null));
+  var tags = [];
+  if (showGroup) tags.push(h('span', { class: 'tag', text: groupOf(f.group).label }));
+  if (f.modified && f.status === 'pending') tags.push(h('span', { class: 'tag warn', text: 'en attente du serveur' }));
+  else if (f.modified && f.status === 'error') tags.push(h('span', { class: 'tag bad', text: 'refusé : ' + (f.statusError || 'erreur') }));
+  else if (f.modified) tags.push(h('span', { class: 'tag ok', text: 'appliqué' }));
+  if (broken) tags.push(h('span', { class: 'tag bad', text: f.error || 'introuvable dans le fichier' }));
+  var lb = h('div', { class: 'lb' }, h('b', { text: f.label }), f.hint ? h('small', { text: f.hint }) : null, h('div', { class: 'tags' }, tags));
   var ctl = h('div', { class: 'ctl' });
   if (!broken) {
     ctl = control(f);
@@ -317,30 +347,53 @@ function fieldRow(f, showGroup) {
 function groupOf(id) { return S.groups.filter(function (g) { return g.id === id; })[0]; }
 
 function renderHome() {
+  var st = S.st;
+  var link = h('div', { class: 'card linkcard' },
+    h('div', { class: 'lh' }, h('span', { class: 'chip ' + (st.online ? 'ok' : 'bad') }, h('i'), st.online ? 'Serveur en ligne' : 'Serveur hors ligne'),
+      h('span', { class: 'sub', text: 'Dernière connexion : ' + ago(st.lastSeen) })),
+    h('div', { class: 'lstats' },
+      h('div', {}, h('b', { text: st.linked ? String(st.players == null ? '—' : st.players) + (st.maxPlayers ? ' / ' + st.maxPlayers : '') : '—' }), h('small', { text: 'joueurs connectés' })),
+      h('div', {}, h('b', { text: String(st.changes) }), h('small', { text: 'réglages modifiés via le panel' })),
+      h('div', {}, h('b', { text: String(st.pending) }), h('small', { text: 'en attente du serveur' }))),
+    h('div', { class: 'lact' },
+      h('button', { class: 'btn sm', text: 'Renommer', onclick: function () {
+        var n = prompt('Nom du serveur :', st.name); if (!n) return;
+        api(base() + '/rename', { name: n }).then(function () { return load(); }).then(renderApp).catch(function (e) { toast(e.message, 'bad'); }); } }),
+      h('button', { class: 'btn sm', text: 'Régénérer la clé de liaison', onclick: function () {
+        if (!confirm('Régénérer la clé ? L\'ancienne cessera de fonctionner : il faudra remplacer la ligne dans le server.cfg.')) return;
+        api(base() + '/regenerate', {}).then(function (r) { keyModal(r.line, 'Nouvelle clé de liaison'); return load().then(renderApp); }).catch(function (e) { toast(e.message, 'bad'); }); } }),
+      h('button', { class: 'btn sm danger', text: 'Supprimer ce serveur', onclick: function () {
+        if (!confirm('Supprimer « ' + st.name + ' » du panel ? (les fichiers du serveur ne sont pas modifiés)')) return;
+        api(base(), null, 'DELETE').then(function () { S.view = 'servers'; return loadServers(); }).then(renderServers).catch(function (e) { toast(e.message, 'bad'); }); } })));
+  if (!st.linked) {
+    return h('div', { class: 'home' }, link, h('div', { class: 'hero' }, h('h2', { text: 'En attente de la première connexion' }),
+      h('p', { text: 'Colle la ligne  set pickax_panel_key "…"  dans le server.cfg de ton serveur, puis démarre-le (ressource pickax_panel). Les sections de configuration apparaîtront ici dès qu\'il se sera connecté. Clé perdue ? « Régénérer la clé de liaison ».' })));
+  }
   var cards = S.groups.map(function (g) {
     var mod = g.fields.filter(function (f) { return f.modified; }).length;
-    var ok = g.state === 'started';
+    var ok = g.resource ? g.state === 'started' : true;
     return h('button', { class: 'tile', onclick: function () { S.cur = g.id; S.q = ''; renderApp(); } },
       h('div', { class: 'ti' }, icon(g.icon)),
       h('b', { text: g.label }),
       h('p', { text: g.desc.split('. ')[0] + '.' }),
-      h('div', { class: 'ft' }, h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? 'démarrée' : g.state),
+      h('div', { class: 'ft' }, g.resource ? h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? 'démarrée' : g.state) : h('span', { class: 'chip ok' }, h('i'), 'en direct'),
         h('span', { class: 'sub', text: g.fields.length + ' réglages' + (mod ? ' · ' + mod + ' modifié' + (mod > 1 ? 's' : '') : '') })));
   });
-  return h('div', { class: 'home' },
-    h('div', { class: 'hero' }, h('h2', { text: 'Bienvenue sur le panel' }),
-      h('p', { text: 'Choisis une section pour modifier la configuration de ton serveur. Les changements sont écrits dans les fichiers de tes scripts et sauvegardés en base de données.' })),
+  return h('div', { class: 'home' }, link,
+    h('div', { class: 'hero' }, h('h2', { text: 'Configuration' }),
+      h('p', { text: 'Choisis une section. « Enregistrer » envoie les réglages à ton serveur, qui les applique tout seul dans les fichiers de tes scripts (et les réapplique à chaque démarrage).' })),
     h('div', { class: 'tiles' }, cards));
 }
 
 function renderApp() {
+  S.view = 'server';
   rowEls = {};
-  var q = (S.q || '').trim().toLowerCase();
+  var st = S.st, q = (S.q || '').trim().toLowerCase();
   var home = S.cur === 'home' && !q;
   var g = home ? null : (groupOf(S.cur) || S.groups[0]);
 
   var navItems = [h('button', { class: 'nav' + (home ? ' on' : ''), onclick: function () { S.cur = 'home'; S.q = ''; renderApp(); } }, icon('home'), 'Accueil')];
-  navItems.push(h('div', { class: 'navlbl', text: 'Configuration' }));
+  if (S.groups.length) navItems.push(h('div', { class: 'navlbl', text: 'Configuration' }));
   S.groups.forEach(function (x) {
     navItems.push(h('button', { class: 'nav' + (!home && !q && x.id === S.cur ? ' on' : ''), 'data-g': x.id, onclick: function () { S.cur = x.id; S.q = ''; renderApp(); } }, icon(x.icon), x.label));
   });
@@ -348,7 +401,7 @@ function renderApp() {
   var main, title, sub, state = null;
   previewHost = null;
   if (home) {
-    title = 'Accueil'; sub = S.groups.length + ' sections · ' + S.groups.reduce(function (n, x) { return n + x.fields.length; }, 0) + ' réglages';
+    title = st.name; sub = S.groups.length ? S.groups.length + ' sections · ' + S.groups.reduce(function (n, x) { return n + x.fields.length; }, 0) + ' réglages' : 'Pas encore relié';
     main = renderHome();
   } else if (q) {
     var hits = [];
@@ -356,13 +409,11 @@ function renderApp() {
     title = 'Recherche'; sub = hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + ' pour « ' + S.q + ' »';
     main = h('div', { class: 'content one' }, h('div', { class: 'card' }, hits.length ? hits.map(function (f) { return fieldRow(f, true); }) : h('div', { class: 'empty', text: 'Aucun réglage ne correspond.' })));
   } else {
-    title = g.label; sub = g.resource;
-    var ok = g.state === 'started'; state = h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? g.resource + ' démarrée' : g.resource + ' : ' + g.state);
-    var cards = [], cur = null, last = null;
+    title = g.label; sub = g.resource || 'Variables du serveur';
+    if (g.resource) { var ok = g.state === 'started'; state = h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? g.resource + ' démarrée' : g.resource + ' : ' + g.state); }
+    var cards = [], cur = null;
     g.fields.forEach(function (f) {
-      if (!cur || f.section) {
-        if (f.section || !cur) { last = f.section || null; cur = h('div', { class: 'card sect' }, last ? h('div', { class: 'sh', text: last }) : null); cards.push(cur); }
-      }
+      if (!cur || f.section) { cur = h('div', { class: 'card sect' }, f.section ? h('div', { class: 'sh', text: f.section }) : null); cards.push(cur); }
       cur.appendChild(fieldRow(f));
     });
     previewHost = h('div', { class: 'stage' });
@@ -377,26 +428,105 @@ function renderApp() {
     var again = document.querySelector('.search'); if (again) { again.focus(); again.setSelectionRange(pos, pos); }
   });
 
-  var pend = S.pending.length ? h('div', { class: 'banner' }, h('span', { text: 'À redémarrer pour appliquer : ' + S.pending.join(', ') }),
-    S.pending.map(function (r) { return h('button', { class: 'btn sm', onclick: function () { doRestart(r); }, text: 'Redémarrer ' + r }); })) : null;
+  var banners = [];
+  if (st.linked && !st.online) banners.push(h('div', { class: 'banner off' }, h('span', { text: 'Le serveur est hors ligne (dernière connexion : ' + ago(st.lastSeen) + '). Tes modifications sont gardées et seront appliquées dès sa reconnexion.' })));
+  if (S.pending.length) banners.push(h('div', { class: 'banner' }, h('span', { text: 'À redémarrer pour appliquer : ' + S.pending.join(', ') }),
+    S.pending.map(function (r) { return h('button', { class: 'btn sm', onclick: function () { doRestart(r); }, text: 'Redémarrer ' + r }); })));
 
   dock = h('div', { class: 'dock' }, h('span', { class: 'cnt' }),
     h('button', { class: 'btn ghost', onclick: doCancel, text: 'Annuler' }),
     h('button', { class: 'btn', onclick: function () { doSave(false); }, text: 'Enregistrer' }),
     h('button', { class: 'btn primary', onclick: function () { doSave(true); }, text: 'Enregistrer et appliquer' }));
 
+  var scrollTop = (document.querySelector('.scroll') || {}).scrollTop || 0;
   app.replaceChildren(h('div', { class: 'shell' },
-    h('aside', { class: 'side' }, h('div', { class: 'logo' }, h('i', {}, icon('logo')), h('span', {}, 'Pickax', h('small', { text: 'Panel de configuration' }))), navItems, h('div', { class: 'grow' }),
-      h('div', { class: 'srv' }, h('i'), h('div', {}, h('b', { text: S.server.replace(/\^\d/g, '') || 'Serveur' }), S.players + ' joueur(s) connecté(s)')),
-      h('button', { class: 'nav', onclick: function () { try { sessionStorage.removeItem('pxkey'); } catch (e) {} KEY = ''; renderLogin(); } }, icon('out'), 'Se déconnecter')),
+    h('aside', { class: 'side' }, h('div', { class: 'logo' }, h('i', {}, icon('logo')), h('span', {}, 'Pickax', h('small', { text: 'Panel de configuration' }))),
+      h('button', { class: 'nav back', onclick: function () { S.view = 'servers'; loadServers().then(renderServers); } }, icon('back'), 'Mes serveurs'),
+      h('div', { class: 'srv' }, h('i', { class: st.online ? 'on' : 'off' }), h('div', {}, h('b', { text: st.name }), st.online ? (st.players == null ? 'en ligne' : st.players + ' joueur(s) connecté(s)') : 'hors ligne')),
+      navItems, h('div', { class: 'grow' }),
+      h('button', { class: 'nav', onclick: logout }, icon('out'), 'Se déconnecter (' + S.user + ')')),
     h('main', { class: 'main' },
       h('div', { class: 'top' }, h('div', { class: 'tt' }, h('h1', { text: title }), h('div', { class: 'sub', text: sub })), state,
         h('div', { class: 'sp' }), search, h('button', { class: 'btn', onclick: showLog }, icon('clock'), 'Historique')),
-      pend, h('div', { class: 'scroll' }, main), dock)));
+      banners, h('div', { class: 'scroll' }, main), dock)));
+  var sc = document.querySelector('.scroll'); if (sc) sc.scrollTop = scrollTop;
   drawPreview(); updateBar();
 }
 
+// ───────────── Rendu : liste des serveurs ─────────────
+function loadServers() { return api('servers').then(function (r) { S.servers = r.servers; }); }
+function renderServers() {
+  S.view = 'servers'; dock = null;
+  var cards = S.servers.map(function (s) {
+    return h('button', { class: 'tile srvcard', onclick: function () { openServer(s.id); } },
+      h('div', { class: 'ti' }, icon('server')),
+      h('b', { text: s.name }),
+      h('p', { text: s.linked ? (s.hostname ? s.hostname.replace(/\^\d/g, '') : 'Relié') : 'En attente de la première connexion' }),
+      h('div', { class: 'ft' }, h('span', { class: 'chip ' + (s.online ? 'ok' : 'bad') }, h('i'), s.online ? 'en ligne' : 'hors ligne'),
+        h('span', { class: 'sub', text: s.online && s.players != null ? s.players + ' joueur(s)' : ago(s.lastSeen) + (s.pending ? ' · ' + s.pending + ' en attente' : '') })));
+  });
+  cards.push(h('button', { class: 'tile add', onclick: addServer }, h('div', { class: 'ti' }, icon('plus')), h('b', { text: 'Ajouter un serveur' }), h('p', { text: 'Génère une clé de liaison à coller dans le server.cfg.' })));
+  app.replaceChildren(h('div', { class: 'shell' },
+    h('aside', { class: 'side' }, h('div', { class: 'logo' }, h('i', {}, icon('logo')), h('span', {}, 'Pickax', h('small', { text: 'Panel de configuration' }))),
+      h('button', { class: 'nav on' }, icon('server'), 'Mes serveurs'), h('div', { class: 'grow' }),
+      h('button', { class: 'nav', onclick: logout }, icon('out'), 'Se déconnecter (' + S.user + ')')),
+    h('main', { class: 'main' },
+      h('div', { class: 'top' }, h('div', { class: 'tt' }, h('h1', { text: 'Mes serveurs' }), h('div', { class: 'sub', text: S.servers.length + ' licence' + (S.servers.length > 1 ? 's' : '') })), h('div', { class: 'sp' }),
+        h('button', { class: 'btn primary', onclick: addServer }, icon('plus'), 'Ajouter un serveur')),
+      h('div', { class: 'scroll' }, h('div', { class: 'home' },
+        S.servers.length ? null : h('div', { class: 'hero' }, h('h2', { text: 'Bienvenue sur le panel' }), h('p', { text: 'Ajoute ton premier serveur : le panel te donne une ligne à coller dans le server.cfg, et c\'est tout.' })),
+        h('div', { class: 'tiles' }, cards))))));
+}
+function addServer() {
+  var input = h('input', { type: 'text', placeholder: 'Nom du serveur (ex : BlueBay RP)', maxlength: 60 });
+  var go = h('button', { class: 'btn primary', text: 'Créer la licence' });
+  var m = modal('Ajouter un serveur', [h('p', { class: 'mp', text: 'Donne un nom à ce serveur : une clé de liaison unique est générée.' }), h('div', { class: 'mfield' }, input), h('div', { class: 'mact' }, go)]);
+  function create() {
+    if (!input.value.trim()) return;
+    api('servers', { name: input.value.trim() }).then(function (r) { m.remove(); keyModal(r.line, 'Clé de liaison — ' + input.value.trim()); return loadServers(); }).then(renderServers).catch(function (e) { toast(e.message, 'bad'); });
+  }
+  go.addEventListener('click', create); input.addEventListener('keydown', function (e) { if (e.key === 'Enter') create(); });
+  setTimeout(function () { input.focus(); }, 30);
+}
+function openServer(id) { S.sid = id; S.cur = 'home'; S.q = ''; load().then(renderApp).catch(function (e) { toast(e.message, 'bad'); }); }
+
+// ───────────── Connexion ─────────────
+function authScreen(setup, msg) {
+  var user = h('input', { type: 'text', placeholder: 'Identifiant', autocomplete: 'username', autofocus: true });
+  var pass = h('input', { type: 'password', placeholder: setup ? 'Mot de passe (8 caractères minimum)' : 'Mot de passe', autocomplete: setup ? 'new-password' : 'current-password' });
+  var err = h('div', { class: 'err', text: msg || '' });
+  function go() {
+    api(setup ? 'setup' : 'login', { user: user.value.trim(), pass: pass.value }).then(function (r) { S.user = r.user; return start(); }).catch(function (e) { err.textContent = e.message; });
+  }
+  [user, pass].forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); }); });
+  app.replaceChildren(h('div', { class: 'login' }, h('div', { class: 'login-card' },
+    h('div', { class: 'logo' }, h('i', {}, icon('logo')), 'Pickax Panel'),
+    h('p', { text: setup ? 'Premier lancement : crée ton compte administrateur.' : 'Connecte-toi pour gérer tes serveurs.' }),
+    h('div', { class: 'stack' }, user, pass), h('button', { class: 'btn primary', onclick: go, text: setup ? 'Créer le compte' : 'Se connecter' }), err)));
+}
+function renderLogin(msg) { authScreen(false, msg); }
+function logout() { api('logout', {}).then(function () { S.user = null; renderLogin(); }); }
+
+// ───────────── Rafraîchissement automatique (statut du serveur, accusés d'application) ─────────────
+function signature(st) { return JSON.stringify([st.online, st.pendingRestart, st.players, st.groups.map(function (g) { return [g.state, g.fields.map(function (f) { return [f.value, f.status, f.statusError, f.modified]; })]; })]); }
+setInterval(function () {
+  if (!S.user) return;
+  if (S.view === 'servers') {
+    if (document.querySelector('.modal')) return;
+    api('servers').then(function (r) { if (JSON.stringify(r.servers) !== JSON.stringify(S.servers) && S.view === 'servers') { S.servers = r.servers; renderServers(); } }).catch(function () {});
+  } else if (S.view === 'server' && S.sid) {
+    if (dirtyIds().length || document.querySelector('.modal') || (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) return;
+    api(base()).then(function (st) {
+      if (S.view === 'server' && signature(st) !== signature(S.st)) { return load().then(renderApp); }
+    }).catch(function () {});
+  }
+}, 6000);
+
 // ───────────── Démarrage ─────────────
-if (KEY && (!REMOTE || SERVER)) load().then(renderApp).catch(function (e) { renderLogin(e.message); });
-else renderLogin();
+function start() { return loadServers().then(renderServers); }
+api('me').then(function (r) {
+  if (r.setup) return authScreen(true);
+  if (!r.user) return renderLogin();
+  S.user = r.user; return start();
+}).catch(function (e) { app.replaceChildren(h('div', { class: 'login' }, h('div', { class: 'login-card' }, h('p', { text: 'Panel injoignable : ' + e.message })))); });
 })();
