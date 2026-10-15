@@ -1,4 +1,5 @@
 function _Peds()
+    ContextMenuTitle = "PNJ"
     Action_Config = {
         Peds = {
             {
@@ -153,6 +154,7 @@ function _Peds()
 end
 
 function _Object()
+    ContextMenuTitle = "Objet"
     Action_Config = {
         Object = {
             {
@@ -420,6 +422,7 @@ function _Object()
 end
 
 function _MoiMort()
+    ContextMenuTitle = "Blessé"
     Action_Config = {
         MoiMort = {
             {
@@ -437,6 +440,7 @@ function _MoiMort()
 end
 
 function _Moi()
+    ContextMenuTitle = "Moi"
     Action_Config = {
         My = {
             {
@@ -527,6 +531,35 @@ function _Moi()
                             TriggerServerEvent("jsfour-idcard:open", ESXCustomFonctionContextMenu:MonID(), ESXCustomFonctionContextMenu:MonID(), 'weapon')
                         end
                     }
+                },
+            },
+            {
+                Type = "buttom-submenu",
+                Label = "Actions RP",
+                Condition = ConfigContextMenu.Menu.RPActions ~= false,
+                IsRestricted = false,
+                CloseOnClick = true,
+                Action = {
+                    { "Attendre (impatient)", true, function()
+                        ESXCustomFonctionContextMenu:RPScenario("WORLD_HUMAN_STAND_IMPATIENT")
+                    end },
+                    { "S'appuyer au mur", true, function()
+                        ESXCustomFonctionContextMenu:RPScenario("WORLD_HUMAN_LEANING")
+                    end },
+                    { "Prendre un appel", true, function()
+                        ESXCustomFonctionContextMenu:RPScenario("WORLD_HUMAN_STAND_MOBILE", "passe un appel")
+                    end },
+                    { "Regarder autour (jumelles)", true, function()
+                        ESXCustomFonctionContextMenu:RPScenario("WORLD_HUMAN_BINOCULARS", "regarde au loin avec des jumelles")
+                    end },
+                    { "Prendre des notes", true, function()
+                        ESXCustomFonctionContextMenu:RPScenario("WORLD_HUMAN_CLIPBOARD", "prend des notes")
+                    end },
+                    { "Se faire entendre (/me)", true, function()
+                        ESXCustomFonctionContextMenu:CloseMenu()
+                        local txt = ESXCustomFonctionContextMenu:Keyboard("Action /me", 120, "small_text")
+                        if txt and txt ~= "" then ESXCustomFonctionContextMenu:Command("me " .. txt) end
+                    end },
                 },
             },
             {
@@ -808,6 +841,7 @@ function _Moi()
 end
 
 function _Weather()
+    ContextMenuTitle = "Environnement"
     Action_Config = {
         Weather = {
             {
@@ -962,6 +996,7 @@ function _Weather()
 end
 
 function _AtPose()
+    ContextMenuTitle = "Position"
     Action_Config = {
         AtPose = {
             [1] = {
@@ -981,6 +1016,7 @@ function _AtPose()
 end
 
 function _Other()
+    ContextMenuTitle = "Interactions"
     Action_Config = {
         Other = {
             {
@@ -1066,6 +1102,7 @@ function _Other()
 end
 
 function _Vehicle()
+    ContextMenuTitle = "Véhicule"
     Action_Config = {
         Vehicle = {
             {
@@ -1464,6 +1501,7 @@ function _Vehicle()
 end
 
 function _Player()
+    ContextMenuTitle = "Joueur"
     Action_Config = {
         Joueur = {
             {
@@ -1550,6 +1588,32 @@ function _Player()
                 OnClick = function()
                     ESXCustomFonctionContextMenu:Fouille(LastEntityHit)
                 end,
+            },
+            {
+                Type = "buttom-submenu",
+                Label = "Interactions RP",
+                Condition = ConfigContextMenu.Menu.RPActions ~= false,
+                Distance = 3.0,
+                Blocked = false,
+                IsRestricted = false,
+                CloseOnClick = true,
+                Action = {
+                    { "Serrer la main", true, function()
+                        ESXCustomFonctionContextMenu:RPWithPlayer("mp_ped_interaction", "handshake_guy_a", 3000, "serre la main de la personne en face")
+                    end },
+                    { "Faire un câlin", true, function()
+                        ESXCustomFonctionContextMenu:RPWithPlayer("mp_ped_interaction", "hugs_guy_a", 3500, "fait un câlin à la personne en face")
+                    end },
+                    { "Saluer", true, function()
+                        ESXCustomFonctionContextMenu:RPWithPlayer("gestures@m@standing@casual", "gesture_hello", 2500, "salue la personne en face")
+                    end },
+                    { "Prendre le pouls", true, function()
+                        ESXCustomFonctionContextMenu:RPWithPlayer("amb@medic@standing@tendtodead@base", "base", 4000, "prend le pouls de la personne en face")
+                    end },
+                    { "Faire signe d'approcher", true, function()
+                        ESXCustomFonctionContextMenu:RPWithPlayer("gestures@m@standing@casual", "gesture_come_here_soft", 2500, "fait signe d'approcher à la personne en face")
+                    end },
+                },
             },
             {
                 Type = "buttom",

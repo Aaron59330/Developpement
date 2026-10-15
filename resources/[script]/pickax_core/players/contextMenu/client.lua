@@ -291,7 +291,7 @@ function Separator.CreateNew(menu, index, lineColor, bgColor, alpha)
 end
 function Separator:Process()
     self.background:Draw(Color(self.colors.background.r, self.colors.background.g, self.colors.background.b, self.alpha), self.parent)
-    self.line:Draw(self.colors.line)
+    self.line:Draw(self.colors.line:Alpha(tonumber(ConfigContextMenu.Color.SeparatorAlpha) or 38))
 end
 function Separator:SetPosition(position)
     self.position = position
@@ -366,6 +366,11 @@ function Item:Process(cursorPosition)
     local textAlpha = 255
     if (menuOverlapped) then
         textAlpha = 127
+    end
+    if self.hovered and self.enabled and not menuOverlapped then
+        -- barre d'accent bleue à gauche de la ligne survolée
+        local ac = ConfigContextMenu.Color.ColorAccent or { 0, 164, 255 }
+        DrawRect(self.position.x + 0.0035, self.position.y + self.height * 0.5, 0.0022, self.height * 0.62, ac[1], ac[2], ac[3], 255)
     end
     self.text.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
     self.text:Draw()
@@ -622,7 +627,7 @@ function Border.CreateNew(position, size, thickness, color)
     self.thickness = thickness or 0.001
     -- self.color = color or Colors.Grey
     if ConfigContextMenu.Color.ColorBorder ~= nil then
-        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3]) or Colors.Grey
+        self.color = Color(ConfigContextMenu.Color.ColorBorder[1], ConfigContextMenu.Color.ColorBorder[2], ConfigContextMenu.Color.ColorBorder[3], tonumber(ConfigContextMenu.Color.BorderAlpha) or 150) or Colors.Grey
     end
     
     self.rects = {}
@@ -756,6 +761,20 @@ function Menu:Process(cursorPosition)
     end
     if ConfigContextMenu.Color.ColorBorder ~= nil then
         self.border:Draw()
+    end
+    -- en-tête (menu racine uniquement) : pastille bleue avec le type d'objet visé
+    if self.parent == nil and ContextMenuTitle and ConfigContextMenu.Menu.ShowTitle ~= false and self.position.y > 0.045 then
+        local ac = ConfigContextMenu.Color.ColorAccent or { 0, 164, 255 }
+        local h = 0.026
+        local y = self.position.y - h - 0.004
+        self.titleText = self.titleText or Text(ContextMenuTitle)
+        if self.titleText.title ~= ContextMenuTitle then self.titleText = Text(ContextMenuTitle) end
+        self.titleText.scale = vector2(0.3, 0.3)
+        local w = math.max(self.titleText:GetWidth() + 0.016, 0.06)
+        DrawRect(self.position.x + w * 0.5, y + h * 0.5, w, h, ac[1], ac[2], ac[3], 235)
+        self.titleText.color = Colors.White
+        self.titleText.position = vector2(self.position.x + 0.008, y + 0.004)
+        self.titleText:Draw()
     end
 end
 function Menu:SetPosition(position)
@@ -3079,6 +3098,43 @@ function ESXCustomFonctionContextMenu:CommandME(message)
     if Config.WantToUseME then
         ESXCustomFonctionContextMenu:Command("me "..message)
     end
+end
+
+-- Interactions RP : animation + /me, annulées dès que le joueur bouge
+function ESXCustomFonctionContextMenu:RPAnim(dict, anim, duration, meText, flag)
+    local ped = PlayerPedId()
+    if not IsPedOnFoot(ped) or IsPedDeadOrDying(ped, true) then return ESX.ShowNotification("~r~Action impossible maintenant.") end
+    RequestAnimDict(dict)
+    local t = GetGameTimer()
+    while not HasAnimDictLoaded(dict) and GetGameTimer() - t < 3000 do Wait(10) end
+    if not HasAnimDictLoaded(dict) then return end
+    if meText then ESXCustomFonctionContextMenu:CommandME(meText) end
+    TaskPlayAnim(ped, dict, anim, 8.0, -8.0, duration or 3000, flag or 0, 0.0, false, false, false)
+end
+function ESXCustomFonctionContextMenu:RPScenario(scenario, meText)
+    local ped = PlayerPedId()
+    if not IsPedOnFoot(ped) or IsPedDeadOrDying(ped, true) then return ESX.ShowNotification("~r~Action impossible maintenant.") end
+    if meText then ESXCustomFonctionContextMenu:CommandME(meText) end
+    TaskStartScenarioInPlace(ped, scenario, 0, true)
+    ESX.ShowNotification("~b~Bougez pour arrêter.")
+    CreateThread(function()
+        Wait(1500)
+        while IsPedUsingScenario(ped, scenario) or IsPedActiveInScenario(ped) do
+            if IsControlPressed(0, 32) or IsControlPressed(0, 33) or IsControlPressed(0, 34) or IsControlPressed(0, 35) or IsPedDeadOrDying(ped, true) then
+                ClearPedTasks(ped)
+                break
+            end
+            Wait(150)
+        end
+    end)
+end
+-- Face au joueur visé, anime puis /me
+function ESXCustomFonctionContextMenu:RPWithPlayer(dict, anim, duration, meText)
+    local target = LastEntityHit
+    if not target or not DoesEntityExist(target) then return end
+    if #(GetEntityCoords(target) - GetEntityCoords(PlayerPedId())) > 3.0 then return ESX.ShowNotification("~r~Le joueur est trop loin.") end
+    ESXCustomFonctionContextMenu:MakeEntityFaceEntity(PlayerPedId(), target)
+    ESXCustomFonctionContextMenu:RPAnim(dict, anim, duration, meText)
 end
 
 --Copie Animation
