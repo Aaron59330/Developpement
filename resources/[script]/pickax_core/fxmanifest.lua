@@ -45,6 +45,11 @@ server_scripts {
 }
 
 client_scripts {
+    '@ox_lib/init.lua',   -- requis par hudmap/client.lua (lib.requestStreamedTextureDict)
+
+    -- Minimap ronde (ex-ressource pickax_hudmap)
+    'hudmap/client.lua',
+
     -- RageUI
     'menu/RageUI/RMenu.lua',
     'menu/RageUI/menu/RageUI.lua',
@@ -178,7 +183,18 @@ client_scripts {
 
 ui_page 'players/jsfour-idcard/html/index.html'
 
+-- Écran de chargement (ex-ressource pickax_loading)
+loadscreen 'loading/index.html'
+loadscreen_cursor 'yes'
+
 files {
+    'loading/index.html',
+    'loading/style.css',
+    'loading/index.js',
+    'loading/ui.js',
+    'loading/background.png',
+    'loading/music/music.mp3',
+
     'utils/gifMenu/banner.html',
     'players/jsfour-idcard/html/index.html',
     'players/jsfour-idcard/html/assets/css/*.css',
