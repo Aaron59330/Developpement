@@ -15,6 +15,24 @@ function GetGangConfig() return State.gangConfig end
 
 local menuOrigin = nil   -- instant où une action du menu F7 a été choisie : l'écran ouvert juste après propose « Retour »
 
+-- Menu F6 / F7 : le joueur peut continuer à marcher (le clavier reste au jeu, la souris sert au menu).
+-- Échap / Retour ferment le menu (le NUI ne reçoit plus le clavier) ; pas de tir ni de visée tant que le menu est ouvert.
+local walkMenu = false
+local function setWalkMenu(on)
+    on = on == true
+    if on == walkMenu then return end
+    walkMenu = on
+    SetNuiFocusKeepInput(on)
+    if not on then return end
+    CreateThread(function()
+        while walkMenu and uiOpen do
+            Wait(0)
+            for _, c in ipairs({ 24, 25, 257, 140, 141, 142, 263, 264, 200, 199 }) do DisableControlAction(0, c, true) end
+            if IsDisabledControlJustReleased(0, 200) or IsControlJustReleased(0, 177) then CloseUI() end
+        end
+    end)
+end
+
 function OpenUI(payload)
     if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     if payload.action == 'open' and payload.kind ~= 'menu' and menuOrigin and GetGameTimer() - menuOrigin < 4000 then payload.back = true end
@@ -22,6 +40,7 @@ function OpenUI(payload)
     payload.theme = Config.UI and Config.UI.Accent   -- couleur d'accentuation courante
     uiOpen = true
     SetNuiFocus(true, true)
+    setWalkMenu(payload.action == 'open' and payload.kind == 'menu')
     SendNUIMessage(payload)
 end
 
@@ -29,6 +48,7 @@ function CloseUI()
     placing = false
     if not uiOpen then return end
     uiOpen = false
+    setWalkMenu(false)
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
     TriggerServerEvent('gangbuilder:server:requestSync')
@@ -188,7 +208,7 @@ local function openGangMenu()
     OpenUI({ action = 'open', kind = 'menu', data = { gangLabel = gc.label, color = gc.color, grade = gc.gradeLabel or '', actions = actions } })
 end
 
-RegisterCommand(Config.GangMenuCommand, function() if not uiOpen then openGangMenu() end end, false)
+RegisterCommand(Config.GangMenuCommand, function() if not uiOpen then openGangMenu() elseif walkMenu then CloseUI() end end, false)
 RegisterKeyMapping(Config.GangMenuCommand, 'Menu du gang', 'keyboard', Config.GangMenuKey)
 
 RegisterNetEvent('gangbuilder:client:openBuilder', function()

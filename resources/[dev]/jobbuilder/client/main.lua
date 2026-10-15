@@ -18,6 +18,24 @@ local function currentAccent()
     return own or (Config.UI and Config.UI.Accent)
 end
 
+-- Menu F6 / F7 : le joueur peut continuer à marcher (le clavier reste au jeu, la souris sert au menu).
+-- Échap / Retour ferment le menu (le NUI ne reçoit plus le clavier) ; pas de tir ni de visée tant que le menu est ouvert.
+local walkMenu = false
+local function setWalkMenu(on)
+    on = on == true
+    if on == walkMenu then return end
+    walkMenu = on
+    SetNuiFocusKeepInput(on)
+    if not on then return end
+    CreateThread(function()
+        while walkMenu and uiOpen do
+            Wait(0)
+            for _, c in ipairs({ 24, 25, 257, 140, 141, 142, 263, 264, 200, 199 }) do DisableControlAction(0, c, true) end
+            if IsDisabledControlJustReleased(0, 200) or IsControlJustReleased(0, 177) then CloseUI() end
+        end
+    end)
+end
+
 function OpenUI(payload)
     if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     uiKind = payload.kind
@@ -27,6 +45,7 @@ function OpenUI(payload)
     payload.theme = currentAccent()
     uiOpen = true
     SetNuiFocus(true, true)
+    setWalkMenu(payload.action == 'open' and payload.kind == 'menu')
     SendNUIMessage(payload)
 end
 
@@ -36,6 +55,7 @@ function CloseUI()
     placing = false
     if not uiOpen then return end
     uiOpen = false
+    setWalkMenu(false)
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
     TriggerServerEvent('jobbuilder:server:requestSync')
@@ -212,7 +232,7 @@ local function openJobMenu()
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
 
-RegisterCommand(Config.JobMenuCommand, function() if not uiOpen then openJobMenu() end end, false)
+RegisterCommand(Config.JobMenuCommand, function() if not uiOpen then openJobMenu() elseif walkMenu then CloseUI() end end, false)
 RegisterKeyMapping(Config.JobMenuCommand, 'Menu métier', 'keyboard', Config.JobMenuKey)
 
 RegisterNetEvent('jobbuilder:client:openBuilder', function()
