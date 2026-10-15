@@ -8,4 +8,4 @@
 - Le slot Tenue n'accepte que cet item, uniquement dans l'inventaire du joueur lui-même.
 
 Installation : `ensure p_outfits` après `ox_inventory` et `p_itemclothes`.
-La tenue est créée par `shopbuilder` (boutique de vêtements) via `exports.p_outfits:sanitize`.
+La tenue est créée par `pickax_shopbuilder` (boutique de vêtements) via `exports.p_outfits:sanitize`.

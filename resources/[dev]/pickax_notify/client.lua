@@ -165,8 +165,8 @@ local function resolveIcon(icon)
         local pd = ESX.GetPlayerData()
         name = pd and pd.job and pd.job.name
     end
-    if GetResourceState('jobbuilder') == 'started' then
-        local ok2, t = pcall(function() return exports['jobbuilder']:GetJobType() end)
+    if GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok2, t = pcall(function() return exports['pickax_jobbuilder']:GetJobType() end)
         if ok2 then jtype = t end
     end
     return jobIcon(name, jtype)

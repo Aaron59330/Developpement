@@ -350,9 +350,9 @@ return {
     },
 
     -- Cartes / permis (CorePickax > players/jsfour-idcard)
-    ['id_card'] = { label = "Carte d'identité", weight = 10, stack = false, close = true, description = "Carte nationale d'identité", server = { export = 'CorePickax.id_card' } },
-    ['driver_license'] = { label = 'Permis de conduire', weight = 10, stack = false, close = true, description = 'Permis de conduire', server = { export = 'CorePickax.driver_license' } },
-    ['weapon_license'] = { label = "Permis de port d'arme", weight = 10, stack = false, close = true, description = "Permis de port d'arme", server = { export = 'CorePickax.weapon_license' } },
+    ['id_card'] = { label = "Carte d'identité", weight = 10, stack = false, close = true, description = "Carte nationale d'identité", server = { export = 'pickax_core.id_card' } },
+    ['driver_license'] = { label = 'Permis de conduire', weight = 10, stack = false, close = true, description = 'Permis de conduire', server = { export = 'pickax_core.driver_license' } },
+    ['weapon_license'] = { label = "Permis de port d'arme", weight = 10, stack = false, close = true, description = "Permis de port d'arme", server = { export = 'pickax_core.weapon_license' } },
 
     -- Items utilisés par les builders (braquages worldbuilder, boutique de vêtements shopbuilder)
     ['diamond'] = { label = 'Diamant', weight = 50, stack = true, close = true },
