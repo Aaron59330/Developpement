@@ -181,7 +181,8 @@ function dlgOpenWith(m) {
   $('dl-hint').textContent = d.hint || '';
   var inp = $('dl-input');
   inp.value = d.default || '';
-  inp.placeholder = d.placeholder || '';
+  // placeholder identique au titre = redondant : on propose une invite plus utile
+  inp.placeholder = (d.placeholder && d.placeholder !== d.title) ? d.placeholder : 'Saisis ici puis valide…';
   inp.maxLength = d.max || 60;
   inp.setAttribute('inputmode', d.numeric ? 'numeric' : 'text');
   dlgOpen = true;
