@@ -47,7 +47,8 @@ Config = {
         ["license:0155311d5350cbfe73f6d33c117fd0b8675be1e8"] = true
     },
 
-	MaxSalary = 5000,--évite que les boss abuse sur les salaires
+	MaxSalary = 400,--évite que les boss abuse sur les salaires (salaire par fiche de paie = 1 journée de travail net)
+	ServicePayCheck = false,--true = en plus du salaire es_extended, une paie toutes les 20 min en service (double salaire : déconseillé)
 
 	ArmesPerm = {
 		["WEAPON_PISTOL_MK2"] = true,

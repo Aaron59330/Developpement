@@ -17,7 +17,7 @@ Config.Accounts = {
 
 Config.OxInventory = true
 
-Config.StartingAccountMoney = {money = 25000, bank = 25000}
+Config.StartingAccountMoney = {money = 300, bank = 1500}
 
 Config.StartingInventoryItems = {
     { name = "water", count = 5, slot = 1 },
@@ -80,7 +80,7 @@ Config.EnableSocietyPayouts = false-- pay from the society account that the play
 
 Config.MaxWeight = 24-- the max inventory weight without backpack
 
-Config.PaycheckInterval = 25 * 60000-- how often to recieve pay checks in milliseconds
+Config.PaycheckInterval = 30 * 60000-- how often to recieve pay checks in milliseconds
 
 Config.EnableDebug = false-- Use Debug options?
 Config.EnableDefaultInventory = false-- Display the default Inventory ( F2 )

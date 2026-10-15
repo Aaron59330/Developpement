@@ -16,7 +16,7 @@ Config.MaxGrades = 20
 Config.MaxPoints = 80
 Config.MaxItemsPerPoint = 100
 Config.AllowLeave = true         -- un employé peut quitter son métier via le menu F6 (bouton « Quitter le métier »)
-Config.MaxBossSalary = 5000      -- salaire maximum qu'un patron peut fixer en jeu (même plafond que Config.MaxSalary de CorePickax / esx_society)
+Config.MaxBossSalary = 400       -- salaire maximum qu'un patron peut fixer en jeu (même plafond que Config.MaxSalary de CorePickax / esx_society)
 
 Config.SocietyPrefix = 'society_'  -- compte société = society_<nomdujob> (compatible esx_society / esx_addonaccount)
 Config.Inventory     = 'auto'      -- 'auto' | 'ox' | 'esx'
@@ -148,8 +148,8 @@ Config.DeathBlock = {
 -- F6 → Tablette bancaire : tableau de bord, clients (fiches, cote, notes), prêts (offre acceptée par le client, remboursement automatique),
 -- guichet (dépôt / retrait avec l'accord du client), frais et services facturés, équipe.  Réglages par job : onglet Général du job.
 Config.Bank = {
-    MinLoan = 500, MaxLoan = 2000000,
-    MinRate = 0, MaxRate = 60,          -- intérêt TOTAL en % du capital (ex. 10 % sur 10 000 $ = 1 000 $ d'intérêts)
+    MinLoan = 500, MaxLoan = 300000,
+    MinRate = 0, MaxRate = 25,          -- intérêt TOTAL en % du capital (ex. 10 % sur 10 000 $ = 1 000 $ d'intérêts)
     Terms = { 3, 5, 7, 10, 14, 21, 30 },-- nombre d'échéances proposées
     IntervalHours = 24,                 -- une échéance toutes les X heures (temps réel)
     RetryHours = 4,                     -- si le client n'a pas de quoi payer : nouvel essai après X heures
@@ -163,8 +163,8 @@ Config.Bank = {
     RatingLimit = { A = 100, B = 70, C = 40, D = 20, E = 0 },    -- plafond d'emprunt selon la cote du client (% du plafond du job ; 0 = prêt refusé)
     Flags = { normal = 'Normal', vip = 'VIP', watch = 'Sous surveillance' },
     DefaultFees = {
-        { label = 'Ouverture de compte', amount = 150 }, { label = 'Carte bancaire', amount = 80 }, { label = 'Chéquier', amount = 40 },
-        { label = 'Coffre-fort personnel', amount = 500 }, { label = 'Conseil financier', amount = 200 }, { label = 'Frais de dossier', amount = 100 },
+        { label = 'Ouverture de compte', amount = 20 }, { label = 'Carte bancaire', amount = 30 }, { label = 'Chéquier', amount = 10 },
+        { label = 'Coffre-fort personnel', amount = 120 }, { label = 'Conseil financier', amount = 60 }, { label = 'Frais de dossier', amount = 80 },
     },
 }
 
@@ -174,8 +174,8 @@ Config.Ems = {
     MinCare = 1, MaxCare = 100000,
     BloodTypes = { 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-' },
     DefaultCare = {
-        { label = 'Consultation', amount = 150 }, { label = 'Pansement / premiers soins', amount = 250 }, { label = 'Perfusion', amount = 400 },
-        { label = 'Radio / examen', amount = 500 }, { label = 'Opération', amount = 2500 }, { label = 'Transport en ambulance', amount = 600 },
+        { label = 'Consultation', amount = 30 }, { label = 'Pansement / premiers soins', amount = 20 }, { label = 'Perfusion', amount = 60 },
+        { label = 'Radio / examen', amount = 70 }, { label = 'Opération', amount = 1500 }, { label = 'Transport en ambulance', amount = 120 },
     },
 }
 
@@ -226,12 +226,12 @@ Config.Police = {
     PanicCommand = 'panic',  -- /panic : appel à l'aide d'un policier à ses collègues
     -- Amendes proposées par défaut aux nouveaux jobs police (modifiables ensuite par job dans le builder)
     DefaultFines = {
-        { label = 'Excès de vitesse',          amount = 250 },
-        { label = 'Conduite dangereuse',       amount = 600 },
+        { label = 'Excès de vitesse',          amount = 135 },
+        { label = 'Conduite dangereuse',       amount = 300 },
         { label = 'Refus d\'obtempérer',       amount = 1500 },
-        { label = 'Stationnement gênant',      amount = 150 },
-        { label = 'Port d\'arme illégal',      amount = 2500 },
-        { label = 'Trouble à l\'ordre public', amount = 800 },
+        { label = 'Stationnement gênant',      amount = 35 },
+        { label = 'Port d\'arme illégal',      amount = 1500 },
+        { label = 'Trouble à l\'ordre public', amount = 150 },
     },
     -- Carte de la tablette : sans image, une carte schématique (grille + lieux) est dessinée.
     -- Pour une vraie carte en couleur : dépose le pack de tuiles « mapStyles » dans html/map/ (voir README) ou une image dans html/map/.
@@ -342,30 +342,30 @@ Config.Missions = {
     Templates = {
         dealer = {
             { id = 'delivery', label = 'Livraison de véhicule', desc = 'Livre un véhicule neuf à un client en ville et remets-lui les clés.', minGrade = 0,
-              reward = { min = 400, max = 900 }, cooldown = 60, timeLimit = 900, vehicle = { source = 'catalog', models = { 'sultan', 'asea' } }, peds = {},
+              reward = { min = 35, max = 75 }, cooldown = 60, timeLimit = 900, vehicle = { source = 'catalog', models = { 'sultan', 'asea' } }, peds = {},
               steps = {
                   { t = 'spawn_vehicle', where = 'start', label = 'Monte dans le véhicule à livrer' },
                   { t = 'goto', veh = true, label = 'Conduis le véhicule chez le client' },
                   { t = 'interact', same = true, anim = 'give', secs = 5, consume = true, label = 'Remettre les clés au client' },
               } },
             { id = 'prospect', label = 'Démarchage client', desc = 'Rends visite à un client potentiel et présente les offres de la concession.', minGrade = 0,
-              reward = { min = 250, max = 500 }, cooldown = 60, timeLimit = 900, vehicle = { source = 'models', models = {} }, peds = {},
+              reward = { min = 20, max = 40 }, cooldown = 60, timeLimit = 900, vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'goto', label = 'Rends-toi chez le client' },
                   { t = 'interact', same = true, anim = 'talk', secs = 8, label = 'Présenter les offres' },
               } },
         },
         police = {
-            { id = 'patrol', label = 'Patrouille', desc = 'Contrôle deux secteurs de la ville.', minGrade = 0, reward = { min = 300, max = 600 }, cooldown = 60, timeLimit = 1200,
+            { id = 'patrol', label = 'Patrouille', desc = 'Contrôle deux secteurs de la ville.', minGrade = 0, reward = { min = 25, max = 50 }, cooldown = 60, timeLimit = 1200,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'goto', label = 'Rends-toi dans le premier secteur' }, { t = 'interact', same = true, anim = 'inspect', secs = 6, npc = false, label = 'Contrôler la zone' },
                   { t = 'goto', label = 'Rends-toi dans le second secteur' }, { t = 'interact', same = true, anim = 'inspect', secs = 6, npc = false, label = 'Contrôler la zone' },
               } },
-            { id = 'witness', label = 'Appel : témoin', desc = 'Un témoin a appelé le commissariat : va prendre sa déposition.', minGrade = 0, reward = { min = 250, max = 500 }, cooldown = 60, timeLimit = 900,
+            { id = 'witness', label = 'Appel : témoin', desc = 'Un témoin a appelé le commissariat : va prendre sa déposition.', minGrade = 0, reward = { min = 20, max = 40 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = { { t = 'goto', label = 'Rends-toi sur place' }, { t = 'interact', same = true, anim = 'talk', secs = 8, label = 'Prendre la déposition' } } },
-            { id = 'evidence', label = 'Transport de preuves', desc = 'Récupère les scellés au commissariat et dépose-les au laboratoire.', minGrade = 1, reward = { min = 350, max = 700 }, cooldown = 90, timeLimit = 1200,
+            { id = 'evidence', label = 'Transport de preuves', desc = 'Récupère les scellés au commissariat et dépose-les au laboratoire.', minGrade = 1, reward = { min = 30, max = 60 }, cooldown = 90, timeLimit = 1200,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Récupérer les scellés' },
@@ -373,10 +373,10 @@ Config.Missions = {
               } },
         },
         ems = {
-            { id = 'emergency', label = 'Urgence médicale', desc = 'Une personne est blessée : rends-toi sur place et soigne-la.', minGrade = 0, reward = { min = 400, max = 800 }, cooldown = 60, timeLimit = 600,
+            { id = 'emergency', label = 'Urgence médicale', desc = 'Une personne est blessée : rends-toi sur place et soigne-la.', minGrade = 0, reward = { min = 35, max = 65 }, cooldown = 60, timeLimit = 600,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = { { t = 'goto', label = 'Rends-toi sur les lieux de l\'accident' }, { t = 'interact', same = true, anim = 'heal', patient = true, secs = 10, label = 'Soigner le patient' } } },
-            { id = 'meds', label = 'Livraison de médicaments', desc = 'Charge les médicaments et livre-les à une pharmacie.', minGrade = 0, reward = { min = 250, max = 500 }, cooldown = 60, timeLimit = 900,
+            { id = 'meds', label = 'Livraison de médicaments', desc = 'Charge les médicaments et livre-les à une pharmacie.', minGrade = 0, reward = { min = 20, max = 40 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Charger les médicaments' },
@@ -384,25 +384,25 @@ Config.Missions = {
               } },
         },
         bank = {
-            { id = 'cashtransit', label = 'Transport de fonds', desc = 'Charge les sacs de billets et livre-les à une agence partenaire.', minGrade = 0, reward = { min = 400, max = 800 }, cooldown = 90, timeLimit = 1200,
+            { id = 'cashtransit', label = 'Transport de fonds', desc = 'Charge les sacs de billets et livre-les à une agence partenaire.', minGrade = 0, reward = { min = 35, max = 65 }, cooldown = 90, timeLimit = 1200,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Charger les sacs de billets' },
                   { t = 'goto', label = 'Rends-toi à l\'agence partenaire' }, { t = 'interact', same = true, anim = 'give', secs = 4, label = 'Remettre les fonds' },
               } },
-            { id = 'clientvisit', label = 'Visite client', desc = 'Un client important souhaite un rendez-vous à domicile.', minGrade = 1, reward = { min = 300, max = 600 }, cooldown = 60, timeLimit = 900,
+            { id = 'clientvisit', label = 'Visite client', desc = 'Un client important souhaite un rendez-vous à domicile.', minGrade = 1, reward = { min = 25, max = 50 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = { { t = 'goto', label = 'Rends-toi chez le client' }, { t = 'interact', same = true, anim = 'talk', secs = 8, label = 'Présenter les offres de la banque' } } },
         },
         mecano = {
-            { id = 'breakdown', label = 'Dépannage', desc = 'Un automobiliste est en panne : rejoins-le et répare son véhicule.', minGrade = 0, reward = { min = 350, max = 700 }, cooldown = 60, timeLimit = 900,
+            { id = 'breakdown', label = 'Dépannage', desc = 'Un automobiliste est en panne : rejoins-le et répare son véhicule.', minGrade = 0, reward = { min = 30, max = 60 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = { 'blista', 'asea', 'premier', 'ingot' } }, peds = {},
               steps = {
                   { t = 'spawn_vehicle', where = 'loc', broken = true, label = 'Cherche le véhicule en panne' },
                   { t = 'goto', same = true, label = 'Rejoins le véhicule en panne' },
                   { t = 'interact', same = true, anim = 'repair', secs = 12, npc = false, label = 'Réparer le véhicule' },
               } },
-            { id = 'parts', label = 'Livraison de pièces', desc = 'Livre des pièces détachées à un garage partenaire.', minGrade = 0, reward = { min = 250, max = 500 }, cooldown = 60, timeLimit = 900,
+            { id = 'parts', label = 'Livraison de pièces', desc = 'Livre des pièces détachées à un garage partenaire.', minGrade = 0, reward = { min = 20, max = 40 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Charger les pièces' },
@@ -410,15 +410,15 @@ Config.Missions = {
               } },
         },
         taxi = {
-            { id = 'fare', label = 'Course client', desc = 'Prends un client et dépose-le à sa destination.', minGrade = 0, reward = { min = 200, max = 500 }, cooldown = 45, timeLimit = 900,
+            { id = 'fare', label = 'Course client', desc = 'Prends un client et dépose-le à sa destination.', minGrade = 0, reward = { min = 15, max = 40 }, cooldown = 45, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = { { t = 'pickup_npc', label = 'Va chercher le client' }, { t = 'dropoff_npc', label = 'Dépose le client à destination' } } },
         },
         realestate = {
-            { id = 'visit', label = 'Visite avec un client', desc = 'Retrouve un client et fais-lui visiter un bien.', minGrade = 0, reward = { min = 300, max = 650 }, cooldown = 60, timeLimit = 900,
+            { id = 'visit', label = 'Visite avec un client', desc = 'Retrouve un client et fais-lui visiter un bien.', minGrade = 0, reward = { min = 25, max = 55 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = { { t = 'goto', label = 'Rejoins le client devant le bien' }, { t = 'interact', same = true, anim = 'talk', secs = 12, label = 'Faire visiter le bien' } } },
-            { id = 'signs', label = 'Pose de pancartes', desc = 'Installe des pancartes « à vendre » dans deux quartiers.', minGrade = 0, reward = { min = 200, max = 450 }, cooldown = 60, timeLimit = 1200,
+            { id = 'signs', label = 'Pose de pancartes', desc = 'Installe des pancartes « à vendre » dans deux quartiers.', minGrade = 0, reward = { min = 15, max = 40 }, cooldown = 60, timeLimit = 1200,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'goto', label = 'Rends-toi dans le premier quartier' }, { t = 'interact', same = true, anim = 'work', secs = 6, npc = false, label = 'Poser la pancarte' },
@@ -426,7 +426,7 @@ Config.Missions = {
               } },
         },
         bar = {
-            { id = 'order', label = 'Livraison de commande', desc = 'Prépare une commande et livre-la à un client.', minGrade = 0, reward = { min = 150, max = 350 }, cooldown = 45, timeLimit = 900,
+            { id = 'order', label = 'Livraison de commande', desc = 'Prépare une commande et livre-la à un client.', minGrade = 0, reward = { min = 10, max = 30 }, cooldown = 45, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 6, npc = false, label = 'Préparer la commande' },
@@ -434,13 +434,13 @@ Config.Missions = {
               } },
         },
         government = {
-            { id = 'inspection', label = 'Inspection de terrain', desc = 'Inspecte deux sites de la ville pour le compte du gouvernement.', minGrade = 0, reward = { min = 400, max = 800 }, cooldown = 90, timeLimit = 1500,
+            { id = 'inspection', label = 'Inspection de terrain', desc = 'Inspecte deux sites de la ville pour le compte du gouvernement.', minGrade = 0, reward = { min = 35, max = 65 }, cooldown = 90, timeLimit = 1500,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'goto', label = 'Rends-toi sur le premier site' }, { t = 'interact', same = true, anim = 'inspect', secs = 8, npc = false, label = 'Inspecter le site' },
                   { t = 'goto', label = 'Rends-toi sur le second site' }, { t = 'interact', same = true, anim = 'inspect', secs = 8, npc = false, label = 'Inspecter le site' },
               } },
-            { id = 'documents', label = 'Remise de documents officiels', desc = 'Remets un dossier officiel à un représentant.', minGrade = 0, reward = { min = 300, max = 600 }, cooldown = 60, timeLimit = 900,
+            { id = 'documents', label = 'Remise de documents officiels', desc = 'Remets un dossier officiel à un représentant.', minGrade = 0, reward = { min = 25, max = 50 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Récupérer le dossier' },
@@ -448,7 +448,7 @@ Config.Missions = {
               } },
         },
         custom = {
-            { id = 'parcel', label = 'Livraison de colis', desc = 'Charge un colis et livre-le à un client.', minGrade = 0, reward = { min = 200, max = 450 }, cooldown = 60, timeLimit = 900,
+            { id = 'parcel', label = 'Livraison de colis', desc = 'Charge un colis et livre-le à un client.', minGrade = 0, reward = { min = 15, max = 40 }, cooldown = 60, timeLimit = 900,
               vehicle = { source = 'models', models = {} }, peds = {},
               steps = {
                   { t = 'interact', where = 'start', anim = 'work', secs = 4, npc = false, label = 'Charger le colis' },
@@ -642,8 +642,8 @@ Config.JobTypes = {
         actions = { 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'armory', 'stash', 'boss', 'shop' },
         grades = {
-            { name = 'recrue', label = 'Recrue', salary = 100 },
-            { name = 'boss',   label = 'Patron', salary = 500 },
+            { name = 'recrue', label = 'Recrue', salary = 60 },
+            { name = 'boss',   label = 'Patron', salary = 150 },
         },
     },
 }

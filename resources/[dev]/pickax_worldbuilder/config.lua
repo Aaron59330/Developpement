@@ -244,7 +244,7 @@ Config.Templates.garage = {
 Config.Templates.impound = {
     impound = {
         label = 'Fourrière', icon = 'truck',
-        settings = { fee = 500, perDay = 100, maxFee = 5000, types = {}, payments = { cash = true, bank = true }, society = '',
+        settings = { fee = 150, perDay = 20, maxFee = 600, types = {}, payments = { cash = true, bank = true }, society = '',
             impoundJobs = { police = 0, sheriff = 0, mechanic = 0 },
             blip = { enabled = true, sprite = 68, color = 47, scale = 0.8, label = 'Fourrière', shortRange = true } },
         points = { { label = 'Fourrière', blip = true, ped = ped('s_m_y_construct_01', 'WORLD_HUMAN_CLIPBOARD'), spawns = {} } },
@@ -258,10 +258,10 @@ Config.Templates.rental = {
         settings = { minutes = 60, refundDamage = true, payments = { cash = true, bank = true }, society = '',
             blip = { enabled = true, sprite = 225, color = 5, scale = 0.8, label = 'Location', shortRange = true },
             fleet = {
-                { model = 'faggio',  label = 'Scooter',        price = 80,  deposit = 150,  minGrade = 0 },
-                { model = 'panto',   label = 'Citadine',       price = 150, deposit = 300,  minGrade = 0 },
-                { model = 'blista',  label = 'Compacte',       price = 220, deposit = 450,  minGrade = 0 },
-                { model = 'sultan',  label = 'Berline sport',  price = 450, deposit = 1000, minGrade = 0 },
+                { model = 'faggio',  label = 'Scooter',        price = 30,  deposit = 100,  minGrade = 0 },
+                { model = 'panto',   label = 'Citadine',       price = 40,  deposit = 150,  minGrade = 0 },
+                { model = 'blista',  label = 'Compacte',       price = 55,  deposit = 200,  minGrade = 0 },
+                { model = 'sultan',  label = 'Berline sport',  price = 150, deposit = 500, minGrade = 0 },
             } },
         points = { { label = 'Agence de location', blip = true, ped = ped('a_m_y_business_02'), spawns = {} } },
     },
@@ -269,7 +269,7 @@ Config.Templates.rental = {
         label = 'Location de bateaux', icon = 'boat',
         settings = { minutes = 60, refundDamage = true, payments = { cash = true, bank = true }, society = '',
             blip = { enabled = true, sprite = 427, color = 5, scale = 0.8, label = 'Location bateaux', shortRange = true },
-            fleet = { { model = 'dinghy', label = 'Zodiac', price = 250, deposit = 500, minGrade = 0 }, { model = 'seashark', label = 'Jet-ski', price = 180, deposit = 400, minGrade = 0 } } },
+            fleet = { { model = 'dinghy', label = 'Zodiac', price = 120, deposit = 300, minGrade = 0 }, { model = 'seashark', label = 'Jet-ski', price = 90, deposit = 250, minGrade = 0 } } },
         points = { { label = 'Location bateaux', blip = true, ped = ped('a_m_y_beach_01'), spawns = {} } },
     },
 }
@@ -278,8 +278,8 @@ Config.Templates.rental = {
 Config.Templates.fuel = {
     station = {
         label = 'Station essence', icon = 'fuel',
-        settings = { price = 3.0, tank = 5000, restockMinutes = 60, restockLiters = 200, payments = { cash = true, bank = true }, society = '',
-            jerrycan = { enabled = true, price = 80, item = 'WEAPON_PETROLCAN' },
+        settings = { price = 2.0, tank = 5000, restockMinutes = 60, restockLiters = 200, payments = { cash = true, bank = true }, society = '',
+            jerrycan = { enabled = true, price = 30, item = 'WEAPON_PETROLCAN' },
             blip = { enabled = true, sprite = 361, color = 1, scale = 0.7, label = 'Station essence', shortRange = true } },
         points = { { label = 'Pompe 1', kind = 'pump', blip = true, ped = noPed }, { label = 'Pompe 2', kind = 'pump', blip = false, ped = noPed } },
     },
@@ -326,7 +326,7 @@ Config.Templates.chase = {
 Config.Templates.carlot = {
     lot = {
         label = 'Parking d\'occasion', icon = 'car',
-        settings = { listingFee = 100, commission = 5, maxListings = 3, durationDays = 7, minPrice = 500, maxPrice = 5000000, showPlate = false, payments = { cash = true, bank = true }, society = '',
+        settings = { listingFee = 20, commission = 5, maxListings = 3, durationDays = 7, minPrice = 500, maxPrice = 5000000, showPlate = false, payments = { cash = true, bank = true }, society = '',
             blip = { enabled = true, sprite = 225, color = 25, scale = 0.8, label = 'Occasion', shortRange = true } },
         points = { { kind = 'lot', label = 'Bureau des annonces', blip = true, ped = ped('a_m_y_business_03', 'WORLD_HUMAN_CLIPBOARD') },
             { kind = 'slot', label = 'Place 1' }, { kind = 'slot', label = 'Place 2' }, { kind = 'slot', label = 'Place 3' }, { kind = 'slot', label = 'Place 4' } },
@@ -359,7 +359,7 @@ Config.Templates.doorlock = {
 Config.Templates.locksmith = {
     shop = {
         label = 'Serrurier', icon = 'key',
-        settings = { price = 250, requireNearby = true, keyItem = '', cooldown = 60, payments = { cash = true, bank = true }, society = '',
+        settings = { price = 80, requireNearby = true, keyItem = '', cooldown = 60, payments = { cash = true, bank = true }, society = '',
             blip = { enabled = true, sprite = 402, color = 5, scale = 0.8, label = 'Serrurier', shortRange = true } },
         points = { { kind = 'shop', label = 'Atelier de serrurier', blip = true, ped = ped('s_m_y_construct_01', 'WORLD_HUMAN_CLIPBOARD') } },
     },
@@ -371,7 +371,7 @@ Config.Templates.carwash = {
         label = 'Station de lavage', icon = 'drop',
         settings = { payments = { cash = true, bank = true }, society = '',
             blip = { enabled = true, sprite = 100, color = 3, scale = 0.8, label = 'Station de lavage', shortRange = true },
-            programs = { { label = 'Lavage rapide', price = 30, seconds = 6 }, { label = 'Lavage complet', price = 60, seconds = 12 }, { label = 'Lavage premium', price = 120, seconds = 20 } } },
+            programs = { { label = 'Lavage rapide', price = 8, seconds = 6 }, { label = 'Lavage complet', price = 15, seconds = 12 }, { label = 'Lavage premium', price = 30, seconds = 20 } } },
         points = { { kind = 'wash', label = 'Baie de lavage 1', blip = true, ped = noPed }, { kind = 'wash', label = 'Baie de lavage 2', blip = false, ped = noPed } },
     },
 }
@@ -387,7 +387,7 @@ Config.Templates.bank = {
     },
     atm = {
         label = 'Distributeurs (ATM)', icon = 'card',
-        settings = { depositFee = 0, withdrawFee = 1, transferFee = 2, maxTransaction = 5000, dailyLimit = 10000, atmDeposit = false, society = '',
+        settings = { depositFee = 0, withdrawFee = 1, transferFee = 2, maxTransaction = 500, dailyLimit = 1000, atmDeposit = false, society = '',
             blip = { enabled = true, sprite = 277, color = 2, scale = 0.6, label = 'ATM', shortRange = true } },
         points = { { kind = 'atm', label = 'Distributeur', blip = true, ped = noPed } },
     },
@@ -421,10 +421,10 @@ Config.Templates.driving = {
         settings = { payments = { cash = true, bank = true }, society = '', cooldown = 5,
             blip = { enabled = true, sprite = 225, color = 3, scale = 0.8, label = 'Auto-école', shortRange = true },
             licenses = {
-                license('code', 'Code de la route', '', 200, 0, true, nil),
-                license('drive', 'Permis B (voiture)', 'code', 0, 500, false, 'blista', 80),
-                license('drive_bike', 'Permis moto', 'code', 0, 400, false, 'sanchez', 80),
-                license('drive_truck', 'Permis poids lourd', 'drive', 0, 900, false, 'mule', 70),
+                license('code', 'Code de la route', '', 30, 0, true, nil),
+                license('drive', 'Permis B (voiture)', 'code', 0, 900, false, 'blista', 80),
+                license('drive_bike', 'Permis moto', 'code', 0, 700, false, 'sanchez', 80),
+                license('drive_truck', 'Permis poids lourd', 'drive', 0, 1800, false, 'mule', 70),
             } },
         points = { { kind = 'desk', label = 'Accueil', blip = true, ped = ped('a_f_y_business_01', 'WORLD_HUMAN_CLIPBOARD') },
             { kind = 'spawn', label = 'Départ voiture d\'examen' },

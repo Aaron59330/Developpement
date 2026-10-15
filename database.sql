@@ -4977,11 +4977,11 @@ SET FOREIGN_KEY_CHECKS=0;
 INSERT INTO `jobs` (`name`, `label`, `whitelisted`) VALUES
 ('unemployed', 'Chomeur', '0');
 INSERT INTO `job_grades` (`job_name`, `grade`, `name`, `label`, `salary`, `skin_male`, `skin_female`) VALUES
-('unemployed', '0', 'unemployed', 'RSA', '25', '{}', '{}');
+('unemployed', '0', 'unemployed', 'RSA', '20', '{}', '{}');
 INSERT INTO `jobs2` (`name`, `label`) VALUES
 ('unemployed2', 'Unemployed2');
 INSERT INTO `job2_grades` (`job_name`, `grade`, `name`, `label`, `salary`, `skin_male`, `skin_female`) VALUES
-('unemployed2', '0', 'unemployed2', 'Unemployed2', '200', '{}', '{}');
+('unemployed2', '0', 'unemployed2', 'Unemployed2', '0', '{}', '{}');
 INSERT INTO `licenses` (`type`, `label`) VALUES
 ('code', 'Code de la route'),
 ('drive', 'Permis de conduire'),

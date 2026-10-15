@@ -15,8 +15,8 @@ ConfigLotery = {
         [1] = {x = -558.5, y = -619.05, z = 34.68, a = 200.89}
     },
 
-    Price = 100,-- Prix du ticket
-    PriceByTicket = 10000,--montant ajouté pour le gain
+    Price = 5,-- Prix du ticket
+    PriceByTicket = 3,--montant ajouté pour le gain
     Text = "Merci pour votre achat, bonne chance à vous.",
     Text2 = "Un nouveau ticket à été acheter à la loterie, le gains de la cagnotte s'élève à ~g~%s$~s~",
     ShowHelp = "Appuyez sur ~INPUT_PICKUP~ pour ouvrir la Loterie."

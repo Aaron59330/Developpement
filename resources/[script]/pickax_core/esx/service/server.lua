@@ -95,7 +95,8 @@ function startPayCheck(source, name, society)
 				local job     = xPlayer.job.grade_name
 				local salary  = xPlayer.job.grade_salary
 
-				if salary > 0 and society ~= nil then
+				-- es_extended verse déjà le salaire (Config.PaycheckInterval) : pas de seconde paie en service (économie réaliste, pas de double salaire)
+				if Config.ServicePayCheck == true and salary > 0 and society ~= nil then
 					TriggerEvent('esx_addonaccount:getSharedAccount', society, function (account)
 						if account.money >= salary then					
 							xPlayer.addAccountMoney('bank', salary)

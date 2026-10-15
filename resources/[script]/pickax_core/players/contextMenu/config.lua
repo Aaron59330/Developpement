@@ -176,8 +176,8 @@ ConfigContextMenu = {
         VenteArgent = "black_money",--type d'argent a la vente
         BlipsRemoveAfter = 20000,--remove apres 20 secondes
         DrugsList = {
-            ["weed"] = {Item = "weed_pooch", Count = 2, ItemName = "weed", prix = 250, callback = "ContextMenu:HasDrogue", menu = "Vendre de la weed", vente = "~r~Vous êtes en train de vendre ~b~de la weed", error = "~r~Action Impossible~s~ : Vous devez avoir de la ~b~weed~s~ pour faire ceci !"},
-            ["coke"] = {Item = "coke_pooch", Count = 2, ItemName = "coke", prix = 250, callback = "ContextMenu:HasDrogue1", menu = "Vendre de la coke", vente = "~r~Vous êtes en train de vendre ~b~de la coke", error = "~r~Action Impossible~s~ : Vous devez avoir de la ~b~coke~s~ pour faire ceci !"},
+            ["weed"] = {Item = "weed_pooch", Count = 2, ItemName = "weed", prix = 60, callback = "ContextMenu:HasDrogue", menu = "Vendre de la weed", vente = "~r~Vous êtes en train de vendre ~b~de la weed", error = "~r~Action Impossible~s~ : Vous devez avoir de la ~b~weed~s~ pour faire ceci !"},
+            ["coke"] = {Item = "coke_pooch", Count = 2, ItemName = "coke", prix = 160, callback = "ContextMenu:HasDrogue1", menu = "Vendre de la coke", vente = "~r~Vous êtes en train de vendre ~b~de la coke", error = "~r~Action Impossible~s~ : Vous devez avoir de la ~b~coke~s~ pour faire ceci !"},
         },
         DrugsListCallback = {
             {Item = "weed_pooch", Count = 2, callback = "ContextMenu:HasDrogue"},
