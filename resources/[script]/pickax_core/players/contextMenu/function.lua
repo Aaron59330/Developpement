@@ -748,7 +748,7 @@ function _Moi()
                     },
                     {
                         "Ouvrir la tablette de gang", true, function()
-                            if GetResourceState('pickax_gangbuilder') ~= 'started' then
+                            if GetResourceState('pickax_core') ~= 'started' then
                                 ESX.ShowNotification("~r~La tablette n'est pas démarrée.")
                                 return
                             end

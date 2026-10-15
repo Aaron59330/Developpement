@@ -97,8 +97,8 @@ local function NotifySetRadius(v)
 end
 local HudCfg = { hud = true, server = true, job = true, money = true, radius = 6, scale = 100 }
 local function HudCall(name, ...)
-	if GetResourceState('pickax_hud2') ~= 'started' then return nil end
-	return exports['pickax_hud2'][name](exports['pickax_hud2'], ...)
+	if GetResourceState('pickax_core') ~= 'started' then return nil end
+	return exports['pickax_core'][name](exports['pickax_core'], ...)
 end
 local function HudRefresh()
 	local c = HudCall('GetSettings')
