@@ -143,9 +143,9 @@ body {
     position: absolute;
     left: 0; right: 0; top: 0;
     height: 2px;
-    background: #4c6ef5;
+    background: #00a4ff;
 }
-.staff-bar .sb-tag { color: #4c6ef5; font-weight: 700; font-size: 13.5px; letter-spacing: 0.03em; }
+.staff-bar .sb-tag { color: #00a4ff; font-weight: 700; font-size: 13.5px; letter-spacing: 0.03em; }
 .staff-bar b { color: #fff; font-weight: 700; font-size: 16.5px; margin-right: 5px; }
 .staff-bar .sb-sep { width: 1px; height: 18px; margin: 0 17px; background: rgba(255, 255, 255, 0.2); }
 .staff-bar .sb-flag { font-weight: 600; }
