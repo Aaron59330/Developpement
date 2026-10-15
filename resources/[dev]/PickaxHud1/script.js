@@ -5,18 +5,6 @@ window.addEventListener("message", (event) => {
         if (container) container.style.display = event.data.value === true ? "none" : "";
         return;
     }
-    // Thème envoyé par le panel web (position, espacement, fond)
-    if (event.data.action === "setTheme") {
-        const t = event.data.theme || {};
-        const container = document.querySelector(".hud-container");
-        if (container) {
-            container.style.bottom = t.bottom != null ? t.bottom + "px" : "";
-            container.style.left = t.left != null ? t.left + "px" : "";
-            container.style.gap = t.gap != null ? t.gap + "px" : "";
-        }
-        document.querySelectorAll(".hud-element").forEach((el) => { el.style.background = t.bg || ""; });
-        return;
-    }
     if (event.data.action === "updateHud") {
         const { hunger, thirst } = event.data;
 

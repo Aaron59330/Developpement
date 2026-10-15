@@ -18,23 +18,6 @@ local STATUS_MAX = 1000000
 local STATUS_UPDATE_INTERVAL = 500
 local HIDE_DEFAULT_HUD = true
 local FRAMEWORK_RESOURCE = 'es_extended'
-
--- Réglages du panel web (ressource pickax_panel, facultative) : position / fond des jauges, masquage du HUD GTA, rafraîchissement
-local BASE_HIDE, BASE_INTERVAL = HIDE_DEFAULT_HUD, STATUS_UPDATE_INTERVAL
-local function applyPanel()
-    if GetResourceState('pickax_panel') ~= 'started' then return end
-    local ok, o = pcall(function() return exports.pickax_panel:Get('hud1') end)
-    if not ok or type(o) ~= 'table' then return end
-    if type(o.hideDefault) == 'boolean' then HIDE_DEFAULT_HUD = o.hideDefault else HIDE_DEFAULT_HUD = BASE_HIDE end
-    STATUS_UPDATE_INTERVAL = tonumber(o.interval) or BASE_INTERVAL
-    SendNUIMessage({ action = 'setTheme', theme = { bottom = o.bottom, left = o.left, gap = o.gap, bg = o.bg } })
-end
-
-AddEventHandler('pickax_panel:changed', applyPanel)
-CreateThread(function()
-    Wait(1500) applyPanel()
-    Wait(5000) applyPanel()
-end)
 local uiFaded = false
 local lastHudSend = 0
 local isShowingHiding = false
