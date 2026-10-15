@@ -48,6 +48,13 @@ local function announce(msg)
     for _, s in ipairs(allMembers()) do GB.notify(s, msg) end
 end
 
+-- Résumé de la mission colis pour la tablette
+function GB.objectiveInfo()
+    if not O then return { active = false, nextIn = math.max(0, nextAuto - os.time()), auto = Config.Objectives.AutoStart } end
+    return { active = true, label = O.label, x = O.zone.x, y = O.zone.y, radius = O.radius, phase = O.phase, reward = O.reward,
+        holdLeft = O.holdLeft, holdTotal = O.holdTotal, endsAt = O.endsAt, now = os.time(), carried = O.carrier ~= nil, carrierGang = O.carrierGang and label(O.carrierGang) or nil }
+end
+
 -- ─────────────────────────────── Envoi de l'état aux clients ───────────────────────────────
 -- throttle : le porteur reçoit l'état chaque seconde, les autres seulement toutes les RevealInterval secondes
 local function pushState(throttle)
@@ -123,6 +130,8 @@ local function deliver(src, g)
         return dropCarrier('~r~Votre gang n\'existe plus : livraison impossible.')
     end
     GB.addRep(g.name, C.RewardRep)
+    if GB.questProgress then GB.questProgress(g.name, 'objective', 1) end
+    if GB.news then GB.news(('%s a livré le colis « %s » à son coffre.'):format(label(g.name), O.label), 'objective') end
     GB.log(g.name, ESX.GetPlayerFromId(src), 'objective_delivered', ('%s : %d$'):format(O.label, reward))
     stop(('~g~%s~s~ a livré le colis ~b~%s~s~ à son coffre (~g~+%d$~s~).'):format(label(g.name), O.label, reward))
 end

@@ -207,7 +207,7 @@ local function cleanGang(payload)
     local settings = type(g.settings) == 'table' and g.settings or {}
     local actions = {}
     for _, a in ipairs(type(settings.actions) == 'table' and settings.actions or {}) do
-        if Config.Actions[a] and a ~= 'info' and a ~= 'leave' then actions[#actions + 1] = a end
+        if Config.Actions[a] and a ~= 'info' and a ~= 'leave' and a ~= 'tablet' then actions[#actions + 1] = a end
     end
 
     local points = {}

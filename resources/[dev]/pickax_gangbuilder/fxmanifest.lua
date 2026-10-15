@@ -20,6 +20,7 @@ server_scripts {
     'server/territories.lua',
     'server/conflicts.lua',
     'server/objectives.lua',
+    'server/tablet.lua',
     'server/settings.lua',
 }
 
@@ -39,6 +40,8 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
+    'html/tablet.js',
+    'html/tablet.css',
     'html/bb-ui.js',
 }
 

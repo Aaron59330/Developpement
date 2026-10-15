@@ -259,6 +259,7 @@ NuiRemote = {
     ['sell:do'] = true, info = true, leave = true,
     openPoint = true,
     ['settings:get'] = true, ['settings:save'] = true, ['settings:reset'] = true,
+    ['tablet:open'] = true, ['tablet:claim'] = true, ['tablet:warPropose'] = true, ['tablet:warRespond'] = true,
     ['terr:list'] = true, ['terr:save'] = true, ['terr:delete'] = true, ['terr:setOwner'] = true,
 }
 
@@ -266,6 +267,30 @@ NuiRemote = {
 NuiLocal = {}
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end
+
+-- Tablette : point GPS vers un territoire / une zone
+NuiLocal.waypoint = function(args, cb)
+    local p = args[1]
+    if p and tonumber(p.x) and tonumber(p.y) then
+        SetNewWaypoint(p.x + 0.0, p.y + 0.0)
+        notify('Point GPS défini.')
+    end
+    cb({ ok = true })
+end
+
+-- Tablette de gang (F7, commande, menu contextuel → Organisation)
+function OpenGangTablet()
+    if not State.gangConfig then return notify('~r~Tu n\'es dans aucun gang.') end
+    ESX.TriggerServerCallback('gangbuilder:tablet:open', function(res)
+        if not res or not res.ok then return notify('~r~' .. ((res and res.error) or 'Tablette indisponible')) end
+        OpenUI({ action = 'open', kind = 'tablet', data = res })
+    end)
+end
+exports('OpenTablet', OpenGangTablet)
+RegisterNetEvent('gangbuilder:client:openTablet', function() if not uiOpen then OpenGangTablet() end end)
+if Config.Tablet and Config.Tablet.Command and Config.Tablet.Command ~= '' then
+    RegisterCommand(Config.Tablet.Command, function() if not uiOpen then OpenGangTablet() end end, false)
+end
 
 -- Retour au panel central (builderhub) : ferme ce builder puis ouvre /builders
 NuiLocal.bbHub = function(_, cb)

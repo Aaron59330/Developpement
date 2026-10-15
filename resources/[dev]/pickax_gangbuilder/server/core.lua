@@ -215,6 +215,7 @@ function GB.stat(identifier, gangName, field, amount)
     if not identifier or amount <= 0 then return end
     local cols = { harvested = true, processed = true, sold = true, laundered = true, contribution = true }
     if not cols[field] then return end
+    if field ~= 'contribution' and GB.questProgress then GB.questProgress(gangName, field, amount) end
     MySQL.update(('INSERT INTO gangbuilder_stats (identifier, gang_name, %s) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE %s = %s + VALUES(%s)'):format(field, field, field, field),
         { identifier, gangName, math.floor(amount) })
 end
@@ -342,8 +343,9 @@ end
 -- Actions du menu F7 : celles cochées dans le builder + fiche du gang (+ quitter si autorisé)
 function GB.menuActions(gang)
     local list = { 'info' }
+    if Config.Tablet and Config.Tablet.Enabled then list[#list + 1] = 'tablet' end
     for _, a in ipairs(gang.settings.actions or {}) do
-        if Config.Actions[a] and a ~= 'info' and a ~= 'leave' then list[#list + 1] = a end
+        if Config.Actions[a] and a ~= 'info' and a ~= 'leave' and a ~= 'tablet' then list[#list + 1] = a end
     end
     if Config.Gang.AllowLeave then list[#list + 1] = 'leave' end
     return list

@@ -255,6 +255,7 @@ Config.Actions = {
     escort   = { label = 'Escorter',              icon = 'fa-people-arrows',   target = true },
     search   = { label = 'Fouiller',              icon = 'fa-magnifying-glass', target = true },
     info     = { label = 'Fiche du gang',         icon = 'fa-skull',           target = false },
+    tablet   = { label = 'Tablette de gang',      icon = 'fa-tablet',          target = false },
     leave    = { label = 'Quitter le gang',       icon = 'fa-door-open',       target = false },
 }
 Config.ActionRules = {
@@ -583,3 +584,37 @@ for _, id in ipairs(Config.CustomSections) do GB_SECTIONS[#GB_SECTIONS + 1] = id
 
 GBDefaults = {}
 for _, id in ipairs(GB_SECTIONS) do GBDefaults[id] = GBGet(id) end
+
+-- ─────────────────────────────── Tablette de gang (F7 → Tablette, contexte → Organisation) ───────────────────────────────
+-- Tableau de bord, territoires, quêtes (journalières / hebdomadaires), guerres entre gangs (défis avec mise), classement, actualités.
+Config.Tablet = {
+    Enabled      = true,
+    Command      = 'gangtablet',     -- commande pour ouvrir la tablette ('' = aucune)
+    NewsMax      = 30,               -- actualités gardées en mémoire (visibles par tous les gangs)
+    -- Quêtes : tirées au sort par gang (même tirage pour tous les membres), progression automatique.
+    -- metric : harvested | processed | sold ($) | laundered ($) | capture | conflict_win | objective | war_win
+    Quests = {
+        DailyCount = 3, WeeklyCount = 2, RewardAccount = 'dirty',
+        Daily = {
+            { id = 'd_harvest', label = 'Approvisionnement',   desc = 'Récolter 60 produits.',          metric = 'harvested', target = 60,    reward = 400,  rep = 4 },
+            { id = 'd_process', label = 'Production',          desc = 'Fabriquer 30 produits.',         metric = 'processed', target = 30,    reward = 500,  rep = 5 },
+            { id = 'd_sell',    label = 'Écouler la marchandise', desc = 'Vendre pour 3 000 $.',        metric = 'sold',      target = 3000,  reward = 600,  rep = 6 },
+            { id = 'd_launder', label = 'Lessive',             desc = 'Blanchir 5 000 $.',              metric = 'laundered', target = 5000,  reward = 500,  rep = 5 },
+            { id = 'd_capture', label = 'Prise de territoire', desc = 'Capturer 1 territoire.',         metric = 'capture',   target = 1,     reward = 900,  rep = 12 },
+            { id = 'd_win',     label = 'Garder la rue',       desc = 'Gagner 1 affrontement de zone.', metric = 'conflict_win', target = 1,  reward = 800,  rep = 10 },
+        },
+        Weekly = {
+            { id = 'w_capture', label = 'Expansion',           desc = 'Capturer 3 territoires.',        metric = 'capture',   target = 3,     reward = 4000, rep = 40 },
+            { id = 'w_object',  label = 'Colis livrés',        desc = 'Livrer 2 colis à votre coffre.', metric = 'objective', target = 2,     reward = 5000, rep = 45 },
+            { id = 'w_sell',    label = 'Gros trafic',         desc = 'Vendre pour 25 000 $.',          metric = 'sold',      target = 25000, reward = 5500, rep = 40 },
+            { id = 'w_war',     label = 'Guerre gagnée',       desc = 'Gagner 1 guerre contre un gang.', metric = 'war_win',  target = 1,     reward = 6000, rep = 60 },
+            { id = 'w_win',     label = 'Maîtres du quartier', desc = 'Gagner 3 affrontements de zone.', metric = 'conflict_win', target = 3, reward = 4500, rep = 40 },
+        },
+    },
+    -- Guerres entre gangs : un gang du bureau défie un autre ; chacun mise de l'argent sale ; premier à N kills (ou le plus de kills au bout du temps).
+    Wars = {
+        Enabled = true, Targets = { 10, 15, 25 }, Durations = { 20, 40, 60 },      -- kills à atteindre / durée (min)
+        MaxStake = 50000, ProposalSeconds = 300, Cooldown = 30,                    -- mise max ($ sale), validité de la proposition (s), délai avant de se rebattre contre le même gang (min)
+        RepWin = 60, RepLoss = 15, MaxKillDistance = 250.0,
+    },
+}

@@ -129,7 +129,7 @@ local function cleanGangTypes(v)
             actions = {}, points = {}, grades = {},
         }
         for _, a in ipairs(type(t.actions) == 'table' and t.actions or {}) do
-            if Config.Actions[a] and a ~= 'info' and a ~= 'leave' then entry.actions[#entry.actions + 1] = a end
+            if Config.Actions[a] and a ~= 'info' and a ~= 'leave' and a ~= 'tablet' then entry.actions[#entry.actions + 1] = a end
         end
         for _, p in ipairs(type(t.points) == 'table' and t.points or {}) do
             if Config.PointTypes[p] and not Config.PointTypes[p].hidden then entry.points[#entry.points + 1] = p end

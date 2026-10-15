@@ -112,6 +112,8 @@ local function resolve(c)
             GB.captureTerritory(t, c.intruder)
         end
     end
+    if GB.questProgress and (intruderWins and si or so) > 0 then GB.questProgress(winner, 'conflict_win', 1) end
+    if GB.news and (intruderWins and si or so) > 0 then GB.news(('%s l\'emporte contre %s à %s (%d - %d).'):format(label(winner), label(loser), name, intruderWins and si or so, intruderWins and so or si), 'conflict') end
     if (intruderWins and si or so) > 0 then GB.addRep(winner, C.RepWin) end   -- pas de réputation sur un 0-0 (anti-farm)
     removeRep(loser, C.RepLoss)
     GB.log(winner, nil, 'conflict_win', ('%s : %d - %d contre %s'):format(name, intruderWins and si or so, intruderWins and so or si, loser))

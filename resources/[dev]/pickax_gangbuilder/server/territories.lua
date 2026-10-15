@@ -67,6 +67,8 @@ local function capture(t, gangName)
     t.last_income = now
     MySQL.update('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = ?, last_income = ? WHERE id = ?', { gangName, now, t.protected_until, now, t.id })
     GB.addRep(gangName, Config.Rep.PerCapture)
+    if GB.questProgress then GB.questProgress(gangName, 'capture', 1) end
+    if GB.news then GB.news(('%s a capturé %s%s.'):format(GB.Gangs[gangName].label, t.label, previous and GB.Gangs[previous] and (' à ' .. GB.Gangs[previous].label) or ''), 'territory') end
     GB.log(gangName, nil, 'territory_captured', ('%s%s'):format(t.label, previous and (' (pris à ' .. previous .. ')') or ''))
     if T.AnnounceCapture then
         notifyGang(gangName, ('~g~%s~s~ est à vous !'):format(t.label))
@@ -76,6 +78,7 @@ local function capture(t, gangName)
 end
 
 GB.captureTerritory = capture
+function GB.territoryStatus(id) return state[id] end
 
 -- ─────────────────────────────── Calcul de la capture ───────────────────────────────
 local function tick()

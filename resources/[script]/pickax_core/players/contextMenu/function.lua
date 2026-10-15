@@ -699,7 +699,8 @@ function _Moi()
                 DoubleSubLabel = "nothing",
                 TripleSub = false,
                 TripleSubLabel = "nothing",
-                Condition = ESX.PlayerData.job2 and ESX.PlayerData.job2.grade_name == 'boss' and ESX.PlayerData.job2.name ~= "unemployed2",
+                Condition = ESX.PlayerData.job2 and ESX.PlayerData.job2.name ~= "unemployed2" and ESX.PlayerData.job2.name ~= "unemployed",
+
                 Action = {
                     {
                         ESX.PlayerData.job2.label.." à ~r~"..societymoney2.."$~s~ dans l'Organisation", function()
@@ -746,15 +747,15 @@ function _Moi()
                         end
                     },
                     {
-                        "Ouvrir la tablette", function()
-                            local started = GetResourceState('pickax_gangtablette') == 'started' or GetResourceState('pickax_gang') == 'started'
-                            if not started then
+                        "Ouvrir la tablette de gang", true, function()
+                            if GetResourceState('pickax_gangbuilder') ~= 'started' then
                                 ESX.ShowNotification("~r~La tablette n'est pas démarrée.")
                                 return
                             end
+                            ESXCustomFonctionContextMenu:CloseMenu()
                             CreateThread(function()
                                 Wait(300)
-                                TriggerEvent('pickax_gangtablette:open')
+                                TriggerEvent('gangbuilder:client:openTablet')
                             end)
                         end
                     }

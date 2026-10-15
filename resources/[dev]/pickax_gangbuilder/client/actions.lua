@@ -27,6 +27,10 @@ function RunAction(id)
             OpenUI({ action = 'open', kind = 'info', data = res })
         end)
     end
+    if id == 'tablet' then
+        CloseUI()
+        return SetTimeout(150, function() OpenGangTablet() end)
+    end
     if id == 'leave' then
         local gc = GetGangConfig()
         return OpenUI({ action = 'open', kind = 'leave', data = { gangLabel = gc and gc.label or '' } })

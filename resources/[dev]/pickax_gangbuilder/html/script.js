@@ -302,7 +302,7 @@ document.addEventListener('change', e => { if (Mod && Mod.onInput) Mod.onInput(e
 
 window.addEventListener('message', e => {
   const d = e.data;
-  if (d.action === 'close') { $root.classList.add('hidden'); $root.innerHTML = ''; Placement.hide(); return; }
+  if (d.action === 'close') { $root.classList.add('hidden'); $root.innerHTML = ''; if (typeof Tablet !== 'undefined') Tablet.stop(); Placement.hide(); return; }
   if (d.action === 'placementSave') return Placement.save(d.coords);
   if (d.action === 'placementNav') return Placement.nav(d.dir);
   if (d.action === 'placementEnd') return Placement.end();
@@ -320,8 +320,10 @@ window.addEventListener('message', e => {
   window.__lastOpen = now;
   if ($root.classList.contains('hidden')) { $root.innerHTML = ''; $root.classList.add('fresh'); setTimeout(() => $root.classList.remove('fresh'), 260); }
   $root.classList.remove('hidden', 'corner');
+  if (d.kind !== 'tablet' && typeof Tablet !== 'undefined') Tablet.stop();
   Placement.hide();
-  if (d.kind === 'builder') { Mod = Builder; Builder.open(); }
+  if (d.kind === 'tablet') { Mod = Tablet; Tablet.open(d.data); }
+  else if (d.kind === 'builder') { Mod = Builder; Builder.open(); }
   else { Mod = Runtime; Runtime.open(d.kind, d.data, d.pointId); }
 });
 
@@ -477,7 +479,7 @@ const Builder = {
           ${num('gang.settings.sell_cut', `Part des ventes pour le gang (% ; -1 = défaut : ${d.sellCut})`, s.sell_cut ?? -1, 'min="-1" max="100"')}</div>
         <p class="hint mt">Les salaires ne sont versés que si <b>Paramètres → Salaires</b> est activé.</p></div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('list', 16)} Actions du menu gang (F7)</div></div>
-        <div style="display:flex;flex-direction:column;gap:13px">${Object.entries(acts).filter(([id]) => id !== 'info' && id !== 'leave').map(([id, a]) => `<label class="chk"><input type="checkbox" data-a="toggleAction" data-v="${id}" ${s.actions.includes(id) ? 'checked' : ''}> ${esc(a.label)}</label>`).join('')}</div>
+        <div style="display:flex;flex-direction:column;gap:13px">${Object.entries(acts).filter(([id]) => id !== 'info' && id !== 'leave' && id !== 'tablet').map(([id, a]) => `<label class="chk"><input type="checkbox" data-a="toggleAction" data-v="${id}" ${s.actions.includes(id) ? 'checked' : ''}> ${esc(a.label)}</label>`).join('')}</div>
         <p class="hint mt"><b>Fiche du gang</b> (infos, membres en ligne, territoires) et <b>Quitter le gang</b> sont toujours proposées. Fouille / escorte : voir <b>Paramètres → Gangs</b> (cible menottée ou non).</p></div>
       <div class="card"><div class="card-h"><div class="t">${ic('lock', 16)} Base de données</div></div><p class="hint">À l'enregistrement, le gang est écrit dans <b>${esc('jobs2')}</b> et <b>${esc('job2_grades')}</b> (les membres sont rattachés via <b>users.job2 / users.job2_grade</b>) et dans les tables <b>gangbuilder_*</b> (trésorerie, points, journal). Aucun job existant n'est touché : un nom déjà pris dans <b>jobs</b>, <b>jobs2</b> ou un autre système de gangs est refusé.</p></div></div>`;
   },
@@ -842,7 +844,7 @@ Object.assign(Builder, {
     const S = this.S, types = S.draft.gangTypes, keys = Object.keys(types).sort();
     if (!S.gt || !types[S.gt]) S.gt = keys[0];
     const k = S.gt, t = types[k], b = `S.draft.gangTypes.${k}`;
-    const actions = Object.entries(this.catalog.actions).filter(([id]) => id !== 'info' && id !== 'leave');
+    const actions = Object.entries(this.catalog.actions).filter(([id]) => id !== 'info' && id !== 'leave' && id !== 'tablet');
     const pts = Object.entries(this.catalog.pointTypes).filter(([, p]) => !p.hidden);
     return `<p class="hint" style="margin-bottom:14px">Les modèles proposés à la création d'un gang : couleur, blip, grades, actions et points suggérés. Modifier un modèle n'altère pas les gangs déjà créés.</p>
       <div class="pts"><div>${keys.map(x => `<div class="pt ${x === k ? 'active' : ''}" data-a="gtSel" data-v="${esc(x)}"><span class="swatch" style="background:${esc(types[x].color)}"></span><div style="flex:1;min-width:0"><b>${esc(types[x].label)}</b><small>${esc(x)} · ${types[x].grades.length} grades</small></div></div>`).join('')}
