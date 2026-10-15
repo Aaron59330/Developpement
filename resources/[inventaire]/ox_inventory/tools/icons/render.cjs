@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('/opt/node-tools/node_modules/playwright');
 const { Ctx } = require('./lib.cjs');
 const I = require('./icons.cjs');
 const fs = require('fs');

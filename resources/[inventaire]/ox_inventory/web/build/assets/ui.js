@@ -119,12 +119,21 @@
   // objet sans image : image par défaut (même style) plutôt qu'une croix
   const noImg = () => `${state.imagepath}/_default.png`;
 
+  const pendingData = new Set();
+  let renderQueued = false;
+  function queueRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => { renderQueued = false; renderAll(); });   // un seul rendu pour toutes les données reçues
+  }
   async function ensureItemData(name) {
-    if (!name || state.itemData[name]) return;
+    if (!name || state.itemData[name] || pendingData.has(name)) return;
+    pendingData.add(name);
     try {
       const d = await nui('getItemData', name);
-      if (d && d.name) { state.itemData[name] = d; renderAll(); }
+      if (d && d.name) { state.itemData[name] = d; queueRender(); }
     } catch (e) { /* ignore */ }
+    finally { pendingData.delete(name); }
   }
 
   /* =====================================================================
@@ -330,8 +339,10 @@
   app.querySelectorAll('[data-ui-btn]').forEach(b => b.addEventListener('click', () => nui('uiButton', { id: b.dataset.uiBtn })));
 
   /* ---------- échelle ---------- */
+  let curScale = 1;
   function rescale() {
     const s = Math.min(window.innerWidth / 1590, window.innerHeight / 868);
+    curScale = s;
     document.documentElement.style.setProperty('--scale', String(s));
     return s;
   }
@@ -387,7 +398,7 @@
   function createSlotEl() {
     const el = document.createElement('div');
     el.className = 'slot';
-    el.innerHTML = '<img class="ghost-icon" alt=""><img class="pic" alt=""><div class="count"></div><div class="num"></div><div class="price"></div><div class="label"></div><div class="rar"></div><div class="dur"><i></i></div>';
+    el.innerHTML = '<img class="ghost-icon" alt="" decoding="async"><img class="pic" alt="" decoding="async"><div class="count"></div><div class="num"></div><div class="price"></div><div class="label"></div><div class="rar"></div><div class="dur"><i></i></div>';
     el._pic = el.querySelector('img.pic');
     el._ghost = el.querySelector('img.ghost-icon');
     el._count = el.querySelector('.count');
@@ -597,8 +608,10 @@
   function buildItems(inv) {
     const now = nowSec();
     const list = Array.isArray(inv.items) ? inv.items : Object.values(inv.items || {});
+    const bySlot = new Map();
+    for (const c of list) if (c) bySlot.set(c.slot, c);
     const out = Array.from({ length: inv.slots }, (_, i) => {
-      const found = list.find(c => c && c.slot === i + 1) || { slot: i + 1 };
+      const found = bySlot.get(i + 1) || { slot: i + 1 };
       if (found.name) {
         if (!state.itemData[found.name]) ensureItemData(found.name);
         found.durability = durability(found.metadata, now);
@@ -853,10 +866,11 @@
     ui.ghost.style.display = 'none';
     drag.active = drag.pending = false;
     drag.srcEl = drag.overEl = null;
+    drag.lastTarget = undefined;
   }
 
   function moveGhost(x, y) {
-    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+    const s = curScale || 1;
     ui.ghost.style.transform = `translate(${x - 36.5 * s}px, ${y - 36.5 * s}px) scale(${s})`;
   }
 
@@ -873,12 +887,30 @@
     drag.startY = e.clientY;
   });
 
+  let moveEv = null, moveRaf = 0;
+  function onMove() {
+    moveRaf = 0;
+    const e = moveEv;
+    if (!e) return;
+    if (!drag.active) return;
+    moveGhost(e.clientX, e.clientY);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const target = under && under.closest ? under.closest('.slot') : null;
+    if (target === drag.lastTarget) return;     // même case qu'à l'image précédente : rien à recalculer
+    drag.lastTarget = target;
+    const valid = target && target._side !== undefined && target !== drag.srcEl && !(target._side === 'right' && ['shop', 'crafting'].includes(state.right.type)) && !(target._outfit && (!drag.info.item || drag.info.item.name !== state.options.outfititem || drag.info.inventory !== 'player'));
+    if (drag.overEl && drag.overEl !== target) drag.overEl.classList.remove('over');
+    drag.overEl = valid ? target : null;
+    if (valid) target.classList.add('over');
+  }
+
   window.addEventListener('mousemove', e => {
-    if (!drag.pending && !drag.active) return;
+    mouse = { x: e.clientX, y: e.clientY };
     if (drag.pending && !drag.active) {
       if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) < 5) return;
       drag.pending = false;
       drag.active = true;
+      drag.lastTarget = undefined;
       const info = slotInfo(drag.srcEl);
       drag.info = info;
       drag.srcEl.classList.add('dragging');
@@ -889,19 +921,14 @@
       ui.ghost.style.top = '0';
       hideTooltip();
     }
-    if (!drag.active) return;
-    moveGhost(e.clientX, e.clientY);
-    const under = document.elementFromPoint(e.clientX, e.clientY);
-    const target = under && under.closest ? under.closest('.slot') : null;
-    const valid = target && target._side !== undefined && target !== drag.srcEl && !(target._side === 'right' && ['shop', 'crafting'].includes(state.right.type)) && !(target._outfit && (!drag.info.item || drag.info.item.name !== state.options.outfititem || drag.info.inventory !== 'player'));
-    if (drag.overEl && drag.overEl !== target) drag.overEl.classList.remove('over');
-    drag.overEl = valid ? target : null;
-    if (valid) target.classList.add('over');
+    if (drag.active) { moveEv = e; if (!moveRaf) moveRaf = requestAnimationFrame(onMove); return; }
+    if (ui.tooltip.style.display === 'block' && !moveRaf) { moveRaf = requestAnimationFrame(() => { moveRaf = 0; if (ui.tooltip.style.display === 'block') placeTooltip(); }); }
   });
 
   window.addEventListener('mouseup', e => {
     if (drag.pending && !drag.active) { drag.pending = false; drag.srcEl = null; return; }
     if (!drag.active) return;
+    if (moveRaf) { cancelAnimationFrame(moveRaf); onMove(); }   // dernière position de la souris prise en compte avant le dépôt
     const info = drag.info;
     const over = drag.overEl;
     cancelDrag();
@@ -966,7 +993,6 @@
     const el = e.target.closest('.slot');
     if (el && !el.contains(e.relatedTarget)) { clearTimeout(tipTimer); hideTooltip(); }
   });
-  window.addEventListener('mousemove', e => { mouse = { x: e.clientX, y: e.clientY }; if (ui.tooltip.style.display === 'block') placeTooltip(); });
 
   function placeTooltip() {
     const t = ui.tooltip;

@@ -47,6 +47,7 @@ files {
     'web/build/assets/*.png',
     'web/build/assets/*.svg',
     'web/build/assets/*.webp',
+    'web/build/fonts/*.woff2',
     'web/*.svg',
     'web/build/*.svg',
     'web/images/*.png',
