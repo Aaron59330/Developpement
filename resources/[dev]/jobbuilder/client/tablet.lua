@@ -46,7 +46,8 @@ local function announcesHidden() return GetResourceKvpInt('jobbuilder_hide_annou
 RegisterNetEvent('jobbuilder:client:jobAnnounce', function(a)
     if announcesHidden() then return end
     SendNUIMessage({ action = 'announce', title = a.title, text = a.text, author = a.author, jobLabel = a.jobLabel, kindLabel = a.kindLabel, color = a.color, duration = a.duration })
-    PlaySoundFrontend(-1, 'Event_Message_Purple', 'GTAO_FM_Events_Soundset', true)
+    if GetResourceState('pickax_ui') == 'started' then exports['pickax_ui']:Sound('announce')   -- carillon motion design
+    else PlaySoundFrontend(-1, 'Event_Message_Purple', 'GTAO_FM_Events_Soundset', true) end
 end)
 
 RegisterCommand(Config.Announce.ToggleCommand, function()

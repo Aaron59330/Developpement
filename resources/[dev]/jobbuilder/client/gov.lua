@@ -11,5 +11,6 @@ end
 -- Annonce officielle : bandeau en haut de l'écran (sans prendre le focus)
 RegisterNetEvent('jobbuilder:client:announce', function(a)
     SendNUIMessage({ action = 'announce', title = a.title, text = a.text, author = a.author })
-    PlaySoundFrontend(-1, 'Event_Message_Purple', 'GTAO_FM_Events_Soundset', true)
+    if GetResourceState('pickax_ui') == 'started' then exports['pickax_ui']:Sound('announce')   -- carillon motion design
+    else PlaySoundFrontend(-1, 'Event_Message_Purple', 'GTAO_FM_Events_Soundset', true) end
 end)

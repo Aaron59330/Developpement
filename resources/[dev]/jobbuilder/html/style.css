@@ -193,9 +193,26 @@ input[type=color]::-webkit-color-swatch-wrapper { padding: 0; } input[type=color
 kbd { display: inline-block; min-width: 24px; text-align: center; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--surface-2); font: inherit; font-size: 11px; font-weight: 600; margin-right: 6px; color: #fff; }
 
 /* ── Annonce gouvernementale ── */
-#announce { position: fixed; top: 26px; left: 50%; transform: translateX(-50%); width: min(720px, 92vw); z-index: 95; background: rgba(22, 23, 28, .96); border: 1px solid var(--line-2); border-radius: 16px; padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 24px 70px rgba(0, 0, 0, .65); animation: pop .25s; }
-#announce .tile { flex-shrink: 0; }
-#announce b { display: block; font-size: 15px; margin-bottom: 4px; } #announce p { color: var(--text-2); line-height: 1.5; font-size: 14px; } #announce small { color: var(--muted); font-size: 11px; display: block; margin-top: 8px; }
+#announce { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: min(660px, 92vw); z-index: 95; display: flex; gap: 18px; align-items: center; padding: 20px 24px 22px; overflow: hidden; background: rgba(22, 23, 28, .94); border: 1px solid var(--line-2); border-radius: 18px; box-shadow: 0 26px 70px rgba(0, 0, 0, .6), 0 0 0 1px rgba(var(--accent-rgb), .1), 0 0 40px rgba(var(--accent-rgb), .12); }
+#announce.in { animation: anIn .5s cubic-bezier(.2, .9, .3, 1.08) both; }
+#announce.out { animation: anOut .38s ease-in both; }
+@keyframes anIn { from { opacity: 0; transform: translate(-50%, -28px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+@keyframes anOut { to { opacity: 0; transform: translate(-50%, -22px) scale(.97); } }
+#announce .an-line { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent) 20%, var(--accent) 80%, transparent); }
+#announce .an-ico { width: 58px; height: 58px; flex-shrink: 0; display: grid; place-items: center; border-radius: 16px; color: var(--accent); background: linear-gradient(145deg, rgba(var(--accent-rgb), .24), rgba(var(--accent-rgb), .07)); border: 1px solid rgba(var(--accent-rgb), .5); box-shadow: 0 0 26px rgba(var(--accent-rgb), .28); animation: anPulse 2.2s ease-in-out infinite; }
+#announce .an-ico svg { width: 26px; height: 26px; }
+@keyframes anPulse { 50% { box-shadow: 0 0 36px rgba(var(--accent-rgb), .5); } }
+#announce .an-body { min-width: 0; flex: 1; }
+#announce .an-top { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; flex-wrap: wrap; }
+#announce .an-org { font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); }
+#announce .an-kind { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(var(--accent-rgb), .45); color: var(--accent); background: rgba(var(--accent-rgb), .14); }
+#announce h3 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; margin-bottom: 4px; color: var(--text); }
+#announce p { color: var(--text-2); line-height: 1.55; font-size: 14.5px; overflow-wrap: anywhere; }
+#announce .an-foot { display: flex; align-items: center; gap: 9px; margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--muted); }
+#announce .an-av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; background: var(--accent); }
+#announce .an-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .06); }
+#announce .an-bar i { display: block; height: 100%; width: 100%; background: var(--accent); box-shadow: 0 0 10px var(--accent); transform-origin: left; animation: anCount linear forwards; }
+@keyframes anCount { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 textarea { font: inherit; letter-spacing: inherit; color: var(--text); background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; outline: none; resize: vertical; min-height: 96px; user-select: text; }
 textarea:focus { border-color: rgba(255, 255, 255, .45); }
 .cat-row { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
@@ -206,7 +223,7 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 
 /* ═════════════ Thème accent (couleur modifiable en jeu : Paramètres → Apparence) ═════════════ */
 :root {
-  --accent-rgb: 239, 68, 68;
+  --accent-rgb: 0, 164, 255;
   --accent: rgb(var(--accent-rgb));
   --accent-soft: rgba(var(--accent-rgb), .12);
   --accent-line: rgba(var(--accent-rgb), .5);

@@ -31,6 +31,8 @@
     open:    function (m) { tone(330, 0.12, 'sine', 0.09, 0, 520, m); tone(660, 0.16, 'sine', 0.08, 0.09, 0, m); },
     close:   function (m) { tone(620, 0.1, 'sine', 0.08, 0, 330, m); },
     success: function (m) { tone(660, 0.1, 'triangle', 0.1, 0, 0, m); tone(990, 0.18, 'triangle', 0.09, 0.09, 0, m); },
+    // annonce de serveur / d'entreprise : carillon doux en trois notes
+    announce:     function (m) { tone(659, 0.16, 'sine', 0.1, 0, 0, m); tone(880, 0.16, 'sine', 0.1, 0.13, 0, m); tone(1318, 0.42, 'sine', 0.09, 0.26, 0, m); tone(1976, 0.3, 'sine', 0.025, 0.28, 0, m); },
     // ── Sons du staff (chacun reconnaissable) ──
     // nouveau report : alerte montante en 3 notes + petite pulsation grave
     report:       function (m) { tone(740, 0.09, 'triangle', 0.11, 0, 0, m); tone(988, 0.09, 'triangle', 0.11, 0.1, 0, m); tone(1318, 0.2, 'triangle', 0.1, 0.2, 0, m); tone(220, 0.28, 'sine', 0.08, 0.18, 165, m); },

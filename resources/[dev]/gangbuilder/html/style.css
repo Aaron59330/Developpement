@@ -206,7 +206,7 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 
 /* ═════════════ Thème accent (couleur modifiable en jeu : Paramètres → Apparence) ═════════════ */
 :root {
-  --accent-rgb: 239, 68, 68;
+  --accent-rgb: 0, 164, 255;
   --accent: rgb(var(--accent-rgb));
   --accent-soft: rgba(var(--accent-rgb), .12);
   --accent-line: rgba(var(--accent-rgb), .5);

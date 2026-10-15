@@ -205,12 +205,29 @@ function showDeath(d) {
 function showAnnounce(a) {
   const el = document.getElementById('announce');
   const col = Array.isArray(a.color) ? a.color.join(',') : '';
-  const head = a.jobLabel ? `${esc(a.jobLabel)}${a.kindLabel ? ' — ' + esc(a.kindLabel) : ''}` : `${esc(a.title)} — Annonce officielle`;
-  el.innerHTML = `<div class="tile lg" ${col ? `style="color:rgb(${col});border-color:rgba(${col},.5);background:rgba(${col},.12)"` : ''}>${ic('megaphone')}</div><div><b>${head}</b><p>${a.jobLabel ? `<strong>${esc(a.title)}</strong> — ` : ''}${esc(a.text)}</p><small>${esc(a.author)}</small></div>`;
-  el.style.borderColor = col ? `rgba(${col},.6)` : '';
-  el.classList.remove('hidden');
-  clearTimeout(showAnnounce.t);
-  showAnnounce.t = setTimeout(() => el.classList.add('hidden'), (a.duration || 12) * 1000);
+  const official = !a.jobLabel;                                   // annonce du gouvernement : pas de métier / type
+  const org = official ? a.title : a.jobLabel;
+  const kind = official ? 'Annonce officielle' : (a.kindLabel || 'Annonce');
+  const chipStyle = col ? ` style="color:rgb(${col});background:rgba(${col},.14);border-color:rgba(${col},.45)"` : '';
+  const dur = Math.max(3, a.duration || 12);
+  const initial = (String(a.author || '?').trim()[0] || '?').toUpperCase();
+  el.innerHTML = `<div class="an-line"></div>
+    <div class="an-ico">${ic('megaphone', 26)}</div>
+    <div class="an-body">
+      <div class="an-top"><span class="an-org">${esc(org)}</span><span class="an-kind"${chipStyle}>${esc(kind)}</span></div>
+      ${official ? '' : `<h3>${esc(a.title)}</h3>`}
+      <p>${esc(a.text)}</p>
+      <div class="an-foot"><span class="an-av">${esc(initial)}</span><span>${esc(a.author)}</span></div>
+    </div>
+    <div class="an-bar"><i style="animation-duration:${dur}s"></i></div>`;
+  el.classList.remove('hidden', 'out');
+  void el.offsetWidth;                                            // relance l'animation d'entrée
+  el.classList.add('in');
+  clearTimeout(showAnnounce.t); clearTimeout(showAnnounce.t2);
+  showAnnounce.t = setTimeout(() => {
+    el.classList.remove('in'); el.classList.add('out');
+    showAnnounce.t2 = setTimeout(() => el.classList.add('hidden'), 380);
+  }, dur * 1000);
 }
 
 /* ════════════════════════════ Mode placement ════════════════════════════ */
