@@ -18,7 +18,7 @@ local function currentAccent()
     return own or (Config.UI and Config.UI.Accent)
 end
 
--- Menu F6 / F7 : le joueur peut continuer à marcher (le clavier reste au jeu, la souris sert au menu).
+-- Menu F6 / F7 : le joueur peut continuer à marcher (le clavier reste au jeu) ; la caméra ne bouge pas, la souris ne sert qu'au menu.
 -- Échap / Retour ferment le menu (le NUI ne reçoit plus le clavier) ; pas de tir ni de visée tant que le menu est ouvert.
 local walkMenu = false
 local function setWalkMenu(on)
@@ -30,7 +30,8 @@ local function setWalkMenu(on)
     CreateThread(function()
         while walkMenu and uiOpen do
             Wait(0)
-            for _, c in ipairs({ 24, 25, 257, 140, 141, 142, 263, 264, 200, 199 }) do DisableControlAction(0, c, true) end
+            -- tir / visée / pause + caméra à la souris (1-6, 106, 270-273) : la souris ne sert qu'au menu
+            for _, c in ipairs({ 24, 25, 257, 140, 141, 142, 263, 264, 200, 199, 1, 2, 3, 4, 5, 6, 106, 270, 271, 272, 273 }) do DisableControlAction(0, c, true) end
             if IsDisabledControlJustReleased(0, 200) or IsControlJustReleased(0, 177) then CloseUI() end
         end
     end)
