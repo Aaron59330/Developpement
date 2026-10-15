@@ -47,6 +47,12 @@ if Config.AfterRebootDeleteLandKey then
 	end)
 end
 
+ESX.RegisterServerCallback('CorePickax:isPlateTaken', function(source, cb, plate)
+	MySQL.Async.fetchScalar('SELECT 1 FROM owned_vehicles WHERE plate = @plate LIMIT 1', {['@plate'] = plate}, function(r)
+		cb(r ~= nil)
+	end)
+end)
+
 ESX.RegisterServerCallback('CorePickax:getVehiclesnokey', function(source, cb)
 	local _source = source
 	local xPlayer = ESX.GetPlayerFromId(_source)

@@ -1,3 +1,26 @@
+-- Plaque unique « ABC 123 » (vérifiée côté serveur dans owned_vehicles). Doit être appelée depuis un thread.
+local PLATE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+local function randomPlate()
+	local p = ''
+	for _ = 1, 3 do
+		local i = math.random(1, #PLATE_LETTERS)
+		p = p .. PLATE_LETTERS:sub(i, i)
+	end
+	return p .. ' ' .. string.format('%03d', math.random(0, 999))
+end
+
+function GeneratePlate()
+	math.randomseed(GetGameTimer() + GetPlayerServerId(PlayerId()))
+	local plate
+	for _ = 1, 25 do
+		plate = randomPlate()
+		local p = promise.new()
+		ESX.TriggerServerCallback('CorePickax:isPlateTaken', function(taken) p:resolve(taken) end, plate)
+		if not Citizen.Await(p) then return plate end
+	end
+	return plate
+end
+
 if ConfigVehicle.Bikerick == true then
 	Citizen.CreateThread(function()
 		while true do

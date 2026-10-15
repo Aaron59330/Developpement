@@ -1828,17 +1828,23 @@ end)
 local voituregive = {}
 
 function give_vehi(veh)
-    local plyCoords = GetEntityCoords(GetPlayerPed(-1), false)
-    
+    local ped = PlayerPedId()
+    local plyCoords = GetEntityCoords(ped, false)
+
     Citizen.Wait(10)
-    ESX.Game.SpawnVehicle(veh, {x = plyCoords.x+2 ,y = plyCoords.y, z = plyCoords.z+2}, 313.4216, function (vehicle)
-        local plate = GeneratePlate()
-        table.insert(voituregive, vehicle)		
-        local vehicleProps = ESX.Game.GetVehicleProperties(voituregive[#voituregive])
+    ESX.Game.SpawnVehicle(veh, vector3(plyCoords.x, plyCoords.y, plyCoords.z + 0.5), GetEntityHeading(ped), function (vehicle)
+        local plate = GeneratePlate()                       -- plaque unique (vérifiée en base)
+        table.insert(voituregive, vehicle)
+        SetVehicleNumberPlateText(vehicle, plate)
+        local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
         vehicleProps.plate = plate
-        SetVehicleNumberPlateText(voituregive[#voituregive] , plate)
-		TriggerServerEvent('shop:vehicule', vehicleProps, plate)
-	end)
+        SetEntityAsMissionEntity(vehicle, true, true)
+        SetVehicleHasBeenOwnedByPlayer(vehicle, true)
+        TaskWarpPedIntoVehicle(ped, vehicle, -1)
+        TriggerServerEvent('CorePickax:registerkey', plate, 'no', false)   -- la clé du véhicule
+        TriggerServerEvent('shop:vehicule', vehicleProps, plate)           -- propriété (owned_vehicles)
+        ESX.ShowNotification(('Véhicule ajouté à ton garage avec sa clé (plaque ~b~%s~s~).'):format(plate))
+    end)
 end
 
 --Vehicle Max

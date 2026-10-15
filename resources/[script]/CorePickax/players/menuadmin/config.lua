@@ -1052,7 +1052,6 @@ ConfigMenuAdministrationAdmin = {
 					while not HasModelLoaded(ModelName) do
 						Citizen.Wait(0)
 					end
-					TaskWarpPedIntoVehicle(GetPlayerPed(-1), veh, -1)
 					give_vehi(ModelName)
 				else
 					ESX.ShowNotification("Erreur !")
