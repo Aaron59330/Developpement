@@ -3,7 +3,10 @@
 
 // ───────────── Utilitaires ─────────────
 var app = document.getElementById('app');
-var KEY = ''; try { KEY = sessionStorage.getItem('pxkey') || ''; } catch (e) {}
+var KEY = '', SERVER = '';
+var meta = document.querySelector('meta[name=panel-remote]');
+var REMOTE = !!meta && meta.content === 'yes';   // panel lancé en local (serve.py) : il parle à un serveur distant
+try { KEY = sessionStorage.getItem('pxkey') || ''; SERVER = REMOTE ? (localStorage.getItem('pxserver') || '') : ''; } catch (e) {}
 
 function h(tag, attrs) {
   var el = document.createElement(tag);
@@ -58,7 +61,7 @@ function toast(msg, kind) {
 }
 
 function api(path, body) {
-  return fetch('api/' + path, {
+  return fetch((REMOTE ? SERVER + '/pickax_panel/' : '') + 'api/' + path, {
     method: body ? 'POST' : 'GET',
     headers: { 'X-Panel-Key': KEY, 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined
@@ -89,15 +92,20 @@ function dirtyIds(groupId) {
 function renderLogin(msg) {
   var input = h('input', { type: 'password', placeholder: 'Clé du panel', autocomplete: 'off', autofocus: true });
   var err = h('div', { class: 'err', text: msg || '' });
+  var srv = REMOTE ? h('input', { type: 'text', placeholder: 'Adresse du serveur  ex : http://123.45.67.89:30120', value: SERVER, style: 'margin-bottom:10px' }) : null;
   function go() {
     KEY = input.value.trim();
-    load().then(function () { try { sessionStorage.setItem('pxkey', KEY); } catch (e) {} renderApp(); })
-      .catch(function (e) { err.textContent = e.message; });
+    if (REMOTE) {
+      SERVER = srv.value.trim().replace(/\/+$/, '').replace(/\/pickax_panel$/, '');
+      if (!/^https?:\/\/[^\s]+$/.test(SERVER)) { err.textContent = 'Adresse du serveur invalide (http://IP:30120).'; return; }
+    }
+    load().then(function () { try { sessionStorage.setItem('pxkey', KEY); if (REMOTE) localStorage.setItem('pxserver', SERVER); } catch (e) {} renderApp(); })
+      .catch(function (e) { err.textContent = e.message === 'Failed to fetch' ? 'Serveur injoignable (adresse, port 30120 ouvert, ressource pickax_panel démarrée ?)' : e.message; });
   }
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
   app.replaceChildren(h('div', { class: 'login' }, h('div', { class: 'login-card' },
     h('div', { class: 'logo' }, h('i', {}, icon('logo')), 'Pickax Panel'),
-    h('p', { text: 'Saisis la clé définie dans le server.cfg (pickax_panel_key).' }), input,
+    h('p', { text: REMOTE ? 'Saisis l\'adresse de ton serveur et la clé définie dans son server.cfg (pickax_panel_key).' : 'Saisis la clé définie dans le server.cfg (pickax_panel_key).' }), srv, input,
     h('button', { class: 'btn primary', onclick: go, text: 'Se connecter' }), err)));
 }
 
@@ -328,6 +336,6 @@ function renderApp() {
 }
 
 // ───────────── Démarrage ─────────────
-if (KEY) load().then(renderApp).catch(function (e) { renderLogin(e.message); });
+if (KEY && (!REMOTE || SERVER)) load().then(renderApp).catch(function (e) { renderLogin(e.message); });
 else renderLogin();
 })();

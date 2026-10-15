@@ -252,6 +252,8 @@ local STATIC = {
     ['/app.css'] = { 'web/app.css', 'text/css; charset=utf-8' },
 }
 
+local CORS_ORIGIN = GetConvar('pickax_panel_origin', '*')   -- optionnel : restreindre à une origine, ex. http://localhost:8080
+
 local function send(res, code, body, ctype)
     res.writeHead(code, {
         ['Content-Type'] = ctype or 'application/json; charset=utf-8',
@@ -259,6 +261,10 @@ local function send(res, code, body, ctype)
         ['X-Content-Type-Options'] = 'nosniff',
         ['X-Frame-Options'] = 'DENY',
         ['Referrer-Policy'] = 'no-referrer',
+        -- Accès depuis un panel lancé sur un autre PC (localhost) : l'authentification se fait par la clé (en-tête), pas par cookie
+        ['Access-Control-Allow-Origin'] = CORS_ORIGIN,
+        ['Access-Control-Allow-Headers'] = 'X-Panel-Key, Content-Type',
+        ['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS',
         ['Content-Security-Policy'] = "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'",
     })
     res.send(body)
@@ -308,12 +314,13 @@ end
 local function handle(req, res, body)
     local path = req.path or '/'
     local method = req.method
+    if method == 'OPTIONS' then return send(res, 204, '', 'text/plain') end
 
     if STATIC[path] and method == 'GET' then
         local s = STATIC[path]
         local content = LoadResourceFile(RES, s[1])
         if not content then return send(res, 404, 'introuvable', 'text/plain') end
-        if path == '/' or path == '/index.html' then content = content:gsub('{{BASE}}', '/' .. RES .. '/') end
+        if path == '/' or path == '/index.html' then content = content:gsub('{{BASE}}', '/' .. RES .. '/'):gsub('{{REMOTE}}', 'no') end
         return send(res, 200, content, s[2])
     end
 

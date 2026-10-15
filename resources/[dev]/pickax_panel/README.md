@@ -13,6 +13,10 @@ La ressource est lancée par `ensure [dev]` (déjà présent dans `resources.cfg
 Ouvrir ensuite : `http://IP_DU_SERVEUR:30120/pickax_panel/` puis saisir la clé.
 (Le panel utilise le port du serveur de jeu, aucun autre port à ouvrir. Pour du HTTPS, le placer derrière un reverse proxy.)
 
+## Utiliser le panel depuis ton PC (serveur sur un VPS)
+
+Voir `panel-local/README.md` à la racine du dépôt : `lancer-panel.bat` ouvre http://localhost:8080, tu saisis `http://IP_DU_VPS:30120` + la clé ; tout est écrit sur le VPS (fichiers + base). Option : `set pickax_panel_origin "http://localhost:8080"` dans le server.cfg du VPS pour n'accepter que ce panel.
+
 ## Comment ça marche
 
 * Le panel **lit directement tes fichiers existants** (`CorePickax/config.lua`, `pickax_notify/config.lua`, `PickaxLoading/style.css`, `PickaxHud2/html/css/css.css`...). Aucun script n'est à modifier.
