@@ -72,8 +72,8 @@ body {
     border-radius: 9px;
 }
 .hh-fill {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--hh-color) 78%, #fff) 0%, var(--hh-color) 45%, color-mix(in srgb, var(--hh-color) 70%, #000) 100%);
-    box-shadow: 0 0 8px var(--hh-color);
+    background: var(--hh-color);                 /* couleur unie : compatible avec le navigateur intégré du jeu */
+    box-shadow: 0 0 8px var(--hh-color), inset 0 5px 6px rgba(255, 255, 255, 0.28);
     transition: width 0.22s ease-out, background 0.4s ease, box-shadow 0.4s ease;
 }
 /* traînée blanche : montre les dégâts qui viennent d'être pris, elle rattrape la vie lentement */
