@@ -1344,6 +1344,7 @@ RegisterNetEvent("Admin:takingReport", function(id)
 	if ESX.GetPlayerFromId(source).getGroup() ~= "user" then
 		if ConfigMenuAdministrationAdmin.staffList[getLicense(source)] or ESX.GetPlayerFromId(source).getGroup() ~= "user" then
 			TriggerClientEvent(Config.Trigger.TriggerNotification, id, ConfigMenuAdmin.Notification["ReportTaking"])
+			TriggerClientEvent('menuadmin:sound', id, 'reportTaken')   -- le joueur entend que son report est pris en charge
 			local xPlayers = ESX.GetPlayers()
 			for i = 1, #xPlayers, 1 do
 				if ESX.GetPlayerFromId(xPlayers[i]).getGroup() ~= "user" then

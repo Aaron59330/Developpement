@@ -31,6 +31,16 @@
     open:    function (m) { tone(330, 0.12, 'sine', 0.09, 0, 520, m); tone(660, 0.16, 'sine', 0.08, 0.09, 0, m); },
     close:   function (m) { tone(620, 0.1, 'sine', 0.08, 0, 330, m); },
     success: function (m) { tone(660, 0.1, 'triangle', 0.1, 0, 0, m); tone(990, 0.18, 'triangle', 0.09, 0.09, 0, m); },
+    // ── Sons du staff (chacun reconnaissable) ──
+    // nouveau report : alerte montante en 3 notes + petite pulsation grave
+    report:       function (m) { tone(740, 0.09, 'triangle', 0.11, 0, 0, m); tone(988, 0.09, 'triangle', 0.11, 0.1, 0, m); tone(1318, 0.2, 'triangle', 0.1, 0.2, 0, m); tone(220, 0.28, 'sine', 0.08, 0.18, 165, m); },
+    // report pris en charge : « ding » cristallin à deux notes
+    reportTaken:  function (m) { tone(1175, 0.16, 'sine', 0.1, 0, 0, m); tone(1568, 0.3, 'sine', 0.09, 0.1, 0, m); tone(2349, 0.22, 'sine', 0.03, 0.1, 0, m); },
+    // report fermé : glissando descendant doux
+    reportClosed: function (m) { tone(880, 0.18, 'sine', 0.09, 0, 523, m); tone(523, 0.22, 'sine', 0.07, 0.14, 392, m); },
+    // mode staff : balayage montant avec scintillement / descendant
+    staffOn:      function (m) { tone(260, 0.22, 'sawtooth', 0.04, 0, 780, m); tone(520, 0.16, 'sine', 0.08, 0.12, 0, m); tone(1040, 0.22, 'sine', 0.07, 0.2, 0, m); tone(1560, 0.2, 'sine', 0.03, 0.26, 0, m); },
+    staffOff:     function (m) { tone(780, 0.2, 'sawtooth', 0.035, 0, 260, m); tone(1040, 0.14, 'sine', 0.07, 0, 0, m); tone(520, 0.22, 'sine', 0.07, 0.12, 0, m); },
     error:   function (m) { tone(210, 0.18, 'square', 0.05, 0, 0, m); tone(170, 0.2, 'square', 0.05, 0.12, 0, m); }
   };
   window.addEventListener('message', function (e) {

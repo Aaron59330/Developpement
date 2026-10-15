@@ -1,4 +1,22 @@
 local staffService = false
+
+-- Sons du staff (motion design, banque de pickax_ui ; sons GTA en secours) : report, reportTaken, reportClosed, staffOn, staffOff
+local STAFF_NATIVE_SOUNDS = {
+    report = {'Beep_Red', 'DLC_HEIST_HACKING_SNAKE_SOUNDS'},
+    reportTaken = {'Menu_Accept', 'Phone_SoundSet_Default'},
+    reportClosed = {'Menu_Back', 'Phone_SoundSet_Default'},
+    staffOn = {'CONFIRM_BEEP', 'HUD_MINI_GAME_SOUNDSET'},
+    staffOff = {'CANCEL', 'HUD_FREEMODE_SOUNDSET'},
+}
+local function StaffSound(name)
+    if GetResourceState('pickax_ui') == 'started' then
+        exports['pickax_ui']:Sound(name)
+    else
+        local s = STAFF_NATIVE_SOUNDS[name]
+        if s then PlaySoundFrontend(-1, s[1], s[2], true) end
+    end
+end
+RegisterNetEvent("menuadmin:sound", function(name) StaffSound(name) end)
 local showStaffHud = true -- affiche / masque le HUD staff (Paramètres perso)
 local NoClip = false
 local ShowName = false
@@ -763,12 +781,14 @@ function MenuStaffOpen()
             end, function()
                 staffService = true
                 TriggerEvent("CorePickax:Staff:OnEnable")
+                StaffSound('staffOn')
                 ESX.ShowAdvancedNotification("Administration", ConfigMenuAdmin.Notification["StatsStaff"], ConfigMenuAdmin.Notification["ModeStaffNotif1"])
                 initializeText()
                 generateStaffOutfit(GetEntityModel(PlayerPedId()))
                 TriggerServerEvent('takeInfo', true)
             end, function()
                 staffService = false
+                StaffSound('staffOff')
                 NoClip = false
                 ShowName = false
                 invisible = false
@@ -2083,10 +2103,12 @@ RegisterNetEvent("CorePickax:Open/CloseReport", function(type, nomdumec, raisond
         if type == 1 then
             if playerGroup[MonID()] ~= nil and playerGroup[MonID()] ~= "user" then
                 ESX.ShowNotification((ConfigMenuAdmin.Notification["NewReport"]):format(nomdumec))
+                StaffSound('report')
             end
         elseif type == 2 then
             if playerGroup[MonID()] ~= nil and playerGroup[MonID()] ~= "user" then
                 ESX.ShowNotification((ConfigMenuAdmin.Notification["CloseReport"]):format(nomdumec))
+                StaffSound('reportClosed')
             end
         end
     end
