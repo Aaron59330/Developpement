@@ -62,12 +62,8 @@ body {
     position: relative;
     height: var(--hh-h);
     border-radius: 9px;
-    background: linear-gradient(180deg, rgba(8, 10, 14, 0.78), rgba(18, 22, 28, 0.7));
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.12);      /* fond de barre clair et transparent : plus de rectangle noir */
     overflow: hidden;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
 }
 .hh-fill, .hh-ghost {
     position: absolute;
@@ -77,12 +73,12 @@ body {
 }
 .hh-fill {
     background: linear-gradient(180deg, color-mix(in srgb, var(--hh-color) 78%, #fff) 0%, var(--hh-color) 45%, color-mix(in srgb, var(--hh-color) 70%, #000) 100%);
-    box-shadow: 0 0 12px var(--hh-color);
+    box-shadow: 0 0 8px var(--hh-color);
     transition: width 0.22s ease-out, background 0.4s ease, box-shadow 0.4s ease;
 }
 /* traînée blanche : montre les dégâts qui viennent d'être pris, elle rattrape la vie lentement */
 .hh-ghost {
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.5);
     transition: width 0.9s ease-out 0.35s;
 }
 /* graduations à 25 / 50 / 75 % */
@@ -90,9 +86,9 @@ body {
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(90deg, transparent calc(25% - 1px), rgba(0, 0, 0, 0.35) calc(25% - 1px), rgba(0, 0, 0, 0.35) 25%, transparent 25%),
-        linear-gradient(90deg, transparent calc(50% - 1px), rgba(0, 0, 0, 0.35) calc(50% - 1px), rgba(0, 0, 0, 0.35) 50%, transparent 50%),
-        linear-gradient(90deg, transparent calc(75% - 1px), rgba(0, 0, 0, 0.35) calc(75% - 1px), rgba(0, 0, 0, 0.35) 75%, transparent 75%);
+        linear-gradient(90deg, transparent calc(25% - 1px), rgba(0, 0, 0, 0.28) calc(25% - 1px), rgba(0, 0, 0, 0.28) 25%, transparent 25%),
+        linear-gradient(90deg, transparent calc(50% - 1px), rgba(0, 0, 0, 0.28) calc(50% - 1px), rgba(0, 0, 0, 0.28) 50%, transparent 50%),
+        linear-gradient(90deg, transparent calc(75% - 1px), rgba(0, 0, 0, 0.28) calc(75% - 1px), rgba(0, 0, 0, 0.28) 75%, transparent 75%);
     pointer-events: none;
 }
 .hh-icon {
@@ -116,8 +112,8 @@ body {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 .hh-bar.low { animation: hhPulse 0.9s ease-in-out infinite; }
-@keyframes hhPulse { 50% { box-shadow: 0 0 16px rgba(255, 60, 60, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08); border-color: rgba(255, 90, 90, 0.85); } }
+@keyframes hhPulse { 50% { box-shadow: 0 0 14px rgba(255, 60, 60, 0.85); } }
 /* armure : fine ligne bleue en haut de la barre */
-.hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(0, 0, 0, 0.4); }
+.hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(255, 255, 255, 0.15); }
 .hh-armor.on { display: block; }
 .hh-armor-fill { height: 100%; width: 100%; background: #4aa8ff; box-shadow: 0 0 6px #4aa8ff; transition: width 0.25s ease; }
