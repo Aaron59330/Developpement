@@ -58,6 +58,7 @@ const getPath = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o :
 
 /* ── Icônes (style trait fin) ── */
 const P = {
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   chevron: '<path d="m9 18 6-6-6-6"/>',
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
@@ -118,7 +119,7 @@ const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
 function applyTheme(rgb) {
@@ -2543,6 +2544,9 @@ const Runtime = {
       case 'boss': return this.renderBoss();
       case 'menu': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: TYPE_ICON[d.type] || 'briefcase', title: d.jobLabel, sub: `Grade : ${d.grade}`, cls: 'corner',
         body: list(d.actions, a => `<div class="item click" data-a="act" data-id="${a.id}">${tile(ACTION_ICON[a.id] || 'grid')}<div class="grow"><b>${esc(a.label)}</b></div><span class="chev">${ic('chevron', 16)}</span></div>`, 'Aucune action.') });
+      case 'leaveJob': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'logout', title: 'Quitter le métier', sub: d.jobLabel, cls: 'corner',
+        body: `<p class="hint">Tu es sûr de vouloir quitter <b>${esc(d.jobLabel)}</b> ? Tu perds ton grade et l'accès aux points, coffres et véhicules du métier.</p>
+        <div class="row"><span class="spacer"></span><button data-a="leaveJobCancel">Annuler</button><button class="danger" data-a="leaveJobConfirm">Quitter le métier</button></div>` });
       case 'invoiceForm': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'file', title: 'Facturer', sub: 'Le joueur le plus proche recevra la facture', cls: 'corner',
         body: `<div class="grid2">${fld('Motif', '<input id="iv-l" maxlength="60" placeholder="Prestation">')}${fld('Montant ($)', '<input id="iv-a" type="number" min="1" placeholder="500">')}</div><button class="primary" data-a="invSend">Envoyer la facture</button>` });
       case 'invoice': if (d.offer) return $root.innerHTML = panel({ icon: 'landmark', title: d.offer.title, sub: d.jobLabel,
@@ -2686,7 +2690,10 @@ const Runtime = {
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile', 'ok');
       case 'take': return ok(await rpc('armory:take', pid, i), 'Objet récupéré');
       case 'buy': return ok(await rpc('shop:buy', pid, i, Number(document.getElementById('q' + i).value)), 'Achat effectué');
+      case 'leaveJobCancel': return this.open('menu', this.menuData);
+      case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':
+        if (el.dataset.id === 'leavejob') { this.kind = 'leaveJob'; this.data = { jobLabel: (this.menuData || {}).jobLabel || '' }; return this.render(); }
         if (el.dataset.id === 'invoice') { this.kind = 'invoiceForm'; return this.render(); }
         if (el.dataset.id === 'tablet') { const r = await rpc('tablet:open'); if (!ok(r)) return; window.JBBackFromMenu = true; window.JBBack = true; Mod = Tablet; return Tablet.open(r); }
         if (el.dataset.id === 'emstablet') { const r = await rpc('emstab:open'); if (!ok(r)) return; window.JBBackFromMenu = true; window.JBBack = true; Mod = Ems; return Ems.open(r); }

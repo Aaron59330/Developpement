@@ -221,7 +221,7 @@ end)
 -- ─────────────────────────────── Menu métier ───────────────────────────────
 local function openJobMenu()
     local jc = State.jobConfig
-    if not jc or #(jc.actions or {}) == 0 then
+    if not jc then
         JBNotify('~r~Aucune action disponible pour ton métier.')
         return
     end
@@ -229,6 +229,11 @@ local function openJobMenu()
     for _, id in ipairs(jc.actions) do
         local a = Config.Actions[id]
         if a then actions[#actions + 1] = { id = id, label = a.label, icon = a.icon, target = a.target } end
+    end
+    if Config.AllowLeave ~= false then actions[#actions + 1] = { id = 'leavejob', label = 'Quitter le métier', icon = 'logout' } end
+    if #actions == 0 then
+        JBNotify('~r~Aucune action disponible pour ton métier.')
+        return
     end
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
@@ -303,7 +308,7 @@ end
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'jobbuilder:<nom>')
 NuiRemote = {
-    list = true, get = true, catalog = true, save = true, delete = true, setMyJob = true,
+    list = true, get = true, catalog = true, save = true, delete = true, setMyJob = true, leaveJob = true,
     ['cloak:wear'] = true, ['armory:take'] = true, ['shop:buy'] = true,
     ['boss:money'] = true, ['boss:recruit'] = true, ['boss:setGrade'] = true, ['boss:fire'] = true, ['boss:salary'] = true,
     openPoint = true,

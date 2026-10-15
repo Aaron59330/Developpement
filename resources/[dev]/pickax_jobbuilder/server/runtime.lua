@@ -530,6 +530,18 @@ local function playersClose(a, b)
     return #(GetEntityCoords(GetPlayerPed(a)) - GetEntityCoords(GetPlayerPed(b))) <= Config.TargetDistance + 2.0
 end
 
+-- Quitter son métier (bouton « Quitter le métier » du menu F6) : retour au job par défaut
+ESX.RegisterServerCallback('jobbuilder:leaveJob', function(src, cb)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return cb(fail('Joueur introuvable')) end
+    if Config.AllowLeave == false then return cb(fail('Quitter son métier est désactivé')) end
+    local job = JB.Jobs[xPlayer.job.name]
+    if not job then return cb(fail('Tu n\'as aucun métier à quitter')) end
+    xPlayer.setJob('unemployed', 0)
+    if JB.log then pcall(JB.log, job.name, xPlayer, 'leave') end
+    cb({ ok = true })
+end)
+
 ESX.RegisterServerCallback('jobbuilder:action', function(src, cb, action, targetId)
     local xPlayer = ESX.GetPlayerFromId(src)
     if not xPlayer or not jobHasAction(xPlayer, action) then return cb(fail('Action non autorisée')) end
