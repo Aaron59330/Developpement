@@ -108,14 +108,14 @@ ButtonContextMenu = {
 ConfigContextMenu = {
     Color = {
         ColorMenu = {22, 23, 28},            -- gris de base (#16171c)
-        ColorMenuHovered = {44, 46, 56},     -- survol : gris plus clair
+        ColorMenuHovered = {0, 164, 255},     -- survol : bleu principal #00a4ff
         ColorText = {255, 255, 255},
         ColorTextDisable = {107, 110, 120},
-        ColorBorder = {255, 255, 255},     -- liseré blanc très discret
-        ColorSeparator = {255, 255, 255},
+        ColorBorder = {0, 164, 255},         -- liseré bleu #00a4ff
+        ColorSeparator = {0, 164, 255},
         ColorAccent = {0, 164, 255},         -- (réservé)
-        BorderAlpha = 26,                    -- opacité du liseré (0-255)
-        SeparatorAlpha = 30                  -- opacité des séparateurs (0-255)
+        BorderAlpha = 190,-- opacité du liseré (0-255)
+        SeparatorAlpha = 90 -- opacité des séparateurs (0-255)
     },
 
     Jobs2 = true,
