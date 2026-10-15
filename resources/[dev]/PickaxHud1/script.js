@@ -27,6 +27,13 @@ window.addEventListener("message", (event) => {
         const hh = document.getElementById("healthHud");
         const fill = document.getElementById("hhFill");
         if (!hh || !fill) return;
+        const ghost = document.getElementById("hhGhost");
+        // la traînée blanche reste à l'ancienne valeur puis rattrape ; elle suit tout de suite quand la vie remonte
+        if (ghost) {
+            const prev = parseFloat(fill.style.width) || 0;
+            if (health >= prev) { ghost.style.transition = "none"; ghost.style.width = health + "%"; void ghost.offsetWidth; ghost.style.transition = ""; }
+            else { ghost.style.width = health + "%"; }
+        }
         fill.style.width = health + "%";
         // vert (100 %) -> jaune -> rouge (0 %)
         fill.parentElement.style.setProperty("--hh-color", "hsl(" + Math.round(health * 1.2) + ", 78%, 50%)");

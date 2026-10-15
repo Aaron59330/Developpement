@@ -30,10 +30,12 @@
 
     <!-- Vie (sous la minimap) -->
     <div class="health-hud" id="healthHud">
-        <div class="hh-armor" id="hhArmor"><div class="hh-armor-fill" id="hhArmorFill"></div></div>
         <div class="hh-bar" id="hhBar">
+            <div class="hh-ghost" id="hhGhost"></div>
             <div class="hh-fill" id="hhFill"></div>
-            <svg class="hh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.6 1 4.6 2.6h2C14 6 15.600 5 17.600 5 21 5 23.100 8.400 21.600 11.800 19.500 16.400 12 21 12 21z" fill="currentColor"/></svg>
+            <div class="hh-ticks"></div>
+            <div class="hh-armor" id="hhArmor"><div class="hh-armor-fill" id="hhArmorFill"></div></div>
+            <svg class="hh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.6 1 4.6 2.6h2C14 6 15.6 5 17.6 5 21 5 23.1 8.4 21.6 11.8 19.5 16.4 12 21 12 21z" fill="currentColor"/></svg>
             <span class="hh-val" id="hhVal">100</span>
         </div>
     </div>

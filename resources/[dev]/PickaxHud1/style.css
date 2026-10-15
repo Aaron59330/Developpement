@@ -51,60 +51,73 @@ body {
 /* ===== Barre de vie sous la minimap ===== */
 .health-hud {
     position: fixed;
-    left: 1.6vw;
-    bottom: 0.9vh;
-    width: 11.8vw;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    --hh-h: 15px;
+    left: 2.8vh;
+    bottom: 0.55vh;
+    width: 24.8vh;
+    --hh-h: 13px;
+    --hh-color: #3ddc84;
 }
 .health-hud.off { display: none; }
 .hh-bar {
     position: relative;
     height: var(--hh-h);
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.62);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background: linear-gradient(180deg, rgba(8, 10, 14, 0.78), rgba(18, 22, 28, 0.7));
+    border: 1px solid rgba(255, 255, 255, 0.16);
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
 }
-.hh-fill {
+.hh-fill, .hh-ghost {
     position: absolute;
     inset: 0 auto 0 0;
     width: 100%;
-    border-radius: 999px;
-    background: var(--hh-color, #3ddc84);
-    box-shadow: 0 0 10px var(--hh-color, #3ddc84);
-    transition: width 0.25s ease, background 0.4s ease, box-shadow 0.4s ease;
+    border-radius: 9px;
+}
+.hh-fill {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--hh-color) 78%, #fff) 0%, var(--hh-color) 45%, color-mix(in srgb, var(--hh-color) 70%, #000) 100%);
+    box-shadow: 0 0 12px var(--hh-color);
+    transition: width 0.22s ease-out, background 0.4s ease, box-shadow 0.4s ease;
+}
+/* traînée blanche : montre les dégâts qui viennent d'être pris, elle rattrape la vie lentement */
+.hh-ghost {
+    background: rgba(255, 255, 255, 0.55);
+    transition: width 0.9s ease-out 0.35s;
+}
+/* graduations à 25 / 50 / 75 % */
+.hh-ticks {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, transparent calc(25% - 1px), rgba(0, 0, 0, 0.35) calc(25% - 1px), rgba(0, 0, 0, 0.35) 25%, transparent 25%),
+        linear-gradient(90deg, transparent calc(50% - 1px), rgba(0, 0, 0, 0.35) calc(50% - 1px), rgba(0, 0, 0, 0.35) 50%, transparent 50%),
+        linear-gradient(90deg, transparent calc(75% - 1px), rgba(0, 0, 0, 0.35) calc(75% - 1px), rgba(0, 0, 0, 0.35) 75%, transparent 75%);
+    pointer-events: none;
 }
 .hh-icon {
     position: absolute;
-    left: 6px;
+    left: 7px;
     top: 50%;
-    width: calc(var(--hh-h) - 5px);
-    height: calc(var(--hh-h) - 5px);
+    width: calc(var(--hh-h) - 3px);
+    height: calc(var(--hh-h) - 3px);
     transform: translateY(-50%);
     color: #fff;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 .hh-val {
     position: absolute;
-    right: 8px;
+    right: 9px;
     top: 50%;
     transform: translateY(-50%);
-    font: 700 calc(var(--hh-h) - 5px) / 1 'Segoe UI', Arial, sans-serif;
+    font: 800 calc(var(--hh-h) - 4px) / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.3px;
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 .hh-bar.low { animation: hhPulse 0.9s ease-in-out infinite; }
-@keyframes hhPulse { 50% { box-shadow: 0 0 14px rgba(255, 60, 60, 0.85); border-color: rgba(255, 90, 90, 0.8); } }
-.hh-armor {
-    height: 5px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.55);
-    overflow: hidden;
-    display: none;
-}
+@keyframes hhPulse { 50% { box-shadow: 0 0 16px rgba(255, 60, 60, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08); border-color: rgba(255, 90, 90, 0.85); } }
+/* armure : fine ligne bleue en haut de la barre */
+.hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(0, 0, 0, 0.4); }
 .hh-armor.on { display: block; }
-.hh-armor-fill { height: 100%; width: 100%; border-radius: 999px; background: #3b9dff; box-shadow: 0 0 8px #3b9dff; transition: width 0.25s ease; }
+.hh-armor-fill { height: 100%; width: 100%; background: #4aa8ff; box-shadow: 0 0 6px #4aa8ff; transition: width 0.25s ease; }
