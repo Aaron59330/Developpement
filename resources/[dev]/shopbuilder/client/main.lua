@@ -9,6 +9,7 @@ local blipHandles, peds, targetZones = {}, {}, {}
 function IsUIOpen() return uiOpen end
 
 local function openUI(payload)
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     payload.theme = Config.UI and Config.UI.Accent
     uiOpen = true
     SetNuiFocus(true, true)
@@ -24,6 +25,14 @@ function CloseUI()
     SendNUIMessage({ action = 'close' })
     TriggerServerEvent('shopbuilder:server:requestSync')
 end
+
+-- Mort : un menu déjà ouvert se ferme
+CreateThread(function()
+    while true do
+        Wait(250)
+        if uiOpen and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then CloseUI() end
+    end
+end)
 
 -- ─────────────────────────────── Blips ───────────────────────────────
 local function rebuildBlips()

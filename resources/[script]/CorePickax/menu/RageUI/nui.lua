@@ -115,8 +115,25 @@ end
 -- Fermeture immédiate : dès qu'un menu est fermé (Retour, Échap, CloseAll…) et qu'aucun autre menu ne prend le relais,
 -- l'affichage NUI disparaît à la frame suivante (au lieu d'attendre le délai de sécurité ci-dessous).
 local closeCheck = false
+
+-- Joueur mort (écran EMS) : aucun menu ne peut s'ouvrir tant qu'il n'est pas réanimé, et ceux déjà ouverts sont fermés
+local function playerIsDead()
+    return IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true
+end
+
+CreateThread(function()
+    while true do
+        Wait(250)
+        if playerIsDead() then
+            if RageUI.CurrentMenu ~= nil then RageUI.CloseAll() end
+            if ESX and ESX.UI and ESX.UI.Menu and ESX.UI.Menu.CloseAll then ESX.UI.Menu.CloseAll() end
+        end
+    end
+end)
+
 local _Visible = RageUI.Visible
 function RageUI.Visible(Menu, Value)
+    if Value == true and playerIsDead() then return false end
     local r = _Visible(Menu, Value)
     if Value == false and shown then closeCheck = true end
     return r

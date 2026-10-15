@@ -7,6 +7,13 @@ local function close()
     SendNUIMessage({ a = 'close' })
 end
 
+CreateThread(function()
+    while true do
+        Wait(250)
+        if open and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then close() end
+    end
+end)
+
 RegisterCommand(Config.Command, function()
     if not open then TriggerServerEvent('builderhub:request') end
 end, false)
@@ -16,6 +23,7 @@ if Config.OpenKey then
 end
 
 RegisterNetEvent('builderhub:open', function(list)
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     open = true
     SetNuiFocus(true, true)
     SendNUIMessage({ a = 'open', list = list })

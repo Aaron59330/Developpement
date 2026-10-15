@@ -79,6 +79,7 @@ function IsUIOpen() return uiOpen end
 
 function OpenPanel(kind, data, ctx)
     if uiOpen then return end
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     Ctx = ctx
     if type(data) == 'table' and kind ~= 'builder' then data.imagePath, data.currency = Config.ImagePath, Config.Currency end
     uiOpen = true
@@ -98,6 +99,14 @@ function CloseUI()
     SendNUIMessage({ action = 'close' })
     TriggerServerEvent('worldbuilder:server:requestSync')
 end
+
+-- Mort : un menu déjà ouvert se ferme
+CreateThread(function()
+    while true do
+        Wait(250)
+        if uiOpen and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then CloseUI() end
+    end
+end)
 
 -- ─────────────────────────────── Barre de progression + animation ───────────────────────────────
 local function animOf(id)

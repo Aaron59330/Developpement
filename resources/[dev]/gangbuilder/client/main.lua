@@ -16,6 +16,7 @@ function GetGangConfig() return State.gangConfig end
 local menuOrigin = nil   -- instant où une action du menu F7 a été choisie : l'écran ouvert juste après propose « Retour »
 
 function OpenUI(payload)
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     if payload.action == 'open' and payload.kind ~= 'menu' and menuOrigin and GetGameTimer() - menuOrigin < 4000 then payload.back = true end
     menuOrigin = nil
     payload.theme = Config.UI and Config.UI.Accent   -- couleur d'accentuation courante
@@ -164,6 +165,14 @@ CreateThread(function()
             end
         end
         Wait(sleep)
+    end
+end)
+
+-- Mort : un menu déjà ouvert se ferme
+CreateThread(function()
+    while true do
+        Wait(250)
+        if uiOpen and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then CloseUI() end
     end
 end)
 
