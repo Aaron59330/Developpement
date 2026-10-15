@@ -313,7 +313,7 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.position = vector2(0, 0)
     
-    self.height = 0.03
+    self.height = 0.032
     self.text = Text(title)
     self.text:SetMoneySegments(title)
     self.rightText = nil
@@ -367,15 +367,10 @@ function Item:Process(cursorPosition)
     if (menuOverlapped) then
         textAlpha = 127
     end
-    if self.hovered and self.enabled and not menuOverlapped then
-        -- barre d'accent bleue à gauche de la ligne survolée
-        local ac = ConfigContextMenu.Color.ColorAccent or { 0, 164, 255 }
-        DrawRect(self.position.x + 0.0035, self.position.y + self.height * 0.5, 0.0022, self.height * 0.62, ac[1], ac[2], ac[3], 255)
-    end
     self.text.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
     self.text:Draw()
     if (self.rightText) then
-        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.004, 0.003)
+        self.rightText.position = self.position + vector2(self.parent.width - self.rightText:GetWidth() - 0.006, 0.0045)
         self.rightText.color = self.enabled and self.colors.text:Alpha(textAlpha) or self.colors.disabledText:Alpha(textAlpha)
         self.rightText:Draw()
     end
@@ -434,9 +429,9 @@ end
 function Item:SetPosition(position)
     self.position = position
     self.background.position = self.position
-    self.text.position = self.position + vector2(0.002, 0.003)
+    self.text.position = self.position + vector2(0.005, 0.0045)
     if (self.rightSprite) then
-        self.rightSprite:SetPosition(position + vector2(0.135, 0.0015))
+        self.rightSprite:SetPosition(position + vector2(0.132, 0.0025))
     end
 end
 function Item:InBounds(position)
@@ -761,20 +756,6 @@ function Menu:Process(cursorPosition)
     end
     if ConfigContextMenu.Color.ColorBorder ~= nil then
         self.border:Draw()
-    end
-    -- en-tête (menu racine uniquement) : pastille bleue avec le type d'objet visé
-    if self.parent == nil and ContextMenuTitle and ConfigContextMenu.Menu.ShowTitle ~= false and self.position.y > 0.045 then
-        local ac = ConfigContextMenu.Color.ColorAccent or { 0, 164, 255 }
-        local h = 0.026
-        local y = self.position.y - h - 0.004
-        self.titleText = self.titleText or Text(ContextMenuTitle)
-        if self.titleText.title ~= ContextMenuTitle then self.titleText = Text(ContextMenuTitle) end
-        self.titleText.scale = vector2(0.3, 0.3)
-        local w = math.max(self.titleText:GetWidth() + 0.016, 0.06)
-        DrawRect(self.position.x + w * 0.5, y + h * 0.5, w, h, ac[1], ac[2], ac[3], 235)
-        self.titleText.color = Colors.White
-        self.titleText.position = vector2(self.position.x + 0.008, y + 0.004)
-        self.titleText:Draw()
     end
 end
 function Menu:SetPosition(position)

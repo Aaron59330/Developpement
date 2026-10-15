@@ -108,14 +108,14 @@ ButtonContextMenu = {
 ConfigContextMenu = {
     Color = {
         ColorMenu = {22, 23, 28},            -- gris de base (#16171c)
-        ColorMenuHovered = {38, 40, 49},     -- survol : gris plus clair + barre bleue
+        ColorMenuHovered = {44, 46, 56},     -- survol : gris plus clair
         ColorText = {255, 255, 255},
         ColorTextDisable = {107, 110, 120},
-        ColorBorder = {0, 164, 255},         -- bleu principal #00a4ff
+        ColorBorder = {255, 255, 255},     -- liseré blanc très discret
         ColorSeparator = {255, 255, 255},
-        ColorAccent = {0, 164, 255},         -- barre de survol + en-tête
-        BorderAlpha = 150,                   -- opacité du liseré (0-255)
-        SeparatorAlpha = 38                  -- opacité des séparateurs (0-255)
+        ColorAccent = {0, 164, 255},         -- (réservé)
+        BorderAlpha = 26,                    -- opacité du liseré (0-255)
+        SeparatorAlpha = 30                  -- opacité des séparateurs (0-255)
     },
 
     Jobs2 = true,
@@ -143,7 +143,6 @@ ConfigContextMenu = {
         OpenMenuBind = 19,--ALT (ouvrir le menu principale)
         ClickInMenu = 24,--Intéraction (clique gauche)
         ColorAlpha = 232,--Alpha du menu
-        ShowTitle = true,-- en-tête bleu au-dessus du menu (Joueur, Véhicule, Moi…)
         RPActions = true,-- ajoute les interactions RP (serrer la main, câlin, pouls…) sur les joueurs et sur soi
     },
 

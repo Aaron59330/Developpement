@@ -1,5 +1,4 @@
 function _Peds()
-    ContextMenuTitle = "PNJ"
     Action_Config = {
         Peds = {
             {
@@ -154,7 +153,6 @@ function _Peds()
 end
 
 function _Object()
-    ContextMenuTitle = "Objet"
     Action_Config = {
         Object = {
             {
@@ -422,7 +420,6 @@ function _Object()
 end
 
 function _MoiMort()
-    ContextMenuTitle = "Blessé"
     Action_Config = {
         MoiMort = {
             {
@@ -440,7 +437,6 @@ function _MoiMort()
 end
 
 function _Moi()
-    ContextMenuTitle = "Moi"
     Action_Config = {
         My = {
             {
@@ -841,7 +837,6 @@ function _Moi()
 end
 
 function _Weather()
-    ContextMenuTitle = "Environnement"
     Action_Config = {
         Weather = {
             {
@@ -996,7 +991,6 @@ function _Weather()
 end
 
 function _AtPose()
-    ContextMenuTitle = "Position"
     Action_Config = {
         AtPose = {
             [1] = {
@@ -1016,7 +1010,6 @@ function _AtPose()
 end
 
 function _Other()
-    ContextMenuTitle = "Interactions"
     Action_Config = {
         Other = {
             {
@@ -1102,7 +1095,6 @@ function _Other()
 end
 
 function _Vehicle()
-    ContextMenuTitle = "Véhicule"
     Action_Config = {
         Vehicle = {
             {
@@ -1501,7 +1493,6 @@ function _Vehicle()
 end
 
 function _Player()
-    ContextMenuTitle = "Joueur"
     Action_Config = {
         Joueur = {
             {
