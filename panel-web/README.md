@@ -28,6 +28,17 @@ Variables optionnelles : `PORT` (3000), `HOST` (0.0.0.0), `DATA_DIR`, `PUBLIC_UR
 
 Le serveur **appelle** le panel toutes les 15 secondes (connexion sortante : aucun port à ouvrir côté jeu, le serveur de jeu peut être sur un VPS et le panel n'importe où, y compris sur ton PC si le VPS peut l'atteindre).
 
+## Panel sur ton PC + serveur de jeu chez un hébergeur (VibeGames…)
+
+Le serveur de jeu doit pouvoir **joindre** le panel. Ton PC est derrière ta box : il faut le rendre accessible avec un **tunnel** gratuit (Cloudflare) :
+
+1. Lance le panel : `lancer-panel.bat`.
+2. Télécharge `cloudflared` pour Windows (https://github.com/cloudflare/cloudflared/releases/latest → `cloudflared-windows-amd64.exe`), renomme-le `cloudflared.exe` et place-le dans le dossier `panel-web`.
+3. Lance `lancer-tunnel.bat` : repère l'adresse `https://xxxx.trycloudflare.com` affichée.
+4. Dans le panel (http://localhost:3000) → Mes serveurs → Ajouter / Régénérer la clé : **remplace l'adresse par celle du tunnel**, copie la ligne dans le `server.cfg`, redémarre le serveur.
+
+Limites : le PC et le tunnel doivent rester allumés (sinon le serveur apparaît « hors ligne », ses réglages déjà appliqués restent en place), et cette adresse **change à chaque lancement du tunnel** : il faut alors régénérer la clé. Pour une adresse fixe : tunnel Cloudflare nommé (nom de domaine) ou ngrok avec domaine statique, puis écris l'adresse dans `public-url.txt` (lue par `lancer-panel.bat`). Solution durable : héberger le panel sur un petit VPS allumé en permanence.
+
 ## Fonctionnement
 
 * À chaque appel, le serveur envoie la liste des réglages de **tes scripts** (lus dans tes fichiers existants : `config.lua`, `style.css`, `index.html`…) avec leur valeur actuelle : le panel s'adapte donc à ta configuration, sans rien modifier dans tes scripts.
