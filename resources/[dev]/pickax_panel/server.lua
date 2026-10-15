@@ -311,9 +311,20 @@ local function authorized(req, res)
     return true
 end
 
+local DEBUG = GetConvar('pickax_panel_debug', '0') == '1'
+local seen = 0
+
 local function handle(req, res, body)
-    local path = req.path or '/'
+    local path = (req.path or '/'):gsub('%?.*$', '')
+    -- selon la version du serveur, le chemin peut contenir le nom de la ressource
+    path = path:gsub('^/' .. RES, '')
+    if path == '' then path = '/' end
     local method = req.method
+    if DEBUG or seen < 5 then
+        seen = seen + 1
+        log(('requête reçue : %s %s depuis %s'):format(tostring(method), tostring(req.path), tostring(req.address)))
+    end
+    if path == '/ping' then return send(res, 200, 'pickax_panel OK', 'text/plain; charset=utf-8') end
     if method == 'OPTIONS' then return send(res, 204, '', 'text/plain') end
 
     if STATIC[path] and method == 'GET' then
@@ -377,7 +388,9 @@ SetHttpHandler(function(req, res)
 end)
 
 if KEY_OK then
-    log(('^2Panel prêt^7 → http://IP_DU_SERVEUR:%s/%s/'):format(GetConvar('netPort', '30120'), RES))
+    local ip = GetConvar('sv_listingIpOverride', '')
+    if ip == '' or ip:find('IP_PUBLIQUE') then ip = 'IP_DU_SERVEUR' end
+    log(('^2Panel prêt^7 → http://%s:%s/%s/   (test de connexion : /%s/ping)'):format(ip, GetConvar('netPort', '30120'), RES, RES))
 else
     log('^1Aucune clé : ajoute dans server.cfg →  set pickax_panel_key "UneCleLongueEtSecrete"  (12 caractères minimum). Le panel reste désactivé.')
 end
