@@ -163,6 +163,7 @@ AddEventHandler("CorePickax:SendServerSideBoutique", function()--Send to client 
             PlayerCacheBoutique2[xPlayer.boutique_id].points = xPlayer.points
         end
     end
+	PlayerCacheBoutique[xPlayer.identifier].Staff = BoutiqueIsAdmin(source) or nil
 	TriggerClientEvent("CorePickax:ReceiveClientSideBoutique", source, PlayerCacheBoutique[xPlayer.identifier])
 end)
 
@@ -423,7 +424,7 @@ end)
 --Commande
 RegisterCommand(ConfigBoutique.Commande.CommandeGiveViaIDIG, function(source, args, raw)
     if source ~= 0 then
-        if ConfigBoutique.PermissionAllowed[ESXCustom_Function_ServerSide:getLicense(source)] then
+        if BoutiqueIsAdmin(source) then
             if args[1] == nil then
                 TriggerClientEvent(Config.Trigger.TriggerNotification, source, ConfigBoutique.Notification["Error"])
                 return
@@ -489,7 +490,7 @@ end, false)
 
 RegisterCommand(ConfigBoutique.Commande.CommandeGiveViaBoutiqueID, function(source, args, raw)
     if source ~= 0 then
-        if ConfigBoutique.PermissionAllowed[ESXCustom_Function_ServerSide:getLicense(source)] then
+        if BoutiqueIsAdmin(source) then
             if args[1] == nil then
                 TriggerClientEvent(Config.Trigger.TriggerNotification, source, ConfigBoutique.Notification["Error"])
                 return
@@ -644,5 +645,141 @@ RegisterNetEvent("CorePickax:Boutique:Remove", function(data)
         else
 			TriggerClientEvent(Config.Trigger.TriggerNotification, source, "~r~Vous ne possédez pas assez de coins nécessaires pour payer ceci.~s~")
         end
+    end)
+end)
+
+-- ============================================================
+-- Administration de la boutique (menu Boutique → Administration)
+-- Accès : licence listée dans ConfigBoutique.PermissionAllowed OU groupe ESX listé dans ConfigBoutique.AdminGroups
+-- ============================================================
+function BoutiqueIsAdmin(src)
+    if not src or src == 0 then return true end
+    local lic = ESXCustom_Function_ServerSide:getLicense(src)
+    if lic and ConfigBoutique.PermissionAllowed[lic] then return true end
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return false end
+    if ConfigBoutique.PermissionAllowed['license:' .. xPlayer.identifier] or ConfigBoutique.PermissionAllowed[xPlayer.identifier] then return true end
+    local group = xPlayer.getGroup()
+    return ConfigBoutique.AdminGroups ~= nil and ConfigBoutique.AdminGroups[group] == true
+end
+
+local function adminMaxAmount() return tonumber(ConfigBoutique.AdminMaxAmount) or 1000000 end
+
+local function onlineByIdentifier()
+    local map = {}
+    for _, xPlayer in pairs(ESX.GetExtendedPlayers()) do map[xPlayer.identifier] = xPlayer end
+    return map
+end
+
+local function formatRows(rows, online)
+    local list = {}
+    for _, r in ipairs(rows or {}) do
+        local xp = online[r.identifier]
+        list[#list + 1] = {
+            identifier = r.identifier,
+            id = xp and xp.source or nil,
+            name = ((r.firstname or '?') .. ' ' .. (r.lastname or '')):gsub('%s+$', ''),
+            boutique_id = r.boutique_id,
+            points = r.points or 0,
+            online = xp ~= nil,
+            last_seen = r.last_seen and tostring(r.last_seen) or nil,
+        }
+    end
+    return list
+end
+
+local ADMIN_COLUMNS = 'identifier, firstname, lastname, boutique_id, points, last_seen'
+
+-- Joueurs en ligne
+ESX.RegisterServerCallback('CorePickax:boutique:admin:online', function(source, cb)
+    if not BoutiqueIsAdmin(source) then return cb({}) end
+    local list = {}
+    for _, xPlayer in pairs(ESX.GetExtendedPlayers()) do
+        local c = PlayerCacheBoutique[xPlayer.identifier]
+        list[#list + 1] = {
+            identifier = xPlayer.identifier, id = xPlayer.source, name = xPlayer.getName(),
+            boutique_id = (c and c.boutique_id) or xPlayer.boutique_id, points = (c and c.points) or 0, online = true,
+        }
+    end
+    table.sort(list, function(a, b) return a.id < b.id end)
+    cb(list)
+end)
+
+-- Recherche (nom, prénom, identifiant, code boutique, ID serveur) : joueurs en ligne ou hors ligne
+ESX.RegisterServerCallback('CorePickax:boutique:admin:search', function(source, cb, query)
+    if not BoutiqueIsAdmin(source) then return cb({}) end
+    query = tostring(query or ''):sub(1, 40)
+    local num = tonumber(query)
+    if #query < 2 and not num then return cb({}) end
+    local like = '%' .. query:gsub('[%%_\\]', '\\%0') .. '%'
+    local online = onlineByIdentifier()
+    MySQL.Async.fetchAll(('SELECT %s FROM users WHERE firstname LIKE @q OR lastname LIKE @q OR CONCAT(firstname, " ", lastname) LIKE @q OR identifier LIKE @q OR boutique_id = @n ORDER BY last_seen DESC LIMIT 30'):format(ADMIN_COLUMNS), {
+        ['@q'] = like, ['@n'] = num or -1,
+    }, function(rows)
+        local list = formatRows(rows, online)
+        if num then   -- ID serveur d'un joueur connecté
+            local xp = ESX.GetPlayerFromId(math.floor(num))
+            if xp then
+                local exists = false
+                for _, p in ipairs(list) do if p.identifier == xp.identifier then exists = true end end
+                if not exists then
+                    local c = PlayerCacheBoutique[xp.identifier]
+                    table.insert(list, 1, { identifier = xp.identifier, id = xp.source, name = xp.getName(), boutique_id = c and c.boutique_id, points = c and c.points or 0, online = true })
+                end
+            end
+        end
+        cb(list)
+    end)
+end)
+
+-- Derniers joueurs vus hors ligne
+ESX.RegisterServerCallback('CorePickax:boutique:admin:recent', function(source, cb)
+    if not BoutiqueIsAdmin(source) then return cb({}) end
+    local online = onlineByIdentifier()
+    MySQL.Async.fetchAll(('SELECT %s FROM users ORDER BY last_seen DESC LIMIT 80'):format(ADMIN_COLUMNS), {}, function(rows)
+        local list = {}
+        for _, p in ipairs(formatRows(rows, online)) do
+            if not p.online then list[#list + 1] = p end
+        end
+        cb(list)
+    end)
+end)
+
+-- Donner (montant > 0) ou retirer (montant < 0) des coins : `target` = identifiant OU ID serveur d'un joueur en ligne
+ESX.RegisterServerCallback('CorePickax:boutique:admin:coins', function(source, cb, target, amount)
+    if not BoutiqueIsAdmin(source) then return cb(false, 'Permission refusée') end
+    amount = math.floor(tonumber(amount) or 0)
+    if amount == 0 or math.abs(amount) > adminMaxAmount() then
+        return cb(false, ('Montant invalide (1 à %s)'):format(adminMaxAmount()))
+    end
+    if amount < 0 and ConfigBoutique.AdminCanRemove == false then return cb(false, 'Le retrait de coins est désactivé') end
+
+    local identifier = target
+    if type(target) == 'number' then
+        local xp = ESX.GetPlayerFromId(target)
+        if not xp then return cb(false, 'Aucun joueur connecté avec cet ID') end
+        identifier = xp.identifier
+    end
+    if type(identifier) ~= 'string' or identifier == '' then return cb(false, 'Joueur introuvable') end
+
+    MySQL.Async.fetchScalar('SELECT points FROM users WHERE identifier = @i', { ['@i'] = identifier }, function(current)
+        if current == nil then return cb(false, 'Joueur introuvable') end
+        local new = math.max(0, current + amount)
+        MySQL.Async.execute('UPDATE users SET points = @p WHERE identifier = @i', { ['@p'] = new, ['@i'] = identifier }, function()
+            local c = PlayerCacheBoutique[identifier]
+            if c then c.points = new end
+            local xp = onlineByIdentifier()[identifier]
+            if xp then
+                if c then TriggerClientEvent('CorePickax:ReceiveClientSideBoutique', xp.source, c) end
+                if amount > 0 then
+                    TriggerClientEvent(Config.Trigger.TriggerNotification, xp.source, (ConfigBoutique.Notification['ReceiveCoins']):format(amount))
+                else
+                    TriggerClientEvent(Config.Trigger.TriggerNotification, xp.source, ('~r~%s coins~s~ ont été retirés de votre solde boutique.'):format(-amount))
+                end
+            end
+            local adminName = (source ~= 0 and ESX.GetPlayerFromId(source)) and ESX.GetPlayerFromId(source).getName() or 'Console'
+            PerformHttpRequest(discord_webhook.url, function() end, 'POST', json.encode({ username = '', content = ('[**%s**] %s : __%s coins__ par **%s** — nouveau solde : __%s__'):format(identifier, amount > 0 and 'a reçu des coins' or 'a perdu des coins', amount, adminName, new) }), { ['Content-Type'] = 'application/json' })
+            cb(true, new)
+        end)
     end)
 end)

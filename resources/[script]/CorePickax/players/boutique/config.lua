@@ -380,6 +380,11 @@ ConfigBoutique = {
         }
     },
     
+    -- Rôles ESX (colonne `group` des joueurs) autorisés à utiliser « Administration » dans le menu boutique
+    AdminGroups = { superadmin = true, _dev = true },
+    AdminMaxAmount = 1000000,   -- maximum de coins par action
+    AdminCanRemove = true,      -- false = les admins ne peuvent que donner des coins
+
     PermissionAllowed = {
         ["license:ebc3a4d7b0de5d708994814df999cfd9c3efa5ad"] = true
     }

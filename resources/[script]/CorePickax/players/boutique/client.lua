@@ -68,6 +68,51 @@ function OpenMenuBoutique()
         local weaponmenu2 = RageUI.CreateSubMenu(store, ConfigBoutique.Menu["Title14"], ConfigBoutique.Menu["SubTitle14"])
         local buyCustommenu = RageUI.CreateSubMenu(store, ConfigBoutique.Menu["Title13"], ConfigBoutique.Menu["SubTitle13"])
         local adminMenu = RageUI.CreateSubMenu(store, ConfigBoutique.Menu["Title16"], ConfigBoutique.Menu["SubTitle16"])
+        local adminOnline = RageUI.CreateSubMenu(adminMenu, ConfigBoutique.Menu["Title16"], "Joueurs en ligne")
+        local adminRecent = RageUI.CreateSubMenu(adminMenu, ConfigBoutique.Menu["Title16"], "Joueurs hors ligne (derniers vus)")
+        local adminResults = RageUI.CreateSubMenu(adminMenu, ConfigBoutique.Menu["Title16"], "Résultats de la recherche")
+        local adminTarget = RageUI.CreateSubMenu(adminMenu, ConfigBoutique.Menu["Title16"], "Joueur")
+
+        -- Administration : listes de joueurs + donner / retirer des coins (contrôles faits côté serveur)
+        local adminList, adminSelected = {}, nil
+
+        local function adminLoad(callbackName, ...)
+            adminList = {}
+            ESX.TriggerServerCallback(callbackName, function(list) adminList = list or {} end, ...)
+        end
+
+        local function adminCoins(sign, target, label)
+            local value = ESXCustom_Function_ClientSide:KeyboardInput((sign > 0 and "Coins à donner à " or "Coins à retirer à ") .. label, 8)
+            local amount = tonumber(value)
+            if not amount or amount < 1 then
+                ESX.ShowNotification("~r~Montant invalide")
+                return
+            end
+            ESX.TriggerServerCallback('CorePickax:boutique:admin:coins', function(ok, result)
+                if ok then
+                    if adminSelected and adminSelected.identifier == target then adminSelected.points = result end
+                    ESX.ShowNotification(("~g~Fait~s~ : %s a maintenant ~b~%s~s~ coins"):format(label, ESX.Math.GroupDigits(result)))
+                else
+                    ESX.ShowNotification("~r~" .. tostring(result))
+                end
+            end, target, math.floor(amount) * sign)
+        end
+
+        local function adminPlayerButtons(parentMenu)
+            if #adminList == 0 then
+                RageUI.Separator("Aucun joueur")
+            end
+            for _, p in ipairs(adminList) do
+                local label = (p.id and ("[" .. p.id .. "] ") or "") .. p.name
+                local desc = ("Code boutique : ~b~%s~s~\nIdentifiant : %s\n%s"):format(tostring(p.boutique_id or "?"), p.identifier, p.online and "~g~En ligne" or ("~r~Hors ligne" .. (p.last_seen and (" · vu " .. p.last_seen) or "")))
+                RageUI.ButtonWithStyle(label, desc, { RightLabel = ESX.Math.GroupDigits(p.points) .. " coins" }, true, function(Hovered, Active, Selected)
+                    if Selected then
+                        adminSelected = p
+                        adminTarget.Parent = parentMenu
+                    end
+                end, adminTarget)
+            end
+        end
 
         weaponmenu2.Closed = function() 
             TriggerEvent('esx:restoreLoadout')
@@ -161,31 +206,55 @@ function OpenMenuBoutique()
             end)
 
             RageUI.IsVisible(adminMenu, true, true, true, function()
+                RageUI.Separator("Joueurs")
+                RageUI.ButtonWithStyle("Joueurs en ligne", "Voir les joueurs connectés, leur solde, et leur donner / retirer des coins", {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
+                    if Selected then adminLoad('CorePickax:boutique:admin:online') end
+                end, adminOnline)
+                RageUI.ButtonWithStyle("Rechercher un joueur", "Par nom, prénom, ID serveur, code boutique ou identifiant (en ligne ou hors ligne)", {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
+                    if Selected then
+                        local q = ESXCustom_Function_ClientSide:KeyboardInput("Nom, ID, code boutique…", 40)
+                        if q ~= nil and q ~= "" then
+                            adminLoad('CorePickax:boutique:admin:search', q)
+                        else
+                            adminList = {}
+                        end
+                    end
+                end, adminResults)
+                RageUI.ButtonWithStyle("Joueurs hors ligne", "Les derniers joueurs vus qui ne sont pas connectés", {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
+                    if Selected then adminLoad('CorePickax:boutique:admin:recent') end
+                end, adminRecent)
+                RageUI.Separator("Par ID de joueur connecté")
                 RageUI.ButtonWithStyle(ConfigBoutique.Menu.Bouton["Bouton_GiveCoins"], ConfigBoutique.Menu.Bouton["Bouton_GiveCoins_Desc"], {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
                     if Selected then
-                        local id = ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Give"], 3)
-
-                        if id ~= nil then
-                            local cbm = ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Amount"], 5)
-
-                            if cbm ~= nil then
-                                ExecuteCommand(ConfigBoutique.Commande.CommandeGiveViaIDIG.." "..id.." "..cbm)
-                            end
-                        end
+                        local id = tonumber(ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Give"], 3))
+                        if id ~= nil then adminCoins(1, id, "le joueur " .. id) end
                     end
                 end)
                 RageUI.ButtonWithStyle(ConfigBoutique.Menu.Bouton["Bouton_RemoveCoins"], ConfigBoutique.Menu.Bouton["Bouton_RemoveCoins_Desc"], {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
                     if Selected then
-                        local id = ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Remove"], 3)
-
-                        if id ~= nil then
-                            local cbm = ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Amount"], 5)
-
-                            if cbm ~= nil then
-                                ExecuteCommand(ConfigBoutique.Commande.CommandeRemoveCoins.." "..id.." "..cbm)
-                            end
-                        end
+                        local id = tonumber(ESXCustom_Function_ClientSide:KeyboardInput(ConfigBoutique.Menu.Keyboard["Remove"], 3))
+                        if id ~= nil then adminCoins(-1, id, "le joueur " .. id) end
                     end
+                end)
+            end)
+
+            RageUI.IsVisible(adminOnline, true, true, true, function() adminPlayerButtons(adminOnline) end)
+            RageUI.IsVisible(adminResults, true, true, true, function() adminPlayerButtons(adminResults) end)
+            RageUI.IsVisible(adminRecent, true, true, true, function() adminPlayerButtons(adminRecent) end)
+
+            RageUI.IsVisible(adminTarget, true, true, true, function()
+                if not adminSelected then
+                    RageUI.Separator("Aucun joueur sélectionné")
+                    return
+                end
+                local p = adminSelected
+                RageUI.Separator(p.name .. (p.online and " ~g~• en ligne" or " ~r~• hors ligne"))
+                RageUI.ButtonWithStyle("Solde actuel", ("Code boutique : ~b~%s~s~\nIdentifiant : %s"):format(tostring(p.boutique_id or "?"), p.identifier), {RightLabel = ESX.Math.GroupDigits(p.points) .. " coins"}, true, function() end)
+                RageUI.ButtonWithStyle("Donner des coins", nil, {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
+                    if Selected then adminCoins(1, p.identifier, p.name) end
+                end)
+                RageUI.ButtonWithStyle("Retirer des coins", nil, {RightLabel = "→→→"}, true, function(Hovered, Active, Selected)
+                    if Selected then adminCoins(-1, p.identifier, p.name) end
                 end)
             end)
 
@@ -1088,7 +1157,7 @@ function OpenMenuBoutique()
                 end
             end)
 
-            if not RageUI.Visible(store) and not RageUI.Visible(caissemenu) and not RageUI.Visible(caissemenu2) and not RageUI.Visible(menuPack) and not RageUI.Visible(entreprisemenu) and not RageUI.Visible(vehiclemenu) and not RageUI.Visible(weaponmenu) and not RageUI.Visible(weaponmenu2) and not RageUI.Visible(buyCustommenu) and not RageUI.Visible(adminMenu) then
+            if not RageUI.Visible(store) and not RageUI.Visible(caissemenu) and not RageUI.Visible(caissemenu2) and not RageUI.Visible(menuPack) and not RageUI.Visible(entreprisemenu) and not RageUI.Visible(vehiclemenu) and not RageUI.Visible(weaponmenu) and not RageUI.Visible(weaponmenu2) and not RageUI.Visible(buyCustommenu) and not RageUI.Visible(adminMenu) and not RageUI.Visible(adminOnline) and not RageUI.Visible(adminRecent) and not RageUI.Visible(adminResults) and not RageUI.Visible(adminTarget) then
                 MenuStore = false
                 if ConfigBoutique.weaponCustom ~= nil and ConfigBoutique.weaponCustom then
                     TriggerEvent('esx:restoreLoadout')
