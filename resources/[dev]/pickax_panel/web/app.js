@@ -44,7 +44,9 @@ var ICONS = {
   queue: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4M15.5 14c3 0 5.5 1.7 5.5 4.6"/>',
   undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
   plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  home: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+  out: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
 };
 function icon(name) { return svg(ICONS[name] || ICONS.menu); }
 function clone(v) { return JSON.parse(JSON.stringify(v)); }
@@ -69,7 +71,7 @@ function api(path, body) {
 }
 
 // ───────────── État ─────────────
-var S = { groups: [], pending: [], vals: {}, base: {}, fields: {}, cur: null, server: '', players: 0 };
+var S = { groups: [], pending: [], vals: {}, base: {}, fields: {}, cur: 'home', q: '', server: '', players: 0 };
 
 function load() {
   return api('state').then(function (st) {
@@ -79,7 +81,7 @@ function load() {
       S.fields[f.id] = f; f.group = g.id;
       if (f.value !== undefined && f.value !== null) { S.vals[f.id] = clone(f.value); S.base[f.id] = clone(f.value); }
     }); });
-    if (!S.cur || !S.groups.some(function (g) { return g.id === S.cur; })) S.cur = S.groups[0].id;
+    if (S.cur !== 'home' && !S.groups.some(function (g) { return g.id === S.cur; })) S.cur = 'home';
   });
 }
 function dirtyIds(groupId) {
@@ -247,19 +249,22 @@ function drawPreview() {
 }
 
 // ───────────── Rafraîchissement ciblé ─────────────
-var rowEls = {}, saveBtns = [];
+var rowEls = {}, dock = null;
 function refresh(id) {
-  var f = S.fields[id], row = rowEls[id];
+  var row = rowEls[id];
   if (row) row.classList.toggle('changed', !same(S.vals[id], S.base[id]));
   drawPreview(); updateBar();
 }
 function updateBar() {
   var n = dirtyIds().length;
-  saveBtns.forEach(function (b) { b.disabled = n === 0; });
-  var c = document.getElementById('dirtyCount'); if (c) c.textContent = n ? n + ' modification' + (n > 1 ? 's' : '') + ' non enregistrée' + (n > 1 ? 's' : '') : 'Tout est enregistré';
-  document.querySelectorAll('.nav').forEach(function (b) {
-    var d = b.querySelector('.dot'); var has = dirtyIds(b.dataset.g).length > 0;
-    if (has && !d) b.appendChild(h('span', { class: 'dot' })); if (!has && d) d.remove();
+  if (dock) {
+    dock.classList.toggle('show', n > 0);
+    dock.querySelector('.cnt').textContent = n + ' modification' + (n > 1 ? 's' : '') + ' non enregistrée' + (n > 1 ? 's' : '');
+  }
+  document.querySelectorAll('.nav[data-g]').forEach(function (b) {
+    var d = dirtyIds(b.dataset.g).length, badge = b.querySelector('.dot');
+    if (d && !badge) { badge = h('span', { class: 'dot' }); b.appendChild(badge); }
+    if (badge) { if (d) badge.textContent = d; else badge.remove(); }
   });
 }
 
@@ -272,6 +277,7 @@ function doSave(apply) {
     return load().then(renderApp);
   }).catch(function (e) { toast(e.message, 'bad'); });
 }
+function doCancel() { load().then(renderApp); }
 function doReset(f) {
   if (!confirm('Restaurer la valeur d\'origine du script pour « ' + f.label + ' » ?')) return;
   api('reset', { ids: [f.id], apply: false }).then(function () { toast('Valeur d\'origine restaurée', 'ok'); return load().then(renderApp); })
@@ -293,45 +299,100 @@ function showLog() {
   }).catch(function (e) { toast(e.message, 'bad'); });
 }
 
-// ───────────── Rendu principal ─────────────
+// ───────────── Rendu ─────────────
+function fieldRow(f, showGroup) {
+  var broken = f.error || S.vals[f.id] === undefined;
+  var lb = h('div', { class: 'lb' }, h('b', { text: f.label }), f.hint ? h('small', { text: f.hint }) : null,
+    h('div', { class: 'tags' }, showGroup ? h('span', { class: 'tag', text: groupOf(f.group).label }) : null,
+      f.modified ? h('span', { class: 'tag ok', text: 'modifié via le panel' }) : null,
+      broken ? h('span', { class: 'tag bad', text: f.error || 'introuvable dans le fichier' }) : null));
+  var ctl = h('div', { class: 'ctl' });
+  if (!broken) {
+    ctl = control(f);
+    if (f.modified) ctl.appendChild(h('button', { class: 'icon-btn', title: 'Restaurer la valeur d\'origine du script', onclick: function () { doReset(f); } }, icon('undo')));
+  }
+  var row = h('div', { class: 'field' + (broken ? ' broken' : '') + (!broken && !same(S.vals[f.id], S.base[f.id]) ? ' changed' : '') }, lb, ctl);
+  rowEls[f.id] = row; return row;
+}
+function groupOf(id) { return S.groups.filter(function (g) { return g.id === id; })[0]; }
+
+function renderHome() {
+  var cards = S.groups.map(function (g) {
+    var mod = g.fields.filter(function (f) { return f.modified; }).length;
+    var ok = g.state === 'started';
+    return h('button', { class: 'tile', onclick: function () { S.cur = g.id; S.q = ''; renderApp(); } },
+      h('div', { class: 'ti' }, icon(g.icon)),
+      h('b', { text: g.label }),
+      h('p', { text: g.desc.split('. ')[0] + '.' }),
+      h('div', { class: 'ft' }, h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? 'démarrée' : g.state),
+        h('span', { class: 'sub', text: g.fields.length + ' réglages' + (mod ? ' · ' + mod + ' modifié' + (mod > 1 ? 's' : '') : '') })));
+  });
+  return h('div', { class: 'home' },
+    h('div', { class: 'hero' }, h('h2', { text: 'Bienvenue sur le panel' }),
+      h('p', { text: 'Choisis une section pour modifier la configuration de ton serveur. Les changements sont écrits dans les fichiers de tes scripts et sauvegardés en base de données.' })),
+    h('div', { class: 'tiles' }, cards));
+}
+
 function renderApp() {
-  rowEls = {}; saveBtns = [];
-  var g = S.groups.filter(function (x) { return x.id === S.cur; })[0];
-  var nav = S.groups.map(function (x) {
-    return h('button', { class: 'nav' + (x.id === S.cur ? ' on' : ''), 'data-g': x.id, onclick: function () { S.cur = x.id; renderApp(); } }, icon(x.icon), x.label);
+  rowEls = {};
+  var q = (S.q || '').trim().toLowerCase();
+  var home = S.cur === 'home' && !q;
+  var g = home ? null : (groupOf(S.cur) || S.groups[0]);
+
+  var navItems = [h('button', { class: 'nav' + (home ? ' on' : ''), onclick: function () { S.cur = 'home'; S.q = ''; renderApp(); } }, icon('home'), 'Accueil')];
+  navItems.push(h('div', { class: 'navlbl', text: 'Configuration' }));
+  S.groups.forEach(function (x) {
+    navItems.push(h('button', { class: 'nav' + (!home && !q && x.id === S.cur ? ' on' : ''), 'data-g': x.id, onclick: function () { S.cur = x.id; S.q = ''; renderApp(); } }, icon(x.icon), x.label));
   });
-  var rows = g.fields.map(function (f) {
-    var broken = f.error || S.vals[f.id] === undefined;
-    var lb = h('div', { class: 'lb' }, h('b', { text: f.label }), f.hint ? h('small', { text: f.hint }) : null,
-      h('div', { class: 'tags' }, f.modified ? h('span', { class: 'tag', text: 'modifié via le panel' }) : null,
-        broken ? h('span', { class: 'tag bad', text: f.error || 'introuvable dans le fichier' }) : null));
-    var ctl = h('div', { class: 'ctl' });
-    if (!broken) {
-      ctl = control(f);
-      if (f.modified) ctl.appendChild(h('button', { class: 'icon-btn', title: 'Restaurer la valeur d\'origine du script', onclick: function () { doReset(f); } }, icon('undo')));
-    }
-    var row = h('div', { class: 'field' + (broken ? ' broken' : '') + (!broken && !same(S.vals[f.id], S.base[f.id]) ? ' changed' : '') }, lb, ctl);
-    rowEls[f.id] = row; return row;
+
+  var main, title, sub, state = null;
+  previewHost = null;
+  if (home) {
+    title = 'Accueil'; sub = S.groups.length + ' sections · ' + S.groups.reduce(function (n, x) { return n + x.fields.length; }, 0) + ' réglages';
+    main = renderHome();
+  } else if (q) {
+    var hits = [];
+    S.groups.forEach(function (x) { x.fields.forEach(function (f) { if ((f.label + ' ' + (f.hint || '') + ' ' + x.label).toLowerCase().indexOf(q) >= 0) hits.push(f); }); });
+    title = 'Recherche'; sub = hits.length + ' résultat' + (hits.length > 1 ? 's' : '') + ' pour « ' + S.q + ' »';
+    main = h('div', { class: 'content one' }, h('div', { class: 'card' }, hits.length ? hits.map(function (f) { return fieldRow(f, true); }) : h('div', { class: 'empty', text: 'Aucun réglage ne correspond.' })));
+  } else {
+    title = g.label; sub = g.resource;
+    var ok = g.state === 'started'; state = h('span', { class: 'chip ' + (ok ? 'ok' : 'bad') }, h('i'), ok ? g.resource + ' démarrée' : g.resource + ' : ' + g.state);
+    var cards = [], cur = null, last = null;
+    g.fields.forEach(function (f) {
+      if (!cur || f.section) {
+        if (f.section || !cur) { last = f.section || null; cur = h('div', { class: 'card sect' }, last ? h('div', { class: 'sh', text: last }) : null); cards.push(cur); }
+      }
+      cur.appendChild(fieldRow(f));
+    });
+    previewHost = h('div', { class: 'stage' });
+    main = h('div', { class: 'content' },
+      h('div', { class: 'col' }, h('p', { class: 'desc', text: g.desc }), cards),
+      h('div', { class: 'preview' }, h('div', { class: 'card' }, h('div', { class: 'hd' }, 'Aperçu', h('small', { text: 'approximatif' })), previewHost)));
+  }
+
+  var search = h('input', { type: 'search', class: 'search', placeholder: 'Rechercher un réglage…', value: S.q || '' });
+  search.addEventListener('input', function () {
+    S.q = search.value; var pos = search.selectionStart; renderApp();
+    var again = document.querySelector('.search'); if (again) { again.focus(); again.setSelectionRange(pos, pos); }
   });
-  var save = h('button', { class: 'btn', onclick: function () { doSave(false); }, text: 'Enregistrer' });
-  var apply = h('button', { class: 'btn primary', onclick: function () { doSave(true); }, text: 'Enregistrer et appliquer' });
-  saveBtns.push(save, apply);
-  var state = g.state === 'started' ? ['ok', g.resource + ' démarrée'] : ['bad', g.resource + ' : ' + g.state];
-  previewHost = h('div', { class: 'stage' });
+
   var pend = S.pending.length ? h('div', { class: 'banner' }, h('span', { text: 'À redémarrer pour appliquer : ' + S.pending.join(', ') }),
     S.pending.map(function (r) { return h('button', { class: 'btn sm', onclick: function () { doRestart(r); }, text: 'Redémarrer ' + r }); })) : null;
 
+  dock = h('div', { class: 'dock' }, h('span', { class: 'cnt' }),
+    h('button', { class: 'btn ghost', onclick: doCancel, text: 'Annuler' }),
+    h('button', { class: 'btn', onclick: function () { doSave(false); }, text: 'Enregistrer' }),
+    h('button', { class: 'btn primary', onclick: function () { doSave(true); }, text: 'Enregistrer et appliquer' }));
+
   app.replaceChildren(h('div', { class: 'shell' },
-    h('aside', { class: 'side' }, h('div', { class: 'logo' }, h('i', {}, icon('logo')), 'Pickax Panel'), nav, h('div', { class: 'grow' }),
-      h('div', { class: 'srv' }, h('b', { text: S.server.replace(/\^\d/g, '') || 'Serveur' }), S.players + ' joueur(s) connecté(s)'),
-      h('button', { class: 'nav', onclick: function () { try { sessionStorage.removeItem('pxkey'); } catch (e) {} KEY = ''; renderLogin(); } }, 'Se déconnecter')),
+    h('aside', { class: 'side' }, h('div', { class: 'logo' }, h('i', {}, icon('logo')), h('span', {}, 'Pickax', h('small', { text: 'Panel de configuration' }))), navItems, h('div', { class: 'grow' }),
+      h('div', { class: 'srv' }, h('i'), h('div', {}, h('b', { text: S.server.replace(/\^\d/g, '') || 'Serveur' }), S.players + ' joueur(s) connecté(s)')),
+      h('button', { class: 'nav', onclick: function () { try { sessionStorage.removeItem('pxkey'); } catch (e) {} KEY = ''; renderLogin(); } }, icon('out'), 'Se déconnecter')),
     h('main', { class: 'main' },
-      h('div', { class: 'top' }, h('div', {}, h('h1', { text: g.label }), h('div', { class: 'sub', id: 'dirtyCount' })), h('span', { class: 'chip ' + state[0] }, h('i'), state[1]),
-        h('div', { class: 'sp' }), h('button', { class: 'btn', onclick: showLog }, icon('clock'), 'Historique'), save, apply),
-      pend,
-      h('div', { class: 'content' },
-        h('div', {}, h('p', { class: 'desc', text: g.desc }), h('div', { class: 'card' }, rows)),
-        h('div', { class: 'preview' }, h('div', { class: 'card' }, h('div', { class: 'hd' }, 'Aperçu', h('small', { text: 'approximatif' })), previewHost))))));
+      h('div', { class: 'top' }, h('div', { class: 'tt' }, h('h1', { text: title }), h('div', { class: 'sub', text: sub })), state,
+        h('div', { class: 'sp' }), search, h('button', { class: 'btn', onclick: showLog }, icon('clock'), 'Historique')),
+      pend, h('div', { class: 'scroll' }, main), dock)));
   drawPreview(); updateBar();
 }
 

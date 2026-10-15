@@ -225,7 +225,7 @@ local function buildState()
             state = GetResourceState(g.resource), fields = {} }
         for _, f in ipairs(g.fields) do
             local o = {
-                id = f.id, label = f.label, hint = f.hint, type = f.type, min = f.min, max = f.max, unit = f.unit,
+                id = f.id, section = f.section, label = f.label, hint = f.hint, type = f.type, min = f.min, max = f.max, unit = f.unit,
                 int = f.int, named = f.named, value = values[f.id], error = status[f.id],
             }
             if f.type == 'rgba' and values[f.id] then o.alpha = #values[f.id] >= 4 end
