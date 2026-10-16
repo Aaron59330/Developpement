@@ -250,3 +250,9 @@ end)
 exports('StaffBar', function(data)
     SendNUIMessage({ action = 'staffBar', data = data })
 end)
+
+
+-- Bandeau « zone safe » : évènement envoyé par pickax_core (players/safezone) quand le joueur entre / sort de la zone
+AddEventHandler('pickax:safezone', function(on)
+    SendNUIMessage({ action = 'safeZone', value = on == true })
+end)

@@ -42,6 +42,11 @@
 
     <!-- Bandeau du HUD staff (haut de l'écran, piloté par le menu admin) -->
     <div class="staff-bar" id="staffBar"></div>
+    <!-- Bandeau « zone safe » (sous le HUD staff ; piloté par pickax_core via l'évènement pickax:safezone) -->
+    <div class="safezone" id="safeZone">
+        <div class="sz-ico"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.6v5.7c0 4.9 3.3 8.7 8 10.2 4.7-1.500 8-5.300 8-10.200V5.600z"/><path d="m8.600 12.200 2.500 2.500 4.600-5"/></svg></div>
+        <div class="sz-txt"><b>ZONE SAFE</b><span>Vous êtes protégé · combat et armes désactivés</span></div>
+    </div>
 
     <script src="script.js"></script>
 </body>

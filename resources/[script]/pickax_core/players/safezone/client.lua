@@ -70,6 +70,14 @@ Citizen.CreateThread(function()
 			end
 		end
 
+		do
+			local show = notifIn and ConfigSafeZone.SeeText and not InAFK or false
+			if show ~= ConfigSafeZone._shown then
+				ConfigSafeZone._shown = show
+				TriggerEvent('pickax:safezone', show)
+			end
+		end
+
 		if notifIn then
 			--NO OPTI FONCTIONNEL !
 			-- for vehicle in ESXCustom.Game.EnumerateVehicles() do
@@ -100,11 +108,7 @@ Citizen.CreateThread(function()
 				end
 			end
 
-			if ConfigSafeZone.SeeText then
-				if not InAFK then
-					RageUI.Text({message = "~g~Vous êtes protéger par la zone safe~s~", time_display = 1})
-				end
-			end
+			-- affichage « zone safe » : bandeau NUI sous le HUD staff (pickax_hud1), piloté par l'évènement ci-dessous
 		end
 	end
 end)

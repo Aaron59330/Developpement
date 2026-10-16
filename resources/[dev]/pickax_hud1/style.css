@@ -149,3 +149,48 @@ body {
 .staff-bar b { color: #fff; font-weight: 700; font-size: 16.5px; margin-right: 5px; }
 .staff-bar .sb-sep { width: 1px; height: 18px; margin: 0 17px; background: rgba(255, 255, 255, 0.2); }
 .staff-bar .sb-flag { font-weight: 600; }
+
+
+/* ===== Bandeau « zone safe » (juste sous le HUD staff, ou en haut s'il n'y a pas de bandeau staff) ===== */
+.safezone {
+    position: fixed;
+    top: 1.2vh;
+    left: 50%;
+    transform: translate(-50%, -14px);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 8px 20px 8px 10px;
+    border-radius: 12px;
+    background: rgba(22, 23, 28, 0.82);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 22px rgba(34, 197, 94, 0.12);
+    font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1), top 0.2s ease;
+}
+.staff-bar.on ~ .safezone { top: calc(1.2vh + 48px); }     /* sous le bandeau staff (40 px + 8 px d'écart) */
+.safezone.show { opacity: 1; transform: translate(-50%, 0); }
+.safezone .sz-ico {
+    position: relative;
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    background: rgba(34, 197, 94, 0.16);
+    color: #4ade80;
+}
+.safezone .sz-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.safezone .sz-ico::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 10px;
+    border: 2px solid #22c55e;
+    opacity: 0;
+    animation: szPulse 2.2s ease-out infinite;
+}
+@keyframes szPulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(1.55); opacity: 0; } }
+.safezone .sz-txt { display: flex; flex-direction: column; line-height: 1.2; }
+.safezone .sz-txt b { color: #4ade80; font-size: 13px; font-weight: 800; letter-spacing: 0.16em; }
+.safezone .sz-txt span { color: #c6c9d2; font-size: 12px; font-weight: 500; }

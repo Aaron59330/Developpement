@@ -7,6 +7,14 @@ window.addEventListener("message", (event) => {
         if (hh) hh.style.visibility = event.data.value === true ? "hidden" : "";
         const sb = document.getElementById("staffBar");
         if (sb) sb.style.visibility = event.data.value === true ? "hidden" : "";
+        const sz = document.getElementById("safeZone");
+        if (sz) sz.style.visibility = event.data.value === true ? "hidden" : "";
+        return;
+    }
+    // Bandeau « zone safe » (sous le HUD staff)
+    if (event.data.action === "safeZone") {
+        const sz = document.getElementById("safeZone");
+        if (sz) sz.classList.toggle("show", event.data.value === true);
         return;
     }
     // Bandeau HUD staff : { tag, items: [{ n, u, x }], flags: [{ t, c }] } ou { hidden: true }
