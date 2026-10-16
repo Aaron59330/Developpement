@@ -33,6 +33,10 @@ const I = {
 const ic = (n, s) => `<svg viewBox="0 0 24 24" class="ic" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${I[n] || I.music}</svg>`;
 const fmt = sec => { sec = Math.max(0, Math.floor(sec || 0)); const m = Math.floor(sec / 60), s = sec % 60; return `${m}:${String(s).padStart(2, '0')}`; };
 
+const arr = x => (Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.values(x) : []));   // une table Lua vide peut arriver en {} : toujours un tableau
+const normSt = st => (st && typeof st === 'object' ? Object.assign({}, st, { queue: arr(st.queue) }) : null);
+const normLib = l => ({ favorites: arr(l && l.favorites), history: arr(l && l.history) });
+
 const S = { open: false, netId: null, st: null, veh: {}, lib: { favorites: [], history: [] }, presets: [], canSearch: false, canControl: true, personal: { vol: 100, toast: true }, page: 'now', results: null, searching: false, maxQueue: 40 };
 
 const current = () => (S.st && S.st.queue && S.st.queue[S.st.index - 1]) || null;   // index : 1 = premier titre (numérotation Lua)
@@ -283,17 +287,21 @@ window.addEventListener('message', ev => {
   const d = ev.data || {};
   if (d.now) Engine.sync(d.now);
   switch (d.t) {
-    case 'ping': console.log('[carplay] interface chargée (ping reçu)'); return;
+    case 'ping': post('pong', {}); return;
     case 'engine': return Engine.update(d.ch, d.now);
     case 'toast': return showToast(d.track);
     case 'open':
-      Object.assign(S, { open: true, netId: d.netId, st: d.st || null, veh: d.veh || {}, lib: d.lib || S.lib, presets: d.presets || [], canSearch: !!d.canSearch, canControl: d.canControl !== false, personal: d.personal || S.personal, maxQueue: d.maxQueue || 40, page: 'now', results: null });
-      lastKey = '';
-      $root.classList.remove('hidden');
-      frame();
+      try {
+        Object.assign(S, { open: true, netId: d.netId, st: normSt(d.st), veh: d.veh || {}, lib: normLib(d.lib || S.lib), presets: arr(d.presets), canSearch: !!d.canSearch, canControl: d.canControl !== false, personal: d.personal || S.personal, maxQueue: d.maxQueue || 40, page: 'now', results: null });
+        lastKey = '';
+        rescale();
+        $root.classList.remove('hidden');
+        frame();
+        post('shown', { ok: true });
+      } catch (err) { post('shown', { ok: false, err: String(err && err.stack || err).slice(0, 300) }); }
       return;
-    case 'state': S.st = d.st || null; return S.open && onState();
-    case 'lib': S.lib = d.lib || S.lib; if (S.open && (S.page === 'favs' || S.page === 'hist' || S.page === 'now' || S.page === 'search')) { lastKey = ''; page(); } return;
+    case 'state': S.st = normSt(d.st); return S.open && onState();
+    case 'lib': S.lib = normLib(d.lib || S.lib); if (S.open && (S.page === 'favs' || S.page === 'hist' || S.page === 'now' || S.page === 'search')) { lastKey = ''; page(); } return;
     case 'caps': S.canSearch = !!d.canSearch; return S.open && frame();
     case 'close': S.open = false; $root.classList.add('hidden'); $root.innerHTML = ''; return;
   }

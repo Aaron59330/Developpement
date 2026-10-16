@@ -22,7 +22,7 @@
   const DEFAULT = 'idcard';
   const frames = {}, ready = {}, queue = {};
 
-  for (const [name, src] of Object.entries(UIS)) {
+  function makeFrame(name, src) {
     const f = document.createElement('iframe');
     f.dataset.ui = name;
     f.setAttribute('allow', 'autoplay');
@@ -34,10 +34,14 @@
     f.src = src;
     document.body.appendChild(f);
     frames[name] = f;
+    return f;
   }
+  for (const [name, src] of Object.entries(UIS)) makeFrame(name, src);
 
   function post(name, data) {
-    const f = frames[name];
+    let f = frames[name];
+    // module absent de la liste ci-dessus : on suppose la convention modules/<nom>/html/index.html
+    if (!f && typeof name === 'string' && /^[a-z0-9_]+$/.test(name)) f = makeFrame(name, '../' + name + '/html/index.html');
     if (!f) return;
     if (ready[name]) f.contentWindow.postMessage(data, '*');
     else (queue[name] = queue[name] || []).push(data);
@@ -45,6 +49,7 @@
 
   function setFocus(name, on) {
     for (const f of Object.values(frames)) f.classList.remove('on');
+    if (on && !frames[name] && typeof name === 'string' && /^[a-z0-9_]+$/.test(name)) makeFrame(name, '../' + name + '/html/index.html');
     const f = on && frames[name];
     if (!f) { try { document.activeElement && document.activeElement.blur(); } catch (e) { /* ignore */ } return; }
     f.classList.add('on');

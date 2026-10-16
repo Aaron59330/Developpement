@@ -149,17 +149,29 @@ local function closeUI()
     SendNUIMessage({ t = 'close' })
 end
 
+local shown, pong = false, false
+
 local function doOpen()
     local veh = myVehicle()
     if not veh then return notify('~r~Monte dans un véhicule (réseau) pour utiliser CarPlay.') end
     uiOpen, uiVeh, uiNet = true, veh, NetworkGetNetworkIdFromEntity(veh)
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)          -- on peut continuer à conduire avec le clavier
-    SendNUIMessage({
+    local payload = {
         t = 'open', netId = uiNet, now = cloud(), st = active[uiNet], lib = library, canSearch = canSearch, canControl = canControl(veh),
         presets = Config.Presets, personal = personal, maxQueue = Config.QueueMax,
         veh = { plate = GetVehicleNumberPlateText(veh), label = modelLabel(veh) },
-    })
+    }
+    shown = false
+    SendNUIMessage(payload)
+    -- l'interface doit accuser réception : sinon on renvoie une fois, puis on prévient (le curseur seul = interface non affichée)
+    SetTimeout(900, function() if uiOpen and not shown then SendNUIMessage(payload) end end)
+    SetTimeout(2600, function()
+        if uiOpen and not shown then
+            print('^1[carplay] l\'interface n\'a pas répondu : le hub NUI de pickax_core ne contient pas le cadre « carplay » ou la page a une erreur. Redémarre le SERVEUR en entier puis vérifie la console F8 (touche F8 → onglet NUI) ; /carplaydebug pour un test.^0')
+            notify('~r~CarPlay : l\'interface ne répond pas (voir console F8).')
+        end
+    end)
     ESX.TriggerServerCallback('carplay:library', function(lib) library = lib or library SendNUIMessage({ t = 'lib', lib = library }) end)
     ESX.TriggerServerCallback('carplay:canSearch', function(ok) canSearch = ok == true SendNUIMessage({ t = 'caps', canSearch = canSearch }) end)
     CreateThread(function()
@@ -214,6 +226,12 @@ end)
 
 -- ─────────────────────────────── Callbacks de l'interface ───────────────────────────────
 RegisterNUICallback('close', function(_, cb) closeUI() cb({}) end)
+RegisterNUICallback('shown', function(d, cb)
+    cb({})
+    shown = true
+    if type(d) == 'table' and d.ok == false then print('^1[carplay] erreur dans l\'interface : ' .. tostring(d.err) .. '^0') end
+end)
+RegisterNUICallback('pong', function(_, cb) cb({}) pong = true end)
 
 RegisterNUICallback('cmd', function(d, cb)
     if uiOpen and uiNet and type(d) == 'table' and type(d.action) == 'string' then
@@ -274,6 +292,8 @@ RegisterCommand('carplaydebug', function()
     for _ in pairs(active) do n = n + 1 end
     print(('[carplay] module client chargé · véhicule=%s · réseau=%s · interface ouverte=%s · focus NUI=%s · véhicules avec musique=%d'):format(
         tostring(veh), tostring(veh ~= 0 and NetworkGetEntityIsNetworked(veh)), tostring(uiOpen), tostring(IsNuiFocused()), n))
+    pong = false
     SendNUIMessage({ t = 'ping' })
+    SetTimeout(1500, function() print(pong and '[carplay] interface : OK (le cadre CarPlay répond)' or '^1[carplay] interface : AUCUNE RÉPONSE (cadre absent du hub ou page en erreur)^0') end)
     notify('CarPlay : diagnostic envoyé dans la console F8.')
 end, false)
