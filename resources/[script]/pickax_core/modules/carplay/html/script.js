@@ -283,6 +283,7 @@ window.addEventListener('message', ev => {
   const d = ev.data || {};
   if (d.now) Engine.sync(d.now);
   switch (d.t) {
+    case 'ping': console.log('[carplay] interface chargée (ping reçu)'); return;
     case 'engine': return Engine.update(d.ch, d.now);
     case 'toast': return showToast(d.track);
     case 'open':

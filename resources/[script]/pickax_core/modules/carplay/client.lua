@@ -149,14 +149,10 @@ local function closeUI()
     SendNUIMessage({ t = 'close' })
 end
 
-function OpenCarPlay()
-    if uiOpen then return end
-    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end
+local function doOpen()
     local veh = myVehicle()
-    if not veh then return notify('~r~Monte dans un véhicule pour utiliser CarPlay.') end
+    if not veh then return notify('~r~Monte dans un véhicule (réseau) pour utiliser CarPlay.') end
     uiOpen, uiVeh, uiNet = true, veh, NetworkGetNetworkIdFromEntity(veh)
-    ESX.TriggerServerCallback('carplay:library', function(lib) library = lib or library SendNUIMessage({ t = 'lib', lib = library }) end)
-    ESX.TriggerServerCallback('carplay:canSearch', function(ok) canSearch = ok == true SendNUIMessage({ t = 'caps', canSearch = canSearch }) end)
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)          -- on peut continuer à conduire avec le clavier
     SendNUIMessage({
@@ -164,6 +160,8 @@ function OpenCarPlay()
         presets = Config.Presets, personal = personal, maxQueue = Config.QueueMax,
         veh = { plate = GetVehicleNumberPlateText(veh), label = modelLabel(veh) },
     })
+    ESX.TriggerServerCallback('carplay:library', function(lib) library = lib or library SendNUIMessage({ t = 'lib', lib = library }) end)
+    ESX.TriggerServerCallback('carplay:canSearch', function(ok) canSearch = ok == true SendNUIMessage({ t = 'caps', canSearch = canSearch }) end)
     CreateThread(function()
         while uiOpen do
             Wait(0)
@@ -171,6 +169,21 @@ function OpenCarPlay()
             for _, c in ipairs({ 1, 2, 3, 4, 5, 6, 24, 25, 106, 140, 141, 142, 257, 263, 264, 270, 271, 272, 273 }) do DisableControlAction(0, c, true) end
         end
     end)
+end
+
+function OpenCarPlay()
+    -- état « ouvert » resté coincé (interface fermée sans nous prévenir) : on repart de zéro
+    if uiOpen and not IsNuiFocused() then uiOpen, uiNet, uiVeh, inputMode = false, nil, nil, false end
+    if uiOpen then return end
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return notify('~r~Impossible pour le moment.') end
+    local ok, err = pcall(doOpen)
+    if not ok then
+        uiOpen, uiNet, uiVeh = false, nil, nil
+        SetNuiFocusKeepInput(false)
+        SetNuiFocus(false, false)
+        print(('^1[carplay] erreur à l\'ouverture : %s^0'):format(tostring(err)))
+        notify('~r~CarPlay : erreur à l\'ouverture (voir la console F8).')
+    end
 end
 exports('OpenCarPlay', OpenCarPlay)
 RegisterNetEvent('carplay:client:open', function() OpenCarPlay() end)
@@ -253,3 +266,14 @@ RegisterNUICallback('error', function(d, cb)
     local veh = myVehicle()
     if veh and netId == NetworkGetNetworkIdFromEntity(veh) and isReferent(veh) then TriggerServerEvent('carplay:server:error', netId, d.rev, d.code) end
 end)
+
+-- Diagnostic : /carplaydebug (console F8)
+RegisterCommand('carplaydebug', function()
+    local veh = GetVehiclePedIsIn(PlayerPedId(), false)
+    local n = 0
+    for _ in pairs(active) do n = n + 1 end
+    print(('[carplay] module client chargé · véhicule=%s · réseau=%s · interface ouverte=%s · focus NUI=%s · véhicules avec musique=%d'):format(
+        tostring(veh), tostring(veh ~= 0 and NetworkGetEntityIsNetworked(veh)), tostring(uiOpen), tostring(IsNuiFocused()), n))
+    SendNUIMessage({ t = 'ping' })
+    notify('CarPlay : diagnostic envoyé dans la console F8.')
+end, false)
