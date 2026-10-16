@@ -488,14 +488,14 @@ local function initializeText()
     Citizen.CreateThread(function()
         local nuiUsed, lastJson, lastSend = false, nil, 0
         while staffService do
-            if GetResourceState('pickax_core') == 'started' then
+            if GetResourceState('pickax_hud1') == 'started' then
                 -- Bandeau NUI (design du HUD) : mis à jour seulement quand une valeur change (+ rappel toutes les 3 s)
                 Citizen.Wait(400)
                 local data = showStaffHud and staffBarData() or {hidden = true}
                 local enc = json.encode(data)
                 if enc ~= lastJson or GetGameTimer() - lastSend > 3000 then
                     lastJson, lastSend = enc, GetGameTimer()
-                    pcall(function() exports['pickax_core']:StaffBar(data) end)
+                    pcall(function() exports['pickax_hud1']:StaffBar(data) end)
                 end
                 nuiUsed = true
             else
@@ -514,8 +514,8 @@ local function initializeText()
                 end
             end
         end
-        if nuiUsed and GetResourceState('pickax_core') == 'started' then
-            pcall(function() exports['pickax_core']:StaffBar({hidden = true}) end)
+        if nuiUsed and GetResourceState('pickax_hud1') == 'started' then
+            pcall(function() exports['pickax_hud1']:StaffBar({hidden = true}) end)
         end
     end)
 end

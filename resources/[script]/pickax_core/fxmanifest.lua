@@ -43,7 +43,7 @@ server_scripts {
 
     'compat/ox_server.lua',
 
-    -- Modules intégrés (builders, HUD, menu pause…) : chargés en dernier, chacun dans son environnement
+    -- Modules serveur intégrés sans interface NUI (modules/registry.lua)
     'modules/loader.lua'
 }
 
@@ -181,87 +181,16 @@ client_scripts {
 
 
     -- OX INVENTORY
-    'compat/ox_client.lua',
-
-    -- Modules intégrés (builders, HUD, menu pause…) : chargés en dernier, chacun dans son environnement
-    'modules/loader.lua'
+    'compat/ox_client.lua'
 }
 
--- Une seule page NUI par ressource : le hub affiche chaque interface (carte d'identité, builders, HUD, menu pause…) dans un cadre
-ui_page 'modules/_hub/index.html'
+ui_page 'players/jsfour-idcard/html/index.html'
 
 -- Écran de chargement (ex-ressource pickax_loading)
 loadscreen 'loading/index.html'
 loadscreen_cursor 'yes'
 
 files {
-    -- Fichiers Lua des modules lus côté CLIENT par le chargeur (LoadResourceFile côté client n'accède qu'aux fichiers déclarés ici).
-    -- Les scripts serveur des modules ne sont volontairement PAS listés. À régénérer si modules/registry.lua change.
-    'modules/builderhub/config.lua',
-    'modules/builderhub/client.lua',
-    'modules/jobbuilder/config.lua',
-    'modules/jobbuilder/client/notify.lua',
-    'modules/jobbuilder/client/bb_map.lua',
-    'modules/jobbuilder/client/main.lua',
-    'modules/jobbuilder/client/actions.lua',
-    'modules/jobbuilder/client/property.lua',
-    'modules/jobbuilder/client/dealer.lua',
-    'modules/jobbuilder/client/gov.lua',
-    'modules/jobbuilder/client/missions.lua',
-    'modules/jobbuilder/client/kitchen.lua',
-    'modules/jobbuilder/client/tablet.lua',
-    'modules/jobbuilder/client/tuning.lua',
-    'modules/jobbuilder/client/death.lua',
-    'modules/jobbuilder/client/emstablet.lua',
-    'modules/jobbuilder/client/bank.lua',
-    'modules/gangbuilder/config.lua',
-    'modules/gangbuilder/client/bb_map.lua',
-    'modules/gangbuilder/client/main.lua',
-    'modules/gangbuilder/client/actions.lua',
-    'modules/gangbuilder/client/activities.lua',
-    'modules/gangbuilder/client/territories.lua',
-    'modules/gangbuilder/client/conflicts.lua',
-    'modules/gangbuilder/client/objectives.lua',
-    'modules/shopbuilder/config.lua',
-    'modules/shopbuilder/client/bb_map.lua',
-    'modules/shopbuilder/client/main.lua',
-    'modules/shopbuilder/client/clothing.lua',
-    'modules/worldbuilder/config.lua',
-    'modules/worldbuilder/client/bb_map.lua',
-    'modules/worldbuilder/client/main.lua',
-    'modules/worldbuilder/client/garage.lua',
-    'modules/worldbuilder/client/rental.lua',
-    'modules/worldbuilder/client/bank.lua',
-    'modules/worldbuilder/client/driving.lua',
-    'modules/worldbuilder/client/fuel.lua',
-    'modules/worldbuilder/client/carwash.lua',
-    'modules/worldbuilder/client/locksmith.lua',
-    'modules/worldbuilder/client/drugs.lua',
-    'modules/worldbuilder/client/robbery.lua',
-    'modules/worldbuilder/client/doorlock.lua',
-    'modules/worldbuilder/client/carlot.lua',
-    'modules/worldbuilder/client/chase.lua',
-    'modules/worldbuilder/client/pvp.lua',
-    'modules/hud1/config.lua',
-    'modules/hud1/client.lua',
-    'modules/hud2/client.lua',
-    'modules/hud2/ruidebdv.lua',
-    'modules/speedometer/client/client.lua',
-    'modules/speedometer/client/utils.lua',
-    'modules/pause/config.lua',
-    'modules/pause/client.lua',
-    'modules/carplay/config.lua',
-    'modules/carplay/shared.lua',
-    'modules/carplay/client.lua',
-    'modules/connectui/config.lua',
-
-    -- Interfaces des modules intégrés
-    'modules/registry.lua',
-    'modules/_hub/*',
-    'modules/*/html/**/*',
-    'modules/hud1/index.html', 'modules/hud1/style.css', 'modules/hud1/script.js',
-    'modules/speedometer/web/build/**/*',
-
     'loading/index.html',
     'loading/style.css',
     'loading/index.js',

@@ -748,7 +748,7 @@ function _Moi()
                     },
                     {
                         "Ouvrir la tablette de gang", true, function()
-                            if GetResourceState('pickax_core') ~= 'started' then
+                            if GetResourceState('pickax_gangbuilder') ~= 'started' then
                                 ESX.ShowNotification("~r~La tablette n'est pas démarrée.")
                                 return
                             end
@@ -1208,7 +1208,7 @@ function _Vehicle()
                 Condition = IsPedSittingInAnyVehicle(PlayerPedId()) and GetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false)) == GetVehicleNumberPlateText(LastEntityHit),
                 Label = "Ouvrir CarPlay",
                 OnClick = function()
-                    if GetResourceState(GetCurrentResourceName()) ~= 'started' then return end
+                    if GetResourceState('pickax_carplay') ~= 'started' then return ESX.ShowNotification("~r~CarPlay n'est pas démarré.") end
                     CreateThread(function()
                         Wait(250)
                         TriggerEvent('carplay:client:open')

@@ -1,5 +1,5 @@
 -- ─────────────────────────────── Chargeur des modules intégrés ───────────────────────────────
--- Les builders, HUD, menu pause… sont des scripts autonomes déplacés dans pickax_core SANS changer leur logique.
+-- Modules sans interface NUI (écran de connexion…) déplacés dans pickax_core SANS changer leur logique. Chargé côté serveur uniquement.
 -- Chaque module est exécuté dans son propre environnement Lua : ses variables globales (Config, GB, JB, ESX…) restent privées,
 -- exactement comme quand il était une ressource séparée. Seuls quelques appels sont adaptés pour cohabiter dans une seule ressource :
 --   • SendNUIMessage / RegisterNUICallback / SetNuiFocus : étiquetés avec le nom du module (le hub NUI route vers le bon cadre)
@@ -42,6 +42,7 @@ local function makeEnv(mod)
     if not SERVER then
         env.SendNUIMessage = function(data) return rawSend({ __ui = mod.name, __d = data }) end
         env.RegisterNUICallback = function(name, cb) return rawRegNui(mod.name .. ':' .. name, cb) end
+        env.HubStatus = function() rawSend({ __hub = 'status' }) end      -- diagnostic : état des cadres du hub NUI (résultat dans la console F8)
         env.SetNuiFocus = function(hasFocus, hasCursor)
             rawSend({ __hub = 'focus', ui = mod.name, on = hasFocus and true or false })
             return rawFocus(hasFocus, hasCursor)
@@ -76,6 +77,14 @@ end
 
 if SERVER then
     log(2, ('%d module(s) chargé(s) : %s'):format(#loaded, table.concat(loaded, ', ')))
+end
+
+if not SERVER then
+    -- réponse du hub NUI à { __hub = 'status' } : cadres présents / chargés
+    RegisterNUICallback('hubstatus', function(data, cb)
+        cb({})
+        print('^3[pickax_core/hub] ' .. json.encode(data) .. '^0')
+    end)
 end
 
 -- Liste des modules (côté client : pour les autres scripts du core)
