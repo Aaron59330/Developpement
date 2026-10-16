@@ -590,6 +590,16 @@ local function OpenMenu()
 			end)
 			RageUI.ButtonWithStyle("État du moteur", nil, {RightLabel = "~p~"..math.floor(GetVehicleEngineHealth(GetVehiclePedIsIn(PlayerPedId(), false))/10) .."%"}, true, function(_,_,s)
 			end)
+			RageUI.Separator("~b~Multimédia~s~")
+			RageUI.ButtonWithStyle("Ouvrir CarPlay", "Autoradio : musique YouTube, radios, volume…", {RightLabel = "→→→"}, true, function(_,_,s)
+				if s then
+					RageUI.CloseAll()
+					CreateThread(function()
+						Wait(300)
+						TriggerEvent('carplay:client:open')
+					end)
+				end
+			end)
 			if (GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1), false), -1) == GetPlayerPed(-1)) then
 				RageUI.Separator("~r~Actions~s~")
 				RageUI.ButtonWithStyle("Allumer/Eteindre le moteur", nil, {RightLabel = "→→→"}, true, function(_,_,s)

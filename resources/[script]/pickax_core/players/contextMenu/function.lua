@@ -1200,6 +1200,22 @@ function _Vehicle()
                 end,
             },
             {
+                Type = "buttom",
+                IsRestricted = false,
+                Blocked = false,
+                CloseOnClick = true,
+                FlecheActive = true,
+                Condition = IsPedSittingInAnyVehicle(PlayerPedId()) and GetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false)) == GetVehicleNumberPlateText(LastEntityHit),
+                Label = "Ouvrir CarPlay",
+                OnClick = function()
+                    if GetResourceState(GetCurrentResourceName()) ~= 'started' then return end
+                    CreateThread(function()
+                        Wait(250)
+                        TriggerEvent('carplay:client:open')
+                    end)
+                end,
+            },
+            {
                 Type = "buttom-submenu",
                 Label = "Limitateur",
                 Blocked = false,

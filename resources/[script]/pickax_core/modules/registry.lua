@@ -31,5 +31,6 @@ return {
     { name = 'hud2', client = { 'client.lua', 'ruidebdv.lua' }, server = { 'pickax.lua' }, ui = 'html/index.html' },
     { name = 'speedometer', client = { 'client/client.lua', 'client/utils.lua' }, ui = 'web/build/index.html' },
     { name = 'pause', shared = { 'config.lua' }, server = { 'server.lua' }, client = { 'client.lua' }, ui = 'html/index.html' },
+    { name = 'carplay', shared = { 'config.lua', 'shared.lua' }, server = { 'server.lua' }, client = { 'client.lua' }, ui = 'html/index.html' },
     { name = 'connectui', shared = { 'config.lua' }, server = { 'server.lua' } },
 }

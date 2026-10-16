@@ -17,6 +17,7 @@
     hud2: '../hud2/html/index.html',
     speedometer: '../speedometer/web/build/index.html',
     pause: '../pause/html/index.html',
+    carplay: '../carplay/html/index.html',
   };
   const DEFAULT = 'idcard';
   const frames = {}, ready = {}, queue = {};

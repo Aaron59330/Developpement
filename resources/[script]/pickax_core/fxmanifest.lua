@@ -250,6 +250,9 @@ files {
     'modules/speedometer/client/utils.lua',
     'modules/pause/config.lua',
     'modules/pause/client.lua',
+    'modules/carplay/config.lua',
+    'modules/carplay/shared.lua',
+    'modules/carplay/client.lua',
     'modules/connectui/config.lua',
 
     -- Interfaces des modules intégrés
