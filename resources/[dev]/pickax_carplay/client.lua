@@ -26,7 +26,24 @@ end
 local function savePersonal() SetResourceKvp(KVP, json.encode(personal)) end
 
 local function notify(msg) ESX.ShowNotification(msg) end
-local function cloud() return GetCloudTimeAsInt() end
+-- Horloge du serveur : décalage mesuré avec le serveur (aucune dépendance à l'heure du PC ni à l'heure Rockstar)
+local srvOffset = nil
+local function syncClock()
+    local t0 = GetGameTimer()
+    ESX.TriggerServerCallback('carplay:time', function(serverNow)
+        if type(serverNow) ~= 'number' then return end
+        local t1 = GetGameTimer()
+        srvOffset = serverNow - ((t0 + t1) / 2) / 1000.0
+    end)
+end
+CreateThread(function()
+    Wait(1000)
+    while true do
+        syncClock()
+        Wait(30000)
+    end
+end)
+local function cloud() return GetGameTimer() / 1000.0 + (srvOffset or 0.0) end
 
 -- ─────────────────────────────── Véhicules & états ───────────────────────────────
 AddStateBagChangeHandler('carplay', nil, function(bagName, _, value)
@@ -72,6 +89,7 @@ end
 CreateThread(function()
     while true do
         Wait(250)
+        if not srvOffset then goto continue end      -- horloge du serveur pas encore connue
         local ped = PlayerPedId()
         local pc = GetEntityCoords(ped)
         local myVeh = GetVehiclePedIsIn(ped, false)
@@ -101,7 +119,7 @@ CreateThread(function()
             local c = list[i]
             local v = math.floor(c.vol * 50 + 0.5) / 50      -- pas de 2 % : évite d'inonder l'interface
             out[i] = { id = c.netId, kind = c.t.kind, ref = c.t.ref, rev = c.st.rev, playing = c.st.playing, startedAt = c.st.startedAt, pausedAt = c.st.pausedAt, vol = v, mine = c.mine }
-            sig[i] = ('%d:%d:%s:%d:%d:%.2f'):format(c.netId, c.st.rev, tostring(c.st.playing), c.st.startedAt, c.st.pausedAt, v)
+            sig[i] = ('%d:%d:%s:%.1f:%.1f:%.2f'):format(c.netId, c.st.rev, tostring(c.st.playing), c.st.startedAt, c.st.pausedAt, v)
         end
         local s = table.concat(sig, '|')
         if s ~= lastSig then
@@ -118,6 +136,7 @@ CreateThread(function()
                 SetTimeout(1500, function() SendNUIMessage({ t = 'toast', track = t }) end)
             end
         end
+        ::continue::
     end
 end)
 
@@ -157,6 +176,7 @@ local function doOpen()
     uiOpen, uiVeh, uiNet = true, veh, NetworkGetNetworkIdFromEntity(veh)
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)          -- on peut continuer à conduire avec le clavier
+    if not srvOffset then syncClock() end
     local payload = {
         t = 'open', netId = uiNet, now = cloud(), st = active[uiNet], lib = library, canSearch = canSearch, canControl = canControl(veh),
         presets = Config.Presets, personal = personal, maxQueue = Config.QueueMax,

@@ -43,7 +43,7 @@ const Engine = (() => {
         c.el.appendChild(host);
         c.player = new YT.Player(host, {
           width: '200', height: '113', videoId: c.ref,
-          playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, playsinline: 1, enablejsapi: 1, origin: /^https?:/.test(location.origin) ? location.origin : undefined },
+          playerVars: { start: Math.max(0, Math.floor(posOf(c))), autoplay: 1, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, playsinline: 1, enablejsapi: 1, origin: /^https?:/.test(location.origin) ? location.origin : undefined },
           events: {
             onReady: () => { c.ready = true; apply(c, true); },
             onStateChange: e => { if (e.data === 1) c.started = true; },
@@ -58,6 +58,7 @@ const Engine = (() => {
       a.addEventListener('loadedmetadata', () => { c.ready = true; apply(c, true); });
       a.src = c.ref;
       c.audio = a;
+      c.pendingStart = Math.max(0, posOf(c));
     }
   }
 
@@ -85,22 +86,31 @@ const Engine = (() => {
     return 0;
   }
 
-  // aligne lecture / pause / position / volume sur l'état du serveur
+  // aligne lecture / pause / position / volume sur l'état du serveur.
+  // Recalage de position seulement si l'écart est grand ET que le lecteur joue vraiment (jamais pendant le chargement), avec un délai entre deux recalages :
+  // sinon chaque recalage relance la mise en mémoire tampon et la musique redémarre en boucle.
+  function seek(c, t) {
+    c.lastSeek = Date.now();
+    try { if (c.kind === 'yt') c.player.seekTo(Math.max(0, t), true); else c.audio.currentTime = Math.max(0, t); } catch (e) { /* ignore */ }
+  }
   function apply(c, force) {
     if (!c.ready) return;
     setVol(c);
     const want = posOf(c);
     const live = c.live === true;
+    const settled = !c.lastSeek || Date.now() - c.lastSeek > 8000;
     try {
       if (c.playing) {
-        if (!live && (force || Math.abs(current(c) - want) > 2.5)) {
-          if (c.kind === 'yt') c.player.seekTo(Math.max(0, want), true); else c.audio.currentTime = Math.max(0, want);
-        }
-        if (c.kind === 'yt') { const st = c.player.getPlayerState && c.player.getPlayerState(); if (st !== 1 && st !== 3) c.player.playVideo(); }
-        else if (c.audio.paused) { const p = c.audio.play(); if (p && p.catch) p.catch(() => { }); }
+        let state = 0;
+        if (c.kind === 'yt') { state = c.player.getPlayerState ? c.player.getPlayerState() : -1; }
+        else state = c.audio.paused ? 2 : 1;
+        if (force && !live && want > 2) seek(c, want);                                    // premier calage (le lecteur démarre déjà à peu près au bon endroit)
+        else if (!live && state === 1 && settled && want >= 0 && Math.abs(current(c) - want) > 6) seek(c, want);   // dérive importante : un seul recalage
+        if (c.kind === 'yt') { if ((state === -1 || state === 5 || state === 2) && (!c.lastPlay || Date.now() - c.lastPlay > 3000)) { c.lastPlay = Date.now(); c.player.playVideo(); } }
+        else if (c.audio.paused && (!c.lastPlay || Date.now() - c.lastPlay > 3000)) { c.lastPlay = Date.now(); const p = c.audio.play(); if (p && p.catch) p.catch(() => { }); }
       } else {
-        if (c.kind === 'yt') { c.player.pauseVideo(); if (force) c.player.seekTo(Math.max(0, want), true); }
-        else { c.audio.pause(); if (force && !live) c.audio.currentTime = Math.max(0, want); }
+        if (c.kind === 'yt') { c.player.pauseVideo(); if (force) seek(c, want); }
+        else { c.audio.pause(); if (force && !live) seek(c, want); }
       }
     } catch (e) { /* lecteur pas encore prêt */ }
   }

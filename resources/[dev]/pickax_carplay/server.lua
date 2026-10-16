@@ -7,7 +7,9 @@ local bucket = {}         -- limitation de débit par joueur
 local ready = false
 local searchAt = {}
 
-local function now() return GetCloudTimeAsInt and GetCloudTimeAsInt() or os.time() end
+-- Horloge unique du serveur (secondes, précision à la milliseconde) : les clients se calent dessus (callback carplay:time), jamais sur leur propre heure
+local function now() return GetGameTimer() / 1000.0 end
+ESX.RegisterServerCallback('carplay:time', function(_, cb) cb(now()) end)
 local function notify(src, msg) TriggerClientEvent('esx:showNotification', src, msg) end
 
 -- ─────────────────────────────── Base de données (favoris / historique) ───────────────────────────────
