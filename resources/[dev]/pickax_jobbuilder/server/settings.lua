@@ -174,7 +174,7 @@ S.jobTypes = function(v)
         local blip = type(t.blip) == 'table' and t.blip or {}
         local clean = {
             label = str(t.label, 40, key),
-            blip = { sprite = int(blip.sprite, 0, 900, 478), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, 0.9) },
+            blip = { sprite = int(blip.sprite, 0, 900, 478), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9)) },
             actions = {}, grades = {},
             points = (Config.JobTypes[key] and Config.JobTypes[key].points) or { 'garage', 'cloakroom', 'armory', 'stash', 'boss', 'shop' },
         }

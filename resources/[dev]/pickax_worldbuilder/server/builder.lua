@@ -132,7 +132,7 @@ local TOOL = obj({ item = ITEM, consume = { 'b', false } })
 local STACK = { 'a', obj({ item = ITEM, count = { 'n', 1, 1000, 1 } }), 10, function(x) return x.item ~= '' end }
 
 local PED = obj({ enabled = { 'b', false }, model = MODEL, scenario = { 's', 60, '' }, pos = { 'c' } })
-local BLIP = obj({ enabled = { 'b', false }, sprite = { 'n', 0, 900, 52 }, color = { 'n', 0, 85, 0 }, scale = { 'n', 0.1, 3, 0.8 }, label = { 's', 60, '' }, shortRange = { 'b', true } })
+local BLIP = obj({ enabled = { 'b', false }, sprite = { 'n', 0, 900, 52 }, color = { 'n', 0, 85, 0 }, scale = { 'n', 0.1, 3, (PickaxTheme and PickaxTheme.blipScale or 0.8) }, label = { 's', 60, '' }, shortRange = { 'b', true } })
 
 local COMMON = {
     blip = BLIP,

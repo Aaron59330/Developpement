@@ -1,4 +1,7 @@
 Config = {}
+-- Taille des blips par défaut : celle de tout le serveur (pickax_core/config.lua → Config.GlobalBlip.Scale), sinon la valeur donnée.
+-- Un blip réglé en jeu dans un builder garde sa taille.
+local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or default end
 
 -- ─────────────────────────────── Général ───────────────────────────────
 Config.AllowedGroups   = { '_dev', 'admin', 'superadmin' }   -- groupes ESX autorisés à ouvrir le builder

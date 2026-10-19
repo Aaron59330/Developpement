@@ -225,7 +225,7 @@ local function cleanGang(payload)
         name = name, label = label, type = g.type, color = color, boss_grade = bossGrade,
         blip = {
             enabled = blip.enabled == true, label = str(blip.label, 40), sprite = int(blip.sprite, 0, 900, 310),
-            color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2.0, 0.9), coords = cleanCoords(blip.coords), shortRange = blip.shortRange == true,
+            color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2.0, (PickaxTheme and PickaxTheme.blipScale or 0.9)), coords = cleanCoords(blip.coords), shortRange = blip.shortRange == true,
         },
         settings = {
             actions = actions,

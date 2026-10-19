@@ -265,7 +265,7 @@ local function cleanJob(payload)
         boss_grade = math.floor(num(j.boss_grade, 0, maxGrade, maxGrade)),
         blip = {
             enabled = blip.enabled == true, label = str(blip.label, 40), sprite = math.floor(num(blip.sprite, 0, 900, 478)),
-            color = math.floor(num(blip.color, 0, 85, 0)), scale = num(blip.scale, 0.3, 2.0, 0.9), coords = cleanCoords(blip.coords),
+            color = math.floor(num(blip.color, 0, 85, 0)), scale = num(blip.scale, 0.3, 2.0, (PickaxTheme and PickaxTheme.blipScale or 0.9)), coords = cleanCoords(blip.coords),
             shortRange = blip.shortRange == true,
         },
         settings = {

@@ -1,4 +1,7 @@
 Config = {}
+-- Taille des blips par défaut : celle de tout le serveur (pickax_core/config.lua → Config.GlobalBlip.Scale), sinon la valeur donnée.
+-- Un blip réglé en jeu dans un builder garde sa taille.
+local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or default end
 
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
 --  GANG BUILDER — config.lua
@@ -270,7 +273,7 @@ Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   
 -- Chaque modèle pré-remplit le builder (grades, blip, actions, points suggérés). Tout reste modifiable dans l'UI et ici.
 Config.GangTypes = {
     street = {
-        label = 'Gang de rue', color = '#22c55e', blip = { sprite = 310, color = 2, scale = 0.9 },
+        label = 'Gang de rue', color = '#22c55e', blip = { sprite = 310, color = 2, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'boss' },
         grades = {
@@ -281,7 +284,7 @@ Config.GangTypes = {
         },
     },
     mafia = {
-        label = 'Mafia', color = '#a855f7', blip = { sprite = 310, color = 27, scale = 0.9 },
+        label = 'Mafia', color = '#a855f7', blip = { sprite = 310, color = 27, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'laundry', 'shop', 'boss' },
         grades = {
@@ -293,7 +296,7 @@ Config.GangTypes = {
         },
     },
     biker = {
-        label = 'Club de motards', color = '#f97316', blip = { sprite = 226, color = 17, scale = 0.9 },
+        label = 'Club de motards', color = '#f97316', blip = { sprite = 226, color = 17, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'boss' },
         grades = {
@@ -305,7 +308,7 @@ Config.GangTypes = {
         },
     },
     cartel = {
-        label = 'Cartel', color = '#ef4444', blip = { sprite = 310, color = 1, scale = 0.9 },
+        label = 'Cartel', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'laundry', 'boss' },
         grades = {
@@ -317,7 +320,7 @@ Config.GangTypes = {
         },
     },
     custom = {
-        label = 'Personnalisé', color = '#ef4444', blip = { sprite = 310, color = 1, scale = 0.9 },
+        label = 'Personnalisé', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {

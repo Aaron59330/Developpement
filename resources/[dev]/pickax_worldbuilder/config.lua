@@ -1,4 +1,7 @@
 Config = {}
+-- Taille des blips par défaut : celle de tout le serveur (pickax_core/config.lua → Config.GlobalBlip.Scale), sinon la valeur donnée.
+-- Un blip réglé en jeu dans un builder garde sa taille.
+local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or default end
 
 -- ─────────────────────────────── Général ───────────────────────────────
 Config.AllowedGroups   = { '_dev', 'admin', 'superadmin' }   -- groupes ESX autorisés à ouvrir le builder
@@ -215,25 +218,25 @@ Config.Templates.garage = {
     public = {
         label = 'Garage public', icon = 'car',
         settings = { mode = 'owned', types = { 'car', 'bike' }, fee = 0, bound = false, payments = { cash = true, bank = true },
-            blip = { enabled = true, sprite = 357, color = 3, scale = 0.8, label = 'Garage', shortRange = true } },
+            blip = { enabled = true, sprite = 357, color = 3, scale = PK_BSF(0.8), label = 'Garage', shortRange = true } },
         points = { { label = 'Garage', blip = true, ped = ped('s_m_y_valet_01', 'WORLD_HUMAN_CLIPBOARD'), spawns = {} } },
     },
     boat = {
         label = 'Port / Marina', icon = 'boat',
         settings = { mode = 'owned', types = { 'boat' }, fee = 0, bound = false, payments = { cash = true, bank = true },
-            blip = { enabled = true, sprite = 427, color = 3, scale = 0.8, label = 'Port', shortRange = true } },
+            blip = { enabled = true, sprite = 427, color = 3, scale = PK_BSF(0.8), label = 'Port', shortRange = true } },
         points = { { label = 'Port', blip = true, ped = noPed, spawns = {} } },
     },
     air = {
         label = 'Hangar', icon = 'plane',
         settings = { mode = 'owned', types = { 'aircraft' }, fee = 0, bound = false, payments = { cash = true, bank = true },
-            blip = { enabled = true, sprite = 359, color = 3, scale = 0.8, label = 'Hangar', shortRange = true } },
+            blip = { enabled = true, sprite = 359, color = 3, scale = PK_BSF(0.8), label = 'Hangar', shortRange = true } },
         points = { { label = 'Hangar', blip = true, ped = noPed, spawns = {} } },
     },
     job = {
         label = 'Garage de métier (flotte)', icon = 'shield',
         settings = { mode = 'job', types = {}, fee = 0, bound = false, payments = { cash = true }, access = { jobs = { police = 0 } },
-            blip = { enabled = true, sprite = 357, color = 38, scale = 0.8, label = 'Garage de service', shortRange = true },
+            blip = { enabled = true, sprite = 357, color = 38, scale = PK_BSF(0.8), label = 'Garage de service', shortRange = true },
             fleet = {
                 { model = 'police',  label = 'Voiture de patrouille', minGrade = 0, price = 0 },
                 { model = 'police2', label = 'Interceptor',           minGrade = 2, price = 0 },
@@ -249,7 +252,7 @@ Config.Templates.impound = {
         label = 'Fourrière', icon = 'truck',
         settings = { fee = 150, perDay = 20, maxFee = 600, types = {}, payments = { cash = true, bank = true }, society = '',
             impoundJobs = { police = 0, sheriff = 0, mechanic = 0 },
-            blip = { enabled = true, sprite = 68, color = 47, scale = 0.8, label = 'Fourrière', shortRange = true } },
+            blip = { enabled = true, sprite = 68, color = 47, scale = PK_BSF(0.8), label = 'Fourrière', shortRange = true } },
         points = { { label = 'Fourrière', blip = true, ped = ped('s_m_y_construct_01', 'WORLD_HUMAN_CLIPBOARD'), spawns = {} } },
     },
 }
@@ -259,7 +262,7 @@ Config.Templates.rental = {
     cars = {
         label = 'Location de voitures', icon = 'key',
         settings = { minutes = 60, refundDamage = true, payments = { cash = true, bank = true }, society = '',
-            blip = { enabled = true, sprite = 225, color = 5, scale = 0.8, label = 'Location', shortRange = true },
+            blip = { enabled = true, sprite = 225, color = 5, scale = PK_BSF(0.8), label = 'Location', shortRange = true },
             fleet = {
                 { model = 'faggio',  label = 'Scooter',        price = 30,  deposit = 100,  minGrade = 0 },
                 { model = 'panto',   label = 'Citadine',       price = 40,  deposit = 150,  minGrade = 0 },
@@ -271,7 +274,7 @@ Config.Templates.rental = {
     boats = {
         label = 'Location de bateaux', icon = 'boat',
         settings = { minutes = 60, refundDamage = true, payments = { cash = true, bank = true }, society = '',
-            blip = { enabled = true, sprite = 427, color = 5, scale = 0.8, label = 'Location bateaux', shortRange = true },
+            blip = { enabled = true, sprite = 427, color = 5, scale = PK_BSF(0.8), label = 'Location bateaux', shortRange = true },
             fleet = { { model = 'dinghy', label = 'Zodiac', price = 120, deposit = 300, minGrade = 0 }, { model = 'seashark', label = 'Jet-ski', price = 90, deposit = 250, minGrade = 0 } } },
         points = { { label = 'Location bateaux', blip = true, ped = ped('a_m_y_beach_01'), spawns = {} } },
     },
@@ -283,7 +286,7 @@ Config.Templates.fuel = {
         label = 'Station essence', icon = 'fuel',
         settings = { price = 2.0, tank = 5000, restockMinutes = 60, restockLiters = 200, payments = { cash = true, bank = true }, society = '',
             jerrycan = { enabled = true, price = 30, item = 'WEAPON_PETROLCAN' },
-            blip = { enabled = true, sprite = 361, color = 1, scale = 0.7, label = 'Station essence', shortRange = true } },
+            blip = { enabled = true, sprite = 361, color = 1, scale = PK_BSF(0.7), label = 'Station essence', shortRange = true } },
         points = { { label = 'Pompe 1', kind = 'pump', blip = true, ped = noPed }, { label = 'Pompe 2', kind = 'pump', blip = false, ped = noPed } },
     },
 }
@@ -293,7 +296,7 @@ Config.Templates.pvp = {
     arena = {
         label = 'Zones PVP', icon = 'target',
         settings = { note = 'Les zones se placent en jeu : position = centre', rewardAccount = 'bank',
-            blip = { enabled = true, sprite = 311, color = 1, scale = 0.8, label = 'Zones PVP', shortRange = true } },
+            blip = { enabled = true, sprite = 311, color = 1, scale = PK_BSF(0.8), label = 'Zones PVP', shortRange = true } },
         points = { { kind = 'lobby', label = 'Zones PVP', blip = true, ped = ped('s_m_y_ammucity_01', 'WORLD_HUMAN_GUARD_STAND') },
             { kind = 'zone', label = 'Arène', blip = true, radius = 60, color = { 239, 68, 68 }, reviveEnabled = true, reviveDelay = 5, giveWeapons = true, removeOnExit = true, infiniteAmmo = false,
                 healOnKill = true, armorOnRespawn = true, killReward = 100, spawnProtection = 3, spawns = {},
@@ -309,7 +312,7 @@ Config.Templates.chase = {
         settings = { note = 'Un fugitif contre des poursuivants : colle le fugitif assez longtemps pour gagner', catchDistance = 8, catchTime = 3, headStart = 10, countdown = 5,
             rewardAccount = 'bank', entryFee = 2000, rewardWin = 0, rewardLose = 0, maxChasers = 4, durationMin = 2, durationMax = 20, durationDefault = 8,
             requireVehicle = true, maxPerformance = true, runnerSeesChasers = true, traffic = true,
-            blip = { enabled = true, sprite = 315, color = 3, scale = 0.8, label = 'Course poursuite', shortRange = true },
+            blip = { enabled = true, sprite = 315, color = 3, scale = PK_BSF(0.8), label = 'Course poursuite', shortRange = true },
             vehicles = {
                 cv('sultan', 'Karin Sultan', 'Sportive', 68, 66, 72), cv('elegy2', 'Annis Elegy RH8', 'Sportive', 74, 70, 78), cv('jester', 'Dinka Jester', 'Sportive', 78, 74, 75),
                 cv('kuruma', 'Karin Kuruma', 'Sportive', 72, 70, 70), cv('comet2', 'Pfister Comet', 'Sportive', 76, 72, 77), cv('zentorno', 'Pegassi Zentorno', 'Super', 90, 88, 80),
@@ -330,7 +333,7 @@ Config.Templates.carlot = {
     lot = {
         label = 'Parking d\'occasion', icon = 'car',
         settings = { listingFee = 20, commission = 5, maxListings = 3, durationDays = 7, minPrice = 500, maxPrice = 5000000, showPlate = false, payments = { cash = true, bank = true }, society = '',
-            blip = { enabled = true, sprite = 225, color = 25, scale = 0.8, label = 'Occasion', shortRange = true } },
+            blip = { enabled = true, sprite = 225, color = 25, scale = PK_BSF(0.8), label = 'Occasion', shortRange = true } },
         points = { { kind = 'lot', label = 'Bureau des annonces', blip = true, ped = ped('a_m_y_business_03', 'WORLD_HUMAN_CLIPBOARD') },
             { kind = 'slot', label = 'Place 1' }, { kind = 'slot', label = 'Place 2' }, { kind = 'slot', label = 'Place 3' }, { kind = 'slot', label = 'Place 4' } },
     },
@@ -363,7 +366,7 @@ Config.Templates.locksmith = {
     shop = {
         label = 'Serrurier', icon = 'key',
         settings = { price = 80, requireNearby = true, keyItem = '', cooldown = 60, payments = { cash = true, bank = true }, society = '',
-            blip = { enabled = true, sprite = 402, color = 5, scale = 0.8, label = 'Serrurier', shortRange = true } },
+            blip = { enabled = true, sprite = 402, color = 5, scale = PK_BSF(0.8), label = 'Serrurier', shortRange = true } },
         points = { { kind = 'shop', label = 'Atelier de serrurier', blip = true, ped = ped('s_m_y_construct_01', 'WORLD_HUMAN_CLIPBOARD') } },
     },
 }
@@ -373,7 +376,7 @@ Config.Templates.carwash = {
     station = {
         label = 'Station de lavage', icon = 'drop',
         settings = { payments = { cash = true, bank = true }, society = '',
-            blip = { enabled = true, sprite = 100, color = 3, scale = 0.8, label = 'Station de lavage', shortRange = true },
+            blip = { enabled = true, sprite = 100, color = 3, scale = PK_BSF(0.8), label = 'Station de lavage', shortRange = true },
             programs = { { label = 'Lavage rapide', price = 8, seconds = 6 }, { label = 'Lavage complet', price = 15, seconds = 12 }, { label = 'Lavage premium', price = 30, seconds = 20 } } },
         points = { { kind = 'wash', label = 'Baie de lavage 1', blip = true, ped = noPed }, { kind = 'wash', label = 'Baie de lavage 2', blip = false, ped = noPed } },
     },
@@ -384,14 +387,14 @@ Config.Templates.bank = {
     branch = {
         label = 'Agence bancaire', icon = 'dollar',
         settings = { depositFee = 0, withdrawFee = 0, transferFee = 2, maxTransaction = 0, dailyLimit = 0, atmDeposit = false, society = '',
-            blip = { enabled = true, sprite = 108, color = 2, scale = 0.8, label = 'Banque', shortRange = true } },
+            blip = { enabled = true, sprite = 108, color = 2, scale = PK_BSF(0.8), label = 'Banque', shortRange = true } },
         points = { { kind = 'counter', label = 'Guichet', blip = true, ped = ped('ig_bankman', 'WORLD_HUMAN_CLIPBOARD') },
             { kind = 'atm', label = 'Distributeur', blip = false, ped = noPed } },
     },
     atm = {
         label = 'Distributeurs (ATM)', icon = 'card',
         settings = { depositFee = 0, withdrawFee = 1, transferFee = 2, maxTransaction = 500, dailyLimit = 1000, atmDeposit = false, society = '',
-            blip = { enabled = true, sprite = 277, color = 2, scale = 0.6, label = 'ATM', shortRange = true } },
+            blip = { enabled = true, sprite = 277, color = 2, scale = PK_BSF(0.6), label = 'ATM', shortRange = true } },
         points = { { kind = 'atm', label = 'Distributeur', blip = true, ped = noPed } },
     },
 }
@@ -422,7 +425,7 @@ Config.Templates.driving = {
     school = {
         label = 'Auto-école', icon = 'book',
         settings = { payments = { cash = true, bank = true }, society = '', cooldown = 5,
-            blip = { enabled = true, sprite = 225, color = 3, scale = 0.8, label = 'Auto-école', shortRange = true },
+            blip = { enabled = true, sprite = 225, color = 3, scale = PK_BSF(0.8), label = 'Auto-école', shortRange = true },
             licenses = {
                 license('code', 'Code de la route', '', 30, 0, true, nil),
                 license('drive', 'Permis B (voiture)', 'code', 0, 900, false, 'blista', 80),
@@ -518,7 +521,7 @@ local function baseRob(extra)
     local s = { trigger = 'aim', weapon = true, copsRequired = 0, cooldown = 1800, duration = 240, leaveDistance = 30, coop = true, currency = 'black_money',
         requireItem = { item = '', count = 1, consume = false }, alert = { chance = 100, label = 'Braquage en cours' },
         guards = { enabled = false, model = 's_m_m_security_01', weapon = 'WEAPON_PISTOL', count = 0, accuracy = 30, health = 200 },
-        blip = { enabled = false, sprite = 52, color = 1, scale = 0.8, label = '', shortRange = true } }
+        blip = { enabled = false, sprite = 52, color = 1, scale = PK_BSF(0.8), label = '', shortRange = true } }
     for k, v in pairs(extra or {}) do s[k] = v end
     return s
 end
@@ -545,7 +548,7 @@ Config.Templates.robbery = {
         settings = baseRob({ trigger = 'interact', weapon = false, copsRequired = 4, cooldown = 5400, duration = 600, leaveDistance = 45,
             requireItem = { item = 'thermite', count = 1, consume = true }, alert = { chance = 100, label = 'Braquage de banque' },
             guards = { enabled = true, model = 's_m_m_security_01', weapon = 'WEAPON_PISTOL', count = 2, accuracy = 35, health = 250 },
-            blip = { enabled = false, sprite = 108, color = 1, scale = 0.9, label = 'Banque', shortRange = true } }),
+            blip = { enabled = false, sprite = 108, color = 1, scale = PK_BSF(0.9), label = 'Banque', shortRange = true } }),
         points = { { kind = 'start', label = 'Porte du coffre', blip = false },
             target('vault', 'Coffre principal', 90, 'drill', { min = 8000, max = 15000 }, {}, { minigame = true, tool = { item = 'drill', consume = false } }),
             target('safe', 'Casiers', 40, 'lockpick', { min = 2000, max = 4500 }, {}, { minigame = true, tool = { item = 'lockpick', consume = true } }),

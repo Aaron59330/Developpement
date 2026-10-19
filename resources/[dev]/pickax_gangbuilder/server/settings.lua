@@ -125,7 +125,7 @@ local function cleanGangTypes(v)
         local entry = {
             label = str(t.label, 40, key),
             color = (type(t.color) == 'string' and t.color:match('^#%x%x%x%x%x%x$')) and t.color:lower() or '#ef4444',
-            blip = { sprite = int(blip.sprite, 0, 900, 310), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, 0.9) },
+            blip = { sprite = int(blip.sprite, 0, 900, 310), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9)) },
             actions = {}, points = {}, grades = {},
         }
         for _, a in ipairs(type(t.actions) == 'table' and t.actions or {}) do

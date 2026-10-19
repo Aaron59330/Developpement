@@ -107,7 +107,7 @@ local function cleanSettings(s, old)
     out.mode = s.mode == 'clothing' and 'clothing' or 'items'
 
     local b = type(s.blip) == 'table' and s.blip or {}
-    out.blip = { enabled = b.enabled == true, sprite = int(b.sprite, 0, 900, 52), color = int(b.color, 0, 85, 0), scale = num(b.scale, 0.1, 3.0, 0.8),
+    out.blip = { enabled = b.enabled == true, sprite = int(b.sprite, 0, 900, 52), color = int(b.color, 0, 85, 0), scale = num(b.scale, 0.1, 3.0, (PickaxTheme and PickaxTheme.blipScale or 0.8)),
         label = str(b.label, 60, ''), shortRange = b.shortRange ~= false }
 
     local p = type(s.ped) == 'table' and s.ped or {}
@@ -275,7 +275,7 @@ ESX.RegisterServerCallback('shopbuilder:create', function(src, cb, typeId, label
 
     local settings = cleanSettings({
         mode = tpl.mode,
-        blip = { enabled = tpl.blip ~= nil, sprite = tpl.blip and tpl.blip.sprite or 52, color = tpl.blip and tpl.blip.color or 0, scale = 0.8, shortRange = true },
+        blip = { enabled = tpl.blip ~= nil, sprite = tpl.blip and tpl.blip.sprite or 52, color = tpl.blip and tpl.blip.color or 0, scale = (PickaxTheme and PickaxTheme.blipScale or 0.8), shortRange = true },
         ped = { enabled = tpl.ped ~= nil, model = tpl.ped or '', scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
         payments = tpl.payments or { cash = true, bank = true },
         clothing = tpl.clothing or {},

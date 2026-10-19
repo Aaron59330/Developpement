@@ -1,4 +1,7 @@
 Config = {}
+-- Taille des blips par défaut : celle de tout le serveur (pickax_core/config.lua → Config.GlobalBlip.Scale), sinon la valeur donnée.
+-- Un blip réglé en jeu dans un builder garde sa taille.
+local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or default end
 -- Marker par défaut des points : celui de tout le serveur (pickax_core/config.lua → Config.GlobalMarker).
 -- Un réglage fait en jeu dans le builder (Paramètres / éditeur) est enregistré et reste prioritaire.
 local PK_MK = PickaxTheme and PickaxTheme.marker
@@ -490,8 +493,8 @@ Config.Real = {
     ShowBlips         = true,   -- blips des biens disponibles
     RentCheckMinutes  = 5,      -- fréquence de vérification des loyers impayés
     Blips = {
-        sale = { sprite = 374, color = 2, scale = 0.65 },
-        rent = { sprite = 374, color = 3, scale = 0.65 },
+        sale = { sprite = 374, color = 2, scale = PK_BSF(0.65) },
+        rent = { sprite = 374, color = 3, scale = PK_BSF(0.65) },
     },
     -- Markers des portes / sorties (base commune : type 25, turquoise ; éditables en jeu)
     Markers = {
@@ -546,7 +549,7 @@ Config.Real = {
 -- Chaque template pré-remplit le builder (grades, blip, actions). Tout reste modifiable dans l'UI.
 Config.JobTypes = {
     police = {
-        label = 'Police', blip = { sprite = 60, color = 29, scale = 0.9 },
+        label = 'Police', blip = { sprite = 60, color = 29, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
@@ -558,7 +561,7 @@ Config.JobTypes = {
         },
     },
     ems = {
-        label = 'EMS / Ambulance', blip = { sprite = 61, color = 1, scale = 0.9 },
+        label = 'EMS / Ambulance', blip = { sprite = 61, color = 1, scale = PK_BSF(0.9) },
         actions = { 'revive', 'heal', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'shop', 'boss' },
         grades = {
@@ -569,7 +572,7 @@ Config.JobTypes = {
         },
     },
     bank = {
-        label = 'Banque', blip = { sprite = 108, color = 2, scale = 0.9 },
+        label = 'Banque', blip = { sprite = 108, color = 2, scale = PK_BSF(0.9) },
         actions = { 'invoice' },
         points = { 'cloakroom', 'stash', 'shop', 'boss' },
         grades = {
@@ -580,7 +583,7 @@ Config.JobTypes = {
         },
     },
     mecano = {
-        label = 'Mécano', blip = { sprite = 446, color = 5, scale = 0.9 },
+        label = 'Mécano', blip = { sprite = 446, color = 5, scale = PK_BSF(0.9) },
         actions = { 'repair', 'clean', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'tuning', 'shop', 'boss' },
         grades = {
@@ -591,7 +594,7 @@ Config.JobTypes = {
         },
     },
     taxi = {
-        label = 'Taxi', blip = { sprite = 198, color = 5, scale = 0.9 },
+        label = 'Taxi', blip = { sprite = 198, color = 5, scale = PK_BSF(0.9) },
         actions = { 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'boss' },
         grades = {
@@ -601,7 +604,7 @@ Config.JobTypes = {
         },
     },
     realestate = {
-        label = 'Agence immobilière', blip = { sprite = 374, color = 2, scale = 0.9 },
+        label = 'Agence immobilière', blip = { sprite = 374, color = 2, scale = PK_BSF(0.9) },
         actions = { 'invoice' },   -- 'properties' (gestion immobilière) est ajoutée automatiquement
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'boss' },
         grades = {
@@ -611,7 +614,7 @@ Config.JobTypes = {
         },
     },
     dealer = {
-        label = 'Concessionnaire', blip = { sprite = 225, color = 3, scale = 0.9 },
+        label = 'Concessionnaire', blip = { sprite = 225, color = 3, scale = PK_BSF(0.9) },
         actions = { 'invoice' },   -- 'dealership' (gestion concession) est ajoutée automatiquement
         points = { 'showroom', 'display', 'testdrive', 'cloakroom', 'stash', 'boss' },
         grades = {
@@ -622,7 +625,7 @@ Config.JobTypes = {
         },
     },
     government = {
-        label = 'Gouvernement', blip = { sprite = 419, color = 5, scale = 0.9 },
+        label = 'Gouvernement', blip = { sprite = 419, color = 5, scale = PK_BSF(0.9) },
         actions = { 'invoice' },   -- 'government' (trésor, taxes, subventions, annonces) est ajoutée automatiquement
         points = { 'cloakroom', 'stash', 'boss' },
         grades = {
@@ -633,7 +636,7 @@ Config.JobTypes = {
         },
     },
     bar = {
-        label = 'Bar / Restaurant', blip = { sprite = 93, color = 46, scale = 0.9 },
+        label = 'Bar / Restaurant', blip = { sprite = 93, color = 46, scale = PK_BSF(0.9) },
         actions = { 'invoice', 'serve' },
         points = { 'cloakroom', 'harvest', 'stash', 'kitchen', 'shop', 'boss' },
         grades = {
@@ -643,7 +646,7 @@ Config.JobTypes = {
         },
     },
     custom = {
-        label = 'Personnalisé', blip = { sprite = 478, color = 0, scale = 0.9 },
+        label = 'Personnalisé', blip = { sprite = 478, color = 0, scale = PK_BSF(0.9) },
         actions = { 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'armory', 'stash', 'boss', 'shop' },
         grades = {
