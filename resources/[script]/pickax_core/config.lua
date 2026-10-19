@@ -1,4 +1,6 @@
 Config = {
+	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB). Après modification : restart pickax_theme puis relance des ressources (ou reconnexion)
+
 	DisableTitle = true,--Si vous utilisez une bannière alors mettez true pour enlever le title des menu en RageUI si nécessaire
 	DisableMenuskin = false,--Mettre true si vous utiliser un autre skinMenu
 

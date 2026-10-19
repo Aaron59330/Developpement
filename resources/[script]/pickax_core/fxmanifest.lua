@@ -192,6 +192,7 @@ loadscreen 'loading/index.html'
 loadscreen_cursor 'yes'
 
 files {
+    'config.lua',   -- lu par pickax_theme (Config.AccentColor)
     'loading/index.html',
     'loading/style.css',
     'loading/index.js',

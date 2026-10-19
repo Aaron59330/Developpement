@@ -1,10 +1,12 @@
 # pickax_theme — couleur principale commune
 
-Pour changer le bleu (`#00a4ff`) de **toutes** les interfaces : ouvre `theme.js`, modifie la ligne
+Pour changer le bleu (`#00a4ff`) de **toutes** les interfaces : ouvre `pickax_core/config.lua` et modifie
 
-```js
-window.PICKAX_ACCENT = '#00a4ff';
+```lua
+AccentColor = '#00a4ff',
 ```
+
+(`theme.js` contient la même couleur comme valeur de secours si le fichier du core est illisible.)
 
 puis `restart pickax_theme` et relance les ressources voulues (ou reconnecte-toi).
 
