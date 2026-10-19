@@ -1,3 +1,23 @@
+-- Carburant : SetFuel / GetFuel globaux (utilisés par le contextMenu, les véhicules de job…).
+-- Compatible ox_fuel / LegacyFuel, sinon natif.
+function SetFuel(veh, level)
+	if not veh or not DoesEntityExist(veh) then return end
+	level = math.max(0.0, math.min(100.0, (tonumber(level) or 0) + 0.0))
+	if GetResourceState('ox_fuel') == 'started' then Entity(veh).state.fuel = level end
+	if GetResourceState('LegacyFuel') == 'started' then pcall(function() exports['LegacyFuel']:SetFuel(veh, level) end) end
+	SetVehicleFuelLevel(veh, level)
+end
+
+function GetFuel(veh)
+	if not veh or not DoesEntityExist(veh) then return 0.0 end
+	if GetResourceState('ox_fuel') == 'started' then return Entity(veh).state.fuel or GetVehicleFuelLevel(veh) end
+	if GetResourceState('LegacyFuel') == 'started' then
+		local ok, v = pcall(function() return exports['LegacyFuel']:GetFuel(veh) end)
+		if ok and v then return v end
+	end
+	return GetVehicleFuelLevel(veh)
+end
+
 ESXCustom_Function_ClientSide = {}
 
 function ESXCustom_Function_ClientSide:LoadDict(dict)
