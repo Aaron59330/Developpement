@@ -40,6 +40,7 @@ function build(d) {
       <div class="tag">Menu pause</div><div class="menu">${menu}${exits.length ? '<div class="sep"></div>' + exits.join('') : ''}</div>
       <div class="foot"><kbd>↑</kbd><kbd>↓</kbd> naviguer <kbd>Entrée</kbd> valider <kbd>Échap</kbd> reprendre</div></div>
     <div class="right">
+      <div class="clock"><b id="clk2"></b><span id="dte"></span></div>
       <div class="card"><div class="who"><div class="av">${esc(initials(p.name))}</div><div><h2>${esc(p.name)}</h2><small>ID ${esc(p.id)}</small></div></div>
         <div class="chips">${p.job ? `<span class="chip blue">Métier <b>${esc(p.job)}${p.grade ? ' · ' + esc(p.grade) : ''}</b></span>` : ''}${p.job2 ? `<span class="chip">Organisation <b>${esc(p.job2)}${p.grade2 ? ' · ' + esc(p.grade2) : ''}</b></span>` : ''}<span class="chip">${ic('clock')}<b id="sess">0 min</b> de session</span></div>
         <div class="money"><div class="m g"><span>Liquide</span><b>${money(p.money)}</b></div><div class="m b"><span>Banque</span><b>${money(p.bank)}</b></div><div class="m r"><span>Argent sale</span><b>${money(p.dirty)}</b></div></div></div>
@@ -57,6 +58,7 @@ function setFocus(i) {
 }
 
 const clock = () => {
+  const c2 = document.getElementById('clk2'); if (c2) { const n = new Date(); c2.textContent = n.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); const d = document.getElementById('dte'); if (d) d.textContent = n.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); }
   const e = document.getElementById('clk'); if (e) e.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const s = document.getElementById('sess'); if (s) s.textContent = fmt((Date.now() - opened) / 1000);
 };
