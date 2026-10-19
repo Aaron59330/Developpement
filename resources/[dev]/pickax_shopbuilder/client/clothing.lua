@@ -151,7 +151,8 @@ end
 
 -- Items à envoyer au serveur selon le mode ; nil = rien n'a changé (pas d'achat)
 local function purchaseItems(snapshot, restrict, cb)
-    if Config.ClothingMode() == 'outfit' then
+    local mode = Config.ClothingMode(restrict)
+    if mode == 'outfit' then
         return anyChange(snapshot, restrict, function(changed)
             if not changed then return cb(nil) end
             TriggerEvent('skinchanger:getSkin', function(skin)
@@ -160,17 +161,18 @@ local function purchaseItems(snapshot, restrict, cb)
             end)
         end)
     end
-    if Config.ClothingMode() == 'items' then
+    if mode == 'items' then
         return changedClothingItems(snapshot, function(items) cb(#items > 0 and items or nil) end)
     end
     anyChange(snapshot, restrict, function(changed) cb(changed and {} or nil) end)
 end
 
 -- Après paiement : enregistre le skin et, avec p_itemclothes, resynchronise les emplacements de vêtements portés
-local function afterPurchase()
-    if Config.ClothingMode() == 'outfit' then return end      -- le look reste celui d'avant : la tenue est dans l'inventaire
+local function afterPurchase(restrict)
+    local mode = Config.ClothingMode(restrict)
+    if mode == 'outfit' then return end      -- le look reste celui d'avant : la tenue est dans l'inventaire
     Config.SaveSkin()
-    if Config.ClothingMode() == 'p_itemclothes' then
+    if mode == 'p_itemclothes' then
         SetTimeout(300, function() TriggerEvent('p_itemclothes/client/updateClothes') end)
     end
 end
@@ -178,6 +180,9 @@ end
 local function notifyBought(res)
     if res.outfit then
         return ESX.ShowNotification(('~g~Tenue achetée pour %s%s — glisse-la sur la case Tenue de ton inventaire pour la porter'):format(res.paid, Config.Currency), nil, nil, 'shop')
+    end
+    if not res.items or res.items == 0 then
+        return ESX.ShowNotification(('~g~Nouveau style payé %s%s'):format(res.paid, Config.Currency), nil, nil, 'shop')      -- coiffeur / barbier : pas de tenue
     end
     local extra = (res.items and res.items > 0) and (' — %d vêtement(s) ajouté(s) à ton inventaire'):format(res.items) or ''
     ESX.ShowNotification(('~g~Tenue achetée pour %s%s%s'):format(res.paid, Config.Currency, extra), nil, nil, 'shop')
@@ -190,8 +195,8 @@ function CabinConfirm(cb)
         if not items then return cb({ ok = false, error = 'Aucun vêtement modifié : rien à acheter' }) end
         ESX.TriggerServerCallback('shopbuilder:clothing:pay', function(res)
             if res and res.ok then
-                EndCabin(Config.ClothingMode() == 'outfit')      -- mode tenue : on restaure le look d'avant l'essayage
-                afterPurchase()
+                EndCabin(Config.ClothingMode(c.cur.restrict) == 'outfit')      -- mode tenue : on restaure le look d'avant l'essayage
+                afterPurchase(c.cur.restrict)
                 notifyBought(res)
                 cb({ ok = true })
             else
@@ -220,8 +225,8 @@ function StartClothing(cur, method)
                 end
                 ESX.TriggerServerCallback('shopbuilder:clothing:pay', function(res)
                     if res and res.ok then
-                        if Config.ClothingMode() == 'outfit' then Config.RestoreSkin() end
-                        afterPurchase()
+                        if Config.ClothingMode(cur.restrict) == 'outfit' then Config.RestoreSkin() end
+                        afterPurchase(cur.restrict)
                         notifyBought(res)
                     else
                         Config.RestoreSkin()

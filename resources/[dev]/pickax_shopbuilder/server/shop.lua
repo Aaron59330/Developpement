@@ -251,9 +251,18 @@ end)
 -- ─────────────────────────────── Vêtements / coiffeur : paiement à la validation de la tenue ───────────────────────────────
 -- Valide les items de vêtements demandés par le client : groupe connu, clés du groupe uniquement, valeurs entières bornées,
 -- et groupe réellement modifiable dans cette boutique (parties cochées dans le builder).
+local function shopRestrict(shop)
+    local r = {}
+    for _, id in ipairs(shop.settings.clothing and shop.settings.clothing.parts or {}) do
+        local part = Config.ClothingParts[id]
+        if part then for _, k in ipairs(part.keys) do r[#r + 1] = k end end
+    end
+    return r
+end
+
 local function cleanClothingItems(shop, list)
     local ci = Config.ClothingItems
-    if Config.ClothingMode() ~= 'items' or SB.inventory() ~= 'ox' then return {} end
+    if Config.ClothingMode(shopRestrict(shop)) ~= 'items' or SB.inventory() ~= 'ox' then return {} end
     local allowed = {}
     for _, id in ipairs(shop.settings.clothing and shop.settings.clothing.parts or {}) do
         local part = Config.ClothingParts[id]
@@ -291,7 +300,7 @@ ESX.RegisterServerCallback('shopbuilder:clothing:pay', function(src, cb0, shopId
     local entries, ierr = cleanClothingItems(shop, items)
     if not entries then return cb(fail(ierr)) end
     -- mode « tenue » : le client envoie le look complet, le serveur le nettoie et en fait un item
-    local outfitMode = Config.ClothingMode() == 'outfit' and SB.inventory() == 'ox'
+    local outfitMode = Config.ClothingMode(shopRestrict(shop)) == 'outfit' and SB.inventory() == 'ox'
     local outfit, outfitItem
     if outfitMode then
         outfit = type(items) == 'table' and exports.p_outfits:sanitize(items.outfit) or nil
@@ -303,7 +312,7 @@ ESX.RegisterServerCallback('shopbuilder:clothing:pay', function(src, cb0, shopId
         end
         if not exports.ox_inventory:CanCarryItem(src, outfitItem, 1) then return cb(fail('Pas assez de place ou de poids dans ton inventaire')) end
     end
-    local asItems = Config.ClothingMode() == 'items' and SB.inventory() == 'ox'
+    local asItems = Config.ClothingMode(shopRestrict(shop)) == 'items' and SB.inventory() == 'ox'
     if asItems and #entries == 0 then return cb(fail('Aucun vêtement modifié : rien à acheter')) end
     for _, e in ipairs(entries) do
         if not exports.ox_inventory:Items(e.name) then

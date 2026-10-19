@@ -92,7 +92,20 @@ Config.ClothingItems = {
     },
 }
 
-function Config.ClothingMode()
+-- Parties « esthétiques » (coiffeur, barbier, maquillage) : jamais de tenue ni de vêtement en item, le skin est simplement modifié et enregistré.
+local COSMETIC = {}
+for _, id in ipairs({ 'hair', 'beard', 'makeup' }) do
+    for _, k in ipairs((Config.ClothingParts[id] or {}).keys or {}) do COSMETIC[k] = true end
+end
+function Config.CosmeticOnly(restrict)
+    if type(restrict) ~= 'table' or #restrict == 0 then return false end
+    for _, k in ipairs(restrict) do if not COSMETIC[k] then return false end end
+    return true
+end
+
+-- restrict (optionnel) : clés modifiables dans la boutique ; uniquement du coiffeur / barbe / maquillage → mode 'none' (pas de tenue)
+function Config.ClothingMode(restrict)
+    if Config.CosmeticOnly(restrict) then return 'none' end
     local ci = Config.ClothingItems
     if ci.mode ~= 'auto' then return ci.mode end
     if GetResourceState('p_outfits') == 'started' then return 'outfit' end
