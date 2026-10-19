@@ -231,16 +231,16 @@ escrow_ignore {
 
 data_file 'WEAPONINFO_FILE_PATCH' 'utils/weapon/weapons.meta'
 
-data_file 'DLC_ITYP_REQUEST' 'stream/loq_atm.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon_emotes.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon2_props.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon3_props.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/apple_1.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon4_props.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon5_pizzas.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon6_props_lollipops.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/ultra_ringcase.ytyp'
-data_file 'DLC_ITYP_REQUEST' 'stream/addon7_props.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[ATMRobberry]/loq_atm.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon_emotes.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon2_props.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon3_props.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/apple_1.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon4_props.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon5_pizzas.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon6_props_lollipops.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/ultra_ringcase.ytyp'
+data_file 'DLC_ITYP_REQUEST' 'stream/[Props]/addon7_props.ytyp'
 
 dependencies {
     'es_extended',
