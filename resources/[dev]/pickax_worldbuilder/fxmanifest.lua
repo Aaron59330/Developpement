@@ -7,7 +7,7 @@ description 'World Builder ESX : crée en jeu des garages, fourrières, location
 version '1.0.0'
 
 shared_scripts {
-    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
+    'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
 }
 

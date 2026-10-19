@@ -15,7 +15,7 @@ files {
 }
 
 client_scripts {
-    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
+    'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
     'client.lua'
 }

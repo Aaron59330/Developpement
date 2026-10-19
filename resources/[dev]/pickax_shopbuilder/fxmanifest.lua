@@ -7,7 +7,7 @@ description 'Shop Builder ESX : crée n\'importe quelle boutique (supérette, ar
 version '1.0.0'
 
 shared_scripts {
-    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
+    'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
 }
 

@@ -222,7 +222,15 @@ end)
 local function openJobMenu()
     local jc = State.jobConfig
     if not jc then
-        JBNotify('~r~Aucune action disponible pour ton métier.')
+        -- données du métier pas encore reçues (job tout juste créé / attribué) : on les redemande au serveur puis on réessaie une fois
+        TriggerServerEvent('jobbuilder:server:requestSync')
+        local t = GetGameTimer()
+        while not State.jobConfig and GetGameTimer() - t < 1200 do Wait(50) end
+        jc = State.jobConfig
+    end
+    if not jc then
+        local pd = ESX.GetPlayerData() or {}
+        JBNotify(('~r~Ton métier actuel (%s) n\'a pas de menu : il doit être créé avec le Job Builder (/jobbuilder) et tu dois y être embauché.'):format(pd.job and pd.job.name or '?'))
         return
     end
     local actions = {}
@@ -238,24 +246,38 @@ local function openJobMenu()
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
 
-RegisterCommand(Config.JobMenuCommand, function()
+local lastToggle = 0
+local function toggleJobMenu(from)
+    if GetGameTimer() - lastToggle < 400 then return end      -- la touche F6 peut arriver par la commande ET par le contrôle : une seule ouverture
+    lastToggle = GetGameTimer()
     -- état coincé (menu marqué ouvert alors que le NUI n'a plus le focus, ex. fermé par un autre script) : on le réinitialise
     if uiOpen and not IsNuiFocused() then
         uiOpen = false
         setWalkMenu(false)
     end
-    if not uiOpen then
-        if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then
-            JBNotify('~r~Tu ne peux pas ouvrir le menu métier en étant inconscient.')
-            return
-        end
-        local ok, err = pcall(openJobMenu)
-        if not ok then
-            print(('^1[jobbuilder] menu F6 : %s^0'):format(tostring(err)))
-            JBNotify('~r~Menu métier indisponible (voir la console F8).')
-        end
-    elseif walkMenu then CloseUI() end
-end, false)
+    if uiOpen then
+        if walkMenu then CloseUI() end
+        return
+    end
+    if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then
+        JBNotify('~r~Tu ne peux pas ouvrir le menu métier en étant inconscient.')
+        return
+    end
+    local ok, err = pcall(openJobMenu)
+    if not ok then
+        print(('^1[jobbuilder] menu F6 (%s) : %s^0'):format(from or '?', tostring(err)))
+        JBNotify('~r~Menu métier indisponible (voir la console F8).')
+    end
+end
+
+RegisterCommand(Config.JobMenuCommand, function() toggleJobMenu('commande') end, false)
+-- Filet de sécurité : si le raccourci clavier enregistré (RegisterKeyMapping) a été perdu / réattribué dans les paramètres FiveM, F6 (contrôle 167) ouvre quand même le menu
+CreateThread(function()
+    while true do
+        Wait(0)
+        if IsControlJustPressed(0, 167) and not IsNuiFocused() then toggleJobMenu('touche F6') end
+    end
+end)
 RegisterKeyMapping(Config.JobMenuCommand, 'Menu métier', 'keyboard', Config.JobMenuKey)
 
 RegisterNetEvent('jobbuilder:client:openBuilder', function()
