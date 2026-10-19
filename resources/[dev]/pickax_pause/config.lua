@@ -1,7 +1,7 @@
 Config = {}
 
-Config.ServerName = 'Bluebay Roleplay'
-Config.Tagline    = 'RP sérieux · Free-Access'
+Config.ServerName = (PickaxTheme and PickaxTheme.name) or 'Bluebay Roleplay'   -- réglé dans pickax_core/config.lua
+Config.Tagline    = (PickaxTheme and PickaxTheme.tagline) or 'RP sérieux · Free-Access'
 
 -- Ouverture : ÉCHAP (et P). Le vrai menu pause GTA reste accessible via les boutons « Carte » / « Paramètres ».
 Config.OpenKeys   = { 200, 199 }
@@ -13,7 +13,7 @@ Config.FrontendTabs = { map = 0, settings = 6 }
 
 -- Raccourcis affichés dans le menu (url ouverte dans le navigateur) — laisse vide pour masquer
 Config.Links = {
-    { label = 'Discord',    icon = 'discord', url = 'https://discord.gg/bluebayrp' },
+    { label = 'Discord',    icon = 'discord', url = 'https://' .. ((PickaxTheme and PickaxTheme.discord) or 'discord.gg/bluebayrp') },
     { label = 'Règlement',  icon = 'book',    url = '' },
     { label = 'Boutique',   icon = 'cart',    url = '' },
 }

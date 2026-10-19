@@ -3,10 +3,11 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_theme'
-description 'Thème général Pickax : la couleur principale de TOUTES les interfaces se règle en une ligne dans theme.js'
+description 'Thème général Pickax : couleur, nom et logo communs à toutes les interfaces (réglés dans pickax_core/config.lua)'
 version '1.0.0'
 
 -- Pas de script : ressource de données.
---  • theme.js  : la config (couleur principale) + application automatique aux interfaces NUI
+--  • theme.js  : valeurs de secours + application automatique aux interfaces NUI (couleur, nom, logo)
+--  • logo/     : logo du serveur (logo/logo.png par défaut, remplaçable)
 --  • theme.lua : inclus par les autres ressources ('@pickax_theme/theme.lua') pour lire la même couleur côté Lua
-files { 'theme.js', 'theme.lua' }
+files { 'theme.js', 'theme.lua', 'logo/*' }

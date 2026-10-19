@@ -12,7 +12,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .left { display: flex; flex-direction: column; padding: 6vh 4vw 5vh 5vw; border-right: 1px solid var(--line); background: linear-gradient(180deg, rgba(22, 23, 28, .6), rgba(22, 23, 28, .9)); animation: slideL .4s cubic-bezier(.2, .9, .3, 1); }
 @keyframes slideL { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
 .brand { display: flex; align-items: center; gap: 16px; margin-bottom: 5vh; }
-.brand img { width: 62px; height: 62px; border-radius: 18px; object-fit: cover; box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(var(--pk-accent-rgb,0,164,255),.25); background: #0e0f13; }
+.brand img { width: 62px; height: 62px; border-radius: 18px; object-fit: contain; box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(var(--pk-accent-rgb,0,164,255),.25); background: #0e0f13; }
 .brand h1 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
 .brand p { color: var(--muted); font-size: 13px; margin-top: 4px; letter-spacing: .3px; }
 .tag { font-size: 11px; letter-spacing: 3px; color: var(--accent); font-weight: 700; margin-bottom: 14px; text-transform: uppercase; }

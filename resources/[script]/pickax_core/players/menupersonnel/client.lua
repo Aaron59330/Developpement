@@ -27,13 +27,13 @@ local Action = {
 local Prefs = {
 	Styles = {
 		{ id = 'noir', name = 'Noir' }, { id = 'verre', name = 'Verre' }, { id = 'clair', name = 'Clair' },
-		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Bleu BlueBay' },
+		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Couleur du serveur' },
 	},
 	Sizes = { { id = 'sm', name = 'Petit' }, { id = 'md', name = 'Moyen' }, { id = 'lg', name = 'Grand' } },
 	-- Couleurs : liste de préréglages + "Personnalisé" (Entrée = saisir un code #RRGGBB au clavier)
 	Colors = {
 		{ key = 'accent', label = 'Couleur principale', desc = 'Barre, détails et accents des menus', noDefault = true, presets = {
-			{ '#00a4ff', 'Bleu BlueBay' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
+			{ (PickaxTheme and PickaxTheme.hex) or '#00a4ff', 'Couleur du serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
 			{ '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
 		{ key = 'bg', label = 'Fond du menu', desc = 'Couleur de fond des menus', presets = {
 			{ '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' },

@@ -1,17 +1,22 @@
-# pickax_theme — couleur principale commune
+# pickax_theme — identité commune du serveur
 
-Pour changer le bleu (`#00a4ff`) de **toutes** les interfaces : ouvre `pickax_core/config.lua` et modifie
+Tout se règle en haut de `pickax_core/config.lua` :
 
 ```lua
-AccentColor = '#00a4ff',
+AccentColor = '#00a4ff',            -- couleur principale
+ServerName = 'Bluebay Roleplay',    -- nom complet
+ServerShortName = 'BLUEBAY',        -- nom court (HUD, connexion, Discord…)
+ServerTagline = 'RP sérieux · Free-Access',
+ServerDiscord = 'discord.gg/bluebayrp',
+ServerLogo = 'logo.png',            -- fichier dans pickax_theme/logo/ (ou lien https://…)
 ```
 
-(`theme.js` contient la même couleur comme valeur de secours si le fichier du core est illisible.)
+Logo : remplace `logo/logo.png` (PNG transparent, idéalement carré 500×500) ou dépose ton image dans `logo/` et mets son nom dans `ServerLogo`.
 
-puis `restart pickax_theme` et relance les ressources voulues (ou reconnecte-toi).
+Après modification : `restart pickax_theme`, puis relance les ressources voulues (ou reconnecte-toi).
 
-- NUI (HUD, pause, CarPlay, builders, tablette, notifications, pickax_ui…) : chaque page charge `theme.js` et utilise les variables CSS `--pk-accent`, `--pk-accent-rgb`, `--pk-accent-light`, `--pk-accent-dark`.
-- Lua (menu contextuel, notify, pickax_ui, menu personnel, builders) : `shared_script '@pickax_theme/theme.lua'` → `PickaxTheme.hex` / `PickaxTheme.rgb`.
-- `ensure pickax_theme` doit être lancé **avant** les autres ressources (déjà en tête de `resources.cfg`).
-- Nouvelle interface : ajoute `<script src="https://cfx-nui-pickax_theme/theme.js"></script>` dans le `<head>` et utilise `var(--pk-accent, #00a4ff)` / `rgba(var(--pk-accent-rgb, 0,164,255), .3)` dans le CSS.
-- Exceptions : couleurs choisies par le joueur (menu personnel → Préférences) ou enregistrées en jeu dans un builder (Paramètres → Apparence) : elles priment sur le défaut.
+- NUI : chaque page charge `theme.js` (variables CSS `--pk-accent*`, `--pk-logo`, attributs `data-pk="name|short|tagline|discord"`, `data-pk-logo`).
+- Lua : `shared_script '@pickax_theme/theme.lua'` → `PickaxTheme.hex/.rgb/.name/.short/.tagline/.discord/.logo`.
+- `theme.js` contient des valeurs de secours si `pickax_core/config.lua` est illisible.
+- `server.cfg` (`sv_projectName`, `sets discord`…) reste à modifier à la main : ce fichier n'est pas lisible par les scripts.
+- Les choix faits en jeu par les joueurs (menu personnel) ou enregistrés dans un builder priment sur la couleur par défaut.

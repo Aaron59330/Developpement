@@ -1,7 +1,7 @@
 Config = {}
 
 --  Informations générales
-Config.ServerName = "Bienvenue sur BLUEBAY"
+Config.ServerName = "Bienvenue sur " .. ((PickaxTheme and PickaxTheme.short) or "BLUEBAY")   -- réglé dans pickax_core/config.lua
 Config.MaxClientsConvar = "sv_maxclients"
 
 --  File d'attente
@@ -9,7 +9,7 @@ Config.SecondsPerPlayer = 5
 Config.NoPlayerText = "Aucun joueur en connexion"
 
 --  Liens
-Config.DiscordURL = "https://discord.gg/JGxkBuckU"
+Config.DiscordURL = "https://discord.gg/JGxkBuckU"   -- (lien propre à l'écran de connexion)
 Config.ShopURL = "https://bluebayrp.tebex.io/"
 
 --  Textes

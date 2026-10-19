@@ -45,6 +45,6 @@ end
 
 -- Liens ouverts depuis le menu personnel (https uniquement)
 ConfigMenuF5.Links = {
-	Discord = "https://discord.gg/bluebayrp",
+	Discord = "https://" .. ((PickaxTheme and PickaxTheme.discord) or "discord.gg/bluebayrp"),
 	Boutique = "https://bluebayrp.tebex.io/",
 }

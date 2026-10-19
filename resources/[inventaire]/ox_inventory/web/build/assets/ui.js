@@ -300,7 +300,9 @@
     const cfg = window.INVENTORY_THEME || {};
     const logo = $('#logo');
     if (cfg.logo === false) logo.style.display = 'none';
+    else if (window.PICKAX_LOGO) logo.src = window.PICKAX_LOGO;     // logo commun du serveur (pickax_core/config.lua → ServerLogo)
     else if (typeof cfg.logo === 'string' && cfg.logo) logo.src = cfg.logo;
+    window.addEventListener('pickax-theme', () => { if (cfg.logo !== false && window.PICKAX_LOGO) logo.src = window.PICKAX_LOGO; });
     // contour des cases (couleur, opacité, épaisseur, on/off)
     {
       const root = document.documentElement.style;

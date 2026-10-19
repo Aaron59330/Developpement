@@ -6,7 +6,7 @@ name 'pickax_pause'
 description 'Menu pause Pickax : remplace la carte GTA à ÉCHAP par un menu stylé (joueur, serveur, raccourcis)'
 version '1.0.0'
 
-shared_script 'config.lua'
+shared_scripts { '@pickax_theme/theme.lua', 'config.lua' }
 server_script 'server.lua'
 client_script 'client.lua'
 

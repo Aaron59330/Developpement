@@ -194,9 +194,8 @@ select option { background: #151516; color: #fff; }
 /* Logo serveur (recadré sur la zone utile du PNG) */
 .head { position: relative; }
 .server-logo {
-	margin-left: auto; width: 150px; height: 54px; flex-shrink: 0;
-	background: url("../img/logo.png") no-repeat;
-	background-size: 160px 160px; background-position: -5px -51px;
+	margin-left: auto; width: 150px; height: 64px; flex-shrink: 0;
+	background: var(--pk-logo, url("../img/logo.png")) no-repeat center / contain;
 	filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
 	opacity: .95; animation: rise .6s .2s ease-out both;
 }

@@ -1,5 +1,13 @@
 Config = {
-	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB). Après modification : restart pickax_theme puis relance des ressources (ou reconnexion)
+	-- ══════════ IDENTITÉ DU SERVEUR (appliquée à toutes les interfaces) ══════════
+	-- Après modification : restart pickax_theme puis relance des ressources (ou reconnexion).
+	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
+	ServerName = 'Bluebay Roleplay',--Nom complet du serveur (menu pause, identité, textes…)
+	ServerShortName = 'BLUEBAY',--Nom court (HUD, écran de connexion, Discord, menus RageUI…)
+	ServerTagline = 'RP sérieux · Free-Access',--Slogan affiché sous le nom
+	ServerDiscord = 'discord.gg/bluebayrp',--Invitation Discord (sans https://)
+	ServerLogo = 'logo.png',--Logo principal : fichier placé dans pickax_theme/logo/ (HUD, inventaire, pause, identité…) ou lien https://...
+	-- ═════════════════════════════════════════════════════════════════════════
 
 	DisableTitle = true,--Si vous utilisez une bannière alors mettez true pour enlever le title des menu en RageUI si nécessaire
 	DisableMenuskin = false,--Mettre true si vous utiliser un autre skinMenu

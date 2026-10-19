@@ -36,7 +36,7 @@ function build(d) {
   if (b.quit !== false) exits.push(`<button class="btn danger" data-k="quit" style="animation-delay:.25s"><span class="ico">${ic('power')}</span>Quitter le jeu</button>`);
   const pct = s.max ? Math.min(100, Math.round((s.online || 0) / s.max * 100)) : 0;
   const links = (c.links || []).filter(l => l.url);
-  $root.innerHTML = `<div class="left"><div class="brand"><img src="logo.png" alt=""><div><h1>${esc(c.name)}</h1><p>${esc(c.tagline)}</p></div></div>
+  $root.innerHTML = `<div class="left"><div class="brand"><img src="${window.PICKAX_LOGO || 'logo.png'}" alt=""><div><h1>${esc(c.name)}</h1><p>${esc(c.tagline)}</p></div></div>
       <div class="tag">Menu pause</div><div class="menu">${menu}${exits.length ? '<div class="sep"></div>' + exits.join('') : ''}</div>
       <div class="foot"><kbd>↑</kbd><kbd>↓</kbd> naviguer <kbd>Entrée</kbd> valider <kbd>Échap</kbd> reprendre</div></div>
     <div class="right">
