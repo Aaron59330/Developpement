@@ -18,6 +18,7 @@ end
 local function openMenu()
     if open then return end
     open = true
+    TriggerEvent('pickax:inventory', true)   -- les HUD (hud1/2, minimap, compteur, voix, notifs) se masquent comme avec l'inventaire
     ESX.TriggerServerCallback('pickax_pause:info', function(srv)
         SendNUIMessage({
             action = 'open', player = playerData(), server = srv or {},
@@ -31,6 +32,7 @@ end
 local function closeMenu()
     if not open then return end
     open = false
+    TriggerEvent('pickax:inventory', false)
     lastClose = GetGameTimer()
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
@@ -75,7 +77,7 @@ CreateThread(function()
 end)
 
 AddEventHandler('onResourceStop', function(res)
-    if res == GetCurrentResourceName() and open then SetNuiFocus(false, false) TriggerScreenblurFadeOut(0) end
+    if res == GetCurrentResourceName() and open then SetNuiFocus(false, false) TriggerScreenblurFadeOut(0) TriggerEvent('pickax:inventory', false) end
 end)
 
 exports('IsOpen', function() return open end)
