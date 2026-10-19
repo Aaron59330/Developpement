@@ -1033,6 +1033,8 @@ ArgentSale = 0
 ArgentBanque = 0
 CheckboxApuyer = false
 noclip = false
+ctxNoclipSpeed = 1.0   -- vitesse du noclip du menu contextuel (molette : +/- 0.5, de 0.5 à 25)
+ctxNoclipShow = 0
 local function starts(String, Start)
     return string.sub(String, 1, string.len(Start)) == Start
 end
@@ -2892,11 +2894,27 @@ Citizen.CreateThread(function()
             local plyCoords = GetEntityCoords(plyPed, false)
             local camCoords = getCamDirection()
             SetEntityVelocity(plyPed, 0.01, 0.01, 0.01)
+            HideHudComponentThisFrame(19)   -- pas de roue des armes avec la molette
             if IsControlPressed(0, 32) then
-                plyCoords = plyCoords + (1 * camCoords)
+                plyCoords = plyCoords + (ctxNoclipSpeed * camCoords)
             end
             if IsControlPressed(0, 269) then
-                plyCoords = plyCoords - (1 * camCoords)
+                plyCoords = plyCoords - (ctxNoclipSpeed * camCoords)
+            end
+            -- Molette haut : accélérer / molette bas : ralentir (comme le noclip du menu admin)
+            -- FiveM : 15/17 = molette haut, 14/16 = molette bas
+            if IsControlJustPressed(0, 15) or IsControlJustPressed(0, 17) then
+                ctxNoclipSpeed = math.min(ctxNoclipSpeed + 0.5, 25.0)
+                ctxNoclipShow = GetGameTimer() + 1500
+            elseif IsControlJustPressed(0, 14) or IsControlJustPressed(0, 16) then
+                ctxNoclipSpeed = math.max(ctxNoclipSpeed - 0.5, 0.5)
+                ctxNoclipShow = GetGameTimer() + 1500
+            end
+            if GetGameTimer() < ctxNoclipShow then
+                SetTextFont(4) SetTextScale(0.0, 0.5) SetTextColour(255, 255, 255, 235) SetTextOutline() SetTextCentre(true)
+                BeginTextCommandDisplayText('STRING')
+                AddTextComponentSubstringPlayerName(('Vitesse noclip : ~b~x%.1f'):format(ctxNoclipSpeed))
+                EndTextCommandDisplayText(0.5, 0.9)
             end
             SetEntityCoordsNoOffset(plyPed, plyCoords, true, true, true)
         end
