@@ -32,6 +32,20 @@ end
 -- Appelé par Gangbuilder après création/suppression d'un métier secondaire.
 AddEventHandler('esx_society:refreshJobs2', RefreshSocietyJobs2)
 
+-- Charge (ou recharge) un métier depuis la base : les métiers créés en jeu (Job Builder) n'existaient pas dans le cache chargé au démarrage
+local function EnsureJob(name, force)
+	if not name or (Jobs[name] and not force) then return Jobs[name] end
+	local row = MySQL.Sync.fetchAll('SELECT * FROM jobs WHERE name = @name', { ['@name'] = name })
+	if not row or not row[1] then return nil end
+	local job = row[1]
+	job.grades = {}
+	local grades = MySQL.Sync.fetchAll('SELECT * FROM job_grades WHERE job_name = @name', { ['@name'] = name }) or {}
+	for i = 1, #grades do job.grades[tostring(grades[i].grade)] = grades[i] end
+	Jobs[name] = job
+	return job
+end
+AddEventHandler('esx_society:refreshJob', function(name) EnsureJob(name, true) end)
+
 MySQL.ready(function()
 	local result = MySQL.Sync.fetchAll('SELECT * FROM jobs', {})
 
@@ -274,6 +288,9 @@ ESX.RegisterServerCallback('esx_society:getEmployees', function(source, cb, soci
 			local employees = {}
 
 			for i=1, #results, 1 do
+				EnsureJob(results[i].job)
+				local J = Jobs[results[i].job]
+				if J and J.grades[tostring(results[i].job_grade)] then   -- métier / grade inconnu : employé ignoré au lieu de planter
 				table.insert(employees, {
 					name       = results[i].firstname .. ' ' .. results[i].lastname,
 					identifier = results[i].identifier,
@@ -285,6 +302,7 @@ ESX.RegisterServerCallback('esx_society:getEmployees', function(source, cb, soci
 						grade_label = Jobs[results[i].job].grades[tostring(results[i].job_grade)].label
 					},
 				})
+				end
 			end
 
 			print(#employees)
@@ -321,7 +339,9 @@ ESX.RegisterServerCallback('esx_society:getEmployees2', function(source, cb, soc
 end)
 
 ESX.RegisterServerCallback('esx_society:getJob', function(source, cb, society)
-	local job    = json.decode(json.encode(Jobs[society]))
+	EnsureJob(society)
+	local job    = Jobs[society] and json.decode(json.encode(Jobs[society]))
+	if not job then return cb(nil) end
 	local grades = {}
 
 	for k,v in pairs(job.grades) do
@@ -338,7 +358,8 @@ ESX.RegisterServerCallback('esx_society:getJob', function(source, cb, society)
 end)
 
 ESX.RegisterServerCallback('esx_society:getJob2', function(source, cb, society)
-	local job2    = json.decode(json.encode(Jobs2[society]))
+	local job2    = Jobs2[society] and json.decode(json.encode(Jobs2[society]))
+	if not job2 then return cb(nil) end
 	local grades = {}
 
 	for k,v in pairs(job2.grades) do
@@ -454,7 +475,8 @@ ESX.RegisterServerCallback('esx_society:setJobSalary', function(source, cb, job,
 				['@job_name'] = job,
 				['@grade']    = grade
 			}, function(rowsChanged)
-				Jobs[job].grades[tostring(grade)].salary = salary
+				EnsureJob(job)
+				if Jobs[job] and Jobs[job].grades[tostring(grade)] then Jobs[job].grades[tostring(grade)].salary = salary end
 				local xPlayers = ESX.GetPlayers()
 
 				for i=1, #xPlayers, 1 do
@@ -485,7 +507,8 @@ ESX.RegisterServerCallback('esx_society:setJobSalaryGouv', function(source, cb, 
 		['@job_name'] = job,
 		['@grade']    = grade
 	}, function(rowsChanged)
-		Jobs[job].grades[tostring(grade)].salary = salary
+		EnsureJob(job)
+		if Jobs[job] and Jobs[job].grades[tostring(grade)] then Jobs[job].grades[tostring(grade)].salary = salary end
 		local xPlayers = ESX.GetPlayers()
 
 		for i=1, #xPlayers, 1 do
