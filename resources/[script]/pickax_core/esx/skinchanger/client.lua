@@ -315,6 +315,15 @@ if not Config.DisableMenuskin then
 	end)
 end
 
+-- Protection du skin enregistré : le serveur refuse tout « esx_skin:save » tant que le skin enregistré n'a pas été réappliqué
+-- (sinon un script qui enregistre trop tôt, ex. p_itemclothes au chargement de l'inventaire, écrase les cheveux / l'apparence par le modèle par défaut).
+function SkinMarkReady()
+	Citizen.CreateThread(function()
+		Citizen.Wait(2500)   -- laisse le temps au modèle et à l'apparence d'être appliqués
+		TriggerServerEvent('CorePickax:skin:ready')
+	end)
+end
+
 AddEventHandler('playerSpawned', function()
 	Citizen.CreateThread(function()
 		while not PlayerLoaded do
@@ -328,6 +337,7 @@ AddEventHandler('playerSpawned', function()
 				else
 					TriggerEvent('skinchanger:loadSkin', skin)
 				end
+				SkinMarkReady()
 			end)
 
 			FirstSpawn = false
@@ -347,9 +357,12 @@ AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, savedSkin)
 			if FirstSpawn then
 				TriggerEvent('skinchanger:loadSkin', savedSkin)
 				FirstSpawn = false
+				SkinMarkReady()
 			end
 		end)
 	end
+	-- Nouveau personnage ou aucun skin enregistré : rien à protéger, les enregistrements du menu de création sont autorisés
+	if isNew or type(savedSkin) ~= 'table' or next(savedSkin) == nil then TriggerServerEvent('CorePickax:skin:ready') end
 end)
 
 AddEventHandler('esx_skin:getLastSkin', function(cb)

@@ -1,6 +1,17 @@
+-- Joueurs dont le skin enregistré a été réappliqué cette session (voir SkinMarkReady côté client)
+local skinReady = {}
+RegisterServerEvent('CorePickax:skin:ready')
+AddEventHandler('CorePickax:skin:ready', function() skinReady[source] = true end)
+AddEventHandler('playerDropped', function() skinReady[source] = nil end)
+
 RegisterServerEvent('esx_skin:save')
 AddEventHandler('esx_skin:save', function(skin)
 	local xPlayer = ESX.GetPlayerFromId(source)
+	if not xPlayer or type(skin) ~= 'table' then return end
+	if not skinReady[source] then
+		print(('^3[skinchanger] enregistrement du skin refusé pour %s : le skin enregistré n\'a pas encore été réappliqué (protection contre l\'écrasement)^0'):format(xPlayer.identifier))
+		return
+	end
 
 	MySQL.Async.execute('UPDATE users SET skin = @skin WHERE identifier = @identifier', {
 		['@skin'] = json.encode(skin),
