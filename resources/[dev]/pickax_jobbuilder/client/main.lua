@@ -238,7 +238,24 @@ local function openJobMenu()
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
 
-RegisterCommand(Config.JobMenuCommand, function() if not uiOpen then openJobMenu() elseif walkMenu then CloseUI() end end, false)
+RegisterCommand(Config.JobMenuCommand, function()
+    -- état coincé (menu marqué ouvert alors que le NUI n'a plus le focus, ex. fermé par un autre script) : on le réinitialise
+    if uiOpen and not IsNuiFocused() then
+        uiOpen = false
+        setWalkMenu(false)
+    end
+    if not uiOpen then
+        if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then
+            JBNotify('~r~Tu ne peux pas ouvrir le menu métier en étant inconscient.')
+            return
+        end
+        local ok, err = pcall(openJobMenu)
+        if not ok then
+            print(('^1[jobbuilder] menu F6 : %s^0'):format(tostring(err)))
+            JBNotify('~r~Menu métier indisponible (voir la console F8).')
+        end
+    elseif walkMenu then CloseUI() end
+end, false)
 RegisterKeyMapping(Config.JobMenuCommand, 'Menu métier', 'keyboard', Config.JobMenuKey)
 
 RegisterNetEvent('jobbuilder:client:openBuilder', function()
