@@ -90,7 +90,7 @@ Config.Chase = { ShowBlips = false, TickMs = 200, UiTickMs = 500, EndDelay = 8, 
 
 -- ─────────────────────────────── Apparence ───────────────────────────────
 Config.Marker = { type = 25, color = { 64, 224, 208 }, alpha = 140, scale = { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95 }
-Config.UI = { Accent = { 0, 164, 255 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
+Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────
 Config.Types = {

@@ -8697,7 +8697,7 @@ const nv = "" + new URL("light.67761956.svg",
                                     d: "M 0 0 a 180 180 0 1 1 260 0",
                                     strokeWidth: "16",
                                     style: {
-                                        stroke: "#00a4ff",
+                                        stroke: window.PICKAX_ACCENT || "#00a4ff",
                                         strokeMiterlimit: 10,
                                         strokeLinecap: "round",
                                         strokeOpacity: 1,

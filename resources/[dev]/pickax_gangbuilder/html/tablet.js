@@ -21,12 +21,12 @@ const TI = {
   gps: '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
 };
 const ti = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${TI[n] || TI.home}</svg>`;
-const hexToRgbStr = h => { h = String(h || '#00a4ff'); if (!/^#[0-9a-f]{6}$/i.test(h)) h = '#00a4ff'; return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', '); };
+const hexToRgbStr = h => { h = String(h || (window.PICKAX_ACCENT || '#00a4ff')); if (!/^#[0-9a-f]{6}$/i.test(h)) h = (window.PICKAX_ACCENT || '#00a4ff'); return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', '); };
 const tbInit = n => String(n || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 const tbTime = t => new Date(t * 1000).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const METRIC_ICON = { harvested: 'box', processed: 'bolt', sold: 'coins', laundered: 'coins', capture: 'flag', conflict_win: 'skull', objective: 'box', war_win: 'war' };
 const NEWS_ICON = { territory: 'flag', war: 'war', quest: 'quest', conflict: 'skull', objective: 'box', info: 'news' };
-const NEWS_COLOR = { war: '#f87171', territory: '#00a4ff', quest: '#4ade80', conflict: '#fbbf24', objective: '#a78bfa' };
+const NEWS_COLOR = { war: '#f87171', territory: (window.PICKAX_ACCENT || '#00a4ff'), quest: '#4ade80', conflict: '#fbbf24', objective: '#a78bfa' };
 const TB_LOG = {
   territory_captured: 'Territoire capturé', territory_income: 'Revenu de territoire', conflict_win: 'Affrontement gagné', objective_delivered: 'Colis livré',
   quest_done: 'Quête terminée', war_propose: 'Défi lancé', war_win: 'Guerre gagnée', war_loss: 'Guerre perdue', treasury_deposit: 'Dépôt', treasury_withdraw: 'Retrait',
@@ -71,7 +71,7 @@ const Tablet = {
 
   render(scroll) {
     const d = this.d, me = d.me;
-    const g = me.color || '#00a4ff';
+    const g = me.color || (window.PICKAX_ACCENT || '#00a4ff');
     const nav = [['home', 'home', 'Accueil'], ['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['rank', 'trophy', 'Classement'], ['news', 'news', 'Actus'], ['log', 'log', 'Journal']];
     const badge = { quest: this.claimable(), war: d.wars.incoming ? 1 : 0 };
     $root.innerHTML = `<div class="tb-device" style="--g:${esc(g)};--g-rgb:${hexToRgbStr(g)}"><div class="tb-cam"></div><div class="tb-screen">

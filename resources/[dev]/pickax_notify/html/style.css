@@ -5,8 +5,8 @@
     --notify-min-height: 65px;
     --notify-gap: 8px;
 
-    --accent: #00a4ff;
-    --accent-rgb: 0, 164, 255;
+    --accent: var(--pk-accent,#00a4ff);
+    --accent-rgb: var(--pk-accent-rgb,0,164,255);
     --panel-rgb: 22, 23, 28;
     --panel-alpha: .82;
     --text: #f7f7fb;
@@ -14,7 +14,7 @@
     --success: #5be39a;
     --error: #ff7373;
     --warning: #ffd86a;
-    --blue-text: #00a4ff;
+    --blue-text: var(--pk-accent,#00a4ff);
 
     --radius: 0px;
     --side-line-width: 4px;

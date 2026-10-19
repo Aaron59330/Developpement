@@ -470,7 +470,7 @@ Config.Gov = {
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
 -- Couleur d'accentuation de toute l'interface (boutons, onglet actif, pastilles, icônes, bordures teintées).
 -- Modifiable en direct par les _dev : /jobbuilder → Paramètres → Apparence (appliquée à tous les joueurs).
-Config.UI = { Accent = { 0, 164, 255 } }   -- bleu #00a4ff (modifiable en jeu)
+Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   -- bleu #00a4ff (modifiable en jeu)
 
 -- ─────────────────────────────── Immobilier ───────────────────────────────
 Config.Real = {

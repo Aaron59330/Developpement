@@ -1,5 +1,5 @@
-/* HUD voix pickax : pastilles en verre (gris #16171c) + accent bleu #00a4ff */
-:root { --accent: #00a4ff; --bg: rgba(22, 23, 28, .84); --line: rgba(255, 255, 255, .08); --dim: #8c8f99; }
+/* HUD voix pickax : pastilles en verre (gris #16171c) + accent bleu var(--pk-accent,#00a4ff) */
+:root { --accent: var(--pk-accent,#00a4ff); --bg: rgba(22, 23, 28, .84); --line: rgba(255, 255, 255, .08); --dim: #8c8f99; }
 html, body { margin: 0; background: transparent; overflow: hidden; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
 #app { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; pointer-events: none; }

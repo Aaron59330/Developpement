@@ -1,6 +1,6 @@
 'use strict';
 var $ = function (id) { return document.getElementById(id); };
-var COLORS = { r: '#f87171', g: '#4ade80', b: '#00a4ff', y: '#fbbf24', o: '#fb923c', p: '#c084fc', c: '#9ca3af', m: '#6b7280', u: '#000', w: '#fff', q: '#f472b6' };
+var COLORS = { r: '#f87171', g: '#4ade80', b: (window.PICKAX_ACCENT || '#00a4ff'), y: '#fbbf24', o: '#fb923c', p: '#c084fc', c: '#9ca3af', m: '#6b7280', u: '#000', w: '#fff', q: '#f472b6' };
 
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
@@ -69,7 +69,7 @@ function item(it) {
 
 function hexRgb(h) {
   var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || '');
-  return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : '0,164,255';
+  return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : (window.PICKAX_ACCENT_RGB || '0,164,255');
 }
 
 var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96 };
@@ -85,7 +85,7 @@ function applyCfgTo(w, c) {
   var st = w.style;
   w.setAttribute('data-style', c.style || 'noir');
   w.setAttribute('data-size', c.size || 'md');
-  st.setProperty('--accent', c.accent || '#00a4ff');
+  st.setProperty('--accent', c.accent || (window.PICKAX_ACCENT || '#00a4ff'));
   st.setProperty('--accent-rgb', hexRgb(c.accent));
   OVERRIDES.forEach(function (k) { st.removeProperty(k); });
   if (c.bg) st.setProperty('--card-bg', 'rgba(' + hexRgb(c.bg) + ',' + (STYLE_ALPHA[c.style] || .94) + ')');

@@ -7,6 +7,7 @@ description 'Job Builder ESX complet : jobs, grades, garages, vestiaires, armure
 version '1.0.0'
 
 shared_scripts {
+    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
 }
 

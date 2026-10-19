@@ -9,6 +9,7 @@ version '1.0'
 
 shared_scripts {
     '@es_extended/imports.lua',
+    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
 
     'init/shared/mute.lua',
     'esx/notify.lua',

@@ -10,7 +10,7 @@
   --ok: #4ade80;
   --warn: #fbbf24;
   --danger: #f87171;
-  --accent: #00a4ff;
+  --accent: var(--pk-accent,#00a4ff);
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }

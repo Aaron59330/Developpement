@@ -49,7 +49,7 @@ local Prefs = {
 	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
 
-local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
+local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end

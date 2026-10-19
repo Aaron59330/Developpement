@@ -264,7 +264,7 @@ Config.ActionRules = {
 }
 
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
-Config.UI = { Accent = { 0, 164, 255 } }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
+Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
 
 -- ─────────────────────────────── Modèles de gangs ───────────────────────────────
 -- Chaque modèle pré-remplit le builder (grades, blip, actions, points suggérés). Tout reste modifiable dans l'UI et ici.

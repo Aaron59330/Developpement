@@ -7,6 +7,7 @@ description 'Gang Builder ESX complet basé sur job2 : gangs, grades, garages, v
 version '1.0.0'
 
 shared_scripts {
+    '@pickax_theme/theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
 }
 

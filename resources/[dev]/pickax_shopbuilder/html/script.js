@@ -670,7 +670,7 @@ const Builder = {
         <div class="grid2 mt-s">${fld('Fonctionnement', this.sel('settings.mode', [['items', 'Catalogue de produits'], ['clothing', 'Cabine d\'essayage (vêtements / coiffeur)']], s.mode || 'items', { r: true }))}${fld('Message affiché aux clients (optionnel)', this.inp('settings.note', s.note, { extra: 'maxlength="200"', ph: 'Ex : Ouvert à tous, sans permis requis' }))}</div>
         <div class="mt">${this.chk('enabled', 'Boutique active (visible et utilisable par les joueurs)', c.enabled, true)}</div>
         ${c.enabled && noLoc ? `<div class="hint mt-s">⚠ Active mais sans emplacement : personne ne peut l'ouvrir.</div>` : ''}</div>
-      <div class="card" style="border-color:rgba(0,164,255,.35)"><div class="card-h"><div class="t">${ic('lock', 17)} Repères de gestion</div>${chip('Invisible aux joueurs', 'info nodot')}</div>
+      <div class="card" style="border-color:rgba(var(--pk-accent-rgb,0,164,255),.35)"><div class="card-h"><div class="t">${ic('lock', 17)} Repères de gestion</div>${chip('Invisible aux joueurs', 'info nodot')}</div>
         <div class="grid2">${fld('Nom interne / repère', this.inp('settings.tag', s.tag, { ph: 'Ex : Centre-ville, Sandy Shores…', extra: 'maxlength="40"' }))}${fld('Note privée', this.inp('settings.memo', s.memo, { ph: 'Ex : celle près du commissariat', extra: 'maxlength="500"' }))}</div>
         <div class="hint mt-s">Sert à reconnaître tes boutiques quand plusieurs ont le même nom : affiché dans la liste de gestion, jamais côté joueurs.</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('sliders', 17)} Apparence de la boutique</div>${s.color ? `<button class="sm" data-a="shopColorReset">Couleur par défaut</button>` : ''}</div>

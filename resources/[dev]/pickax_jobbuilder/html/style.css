@@ -10,8 +10,8 @@
   --ok: #4ade80;
   --warn: #fbbf24;
   --danger: #f87171;
-  --accent: #00a4ff;
-  --accent-rgb: 0, 164, 255;
+  --accent: var(--pk-accent,#00a4ff);
+  --accent-rgb: var(--pk-accent-rgb,0,164,255);
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -223,7 +223,7 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 
 /* ═════════════ Thème accent (couleur modifiable en jeu : Paramètres → Apparence) ═════════════ */
 :root {
-  --accent-rgb: 0, 164, 255;
+  --accent-rgb: var(--pk-accent-rgb,0,164,255);
   --accent: rgb(var(--accent-rgb));
   --accent-soft: rgba(var(--accent-rgb), .12);
   --accent-line: rgba(var(--accent-rgb), .5);
@@ -258,7 +258,7 @@ input[type=checkbox]:checked::after { border-color: var(--on-accent); }
 .chip.ok { color: var(--ok); background: rgba(74, 222, 128, .1); border-color: rgba(74, 222, 128, .35); }
 .chip.warn { color: var(--warn); background: rgba(251, 191, 36, .1); border-color: rgba(251, 191, 36, .35); }
 .chip.bad { color: var(--danger); background: rgba(248, 113, 113, .1); border-color: rgba(248, 113, 113, .35); }
-.chip.info { color: #00a4ff; background: rgba(0, 164, 255, .1); border-color: rgba(0, 164, 255, .35); }
+.chip.info { color: var(--pk-accent,#00a4ff); background: rgba(var(--pk-accent-rgb,0,164,255),.1); border-color: rgba(var(--pk-accent-rgb,0,164,255),.35); }
 .chip.mute { color: var(--muted); background: rgba(255, 255, 255, .04); border-color: var(--line); }
 #placement, #announce { border-color: var(--accent-line); }
 #placement .dots i.cur { outline-color: var(--accent); }

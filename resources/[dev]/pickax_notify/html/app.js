@@ -46,7 +46,7 @@ let uiSettings = {
     counterEnabled: true
 };
 
-function normalizeHexColor(value, fallback = '#00a4ff') {
+function normalizeHexColor(value, fallback = (window.PICKAX_ACCENT || '#00a4ff')) {
     const raw = String(value || '').trim();
     const hex = raw.startsWith('#') ? raw.slice(1) : raw;
     if (/^[0-9a-fA-F]{3}$/.test(hex)) return `#${hex.split('').map(c => c + c).join('')}`;
@@ -91,7 +91,7 @@ function cssLength(value, fallback) {
 function applyConfig(config = {}) {
     const root = document.documentElement;
 
-    const accent = normalizeHexColor(config.mainColor, '#00a4ff');
+    const accent = normalizeHexColor(config.mainColor, (window.PICKAX_ACCENT || '#00a4ff'));
     const accentRgb = hexToRgb(accent);
     const panel = normalizeHexColor(config.backgroundColor, '#070c12');
     const panelRgb = hexToRgb(panel, '#070c12');
