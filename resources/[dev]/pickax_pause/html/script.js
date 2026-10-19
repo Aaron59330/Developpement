@@ -70,15 +70,17 @@ function build(d) {
   const pct = s.max ? Math.min(100, Math.round((s.online || 0) / s.max * 100)) : 0;
   const links = (c.links || []).filter(l => l.url);
   $root.innerHTML = `<div class="left"><div class="brand"><img src="${window.PICKAX_LOGO || 'logo.png'}" alt=""><div><h1>${esc(c.name)}</h1><p>${esc(c.tagline)}</p></div></div>
-      <div class="tag">Menu pause</div><div class="menu">${menu}${exits.length ? '<div class="sep"></div>' + exits.join('') : ''}</div>
+      <div class="menuwrap"><div class="tag">Menu pause</div><div class="menu">${menu}${exits.length ? '<div class="sep"></div>' + exits.join('') : ''}</div></div>
       <div class="foot"><kbd>↑</kbd><kbd>↓</kbd> naviguer <kbd>Entrée</kbd> valider <kbd>Échap</kbd> reprendre</div></div>
     <div class="right">
       <div class="clock"><b id="clk2"></b><span id="dte"></span></div>
+      <div class="cards">
       <div class="card"><div class="who"><div class="av">${esc(initials(p.name))}</div><div><h2>${esc(p.name)}</h2><small>ID ${esc(p.id)}</small></div></div>
         <div class="chips">${p.job ? `<span class="chip blue">Métier <b>${esc(p.job)}${p.grade ? ' · ' + esc(p.grade) : ''}</b></span>` : ''}${p.job2 ? `<span class="chip">Organisation <b>${esc(p.job2)}${p.grade2 ? ' · ' + esc(p.grade2) : ''}</b></span>` : ''}<span class="chip">${ic('clock')}<b id="sess">0 min</b> de session</span></div>
         <div class="money"><div class="m g"><span>Liquide</span><b data-count="${Number(p.money)||0}" data-suffix=" $">0 $</b></div><div class="m b"><span>Banque</span><b data-count="${Number(p.bank)||0}" data-suffix=" $">0 $</b></div><div class="m r"><span>Argent sale</span><b data-count="${Number(p.dirty)||0}" data-suffix=" $">0 $</b></div></div></div>
-      <div class="card"><div class="title">Serveur</div><div class="srv"><div class="s"><span>Joueurs</span><b><i data-count="${Number(s.online)||0}" style="font-style:normal">0</i><small style="font-size:14px;color:var(--muted)"> / ${s.max ?? '—'}</small></b></div><div class="s"><span>En ligne depuis</span><b style="font-size:20px">${s.uptime != null ? fmt(s.uptime) : '—'}</b></div><div class="s"><span>Heure</span><b style="font-size:20px" id="clk"></b></div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+      <div class="card"><div class="title">Serveur</div><div class="srv"><div class="s"><span>Joueurs</span><b><i data-count="${Number(s.online)||0}" style="font-style:normal">0</i><small style="font-size:.55em;color:var(--muted)"> / ${s.max ?? '—'}</small></b></div><div class="s"><span>En ligne depuis</span><b>${s.uptime != null ? fmt(s.uptime) : '—'}</b></div><div class="s"><span>Heure</span><b id="clk"></b></div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
       ${links.length ? `<div class="card"><div class="title">Raccourcis</div><div class="links">${links.map(l => `<button class="lk" data-url="${esc(l.url)}">${ic(l.icon || 'link')}${esc(l.label)}</button>`).join('')}</div></div>` : ''}
+      </div>
     </div>`;
   SND.on = c.sounds !== false; SND.vol = Math.max(0, Math.min(1, Number(c.volume ?? 0.5)));
   firstFocus = true; setFocus(0); firstFocus = false;
