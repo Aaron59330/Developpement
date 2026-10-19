@@ -25,5 +25,31 @@ do
     PickaxTheme.discord = str('ServerDiscord', 'discord.gg/bluebayrp'):gsub('^https?://', '')
     PickaxTheme.logo = str('ServerLogo', 'logo.png')
     local inv = str('InventoryColor', '')
+    -- Marker de tout le serveur (Config.GlobalMarker) et blips (Config.GlobalBlip) du config du core
+    local function block(name)
+        local a = raw:find('Config%.' .. name .. '%s*=%s*{')
+        if not a then return nil end
+        local b = raw:find('\n}', a, true)
+        return raw:sub(a, b or #raw)
+    end
+    local gm = block('GlobalMarker')
+    if gm then
+        local t = tonumber(gm:match('[%s,{]Type%s*=%s*(%d+)'))
+        local sz = gm:match('[%s,{]Size%s*=%s*{([^}]*)}')
+        local co = gm:match('[%s,{]Color%s*=%s*{([^}]*)}')
+        local function n(src, k, d) return tonumber(src and src:match(k .. '%s*=%s*(-?[%d%.]+)')) or d end
+        PickaxTheme.marker = {
+            type = t or 25,
+            scale = { x = n(sz, 'x', 0.9), y = n(sz, 'y', 0.9), z = n(sz, 'z', 0.6) },
+            color = { n(co, 'r', 64), n(co, 'g', 224), n(co, 'b', 208) },
+            alpha = math.floor(n(co, 'a', 140)),
+        }
+    end
+    local gb = block('GlobalBlip')
+    if gb then
+        PickaxTheme.blipScale = tonumber(gb:match('[%s,{]Scale%s*=%s*([%d%.]+)'))
+        local c = tonumber(gb:match('[%s,{]Color%s*=%s*(-?%d+)'))
+        PickaxTheme.blipColor = (c and c >= 0) and c or nil
+    end
     PickaxTheme.invHex = inv:match('^#%x%x%x%x%x%x$') and inv:lower() or PickaxTheme.hex
 end

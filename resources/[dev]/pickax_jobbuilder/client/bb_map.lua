@@ -43,7 +43,11 @@ BB.Alias = { driving = 'school', carlot = 'dealer', general = 'shop', custom = '
     cars = 'rental', lot = 'dealer', doorlock = 'default', garage_bike = 'garage', garage_boat = 'garage', garage_aircraft = 'garage' }
 
 -- Marker par défaut commun (peut être remplacé par Config.Marker du builder, éditable en jeu)
-BB.Marker = { marker = 25, color = { 64, 224, 208 }, alpha = 140, scale = { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95, bob = false, rotate = false, help = true }
+-- Défaut = marker de tout le serveur (pickax_core/config.lua → Config.GlobalMarker, lu via PickaxTheme) ; sinon valeurs ci-dessous.
+-- Ce que l'admin règle EN JEU dans un builder (module / point) reste prioritaire : voir BB.Style.
+local GM = PickaxTheme and PickaxTheme.marker
+BB.Marker = { marker = GM and GM.type or 25, color = GM and { GM.color[1], GM.color[2], GM.color[3] } or { 64, 224, 208 }, alpha = GM and GM.alpha or 140,
+    scale = GM and { x = GM.scale.x, y = GM.scale.y, z = GM.scale.z } or { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95, bob = false, rotate = false, help = true }
 
 local function cleanColor(c)
     if type(c) == 'table' and tonumber(c[1]) and tonumber(c[2]) and tonumber(c[3]) then return c end
@@ -119,8 +123,9 @@ function BB.Blip(coords, b, opts)
         blip = AddBlipForCoord(coords.x + 0.0, coords.y + 0.0, (coords.z or 0.0) + 0.0)
     end
     SetBlipSprite(blip, tonumber(b.sprite) or cat.sprite)
-    SetBlipColour(blip, tonumber(b.color) or cat.color)
-    SetBlipScale(blip, (tonumber(b.scale) or cat.scale) + 0.0)
+    -- ordre : réglage du point / module (en jeu) → réglage global du serveur (Config.GlobalBlip) → défaut de la catégorie
+    SetBlipColour(blip, tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color)
+    SetBlipScale(blip, (tonumber(b.scale) or (PickaxTheme and PickaxTheme.blipScale) or cat.scale) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, b.shortRange ~= false)
     BeginTextCommandSetBlipName('STRING')

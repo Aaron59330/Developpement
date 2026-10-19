@@ -1,4 +1,9 @@
 Config = {}
+-- Marker par défaut des points : celui de tout le serveur (pickax_core/config.lua → Config.GlobalMarker).
+-- Un réglage fait en jeu dans le builder (Paramètres / éditeur) est enregistré et reste prioritaire.
+local PK_MK = PickaxTheme and PickaxTheme.marker
+local PK_MKT = PK_MK and PK_MK.type or 25
+local function PK_MKC() return PK_MK and { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] } or { 64, 224, 208 } end
 
 -- ─────────────────────────────── Général ───────────────────────────────
 Config.AllowedGroups   = { '_dev' }      -- groupes ESX autorisés à ouvrir le builder
@@ -36,24 +41,24 @@ Config.Webhook = ''  -- (optionnel) webhook Discord pour les logs (argent socié
 -- Types de points disponibles dans le builder
 -- Apparence de base commune à tous les points (modifiable en jeu : Paramètres → Markers des points) : marker 25, bleu clair turquoise
 Config.PointTypes = {
-    garage    = { label = 'Garage',          color = { 64, 224, 208 },  marker = 25 },
-    garage_return = { label = 'Rangement véhicule', color = { 64, 224, 208 }, marker = 25, hidden = true },   -- désormais intégré au garage (carte « Rangement » de l'éditeur) ; ce type reste géré pour les anciens points
-    cloakroom = { label = 'Vestiaire',       color = { 64, 224, 208 },  marker = 25 },
-    armory    = { label = 'Armurerie',       color = { 64, 224, 208 },   marker = 25 },
-    stash     = { label = 'Coffre',          color = { 64, 224, 208 },   marker = 25 },
-    boss      = { label = 'Gestion boss',    color = { 64, 224, 208 },   marker = 25 },
-    shop      = { label = 'Boutique',        color = { 64, 224, 208 },  marker = 25 },
+    garage    = { label = 'Garage',          color = PK_MKC(),  marker = PK_MKT },
+    garage_return = { label = 'Rangement véhicule', color = PK_MKC(), marker = PK_MKT, hidden = true },   -- désormais intégré au garage (carte « Rangement » de l'éditeur) ; ce type reste géré pour les anciens points
+    cloakroom = { label = 'Vestiaire',       color = PK_MKC(),  marker = PK_MKT },
+    armory    = { label = 'Armurerie',       color = PK_MKC(),   marker = PK_MKT },
+    stash     = { label = 'Coffre',          color = PK_MKC(),   marker = PK_MKT },
+    boss      = { label = 'Gestion boss',    color = PK_MKC(),   marker = PK_MKT },
+    shop      = { label = 'Boutique',        color = PK_MKC(),  marker = PK_MKT },
     -- Variantes de garage (hidden = non ajoutables directement : on choisit le « type » dans l'éditeur du garage)
-    garage_bike     = { label = 'Garage motos',     color = { 64, 224, 208 },  marker = 25, hidden = true },
-    garage_aircraft = { label = 'Garage aéronefs',  color = { 64, 224, 208 }, marker = 25, hidden = true },
-    garage_boat     = { label = 'Garage bateaux',   color = { 64, 224, 208 },   marker = 25, hidden = true },
-    missions  = { label = 'Missions PNJ',    color = { 64, 224, 208 },  marker = 25 },
-    showroom  = { label = 'Showroom',        color = { 64, 224, 208 },  marker = 25 },
-    display   = { label = 'Véhicule expo',   color = { 64, 224, 208 }, marker = 25 },
-    testdrive = { label = 'Essai routier',   color = { 64, 224, 208 },  marker = 25 },
-    harvest   = { label = 'Récolte',         color = { 64, 224, 208 },  marker = 25 },
-    kitchen   = { label = 'Cuisine / Bar',   color = { 64, 224, 208 },  marker = 25 },
-    tuning    = { label = 'Atelier tuning',  color = { 64, 224, 208 },  marker = 25 },
+    garage_bike     = { label = 'Garage motos',     color = PK_MKC(),  marker = PK_MKT, hidden = true },
+    garage_aircraft = { label = 'Garage aéronefs',  color = PK_MKC(), marker = PK_MKT, hidden = true },
+    garage_boat     = { label = 'Garage bateaux',   color = PK_MKC(),   marker = PK_MKT, hidden = true },
+    missions  = { label = 'Missions PNJ',    color = PK_MKC(),  marker = PK_MKT },
+    showroom  = { label = 'Showroom',        color = PK_MKC(),  marker = PK_MKT },
+    display   = { label = 'Véhicule expo',   color = PK_MKC(), marker = PK_MKT },
+    testdrive = { label = 'Essai routier',   color = PK_MKC(),  marker = PK_MKT },
+    harvest   = { label = 'Récolte',         color = PK_MKC(),  marker = PK_MKT },
+    kitchen   = { label = 'Cuisine / Bar',   color = PK_MKC(),  marker = PK_MKT },
+    tuning    = { label = 'Atelier tuning',  color = PK_MKC(),  marker = PK_MKT },
 }
 
 -- Types de points réservés à certains métiers (absent = tous les jobs ; le type « Personnalisé » peut tout placer).
@@ -257,7 +262,7 @@ Config.Announce = {
     History = 15,        -- annonces gardées dans l'historique affiché
     ToggleCommand = 'annonces',   -- /annonces : un joueur masque / réaffiche les annonces d'entreprise
     Types = {
-        { id = 'info',        label = 'Information',   color = { 64, 224, 208 } },
+        { id = 'info',        label = 'Information',   color = PK_MKC() },
         { id = 'recruitment', label = 'Recrutement',   color = { 59, 130, 246 } },
         { id = 'promo',       label = 'Promotion',     color = { 245, 158, 11 } },
         { id = 'event',       label = 'Événement',     color = { 168, 85, 247 } },
@@ -490,10 +495,10 @@ Config.Real = {
     },
     -- Markers des portes / sorties (base commune : type 25, turquoise ; éditables en jeu)
     Markers = {
-        available = { marker = 25, color = { 64, 224, 208 } },    -- bien disponible
-        access    = { marker = 25, color = { 64, 224, 208 } },   -- ta propriété / tes clés
-        noaccess  = { marker = 25, color = { 64, 224, 208 } },  -- propriété occupée (visiteur)
-        exit      = { marker = 25,  color = { 64, 224, 208 } },  -- sortie de l'intérieur
+        available = { marker = PK_MKT, color = PK_MKC() },    -- bien disponible
+        access    = { marker = PK_MKT, color = PK_MKC() },   -- ta propriété / tes clés
+        noaccess  = { marker = PK_MKT, color = PK_MKC() },  -- propriété occupée (visiteur)
+        exit      = { marker = PK_MKT,  color = PK_MKC() },  -- sortie de l'intérieur
     },
     -- Types de biens (catégorie affichée dans le panel agence, filtres et blips)
     Categories = {
@@ -510,9 +515,9 @@ Config.Real = {
     },
     CategoryOrder = { 'house', 'apartment', 'villa', 'lab', 'garage', 'warehouse', 'office', 'shop', 'hotel', 'other' },
     PointTypes = {
-        stash    = { label = 'Coffre',   marker = 25, color = { 64, 224, 208 } },
-        safe     = { label = 'Coffre-fort', marker = 25, color = { 64, 224, 208 } },   -- réservé au propriétaire (pas aux détenteurs de clés)
-        wardrobe = { label = 'Penderie', marker = 25, color = { 64, 224, 208 } },
+        stash    = { label = 'Coffre',   marker = PK_MKT, color = PK_MKC() },
+        safe     = { label = 'Coffre-fort', marker = PK_MKT, color = PK_MKC() },   -- réservé au propriétaire (pas aux détenteurs de clés)
+        wardrobe = { label = 'Penderie', marker = PK_MKT, color = PK_MKC() },
     },
     -- Intérieurs prêts à l'emploi (TP). Coordonnées de sortie = où le joueur apparaît / où se trouve la porte.
     -- Vérifie-les en jeu ; "Intérieur personnalisé" te permet d'utiliser n'importe quel MLO / shell.

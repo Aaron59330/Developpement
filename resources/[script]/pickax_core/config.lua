@@ -148,6 +148,12 @@ Config.GlobalMarker = {
     GroundCacheLimit = 4096
 }
 
+-- Blips de TOUT le serveur (Job / Gang / Shop / World Builder). Un réglage fait en jeu dans un builder (blip d'un point ou d'un module) reste prioritaire et n'est jamais écrasé.
+Config.GlobalBlip = {
+    Scale = 0.8,   -- taille de tous les blips (0.5 petit … 1.2 grand)
+    Color = -1,    -- couleur GTA imposée à tous les blips des builders (-1 = couleur propre à chaque catégorie)
+}
+
 
 -- Style des menus RageUI.
 -- Couleurs : {rouge, vert, bleu, opacité}, de 0 à 255.
