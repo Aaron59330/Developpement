@@ -71,8 +71,7 @@ window.addEventListener("message", (event) => {
             else { ghost.style.width = health + "%"; }
         }
         fill.style.width = health + "%";
-        // vert (100 %) -> jaune -> rouge (0 %)
-        fill.parentElement.style.setProperty("--hh-color", "hsl(" + Math.round(health * 1.2) + ", 78%, 50%)");
+        // couleur du serveur (CSS : --hh-color) ; passe au rouge sous 25 % (classe .low ci-dessous)
         document.getElementById("hhVal").textContent = health;
         document.getElementById("hhBar").classList.toggle("low", health > 0 && health <= 25);
         const ar = document.getElementById("hhArmor");

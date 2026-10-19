@@ -55,7 +55,7 @@ body {
     bottom: 0.55vh;
     width: 24.8vh;
     --hh-h: 13px;
-    --hh-color: #3ddc84;
+    --hh-color: var(--pk-accent, #00a4ff);       /* couleur du serveur (pickax_core/config.lua → AccentColor) */
 }
 .health-hud.off { display: none; }
 .hh-bar {
@@ -111,7 +111,7 @@ body {
     color: #fff;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
-.hh-bar.low { animation: hhPulse 0.9s ease-in-out infinite; }
+.hh-bar.low { --hh-color: #ef4444; animation: hhPulse 0.9s ease-in-out infinite; }
 @keyframes hhPulse { 50% { box-shadow: 0 0 14px rgba(255, 60, 60, 0.85); } }
 /* armure : fine ligne bleue en haut de la barre */
 .hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(255, 255, 255, 0.15); }
