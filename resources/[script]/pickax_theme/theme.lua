@@ -24,4 +24,6 @@ do
     PickaxTheme.tagline = str('ServerTagline', 'RP sérieux · Free-Access')
     PickaxTheme.discord = str('ServerDiscord', 'discord.gg/bluebayrp'):gsub('^https?://', '')
     PickaxTheme.logo = str('ServerLogo', 'logo.png')
+    local inv = str('InventoryColor', '')
+    PickaxTheme.invHex = inv:match('^#%x%x%x%x%x%x$') and inv:lower() or PickaxTheme.hex
 end

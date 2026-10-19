@@ -293,7 +293,12 @@
     root.setProperty('--accent-dark-rgb', dark.join(', '));
     root.setProperty('--bg-rgb', bg.join(', '));
   }
-  applyTheme((window.INVENTORY_THEME && window.INVENTORY_THEME.color) || '#7b4bb8');
+  const themeColor = () => {
+    const c = window.INVENTORY_THEME && window.INVENTORY_THEME.color;
+    return (!c || c === 'auto') ? (window.PICKAX_INV_COLOR || window.PICKAX_ACCENT || '#00a4ff') : c;
+  };
+  applyTheme(themeColor());
+  window.addEventListener('pickax-theme', () => applyTheme(themeColor()));     // la couleur du core est lue après le chargement
 
   /* ---------- logo & bloc Tenue (configurables dans theme.js) ---------- */
   (function applyBranding() {

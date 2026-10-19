@@ -1,7 +1,9 @@
+@font-face { font-family: 'PJS'; font-weight: 400 800; font-display: swap; src: url('fonts/pjs-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'PJS'; font-weight: 400 800; font-display: swap; src: url('fonts/pjs-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 /* Menu pause — sans backdrop-filter ni calque plein écran noir (cause du rectangle noir dans le NUI) */
 :root { --bg: #16171c; --accent: var(--pk-accent,#00a4ff); --line: rgba(255, 255, 255, .08); --text: #f4f4f5; --muted: #8c8f99; --card: rgba(22, 23, 28, .94); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: transparent; color: var(--text); font-family: 'Segoe UI', Inter, system-ui, sans-serif; overflow: hidden; user-select: none; }
+html, body { height: 100%; background: transparent; color: var(--text); font-family: 'PJS', 'Segoe UI', system-ui, sans-serif; font-feature-settings: 'tnum' 1; -webkit-font-smoothing: antialiased; overflow: hidden; user-select: none; }
 .hidden { display: none !important; }
 svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
@@ -11,11 +13,11 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 #root.out { animation: fadeOut .18s ease-in forwards; } @keyframes fadeOut { to { opacity: 0; } }
 
 /* colonne gauche : marque + menu (aucun fond propre) */
-.left { display: flex; flex-direction: column; padding: 6vh 3vw 5vh 5vw; animation: slideL .4s cubic-bezier(.2, .9, .3, 1); }
+.left { display: flex; flex-direction: column; padding: 6vh 3vw 5vh 5vw; position: relative; animation: slideL .4s cubic-bezier(.2, .9, .3, 1); }
 @keyframes slideL { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
 .brand { display: flex; align-items: center; gap: 18px; margin-bottom: 6vh; }
-.brand img { height: 92px; width: 140px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 16px rgba(0, 0, 0, .55)); }
-.brand h1 { font-size: 25px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.brand img { height: 92px; width: 140px; object-fit: contain; flex: none; animation: floaty 5s ease-in-out infinite; filter: drop-shadow(0 6px 16px rgba(0, 0, 0, .55)); }
+.brand h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
 .brand p { color: var(--muted); font-size: 13px; margin-top: 5px; letter-spacing: .3px; }
 .tag { font-size: 11px; letter-spacing: 3px; color: var(--accent); font-weight: 700; margin-bottom: 14px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
 .tag::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(var(--pk-accent-rgb,0,164,255),.5), transparent); }
@@ -61,3 +63,36 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .lk { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); color: var(--text); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all .15s; }
 .lk:hover { background: rgba(var(--pk-accent-rgb,0,164,255),.18); border-color: rgba(var(--pk-accent-rgb,0,164,255),.5); color: #fff; transform: translateY(-2px); }
 .title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 14px; }
+
+/* ───────── Motion design ───────── */
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes drift { 0% { transform: translate(-6%, -4%) scale(1); } 100% { transform: translate(8%, 6%) scale(1.15); } }
+@keyframes shine { from { transform: translateX(-120%) skewX(-18deg); } to { transform: translateX(260%) skewX(-18deg); } }
+@keyframes sweep { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes growBar { from { width: 0; } }
+
+/* lueur d'ambiance qui dérive lentement (dégradé radial, pas de filtre) */
+#root::before { content: ''; position: absolute; left: -10vw; bottom: -20vh; width: 60vw; height: 70vh; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(var(--pk-accent-rgb,0,164,255),.22), transparent); animation: drift 9s ease-in-out infinite alternate; }
+#root > * { position: relative; z-index: 1; }
+
+/* ligne d'accent qui se déploie sous le titre « Menu pause » */
+.tag::after { transform-origin: left; animation: sweep .7s .25s cubic-bezier(.2, .9, .3, 1) backwards; }
+
+/* reflet qui traverse le bouton au survol */
+.btn { overflow: hidden; }
+.btn::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 38%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .14), transparent); transform: translateX(-120%) skewX(-18deg); pointer-events: none; }
+.btn:hover::after, .btn.f::after { animation: shine .7s ease; }
+.btn:active { transform: translateX(8px) scale(.985); }
+.btn .k { transition: all .15s; }
+.btn:nth-child(1) { animation-delay: .05s; } .btn:nth-child(2) { animation-delay: .1s; } .btn:nth-child(3) { animation-delay: .15s; }
+
+/* cartes : entrée décalée, avatar qui respire, barre qui se remplit, horloge qui clignote */
+.av { animation: floaty 4.5s ease-in-out infinite; }
+.bar i { animation: growBar 1s .5s cubic-bezier(.2, .9, .3, 1) backwards; }
+.clock b { animation: none; }
+.chip.blue::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulseDot 1.6s ease-in-out infinite; }
+.m { transition: transform .15s, border-color .15s, background .15s; }
+.m:hover { transform: translateY(-2px); border-color: rgba(var(--pk-accent-rgb,0,164,255),.45); background: rgba(255, 255, 255, .06); }
+.card { transition: border-color .2s; } .card:hover { border-color: rgba(var(--pk-accent-rgb,0,164,255),.35); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; } }

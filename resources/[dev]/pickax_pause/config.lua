@@ -7,6 +7,8 @@ Config.Tagline    = (PickaxTheme and PickaxTheme.tagline) or 'RP sérieux · Fre
 Config.OpenKeys   = { 200, 199 }
 Config.Cooldown   = 600            -- ms : évite de rouvrir le menu juste après l'avoir fermé avec ÉCHAP
 Config.BlurScreen = true
+Config.Sounds     = true           -- sons d'interface (survol, clic, ouverture, fermeture)
+Config.SoundVolume = 0.5          -- volume des sons de 0.0 à 1.0
 
 -- Onglets du menu pause GTA (PauseMenuceptionGoDeeper) : adapte-les si besoin
 Config.FrontendTabs = { map = 0, settings = 6 }

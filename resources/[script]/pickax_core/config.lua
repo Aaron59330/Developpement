@@ -2,6 +2,7 @@ Config = {
 	-- ══════════ IDENTITÉ DU SERVEUR (appliquée à toutes les interfaces) ══════════
 	-- Après modification : restart pickax_theme puis relance des ressources (ou reconnexion).
 	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
+	InventoryColor = '',--Couleur de l'inventaire (#RRGGBB) ; laisser vide = même couleur que AccentColor. Ex : '#dc2626' pour un inventaire rouge
 	ServerName = 'Bluebay Roleplay',--Nom complet du serveur (menu pause, identité, textes…)
 	ServerShortName = 'BLUEBAY',--Nom court (HUD, écran de connexion, Discord, menus RageUI…)
 	ServerTagline = 'RP sérieux · Free-Access',--Slogan affiché sous le nom

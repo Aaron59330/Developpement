@@ -12,7 +12,7 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 window.PICKAX_ACCENT = '#00a4ff';
-window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'RP sérieux · Free-Access', discord: 'discord.gg/bluebayrp', logo: 'logo.png' };
+window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'RP sérieux · Free-Access', discord: 'discord.gg/bluebayrp', logo: 'logo.png', invColor: '' };
 
 /* ─────────────────────────── ne rien modifier sous cette ligne ─────────────────────────── */
 (function () {
@@ -46,6 +46,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     window.PICKAX_ACCENT_DARK = mix(0, 0.28);
     window.PICKAX_SERVER = server;
     window.PICKAX_LOGO = logoUrl(server.logo);
+    window.PICKAX_INV_COLOR = okHex(server.invColor) ? server.invColor : hex;     // couleur de l'inventaire (InventoryColor, sinon AccentColor)
     var s = document.documentElement.style;
     s.setProperty('--pk-accent', hex);
     s.setProperty('--pk-accent-rgb', window.PICKAX_ACCENT_RGB);
@@ -73,7 +74,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
       var server = {
         name: get('ServerName', def.server.name), short: get('ServerShortName', def.server.short),
         tagline: get('ServerTagline', def.server.tagline), discord: get('ServerDiscord', def.server.discord).replace(/^https?:\/\//i, ''),
-        logo: get('ServerLogo', def.server.logo)
+        logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', '')
       };
       hex = hex.toLowerCase();
       var next = JSON.stringify({ accent: hex, server: server });

@@ -22,7 +22,7 @@ local function openMenu()
     ESX.TriggerServerCallback('pickax_pause:info', function(srv)
         SendNUIMessage({
             action = 'open', player = playerData(), server = srv or {},
-            cfg = { name = Config.ServerName, tagline = Config.Tagline, links = Config.Links, buttons = Config.Buttons },
+            cfg = { name = Config.ServerName, tagline = Config.Tagline, links = Config.Links, buttons = Config.Buttons, sounds = Config.Sounds ~= false, volume = Config.SoundVolume or 0.5 },
         })
     end)
     SetNuiFocus(true, true)

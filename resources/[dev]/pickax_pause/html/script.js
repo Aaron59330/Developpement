@@ -21,7 +21,40 @@ const ic = n => `<svg viewBox="0 0 24 24">${I[n] || I.link}</svg>`;
 const initials = n => String(n || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 const fmt = s => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h > 0 ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; };
 
-let opened = 0, focusIdx = 0;
+
+/* ── Sons d'interface (WebAudio, aucun fichier) ── */
+const SND = { on: true, vol: 0.5, ctx: null };
+function tone(freq, dur, type, gain, slideTo, delay) {
+  if (!SND.on) return;
+  try {
+    SND.ctx = SND.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    const c = SND.ctx; if (c.state === 'suspended') c.resume();
+    const t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    const v = Math.max(0.0001, (gain || 0.1) * SND.vol);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
+  } catch (e) { }
+}
+const sfx = {
+  hover: () => tone(1180, 0.05, 'sine', 0.07),
+  click: () => { tone(660, 0.08, 'triangle', 0.14); tone(990, 0.12, 'triangle', 0.12, 0, 0.06); },
+  open: () => { tone(220, 0.28, 'sine', 0.16, 660); tone(880, 0.18, 'triangle', 0.07, 1320, 0.1); },
+  close: () => tone(660, 0.22, 'sine', 0.14, 220),
+  danger: () => { tone(300, 0.14, 'sawtooth', 0.07, 200); },
+};
+
+/* ── Compteurs animés ── */
+function countUp(root) {
+  [...root.querySelectorAll('[data-count]')].forEach(el => {
+    const to = Number(el.dataset.count) || 0, suf = el.dataset.suffix || '', t0 = performance.now(), dur = 800;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.firstChild.nodeValue = Math.round(to * e).toLocaleString('fr-FR') + suf; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+
+let opened = 0, focusIdx = 0, firstFocus = true;
 
 function build(d) {
   const p = d.player || {}, s = d.server || {}, c = d.cfg || {}, b = c.buttons || {};
@@ -43,17 +76,22 @@ function build(d) {
       <div class="clock"><b id="clk2"></b><span id="dte"></span></div>
       <div class="card"><div class="who"><div class="av">${esc(initials(p.name))}</div><div><h2>${esc(p.name)}</h2><small>ID ${esc(p.id)}</small></div></div>
         <div class="chips">${p.job ? `<span class="chip blue">Métier <b>${esc(p.job)}${p.grade ? ' · ' + esc(p.grade) : ''}</b></span>` : ''}${p.job2 ? `<span class="chip">Organisation <b>${esc(p.job2)}${p.grade2 ? ' · ' + esc(p.grade2) : ''}</b></span>` : ''}<span class="chip">${ic('clock')}<b id="sess">0 min</b> de session</span></div>
-        <div class="money"><div class="m g"><span>Liquide</span><b>${money(p.money)}</b></div><div class="m b"><span>Banque</span><b>${money(p.bank)}</b></div><div class="m r"><span>Argent sale</span><b>${money(p.dirty)}</b></div></div></div>
-      <div class="card"><div class="title">Serveur</div><div class="srv"><div class="s"><span>Joueurs</span><b>${s.online ?? '—'}<small style="font-size:14px;color:var(--muted)"> / ${s.max ?? '—'}</small></b></div><div class="s"><span>En ligne depuis</span><b style="font-size:20px">${s.uptime != null ? fmt(s.uptime) : '—'}</b></div><div class="s"><span>Heure</span><b style="font-size:20px" id="clk"></b></div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+        <div class="money"><div class="m g"><span>Liquide</span><b data-count="${Number(p.money)||0}" data-suffix=" $">0 $</b></div><div class="m b"><span>Banque</span><b data-count="${Number(p.bank)||0}" data-suffix=" $">0 $</b></div><div class="m r"><span>Argent sale</span><b data-count="${Number(p.dirty)||0}" data-suffix=" $">0 $</b></div></div></div>
+      <div class="card"><div class="title">Serveur</div><div class="srv"><div class="s"><span>Joueurs</span><b><i data-count="${Number(s.online)||0}" style="font-style:normal">0</i><small style="font-size:14px;color:var(--muted)"> / ${s.max ?? '—'}</small></b></div><div class="s"><span>En ligne depuis</span><b style="font-size:20px">${s.uptime != null ? fmt(s.uptime) : '—'}</b></div><div class="s"><span>Heure</span><b style="font-size:20px" id="clk"></b></div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
       ${links.length ? `<div class="card"><div class="title">Raccourcis</div><div class="links">${links.map(l => `<button class="lk" data-url="${esc(l.url)}">${ic(l.icon || 'link')}${esc(l.label)}</button>`).join('')}</div></div>` : ''}
     </div>`;
-  setFocus(0);
+  SND.on = c.sounds !== false; SND.vol = Math.max(0, Math.min(1, Number(c.volume ?? 0.5)));
+  firstFocus = true; setFocus(0); firstFocus = false;
+  countUp($root);
+  sfx.open();
 }
 
 function setFocus(i) {
   const btns = [...document.querySelectorAll('.btn')];
   if (!btns.length) return;
+  const prev = focusIdx;
   focusIdx = (i + btns.length) % btns.length;
+  if (!firstFocus && prev !== focusIdx) sfx.hover();
   btns.forEach((x, n) => x.classList.toggle('f', n === focusIdx));
 }
 
@@ -64,12 +102,12 @@ const clock = () => {
 };
 setInterval(clock, 1000);
 
-const act = key => (key === 'resume' ? post('close') : post(key));
+const act = key => { (key === 'disconnect' || key === 'quit') ? sfx.danger() : sfx.click(); return key === 'resume' ? post('close') : post(key); };
 
 document.addEventListener('click', e => {
   const b = e.target.closest('.btn'); if (b) return act(b.dataset.k);
   const l = e.target.closest('.lk');
-  if (l && l.dataset.url) { if (window.invokeNative) window.invokeNative('openUrl', l.dataset.url); else window.open(l.dataset.url, '_blank'); }
+  if (l && l.dataset.url) { sfx.click(); if (window.invokeNative) window.invokeNative('openUrl', l.dataset.url); else window.open(l.dataset.url, '_blank'); }
 });
 document.addEventListener('mouseover', e => { const b = e.target.closest('.btn'); if (b) setFocus([...document.querySelectorAll('.btn')].indexOf(b)); });
 document.addEventListener('keydown', e => {
@@ -85,5 +123,5 @@ document.addEventListener('keydown', e => {
 window.addEventListener('message', e => {
   const d = e.data || {};
   if (d.action === 'open') { opened = Date.now(); $root.classList.remove('hidden', 'out'); build(d); clock(); }
-  else if (d.action === 'close') { $root.classList.add('out'); setTimeout(() => { $root.classList.add('hidden'); $root.innerHTML = ''; }, 180); }
+  else if (d.action === 'close') { if (!$root.classList.contains('hidden')) sfx.close(); $root.classList.add('out'); setTimeout(() => { $root.classList.add('hidden'); $root.innerHTML = ''; }, 180); }
 });

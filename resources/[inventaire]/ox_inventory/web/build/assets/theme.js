@@ -1,6 +1,8 @@
 // ============================================================
 //  THEME DE L'INVENTAIRE
-//  Change simplement la couleur ci-dessous (format #RRGGBB).
+//  Par défaut ('auto') l'inventaire prend la couleur du serveur :
+//  pickax_core/config.lua → InventoryColor (ou AccentColor si vide).
+//  Tu peux aussi forcer une couleur ici (format #RRGGBB).
 //  Toutes les teintes (survols, boutons, fonds, bordures,
 //  lueurs, barre de défilement...) sont calculées à partir d'elle.
 //
@@ -8,7 +10,7 @@
 //              vert #16a34a     orange #ea580c   rose #db2777
 // ============================================================
 window.INVENTORY_THEME = {
-  color: '#3b82f6',
+  color: 'auto',
 
   // Fond sombre teinté derrière l'inventaire (le « flou violet ») :
   //   backdrop: false          -> aucun fond
