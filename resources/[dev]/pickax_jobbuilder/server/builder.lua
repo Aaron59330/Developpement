@@ -438,7 +438,7 @@ ESX.RegisterServerCallback('jobbuilder:catalog', function(src, cb)
     end
     table.sort(items, function(a, b) return a.name < b.name end)
     local vehicles = MySQL.query.await('SELECT name, model, category FROM vehicles ORDER BY name') or {}
-    cb({ items = items, vehicles = vehicles, vehicleCategories = (JB.vehicleCategories and JB.vehicleCategories() or {}), jobTypes = Config.JobTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds, categoryTypes = Config.Dealer.CategoryTypes, maxItems = Config.MaxItemsPerPoint, actions = Config.Actions, clothesKeys = Config.ClothesKeys, kitchen = Config.Kitchen, announceTypes = Config.Announce.Types, announce = Config.Announce, police = Config.Police, tuning = Config.Tuning, ems = Config.Ems, bank = Config.Bank, pointRules = JB_POINT_RULES })
+    cb({ items = items, vehicles = vehicles, vehicleCategories = (JB.vehicleCategories and JB.vehicleCategories() or {}), blipScale = PickaxTheme and PickaxTheme.blipScale or nil, jobTypes = Config.JobTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds, categoryTypes = Config.Dealer.CategoryTypes, maxItems = Config.MaxItemsPerPoint, actions = Config.Actions, clothesKeys = Config.ClothesKeys, kitchen = Config.Kitchen, announceTypes = Config.Announce.Types, announce = Config.Announce, police = Config.Police, tuning = Config.Tuning, ems = Config.Ems, bank = Config.Bank, pointRules = JB_POINT_RULES })
 end)
 
 ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)

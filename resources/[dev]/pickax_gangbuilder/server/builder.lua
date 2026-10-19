@@ -292,7 +292,7 @@ ESX.RegisterServerCallback('gangbuilder:catalog', function(src, cb)
     table.sort(items, function(a, b) return a.name < b.name end)
     local okV, vehicles = pcall(MySQL.query.await, 'SELECT name, model, category FROM vehicles ORDER BY name')
     cb({
-        items = items, vehicles = okV and vehicles or {}, gangTypes = Config.GangTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds,
+        items = items, vehicles = okV and vehicles or {}, blipScale = PickaxTheme and PickaxTheme.blipScale or nil, gangTypes = Config.GangTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds,
         maxItems = Config.MaxItemsPerPoint, maxGrades = Config.MaxGrades, categoryTypes = Config.CategoryTypes, territories = Config.Territories, actions = Config.Actions, clothesKeys = Config.ClothesKeys, activities = Config.Activities,
         nameMax = J.NameMaxLength, dirty = Config.Dirty, defaults = { sellCut = Config.Activities.SellGangCut, launderFee = Config.Activities.LaunderFee, launderGangCut = Config.Activities.LaunderGangCut,
             launderMin = Config.Activities.LaunderMin, launderMax = Config.Activities.LaunderMax, launderSeconds = Config.Activities.LaunderSeconds, maxMembers = Config.Gang.MaxMembers },

@@ -387,7 +387,7 @@ const Builder = {
       isNew: true,
       gang: {
         name, label, type, color: t.color || '#ef4444', boss_grade: last, start_money: money,
-        blip: { enabled: false, label, sprite: t.blip.sprite, color: t.blip.color, scale: t.blip.scale, coords: null },
+        blip: { enabled: false, label, sprite: t.blip.sprite, color: t.blip.color, scale: ((this.catalog && this.catalog.blipScale) ?? t.blip.scale), coords: null },
         settings: { actions: [...t.actions], plate_prefix: name.replace(/[^a-z0-9]/g, '').slice(0, 3).toUpperCase(), motd: '', max_members: -1, recruit_grade: 0, withdraw_grade: last, capture_grade: 0, salary_source: 'default', sell_cut: -1 },
       },
       grades: t.grades.map(g => ({ name: g.name, label: g.label, salary: g.salary })),

@@ -305,3 +305,13 @@ AddEventHandler('onResourceStart', function(res)
     if res ~= 'ox_inventory' then return end
     for _, p in pairs(JB.Points) do JB.registerStash(p) end
 end)
+
+-- Diagnostic : réglages d'identité / blips lus dans pickax_core/config.lua (voir pickax_theme)
+CreateThread(function()
+    Wait(1500)
+    if PickaxTheme and PickaxTheme.blipScale then
+        print(('^2[jobbuilder] taille des blips globale (pickax_core/config.lua) : %s^0'):format(tostring(PickaxTheme.blipScale)))
+    else
+        print('^3[jobbuilder] réglage global des blips introuvable (pickax_theme absent ou pickax_core/config.lua illisible) : tailles par défaut du builder^0')
+    end
+end)
