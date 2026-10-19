@@ -10,6 +10,7 @@ version '1.0'
 shared_scripts {
     '@es_extended/imports.lua',
     'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
+    'utils/globalstyle/shared.lua',   -- export GetGlobalStyle (couleur / marker / blips du config)
 
     'init/shared/mute.lua',
     'esx/notify.lua',
