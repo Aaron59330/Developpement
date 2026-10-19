@@ -3,6 +3,15 @@ local skinReady = {}
 RegisterServerEvent('CorePickax:skin:ready')
 AddEventHandler('CorePickax:skin:ready', function() skinReady[source] = true end)
 AddEventHandler('playerDropped', function() skinReady[source] = nil end)
+-- Redémarrage de la ressource avec des joueurs déjà connectés (leur skin est déjà appliqué) : rien à protéger
+AddEventHandler('onResourceStart', function(res)
+	if res ~= GetCurrentResourceName() then return end
+	for _, id in ipairs(GetPlayers()) do skinReady[tonumber(id)] = true end
+end)
+-- Filet de sécurité : si le client n'a jamais confirmé (cas imprévu), l'enregistrement est autorisé 40 s après le chargement du joueur
+AddEventHandler('esx:playerLoaded', function(playerId)
+	SetTimeout(40000, function() if GetPlayerName(playerId) then skinReady[playerId] = true end end)
+end)
 
 RegisterServerEvent('esx_skin:save')
 AddEventHandler('esx_skin:save', function(skin)

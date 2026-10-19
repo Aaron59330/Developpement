@@ -88,7 +88,9 @@ function StartCabin(cur, method, cb)
     local allowed = {}
     for _, k in ipairs(cur.restrict or {}) do allowed[k] = true end
     TriggerEvent('skinchanger:getSkin', function(skin)
-        cabin = { cur = cur, method = method, allowed = allowed, snapshot = skin }
+        -- copie (skinchanger:getSkin renvoie la table vivante, modifiée à chaque réglage) : sans copie, « Annuler » ne restaurerait rien
+        local snap = json.decode(json.encode(skin or {}))
+        cabin = { cur = cur, method = method, allowed = allowed, snapshot = snap }
         listComponents(allowed, function(list)
             if #list == 0 then
                 cabin = nil
@@ -206,7 +208,8 @@ function StartClothing(cur, method)
         ESX.ShowNotification('~r~Cette boutique n\'a aucune partie de vêtements activée (builder → Général → Cabine d\'essayage).', nil, nil, 'shop')
         return
     end
-    TriggerEvent('skinchanger:getSkin', function(before)
+    TriggerEvent('skinchanger:getSkin', function(live)
+        local before = json.decode(json.encode(live or {}))     -- copie : la table renvoyée est modifiée en direct
         Config.OpenClothingMenu(cur.restrict, function()
             if done then return end
             done = true
