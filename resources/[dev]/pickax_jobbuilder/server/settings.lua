@@ -1,4 +1,12 @@
 -- ─────────────────────────────── Paramètres modifiables en jeu (réservé aux groupes autorisés) ───────────────────────────────
+
+-- Taille de blip « par défaut d'origine » (0.8 / 0.9) enregistrée avec les anciens réglages : on la remplace par la taille globale du serveur
+-- (pickax_core/config.lua → Config.GlobalBlip.Scale). Toute autre valeur choisie en jeu est conservée.
+local function pkScale(sc)
+    local g = PickaxTheme and PickaxTheme.blipScale
+    if g and sc and (math.abs(sc - 0.9) < 0.001 or math.abs(sc - 0.8) < 0.001) then return g end
+    return sc
+end
 -- Chaque section est validée strictement, stockée en base (jobbuilder_settings), appliquée à Config en place
 -- côté serveur puis diffusée à tous les clients.
 
@@ -129,7 +137,7 @@ S.real = function(v)
     local b = type(v.Blips) == 'table' and v.Blips or {}
     for _, k in ipairs({ 'sale', 'rent' }) do
         local d = type(b[k]) == 'table' and b[k] or {}
-        out.Blips[k] = { sprite = int(d.sprite, 0, 900, R.Blips[k].sprite), color = int(d.color, 0, 85, R.Blips[k].color), scale = num(d.scale, 0.1, 3, R.Blips[k].scale) }
+        out.Blips[k] = { sprite = int(d.sprite, 0, 900, R.Blips[k].sprite), color = int(d.color, 0, 85, R.Blips[k].color), scale = pkScale(num(d.scale, 0.1, 3, R.Blips[k].scale)) }
     end
     for key, base in pairs(R.PointTypes) do out.PointTypes[key] = withLabel(type(v.PointTypes) == 'table' and v.PointTypes[key], base) end
     for key, base in pairs(R.Markers) do out.Markers[key] = markerDef(type(v.Markers) == 'table' and v.Markers[key], base) end
@@ -174,7 +182,7 @@ S.jobTypes = function(v)
         local blip = type(t.blip) == 'table' and t.blip or {}
         local clean = {
             label = str(t.label, 40, key),
-            blip = { sprite = int(blip.sprite, 0, 900, 478), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9)) },
+            blip = { sprite = int(blip.sprite, 0, 900, 478), color = int(blip.color, 0, 85, 0), scale = pkScale(num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9))) },
             actions = {}, grades = {},
             points = (Config.JobTypes[key] and Config.JobTypes[key].points) or { 'garage', 'cloakroom', 'armory', 'stash', 'boss', 'shop' },
         }

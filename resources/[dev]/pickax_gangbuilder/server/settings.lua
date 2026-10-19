@@ -1,4 +1,12 @@
 -- ─────────────────────────────── Paramètres modifiables en jeu (réservé aux groupes autorisés) ───────────────────────────────
+
+-- Taille de blip « par défaut d'origine » (0.8 / 0.9) enregistrée avec les anciens réglages : on la remplace par la taille globale du serveur
+-- (pickax_core/config.lua → Config.GlobalBlip.Scale). Toute autre valeur choisie en jeu est conservée.
+local function pkScale(sc)
+    local g = PickaxTheme and PickaxTheme.blipScale
+    if g and sc and (math.abs(sc - 0.9) < 0.001 or math.abs(sc - 0.8) < 0.001) then return g end
+    return sc
+end
 -- Les sections « Schema » (config.lua) sont validées champ par champ (type, min, max), stockées en base (gangbuilder_settings),
 -- appliquées à Config en place côté serveur puis diffusées à tous les clients. Les sections « markers » et « modèles de gangs » ont leur validation dédiée.
 
@@ -125,7 +133,7 @@ local function cleanGangTypes(v)
         local entry = {
             label = str(t.label, 40, key),
             color = (type(t.color) == 'string' and t.color:match('^#%x%x%x%x%x%x$')) and t.color:lower() or '#ef4444',
-            blip = { sprite = int(blip.sprite, 0, 900, 310), color = int(blip.color, 0, 85, 0), scale = num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9)) },
+            blip = { sprite = int(blip.sprite, 0, 900, 310), color = int(blip.color, 0, 85, 0), scale = pkScale(num(blip.scale, 0.3, 2, (PickaxTheme and PickaxTheme.blipScale or 0.9))) },
             actions = {}, points = {}, grades = {},
         }
         for _, a in ipairs(type(t.actions) == 'table' and t.actions or {}) do
