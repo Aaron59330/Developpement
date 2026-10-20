@@ -288,7 +288,9 @@ function sheet(it, confirm, c) {
 }
 const closeSheet = () => { $modal.classList.add('hidden'); $modal.innerHTML = ''; };
 
+const sfx = n => { if (window.PKSND) PKSND.play(n); };
 function toast(msg, kind) {
+  sfx(kind === 'bad' ? 'error' : kind === 'ok' ? 'success' : 'click');
   const t = document.createElement('div'); t.className = 'toast ' + (kind || ''); t.textContent = msg; $toasts.appendChild(t); setTimeout(() => t.remove(), 3400);
 }
 function countTo(el, to) {
@@ -427,13 +429,13 @@ document.addEventListener('input', e => {
 });
 window.addEventListener('message', e => {
   const d = e.data || {};
-  if (d.action === 'open') { applyAccent(d.data.accent); S.data = d.data;
+  if (d.action === 'open') { sfx('open'); applyAccent(d.data.accent); S.data = d.data;
     const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
     if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
-  else if (d.action === 'close') { $root.classList.add('hidden'); closeSheet(); }
+  else if (d.action === 'close') { sfx('close'); $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }
-  else if (d.action === 'checkoutDone') { S.paying = Object.assign(S.paying || { n: 0 }, { done: true, failed: d.failed || 0 }); render(); }
+  else if (d.action === 'checkoutDone') { sfx('success'); S.paying = Object.assign(S.paying || { n: 0 }, { done: true, failed: d.failed || 0 }); render(); }
 });
 document.addEventListener('keydown', e => {
   if ($root.classList.contains('hidden')) return;

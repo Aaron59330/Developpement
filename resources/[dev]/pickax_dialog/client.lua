@@ -40,7 +40,6 @@ exports('Ask', function(o)
         RenderScriptCams(true, true, 600, true, false)
     end
     if Config.HideHuds then TriggerEvent('pickax:inventory', true) end
-    if Config.Sound then PlaySoundFrontend(-1, 'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true) end
 
     SetNuiFocus(true, true)
     SendNUIMessage({ action = 'show', name = o.name, text = o.text, accept = o.accept or Config.Accept, refuse = o.refuse or Config.Refuse, speed = Config.TypeSpeed })

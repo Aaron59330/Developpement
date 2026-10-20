@@ -7,7 +7,9 @@ function finishTyping() {
   $('txt').textContent = full; $('txt').classList.remove('typing'); $('btns').classList.remove('wait');
   post('typed');
 }
+const sfx = n => { if (window.PKSND) PKSND.play(n); };
 function show(d) {
+  sfx('open');
   full = String(d.text || ''); shown = true;
   $('name').textContent = d.name || 'Interlocuteur';
   $('okLbl').textContent = d.accept || 'Accepter'; $('noLbl').textContent = d.refuse || 'Refuser';
@@ -15,10 +17,10 @@ function show(d) {
   $('dlg').classList.remove('hidden');
   let i = 0; typing = true; clearInterval(timer);
   const speed = Math.max(5, Number(d.speed) || 28);
-  timer = setInterval(() => { i++; $('txt').textContent = full.slice(0, i); if (i >= full.length) finishTyping(); }, speed);
+  timer = setInterval(() => { i++; if (i % 3 === 0 && full[i - 1] !== ' ') sfx('tick'); $('txt').textContent = full.slice(0, i); if (i >= full.length) finishTyping(); }, speed);
 }
 function hide() { shown = false; clearInterval(timer); $('dlg').classList.add('hidden'); }
-function answer(ok) { if (!shown) return; hide(); post('choice', { accept: ok }); }
+function answer(ok) { if (!shown) return; sfx(ok ? 'confirm' : 'close'); hide(); post('choice', { accept: ok }); }
 
 window.addEventListener('message', e => { const d = e.data || {}; if (d.action === 'show') show(d); else if (d.action === 'hide') hide(); });
 $('ok').addEventListener('click', () => answer(true));

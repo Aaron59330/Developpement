@@ -82,7 +82,7 @@ function build(d) {
       ${links.length ? `<div class="card"><div class="title">Raccourcis</div><div class="links">${links.map(l => `<button class="lk" data-url="${esc(l.url)}">${ic(l.icon || 'link')}${esc(l.label)}</button>`).join('')}</div></div>` : ''}
       </div>
     </div>`;
-  SND.on = c.sounds !== false; SND.vol = Math.max(0, Math.min(1, Number(c.volume ?? 0.5)));
+  if (!SND.linked) { SND.on = c.sounds !== false; SND.vol = Math.max(0, Math.min(1, Number(c.volume ?? 0.5))); }   // sinon : réglage du menu personnel
   firstFocus = true; setFocus(0); firstFocus = false;
   countUp($root);
   sfx.open();
@@ -124,6 +124,7 @@ document.addEventListener('keydown', e => {
 
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.action === 'pkSound') { SND.linked = true; SND.on = d.sound !== false; SND.vol = Math.max(0, Math.min(1, (Number(d.volume) || 0) / 100)); return; }
   if (d.action === 'open') { opened = Date.now(); $root.classList.remove('hidden', 'out'); build(d); clock(); }
   else if (d.action === 'close') { if (!$root.classList.contains('hidden')) sfx.close(); $root.classList.add('out'); setTimeout(() => { $root.classList.add('hidden'); $root.innerHTML = ''; }, 180); }
 });

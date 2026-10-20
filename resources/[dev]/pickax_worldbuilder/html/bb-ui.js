@@ -42,8 +42,17 @@
     success: function () { tone(660, 0.1, 'triangle', 0.1); tone(990, 0.18, 'triangle', 0.09, 0.09); },
     error:   function () { tone(210, 0.18, 'square', 0.05); tone(170, 0.2, 'square', 0.05, 0.12); }
   };
-  function play(name) { if (cfg.sound && SND[name]) { try { SND[name](); } catch (e) {} } }
+  function play(name) { if (cfg.sound && cfg.vol > 0 && SND[name]) { try { SND[name](); } catch (e) {} } }
   window.BBUI = { play: play, settings: cfg };
+  // Réglage commun venu du menu personnel (pickax_ui) : remplace le réglage local de ce builder
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (!m || m.action !== 'pkSound') return;
+    var snd = m.sound !== false, vol = Math.max(0, Math.min(100, Number(m.volume) || 0));
+    var changed = !cfg.linked || cfg.sound !== snd || cfg.vol !== vol;
+    cfg.sound = snd; cfg.vol = vol; cfg.linked = true;
+    if (changed && typeof drawDock === 'function') drawDock();
+  });
 
   // Tout élément cliquable (builder ET menus créés pour les joueurs) : bouton, lien, champ de choix, ou tout ce qui affiche un curseur « main »
   var NATIVE = 'button, select, a[href], label, input[type=checkbox], input[type=radio], [role=button], [data-a], [data-open], .nav-item, .tab, .card.click, .click';
@@ -125,13 +134,15 @@
   function drawDock() {
     dock.innerHTML =
       '<div class="bb-pop">' +
-      '<div class="bb-row"><span class="bb-lbl">Sons</span><button class="bb-sw' + (cfg.sound ? ' on' : '') + '" data-bb="snd" title="Activer / désactiver les sons"></button></div>' +
-      '<div class="bb-row"><span class="bb-lbl">Volume</span><input type="range" min="10" max="100" step="5" value="' + cfg.vol + '" data-bb="vol"></div>' +
+      (cfg.linked
+        ? '<div class="bb-row"><span class="bb-lbl">Sons : réglés dans le menu personnel (' + (cfg.sound ? cfg.vol + ' %' : 'coupés') + ')</span></div>'
+        : '<div class="bb-row"><span class="bb-lbl">Sons</span><button class="bb-sw' + (cfg.sound ? ' on' : '') + '" data-bb="snd" title="Activer / désactiver les sons"></button></div>' +
+          '<div class="bb-row"><span class="bb-lbl">Volume</span><input type="range" min="10" max="100" step="5" value="' + cfg.vol + '" data-bb="vol"></div>') +
       '<div class="bb-row"><span class="bb-lbl">Taille</span>' + seg('size', [[90, '90%'], [100, '100%'], [110, '110%']], cfg.size) + '</div>' +
       '<div class="bb-row"><span class="bb-lbl">Bords</span>' + seg('sq', [['0', 'Arrondis'], ['1', 'Carrés']], cfg.sq ? 1 : 0) + '</div>' +
       (window.BBUI_NO_HUB ? '' : '<button class="bb-hub" data-bb="hub">' + ICON_GRID + ' Tous les builders</button>') +
       '</div>' +
-      '<button class="bb-fab" data-bb="fab" title="Sons et apparence">' + ICON_SND + '<span>' + (cfg.sound ? 'Sons' : 'Muet') + '</span></button>';
+      '<button class="bb-fab" data-bb="fab" title="Sons et apparence">' + ICON_SND + '<span>' + (cfg.sound && cfg.vol > 0 ? 'Sons' : 'Muet') + '</span></button>';
   }
   dock.addEventListener('click', function (e) {
     var t = e.target.closest('[data-bb]'); if (!t) return;

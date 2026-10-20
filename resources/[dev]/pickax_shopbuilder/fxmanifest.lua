@@ -19,6 +19,7 @@ server_scripts {
 }
 
 client_scripts {
+    'pk_sound.lua',
     'client/bb_map.lua',
     'client/main.lua',
     'client/clothing.lua',

@@ -33,6 +33,7 @@ server_scripts {
 }
 
 client_scripts {
+    'pk_sound.lua',
     'client/notify.lua',
     'client/bb_map.lua',
     'client/main.lua',

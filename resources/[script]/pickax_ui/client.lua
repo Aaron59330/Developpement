@@ -71,6 +71,10 @@ exports('Hide', function()
     SendNUIMessage({ a = 'hide' })
 end)
 
+-- Réglage commun des sons (menu personnel → Sons des menus / Volume) : diffusé à toutes les interfaces
+local function soundEvent() TriggerEvent('pickax_ui:settings', { sound = settings.sound, volume = settings.volume }) end
+exports('GetSound', function() return { sound = settings.sound, volume = settings.volume } end)
+
 exports('GetSettings', function()
     local t = {}
     for k in pairs(DEFAULTS) do t[k] = settings[k] end
@@ -83,6 +87,7 @@ exports('SetSetting', function(key, value)
     settings[key] = v
     save()
     push()
+    if key == 'sound' or key == 'volume' then soundEvent() end
     return true
 end)
 
@@ -90,6 +95,7 @@ exports('ResetSettings', function()
     for k, v in pairs(DEFAULTS) do settings[k] = v end
     save()
     push()
+    soundEvent()
 end)
 
 -- Ouvre un lien (https uniquement) dans le navigateur du joueur

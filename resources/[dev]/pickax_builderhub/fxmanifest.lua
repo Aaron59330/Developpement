@@ -13,7 +13,8 @@ server_scripts {
     'server.lua',
 }
 
-client_scripts { 'client.lua' }
+client_scripts {
+    'pk_sound.lua', 'client.lua' }
 
 ui_page 'html/index.html'
 
