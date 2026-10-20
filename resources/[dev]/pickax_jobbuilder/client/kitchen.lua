@@ -3,17 +3,6 @@ for _, n in ipairs({ 'serve:menu', 'serve:offer' }) do NuiRemote[n] = true end
 
 local working = false
 
-local function drawBar(label, pct)
-    local w, x, y = 0.18, 0.5, 0.9
-    DrawRect(x, y, w + 0.006, 0.026, 0, 0, 0, 170)
-    local a = Config.UI and Config.UI.Accent or { 64, 224, 208 }
-    DrawRect(x - w / 2 + (w * pct) / 2, y, math.max(w * pct, 0.0001), 0.018, a[1] or 64, a[2] or 224, a[3] or 208, 235)
-    SetTextFont(4) SetTextScale(0.0, 0.38) SetTextColour(255, 255, 255, 235) SetTextCentre(true) SetTextOutline()
-    BeginTextCommandDisplayText('STRING') AddTextComponentSubstringPlayerName(label) EndTextCommandDisplayText(x, y - 0.055)
-    SetTextFont(4) SetTextScale(0.0, 0.3) SetTextColour(200, 200, 200, 220) SetTextCentre(true) SetTextOutline()
-    BeginTextCommandDisplayText('STRING') AddTextComponentSubstringPlayerName('~INPUT_VEH_DUCK~ Annuler') EndTextCommandDisplayText(x, y + 0.02)
-end
-
 local function runWork(res, pointId)
     working = true
     CreateThread(function()
@@ -22,12 +11,13 @@ local function runWork(res, pointId)
         local scenario = res.kind == 'harvest' and Config.Kitchen.HarvestScenario or Config.Kitchen.CookScenario
         TaskStartScenarioInPlace(ped, scenario, 0, true)
         local t0, total, cancelled = GetGameTimer(), res.seconds * 1000, false
+        JBProgress(res.label, total)
         while GetGameTimer() - t0 < total do
             Wait(0)
-            drawBar(res.label, (GetGameTimer() - t0) / total)
             ped = PlayerPedId()
             if IsEntityDead(ped) or #(GetEntityCoords(ped) - start) > 2.0 or IsControlJustPressed(0, 73) then cancelled = true break end
         end
+        JBProgressEnd()
         ClearPedTasks(ped)
         if cancelled then
             TriggerServerEvent('jobbuilder:kitchen:cancel')

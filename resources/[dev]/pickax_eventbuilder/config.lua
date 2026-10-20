@@ -15,8 +15,7 @@ Config.LogLimit      = 200                                 -- lignes d'historiqu
 -- Lancement automatique des événements marqués « Automatique » dans le builder
 Config.Auto = {
     Enabled       = true,
-    CheckSeconds  = 60,      -- fréquence de vérification
-    Chance        = 0.35,    -- chance (0-1) de lancer UN événement à chaque vérification (si les conditions sont réunies)
+    IntervalMinutes = 30,    -- un événement automatique toutes les X minutes (réglable en jeu : builder → onglet Planification)
     MaxConcurrent = 2,       -- événements automatiques simultanés maximum
     MinPlayers    = 1,       -- joueurs connectés minimum (en plus du « minPlayers » de chaque événement)
 }

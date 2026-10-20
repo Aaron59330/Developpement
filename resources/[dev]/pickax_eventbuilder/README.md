@@ -15,3 +15,6 @@ Déclenchement : **Automatique** (planifié par `Config.Auto`), **Manuel** (bout
 Chaque événement : lieux (tirés au hasard), policiers requis, délai de relance, récompense (argent / objets), alerte police, blip, annonces.
 Tout est contrôlé côté serveur (distances, durées, objets, récompenses) ; table `eventbuilder_events` + historique `eventbuilder_logs` créés automatiquement.
 Commande console : `eventstop` arrête tous les événements en cours.
+
+## Planification automatique
+Builder → onglet **Planification** : un événement tiré au hasard parmi ceux marqués « Automatique » est lancé **toutes les X minutes (30 par défaut)**. Réglable en jeu (activation, intervalle, événements simultanés, joueurs minimum, bouton « lancer maintenant ») et enregistré en base (`eventbuilder_settings`).

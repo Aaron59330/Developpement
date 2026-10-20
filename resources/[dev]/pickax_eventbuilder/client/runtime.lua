@@ -55,17 +55,15 @@ local function progress(seconds, label, scenario)
     local t0, total = GetGameTimer(), math.max(0.2, seconds) * 1000
     if scenario then TaskStartScenarioInPlace(ped, scenario, 0, true) end
     local ok = true
+    SendNUIMessage({ action = 'progress', label = label, ms = math.floor(total), hint = 'Appuie sur X pour annuler' })      -- même barre que tous les builders
     while true do
         Wait(0)
         local k = (GetGameTimer() - t0) / total
-        DrawRect(0.5, 0.92, 0.22, 0.022, 0, 0, 0, 170)
-        DrawRect(0.5 - 0.11 + 0.11 * math.min(1.0, k), 0.92, 0.22 * math.min(1.0, k), 0.014, 0, 164, 255, 230)
-        text2d(0.5, 0.885, label, 0.38, 255, 255, 255, true)
-        text2d(0.5, 0.935, '~INPUT_VEH_DUCK~ annuler', 0.3, 200, 200, 200, true)
         DisableControlAction(0, 24, true)
         if k >= 1.0 then break end
         if IsControlJustPressed(0, 73) or IsEntityDead(ped) or IsPedRagdoll(ped) or #(GetEntityCoords(ped) - start) > 2.5 then ok = false break end
     end
+    SendNUIMessage({ action = 'progressEnd' })
     ClearPedTasks(ped)
     return ok
 end

@@ -191,16 +191,14 @@ setInterval(async () => {
 
 /* ── Barre de progression (récolte, traitement, blanchiment) & HUD de capture de territoire ── */
 const Hud = {
-  progress(d) {
+  progress(d) {      // même barre que tous les builders (voir worldbuilder)
     const el = document.getElementById('progress');
     clearTimeout(this.pt);
     if (d.stop) { el.classList.add('hidden'); return; }
-    el.innerHTML = `<div class="eyebrow">${esc(d.label)}</div><div class="bar"><i></i></div><small><kbd>X</kbd> pour annuler · reste immobile</small>`;
+    const ms = Number(d.ms || d.duration) || 1000;
+    el.innerHTML = `<div class="plabel"><b>${esc(d.label || '')}</b><small>${esc(d.hint || 'Appuie sur X pour annuler')}</small></div><div class="pbar"><i style="animation-duration:${ms}ms"></i></div>`;
     el.classList.remove('hidden');
-    const bar = el.querySelector('i');
-    bar.style.transition = 'none'; bar.style.width = '0%';
-    requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${d.duration}ms linear`; bar.style.width = '100%'; }));
-    this.pt = setTimeout(() => el.classList.add('hidden'), d.duration + 800);
+    this.pt = setTimeout(() => el.classList.add('hidden'), ms + 800);
   },
   zone(d) {
     const el = document.getElementById('zonehud');
@@ -309,6 +307,7 @@ window.addEventListener('message', e => {
   if (d.action === 'money') return liveMoney(d.gang, d.money, d.dirty);
   if (d.action === 'theme') return applyTheme(d.accent);
   if (d.action === 'progress') return Hud.progress(d);
+  if (d.action === 'progressEnd') return Hud.progress({ stop: true });
   if (d.action === 'zone') return Hud.zone(d.data);
   if (d.action === 'objective') return Hud.objective(d.data);
   if (d.action !== 'open') return;

@@ -155,18 +155,19 @@ local function progress(step, mid)
         TaskStartScenarioInPlace(ped, SCENARIOS[step.anim] or SCENARIOS.talk, 0, true)
     end
     local t0, total = GetGameTimer(), step.secs * 1000
+    JBProgress(step.label ~= '' and step.label or 'Mission', total)
     while true do
         local el = GetGameTimer() - t0
         if el >= total then break end
         if aborted(mid) or #(GetEntityCoords(ped) - start) > 3.5 or IsPedInAnyVehicle(ped, false) then
+            JBProgressEnd()
             ClearPedTasks(ped)
             return false
         end
-        DrawRect(0.5, 0.875, 0.18, 0.014, 0, 0, 0, 190)
-        DrawRect(0.5 - 0.09 + 0.09 * (el / total), 0.875, 0.18 * (el / total), 0.014, 255, 255, 255, 235)
         hud(step)
         Wait(0)
     end
+    JBProgressEnd()
     ClearPedTasks(ped)
     return true
 end

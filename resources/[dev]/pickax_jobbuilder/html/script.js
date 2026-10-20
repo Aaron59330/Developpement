@@ -308,6 +308,8 @@ window.addEventListener('message', e => {
   if (d.action === 'placementSave') return Placement.save(d.coords);
   if (d.action === 'placementNav') return Placement.nav(d.dir);
   if (d.action === 'placementEnd') return Placement.end();
+  if (d.action === 'progress') { const el = document.getElementById('progress'); el.innerHTML = `<div class="plabel"><b>${esc(d.label || '')}</b><small>${esc(d.hint || '')}</small></div><div class="pbar"><i style="animation-duration:${Number(d.ms) || 1000}ms"></i></div>`; el.classList.remove('hidden'); return; }
+  if (d.action === 'progressEnd') return document.getElementById('progress').classList.add('hidden');
   if (d.action === 'announce') return showAnnounce(d);
   if (d.action === 'money') return liveMoney(d.job, d.money);
   if (d.action === 'theme') return applyTheme(d.accent);

@@ -416,16 +416,13 @@ RegisterNetEvent('jobbuilder:client:cpr', function(target, secs)
         Wait(600)
         TaskPlayAnim(ped, dict, 'cpr_pumpchest', 8.0, -8.0, -1, 1, 0.0, false, false, false)
         local t0, total, cancelled = GetGameTimer(), secs * 1000, false
+        JBProgress('Massage cardiaque…', total)
         while GetGameTimer() - t0 < total do
             Wait(0)
-            local pct = (GetGameTimer() - t0) / total
-            DrawRect(0.5, 0.9, 0.186, 0.026, 0, 0, 0, 170)
-            DrawRect(0.5 - 0.09 + 0.18 * pct / 2, 0.9, math.max(0.18 * pct, 0.0001), 0.018, 239, 68, 68, 235)
-            SetTextFont(4) SetTextScale(0.0, 0.38) SetTextColour(255, 255, 255, 235) SetTextCentre(true) SetTextOutline()
-            BeginTextCommandDisplayText('STRING') AddTextComponentSubstringPlayerName('Massage cardiaque…') EndTextCommandDisplayText(0.5, 0.845)
             ped = PlayerPedId()
             if IsEntityDead(ped) or #(GetEntityCoords(ped) - start) > 1.5 or IsControlJustPressed(0, 73) then cancelled = true break end
         end
+        JBProgressEnd()
         ClearPedTasks(ped)
         if cancelled then
             TriggerServerEvent('jobbuilder:server:cprCancel')

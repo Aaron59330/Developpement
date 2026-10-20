@@ -17,6 +17,7 @@ const IC = {
   copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>', trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   pin: '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>', tp: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/><circle cx="12" cy="12" r="2"/>',
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
   zap: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 };
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${IC[n] || IC.zap}</svg>`;
@@ -52,7 +53,7 @@ const refreshList = async () => { const l = await rpc('list'); if (ok(l)) S.list
 
 /* ─────────────── rendu ─────────────── */
 function shell(inner) {
-  const tabs = [['events', 'Événements'], ['active', 'En cours'], ['logs', 'Historique']];
+  const tabs = [['events', 'Événements'], ['active', 'En cours'], ['auto', 'Planification'], ['logs', 'Historique']];
   return `<div class="top"><div class="tile">${ic('zap')}</div><div><h1>Event Builder</h1><p>Braquages, largages, livraisons, zones… créés et lancés directement en jeu</p></div><div class="sp"></div>
     <button data-a="hub">${ic('grid')} Panel builders</button><button class="icon" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div>
     <div class="tabs">${tabs.map(t => `<button class="tab ${S.tab === t[0] && !S.cur ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${t[1]}${t[0] === 'active' && S.active.length ? ` <span class="chip acc">${S.active.length}</span>` : ''}</button>`).join('')}</div>
@@ -80,6 +81,20 @@ function renderActive() {
     S.active.map(a => `<tr><td><b>${esc(a.label)}</b><br><span class="chip acc">${esc(a.type)}</span></td><td>${esc(a.stage)}</td><td>${a.loot}</td><td>${a.guards}</td><td>${Math.floor(a.endsIn / 60)}:${String(a.endsIn % 60).padStart(2, '0')}</td>
       <td style="text-align:right"><button class="sm" data-a="tp" data-i="${S.active.indexOf(a)}">${ic('tp', 14)} Aller sur place</button> <button class="sm bad" data-a="stop" data-rid="${a.rid}">${ic('stop', 14)} Arrêter</button></td></tr>`).join('') + '</table>';
 }
+
+function fmtClock(s) { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; }
+function renderAuto() {
+  const a = S.auto;
+  if (!a) return '<div class="empty">Chargement…</div>';
+  return `<div class="card autobox"><h3>${ic('clock')} Événements automatiques</h3>
+    <div class="autonext">${ic('clock')}<div><small class="muted">${a.enabled ? 'Prochain événement automatique dans' : 'Planification désactivée'}</small><br><b id="auto-next">${a.enabled && a.nextIn != null ? fmtClock(a.nextIn) : '—'}</b></div></div>
+    <label class="chk"><input type="checkbox" id="au-en" ${a.enabled ? 'checked' : ''}> Lancer automatiquement un événement</label>
+    <div class="grid g2" style="margin-top:10px">${fld('Toutes les (minutes)', `<input id="au-min" type="number" min="1" max="1440" value="${a.intervalMin}">`)}${fld('Événements simultanés maximum', `<input id="au-max" type="number" min="1" max="10" value="${a.maxConcurrent}">`)}</div>
+    <div class="grid g2" style="margin-top:10px">${fld('Joueurs connectés minimum', `<input id="au-pl" type="number" min="0" max="200" value="${a.minPlayers}">`)}<div></div></div>
+    <p class="hint">Un événement tiré au hasard parmi ceux marqués « Automatique » (${a.autoEvents} actif${a.autoEvents > 1 ? 's' : ''} actuellement) est lancé à chaque échéance. Si personne n'est connecté ou si rien ne peut se lancer, nouvel essai une minute plus tard.</p>
+    <div class="row" style="gap:10px;margin-top:14px"><button class="pri" data-a="autoSave">${ic('check')} Enregistrer la planification</button><button data-a="autoNow">${ic('zap')} Lancer un événement automatique maintenant</button></div></div>`;
+}
+setInterval(() => { const e = document.getElementById('auto-next'); if (e && S.auto && S.auto.enabled && S.auto.nextIn != null) { S.auto.nextIn = Math.max(0, S.auto.nextIn - 1); e.textContent = fmtClock(S.auto.nextIn); } }, 1000);
 
 function renderLogs() {
   if (!S.logs.length) return '<div class="empty">Historique vide.</div>';
@@ -148,6 +163,7 @@ function render() {
   let inner;
   if (S.cur) inner = renderEditor();
   else if (S.tab === 'active') inner = renderActive();
+  else if (S.tab === 'auto') inner = renderAuto();
   else if (S.tab === 'logs') inner = renderLogs();
   else inner = renderList();
   const body = $root.querySelector('.body');
@@ -176,7 +192,12 @@ document.addEventListener('click', async e => {
   switch (a) {
     case 'close': return rpc('close');
     case 'hub': return rpc('bbHub');
-    case 'tab': S.tab = el.dataset.v; S.cur = null; if (S.tab === 'logs') { const l = await rpc('logs'); if (ok(l)) S.logs = l.logs; } if (S.tab === 'active') { const x = await rpc('active'); if (ok(x)) S.active = x.list; } if (S.tab === 'events') await refreshList(); return render();
+    case 'tab': S.tab = el.dataset.v; S.cur = null; if (S.tab === 'logs') { const l = await rpc('logs'); if (ok(l)) S.logs = l.logs; } if (S.tab === 'active') { const x = await rpc('active'); if (ok(x)) S.active = x.list; } if (S.tab === 'events') await refreshList(); if (S.tab === 'auto') { const x = await rpc('autoGet'); if (ok(x)) S.auto = x; } return render();
+    case 'autoSave': {
+      const r = await rpc('autoSave', { enabled: document.getElementById('au-en').checked, intervalMin: Number(document.getElementById('au-min').value), maxConcurrent: Number(document.getElementById('au-max').value), minPlayers: Number(document.getElementById('au-pl').value) });
+      if (ok(r, 'Planification enregistrée')) { S.auto = r; render(); } return;
+    }
+    case 'autoNow': { const r = await rpc('autoNow'); if (ok(r, 'Événement automatique lancé')) { const x = await rpc('autoGet'); if (ok(x)) S.auto = x; render(); } return; }
     case 'new': return openTemplates();
     case 'closeModal': return closeModal();
     case 'tpl': { closeModal(); const r = await rpc('draft', el.dataset.id); if (!ok(r)) return; S.cur = r.event; S.isNew = true; S.curId = null; return render(); }
@@ -223,6 +244,8 @@ document.addEventListener('change', e => {
 
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.action === 'progress') { const el = document.getElementById('progress'); el.innerHTML = `<div class="plabel"><b>${esc(d.label || '')}</b><small>${esc(d.hint || '')}</small></div><div class="pbar"><i style="animation-duration:${Number(d.ms) || 1000}ms"></i></div>`; el.classList.remove('hidden'); return; }
+  if (d.action === 'progressEnd') { document.getElementById('progress').classList.add('hidden'); return; }
   if (d.action === 'open') { $root.classList.remove('hidden'); S.cur = null; S.tab = 'events'; loadAll(); }
   else if (d.action === 'close') { $root.classList.add('hidden'); closeModal(); if (S.timer) { clearInterval(S.timer); S.timer = null; } }
 });

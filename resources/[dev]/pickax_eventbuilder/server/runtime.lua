@@ -659,27 +659,84 @@ RegisterNetEvent('eventbuilder:server:trigger', function(defId, locIdx)
     if not ok then notify(src, '~r~' .. tostring(err)) end
 end)
 
--- ─────────────────────────────── Planification automatique ───────────────────────────────
+-- ─────────────────────────────── Planification automatique ───────────────────
+-- Un événement « Automatique » (marqué ainsi dans le builder) est lancé toutes les X minutes (30 par défaut), réglable dans le builder → onglet Planification.
+local Auto = { enabled = Config.Auto.Enabled ~= false, intervalMin = Config.Auto.IntervalMinutes or 30, maxConcurrent = Config.Auto.MaxConcurrent or 2, minPlayers = Config.Auto.MinPlayers or 1, nextAt = 0 }
+
+local function autoCount()
+    local n = 0
+    for _, d in pairs(EB.Defs) do if d.enabled and d.trigger == 'auto' then n = n + 1 end end
+    return n
+end
+
+local function autoSaveDb()
+    MySQL.update.await("INSERT INTO eventbuilder_settings (name, value) VALUES ('auto', ?) ON DUPLICATE KEY UPDATE value = VALUES(value)",
+        { json.encode({ enabled = Auto.enabled, intervalMin = Auto.intervalMin, maxConcurrent = Auto.maxConcurrent, minPlayers = Auto.minPlayers }) })
+end
+
+-- Lance un événement automatique tiré au hasard ; renvoie true si lancé
+local function autoLaunch(force)
+    local running = 0
+    for _ in pairs(EB.Active) do running = running + 1 end
+    if not force and (running >= Auto.maxConcurrent or #GetPlayers() < Auto.minPlayers) then return false, 'conditions non réunies' end
+    local pool = {}
+    for _, d in pairs(EB.Defs) do if d.enabled and d.trigger == 'auto' then pool[#pool + 1] = d end end
+    if #pool == 0 then return false, 'aucun événement « Automatique » actif' end
+    local d = pool[math.random(#pool)]
+    local ok, err = EB.startRun(d.id, force and { force = true } or {})
+    if ok then print(('^3[eventbuilder] événement automatique lancé : %s^0'):format(d.label)) end
+    return ok, err
+end
+
 CreateThread(function()
     while not EB.ready do Wait(500) end
-    while true do
-        Wait((Config.Auto.CheckSeconds or 60) * 1000)
-        if Config.Auto.Enabled and #GetPlayers() >= (Config.Auto.MinPlayers or 1) then
-            local running = 0
-            for _ in pairs(EB.Active) do running = running + 1 end
-            if running < (Config.Auto.MaxConcurrent or 2) and math.random() <= (Config.Auto.Chance or 0.3) then
-                local pool = {}
-                for _, d in pairs(EB.Defs) do
-                    if d.enabled and d.trigger == 'auto' then pool[#pool + 1] = d end
-                end
-                if #pool > 0 then
-                    local d = pool[math.random(#pool)]
-                    local ok, err = EB.startRun(d.id, {})
-                    if ok then print(('^3[eventbuilder] événement automatique lancé : %s^0'):format(d.label)) end
-                end
-            end
+    MySQL.query.await("CREATE TABLE IF NOT EXISTS eventbuilder_settings (name VARCHAR(40) PRIMARY KEY, value TEXT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")
+    local row = MySQL.single.await("SELECT value FROM eventbuilder_settings WHERE name = 'auto'")
+    if row then
+        local ok, v = pcall(json.decode, row.value)
+        if ok and type(v) == 'table' then
+            Auto.enabled = v.enabled ~= false
+            Auto.intervalMin = math.max(1, math.min(1440, math.floor(tonumber(v.intervalMin) or Auto.intervalMin)))
+            Auto.maxConcurrent = math.max(1, math.min(10, math.floor(tonumber(v.maxConcurrent) or Auto.maxConcurrent)))
+            Auto.minPlayers = math.max(0, math.min(200, math.floor(tonumber(v.minPlayers) or Auto.minPlayers)))
         end
     end
+    Auto.nextAt = now() + Auto.intervalMin * 60
+    while true do
+        Wait(10000)
+        if Auto.enabled and now() >= Auto.nextAt then
+            local ok = autoLaunch(false)
+            Auto.nextAt = now() + (ok and Auto.intervalMin * 60 or 60)      -- raté (personne / rien à lancer) : nouvel essai dans 1 minute
+        end
+    end
+end)
+
+local function autoState()
+    return { ok = true, enabled = Auto.enabled, intervalMin = Auto.intervalMin, maxConcurrent = Auto.maxConcurrent, minPlayers = Auto.minPlayers,
+        nextIn = Auto.enabled and math.max(0, Auto.nextAt - now()) or nil, autoEvents = autoCount() }
+end
+
+ESX.RegisterServerCallback('eventbuilder:autoGet', function(src, cb)
+    if not EB.isAdmin(src) then return cb({ ok = false, error = 'Accès refusé' }) end
+    cb(autoState())
+end)
+
+ESX.RegisterServerCallback('eventbuilder:autoSave', function(src, cb, d)
+    if not EB.isAdmin(src) then return cb({ ok = false, error = 'Accès refusé' }) end
+    if type(d) ~= 'table' then return cb({ ok = false, error = 'Données invalides' }) end
+    Auto.enabled = d.enabled == true
+    Auto.intervalMin = math.max(1, math.min(1440, math.floor(tonumber(d.intervalMin) or 30)))
+    Auto.maxConcurrent = math.max(1, math.min(10, math.floor(tonumber(d.maxConcurrent) or 2)))
+    Auto.minPlayers = math.max(0, math.min(200, math.floor(tonumber(d.minPlayers) or 1)))
+    Auto.nextAt = now() + Auto.intervalMin * 60
+    autoSaveDb()
+    cb(autoState())
+end)
+
+ESX.RegisterServerCallback('eventbuilder:autoNow', function(src, cb)
+    if not EB.isAdmin(src) then return cb({ ok = false, error = 'Accès refusé' }) end
+    local ok, err = autoLaunch(true)
+    cb({ ok = ok, error = err and tostring(err) or nil })
 end)
 
 -- ─────────────────────────────── Administration en direct ───────────────────────────────

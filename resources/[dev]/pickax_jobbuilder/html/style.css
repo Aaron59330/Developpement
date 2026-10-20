@@ -343,3 +343,13 @@ kbd { border-color: var(--accent-line); }
 .death-card .d-status, .death-card .d-keys { color: #fff; }
 .death-card .d-hold { background: rgba(0, 0, 0, .4); box-shadow: 0 0 0 1px rgba(255, 255, 255, .2); }
 .death-card kbd { box-shadow: 0 2px 6px rgba(0, 0, 0, .6); text-shadow: none; }
+
+/* Barre de progression d'action : même rendu que tous les builders (récolte, fabrication, braquage, quêtes…) */
+#progress { position: fixed; left: 50%; bottom: 14vh; transform: translateX(-50%); width: min(460px, 86vw); z-index: 96; padding: 14px 18px 16px; border-radius: 16px;
+  background: rgba(22, 23, 28, .94); border: 1px solid var(--accent-line); box-shadow: 0 20px 60px rgba(0, 0, 0, .6); animation: pop .15s; pointer-events: none; }
+#progress.hidden { display: none; }
+#progress .plabel { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+#progress .plabel b { font-size: 14px; letter-spacing: -.01em; } #progress .plabel small { color: var(--muted); font-size: 11px; }
+#progress .pbar { height: 8px; border-radius: 8px; background: rgba(255, 255, 255, .09); overflow: hidden; }
+#progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--accent); box-shadow: 0 0 14px var(--accent-glow); animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
+@keyframes pfill { to { width: 100%; } }

@@ -1327,6 +1327,9 @@ function MenuStaffOpen()
             RageUI.ButtonWithStyle("World Builder", "Garages, locations, stations, banques, portes…", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("worldbuilder") end
             end)
+            RageUI.ButtonWithStyle("Event Builder", "Événements : braquage de fourgon, largage, livraison… (toutes les 30 min, réglable)", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("eventbuilder") end
+            end)
         end)
 
         RageUI.IsVisible(Menu_cutscene,true,true,true, function()
