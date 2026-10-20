@@ -21,3 +21,6 @@ Config.Tebex = {
     Command    = 'pickax_tebex',
     BonusPct   = 0,                  -- % de coins offerts en plus sur tous les achats (ex : 10 pour une promo +10 %)
 }
+
+-- Qui peut modifier les descriptifs des articles en jeu (clic sur un article → « Modifier le descriptif ») : groupes ESX (colonne `group`)
+Config.DescGroups = { _dev = true }

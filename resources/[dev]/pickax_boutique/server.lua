@@ -326,3 +326,52 @@ RegisterCommand((Config.Tebex and Config.Tebex.Command) or 'pickax_tebex', funct
     log(('Tebex : %s reçoit %d coins%s'):format(name, total, tx and (' (transaction ' .. tx .. ')') or ''))
     print(('^2[pickax_boutique] Tebex : +%d coins pour %s^7'):format(total, name))
 end, true)
+
+
+-- ─────────────────────────────── Code boutique & descriptifs des articles ───────────────────────────────
+local DESC_CATS = { vehicle = true, moto = true, other = true, weapon = true, crate = true, pack = true, business = true }
+CreateThread(function()
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS boutique_descriptions (
+        cat VARCHAR(16) NOT NULL, item_key VARCHAR(100) NOT NULL, description TEXT NOT NULL, updated_by VARCHAR(80) NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (cat, item_key)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+
+local function canEditDesc(src)
+    local x = playerOf(src)
+    if not x then return false end
+    local g = x.getGroup and x.getGroup()
+    return Config.DescGroups ~= nil and g ~= nil and Config.DescGroups[g] == true
+end
+
+-- Code boutique unique du joueur : la colonne users.boutique_id est unique (auto-incrément) ; on la relit en base si elle est vide côté jeu
+local function boutiqueIdOf(xPlayer)
+    local id = tonumber(xPlayer.boutique_id) or 0
+    if id > 0 then return id end
+    local row = MySQL.single.await('SELECT boutique_id FROM users WHERE identifier = ?', { xPlayer.identifier })
+    id = row and tonumber(row.boutique_id) or 0
+    if id > 0 then xPlayer.boutique_id = id end
+    return id > 0 and id or nil
+end
+
+ESX.RegisterServerCallback('pickax_boutique:descs', function(src, cb)
+    local xPlayer = playerOf(src)
+    local map = {}
+    for _, r in ipairs(MySQL.query.await('SELECT cat, item_key, description FROM boutique_descriptions') or {}) do map[r.cat .. '|' .. r.item_key] = r.description end
+    cb({ ok = true, map = map, dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil })
+end)
+
+ESX.RegisterServerCallback('pickax_boutique:saveDesc', function(src, cb, d)
+    if not canEditDesc(src) then return cb(fail('Réservé aux administrateurs (_dev)')) end
+    if type(d) ~= 'table' or not DESC_CATS[d.cat] then return cb(fail('Article invalide')) end
+    local key, text = esc(d.key, 100), tostring(d.text or ''):gsub('\r', ''):gsub('[\0-\8\11\12\14-\31]', ''):sub(1, 800)
+    if key == '' then return cb(fail('Article invalide')) end
+    local xPlayer = playerOf(src)
+    if text:gsub('%s', '') == '' then
+        MySQL.update.await('DELETE FROM boutique_descriptions WHERE cat = ? AND item_key = ?', { d.cat, key })
+    else
+        MySQL.update.await('INSERT INTO boutique_descriptions (cat, item_key, description, updated_by) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE description = VALUES(description), updated_by = VALUES(updated_by)',
+            { d.cat, key, text, xPlayer and xPlayer.identifier or 'console' })
+    end
+    log(('%s a modifié le descriptif de « %s » (%s)'):format(GetPlayerName(src), key, d.cat))
+    cb({ ok = true })
+end)

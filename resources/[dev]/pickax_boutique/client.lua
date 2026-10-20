@@ -26,6 +26,19 @@ local function Open()
         ESX.ShowNotification('~r~Boutique indisponible pour le moment.')
         return
     end
+    local d = promise.new()
+    ESX.TriggerServerCallback('pickax_boutique:descs', function(res) d:resolve(res) end)
+    local res = Citizen.Await(d)
+    if type(res) == 'table' and res.ok then
+        cat.dev = res.dev == true
+        if res.boutiqueId then cat.boutiqueId = res.boutiqueId end
+        for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, business = 1 }) do
+            for _, it in ipairs(cat[c] or {}) do
+                local txt = res.map[c .. '|' .. tostring(it.model or it.name)]
+                if txt then it.desc = txt end
+            end
+        end
+    end
     open = true
     points = tonumber(cat.points) or points
     SetNuiFocus(true, true)
@@ -49,7 +62,7 @@ end)
 RegisterNUICallback('close', function(_, cb) Close() cb({}) end)
 
 -- Appels serveur autorisés (historique, parrainage, codes, administration)
-local Remote = { history = true, overview = true, redeem = true, previewCode = true,
+local Remote = { saveDesc = true, history = true, overview = true, redeem = true, previewCode = true,
     ['admin:data'] = true, ['admin:saveCode'] = true, ['admin:toggleCode'] = true, ['admin:deleteCode'] = true, ['admin:saveSettings'] = true }
 
 RegisterNUICallback('rpc', function(body, cb)

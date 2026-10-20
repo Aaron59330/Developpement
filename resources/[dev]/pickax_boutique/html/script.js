@@ -25,6 +25,7 @@ const IC = {
   store: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>',
   _store: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>',
 };
+IC.check = '<path d="M5 12.5l4.5 4.5L19 7"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${IC[n] || IC.box}</svg>`;
 
 const CATS = [
@@ -134,7 +135,7 @@ function sidebar(cats) {
       ${nav('history', 'hist', 'Historique', '', 'var(--pk-accent,#00a4ff)')}
       ${nav('codes', 'tag', 'Codes & parrainage', '', 'var(--pk-accent,#00a4ff)')}
       ${S.data.staff ? nav('admin', 'shield', 'Gestion', '', 'var(--pk-accent,#00a4ff)') : ''}</nav>
-    <div class="foot">${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
+    <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
 const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
@@ -252,7 +253,9 @@ function sheet(it, confirm, c) {
   c = c || S.cat;
   const ct = CATS.find(x => x.id === c) || cat(), lack = it.price - S.points;
   $modal.innerHTML = `<div class="sheet">${picHtml(c, it, tagOf(it, c))}<div class="body"><span class="kind">${esc(ct.kind)}</span><h2>${esc(it.name)}</h2>
-    ${it.desc ? `<div class="desc">${esc(it.desc)}</div>` : ''}
+    <div class="desc ${it.desc ? '' : 'none'}">${it.desc ? esc(it.desc) : 'Aucun descriptif pour le moment.'}</div>
+    ${S.data.dev ? `<div class="deved"><label>Descriptif (visible par tous les joueurs)<textarea id="descText" maxlength="800" rows="4" placeholder="Décris l'article : vitesse, places, particularités…">${esc(it.desc || '')}</textarea></label>
+      <button class="btn" data-a="saveDesc" data-c="${c}" data-i="${it.idx}">${ic('check', 16)} Enregistrer le descriptif</button></div>` : ''}
     <div class="chips">${it.model && c !== 'pack' && c !== 'crate' && c !== 'business' ? `<span class="chip">Modèle : ${esc(it.model)}</span>` : ''}${it.balle ? `<span class="chip">${esc(it.balle)} munitions</span>` : ''}${it.vtype ? `<span class="chip">${it.vtype === 'boat' ? 'Bateau' : 'Avion'}</span>` : ''}</div>
     ${(it.contents && it.contents.length) ? `<div class="contents"><b>Contenu</b><ul>${it.contents.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
     <div class="buy">${lack > 0 ? `<div class="warn">Il te manque ${fmt(lack)} coins.</div>` : ''}<div class="total"><span class="pill ${lack > 0 ? 'short' : ''}"><i></i>${fmt(it.price)} coins</span><small>Solde : ${fmt(S.points)}</small></div>
@@ -300,6 +303,14 @@ document.addEventListener('click', async e => {
     case 'open': { if (e.target.closest('.mini')) return; const it = itemIn(S.cat, i); if (it) sheet(it, false, S.cat); return; }
     case 'closeSheet': return closeSheet();
     case 'ask': { const it = itemIn(c, i); if (it) sheet(it, true, c); return; }
+    case 'saveDesc': {
+      const it = itemIn(c, i); if (!it) return;
+      const text = (document.getElementById('descText') || {}).value || '';
+      const r = await rpc('saveDesc', { cat: c, key: it.model || it.name, text });
+      if (r && r.ok) { it.desc = text.trim(); toast(text.trim() ? 'Descriptif enregistré' : 'Descriptif supprimé', 'ok'); sheet(it, false, c); }
+      else toast((r && r.error) || 'Erreur', 'bad');
+      return;
+    }
     case 'addcart': e.stopPropagation(); addToCart(c, i); if (el.dataset.close) closeSheet(); return;
     case 'link': if (window.invokeNative) window.invokeNative('openUrl', S.data.link); else window.open(S.data.link, '_blank'); return;
     case 'classic': return post('classic');
