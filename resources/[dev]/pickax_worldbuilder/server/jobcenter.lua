@@ -119,8 +119,8 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:info', function(src, cb, eid,
         if not p or not p.coords or not WB.near(src, p.coords, 4.0) then return cb(fail('Trop loin du guichet')) end
         return cb(payload(x, (p.label and p.label ~= '') and p.label or e.label))
     end
-    if not BY[x.job.name] and not isFreeJob(x.job.name) then return cb(fail('Menu réservé aux petits jobs et aux sans-emploi')) end
-    cb(payload(x, BY[x.job.name] and 'Mes quêtes' or 'Pôle emploi'))      -- depuis le menu F6
+    if not BY[x.job.name] then return cb(fail('Pour prendre un job, rends-toi à un guichet Pôle emploi')) end
+    cb(payload(x, 'Mes quêtes'))      -- depuis le menu F6 : uniquement les quêtes d'un petit job déjà pris
 end)
 
 ESX.RegisterServerCallback('worldbuilder:jobcenter:take', function(src, cb, eid, pi, jobName)
@@ -131,9 +131,9 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:take', function(src, cb, eid,
         e = WB.Entities[tonumber(eid)]
         p = e and e.type == 'jobcenter' and e.enabled and e.points[tonumber(pi) or 0]
         if not p or not p.coords or not WB.near(src, p.coords, 4.0) then return cb(fail('Trop loin du guichet')) end
-    elseif C.MenuFromF6 == false then
-        return cb(fail('Passe par un guichet Pôle emploi'))
-    end      -- sinon : menu F6 des sans-emploi, sans guichet (le contrôle « métier libre » plus bas s'applique dans les deux cas)
+    else
+        return cb(fail('Prends ton job à un guichet Pôle emploi'))      -- l'embauche n'est possible qu'au point marker, jamais depuis F6
+    end
     local j = BY[tostring(jobName)]
     if not j then return cb(fail('Job inconnu')) end
     if x.job.name == j.name then return cb(fail('C\'est déjà ton job')) end

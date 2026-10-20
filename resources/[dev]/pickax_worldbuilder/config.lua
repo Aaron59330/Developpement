@@ -602,7 +602,6 @@ Config.Templates.robbery = {
 -- pour le menu F6) puis rechargés. Chaque job a des petites quêtes (aller sur place, travailler avec une animation, être payé).
 Config.JobCenter = {
     Enabled        = true,
-    MenuFromF6     = true,                 -- les sans-emploi (FreeJobs) ouvrent le menu des jobs directement avec F6, sans passer par un guichet
     FreeJobs       = { 'unemployed' },     -- métiers dont on peut partir directement vers un petit job (en plus des petits jobs eux-mêmes)
     RewardAccount  = 'money',              -- compte crédité à la fin d'une quête
     Cooldown       = 45,                   -- secondes avant de refaire la même quête
