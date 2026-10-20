@@ -8,6 +8,6 @@ Config.Compact = {                -- position de la version compacte (unités CS
     bottom = '3.4vh',
     width  = 210,                 -- largeur en pixels
 }
-Config.ShowStreet     = true     -- rue et quartier (version « top » uniquement)
+Config.ShowStreet     = true     -- nom de rue sous la boussole (la version « top » ajoute aussi le quartier)
 Config.Refresh        = 33       -- ms entre deux mises à jour du cap (plus petit = plus fluide)
 Config.HideWhenMapOpen = true    -- masquée quand la carte du menu pause est ouverte

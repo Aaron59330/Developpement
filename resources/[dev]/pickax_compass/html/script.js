@@ -40,7 +40,8 @@ window.addEventListener('message', e => {
   else if (m.a === 'h') {
     setHeading(m.h);
     document.getElementById('deg').textContent = m.h;
-    const w = street ? [m.street, m.zone].filter(Boolean).join(' · ') : '';
+    const compact = document.body.classList.contains('compact');
+    const w = street ? (compact ? (m.street || m.zone || '') : [m.street, m.zone].filter(Boolean).join(' · ')) : '';
     document.getElementById('where').textContent = w;
   }
 });

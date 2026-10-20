@@ -28,4 +28,4 @@ body.compact .t i { bottom: 3px; height: 5px; }
 body.compact .t.m i { height: 8px; }
 body.compact .caret { border-left-width: 5px; border-right-width: 5px; border-top-width: 6px; margin-top: 1px; }
 body.compact .deg { font-size: 12px; margin-top: 0; }
-body.compact .where { display: none; }
+body.compact .where { font-size: 11px; margin-top: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .02em; }
