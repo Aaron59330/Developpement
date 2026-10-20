@@ -177,7 +177,16 @@ local SETTINGS = {
         listingFee = { 'n', 0, 10000000, 0 }, commission = { 'n', 0, 100, 0 }, maxListings = { 'n', 1, 30, 3 }, durationDays = { 'n', 0, 365, 7 },
         minPrice = { 'n', 0, 1000000000, 0 }, maxPrice = { 'n', 0, 1000000000, 0 }, showPlate = { 'b', false }, payments = { 'p' }, society = ITEM,
     }),
-    jobcenter = merge(COMMON, {}),
+    jobcenter = merge(COMMON, {
+        jobs = { 'a', obj({
+            name = { 's', 20, '' }, label = { 's', 40, '' }, icon = { 's', 12, 'tool' }, desc = { 's', 160, '' },
+            grades = { 'a', obj({ label = { 's', 40, '' }, salary = { 'n', 0, 10000, 20 } }), 4, function(g) return g.label ~= '' end },
+            quests = { 'a', obj({ id = { 's', 24, '' }, label = { 's', 60, '' }, desc = { 's', 160, '' }, spots = { 'n', 1, 6, 1 }, anim = { 'e', animIds, 'clipboard' }, secs = { 'n', 3, 60, 8 },
+                go = { 's', 80, '' }, work = { 's', 80, '' }, min = { 'n', 0, 100000, 50 }, max = { 'n', 0, 100000, 80 } }), 12, function(q) if q.id == '' then q.id = q.label end q.id = q.id:lower():gsub('[^%l%d_]', '') if q.id == '' then q.id = 'quete' end if q.max < q.min then q.max = q.min end return q.label ~= '' end },
+        }), 20, function(j) j.name = j.name:lower():gsub('[^%l%d_]', '') return j.name ~= '' and j.label ~= '' and #j.grades >= 1 end },
+        locations = { 'a', obj({ label = { 's', 60, '' }, x = { 'n', -20000, 20000, 0 }, y = { 'n', -20000, 20000, 0 }, z = { 'n', -2000, 4000, 0 }, h = { 'n', 0, 360, 0 } }), 60,
+            function(l) return l.label ~= '' and (l.x ~= 0 or l.y ~= 0) end },
+    }),
     locksmith = merge(COMMON, {
         price = { 'n', 0, 10000000, 250 }, requireNearby = { 'b', true }, allowIfHasKey = { 'b', false }, keyItem = ITEM, cooldown = { 'n', 0, 86400, 60 }, payments = { 'p' }, society = ITEM,
     }),
@@ -374,7 +383,7 @@ ESX.RegisterServerCallback('worldbuilder:catalog', function(src, cb)
     for _, a in ipairs(Config.Animations) do anims[#anims + 1] = { id = a.id, label = a.label } end
     local pw = {}
     for _, w in ipairs(Config.PvpWeapons) do pw[#pw + 1] = { name = w.name, label = w.label, category = w.category } end
-    cb({ ok = true, types = types, items = WB.itemCatalog(), jobs = jobList(), jobs2 = jobs2List(), weapons = pw, payments = pay, scenarios = Config.PedScenarios, animations = anims,
+    cb({ ok = true, types = types, items = WB.itemCatalog(), jobs = jobList(), jobs2 = jobs2List(), weapons = pw, payments = pay, scenarios = Config.PedScenarios, animations = anims, jobcenter = Config.JobCenterDefaults(),
         vehicleTypes = Config.VehicleTypes, inventory = WB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent,
         policeJobs = Config.PoliceJobs, limits = { points = Config.Max.Points, fleet = Config.Max.Fleet, recipes = Config.Max.Recipes } })
 end)

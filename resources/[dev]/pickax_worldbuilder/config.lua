@@ -691,3 +691,20 @@ Config.Templates.jobcenter = {
         points = { { kind = 'desk', label = 'Pôle emploi', blip = true, ped = ped('a_f_y_business_01', 'WORLD_HUMAN_CLIPBOARD') } },
     },
 }
+
+-- Jobs / quêtes / lieux au format modifiable dans le builder (module Pôle emploi → onglet « Jobs & quêtes »)
+function Config.JobCenterDefaults()
+    local jobs, locs = {}, {}
+    for _, j in ipairs(Config.JobCenter.Jobs) do
+        local g, q = {}, {}
+        for _, x in ipairs(j.grades) do g[#g + 1] = { label = x[2], salary = x[3] } end
+        for _, x in ipairs(j.quests) do q[#q + 1] = { id = x.id, label = x.label, desc = x.desc, spots = x.spots, anim = x.anim, secs = x.secs, go = x.go, work = x.work, min = x.reward[1], max = x.reward[2] } end
+        jobs[#jobs + 1] = { name = j.name, label = j.label, icon = j.icon, desc = j.desc, grades = g, quests = q }
+    end
+    for _, l in ipairs(Config.JobCenter.Locations) do locs[#locs + 1] = { label = l[1], x = l[2], y = l[3], z = l[4], h = l[5] } end
+    return { jobs = jobs, locations = locs }
+end
+do
+    local d = Config.JobCenterDefaults()
+    Config.Templates.jobcenter.office.settings.jobs, Config.Templates.jobcenter.office.settings.locations = d.jobs, d.locations
+end

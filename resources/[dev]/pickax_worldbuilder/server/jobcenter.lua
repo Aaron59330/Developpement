@@ -6,8 +6,45 @@ local nextId = 0
 local function fail(msg) return { ok = false, error = msg } end
 local function now() return os.time() end
 
-local JOBS, BY = C.Jobs, {}
-for _, j in ipairs(JOBS) do BY[j.name] = j end
+-- Jobs / quêtes / lieux effectifs : ceux du module Pôle emploi (modifiables dans le builder → onglet « Jobs & quêtes »), sinon ceux de Config.JobCenter
+local cache
+local function slug(x) return (tostring(x or ''):lower():gsub('[^%l%d]', '')) end
+
+local function build()
+    local src
+    for _, e in pairs(WB.Entities) do
+        if e.type == 'jobcenter' and e.settings and type(e.settings.jobs) == 'table' and #e.settings.jobs > 0 then src = e.settings break end
+    end
+    if not src then src = Config.JobCenterDefaults() end
+    -- un job dont le nom existe déjà dans ta table jobs sans avoir été créé par le Pôle emploi n'est jamais utilisé (aucun mélange)
+    local existing, ours = {}, {}
+    for _, r in ipairs(MySQL.query.await('SELECT name FROM jobs') or {}) do existing[r.name] = true end
+    local okJB, rows = pcall(MySQL.query.await, "SELECT name FROM jobbuilder_jobs WHERE created_by = 'polemploi'")
+    for _, r in ipairs(okJB and rows or {}) do ours[r.name] = true end
+    local K = { JOBS = {}, BY = {}, LOCS = {}, skipped = {} }
+    for _, j in ipairs(src.jobs) do
+        if existing[j.name] and not ours[j.name] then
+            K.skipped[#K.skipped + 1] = j.name
+        else
+            local job = { name = j.name, label = j.label, icon = j.icon, desc = j.desc, grades = {}, quests = {} }
+            for i, g in ipairs(j.grades) do job.grades[i] = { slug(g.label) ~= '' and slug(g.label) or ('grade' .. i), g.label, g.salary } end
+            local used = {}
+            for _, q in ipairs(j.quests) do
+                local id = q.id
+                while used[id] do id = id .. '_' end
+                used[id] = true
+                job.quests[#job.quests + 1] = { id = id, label = q.label, desc = q.desc, spots = q.spots, anim = q.anim, secs = q.secs, go = q.go ~= '' and q.go or 'Rends-toi sur place',
+                    work = q.work ~= '' and q.work or 'Travailler', reward = { q.min, math.max(q.min, q.max) } }
+            end
+            K.JOBS[#K.JOBS + 1] = job
+            K.BY[job.name] = job
+        end
+    end
+    for _, l in ipairs(src.locations or {}) do K.LOCS[#K.LOCS + 1] = { l.label, l.x, l.y, l.z, l.h } end
+    if #K.LOCS == 0 then for _, l in ipairs(Config.JobCenter.Locations) do K.LOCS[#K.LOCS + 1] = l end end
+    return K
+end
+local function CFG() if not cache then cache = build() end return cache end
 
 local function gradeOf(done)
     local g = 0
@@ -19,10 +56,23 @@ end
 -- jobs + job_grades (ESX) + fiche jobbuilder_jobs (menu F6 : « Mes quêtes », « Quitter le métier »). Ne modifie jamais un job qui existe déjà.
 local function ensureJobs()
     if not C.Enabled then return end
-    local created = {}
+    cache = nil
+    local created, updated = {}, 0
     local hasJB = pcall(MySQL.scalar.await, 'SELECT 1 FROM jobbuilder_jobs LIMIT 1')
-    for _, j in ipairs(JOBS) do
+    for _, n in ipairs(CFG().skipped) do print(('^3[worldbuilder] Pôle emploi : le job « %s » existe déjà dans ta table jobs (non créé par le Pôle emploi) : ignoré.^0'):format(n)) end
+    for _, j in ipairs(CFG().JOBS) do
         local exists = MySQL.scalar.await('SELECT 1 FROM jobs WHERE name = ? LIMIT 1', { j.name })
+        if exists then
+            -- job créé par le Pôle emploi : on applique les modifications faites dans le builder (nom, grades, salaires)
+            MySQL.update.await('UPDATE jobs SET label = ? WHERE name = ?', { j.label, j.name })
+            MySQL.update.await('DELETE FROM job_grades WHERE job_name = ?', { j.name })
+            for i, g in ipairs(j.grades) do
+                MySQL.insert.await("INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, '{}', '{}')", { j.name, i - 1, g[1], g[2], g[3] })
+            end
+            MySQL.update.await('UPDATE users SET job_grade = 0 WHERE job = ? AND job_grade > ?', { j.name, #j.grades - 1 })
+            pcall(MySQL.update.await, 'UPDATE jobbuilder_jobs SET label = ? WHERE name = ?', { j.label, j.name })
+            updated = updated + 1
+        end
         if not exists then
             MySQL.insert.await('INSERT INTO jobs (name, label, whitelisted) VALUES (?, ?, 0)', { j.name, j.label })
             for i, g in ipairs(j.grades) do
@@ -41,8 +91,8 @@ local function ensureJobs()
     end
     if #created > 0 or hasJB then
         pcall(function() exports.pickax_jobbuilder:Reload() end)
+        if #created > 0 or updated > 0 then if ESX.RefreshJobs then pcall(ESX.RefreshJobs) end end
         if #created > 0 then
-            if ESX.RefreshJobs then pcall(ESX.RefreshJobs) end
             print(('^2[worldbuilder] Pôle emploi : %d job(s) créé(s) dans la base : %s^0'):format(#created, table.concat(created, ', ')))
         end
     end
@@ -56,7 +106,7 @@ end
 local prevChanged, prevReady = WB.onEntityChanged, WB.onReady
 WB.onEntityChanged = function(e)
     if prevChanged then prevChanged(e) end
-    if e and e.type == 'jobcenter' then CreateThread(ensureJobs) end
+    if e and e.type == 'jobcenter' then cache = nil CreateThread(ensureJobs) end
 end
 WB.onReady = function()
     if prevReady then prevReady() end
@@ -74,7 +124,7 @@ end, false)
 
 -- ─────────────────────────────── Données pour le menu ───────────────────────────────
 local function isFreeJob(name)
-    if BY[name] then return true end
+    if CFG().BY[name] then return true end
     for _, n in ipairs(C.FreeJobs or {}) do if n == name then return true end end
     return false
 end
@@ -84,7 +134,7 @@ local function statsOf(identifier, job)
 end
 
 local function questList(x, jobName)
-    local j = BY[jobName]
+    local j = CFG().BY[jobName]
     if not j then return {}, nil end
     local st = statsOf(x.identifier, jobName)
     local g = x.job.name == jobName and x.job.grade or 0
@@ -99,14 +149,14 @@ end
 local function payload(x, label)
     local jobs = {}
     local cur = x.job.name
-    for _, j in ipairs(JOBS) do
+    for _, j in ipairs(CFG().JOBS) do
         local lo, hi = 9e9, 0
         for _, q in ipairs(j.quests) do lo = math.min(lo, q.reward[1]) hi = math.max(hi, q.reward[2]) end
         jobs[#jobs + 1] = { id = j.name, label = j.label, icon = j.icon, desc = j.desc, quests = #j.quests, min = lo, max = hi, current = cur == j.name, salary = j.grades[1][3] }
     end
     local quests, st = questList(x, cur)
     local a = Active[x.source]
-    return { ok = true, label = label, jobs = jobs, current = cur, currentLabel = x.job.label, isSmall = BY[cur] ~= nil, quests = quests, stats = st,
+    return { ok = true, label = label, jobs = jobs, current = cur, currentLabel = x.job.label, isSmall = CFG().BY[cur] ~= nil, quests = quests, stats = st,
         gradeLabel = x.job.grade_label, active = a and { label = a.label, idx = math.min(a.idx, #a.steps), total = #a.steps } or nil }
 end
 
@@ -119,7 +169,7 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:info', function(src, cb, eid,
         if not p or not p.coords or not WB.near(src, p.coords, 4.0) then return cb(fail('Trop loin du guichet')) end
         return cb(payload(x, (p.label and p.label ~= '') and p.label or e.label))
     end
-    if not BY[x.job.name] then return cb(fail('Pour prendre un job, rends-toi à un guichet Pôle emploi')) end
+    if not CFG().BY[x.job.name] then return cb(fail('Pour prendre un job, rends-toi à un guichet Pôle emploi')) end
     cb(payload(x, 'Mes quêtes'))      -- depuis le menu F6 : uniquement les quêtes d'un petit job déjà pris
 end)
 
@@ -134,7 +184,7 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:take', function(src, cb, eid,
     else
         return cb(fail('Prends ton job à un guichet Pôle emploi'))      -- l'embauche n'est possible qu'au point marker, jamais depuis F6
     end
-    local j = BY[tostring(jobName)]
+    local j = CFG().BY[tostring(jobName)]
     if not j then return cb(fail('Job inconnu')) end
     if x.job.name == j.name then return cb(fail('C\'est déjà ton job')) end
     if not isFreeJob(x.job.name) then return cb(fail('Quitte d\'abord ton métier actuel (F6 → Quitter le métier)')) end
@@ -153,7 +203,7 @@ end)
 
 ESX.RegisterServerCallback('worldbuilder:jobcenter:leave', function(src, cb)
     local x = ESX.GetPlayerFromId(src)
-    if not x or not BY[x.job.name] then return cb(fail('Tu n\'as pas de petit job')) end
+    if not x or not CFG().BY[x.job.name] then return cb(fail('Tu n\'as pas de petit job')) end
     Active[src] = nil
     x.setJob((C.FreeJobs or { 'unemployed' })[1], 0)
     cb({ ok = true })
@@ -162,11 +212,11 @@ end)
 -- ─────────────────────────────── Quêtes ───────────────────────────────
 local function pickSpots(n)
     local idx = {}
-    for i = 1, #C.Locations do idx[i] = i end
+    for i = 1, #CFG().LOCS do idx[i] = i end
     for i = #idx, 2, -1 do local j = math.random(i) idx[i], idx[j] = idx[j], idx[i] end
     local out = {}
     for i = 1, n do
-        local l = C.Locations[idx[(i - 1) % #idx + 1]]
+        local l = CFG().LOCS[idx[(i - 1) % #idx + 1]]
         out[i] = { label = l[1], x = l[2], y = l[3], z = l[4], h = l[5] }
     end
     return out
@@ -175,7 +225,7 @@ end
 ESX.RegisterServerCallback('worldbuilder:jobcenter:questStart', function(src, cb, questId)
     local x = ESX.GetPlayerFromId(src)
     if not x then return cb(fail('Joueur introuvable')) end
-    local j = BY[x.job.name]
+    local j = CFG().BY[x.job.name]
     if not j then return cb(fail('Prends d\'abord un petit job au pôle emploi')) end
     local q
     for _, t in ipairs(j.quests) do if t.id == tostring(questId) then q = t end end
@@ -210,7 +260,7 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:questFinish', function(src, c
     local a, x = Active[src], ESX.GetPlayerFromId(src)
     if not a or not x or a.id ~= id or a.idx <= #a.steps or x.job.name ~= a.job then return cb(fail('Quête non terminée')) end
     Active[src] = nil
-    local j = BY[a.job]
+    local j = CFG().BY[a.job]
     local st = statsOf(x.identifier, a.job)
     local reward = math.random(a.q.reward[1], math.max(a.q.reward[1], a.q.reward[2]))
     local bonus = (C.GradeBonus or {})[x.job.grade + 1] or 0

@@ -920,6 +920,9 @@ const NEWROW = {
   pweapon: () => ({ name: '', ammo: 250 }),
   cvehicle: () => ({ model: '', label: '', category: 'Sportive', speed: 70, accel: 70, handling: 70 }),
   program: () => ({ label: 'Lavage', price: 50, seconds: 8 }),
+  jcjob: () => ({ name: 'nouveaujob', label: 'Nouveau job', icon: 'tool', desc: '', grades: [{ label: 'Débutant', salary: 15 }, { label: 'Confirmé', salary: 25 }, { label: 'Expert', salary: 40 }], quests: [NEWROW.jcquest()] }),
+  jcquest: () => ({ id: '', label: 'Nouvelle quête', desc: '', spots: 2, anim: 'clipboard', secs: 8, go: 'Rends-toi sur place', work: 'Travailler', min: 50, max: 80 }),
+  jcloc: () => ({ label: 'Nouveau lieu', x: 0, y: 0, z: 0, h: 0 }),
   license: () => ({ id: '', label: 'Nouveau permis', requires: '', theoryPrice: 200, practicalPrice: 500, theory: { enabled: true, count: 10, passPercent: 80, questions: [] }, practical: { enabled: true, model: 'blista', speedLimit: 80, maxFaults: 5 } }),
   question: () => ({ q: '', answers: ['', '', '', ''], correct: 1 }),
   recipe: () => ({ label: 'Nouvelle recette', inputs: [{ item: '', count: 1 }], outputs: [{ item: '', count: 1 }], time: 8, anim: 'repair', failChance: 0, tool: TOOL0() }),
@@ -1076,6 +1079,7 @@ const Builder = {
     if (t === 'driving') out.push(['licenses', 'Permis', 'key']);
     if (t === 'carwash') out.push(['programs', 'Programmes', 'drop']);
     if (t === 'locksmith') out.push(['keys', 'Clés', 'key']);
+    if (t === 'jobcenter') out.push(['jobs', 'Jobs & quêtes', 'users']);
     if (t === 'carlot') out.push(['sale', 'Règles de vente', 'dollar']);
     if (t === 'chase') out.push(['rules', 'Règles & récompenses', 'target'], ['cars', 'Véhicules', 'car']);
     if (t === 'pvp') out.push(['rules', 'Réglages', 'dollar']);
@@ -1096,7 +1100,7 @@ const Builder = {
     const tabs = this.tabs();
     if (!tabs.find(x => x[0] === this.tab)) this.tab = 'general';
     const warn = this.missing.length ? `<div class="hint warn" style="margin-bottom:14px">Items introuvables sur ton serveur : <b>${this.missing.map(esc).join(', ')}</b>. Corrige leur nom (ou crée-les dans ton inventaire) pour que ce module fonctionne.</div>` : '';
-    const fn = { general: 'tabGeneral', rules: 'tabRules', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', access: 'tabAccess', stats: 'tabStats' }[this.tab];
+    const fn = { general: 'tabGeneral', rules: 'tabRules', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', jobs: 'tabJobs', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', access: 'tabAccess', stats: 'tabStats' }[this.tab];
     return `${warn}<div class="seg wrap">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[2], 15)} ${t[1]}</button>`).join('')}</div>${this[fn]()}`;
   },
 
@@ -1259,6 +1263,43 @@ const Builder = {
         <div class="row wrap mt" style="gap:22px">${this.fC('Afficher la plaque dans l\'annonce', 'settings.showPlate')}</div>
         <div class="mt">${this.payChecks('settings.payments')}</div><div class="mt">${this.fItem('Compte société crédité (frais + commissions)', 'settings.society')}</div>
         <div class="hint mt-s">Le véhicule mis en vente <b>quitte le garage</b> et est exposé sur une <b>place d'exposition</b> (onglet Emplacements : place avec le cap voulu). Une place = une annonce : ajoute autant de places que de véhicules à exposer. À la vente, le véhicule va dans le garage de l'acheteur et le vendeur reçoit le prix moins la commission sur son compte bancaire (même hors ligne). Si l'annonce expire ou est retirée, le véhicule retourne au garage du vendeur.</div></div>`;
+  },
+
+  /* ── Pôle emploi : jobs, grades, quêtes et lieux des quêtes ── */
+  tabJobs() {
+    const s = this.cur.settings;
+    if (!Array.isArray(s.jobs) || !s.jobs.length) {
+      return `<div class="card"><div class="card-h"><div class="t">${ic('users', 17)} Jobs & quêtes</div></div>
+        <p class="hint">Ce Pôle emploi utilise les jobs et quêtes par défaut (fichier de config). Personnalise-les pour modifier chaque job, ses grades, ses quêtes et leurs lieux depuis le builder.</p>
+        <button class="primary mt" data-a="jcInit">${ic('edit', 15)} Personnaliser les jobs et les quêtes</button></div>`;
+    }
+    this.jcOpen = this.jcOpen || {};
+    const ICONS = [['leaf', 'Plante'], ['wrench', 'Clé'], ['bolt', 'Éclair'], ['drop', 'Goutte'], ['box', 'Carton'], ['tool', 'Outil'], ['cart', 'Panier'], ['users', 'Personnes']];
+    const quest = (b, q, qi) => `<div class="card" style="background:rgba(255,255,255,.03)"><div class="card-h"><div class="t">${ic('flag', 15)} ${esc(q.label || 'Quête')}</div><button class="icon danger" data-a="rowDel" data-v="${b}.quests|${qi}">${ic('x', 14)}</button></div>
+        <div class="grid2">${this.fS('Nom de la quête', `${b}.quests.${qi}.label`, { max: 60 })}${this.fS('Description (affichée au joueur)', `${b}.quests.${qi}.desc`, { max: 160 })}</div>
+        <div class="grid3 mt-s">${this.fN('Nombre de lieux visités', `${b}.quests.${qi}.spots`, { min: 1, max: 6 })}${this.animSel('Animation de travail', `${b}.quests.${qi}.anim`)}${this.fN('Durée du travail par lieu (s)', `${b}.quests.${qi}.secs`, { min: 3, max: 60 })}</div>
+        <div class="grid2 mt-s">${this.fN(`Gain minimum (${CUR})`, `${b}.quests.${qi}.min`, { min: 0 })}${this.fN(`Gain maximum (${CUR})`, `${b}.quests.${qi}.max`, { min: 0 })}</div>
+        <div class="grid2 mt-s">${this.fS('Texte du trajet', `${b}.quests.${qi}.go`, { max: 80, ph: 'Rends-toi chez le client' })}${this.fS('Texte du travail', `${b}.quests.${qi}.work`, { max: 80, ph: 'Tondre la pelouse' })}</div></div>`;
+    const job = (j, i) => {
+      const b = `settings.jobs.${i}`, op = this.jcOpen['j' + i];
+      return `<div class="card"><div class="card-h"><div class="t">${ic(j.icon || 'tool', 17)} ${esc(j.label || 'Nouveau job')} <span class="muted" style="font-weight:400;margin-left:8px">${esc(j.name)} · ${(j.quests || []).length} quête(s)</span></div>
+        <div class="row" style="gap:6px"><button class="sm" data-a="jcToggle" data-v="j${i}">${op ? 'Réduire' : 'Modifier'}</button><button class="icon danger" data-a="rowDel" data-v="settings.jobs|${i}" title="Supprimer ce job">${ic('x', 14)}</button></div></div>
+        ${op ? `<div class="grid3">${this.fS('Nom affiché', `${b}.label`, { max: 40 })}${this.fS('Nom en base (a-z, 0-9, _)', `${b}.name`, { max: 20, ph: 'jardinier' })}${this.fSel('Icône', `${b}.icon`, ICONS)}</div>
+          <div class="mt-s">${this.fS('Description', `${b}.desc`, { max: 160 })}</div>
+          <div class="lbl mt">Grades et salaires (promotion automatique aux paliers de quêtes de Config.JobCenter.Promotions)</div>
+          ${(j.grades || []).map((g, gi) => `<div class="grid2 mt-s">${this.fS(`Grade ${gi + 1}`, `${b}.grades.${gi}.label`, { max: 40 })}${this.fN(`Salaire (${CUR})`, `${b}.grades.${gi}.salary`, { min: 0 })}</div>`).join('')}
+          <div class="lbl mt">Quêtes du job</div>
+          ${(j.quests || []).map((q, qi) => quest(b, q, qi)).join('')}
+          <button class="sm mt-s" data-a="rowAdd" data-v="${b}.quests|jcquest">${ic('plus', 14)} Ajouter une quête</button>
+          <div class="hint mt-s">Le nom en base ne se change pas après la création du job (un autre nom créerait un nouveau job). Les grades, salaires et noms sont appliqués à la base à l'enregistrement.</div>` : ''}</div>`;
+    };
+    const locs = (s.locations || []).map((l, i) => `<div class="card" style="background:rgba(255,255,255,.03)"><div class="card-h"><div class="t">${ic('pin', 15)} ${esc(l.label || 'Lieu')}</div><button class="icon danger" data-a="rowDel" data-v="settings.locations|${i}">${ic('x', 14)}</button></div>
+        ${this.fS('Nom du lieu (affiché au joueur)', `settings.locations.${i}.label`, { max: 60 })}<div class="mt-s">${coordField(`settings.locations.${i}`, l, { tp: true })}</div></div>`).join('');
+    return `${s.jobs.map(job).join('')}<button class="sm" data-a="rowAdd" data-v="settings.jobs|jcjob">${ic('plus', 14)} Ajouter un job</button>
+      <div class="card mt"><div class="card-h"><div class="t">${ic('pin', 17)} Lieux des quêtes</div></div>
+        <p class="hint">Les quêtes envoient le joueur sur ces lieux (tirés au hasard, partagés par tous les jobs). Un lieu sans coordonnées est ignoré à l'enregistrement.</p>
+        ${locs || '<p class="hint">Aucun lieu : les lieux par défaut sont utilisés.</p>'}
+        <div class="row mt-s" style="gap:8px"><button class="sm" data-a="jcLocAdd">${ic('pin', 14)} Ajouter ma position</button><button class="sm" data-a="rowAdd" data-v="settings.locations|jcloc">${ic('plus', 14)} Ajouter (saisir les coordonnées)</button></div></div>`;
   },
 
   tabKeys() {
@@ -1538,6 +1579,18 @@ const Builder = {
         arr.push(NEWROW[key]()); this.markDirty(); return this.render();
       }
       case 'rowDel': { const [path, i] = v.split('|'); getPath(c, path).splice(Number(i), 1); this.markDirty(); return this.render(); }
+      case 'jcInit': {
+        const d = this.cat.jobcenter || {};
+        setPath(c, 'settings.jobs', clone(d.jobs || [])); setPath(c, 'settings.locations', clone(d.locations || []));
+        this.markDirty(); return this.render();
+      }
+      case 'jcToggle': this.jcOpen = this.jcOpen || {}; this.jcOpen[v] = !this.jcOpen[v]; return this.render();
+      case 'jcLocAdd': {
+        const p = await rpc('getCoords');
+        let arr = getPath(c, 'settings.locations'); if (!Array.isArray(arr)) { arr = []; setPath(c, 'settings.locations', arr); }
+        if (arr.length >= 60) return toast('60 lieux maximum', 'err');
+        arr.push({ label: 'Lieu ' + (arr.length + 1), x: r2(p.x), y: r2(p.y), z: r2(p.z), h: r2(p.h) }); this.markDirty(); return this.render();
+      }
       case 'toggleRow': this.rows[v] = !(this.rows[v] !== false); return this.render();
       case 'jobAdd': {
         const sel = (this.jobSels[v] || '').trim();
