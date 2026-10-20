@@ -204,7 +204,22 @@ local function doOpen()
     end)
 end
 
+local function hasItem()
+    if not Config.RequireItem or Config.RequireItem == '' then return true end
+    local ok, n = pcall(function() return exports.ox_inventory:Search('count', Config.RequireItem) end)
+    return ok and (tonumber(n) or 0) > 0
+end
+
+-- l'objet disparaît (vendu, volé, donné) pendant l'utilisation : on ferme l'interface
+CreateThread(function()
+    while true do
+        Wait(3000)
+        if uiOpen and not hasItem() then closeUI() end
+    end
+end)
+
 function OpenCarPlay()
+    if not hasItem() then return notify('~r~Il te faut un boîtier ~b~CarPlay~r~ dans ton inventaire (en vente en supérette).') end
     -- état « ouvert » resté coincé (interface fermée sans nous prévenir) : on repart de zéro
     if uiOpen and not IsNuiFocused() then uiOpen, uiNet, uiVeh, inputMode = false, nil, nil, false end
     if uiOpen then return end

@@ -163,6 +163,10 @@ RegisterNetEvent('carplay:server:cmd', function(netId, action, a, b)
     local src = source
     netId = tonumber(netId)
     if not netId or type(action) ~= 'string' or limited(src) then return end
+    if Config.RequireItem and Config.RequireItem ~= '' then
+        local ok, n = pcall(function() return exports.ox_inventory:Search(src, 'count', Config.RequireItem) end)
+        if not ok or (tonumber(n) or 0) < 1 then return notify(src, '~r~Il te faut un boîtier ~b~CarPlay~r~ dans ton inventaire.') end
+    end
     local ent, why = allowed(src, netId)
     if not ent then if why then notify(src, '~r~' .. why) end return end
     local v = Veh[netId]

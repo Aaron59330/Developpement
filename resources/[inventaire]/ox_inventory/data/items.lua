@@ -370,4 +370,5 @@ return {
     ['rope'] = { label = 'Corde', weight = 500, stack = true, close = true },
     ['tablet'] = { label = 'Tablette', weight = 600, stack = true, close = true },
     ['powerbank'] = { label = 'Batterie externe', weight = 300, stack = true, close = true },
+    ['carplay'] = { label = 'Boîtier CarPlay', weight = 300, stack = false, close = true, description = 'Autoradio connecté : utilise-le dans un véhicule pour ouvrir CarPlay.', client = { event = 'carplay:client:open' } },
 }

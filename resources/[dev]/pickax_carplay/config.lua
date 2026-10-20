@@ -2,6 +2,9 @@ Config = {}
 
 -- ─────────────────────────────── CarPlay : autoradio de véhicule ───────────────────────────────
 -- Ouverture : menu contextuel du véhicule → « Ouvrir CarPlay », commande ci-dessous, ou export exports.pickax_carplay:OpenCarPlay().
+-- Objet requis : CarPlay ne s'ouvre que si le joueur possède cet objet (ox_inventory) — à vendre dans une supérette (voir README). '' = aucun objet requis.
+Config.RequireItem = 'carplay'
+
 Config.Command  = 'carplay'      -- '' = pas de commande
 Config.OpenKey  = ''             -- touche proposée dans les réglages FiveM (ex : 'F10') — '' = aucune
 

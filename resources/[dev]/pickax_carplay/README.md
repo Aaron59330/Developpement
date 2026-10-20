@@ -3,6 +3,10 @@
 Ouvrir : **menu contextuel du véhicule → « Ouvrir CarPlay »**, **F5/menu personnel → Véhicule → Multimédia → Ouvrir CarPlay**, la commande `/carplay`
 ou `exports.pickax_carplay:OpenCarPlay()` (il faut être dans le véhicule).
 
+**Objet requis :** CarPlay ne s'ouvre que si le joueur a l'objet `carplay` (ox_inventory, déjà déclaré dans `ox_inventory/data/items.lua`).
+Ajoute simplement `carplay` dans les articles de tes supérettes (shop builder). Utiliser l'objet depuis l'inventaire ouvre CarPlay.
+Pour désactiver l'obligation : `Config.RequireItem = ''` dans `config.lua`.
+
 - Lecture YouTube (liens `youtube.com`, `youtu.be`, `music.youtube.com`, shorts, lives) et liens directs / flux radio (`.mp3`, `.ogg`, Icecast…).
 - File d'attente (lire maintenant, ajouter, retirer, vider, aléatoire, répéter tout / un titre), pause, suivant / précédent, curseur de position,
   volume du véhicule, volume personnel (ce que TU entends), favoris et historique enregistrés par joueur (base de données), radios préconfigurées.
