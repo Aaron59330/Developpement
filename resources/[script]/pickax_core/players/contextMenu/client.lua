@@ -1448,6 +1448,18 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                             end
                         elseif v.Type == "Separator" then
                             contextMenu:AddSeparator()
+                        elseif v.Type == "nested-submenu" then
+                            -- catégorie → sous-menus → actions (ex. Gestion armes → une arme → son placement)
+                            local cat = menuPool:AddSubmenu(contextMenu, v.Label)
+                            for _, g in ipairs(v.Groups or {}) do
+                                local sub = menuPool:AddSubmenu(cat, g.Label)
+                                for _, action in ipairs(g.Action or {}) do
+                                    local it = sub:AddItem(action[1])
+                                    it.OnRelease = action[2]
+                                    it.closeMenuOnRelease = v.CloseOnClick
+                                end
+                            end
+                            if #(v.Groups or {}) == 0 then cat.enabled = false end
                         elseif v.Type == "buttom-submenu" then
                             if v.Condition ~= nil then
                                 if v.Condition then
