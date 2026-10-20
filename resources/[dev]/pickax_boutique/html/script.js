@@ -34,7 +34,7 @@ const S = { data: null, cat: 'vehicle', q: '', points: 0 };
 /* ───── images : fichier du dossier images → docs.fivem.net / ox_inventory → illustration générée ───── */
 function srcsFor(cat, it) {
   const m = String(it.model || '').trim(), low = m.toLowerCase();
-  const loc = (dir, name) => ['png', 'webp', 'jpg'].map(e => `../images/${dir}/${name}.${e}`);
+  const loc = (dir, name) => (dir === 'vehicles' ? ['webp', 'png', 'jpg'] : ['png', 'webp', 'jpg']).map(e => `../images/${dir}/${name}.${e}`);
   if (cat === 'vehicle' || cat === 'moto' || cat === 'other') return [...loc('vehicles', low), `https://docs.fivem.net/vehicles/${low}.webp`, `https://docs.fivem.net/vehicles/${low}.png`];   // véhicules GTA de base : images officielles (internet requis)
   if (cat === 'weapon') return [...loc('weapons', low), `https://cfx-nui-ox_inventory/web/images/${m.toUpperCase()}.png`, `https://cfx-nui-ox_inventory/web/images/${m}.png`];
   if (cat === 'crate') return loc('caisses', low);
