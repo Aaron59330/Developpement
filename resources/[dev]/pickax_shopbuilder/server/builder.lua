@@ -114,6 +114,8 @@ local function cleanSettings(s, old)
     local model = trim(p.model)
     if not model:match('^[%w_]+$') then model = '' end
     out.ped = { enabled = p.enabled == true and model ~= '', model = model:sub(1, 60), scenario = str(p.scenario, 60, '') }
+    local dg = type(p.dialog) == 'table' and p.dialog or {}
+    out.ped.dialog = { enabled = dg.enabled ~= false, text = str(dg.text, 220, '') }
 
     local a = type(s.access) == 'table' and s.access or {}
     local jobs, known = {}, ESX.GetJobs()

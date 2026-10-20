@@ -67,6 +67,7 @@ const P = {
   store: '<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>',
   shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
   user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
@@ -1370,8 +1371,12 @@ const Builder = {
   },
 
   pedCard(base) {
+    const pd = getPath(this.cur, `${base}.ped`);
+    if (pd && !pd.dialog) pd.dialog = { enabled: true, text: '' };
     return `<div class="card"><div class="card-h"><div class="t">${ic('user', 17)} PNJ</div>${this.fC('Afficher un PNJ', `${base}.ped.enabled`, { r: 1 })}</div>
       ${this.v(`${base}.ped.enabled`) ? `<div class="grid2">${this.fS('Modèle', `${base}.ped.model`, { max: 60, ph: 's_m_y_valet_01' })}${this.scenSel('Animation', `${base}.ped.scenario`)}</div>
+      <div class="card-h" style="margin-top:12px"><div class="t">${ic('chat', 17)} Dialogue du PNJ</div>${this.fC('Activer', `${base}.ped.dialog.enabled`, { r: 1 })}</div>
+      ${this.v(`${base}.ped.dialog.enabled`) ? `${this.fS('Texte du PNJ (vide = texte par défaut du service)', `${base}.ped.dialog.text`, { max: 220, ph: 'Bonjour, que puis-je faire pour vous ?' })}<div class="hint">Le PNJ se tourne vers le joueur et écrit ce message avec deux boutons : Accepter ouvre le service, Refuser le ferme.</div>` : '<div class="hint">Désactivé : le service s\'ouvre directement.</div>'}
       ${this.optCoord('Position du PNJ séparée', `${base}.ped.pos`, 'Par défaut, à côté du marker')}` : '<div class="hint">Aucun PNJ affiché.</div>'}</div>`;
   },
 

@@ -14,6 +14,27 @@ Config.InteractDistance = 1.8    -- distance pour interagir (E)
 Config.ServerDistance   = 14.0   -- tolérance côté serveur (anti-triche)
 Config.PedDistance      = 60.0   -- distance d'apparition des PNJ
 
+-- Dialogue du PNJ (ressource pickax_dialog) : quand un point a un PNJ, il écrit un message avec Accepter / Refuser avant d'ouvrir le service.
+-- Activable pour tout le serveur ici, et point par point dans le builder (carte « PNJ » → « Dialogue du PNJ »).
+Config.Dialog = {
+    Enabled = true,          -- false = aucun dialogue nulle part
+    Default = true,          -- état par défaut des points déjà créés avant cette option
+    Texts = {                -- texte par défaut : 'type.kind' (modifiable par point dans le builder)
+        ['impound.main']   = 'Bonjour, vous souhaitez payer pour récupérer un de vos véhicules dans la fourrière ?',
+        ['garage.main']    = 'Bonjour, souhaitez-vous accéder à votre garage ?',
+        ['rental.main']    = 'Bonjour, vous souhaitez louer un véhicule ?',
+        ['bank.counter']   = 'Bonjour, souhaitez-vous accéder à votre compte bancaire ?',
+        ['driving.desk']   = 'Bonjour, vous souhaitez passer votre permis de conduire ?',
+        ['carlot.lot']     = 'Bonjour, souhaitez-vous consulter les annonces de véhicules ?',
+        ['locksmith.shop'] = 'Bonjour, vous avez besoin d\'un service de serrurerie ?',
+        ['pvp.lobby']      = 'Prêt pour le combat ? Souhaitez-vous rejoindre une zone PVP ?',
+        ['chase.lobby']    = 'Envie d\'adrénaline ? Voulez-vous lancer une course poursuite ?',
+        ['drug.sell']      = 'Psst… tu as de la marchandise à me vendre ?',
+        ['drug.launder']   = 'Tu veux blanchir de l\'argent ? Je prends ma commission.',
+        default            = 'Bonjour, que puis-je faire pour vous ?',
+    },
+}
+
 Config.Inventory   = 'auto'      -- 'auto' | 'ox' | 'esx'
 Config.Target      = 'none'      -- 'none' (marker + touche E) | 'ox_target' (zone cliquable, en plus du marker)
 Config.InteractKey = 38          -- E

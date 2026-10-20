@@ -664,6 +664,7 @@ const Builder = {
   /* Onglet : Général */
   tab_general() {
     const c = this.cur, s = c.settings, b = s.blip || {}, p = s.ped || {}, h = s.hours || {}, r = s.restock || {};
+    if (p.enabled && !p.dialog) p.dialog = { enabled: true, text: '' };
     const noLoc = !c.locations.length;
     return `<div class="card"><div class="card-h"><div class="t">${ic('store', 17)} Identité</div></div>
         <div class="grid2">${fld('Nom affiché', this.inp('label', c.label, { extra: 'maxlength="100"' }))}${fld('Modèle', this.sel('type', this.cat.types.map(t => [t.id, t.label]), c.type))}</div>
@@ -682,6 +683,8 @@ const Builder = {
       ${BBMap.blipCard({ base: 'settings.blip', b, labelHint: 'Par défaut : nom de la boutique', hint: 'Le blip est affiché à chaque emplacement de la boutique.', defSprite: 52 })}
       <div class="card"><div class="card-h"><div class="t">${ic('user', 17)} Vendeur (PNJ)</div>${this.chk('settings.ped.enabled', 'Afficher un vendeur', p.enabled, true)}</div>
         ${p.enabled ? `<div class="grid2">${fld('Modèle du PNJ', `<div class="row">${this.inp('settings.ped.model', p.model, { ph: 'ex : mp_m_shopkeep_01' })}<button data-a="checkPed">Vérifier</button></div>`)}${fld('Animation', this.sel('settings.ped.scenario', this.cat.scenarios.map(x => [x.id, x.label]), p.scenario || ''))}</div>
+        <div class="mt">${this.chk('settings.ped.dialog.enabled', 'Dialogue du PNJ (message + boutons Accepter / Refuser avant d\'ouvrir)', p.dialog && p.dialog.enabled !== false, true)}</div>
+        ${p.dialog && p.dialog.enabled !== false ? `<div class="mt-s">${fld('Texte du PNJ (vide = texte par défaut)', this.inp('settings.ped.dialog.text', p.dialog.text, { ph: 'Bonjour, bienvenue ! Souhaitez-vous consulter ma boutique ?', extra: 'maxlength="220"' }))}</div>` : ''}
         <div class="hint mt-s">Le vendeur apparaît à chaque emplacement, dans la direction du « Cap » enregistré.</div>` : '<div class="hint">Sans vendeur, seul le marker au sol est affiché.</div>'}</div>
       <div class="card"><div class="card-h"><div class="t">${ic('clock', 17)} Horaires d'ouverture</div>${this.chk('settings.hours.enabled', 'Limiter les horaires', h.enabled, true)}</div>
         ${h.enabled ? `<div class="grid2">${fld('Ouverture (heure)', this.inp('settings.hours.from', h.from, { t: 'n', type: 'number', extra: 'min="0" max="23"' }))}${fld('Fermeture (heure)', this.inp('settings.hours.to', h.to, { t: 'n', type: 'number', extra: 'min="0" max="24"' }))}</div>

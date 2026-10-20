@@ -104,7 +104,7 @@ end)
 -- ─────────────────────────────── Ouverture d'une boutique ───────────────────────────────
 local opening = false
 
-local function openShop(shop, locIdx)
+local function doOpenShop(shop, locIdx)
     if opening or uiOpen then return end
     opening = true
     SetTimeout(1500, function() opening = false end)
@@ -118,6 +118,26 @@ local function openShop(shop, locIdx)
         current = { id = shop.id, locIdx = locIdx, restrict = res.restrict }
         openUI({ action = 'open', kind = 'shop', data = res })
     end, shop.id, locIdx)
+end
+
+-- Dialogue du PNJ (pickax_dialog) avant l'ouverture : le vendeur écrit un message, Accepter ouvre la boutique
+local asking = false
+local function openShop(shop, locIdx)
+    if asking or opening or uiOpen then return end
+    local d, D = shop.ped, Config.Dialog
+    if D and D.Enabled ~= false and d and d.enabled and d.model ~= '' and not (d.dialog and d.dialog.enabled == false) and GetResourceState('pickax_dialog') == 'started' then
+        asking = true
+        CreateThread(function()
+            local text = d.dialog and d.dialog.text and d.dialog.text ~= '' and d.dialog.text or D.Texts[shop.type] or D.Texts.default
+            local ok, res = pcall(function()
+                return exports.pickax_dialog:Ask({ ped = peds[shop.id .. ':' .. locIdx], name = shop.label, text = text, scenario = d.scenario })
+            end)
+            asking = false
+            if not ok or res == true then doOpenShop(shop, locIdx) end
+        end)
+        return
+    end
+    doOpenShop(shop, locIdx)
 end
 
 -- ─────────────────────────────── ox_target (optionnel) ───────────────────────────────

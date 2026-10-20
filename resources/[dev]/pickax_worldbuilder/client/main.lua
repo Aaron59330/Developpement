@@ -286,8 +286,36 @@ local function visible(n)
     return not f or f(n)
 end
 
+-- Dialogue du PNJ (pickax_dialog) avant d'ouvrir le service : renvoie true si on peut continuer
+local Asking = false
+local DIALOG_SKIP = { store = true, ['return'] = true, exit = true }
+local function askDialog(n)
+    local D = Config.Dialog
+    if not D or D.Enabled == false or DIALOG_SKIP[n.kind] or GetResourceState('pickax_dialog') ~= 'started' then return true end
+    local pt
+    for _, p in ipairs(n.entity.points) do if p.i == n.pi then pt = p break end end
+    local d = pt and pt.ped
+    if not (d and d.enabled and d.model ~= '') then return true end
+    local dl = d.dialog or {}
+    if dl.enabled == false or (dl.enabled == nil and D.Default == false) then return true end
+    local text = (dl.text and dl.text ~= '') and dl.text or D.Texts[n.type .. '.' .. n.kind] or D.Texts.default
+    local ok, res = pcall(function()
+        return exports.pickax_dialog:Ask({ ped = WBPed(n.eid, n.pi), name = (pt.label and pt.label ~= '') and pt.label or n.entity.label, text = text, scenario = d.scenario })
+    end)
+    return not ok or res == true      -- en cas d'erreur du dialogue, on ouvre quand même le service
+end
+
 local function interact(n)
-    if Busy or uiOpen then return end
+    if Busy or uiOpen or Asking then return end
+    Asking = true
+    CreateThread(function()
+        local go = askDialog(n)
+        Asking = false
+        if go and not Busy and not uiOpen then RunInteract(n) end
+    end)
+end
+
+function RunInteract(n)
     LastType = n.type
     local h = Handlers[n.type]
     if not h then return Notify(('Module « %s » non géré par le client (fichiers à jour ? refresh + restart pickax_worldbuilder)'):format(n.type), 'error') end

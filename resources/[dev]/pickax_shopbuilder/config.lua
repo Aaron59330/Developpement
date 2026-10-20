@@ -15,6 +15,16 @@ Config.PedDistance      = 60.0   -- distance d'apparition des vendeurs (PNJ)
 
 Config.Inventory = 'auto'        -- 'auto' | 'ox' | 'esx'
 Config.Target    = 'none'        -- 'none' (marker + touche E) | 'ox_target' (zone cliquable, en plus du marker)
+-- Dialogue du vendeur (ressource pickax_dialog) : le PNJ écrit un message avec Accepter / Refuser avant d'ouvrir la boutique.
+-- Activable pour tout le serveur ici, et boutique par boutique dans le builder (carte « Vendeur (PNJ) »).
+Config.Dialog = {
+    Enabled = true,
+    Texts = {   -- texte par défaut selon le modèle de boutique (modifiable par boutique dans le builder)
+        blackmarket = 'Psst… approche. Je vends de la marchandise qu\'on ne trouve pas en magasin. Ça t\'intéresse ?',
+        default     = 'Bonjour, bienvenue ! Souhaitez-vous consulter ma boutique ?',
+    },
+}
+
 Config.InteractKey = 38          -- E
 
 Config.MaxShops          = 300
