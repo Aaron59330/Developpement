@@ -177,7 +177,6 @@ local SETTINGS = {
         listingFee = { 'n', 0, 10000000, 0 }, commission = { 'n', 0, 100, 0 }, maxListings = { 'n', 1, 30, 3 }, durationDays = { 'n', 0, 365, 7 },
         minPrice = { 'n', 0, 1000000000, 0 }, maxPrice = { 'n', 0, 1000000000, 0 }, showPlate = { 'b', false }, payments = { 'p' }, society = ITEM,
     }),
-    jobcenter = merge(COMMON, {}),
     locksmith = merge(COMMON, {
         price = { 'n', 0, 10000000, 250 }, requireNearby = { 'b', true }, allowIfHasKey = { 'b', false }, keyItem = ITEM, cooldown = { 'n', 0, 86400, 60 }, payments = { 'p' }, society = ITEM,
     }),
@@ -225,7 +224,6 @@ local POINTS = {
     bank    = { counter = PBASE, atm = PBASE },
     carwash = { wash = PBASE },
     locksmith = { shop = PBASE },
-    jobcenter = { desk = PBASE },
     carlot = { lot = PBASE, slot = PBASE },
     pvp = { lobby = PBASE, zone = merge(PBASE, {
         radius = { 'n', 10, 500, 60 }, reviveEnabled = { 'b', true }, reviveDelay = { 'n', 0, 30, 5 }, giveWeapons = { 'b', true }, removeOnExit = { 'b', true }, infiniteAmmo = { 'b', false },

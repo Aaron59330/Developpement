@@ -260,3 +260,10 @@ Tables créées automatiquement : `jobbuilder_bank_clients`, `jobbuilder_bank_en
 - **Points intérieurs** : coffre, **coffre-fort** (réservé au propriétaire / locataire, pas aux détenteurs de clés) et penderie.
 - **Dupliquer** un bien (même immeuble, plusieurs appartements identiques) : copie type, prix, intérieur et points ; il ne reste qu'à placer la nouvelle entrée.
 - Mise à jour automatique de la base : les colonnes `category`, `description` et `ipl` de `jobbuilder_properties` sont ajoutées au démarrage si elles manquent.
+
+## Pôle emploi : petits jobs en libre accès + quêtes
+- **Créer le guichet :** `/jobbuilder` → nouveau job de type **Pôle emploi** (modèle prêt : grades Stagiaire / Conseiller / Directeur) → ajoute un point **Pôle emploi** (marker public) → Enregistrer.
+- **Jobs créés tout seuls :** dès qu'un point Pôle emploi existe (et à chaque démarrage), 8 petits jobs sont créés dans la base : jardinier, bricoleur, électricien, plombier, déménageur, laveur de vitres, ouvrier de chantier, coursier (table `jobs` + 3 grades dans `job_grades` + fiche jobbuilder pour le menu F6). Un job déjà présent n'est jamais modifié. `/jbjobs` (console ou `_dev`) force la création.
+- **Embauche :** le joueur appuie sur E au guichet → « Prendre ce job » = `setJob` automatique (refusé s'il a déjà un vrai métier). Il peut partir à tout moment : F6 → Quitter le métier, ou bouton au guichet.
+- **Quêtes :** 3 par job (aller sur place, travailler avec une animation, être payé), gains selon le grade, promotion automatique (10 puis 30 quêtes). Lancement depuis le guichet ou **F6 → Mes quêtes** ; `/annulerquete` abandonne.
+- Tout se règle dans `Config.JobCenter` (jobs, grades, quêtes, lieux, gains, promotions).

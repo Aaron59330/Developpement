@@ -12,7 +12,7 @@ Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 
 -- ─────────────────────────────── Utilitaires ───────────────────────────────
 -- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
-local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano', jobcenter = 'world',
+local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano',
     bank = 'bank', driving = 'school', drug = 'drug', robbery = 'robbery', doorlock = 'world', pvp = 'gang', chase = 'police' }
 local LastType = nil   -- dernier module utilisé (logo des notifications hors panneau)
 function Notify(msg, kind)
@@ -252,7 +252,6 @@ local KIND_TEXT = {
     carlot = { lot = 'Ouvrir les annonces', slot = 'Voir l\'annonce' },
     doorlock = { lock = 'Verrouiller / déverrouiller la porte' },
     locksmith = { shop = 'Parler au serrurier' },
-    jobcenter = { desk = 'Parler au conseiller Pôle emploi' },
     carwash = { wash = 'Laver le véhicule' },
     driving = { desk = 'Ouvrir l\'auto-école' },
     bank = { counter = 'Accéder au guichet', atm = 'Utiliser le distributeur' },
@@ -434,7 +433,7 @@ end)
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'worldbuilder:<nom>')
 for _, n in ipairs({ 'catalog', 'list', 'get', 'create', 'save', 'delete', 'duplicate', 'toggle', 'resetStats', 'logs', 'settings:save',
-    'drug:processInfo', 'drug:sellInfo', 'drug:sell', 'drug:launderInfo', 'drug:launder', 'fuel:info', 'fuel:jerrycan', 'locksmith:make', 'jobcenter:info', 'jobcenter:take', 'jobcenter:leave', 'driving:theoryStart', 'driving:theorySubmit', 'bank:deposit', 'bank:withdraw', 'bank:transfer' }) do NuiRemote[n] = true end
+    'drug:processInfo', 'drug:sellInfo', 'drug:sell', 'drug:launderInfo', 'drug:launder', 'fuel:info', 'fuel:jerrycan', 'locksmith:make', 'driving:theoryStart', 'driving:theorySubmit', 'bank:deposit', 'bank:withdraw', 'bank:transfer' }) do NuiRemote[n] = true end
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end
 

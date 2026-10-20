@@ -139,6 +139,9 @@ local function cleanPoint(p, maxGrade, jobType)
     elseif p.type == 'tuning' then
         out.data.radius = num(d.radius, 2, 30, Config.Tuning.Radius)
 
+    elseif p.type == 'jobcenter' then
+        out.data = {}      -- guichet public : rien à régler (les jobs sont dans Config.JobCenter)
+
     elseif p.type == 'missions' then
         out.data.spawn = cleanCoords(d.spawn)   -- position d'apparition du véhicule de mission (optionnelle : sinon le point lui-même)
 
@@ -517,6 +520,7 @@ ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)
 
     JB.loadAll()
     JB.refreshESX()
+    if JB.jobcenterAfterSave then CreateThread(JB.jobcenterAfterSave) end      -- point Pôle emploi : crée les petits jobs en libre accès
 
     -- Joueurs en ligne dont le grade n'existe plus
     local okP, players = pcall(ESX.GetExtendedPlayers, 'job', job.name)

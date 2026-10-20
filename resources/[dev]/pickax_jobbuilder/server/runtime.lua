@@ -144,8 +144,6 @@ end
 JB.sharedAccount, JB.sqlBalance, JB.forgetUnknownAccount = sharedAccount, sqlBalance, function(name) unknown[name] = nil end
 
 -- API pour les autres scripts (même esprit que GetGangMoney / AddGangMoney / RemoveGangMoney)
--- Rechargement des jobs après une création faite par un autre script (Pôle emploi du worldbuilder)
-exports('Reload', function() JB.loadAll() JB.refreshESX() for _, src in ipairs(GetPlayers()) do pcall(JB.syncPlayer, tonumber(src)) end return true end)
 exports('GetJobMoney', function(job) return societyBalance(tostring(job)) end)
 exports('AddJobMoney', function(job, amount) return societyAdd(tostring(job), amount) end)
 exports('RemoveJobMoney', function(job, amount) return societyRemove(tostring(job), amount) end)
@@ -220,7 +218,7 @@ end
 ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
     local point = JB.Points[tonumber(pointId)]
     if not point then return cb(fail('Point introuvable')) end
-    local publicShop = point.type == 'shop' or point.type == 'showroom' or point.type == 'display'
+    local publicShop = point.type == 'shop' or point.type == 'showroom' or point.type == 'display' or point.type == 'jobcenter'
     local point2, xPlayer, err = getPoint(src, pointId, nil, publicShop)
     if not point2 then return cb(fail(err)) end
     local job = JB.Jobs[point.job_name]
@@ -262,6 +260,10 @@ ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
     elseif point.type == 'showroom' or point.type == 'display' then
         if not JB.openShowroom then return cb(fail('Module concession non chargé (server/dealer.lua)')) end
         JB.openShowroom(src, xPlayer, point, job, cb)
+
+    elseif point.type == 'jobcenter' then
+        if not JB.openJobcenter then return cb(fail('Module Pôle emploi non chargé (server/jobcenter.lua)')) end
+        JB.openJobcenter(src, xPlayer, point, job, cb)
 
     elseif point.type == 'missions' then
         if not JB.openMissions then return cb(fail('Module missions non chargé (server/missions.lua)')) end

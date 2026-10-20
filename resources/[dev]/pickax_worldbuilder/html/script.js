@@ -106,8 +106,6 @@ const P = {
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
   logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
 };
-P.bolt = '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
-P.tool = '<path d="M4 20l9-9"/><path d="M14 4l6 6-3 3-6-6z"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
 const PAY_ICON = { cash: 'dollar', bank: 'card', black_money: 'lock' };
 
@@ -753,44 +751,6 @@ const LocksmithPanel = new (class extends PanelBase {
   }
 })();
 
-/* ── Pôle emploi : jobs en libre accès + quêtes ── */
-const JobcenterPanel = new (class extends PanelBase {
-  init(d) { this.tab = d.mode === 'quests' ? 'quests' : 'jobs'; }
-  render() {
-    const d = this.d, st = d.stats;
-    const tabs = `<div class="seg">${d.mode === 'desk' ? `<button class="${this.tab === 'jobs' ? 'active' : ''}" data-a="tab" data-v="jobs">${ic('users', 15)} Jobs disponibles</button>` : ''}
-      <button class="${this.tab === 'quests' ? 'active' : ''}" data-a="tab" data-v="quests" ${d.isSmall ? '' : 'disabled'}>${ic('list', 15)} Mes quêtes</button></div>`;
-    const cur = d.isSmall ? `<div class="card" style="display:flex;align-items:center;gap:12px"><div class="tile">${ic('check')}</div><div class="grow"><b style="display:block">Ton job : ${esc(d.currentLabel)}</b><small style="display:block">${esc(d.gradeLabel || '')}${st ? ` · ${st.done} quête${st.done > 1 ? 's' : ''} terminée${st.done > 1 ? 's' : ''}${st.next ? ` · prochain grade à ${st.next}` : ''}${st.bonus ? ` · bonus +${st.bonus}%` : ''}` : ''}</small></div>
-      <button class="sm" data-a="leave">${ic('logout', 15)} Quitter ce job</button></div>` : '';
-    let body;
-    if (this.tab === 'jobs') {
-      const rows = d.jobs.map(j => `<div class="item"><div class="tile">${ic(j.icon)}</div><div class="grow"><b>${esc(j.label)}</b><small>${esc(j.desc)}</small>
-        <small class="mono">${j.quests} quêtes · ${j.min}–${j.max} ${CUR} par quête</small></div>
-        ${j.current ? '<span class="price">Ton job</span>' : `<button class="primary sm" data-a="take" data-v="${esc(j.id)}">Prendre ce job</button>`}</div>`).join('');
-      body = `${cur}<div class="hint">Libre accès : un clic et tu es embauché. Tu peux quitter ton job à tout moment (ici ou dans le menu F6 → Quitter le métier).</div><div class="list">${rows}</div>`;
-    } else {
-      const rows = d.quests.map(q => `<div class="item"><div class="tile">${ic('flag')}</div><div class="grow"><b>${esc(q.label)}</b><small>${esc(q.desc)}</small><small class="mono">${q.steps} étapes · ${q.min}–${q.max} ${CUR}</small></div>
-        ${q.cooldownLeft > 0 ? `<span class="price">${q.cooldownLeft} s</span>` : `<button class="primary sm" data-a="quest" data-v="${esc(q.id)}" ${d.active ? 'disabled' : ''}>Lancer</button>`}</div>`).join('');
-      body = `${cur}${d.active ? `<div class="hint warn">Quête en cours : ${esc(d.active.label)} (étape ${d.active.idx}/${d.active.total}). <button class="sm" data-a="cancelq">Abandonner</button></div>` : ''}<div class="list">${rows || emptyState('flag', 'Aucune quête', 'Prends d\'abord un petit job.')}</div>`;
-    }
-    $root.innerHTML = panel({ icon: 'users', title: d.label, sub: d.mode === 'desk' ? 'Pôle emploi — petits jobs en libre accès' : `Quêtes · ${d.currentLabel}`, cls: 'md', body: tabs + body });
-  }
-  async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'tab') { this.tab = v; return this.render(); }
-    if (a === 'take') {
-      const r = await this.act('jobcenter:take', this.d.eid, this.d.pi, v);
-      if (r && r.ok) { toast(`Embauché : ${(r.jobs.find(j => j.id === r.current) || {}).label || ''}`, 'ok'); r.eid = this.d.eid; r.pi = this.d.pi; r.mode = 'desk'; this.d = r; this.tab = 'quests'; this.render(); }
-    }
-    if (a === 'leave') {
-      const r = await this.act('jobcenter:leave');
-      if (r && r.ok) { toast('Tu as quitté ton job', 'ok'); const i = await this.act('jobcenter:info', this.d.eid, this.d.pi); if (i && i.ok) { i.eid = this.d.eid; i.pi = this.d.pi; i.mode = this.d.mode; this.d = i; this.tab = 'jobs'; if (this.d.mode === 'quests') return rpc('close'); this.render(); } }
-    }
-    if (a === 'quest') { const r = await this.act('jcStart', v); if (r && r.ok) $root.classList.add('hidden'); }
-    if (a === 'cancelq') { await this.act('jcCancel'); const i = await this.act('jobcenter:info', this.d.eid, this.d.pi); if (i && i.ok) { i.eid = this.d.eid; i.pi = this.d.pi; i.mode = this.d.mode; this.d = i; this.render(); } }
-  }
-})();
-
 /* ── Station de lavage ── */
 const CarwashPanel = new (class extends PanelBase {
   render() {
@@ -877,7 +837,7 @@ const BankPanel = new (class extends PanelBase {
   }
 })();
 
-const Panels = { jobcenter: JobcenterPanel, pvp: PvpPanel, chase: ChasePanel, carlot: CarlotPanel, locksmith: LocksmithPanel, carwash: CarwashPanel, driving: DrivingPanel, bank: BankPanel, garage: GaragePanel, impound: ImpoundPanel, rental: RentalPanel, fuel: FuelPanel, lab: LabPanel, dealer: DealerPanel, launder: LaunderPanel };
+const Panels = { pvp: PvpPanel, chase: ChasePanel, carlot: CarlotPanel, locksmith: LocksmithPanel, carwash: CarwashPanel, driving: DrivingPanel, bank: BankPanel, garage: GaragePanel, impound: ImpoundPanel, rental: RentalPanel, fuel: FuelPanel, lab: LabPanel, dealer: DealerPanel, launder: LaunderPanel };
 Object.values(Panels).forEach(p => { const open = p.open.bind(p); p.open = d => { window.__img = d.imagePath === undefined ? window.__img : d.imagePath; window.__cur = d.currency || window.__cur; open(d); }; });
 
 /* ════════════════════════════ BUILDER (admin) ════════════════════════════ */
@@ -902,8 +862,8 @@ const KIND = {
   clerk: { label: 'Vendeur (cible « en joue »)', icon: 'user' }, start: { label: 'Point de départ', icon: 'pin' }, register: { label: 'Caisse', icon: 'cart' },
   safe: { label: 'Coffre', icon: 'lock' }, vault: { label: 'Coffre-fort', icon: 'shield' }, loot: { label: 'Butin (vitrines…)', icon: 'gift' }, guard: { label: 'Garde armé', icon: 'target' },
 };
-const KIND_ORDER = { drug: ['harvest', 'process', 'sell', 'launder', 'door'], robbery: ['clerk', 'start', 'register', 'safe', 'vault', 'loot', 'guard'], garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
-const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', drug: 'point', robbery: 'cible' };
+const KIND_ORDER = { drug: ['harvest', 'process', 'sell', 'launder', 'door'], robbery: ['clerk', 'start', 'register', 'safe', 'vault', 'loot', 'guard'], garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
+const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', drug: 'point', robbery: 'cible' };
 const PED_KINDS = new Set(['main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby', 'harvest', 'process', 'sell', 'launder', 'door', 'clerk']);
 const NO_BLIP = new Set(['map', 'slot', 'spawn', 'checkpoint', 'register', 'safe', 'vault', 'loot', 'guard']);
 const NO_MARKER = new Set(['zone', 'map', 'clerk', 'guard', 'spawn', 'checkpoint']);

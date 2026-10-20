@@ -225,7 +225,7 @@ end
 function JB.publicShops()
     local list = {}
     for id, p in pairs(JB.Points) do
-        if (p.type == 'shop' and p.data and p.data.public) or p.type == 'showroom' or p.type == 'display' then
+        if (p.type == 'shop' and p.data and p.data.public) or p.type == 'showroom' or p.type == 'display' or p.type == 'jobcenter' then
             list[#list + 1] = { id = id, type = p.type, label = p.label, coords = p.coords, min_grade = 0, public = true, job = p.job_name,
                 model = p.type == 'display' and p.data.model or nil, color = p.type == 'display' and p.data.color or nil, style = JB.pointStyle(p) }
         end

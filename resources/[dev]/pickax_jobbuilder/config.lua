@@ -56,6 +56,7 @@ Config.PointTypes = {
     garage_aircraft = { label = 'Garage aéronefs',  color = PK_MKC(), marker = PK_MKT, hidden = true },
     garage_boat     = { label = 'Garage bateaux',   color = PK_MKC(),   marker = PK_MKT, hidden = true },
     missions  = { label = 'Missions PNJ',    color = PK_MKC(),  marker = PK_MKT },
+    jobcenter = { label = 'Pôle emploi',     color = PK_MKC(),  marker = PK_MKT },
     showroom  = { label = 'Showroom',        color = PK_MKC(),  marker = PK_MKT },
     display   = { label = 'Véhicule expo',   color = PK_MKC(), marker = PK_MKT },
     testdrive = { label = 'Essai routier',   color = PK_MKC(),  marker = PK_MKT },
@@ -68,7 +69,7 @@ Config.PointTypes = {
 -- Ex. : un job EMS ne peut pas placer d'atelier tuning, de cuisine, de showroom…
 JB_POINT_RULES = {
     armory = { 'police', 'ems' }, tuning = { 'mecano' }, harvest = { 'bar' }, kitchen = { 'bar' },
-    showroom = { 'dealer' }, display = { 'dealer' }, testdrive = { 'dealer' },
+    showroom = { 'dealer' }, display = { 'dealer' }, testdrive = { 'dealer' }, jobcenter = { 'polemploi' },
 }
 function JBPointAllowed(pointType, jobType)
     local rule = JB_POINT_RULES[pointType]
@@ -104,7 +105,7 @@ Config.Actions = {
     emstablet  = { label = 'Tablette médicale',   icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type ems (urgences, dossiers patients, soins, équipe)
     banktablet = { label = 'Tablette bancaire',   icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type bank (clients, prêts, guichet, frais, statistiques)
     tablet     = { label = 'Tablette',            icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type police (casiers, amendes, dispatch, carte)
-    smallquests = { label = 'Mes quêtes',         icon = 'fa-clipboard-list', target = false, auto = true }, -- auto pour les petits jobs du Pôle emploi (worldbuilder)
+    smallquests = { label = 'Mes quêtes',         icon = 'fa-clipboard-list', target = false, auto = true }, -- auto pour les petits jobs du Pôle emploi
     jobannounce = { label = 'Annonce entreprise', icon = 'fa-bullhorn',     target = false, auto = true }, -- auto (réglage « Annonces » du job)
 }
 
@@ -625,6 +626,16 @@ Config.JobTypes = {
             { name = 'boss',      label = 'Directeur',        salary = 800 },
         },
     },
+    polemploi = {
+        label = 'Pôle emploi', blip = { sprite = 351, color = 3, scale = PK_BSF(0.9) },
+        actions = {},
+        points = { 'jobcenter', 'cloakroom', 'stash', 'boss' },   -- « jobcenter » = guichet public : menu des petits jobs en libre accès + quêtes
+        grades = {
+            { name = 'stagiaire',  label = 'Stagiaire',  salary = 150 },
+            { name = 'conseiller', label = 'Conseiller', salary = 300 },
+            { name = 'boss',       label = 'Directeur',  salary = 600 },
+        },
+    },
     government = {
         label = 'Gouvernement', blip = { sprite = 419, color = 5, scale = PK_BSF(0.9) },
         actions = { 'invoice' },   -- 'government' (trésor, taxes, subventions, annonces) est ajoutée automatiquement
@@ -831,3 +842,97 @@ end
 JB_SECTIONS = { 'general', 'pointTypes', 'real', 'interiors', 'jobTypes', 'dealer', 'gov', 'missions', 'police', 'announce', 'tuning', 'death', 'ui' }
 JBDefaults = {}
 for _, sec in ipairs(JB_SECTIONS) do JBDefaults[sec] = JBGet(sec) end
+
+-- ─────────────────────────────── Pôle emploi : petits jobs en libre accès ───────────────────────────────
+-- Un point « Pôle emploi » (/jobbuilder → job de type Pôle emploi → point Pôle emploi) place un guichet : le joueur clique sur un job et il est embauché (setJob).
+-- Dès qu'un point Pôle emploi est enregistré, les jobs ci-dessous sont créés tout seuls dans la base (jobs + job_grades + fiche jobbuilder
+-- pour le menu F6) puis rechargés. Chaque job a des petites quêtes (aller sur place, travailler avec une animation, être payé).
+Config.JobCenter = {
+    Anims = {                              -- animations de travail des quêtes (scenario, ou dict + clip)
+        harvest   = { scenario = 'WORLD_HUMAN_GARDENER_PLANT' }, pickup = { dict = 'pickup_object', clip = 'pickup_low' }, repair = { dict = 'mini@repair', clip = 'fixing_a_ped' },
+        weld      = { scenario = 'WORLD_HUMAN_WELDING' }, drill = { scenario = 'WORLD_HUMAN_CONST_DRILL' }, hammer = { scenario = 'WORLD_HUMAN_HAMMERING' },
+        clean     = { scenario = 'WORLD_HUMAN_MAID_CLEAN' }, clipboard = { scenario = 'WORLD_HUMAN_CLIPBOARD' },
+    },
+    Enabled        = true,
+    FreeJobs       = { 'unemployed' },     -- métiers dont on peut partir directement vers un petit job (en plus des petits jobs eux-mêmes)
+    RewardAccount  = 'money',              -- compte crédité à la fin d'une quête
+    Cooldown       = 45,                   -- secondes avant de refaire la même quête
+    Tolerance      = 60.0,                 -- distance serveur tolérée autour d'une étape (m)
+    Promotions     = { 10, 30 },           -- quêtes terminées pour passer au grade 1 puis 2 dans ce job (promotion automatique)
+    GradeBonus     = { 0, 15, 30 },        -- % de gain supplémentaire par grade (0, 1, 2)
+    Locations = {                          -- lieux tirés au hasard pour les quêtes (x, y, z, cap)
+        { 'Legion Square',          195.17,  -933.77,  30.69, 160.0 },
+        { 'Grove Street',           110.50, -1944.00,  20.80,  40.0 },
+        { 'Jetée de Del Perro',   -1850.60, -1233.20,  13.02, 140.0 },
+        { 'Mission Row',            428.00,  -984.00,  30.70,  90.0 },
+        { 'Downtown Cab Co.',       909.00,  -176.00,  74.20, 240.0 },
+        { 'Maze Bank',              -67.00,  -801.00,  44.20, 340.0 },
+        { 'Hôpital Pillbox',        298.60,  -584.40,  43.26,  70.0 },
+        { 'Aéroport LSIA',        -1037.50, -2737.80,  20.17, 330.0 },
+        { 'Sandy Shores',          1961.50,  3741.50,  32.34, 300.0 },
+        { 'Harmony',                549.00,  2671.00,  42.20, 100.0 },
+        { 'Grapeseed',             1698.00,  4924.00,  42.10, 320.0 },
+        { 'Paleto Bay',            -102.00,  6467.00,  31.60,  45.0 },
+        { 'Chumash',              -3040.00,   585.00,   7.90,  20.0 },
+    },
+    -- Jobs : name = nom en base (libre accès, non whitelisté), 3 grades (salaire = paie ESX ; l'essentiel du gain vient des quêtes)
+    -- Quête : spots = nombre de lieux visités, anim = animation de travail (Config.Animations), secs = durée par lieu
+    Jobs = {
+        { name = 'jardinier', label = 'Jardinier', icon = 'leaf', desc = 'Tondre, tailler et entretenir les jardins des particuliers.',
+          grades = { { 'apprenti', 'Apprenti jardinier', 15 }, { 'confirme', 'Jardinier confirmé', 25 }, { 'maitre', 'Maître jardinier', 40 } },
+          quests = {
+            { id = 'tonte',   label = 'Tonte de pelouse',  desc = 'Un particulier veut sa pelouse tondue.',          spots = 2, anim = 'harvest', secs = 10, go = 'Rends-toi chez le client',     work = 'Tondre la pelouse',     reward = { 55, 85 } },
+            { id = 'taille',  label = 'Taille de haies',   desc = 'Taille les haies d\'une propriété.',              spots = 2, anim = 'pickup',  secs = 9,  go = 'Rends-toi à la propriété',    work = 'Tailler la haie',       reward = { 60, 90 } },
+            { id = 'plantes', label = 'Plantation',        desc = 'Plante des massifs de fleurs dans un parc.',      spots = 3, anim = 'harvest', secs = 8,  go = 'Rends-toi au parc',           work = 'Planter les fleurs',    reward = { 80, 120 } },
+          } },
+        { name = 'bricoleur', label = 'Bricoleur', icon = 'wrench', desc = 'Petites réparations et montages chez les particuliers.',
+          grades = { { 'apprenti', 'Apprenti bricoleur', 15 }, { 'confirme', 'Bricoleur confirmé', 25 }, { 'maitre', 'Maître bricoleur', 40 } },
+          quests = {
+            { id = 'meuble',  label = 'Montage de meuble', desc = 'Monte un meuble en kit.',                         spots = 1, anim = 'repair',  secs = 14, go = 'Rends-toi chez le client',     work = 'Monter le meuble',      reward = { 50, 75 } },
+            { id = 'etagere', label = 'Pose d\'étagères', desc = 'Fixe des étagères au mur.',                       spots = 2, anim = 'drill',   secs = 10, go = 'Rends-toi chez le client',     work = 'Percer et fixer',       reward = { 65, 95 } },
+            { id = 'porte',   label = 'Réparation de porte', desc = 'Une porte ferme mal : répare-la.',              spots = 2, anim = 'hammer',  secs = 10, go = 'Rends-toi sur place',          work = 'Réparer la porte',      reward = { 70, 100 } },
+          } },
+        { name = 'electricien', label = 'Électricien', icon = 'bolt', desc = 'Installations et dépannages électriques.',
+          grades = { { 'apprenti', 'Apprenti électricien', 18 }, { 'confirme', 'Électricien confirmé', 30 }, { 'maitre', 'Maître électricien', 45 } },
+          quests = {
+            { id = 'prises',  label = 'Changer des prises', desc = 'Remplace des prises défectueuses.',              spots = 2, anim = 'repair',  secs = 10, go = 'Rends-toi chez le client',     work = 'Changer la prise',      reward = { 65, 95 } },
+            { id = 'panne',   label = 'Panne de courant',   desc = 'Un commerce n\'a plus de courant : dépanne-le.', spots = 1, anim = 'weld',    secs = 14, go = 'Rends-toi au commerce',        work = 'Réparer le tableau',    reward = { 75, 110 } },
+            { id = 'lampes',  label = 'Éclairage public',   desc = 'Remplace des lampadaires en panne.',             spots = 3, anim = 'repair',  secs = 8,  go = 'Rends-toi au lampadaire',      work = 'Changer l\'ampoule',    reward = { 90, 130 } },
+          } },
+        { name = 'plombier', label = 'Plombier', icon = 'drop', desc = 'Fuites, canalisations et sanitaires.',
+          grades = { { 'apprenti', 'Apprenti plombier', 18 }, { 'confirme', 'Plombier confirmé', 30 }, { 'maitre', 'Maître plombier', 45 } },
+          quests = {
+            { id = 'fuite',   label = 'Fuite d\'eau',      desc = 'Une fuite inonde une cuisine.',                  spots = 1, anim = 'repair',  secs = 12, go = 'Rends-toi chez le client',     work = 'Réparer la fuite',      reward = { 60, 90 } },
+            { id = 'evier',   label = 'Évier bouché',      desc = 'Débouche des éviers chez deux clients.',         spots = 2, anim = 'pickup',  secs = 9,  go = 'Rends-toi chez le client',     work = 'Déboucher l\'évier',   reward = { 65, 95 } },
+            { id = 'chaudiere', label = 'Entretien de chaudière', desc = 'Entretien annuel de chaudières.',        spots = 2, anim = 'weld',    secs = 12, go = 'Rends-toi chez le client',     work = 'Entretenir la chaudière', reward = { 85, 125 } },
+          } },
+        { name = 'demenageur', label = 'Déménageur', icon = 'box', desc = 'Porter cartons et meubles d\'un logement à l\'autre.',
+          grades = { { 'apprenti', 'Porteur', 15 }, { 'confirme', 'Déménageur confirmé', 25 }, { 'maitre', 'Chef d\'équipe', 40 } },
+          quests = {
+            { id = 'cartons', label = 'Porter des cartons', desc = 'Charge des cartons dans le camion.',             spots = 2, anim = 'pickup',  secs = 8,  go = 'Rends-toi au logement',        work = 'Charger les cartons',   reward = { 50, 80 } },
+            { id = 'canape',  label = 'Déplacer un canapé', desc = 'Un canapé doit changer d\'étage.',               spots = 1, anim = 'pickup',  secs = 14, go = 'Rends-toi chez le client',     work = 'Déplacer le canapé',    reward = { 55, 85 } },
+            { id = 'grand',   label = 'Grand déménagement', desc = 'Vide entièrement un appartement.',               spots = 3, anim = 'pickup',  secs = 10, go = 'Rends-toi à l\'appartement',  work = 'Vider la pièce',        reward = { 90, 130 } },
+          } },
+        { name = 'laveurvitres', label = 'Laveur de vitres', icon = 'drop', desc = 'Vitres et vitrines des commerces et des bureaux.',
+          grades = { { 'apprenti', 'Apprenti laveur', 15 }, { 'confirme', 'Laveur confirmé', 25 }, { 'maitre', 'Maître laveur', 40 } },
+          quests = {
+            { id = 'vitrine', label = 'Vitrines de commerce', desc = 'Nettoie les vitrines d\'une rue commerçante.', spots = 2, anim = 'clean',   secs = 9,  go = 'Rends-toi au commerce',        work = 'Nettoyer la vitrine',   reward = { 50, 80 } },
+            { id = 'bureaux', label = 'Fenêtres de bureaux', desc = 'Lave les fenêtres d\'un immeuble de bureaux.', spots = 2, anim = 'clean',   secs = 11, go = 'Rends-toi à l\'immeuble',     work = 'Laver les fenêtres',    reward = { 60, 95 } },
+            { id = 'tour',    label = 'Façade de tour',      desc = 'Façade complète d\'une grande tour.',           spots = 3, anim = 'clean',   secs = 10, go = 'Rends-toi à la tour',          work = 'Laver la façade',       reward = { 90, 130 } },
+          } },
+        { name = 'ouvrierbtp', label = 'Ouvrier de chantier', icon = 'tool', desc = 'Petits travaux sur les chantiers de la ville.',
+          grades = { { 'manoeuvre', 'Manœuvre', 18 }, { 'confirme', 'Ouvrier qualifié', 30 }, { 'maitre', 'Chef de chantier', 45 } },
+          quests = {
+            { id = 'perforer', label = 'Perçage de dalle', desc = 'Perce la dalle d\'un chantier.',                  spots = 1, anim = 'drill',   secs = 14, go = 'Rends-toi sur le chantier',    work = 'Percer la dalle',       reward = { 60, 90 } },
+            { id = 'soudure',  label = 'Soudure de poutres', desc = 'Soude des poutres métalliques.',                spots = 2, anim = 'weld',    secs = 11, go = 'Rends-toi sur le chantier',    work = 'Souder la poutre',      reward = { 75, 110 } },
+            { id = 'coffrage', label = 'Coffrage',           desc = 'Assemble des coffrages en bois.',               spots = 3, anim = 'hammer',  secs = 9,  go = 'Rends-toi sur le chantier',    work = 'Assembler le coffrage', reward = { 90, 135 } },
+          } },
+        { name = 'coursier', label = 'Coursier', icon = 'cart', desc = 'Livrer colis et courses aux particuliers.',
+          grades = { { 'stagiaire', 'Coursier stagiaire', 15 }, { 'confirme', 'Coursier confirmé', 25 }, { 'maitre', 'Coursier expert', 40 } },
+          quests = {
+            { id = 'colis',   label = 'Livraison de colis', desc = 'Dépose un colis chez un particulier.',          spots = 2, anim = 'clipboard', secs = 6, go = 'Rends-toi chez le destinataire', work = 'Remettre le colis',     reward = { 45, 75 } },
+            { id = 'courses', label = 'Livraison de courses', desc = 'Apporte des courses à domicile.',             spots = 2, anim = 'pickup',    secs = 6, go = 'Rends-toi chez le client',       work = 'Déposer les courses',   reward = { 50, 80 } },
+            { id = 'express', label = 'Tournée express',    desc = 'Une tournée de plusieurs livraisons urgentes.',  spots = 4, anim = 'clipboard', secs = 5, go = 'Rends-toi au prochain client',   work = 'Remettre le colis',     reward = { 100, 150 } },
+          } },
+    },
+}
