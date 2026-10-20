@@ -118,9 +118,15 @@ function addToCart(c, idx) {
 const refreshBadge = () => { const b = document.getElementById('cartBadge'); if (b) { b.textContent = cartCount(); b.style.display = cartCount() ? '' : 'none'; } };
 
 /* ───── navigation ───── */
+// logo + nom du serveur (pickax_core/config.lua → ServerLogo / ServerName / ServerShortName)
+function brand() {
+  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
+  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fb',textContent:'${esc((sv.short || 'B')[0])}'}))">` : `<span class="fb">${esc((sv.short || 'B')[0])}</span>`;
+  return `<div class="brand"><div class="mark">${mark}</div><div class="bt"><b>${esc(sv.name || 'Boutique')}</b><span>Boutique officielle</span></div></div>`;
+}
 function sidebar(cats) {
   const nav = (id, icon, label, extra, color) => `<button class="${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}" style="--cc:${color || 'var(--pk-accent,#00a4ff)'}"><span class="ico">${ic(icon, 19)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
-  return `<aside class="side"><div class="brand"><div class="mark">${ic('bag', 20)}</div><div><b>Boutique</b><span>Paiement en coins</span></div></div>
+  return `<aside class="side">${brand()}
     <div class="cap">Catégories</div>
     <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb">${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
       <div class="cap" style="margin-top:14px">Mon compte</div>
