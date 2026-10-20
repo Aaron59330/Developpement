@@ -53,8 +53,8 @@ function RunAction(id, label, amount)
     local cfg = Config.Actions[id]
 
     if id == 'smallquests' then
-        if not OpenQuestPanel then return JBNotify('~r~client/jobcenter.lua non chargé : fais ~s~refresh~r~ puis ~s~restart pickax_jobbuilder') end
-        return OpenQuestPanel()
+        if GetResourceState('pickax_worldbuilder') ~= 'started' then return JBNotify('~r~pickax_worldbuilder n\'est pas démarré.') end
+        return exports['pickax_worldbuilder']:OpenQuests()
     end
     if id == 'missions' then
         if not OpenMissionStatus then return JBNotify('~r~client/missions.lua non chargé : fais ~s~refresh~r~ puis ~s~restart pickax_jobbuilder') end

@@ -113,16 +113,12 @@ const P = {
   cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2z"/>',
   sliders: '<path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/>',
 };
-P.bolt = '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
-P.tool = '<path d="M4 20l9-9"/><path d="M14 4l6 6-3 3-6-6z"/>';
-P.flag = '<path d="M5 21V4"/><path d="M5 4h13l-2 4 2 4H5"/>';
-const JC_ICON = { leaf: 'sprout', drop: 'droplet' };
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
 
 const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car', realestate: 'home', dealer: 'car', government: 'landmark', bank: 'landmark', bar: 'utensils', custom: 'briefcase' };
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
-const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login', jobcenter: 'users' };
+const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
 const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
@@ -2528,7 +2524,7 @@ const Bank = {
 const Runtime = {
   kind: null, data: null, pointId: null, bossTab: 'money',
 
-  open(kind, data, pointId) { if (kind === 'menu') this.menuData = data; this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.jcTab = null; this.q = ''; this.cat = ''; this.render(); },
+  open(kind, data, pointId) { if (kind === 'menu') this.menuData = data; this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
   set(r) { this.data = { ...this.data, ...r }; this.render(); },
 
   render() {
@@ -2575,7 +2571,6 @@ const Runtime = {
       case 'serve': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'utensils', title: 'Vendre un produit', sub: 'Le client le plus proche reçoit l\'offre et paie directement', cls: 'corner',
         body: list(d.items, it => `<div class="item">${tile('box')}<div class="grow"><b>${esc(it.label)}</b><small>${money(it.price)} · tu en as ${it.have}</small></div>
           <input class="qty" type="number" min="1" max="${d.maxServe}" value="1" id="sq${it.idx}"><button class="primary" style="height:38px" data-a="sell" data-i="${it.idx}" ${it.have > 0 ? '' : 'disabled'}>Proposer</button></div>`, 'La carte est vide : le patron ajoute des produits dans le builder (onglet Général).') });
-      case 'jobcenter': return this.renderJobcenter();
       case 'missions': return this.renderMissions();
       case 'missionStatus': $root.classList.add('corner'); return this.renderMissionStatus();
       case 'showroom': return this.renderShowroom();
@@ -2588,31 +2583,6 @@ const Runtime = {
       case 'propOffer': return $root.innerHTML = panel({ icon: 'home', title: d.deal === 'rent' ? 'Offre de location' : 'Offre d\'achat', sub: d.jobLabel,
         body: `<div class="card"><b style="font-size:16px">${esc(d.label)}</b><p class="hint mt-s">${esc(d.address || '')}</p><div class="eyebrow mt">${d.deal === 'rent' ? `Loyer · par semaine (${d.days} jours)` : 'Prix'}</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div>${d.deal === 'rent' ? '<p class="hint">Le premier loyer est payé maintenant. Les suivants se règlent à la porte.</p>' : ''}</div><div class="row"><button class="danger" style="flex:1" data-a="offerNo">Refuser</button><button class="primary" style="flex:2" data-a="offerYes">${ic('check', 16)} ${d.deal === 'rent' ? 'Louer' : 'Acheter'} · ${money(d.price)}</button></div>` });
     }
-  },
-
-  renderJobcenter() {
-    const d = this.data, st = d.stats, tab = this.jcTab || d.tab || 'jobs';
-    const small = d.isSmall;
-    const tabs = `<div class="seg">${d.pointId ? `<button class="${tab === 'jobs' ? 'active' : ''}" data-a="jcTab" data-v="jobs">${ic('users', 15)} Jobs disponibles</button>` : ''}
-      <button class="${tab === 'quests' ? 'active' : ''}" data-a="jcTab" data-v="quests" ${small ? '' : 'disabled'}>${ic('list', 15)} Mes quêtes</button></div>`;
-    const cur = small ? `<div class="card" style="display:flex;align-items:center;gap:12px"><div class="tile">${ic('check')}</div><div class="grow"><b style="display:block">Ton job : ${esc(d.currentLabel)}</b><small style="display:block">${esc(d.gradeLabel || '')}${st ? ` · ${st.done} quête${st.done > 1 ? 's' : ''} terminée${st.done > 1 ? 's' : ''}${st.next ? ` · prochain grade à ${st.next}` : ''}${st.bonus ? ` · bonus +${st.bonus}%` : ''}` : ''}</small></div>
-      <button class="sm" data-a="jcLeave">${ic('logout', 15)} Quitter ce job</button></div>` : '';
-    let body;
-    if (tab === 'jobs') {
-      body = `${cur}<p class="hint">Libre accès : un clic et tu es embauché. Tu peux quitter ton job à tout moment (ici ou dans le menu F6 → Quitter le métier).</p>` +
-        d.jobs.map(j => `<div class="item">${tile(JC_ICON[j.icon] || j.icon)}<div class="grow"><b>${esc(j.label)}</b><small>${esc(j.desc)}</small><small style="color:var(--text-2)">${j.quests} quêtes · ${money(j.min)} – ${money(j.max)} par quête</small></div>
-          ${j.current ? chip('Ton job', 'info') : `<button class="sm primary" data-a="jcTake" data-id="${esc(j.id)}">Prendre ce job</button>`}</div>`).join('');
-    } else {
-      body = `${cur}${d.active ? `<div class="card"><div class="card-h"><div class="t">${ic('flag', 16)} En cours : ${esc(d.active.label)}</div>${chip(`étape ${d.active.idx}/${d.active.total}`, 'info')}</div><button class="sm" data-a="jcCancel">Abandonner la quête</button></div>` : ''}` +
-        (d.quests.map(q => `<div class="item">${tile('flag')}<div class="grow"><b>${esc(q.label)}</b><small>${esc(q.desc)}</small><small style="color:var(--text-2)">${q.steps} étapes · ${money(q.min)} – ${money(q.max)}</small></div>
-          ${q.cooldownLeft > 0 ? chip(`${q.cooldownLeft} s`, '') : `<button class="sm primary" data-a="jcQuest" data-id="${esc(q.id)}" ${d.active ? 'disabled' : ''}>Lancer</button>`}</div>`).join('') || '<p class="hint">Prends d\'abord un petit job au Pôle emploi.</p>');
-    }
-    $root.innerHTML = panel({ icon: 'users', title: d.label, sub: d.pointId ? 'Pôle emploi — petits jobs en libre accès' : `Quêtes · ${d.currentLabel}`, cls: 'md', body: tabs + body });
-  },
-
-  async jcRefresh() {
-    const r = await rpc('jobcenter:info', this.data.pointId || null);
-    if (r && r.ok) { r.tab = this.jcTab; this.data = r; this.render(); }
   },
 
   renderMissions() {
@@ -2754,11 +2724,6 @@ const Runtime = {
       case 'ringYes': return rpc('ringAnswer', d.ringer, d.propId, true);
       case 'ringNo': return rpc('ringAnswer', d.ringer, d.propId, false);
       /* immobilier : porte */
-      case 'jcTab': this.jcTab = el.dataset.v; return this.render();
-      case 'jcTake': { const r = await rpc('jobcenter:take', d.pointId, el.dataset.id); if (!ok(r, 'Tu es embauché !')) return; this.jcTab = 'quests'; r.tab = 'quests'; this.data = r; return this.render(); }
-      case 'jcLeave': { if (!ok(await rpc('jobcenter:leave'), 'Tu as quitté ton job')) return; if (!d.pointId) return close(); this.jcTab = 'jobs'; return this.jcRefresh(); }
-      case 'jcQuest': { const r = await rpc('jcStart', el.dataset.id); if (!ok(r)) return; return; }
-      case 'jcCancel': { await rpc('jcCancel'); toast('Quête abandonnée', 'ok'); return this.jcRefresh(); }
       case 'missionStart': { const r = await rpc('missions:start', pid, el.dataset.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'missionCancel': { await rpc('missions:cancel'); toast('Mission annulée', 'ok'); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }

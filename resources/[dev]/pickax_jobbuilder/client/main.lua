@@ -221,6 +221,11 @@ end)
 -- ─────────────────────────────── Menu métier ───────────────────────────────
 local function openJobMenu()
     local jc = State.jobConfig
+    -- sans-emploi : F6 ouvre directement le menu des jobs en libre accès (Pôle emploi du worldbuilder, sans passer par un guichet)
+    if not jc and GetResourceState('pickax_worldbuilder') == 'started' then
+        local ok, opened = pcall(function() return exports['pickax_worldbuilder']:OpenJobMenu() end)
+        if ok and opened then return end
+    end
     if not jc then
         -- données du métier pas encore reçues (job tout juste créé / attribué) : on les redemande au serveur puis on réessaie une fois
         TriggerServerEvent('jobbuilder:server:requestSync')
