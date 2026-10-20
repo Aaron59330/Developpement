@@ -244,6 +244,7 @@ function JB.menuActions(job)
     if job.type == 'ems' and job.settings.ems_receive ~= false then list[#list + 1] = 'emscalls' end
     if job.type == 'ems' and job.settings.ems_tablet_enabled ~= false then list[#list + 1] = 'emstablet' end
     if job.type == 'bank' and job.settings.bank_tablet_enabled ~= false then list[#list + 1] = 'banktablet' end
+    if job.settings.smalljob then list[#list + 1] = 'smallquests' end
     if Config.Announce.Enabled and job.settings.announce_enabled ~= false then list[#list + 1] = 'jobannounce' end
     local seen = {}
     for _, a in ipairs(list) do seen[a] = true end

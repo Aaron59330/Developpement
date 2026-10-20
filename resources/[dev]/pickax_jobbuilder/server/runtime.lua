@@ -144,6 +144,8 @@ end
 JB.sharedAccount, JB.sqlBalance, JB.forgetUnknownAccount = sharedAccount, sqlBalance, function(name) unknown[name] = nil end
 
 -- API pour les autres scripts (même esprit que GetGangMoney / AddGangMoney / RemoveGangMoney)
+-- Rechargement des jobs après une création faite par un autre script (Pôle emploi du worldbuilder)
+exports('Reload', function() JB.loadAll() JB.refreshESX() for _, src in ipairs(GetPlayers()) do pcall(JB.syncPlayer, tonumber(src)) end return true end)
 exports('GetJobMoney', function(job) return societyBalance(tostring(job)) end)
 exports('AddJobMoney', function(job, amount) return societyAdd(tostring(job), amount) end)
 exports('RemoveJobMoney', function(job, amount) return societyRemove(tostring(job), amount) end)

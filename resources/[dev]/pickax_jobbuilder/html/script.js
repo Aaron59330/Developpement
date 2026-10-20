@@ -119,7 +119,7 @@ const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
 function applyTheme(rgb) {

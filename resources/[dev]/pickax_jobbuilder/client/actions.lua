@@ -52,6 +52,10 @@ function RunAction(id, label, amount)
     if not hasAction(id) then return JBNotify('~r~Action non autorisée.') end
     local cfg = Config.Actions[id]
 
+    if id == 'smallquests' then
+        if GetResourceState('pickax_worldbuilder') ~= 'started' then return JBNotify('~r~pickax_worldbuilder n\'est pas démarré.') end
+        return exports['pickax_worldbuilder']:OpenQuests()
+    end
     if id == 'missions' then
         if not OpenMissionStatus then return JBNotify('~r~client/missions.lua non chargé : fais ~s~refresh~r~ puis ~s~restart pickax_jobbuilder') end
         return OpenMissionStatus()

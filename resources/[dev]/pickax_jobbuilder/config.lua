@@ -104,6 +104,7 @@ Config.Actions = {
     emstablet  = { label = 'Tablette médicale',   icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type ems (urgences, dossiers patients, soins, équipe)
     banktablet = { label = 'Tablette bancaire',   icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type bank (clients, prêts, guichet, frais, statistiques)
     tablet     = { label = 'Tablette',            icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type police (casiers, amendes, dispatch, carte)
+    smallquests = { label = 'Mes quêtes',         icon = 'fa-clipboard-list', target = false, auto = true }, -- auto pour les petits jobs du Pôle emploi (worldbuilder)
     jobannounce = { label = 'Annonce entreprise', icon = 'fa-bullhorn',     target = false, auto = true }, -- auto (réglage « Annonces » du job)
 }
 
