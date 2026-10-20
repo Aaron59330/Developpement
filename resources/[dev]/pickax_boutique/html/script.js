@@ -35,7 +35,7 @@ const S = { data: null, cat: 'vehicle', q: '', points: 0 };
 function srcsFor(cat, it) {
   const m = String(it.model || '').trim(), low = m.toLowerCase();
   const loc = (dir, name) => ['png', 'webp', 'jpg'].map(e => `../images/${dir}/${name}.${e}`);
-  if (cat === 'vehicle' || cat === 'moto' || cat === 'other') return [...loc('vehicles', low), `https://docs.fivem.net/vehicles/${low}.webp`];
+  if (cat === 'vehicle' || cat === 'moto' || cat === 'other') return [...loc('vehicles', low), `https://docs.fivem.net/vehicles/${low}.webp`, `https://docs.fivem.net/vehicles/${low}.png`];   // véhicules GTA de base : images officielles (internet requis)
   if (cat === 'weapon') return [...loc('weapons', low), `https://cfx-nui-ox_inventory/web/images/${m.toUpperCase()}.png`, `https://cfx-nui-ox_inventory/web/images/${m}.png`];
   if (cat === 'crate') return loc('caisses', low);
   if (cat === 'pack') return loc('packs', String(it.name || '').toLowerCase().replace(/[^a-z0-9]/g, ''));

@@ -7,6 +7,8 @@ Dépose ici les images des articles (PNG, WEBP ou JPG, de préférence 600×375,
 - `caisses/<modèle>.png` — ex. `caisses/caisse1.png`
 - `packs/<nom du pack en minuscules, sans espaces>.png` — ex. `packs/packstarter.png`
 
+Les véhicules de la boutique sont des véhicules GTA de base : leurs images officielles se chargent automatiquement depuis `docs.fivem.net` (connexion internet du joueur requise). Pour fonctionner hors ligne, ou pour remplacer une image, dépose le fichier ci-dessous.
+
 Si une image est absente, l'interface cherche automatiquement :
 1. l'image fournie ici (png → webp → jpg),
 2. pour les véhicules d'origine GTA : `docs.fivem.net/vehicles/<modèle>.webp`,

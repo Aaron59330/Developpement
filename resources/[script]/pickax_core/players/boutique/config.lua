@@ -163,37 +163,48 @@ ConfigBoutique = {
     },
     
     vehicle = {
-        {name = "Alfa roméo", model = "gtam21", price = "1500"},
-        {name = "RS3", model = "rs3", price = "1500"},
-        {name = "A45 AMG", model = "a45", price = "1500"},
-        {name = "Golf", model = "golf", price = "1500"},
-        {name = "BMW 1", model = "bmw1", price = "1500"},
-        {name = "RS5", model = "rs5r", price = "2500"},
-        {name = "RS6", model = "rs6pd600", price = "2500"},
-        {name = "Aston Martin", model = "ast", price = "2500"},
-        {name = "Dodge Redeye", model = "redeye", price = "2500"},
-        {name = "GTR", model = "gtr", price = "2500"},
-        {name = "Porsche 718", model = "game718", price = "2500"},
-        {name = "RSQ 7", model = "sq7", price = "2500"},
-        {name = "Ferrari 812", model = "ferrari812", price = "2500"},
-        {name = "Skyline", model = "skyline", price = "2500"}
+        {name = "Futo", model = "futo", price = "1000"},
+        {name = "Dominator", model = "dominator", price = "1000"},
+        {name = "Buffalo S", model = "buffalo2", price = "1000"},
+        {name = "Kuruma", model = "kuruma", price = "1500"},
+        {name = "Banshee", model = "banshee", price = "1500"},
+        {name = "Sultan RS", model = "sultanrs", price = "1500"},
+        {name = "Comet", model = "comet2", price = "1500"},
+        {name = "Baller", model = "baller2", price = "1500"},
+        {name = "Schafter V12", model = "schafter3", price = "1500"},
+        {name = "Elegy RH8", model = "elegy2", price = "2000"},
+        {name = "Jester", model = "jester", price = "2000"},
+        {name = "Infernus", model = "infernus", price = "2000"},
+        {name = "Entity XF", model = "entityxf", price = "2500"},
+        {name = "Turismo R", model = "turismor", price = "2500"},
+        {name = "Zentorno", model = "zentorno", price = "2500"},
+        {name = "Adder", model = "adder", price = "2500"}
     },
     
     Motos = {
-        {name = "Honda 450 CRF", model = "450crf", price = "1000"},
-        {name = "Kawasaki KX450F", model = "kx450f", price = "1000"},
-        {name = "TM Racing 450", model = "450tm", price = "1000"},
-        {name = "Tmax", model = "tmax", price = "1500"},
-        {name = "Yamaha R6", model = "r6", price = "1500"},
-        {name = "XADV", model = "xadv", price = "1500"},
-        {name = "Kawasaki Ninjah 1000RR", model = "ninjah2", price = "2000"},
+        {name = "Faggio", model = "faggio", price = "1000"},
+        {name = "Sanchez", model = "sanchez", price = "1000"},
+        {name = "Ruffian", model = "ruffian", price = "1000"},
+        {name = "PCJ 600", model = "pcj", price = "1500"},
+        {name = "Vader", model = "vader", price = "1500"},
+        {name = "Bagger", model = "bagger", price = "1500"},
+        {name = "Double-T", model = "double", price = "2000"},
+        {name = "Akuma", model = "akuma", price = "2000"},
+        {name = "Hakuchou", model = "hakuchou", price = "2000"},
+        {name = "Bati 801", model = "bati", price = "2000"}
     },
 
     Autres = {
-        {Separator = true, name = "↓ Avions ↓"},
-        {name = "Besra", model = "besra", price = "1000", type = "aircraft"},
-        {Separator = true, name = "↓ Bateau ↓"},
-        {name = "Dinghy", model = "dinghy", price = "1000", type = "boat"}
+        {Separator = true, name = "↓ Avions et hélicoptères ↓"},
+        {name = "Dodo", model = "dodo", price = "2500", type = "aircraft"},
+        {name = "Frogger", model = "frogger", price = "3000", type = "aircraft"},
+        {name = "Maverick", model = "maverick", price = "3000", type = "aircraft"},
+        {name = "Luxor", model = "luxor", price = "4000", type = "aircraft"},
+        {Separator = true, name = "↓ Bateaux ↓"},
+        {name = "Seashark", model = "seashark", price = "800", type = "boat"},
+        {name = "Dinghy", model = "dinghy", price = "1000", type = "boat"},
+        {name = "Jetmax", model = "jetmax", price = "1500", type = "boat"},
+        {name = "Marquis", model = "marquis", price = "2500", type = "boat"}
     },
 
     weapon = {
@@ -202,9 +213,9 @@ ConfigBoutique = {
     },
     
     caisse = {
-        {name = "Caisse bronze", model = "caisse1", price = "1000", desc = "Une mvisiongt, une teslax ainsi que une w124.\nUne micro SMG, un pistolet calibre 50 ainsi qu'un pétoire.\n500, 750 et 1000 coins.\n75000$, 150000$ et 250000$."},
-        {name = "Caisse argent", model = "caisse2", price = "1500", desc = "Une A45AMG, C63S, RS5, Aston Martin, Dodge.\nUne SMG, UZI, Pistolet calibre 50.\n1000, 1500 et 2000 coins.\n500000$, 750000$ et 1000000$."},
-        {name = "Caisse or", model = "caisse3", price = "1500", desc = "Une Senna, F458S, X6M, Huracan, F458, Lykan.\nUne AK Compact, SMG, AK47.\n1000, 1500 et 2000 coins.\n1000000$, 1500000$ et 2000000$."}
+        {name = "Caisse bronze", model = "caisse1", price = "1000", desc = "Une Dominator, une Buffalo S ou une Futo.\nUne micro SMG, un pistolet calibre 50 ainsi qu'un pétoire.\n500, 750 et 1000 coins.\n75000$, 150000$ et 250000$."},
+        {name = "Caisse argent", model = "caisse2", price = "1500", desc = "Une Banshee, Sultan RS, Kuruma, Comet ou Jester.\nUne SMG, UZI, Pistolet calibre 50.\n1000, 1500 et 2000 coins.\n500000$, 750000$ et 1000000$."},
+        {name = "Caisse or", model = "caisse3", price = "1500", desc = "Une Adder, Zentorno, Turismo R, Entity XF, Infernus ou Elegy RH8.\nUne AK Compact, SMG, AK47.\n1000, 1500 et 2000 coins.\n1000000$, 1500000$ et 2000000$."}
     },
     
     pack = {
@@ -315,9 +326,9 @@ ConfigBoutique = {
             name = "Case #1",
             list = {
                 --Voiture
-                { name = "MVisionGT", vehicle = "mvisiongt", tier = 5},
-                { name = "Tesla X", vehicle = "teslax", tier = 5},
-                { name = "BMW 124", vehicle = "bmw124", tier = 5},
+                { name = "Dominator", vehicle = "dominator", tier = 5},
+                { name = "Buffalo S", vehicle = "buffalo2", tier = 5},
+                { name = "Futo", vehicle = "futo", tier = 5},
                 --------------------------------------
                 {name = "Pistolet MK2", weapon = "weapon_pistol_mk2", amount=1, tier = 4},
                 {name = "Pistolet SNS MK2", weapon = "weapon_snspistol_mk2", amount=1, tier = 4},
@@ -336,11 +347,11 @@ ConfigBoutique = {
             name = "Case #2",
             list = {
                 --Voiture
-                {  name = "A45", vehicle = "a45", tier = 5},
-                {  name = "C63", vehicle = "c63w205", tier = 5},
-                {  name = "RS5", vehicle = "rs5r", tier = 5},
-                {  name = "AST", vehicle = "ast", tier = 5},
-                {  name = "Redeye", vehicle = "redeye", tier = 5},
+                {  name = "Banshee", vehicle = "banshee", tier = 5},
+                {  name = "Sultan RS", vehicle = "sultanrs", tier = 5},
+                {  name = "Kuruma", vehicle = "kuruma", tier = 5},
+                {  name = "Comet", vehicle = "comet2", tier = 5},
+                {  name = "Jester", vehicle = "jester", tier = 5},
                 --------------------------------------
                 { modelTexture = "w_pi_pistolmk2", name = "Pistolet MK2", weapon = "weapon_pistol_mk2", amount=1, tier = 4},
                 { modelTexture = "w_sb_smgmk2", name = "SMG K2", weapon = "weapon_smg_mk2", amount=1, tier = 4},
@@ -359,12 +370,12 @@ ConfigBoutique = {
             name = "Case #3",
             list = {
                 --Voiture
-                { name = "Senna", vehicle = "senna", tier = 5},
-                { name = "LW458", vehicle = "lw458s", tier = 5},
-                { name = "X6M", vehicle = "rmodx6", tier = 5},
-                { name = "Huracan", vehicle = "huracan", tier = 5},
-                { name = "458 itali", vehicle = "italia458", tier = 5},
-                { name = "Lykan", vehicle = "lykan", tier = 5},
+                { name = "Adder", vehicle = "adder", tier = 5},
+                { name = "Zentorno", vehicle = "zentorno", tier = 5},
+                { name = "Turismo R", vehicle = "turismor", tier = 5},
+                { name = "Entity XF", vehicle = "entityxf", tier = 5},
+                { name = "Infernus", vehicle = "infernus", tier = 5},
+                { name = "Elegy RH8", vehicle = "elegy2", tier = 5},
                 --------------------------------------
                 { modelTexture = "w_sb_smgmk2", name = "SMG MK2", weapon = "weapon_smg_mk2", amount=1, tier = 4},
                 { modelTexture = "w_ar_assaultriflemk2", name = "Fusil d'assaut MK2", weapon = "weapon_assaultrifle_mk2", amount=1, tier = 4},
