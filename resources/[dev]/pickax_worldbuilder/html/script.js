@@ -780,7 +780,7 @@ const JobcenterPanel = new (class extends PanelBase {
     if (a === 'tab') { this.tab = v; return this.render(); }
     if (a === 'take') {
       const r = await this.act('jobcenter:take', this.d.eid || 0, this.d.pi || 0, v);
-      if (r && r.ok) { toast(`Embauché : ${(r.jobs.find(j => j.id === r.current) || {}).label || ''}`, 'ok'); r.eid = this.d.eid; r.pi = this.d.pi; r.mode = this.d.mode === 'jobs' ? 'jobs' : 'desk'; this.d = r; this.tab = 'quests'; this.render(); }
+      if (r && r.ok) { toast(`Embauché : ${(r.jobs.find(j => j.id === r.current) || {}).label || ''}`, 'ok'); r.eid = this.d.eid; r.pi = this.d.pi; r.mode = 'desk'; this.d = r; this.tab = 'quests'; this.render(); }
     }
     if (a === 'leave') {
       const r = await this.act('jobcenter:leave');

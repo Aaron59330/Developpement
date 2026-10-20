@@ -8,22 +8,6 @@ Handlers.jobcenter = function(node)
     end, node.eid, node.pi)
 end
 
--- Menu F6 des sans-emploi : liste des jobs en libre accès, sans guichet (appelé par le jobbuilder). Renvoie true si le menu a été ouvert.
-function OpenJobMenu()
-    local pd = ESX.GetPlayerData() or {}
-    local name = pd.job and pd.job.name
-    local free = false
-    for _, n in ipairs(Config.JobCenter.FreeJobs or {}) do if n == name then free = true end end
-    if not free or Config.JobCenter.MenuFromF6 == false then return false end
-    ServerCall('worldbuilder:jobcenter:info', function(res)
-        if not res or not res.ok then return Notify((res and res.error) or 'Pôle emploi indisponible', 'error') end
-        res.mode = 'jobs'
-        OpenPanel('jobcenter', res, { type = 'jobcenter' })
-    end, 0, 0)
-    return true
-end
-exports('OpenJobMenu', OpenJobMenu)
-
 -- Menu F6 (jobbuilder → « Mes quêtes ») : mêmes quêtes sans passer par le guichet
 function OpenQuests()
     ServerCall('worldbuilder:jobcenter:info', function(res)
