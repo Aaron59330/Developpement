@@ -133,6 +133,7 @@ end
 
 AddEventHandler('playerConnecting', function(name, setReason, deferrals)
     local src = source
+    print(('[connect_ui] %s se connecte (écran de connexion)'):format(name))
     local player = {
         name = name,
         deferrals = deferrals,

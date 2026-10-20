@@ -11,6 +11,10 @@ Config.NoPlayerText = "Aucun joueur en connexion"
 --  Liens
 Config.DiscordURL = "https://discord.gg/JGxkBuckU"   -- (lien propre à l'écran de connexion)
 Config.ShopURL = "https://bluebayrp.tebex.io/"
+do   -- si TebexStore est renseigné dans pickax_core/config.lua, le bouton Boutique pointe dessus
+    local ok, st = pcall(function() return exports['pickax_core']:GetGlobalStyle() end)
+    if ok and type(st) == 'table' and type(st.tebex) == 'string' and st.tebex ~= '' then Config.ShopURL = st.tebex end
+end
 
 --  Textes
 Config.Texts = {
