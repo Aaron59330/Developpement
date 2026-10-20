@@ -1180,7 +1180,10 @@ end
 RegisterKeyMapping(ConfigBoutique.Commande.CommandeName, ConfigBoutique.Commande.DescCommande, 'keyboard', ConfigBoutique.Commande.Bind)
 
 RegisterCommand(ConfigBoutique.Commande.CommandeName, function()
-    if MenuStore == false then
+    -- interface moderne (ressource pickax_boutique) si elle est démarrée ; sinon l'ancien menu RageUI
+    if GetResourceState('pickax_boutique') == 'started' then
+        exports['pickax_boutique']:Open()
+    elseif MenuStore == false then
         OpenMenuBoutique()
     end
 end)
@@ -1529,3 +1532,82 @@ function SpawnLocalVehicle(modelName, coords, heading, cb)
 		end
 	end)
 end
+
+-- ═══════════════════════════ Passerelle vers pickax_boutique (interface NUI) ═══════════════════════════
+-- La boutique garde TOUTE sa logique (prix vérifiés par le serveur, livraison des véhicules, packs, caisses…) :
+-- la nouvelle interface appelle simplement les mêmes événements que l'ancien menu RageUI.
+local function stripCodes(str) return (tostring(str or ''):gsub('~[a-zA-Z]~', '')) end
+
+local function packContents(win)
+    local out = {}
+    for _, i in ipairs(win or {}) do
+        if i.item then out[#out + 1] = ('%dx %s'):format(tonumber(i.amount) or 1, i.item)
+        elseif i.money then out[#out + 1] = ('%s $'):format(tostring(i.money))
+        elseif i.weapon then out[#out + 1] = tostring(i.weapon)
+        elseif i.Vehicle then out[#out + 1] = ('Véhicule : %s'):format(tostring(i.Vehicle)) end
+    end
+    return out
+end
+
+local function conv(list, kind)
+    local out = {}
+    for k, v in ipairs(list or {}) do
+        if not v.Separator then
+            out[#out + 1] = { idx = k, name = v.name, model = v.model, price = tonumber(v.price) or 0, desc = stripCodes(v.desc), balle = v.balle, vtype = v.type,
+                contents = kind == 'pack' and packContents(v.Win) or nil }
+        end
+    end
+    return out
+end
+
+exports('BoutiqueCatalog', function()
+    return {
+        points = tonumber(PlayerData.points) or 0, staff = PlayerData.Staff == true, link = ConfigBoutique.LinkShop,
+        vehicle = conv(ConfigBoutique.vehicle), moto = conv(ConfigBoutique.Motos), other = conv(ConfigBoutique.Autres), weapon = conv(ConfigBoutique.weapon),
+        crate = conv(ConfigBoutique.caisse), pack = conv(ConfigBoutique.pack, 'pack'), business = conv(ConfigBoutique.Entreprise),
+    }
+end)
+
+exports('BoutiquePoints', function() return tonumber(PlayerData.points) or 0 end)
+
+exports('BoutiqueOpenClassic', function()
+    if MenuStore == false then OpenMenuBoutique() end
+end)
+
+exports('BoutiqueBuy', function(cat, idx)
+    local lists = { vehicle = ConfigBoutique.vehicle, moto = ConfigBoutique.Motos, other = ConfigBoutique.Autres, weapon = ConfigBoutique.weapon,
+        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, business = ConfigBoutique.Entreprise }
+    local k = tonumber(idx)
+    local v = lists[cat] and k and lists[cat][k]
+    if not v or v.Separator then return { ok = false, error = 'Article introuvable' } end
+    local price = tonumber(v.price) or 0
+    if (tonumber(PlayerData.points) or 0) < price then return { ok = false, error = 'Tu n\'as pas assez de coins' } end
+    CreateThread(function()
+        if cat == 'vehicle' then vehicle_give(v.model, k, v.price)
+        elseif cat == 'moto' then vehicleMotoGive(v.model, k, v.price)
+        elseif cat == 'other' then vehicleOtherGive(v.model, k, v.price, v.type)
+        elseif cat == 'weapon' then
+            TriggerServerEvent("CorePickax:Boutique:Add", { id = k, model = v.model, price = price, Nameweapon = v.name, Interaction = "weapon" })
+        elseif cat == 'crate' then
+            TriggerServerEvent("CorePickax:Boutique:Add", { id = k, price = price, item = v.model, nameitem = v.name, Interaction = "giveitem" })
+        elseif cat == 'pack' then
+            TriggerServerEvent("CorePickax:Boutique:Add", { id = k, price = price, Interaction = "BuyPack" })
+            for _, i in pairs(v.Win) do
+                if i.item then
+                    TriggerServerEvent('ESXCustomBoutique:giveReward', 'item', i.item, i.amount)
+                elseif i.Vehicle then
+                    TriggerEvent('mkbussZ:RewardVehicleCar', i.Vehicle)
+                    Wait(100)
+                elseif i.money then
+                    TriggerServerEvent('ESXCustomBoutique:giveReward', 'money', i.money)
+                elseif i.weapon then
+                    TriggerServerEvent('ESXCustomBoutique:giveReward', 'weapon', i.weapon)
+                end
+            end
+            ESX.ShowNotification("Vous avez reçu votre pack")
+        elseif cat == 'business' then
+            TriggerServerEvent("CorePickax:Boutique:Add", { id = k, price = price, name = v.name, Interaction = "entrepriseachat" })
+        end
+    end)
+    return { ok = true }
+end)
