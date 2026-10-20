@@ -835,6 +835,29 @@ function _Moi()
             }
         },
     }
+
+    -- Placement des armes (pickax_weaponcarry) : une entrée par arme de l'inventaire, avec choix dos / ceinture / poche / cachée
+    if GetResourceState('pickax_weaponcarry') == 'started' then
+        local ok, entries = pcall(function() return exports['pickax_weaponcarry']:GetEntries() end)
+        if ok and type(entries) == 'table' and #entries > 0 then
+            table.insert(Action_Config.My, { Type = "Separator" })
+            for _, w in ipairs(entries) do
+                local actions = {}
+                for _, pl in ipairs(w.places) do
+                    local name = w.name
+                    actions[#actions + 1] = { (pl.id == w.current and "~b~✔ ~s~" or "") .. pl.label, true, function()
+                        exports['pickax_weaponcarry']:SetPlacement(name, pl.id)
+                    end }
+                end
+                local cur = "Cachée"
+                for _, pl in ipairs(w.places) do if pl.id == w.current then cur = pl.label end end
+                table.insert(Action_Config.My, {
+                    Type = "buttom-submenu", Label = ("%s ~b~· %s"):format(w.label, cur),
+                    Blocked = false, IsRestricted = false, CloseOnClick = true, Action = actions,
+                })
+            end
+        end
+    end
 end
 
 function _Weather()
