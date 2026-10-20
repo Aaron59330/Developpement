@@ -27,6 +27,12 @@ Config.Builders = {
         stats = { { 'Boutiques', 'shopbuilder_shops' }, { 'Logs', 'shopbuilder_logs' } },
     },
     {
+        id = 'eventbuilder', resource = 'pickax_eventbuilder', command = 'eventbuilder', icon = 'event',
+        label = 'Event Builder',
+        desc = 'Braquages de fourgon, largages, commerces, épaves, livraisons et zones : crée et lance des événements en jeu.',
+        stats = { { 'Événements', 'eventbuilder_events' }, { 'Historique', 'eventbuilder_logs' } },
+    },
+    {
         id = 'worldbuilder', resource = 'pickax_worldbuilder', command = 'worldbuilder', icon = 'world',
         label = 'World Builder',
         desc = 'Garages, fourrières, locations, stations, drogues, braquages, portes et zones PVP.',
