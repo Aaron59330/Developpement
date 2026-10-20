@@ -8,7 +8,7 @@ svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-wid
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
 
 /* même gabarit que les builders (3vh 6vw), design différent : navigation latérale, grandes cartes visuelles, fond lumineux */
-#root { position: fixed; inset: 3vh 6vw; display: grid; grid-template-columns: 252px 1fr; grid-template-rows: minmax(0, 1fr); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 90px rgba(0,0,0,.6); animation: pop .22s ease-out;
+#root { position: fixed; inset: 0; margin: auto; width: min(1440px, 96vw); height: min(780px, 92vh); display: grid; grid-template-columns: 252px 1fr; grid-template-rows: minmax(0, 1fr); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 90px rgba(0,0,0,.6); animation: pop .22s ease-out;
   background: var(--bg); }
 #root::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, var(--acc), transparent 70%); z-index: 3; }
 @keyframes pop { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
@@ -68,9 +68,9 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .card:hover { transform: translateY(-4px); border-color: rgba(var(--acc-rgb), .55); box-shadow: 0 18px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(var(--acc-rgb), .25); }
 @keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .pic { position: relative; aspect-ratio: 16 / 10; display: grid; place-items: center; background: radial-gradient(circle at 50% 110%, rgba(var(--acc-rgb), .16), transparent 62%), #1b1d23; }
-.pic img { max-width: 88%; max-height: 82%; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,.5)); transition: transform .25s; }
+.pic img { position: absolute; left: 6%; top: 9%; width: 88%; height: 82%; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,.5)); transition: transform .25s; }
 .card:hover .pic img { transform: scale(1.06); }
-.pic svg.art { width: 56%; height: 70%; }
+.pic svg.art { position: absolute; left: 22%; top: 15%; width: 56%; height: 70%; }
 .tag { position: absolute; top: 12px; left: 12px; backdrop-filter: none; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.45); color: #dfe3ea; }
 .info { padding: 14px 16px 16px; }
 .info h3 { font-size: 15px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
