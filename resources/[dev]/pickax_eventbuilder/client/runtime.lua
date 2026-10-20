@@ -138,6 +138,7 @@ end
 local function syncProps()
     local me = GetEntityCoords(PlayerPedId())
     for rid, run in pairs(Runs) do
+      if run.type ~= 'heli_drop' then
         for _, l in ipairs(run.loot or {}) do
             local key = propKey(rid, l.id)
             local dist = #(me - vector3(l.x, l.y, l.z))
@@ -157,6 +158,7 @@ local function syncProps()
                 end
             end
         end
+      end
     end
 end
 
@@ -234,6 +236,8 @@ end
 -- ─────────────────────────────── Réseau ───────────────────────────────
 RegisterNetEvent('eventbuilder:client:state', function(pub)
     pub.recv = GetGameTimer()
+    local old = Runs[pub.rid]
+    pub.t0Local = old and old.t0Local or (GetGameTimer() - (pub.elapsed or 0) * 1000)      -- horloge commune de l'événement (stable entre deux synchros)
     Runs[pub.rid] = pub
     updateBlips(pub)
 end)
@@ -243,6 +247,7 @@ RegisterNetEvent('eventbuilder:client:end', function(rid)
     if run then
         for _, l in ipairs(run.loot or {}) do dropProp(propKey(rid, l.id)) end
     end
+    if HeliCleanup then HeliCleanup(rid) end
     Runs[rid] = nil
     removeBlips(rid)
 end)
@@ -425,6 +430,169 @@ local function drawRun(run, me)
     end
 end
 
+-- ─────────────────────────────── Largage par hélicoptère (rejeu local) ───────────────────────────────
+-- Chaque client voit le même hélicoptère et la même chute de caisses : tout est calculé à partir de l'horloge commune de l'événement.
+local Fx = {}     -- [rid] = { heli, pilot, crates = { [lootId] = { obj, chute, flare, landed } } }
+
+local function lerp(a, b, k) return a + (b - a) * k end
+
+function HeliCleanup(rid)
+    local f = Fx[rid]
+    if not f then return end
+    if f.pilot and DoesEntityExist(f.pilot) then DeleteEntity(f.pilot) end
+    if f.heli and DoesEntityExist(f.heli) then DeleteEntity(f.heli) end
+    for _, c in pairs(f.crates) do
+        if c.chute and DoesEntityExist(c.chute) then DeleteEntity(c.chute) end
+        if c.obj and DoesEntityExist(c.obj) then DeleteEntity(c.obj) end
+        if c.flare then StopParticleFxLooped(c.flare, false) end
+    end
+    Fx[rid] = nil
+end
+
+local function heliPos(H, n, t)
+    local hover = (n - 1) * H.stagger + H.fall + 5.0
+    local dx, dy = H.ex - H.sx, H.ey - H.sy
+    local len = math.sqrt(dx * dx + dy * dy)
+    local ux, uy = dx / math.max(len, 0.001), dy / math.max(len, 0.001)
+    local heading = GetHeadingFromVector_2d(ux, uy)
+    if t < H.flight then
+        local k = t / H.flight
+        return lerp(H.sx, H.ex, k), lerp(H.sy, H.ey, k), lerp(H.sz, H.ez, k), heading, true
+    elseif t < H.flight + hover then
+        return H.ex, H.ey, H.ez, heading, true
+    end
+    local away = t - (H.flight + hover)
+    return H.ex + ux * away * H.speed, H.ey + uy * away * H.speed, H.ez + away * 4.0, heading, away < 30.0
+end
+
+local function heliTick(rid, run, me)
+    local H = run.extra and run.extra.heli
+    if not H then return end
+    local f = Fx[rid]
+    if not f then f = { crates = {} } Fx[rid] = f end
+    local n = #(run.loot or {})
+    local t = (GetGameTimer() - (run.t0Local or GetGameTimer())) / 1000.0
+    local hx, hy, hz, heading, alive = heliPos(H, n, t)
+
+    -- hélicoptère (visuel local, non réseau)
+    if alive and #(me - vector3(hx, hy, hz)) < 900.0 then
+        if not f.heli then
+            local hash = loadModel(H.model or 'maverick')
+            if hash then
+                f.heli = CreateVehicle(hash, hx, hy, hz, heading, false, false)
+                SetEntityCollision(f.heli, false, false)
+                SetEntityInvincible(f.heli, true)
+                SetVehicleEngineOn(f.heli, true, true, true)
+                SetHeliBladesFullSpeed(f.heli)
+                SetVehicleDoorsLocked(f.heli, 10)
+                local ph = loadModel('s_m_y_pilot_01')
+                if ph then
+                    f.pilot = CreatePedInsideVehicle(f.heli, 4, ph, -1, false, false)
+                    SetBlockingOfNonTemporaryEvents(f.pilot, true)
+                    SetModelAsNoLongerNeeded(ph)
+                end
+                SetModelAsNoLongerNeeded(hash)
+            end
+        end
+        if f.heli and DoesEntityExist(f.heli) then
+            SetEntityCoordsNoOffset(f.heli, hx, hy, hz, false, false, false)
+            SetEntityHeading(f.heli, heading)
+            SetHeliBladesFullSpeed(f.heli)
+        end
+    elseif f.heli then
+        if f.pilot and DoesEntityExist(f.pilot) then DeleteEntity(f.pilot) end
+        if DoesEntityExist(f.heli) then DeleteEntity(f.heli) end
+        f.heli, f.pilot = nil, nil
+    end
+
+    -- caisses : chute en parachute puis atterrissage
+    for i, l in ipairs(run.loot or {}) do
+        local c = f.crates[l.id]
+        if l.taken then
+            if c then
+                if c.chute and DoesEntityExist(c.chute) then DeleteEntity(c.chute) end
+                if c.obj and DoesEntityExist(c.obj) then DeleteEntity(c.obj) end
+                if c.flare then StopParticleFxLooped(c.flare, false) end
+                f.crates[l.id] = nil
+            end
+        else
+            local tStart = H.flight + (i - 1) * H.stagger
+            local tLand = tStart + H.fall
+            local close = #(me - vector3(l.x, l.y, l.z)) < ((Config.StreamDistance or 140.0) + 160.0)
+            if t >= tStart and close then
+                if not c then
+                    c = { gz = nil }
+                    f.crates[l.id] = c
+                end
+                if not c.obj then
+                    local hash = loadModel(l.model)
+                    if hash then
+                        local ok, gz = GetGroundZFor_3dCoord(l.x, l.y, l.z + 60.0, false)
+                        c.gz = ok and gz or l.z
+                        c.obj = CreateObject(hash, l.x, l.y, (t >= tLand) and c.gz or (H.ez - 2.0), false, false, false)
+                        SetEntityAsMissionEntity(c.obj, true, true)
+                        FreezeEntityPosition(c.obj, true)
+                        SetModelAsNoLongerNeeded(hash)
+                        if t < tLand then
+                            local chash = loadModel('p_parachute1_mp_dec')
+                            if chash then
+                                c.chute = CreateObject(chash, l.x, l.y, H.ez, false, false, false)
+                                AttachEntityToEntity(c.chute, c.obj, 0, 0.0, 0.0, 1.6, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+                                SetModelAsNoLongerNeeded(chash)
+                            end
+                        end
+                    end
+                end
+                if c.obj and DoesEntityExist(c.obj) then
+                    if t < tLand then
+                        local k = math.min(1.0, (t - tStart) / H.fall)
+                        local z = lerp(H.ez - 2.0, c.gz or l.z, k * (2 - k))                 -- ralentit à l'approche du sol
+                        local sway = math.sin(t * 1.3 + i) * 1.2 * (1 - k)
+                        SetEntityCoordsNoOffset(c.obj, l.x + sway, l.y + math.cos(t + i) * 0.8 * (1 - k), z, false, false, false)
+                    elseif not c.landed then
+                        c.landed = true
+                        SetEntityCoordsNoOffset(c.obj, l.x, l.y, c.gz or l.z, false, false, false)
+                        PlaceObjectOnGroundProperly(c.obj)
+                        if c.chute and DoesEntityExist(c.chute) then DeleteEntity(c.chute) c.chute = nil end
+                        if H.flare then
+                            RequestNamedPtfxAsset('core')
+                            local tt = GetGameTimer()
+                            while not HasNamedPtfxAssetLoaded('core') and GetGameTimer() - tt < 1500 do Wait(10) end
+                            UseParticleFxAssetNextCall('core')
+                            c.flare = StartParticleFxLoopedAtCoord('exp_grd_flare', l.x, l.y, (c.gz or l.z) + 0.2, 0.0, 0.0, 0.0, 1.4, false, false, false, false)
+                        end
+                    end
+                end
+            elseif c and not close then
+                if c.chute and DoesEntityExist(c.chute) then DeleteEntity(c.chute) end
+                if c.obj and DoesEntityExist(c.obj) then DeleteEntity(c.obj) end
+                if c.flare then StopParticleFxLooped(c.flare, false) end
+                f.crates[l.id] = nil
+            end
+        end
+    end
+end
+
+CreateThread(function()
+    while true do
+        local sleep = 500
+        local me = GetEntityCoords(PlayerPedId())
+        for rid, run in pairs(Runs) do
+            if run.type == 'heli_drop' then
+                local H = run.extra and run.extra.heli
+                if H and #(me - vector3(run.coords.x, run.coords.y, run.coords.z)) < 1200.0 then
+                    sleep = 0
+                    local ok, err = pcall(heliTick, rid, run, me)
+                    if not ok then print(('^1[eventbuilder] largage hélico : %s^0'):format(tostring(err))) end
+                elseif Fx[rid] then
+                    HeliCleanup(rid)
+                end
+            end
+        end
+        Wait(sleep)
+    end
+end)
+
 -- ─────────────────────────────── Boucles ───────────────────────────────
 CreateThread(function()
     while true do
@@ -476,5 +644,6 @@ AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     for k in pairs(Props) do dropProp(k) end
     for k in pairs(Clerks) do dropClerk(k) end
+    if HeliCleanup then for rid in pairs(Runs) do HeliCleanup(rid) end end
     for rid in pairs(Blips) do removeBlips(rid) end
 end)

@@ -137,7 +137,7 @@ function EB.pub(run)
         alerted = run.alerted == true, loot = loot, extra = run.extra, params = { patrol = d.params.patrol, fire = d.params.fire, radius = d.params.radius,
             destRadius = d.params.destRadius, openSeconds = d.params.openSeconds, lootSeconds = d.params.lootSeconds, clerkModel = d.params.clerkModel,
             breachSeconds = d.params.breachSeconds, registerSeconds = d.params.registerSeconds },
-        robber = run.robber,
+        robber = run.robber, elapsed = now() - run.startedAt,
     }
 end
 
@@ -350,6 +350,50 @@ TypeTick.drop = function(run)
         run.stage, run.stageText = 'loot', 'Ouvrez les caisses'
         EB.sync(run)
     elseif run.stage == 'done' and now() >= (run.closeAt or 0) then
+        EB.stopRun(run.rid, 'caisses vidées')
+    end
+end
+
+-- 2b) Largage par hélicoptère ─────────────────────────────────────────────────
+-- L'hélicoptère et la chute des caisses sont rejoués localement par chaque client à partir d'un horaire commun (pas de PNJ pilote à synchroniser) ;
+-- le serveur ne gère que le calendrier (approche → chute → verrouillé → butin), les mercenaires et le butin.
+local STAGGER = 1.5
+TypeStart.heli_drop = function(run)
+    local P, c = run.def.params, run.coords
+    local ang = math.random() * math.pi * 2
+    local dist = P.approachDistance or 700
+    local alt = P.altitude or 140
+    local n = P.crates or 4
+    local speed = P.heliSpeed or 38
+    local flight = math.max(5, math.floor(dist / speed))
+    run.extra.heli = { sx = c.x + math.cos(ang) * dist, sy = c.y + math.sin(ang) * dist, sz = c.z + alt, ex = c.x, ey = c.y, ez = c.z + alt,
+        flight = flight, fall = P.fallSeconds or 14, stagger = STAGGER, speed = speed, model = P.heliModel, flare = P.flare ~= false }
+    for i = 1, n do
+        local pos = ring(c, (P.spread or 14) * (0.35 + math.random() * 0.65), i, n)
+        addLoot(run, pos.x, pos.y, pos.z, P.crateModel, P.openSeconds or 5, 'Caisse')
+    end
+    run.flightEnd = now() + flight
+    run.dropEnd = run.flightEnd + math.floor((n - 1) * STAGGER) + (P.fallSeconds or 14)
+    run.endsAt = math.max(run.endsAt, run.dropEnd + (P.unlockSeconds or 0) + 300)
+    run.stage, run.stageText = 'inbound', 'Un hélicoptère approche de la zone…'
+end
+
+TypeTick.heli_drop = function(run)
+    local P, t = run.def.params, now()
+    if run.stage == 'inbound' and t >= run.flightEnd then
+        run.stage, run.stageText = 'dropping', 'Les caisses tombent du ciel !'
+        EB.alert(run, run.coords)
+        EB.sync(run)
+    elseif run.stage == 'dropping' and t >= run.dropEnd then
+        spawnGuards(run, P.guards or 0, run.coords)
+        run.unlockAt = t + (P.unlockSeconds or 0)
+        run.stage = (P.unlockSeconds or 0) > 0 and 'wait' or 'loot'
+        run.stageText = run.stage == 'wait' and 'Les caisses sont verrouillées…' or 'Ouvrez les caisses'
+        EB.sync(run)
+    elseif run.stage == 'wait' and t >= (run.unlockAt or 0) then
+        run.stage, run.stageText = 'loot', 'Ouvrez les caisses'
+        EB.sync(run)
+    elseif run.stage == 'done' and t >= (run.closeAt or 0) then
         EB.stopRun(run.rid, 'caisses vidées')
     end
 end

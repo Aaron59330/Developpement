@@ -170,6 +170,7 @@ ESX.RegisterServerCallback('eventbuilder:draft', function(src, cb, templateId)
     for _, f in ipairs(T.fields) do d.params[f.key] = f.default end
     for k, v in pairs(tpl.params or {}) do d.params[k] = v end
     if tpl.reward then for k, v in pairs(tpl.reward) do d.reward[k] = v end end
+    if tpl.announce then d.announce = EB.copy(tpl.announce) d.announce.finish = d.announce.finish or '' end
     cb({ ok = true, event = d })
 end)
 
