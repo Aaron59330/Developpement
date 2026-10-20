@@ -230,6 +230,11 @@ function viewAdmin() {
         <label>Coins pour le parrain<input id="rp" type="number" min="0" value="${ref.ParrainCoins}"></label></div>
         <button class="btn pri" data-a="saveRef" style="margin-top:12px">Enregistrer</button>
         <p class="sub" style="margin-top:14px">Chaque joueur a un code unique « REF-<i>numéro boutique</i> » visible dans l'onglet Codes & parrainage.</p></div></div>
+      <div class="panel wide"><h3>${ic('users', 18)} Give à tous les joueurs en ligne</h3><div class="form">
+        <label>Coins par joueur<input id="ga" type="number" min="1" max="1000000" value="100"></label>
+        <label>Motif (affiché au joueur)<input id="gr" maxlength="60" placeholder="Événement, compensation…"></label></div>
+        <button class="btn pri" data-a="giveAll" style="margin-top:12px">Envoyer à tout le monde</button>
+        <p class="sub" style="margin-top:10px">Chaque joueur connecté reçoit le montant indiqué, une notification et une ligne dans son historique.</p></div>
       <div class="panel wide"><h3>${ic('tag', 18)} Codes (${a.codes.length})</h3>${a.codes.length ? `<table class="tbl"><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Utilisé</th><th>Par joueur</th><th>Expire</th><th>État</th><th></th></tr>${a.codes.map(c => `<tr><td><b>${esc(c.code)}</b>${c.note ? `<br><small>${esc(c.note)}</small>` : ''}</td>
         <td>${c.kind === 'percent' ? 'Réduction' : 'Coins'}</td><td>${c.kind === 'percent' ? c.value + ' %' : fmt(c.value) + ' coins'}</td><td>${c.uses}${c.max_uses ? ' / ' + c.max_uses : ''}</td><td>${c.per_player}</td><td>${c.expires ? when(c.expires) : '—'}</td>
         <td><span class="chip ${c.active ? 'ok' : 'off'}">${c.active ? 'Actif' : 'Désactivé'}</span></td><td style="text-align:right"><button class="mini2" data-a="toggleCode" data-id="${c.id}">${c.active ? 'Désactiver' : 'Activer'}</button> <button class="mini2 bad" data-a="delCode" data-id="${c.id}">${ic('trash', 14)}</button></td></tr>`).join('')}</table>` : '<p class="sub">Aucun code.</p>'}</div>
@@ -340,6 +345,14 @@ document.addEventListener('click', async e => {
     }
     case 'toggleCode': { await rpc('admin:toggleCode', Number(el.dataset.id)); return loadView('admin'); }
     case 'delCode': { if (!confirm('Supprimer ce code ?')) return; await rpc('admin:deleteCode', Number(el.dataset.id)); return loadView('admin'); }
+    case 'giveAll': {
+      const n = Math.floor(Number(val('ga')) || 0);
+      if (n < 1) return toast('Montant invalide', 'bad');
+      if (!confirm(`Donner ${fmt(n)} coins à TOUS les joueurs en ligne ?`)) return;
+      const r = await rpc('admin:giveAll', { amount: n, reason: val('gr') });
+      if (r && r.ok) { toast(`${fmt(n)} coins envoyés à ${r.given} joueur(s)`, 'ok'); return loadView('admin'); }
+      return toast((r && r.error) || 'Erreur', 'bad');
+    }
     case 'saveRef': {
       const r = await rpc('admin:saveSettings', { Enabled: document.getElementById('re').checked, FilleulCoins: val('rf'), ParrainCoins: val('rp') });
       if (r && r.ok) { toast('Parrainage enregistré', 'ok'); return loadView('admin'); }

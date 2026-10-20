@@ -266,6 +266,27 @@ ESX.RegisterServerCallback('pickax_boutique:admin:saveSettings', function(src, c
 end)
 
 
+-- Give de coins à tous les joueurs actuellement connectés
+ESX.RegisterServerCallback('pickax_boutique:admin:giveAll', function(src, cb, d)
+    if not adminOnly(src, cb) then return end
+    d = type(d) == 'table' and d or {}
+    local amount = math.floor(tonumber(d.amount) or 0)
+    if amount < 1 or amount > 1000000 then return cb(fail('Montant invalide (1 à 1 000 000)')) end
+    local reason = esc(d.reason, 60)
+    local given, label = 0, ('+%d coins (cadeau%s)'):format(amount, reason ~= '' and (' : ' .. reason) or '')
+    for _, id in ipairs(GetPlayers()) do
+        local xTarget = ESX.GetPlayerFromId(tonumber(id))
+        if xTarget and exports['pickax_core']:BoutiqueGrantCoins(xTarget.identifier, amount) then
+            given = given + 1
+            MySQL.insert('INSERT INTO boutique_history (identifier, player_name, item_name, category, price, full_price) VALUES (?, ?, ?, ?, 0, 0)',
+                { xTarget.identifier, esc(nameOf(xTarget), 80), label, 'gift' })
+            TriggerClientEvent('esx:showNotification', xTarget.source, ('~g~Cadeau du serveur !~s~ +%d coins%s'):format(amount, reason ~= '' and (' (' .. reason .. ')') or ''))
+        end
+    end
+    log(('%s a donné %d coins à %d joueur(s) en ligne%s'):format(GetPlayerName(src), amount, given, reason ~= '' and (' — ' .. reason) or ''))
+    cb({ ok = true, given = given })
+end)
+
 -- ─────────────────────────────── Tebex ───────────────────────────────
 -- pickax_tebex <cible> <coins> [transaction]   (console / Tebex uniquement)
 --   cible : ID serveur d'un joueur en ligne (Tebex {id})  ou  b<ID boutique> (joueur en ligne ou non)
