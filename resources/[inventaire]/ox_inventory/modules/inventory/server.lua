@@ -1107,6 +1107,19 @@ exports('SetMaxWeight', Inventory.SetMaxWeight)
 ---@param slot? number
 ---@param cb? fun(success?: boolean, response: string|SlotWithItem|nil)
 ---@return boolean? success, string|SlotWithItem|nil response
+-- Les cases rapides (1 à N, 5 par défaut) ne reçoivent jamais automatiquement un nouvel objet : c'est le joueur qui les remplit.
+-- Elles ne servent qu'en dernier recours (inventaire autrement plein) ; un objet déjà présent dans une de ces cases peut toujours s'y empiler.
+-- Réglage : set inventory:protectedslots 5   (0 = ancien comportement)
+local protectedSlots = GetConvarInt('inventory:protectedslots', 5)
+
+local function slotOrder(inv, limit)
+	local order, last = {}, limit or inv.slots
+	local skip = (inv.player and protectedSlots > 0) and protectedSlots or 0
+	for i = skip + 1, last do order[#order + 1] = i end
+	for i = 1, math.min(skip, last) do order[#order + 1] = i end
+	return order
+end
+
 function Inventory.AddItem(inv, item, count, metadata, slot, cb)
 	if type(item) ~= 'table' then item = Items(item) end
 
@@ -1140,9 +1153,9 @@ function Inventory.AddItem(inv, item, count, metadata, slot, cb)
 		local items = inv.items
 		slotMetadata, slotCount = Items.Metadata(inv.id, item, metadata and table.clone(metadata) or {}, count)
 
-		for i = 1, inv.slots do
-			-- les slots de vetements et le slot Tenue ne servent jamais d'emplacement libre par defaut
-			if inv.player and shared.clothing and i > shared.mainslots then break end
+		local lastSlot = (inv.player and shared.clothing) and math.min(inv.slots, shared.mainslots) or inv.slots   -- les slots de vetements et le slot Tenue ne servent jamais d'emplacement libre par defaut
+
+		for _, i in ipairs(slotOrder(inv, lastSlot)) do
 
 			local slotData = items[i]
 
@@ -2152,7 +2165,7 @@ function Inventory.GetEmptySlot(inv)
 
 	local items = inventory.items
 
-	for i = 1, inventory.slots do
+	for _, i in ipairs(slotOrder(inventory)) do
 		if not items[i] then
 			return i
 		end
@@ -2174,7 +2187,7 @@ function Inventory.GetSlotForItem(inv, itemName, metadata)
 	local items = inventory.items
 	local emptySlot
 
-	for i = 1, inventory.slots do
+	for _, i in ipairs(slotOrder(inventory)) do
 		local slotData = items[i]
 
 		if item.stack and slotData and slotData.name == item.name and table.matches(slotData.metadata, metadata) then
