@@ -72,6 +72,42 @@ local function priceWithPct(price, pct)
     return math.max(0, math.floor(price * (100 - pct) / 100 + 0.5))        -- même arrondi que pickax_core
 end
 
+-- ─────────────────────────────── Boutique du jour ───────────────────────────────
+local daily = { key = nil, items = {}, set = {} }
+local function dayKey() return os.date('%Y-%m-%d', os.time() - (Config.Daily.ResetHour or 0) * 3600) end
+local function hashStr(s) local h = 2166136261 for i = 1, #s do h = ((h ~ s:byte(i)) * 16777619) % 4294967296 end return h end
+
+local function buildDaily()
+    local key = dayKey()
+    if daily.key == key then return daily end
+    local items, set = {}, {}
+    if Config.Daily and Config.Daily.Enabled then
+        for _, p in ipairs(Config.Daily.Pick or {}) do
+            local ok, list = pcall(function() return core():BoutiqueList(p.cat) end)
+            if ok and type(list) == 'table' and #list > 0 and (p.count or 0) > 0 then
+                local x = hashStr(key .. ':' .. p.cat) % 2147483646 + 1
+                local function rnd(n) x = (x * 48271) % 2147483647 return x % n + 1 end       -- tirage déterministe : même résultat pour tout le monde, toute la journée
+                for i = #list, 2, -1 do local j = rnd(i) list[i], list[j] = list[j], list[i] end
+                for i = 1, math.min(p.count, #list) do
+                    items[#items + 1] = { cat = p.cat, idx = list[i].idx }
+                    set[p.cat .. ':' .. list[i].idx] = true
+                end
+            end
+        end
+    end
+    daily = { key = key, items = items, set = set }
+    return daily
+end
+
+local function dailyPayload()
+    local d = buildDaily()
+    if #d.items == 0 then return nil end
+    local t = os.time()
+    local y = os.date('*t', t - (Config.Daily.ResetHour or 0) * 3600)
+    local nextT = os.time({ year = y.year, month = y.month, day = y.day + 1, hour = Config.Daily.ResetHour or 0, min = 0, sec = 0 })
+    return { items = d.items, discount = math.max(0, math.min(90, tonumber(Config.Daily.Discount) or 0)), endsIn = math.max(60, nextT - t) }
+end
+
 -- ─────────────────────────────── Historique ───────────────────────────────
 AddEventHandler('CorePickax:Boutique:Paid', function(src, paid, full, label)
     local xPlayer = playerOf(src)
@@ -81,7 +117,7 @@ AddEventHandler('CorePickax:Boutique:Paid', function(src, paid, full, label)
     if p and #p.queue > 0 then
         local item = table.remove(p.queue, 1)
         name, cat = item.name, item.cat
-        if p.pct > 0 and paid < full then code = p.code end
+        if paid < full then code = (p.pct > 0 and p.code ~= '' and p.code) or (item.daily and 'BOUTIQUE DU JOUR') or nil end
     end
     MySQL.insert('INSERT INTO boutique_history (identifier, player_name, item_name, category, price, full_price, code) VALUES (?, ?, ?, ?, ?, ?, ?)',
         { xPlayer.identifier, esc(nameOf(xPlayer), 80), esc(name, 100), cat, math.floor(tonumber(paid) or 0), math.floor(tonumber(full) or 0), code })
@@ -167,7 +203,7 @@ ESX.RegisterServerCallback('pickax_boutique:prepare', function(src, cb, cart, co
         for _ = 1, qty do
             count = count + 1
             if count > Config.MaxCartItems then return cb(fail(('Panier limité à %d articles'):format(Config.MaxCartItems))) end
-            queue[#queue + 1] = { cat = cat, idx = idx, name = item.name, price = item.price }
+            queue[#queue + 1] = { cat = cat, idx = idx, name = item.name, price = item.price, daily = buildDaily().set[cat .. ':' .. idx] == true }
             total = total + item.price
         end
     end
@@ -182,17 +218,32 @@ ESX.RegisterServerCallback('pickax_boutique:prepare', function(src, cb, cart, co
         pct = row.value
     end
 
+    local dpct = math.max(0, math.min(90, tonumber(Config.Daily and Config.Daily.Discount) or 0))
     local final = 0
-    for _, it in ipairs(queue) do final = final + priceWithPct(it.price, pct) end
+    for _, it in ipairs(queue) do
+        -- remise de la boutique du jour puis code promo, cumulées (calculées ici, jamais fournies par le client)
+        it.pct = it.daily and (100 - (100 - dpct) * (100 - pct) / 100) or pct
+        final = final + priceWithPct(it.price, it.pct)
+    end
     local okP, points = pcall(function() return core():BoutiquePointsOf(src) end)
     if not okP or (tonumber(points) or 0) < final then return cb(fail('Tu n\'as pas assez de coins')) end
 
     if row then consumeCode(row, xPlayer) end
-    pcall(function() core():SetBoutiqueCoupon(src, pct, #queue, Config.CouponSeconds) end)
-    pending[src] = { queue = queue, code = code, pct = pct }
+    local all = {}
+    for i, it in ipairs(queue) do all[i] = it end
+    pending[src] = { queue = queue, all = all, armed = 0, code = code, pct = pct }
     local out = {}
     for _, it in ipairs(queue) do out[#out + 1] = { cat = it.cat, idx = it.idx, name = it.name } end
     cb({ ok = true, queue = out, total = total, final = final, pct = pct })
+end)
+
+-- Avant chaque article, le client demande d'appliquer la remise de CET article (dans l'ordre uniquement) : le pourcentage vient du serveur
+RegisterNetEvent('pickax_boutique:arm', function(i)
+    local src = source
+    local p, n = pending[src], tonumber(i)
+    if not p or not n or n ~= p.armed + 1 or not p.all[n] then return end
+    p.armed = n
+    pcall(function() core():SetBoutiqueCoupon(src, p.all[n].pct, 1, Config.CouponSeconds) end)
 end)
 
 RegisterNetEvent('pickax_boutique:done', function()
@@ -357,7 +408,7 @@ ESX.RegisterServerCallback('pickax_boutique:descs', function(src, cb)
     local xPlayer = playerOf(src)
     local map = {}
     for _, r in ipairs(MySQL.query.await('SELECT cat, item_key, description FROM boutique_descriptions') or {}) do map[r.cat .. '|' .. r.item_key] = r.description end
-    cb({ ok = true, map = map, dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil })
+    cb({ ok = true, map = map, daily = dailyPayload(), dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil })
 end)
 
 ESX.RegisterServerCallback('pickax_boutique:saveDesc', function(src, cb, d)

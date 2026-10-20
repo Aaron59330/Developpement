@@ -819,6 +819,15 @@ exports('BoutiqueItem', function(cat, idx)
     return { name = v.name, price = tonumber(v.price) or 0 }
 end)
 
+-- Liste (index + prix) des articles d'une catégorie : sert à la sélection « boutique du jour » de pickax_boutique
+exports('BoutiqueList', function(cat)
+    local out = {}
+    for k, v in ipairs(BoutiqueLists()[cat] or {}) do
+        if not v.Separator then out[#out + 1] = { idx = k, price = tonumber(v.price) or 0 } end
+    end
+    return out
+end)
+
 exports('BoutiquePointsOf', function(src)
     local xPlayer = ESX.GetPlayerFromId(src)
     local c = xPlayer and PlayerCacheBoutique[xPlayer.identifier]

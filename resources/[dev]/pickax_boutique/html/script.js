@@ -25,10 +25,13 @@ const IC = {
   store: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>',
   _store: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/>',
 };
+IC.clock = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+IC.flame = '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .5 1.5 1.5 2 2 2 0-3-1-5 1-8z"/>';
 IC.check = '<path d="M5 12.5l4.5 4.5L19 7"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${IC[n] || IC.box}</svg>`;
 
 const CATS = [
+  { id: 'daily', label: 'Boutique du jour', sub: 'Une sélection qui change chaque jour, avec une remise', icon: 'flame', kind: 'Offre du jour', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'vehicle', label: 'Véhicules', sub: 'Voitures et SUV, livrés dans ton garage', icon: 'car', kind: 'Véhicule', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'moto', label: 'Motos', sub: 'Deux-roues, sportives et tout-terrain', icon: 'moto', kind: 'Moto', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'other', label: 'Air & mer', sub: 'Avions, hélicoptères et bateaux', icon: 'plane', kind: 'Véhicule', color: 'var(--pk-accent,#00a4ff)' },
@@ -87,6 +90,9 @@ const filtered = () => {
   return l;
 };
 const cat = () => CATS.find(c => c.id === S.cat) || CATS[0];
+const dailyD = () => (S.data && S.data.dailyInfo && S.data.dailyInfo.discount) || 0;
+const isDaily = (c, i) => !!(S.dset && S.dset[c + ':' + Number(i)]);
+const effPrice = (c, it) => (isDaily(c, it.idx) && dailyD() > 0) ? Math.max(0, Math.floor(it.price * (100 - dailyD()) / 100 + 0.5)) : it.price;
 const itemIn = (c, i) => ((S.data && S.data[c]) || []).find(x => x.idx === Number(i));
 
 function tagOf(it, c) {
@@ -107,9 +113,9 @@ function metaOf(it, c) {
 const maxQty = c => (c === 'weapon' || c === 'business') ? 1 : 10;
 const cartCount = () => S.cart.reduce((n, l) => n + l.qty, 0);
 const cartLines = () => S.cart.map(l => ({ l, it: itemIn(l.cat, l.idx) })).filter(x => x.it);
-const subtotal = () => cartLines().reduce((n, x) => n + x.it.price * x.l.qty, 0);
+const subtotal = () => cartLines().reduce((n, x) => n + effPrice(x.l.cat, x.it) * x.l.qty, 0);
 const discounted = p => Math.max(0, Math.floor(p * (100 - S.pct) / 100 + 0.5));
-const finalTotal = () => cartLines().reduce((n, x) => n + discounted(x.it.price) * x.l.qty, 0);
+const finalTotal = () => cartLines().reduce((n, x) => n + discounted(effPrice(x.l.cat, x.it)) * x.l.qty, 0);
 function addToCart(c, idx) {
   const it = itemIn(c, idx); if (!it) return;
   const line = S.cart.find(l => l.cat === c && l.idx === it.idx);
@@ -149,7 +155,7 @@ function render() {
   else if (S.view === 'history') main = viewHistory();
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
-  else main = viewShop();
+  else main = S.cat === 'daily' ? viewDaily() : viewShop();
   $root.innerHTML = sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '');
 }
 
@@ -165,13 +171,26 @@ function viewShop() {
         <span class="addq"><button class="mini" data-a="addcart" data-c="${S.cat}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div>`;
 }
 
+function fmtClock(s) { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; }
+function viewDaily() {
+  const c = cat(), items = S.data.daily || [], d = dailyD();
+  $root.style.setProperty('--cc', c.color);
+  return heroBar(c.icon, c.label, c.sub, c.color) +
+    `<div class="tools"><div class="dayinfo">${ic('clock', 16)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b></div><div class="sp"></div>${d ? `<span class="count dbadge">-${d} % sur toute la sélection</span>` : ''}</div>
+    <div class="scroll"><div class="grid">${items.map((it, n) => { const k = it._cat, p = effPrice(k, it);
+      return `<div class="card" data-a="open" data-c="${k}" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(k, it, tagOf(it, k))}${d ? `<span class="dtag">-${d}%</span>` : ''}
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it, k))}</div><div class="price"><span class="pill ${S.points < p ? 'short' : ''}"><i></i>${fmt(p)}${p < it.price ? ` <s class="old">${fmt(it.price)}</s>` : ''}</span>
+        <span class="addq"><button class="mini" data-a="addcart" data-c="${k}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`; }).join('')}</div></div>`;
+}
+setInterval(() => { const e = document.getElementById('dcd'); if (e && S.dayEnds) e.textContent = fmtClock(S.dayEnds - Date.now() / 1000); }, 1000);
+
 function viewCart() {
   const lines = cartLines(), sub = subtotal(), fin = finalTotal(), lack = fin - S.points;
   return heroBar('cart', 'Mon panier', `${cartCount()} article${cartCount() > 1 ? 's' : ''}`, 'var(--pk-accent,#00a4ff)') +
     `<div class="scroll"><div class="cartwrap"><div class="cartlist">${lines.length ? lines.map(({ l, it }) => `<div class="row">
         <div class="thumb">${picHtml(l.cat, it, '')}</div><div class="rn"><b>${esc(it.name)}</b><span>${esc(metaOf(it, l.cat))}</span></div>
         <div class="qty">${maxQty(l.cat) > 1 ? `<button data-a="qminus" data-c="${l.cat}" data-i="${it.idx}">${ic('minus', 14)}</button><b>${l.qty}</b><button data-a="qplus" data-c="${l.cat}" data-i="${it.idx}">${ic('plus', 14)}</button>` : '<b>×1</b>'}</div>
-        <div class="lp"><span class="pill"><i></i>${fmt(discounted(it.price) * l.qty)}</span>${S.pct ? `<s>${fmt(it.price * l.qty)}</s>` : ''}</div>
+        <div class="lp"><span class="pill"><i></i>${fmt(discounted(effPrice(l.cat, it)) * l.qty)}</span>${(S.pct || isDaily(l.cat, it.idx)) ? `<s>${fmt(it.price * l.qty)}</s>` : ''}</div>
         <button class="xrm" data-a="rm" data-c="${l.cat}" data-i="${it.idx}" title="Retirer">${ic('trash', 16)}</button></div>`).join('')
       : `<div class="empty">Ton panier est vide.<br><button class="btn pri" data-a="view" data-v="shop" style="margin-top:16px;max-width:240px">Parcourir la boutique</button></div>`}</div>
       <aside class="summary"><h3>Récapitulatif</h3>
@@ -251,14 +270,14 @@ function payOverlay() {
 
 function sheet(it, confirm, c) {
   c = c || S.cat;
-  const ct = CATS.find(x => x.id === c) || cat(), lack = it.price - S.points;
+  const ct = CATS.find(x => x.id === c) || cat(), eff = effPrice(c, it), lack = eff - S.points;
   $modal.innerHTML = `<div class="sheet">${picHtml(c, it, tagOf(it, c))}<div class="body"><span class="kind">${esc(ct.kind)}</span><h2>${esc(it.name)}</h2>
     <div class="desc ${it.desc ? '' : 'none'}">${it.desc ? esc(it.desc) : 'Aucun descriptif pour le moment.'}</div>
     ${S.data.dev ? `<div class="deved"><label>Descriptif (visible par tous les joueurs)<textarea id="descText" maxlength="800" rows="4" placeholder="Décris l'article : vitesse, places, particularités…">${esc(it.desc || '')}</textarea></label>
       <button class="btn" data-a="saveDesc" data-c="${c}" data-i="${it.idx}">${ic('check', 16)} Enregistrer le descriptif</button></div>` : ''}
     <div class="chips">${it.model && c !== 'pack' && c !== 'crate' && c !== 'business' ? `<span class="chip">Modèle : ${esc(it.model)}</span>` : ''}${it.balle ? `<span class="chip">${esc(it.balle)} munitions</span>` : ''}${it.vtype ? `<span class="chip">${it.vtype === 'boat' ? 'Bateau' : 'Avion'}</span>` : ''}</div>
     ${(it.contents && it.contents.length) ? `<div class="contents"><b>Contenu</b><ul>${it.contents.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
-    <div class="buy">${lack > 0 ? `<div class="warn">Il te manque ${fmt(lack)} coins.</div>` : ''}<div class="total"><span class="pill ${lack > 0 ? 'short' : ''}"><i></i>${fmt(it.price)} coins</span><small>Solde : ${fmt(S.points)}</small></div>
+    <div class="buy">${lack > 0 ? `<div class="warn">Il te manque ${fmt(lack)} coins.</div>` : ''}<div class="total"><span class="pill ${lack > 0 ? 'short' : ''}"><i></i>${fmt(eff)} coins${eff < it.price ? ` <s class="old">${fmt(it.price)}</s>` : ''}</span><small>Solde : ${fmt(S.points)}</small></div>
       <div class="btns"><button class="btn" data-a="closeSheet">${confirm ? 'Annuler' : 'Fermer'}</button>${confirm ? `<button class="btn pri" data-a="buy" data-c="${c}" data-i="${it.idx}">Confirmer l'achat</button>` : `<button class="btn" data-a="addcart" data-c="${c}" data-i="${it.idx}" data-close="1">${ic('cart', 16)} Au panier</button><button class="btn pri" data-a="ask" data-c="${c}" data-i="${it.idx}" ${lack > 0 ? 'disabled' : ''}>Acheter</button>`}</div></div></div></div>`;
   $modal.classList.remove('hidden');
 }
@@ -300,7 +319,7 @@ document.addEventListener('click', async e => {
     case 'cat': S.view = 'shop'; S.cat = el.dataset.id; S.q = ''; return render();
     case 'view': S.view = el.dataset.v; return S.view === 'shop' ? render() : loadView(S.view);
     case 'sort': S.sort = el.dataset.v; return render();
-    case 'open': { if (e.target.closest('.mini')) return; const it = itemIn(S.cat, i); if (it) sheet(it, false, S.cat); return; }
+    case 'open': { if (e.target.closest('.mini')) return; const k = c || S.cat, it = itemIn(k, i); if (it) sheet(it, false, k); return; }
     case 'closeSheet': return closeSheet();
     case 'ask': { const it = itemIn(c, i); if (it) sheet(it, true, c); return; }
     case 'saveDesc': {
@@ -317,6 +336,13 @@ document.addEventListener('click', async e => {
     case 'buy': {
       const it = itemIn(c, i); if (!it) return;
       el.disabled = true;
+      if (isDaily(c, it.idx)) {      // article de la boutique du jour : passe par le paiement du panier (le serveur applique la remise)
+        const r = await post('checkout', { cart: [{ cat: c, idx: it.idx, qty: 1 }], code: '' });
+        closeSheet();
+        if (!r || !r.ok) return toast((r && r.error) || 'Paiement impossible', 'bad');
+        S.paying = { i: 1, n: r.count, name: '', done: false, single: true };
+        return render();
+      }
       const r = await post('buy', { cat: c, idx: it.idx });
       closeSheet();
       if (r && r.ok) toast(`Achat envoyé : ${it.name}`, 'ok'); else toast((r && r.error) || 'Achat impossible', 'bad');
@@ -342,7 +368,7 @@ document.addEventListener('click', async e => {
       S.paying = { i: 1, n: r.count, name: '', done: false };
       return render();
     }
-    case 'payClose': S.paying = null; S.cart = []; saveCart(); S.code = ''; S.pct = 0; S.promoMsg = ''; S.view = 'history'; return loadView('history');
+    case 'payClose': { const single = S.paying && S.paying.single; S.paying = null; if (!single) { S.cart = []; saveCart(); S.code = ''; S.pct = 0; S.promoMsg = ''; } S.view = 'history'; return loadView('history'); }
     case 'redeem': {
       const code = (val('redeem') || '').trim(); if (!code) return;
       const r = await rpc('redeem', code);
@@ -378,7 +404,9 @@ document.addEventListener('input', e => {
 });
 window.addEventListener('message', e => {
   const d = e.data || {};
-  if (d.action === 'open') { applyAccent(d.data.accent); S.data = d.data; S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
+  if (d.action === 'open') { applyAccent(d.data.accent); S.data = d.data;
+    const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
+    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }

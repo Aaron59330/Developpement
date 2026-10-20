@@ -24,3 +24,19 @@ Config.Tebex = {
 
 -- Qui peut modifier les descriptifs des articles en jeu (clic sur un article → « Modifier le descriptif ») : groupes ESX (colonne `group`)
 Config.DescGroups = { _dev = true }
+
+-- « Boutique du jour » : une sélection d'articles qui change chaque jour (même sélection pour tous les joueurs), avec une remise.
+Config.Daily = {
+    Enabled   = true,
+    Discount  = 15,                 -- remise en % sur ces articles (0 = prix normal) ; cumulée avec un code promo du panier
+    ResetHour = 0,                  -- heure (serveur) du changement de sélection : 0 = minuit
+    Pick = {                        -- combien d'articles tirés au sort par catégorie (0 = aucun)
+        { cat = 'vehicle',  count = 2 },
+        { cat = 'moto',     count = 1 },
+        { cat = 'other',    count = 1 },
+        { cat = 'weapon',   count = 1 },
+        { cat = 'crate',    count = 1 },
+        { cat = 'pack',     count = 1 },
+        { cat = 'business', count = 0 },
+    },
+}

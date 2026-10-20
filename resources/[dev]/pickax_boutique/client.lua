@@ -31,6 +31,7 @@ local function Open()
     local res = Citizen.Await(d)
     if type(res) == 'table' and res.ok then
         cat.dev = res.dev == true
+        cat.dailyInfo = res.daily
         if res.boutiqueId then cat.boutiqueId = res.boutiqueId end
         for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, business = 1 }) do
             for _, it in ipairs(cat[c] or {}) do
@@ -83,6 +84,8 @@ RegisterNUICallback('checkout', function(body, cb)
             local failed = 0
             for i, it in ipairs(res.queue) do
                 SendNUIMessage({ action = 'checkoutProgress', i = i, n = #res.queue, name = it.name })
+                TriggerServerEvent('pickax_boutique:arm', i)      -- le serveur applique la remise de cet article
+                Wait(150)
                 local ok, r = pcall(function() return exports['pickax_core']:BoutiqueBuy(it.cat, it.idx, true) end)
                 if not ok or not r or not r.ok then failed = failed + 1 end
                 Wait(Config.CheckoutSpacing or 3000)

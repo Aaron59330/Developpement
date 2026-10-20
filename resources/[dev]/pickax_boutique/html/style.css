@@ -181,3 +181,10 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .deved { margin-top: 12px; padding: 12px; border-radius: 14px; background: rgba(var(--acc-rgb), .07); border: 1px dashed rgba(var(--acc-rgb), .4); display: grid; gap: 10px; }
 .deved label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
 .deved textarea { width: 100%; resize: vertical; min-height: 84px; padding: 10px 12px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text); font: inherit; font-size: 13px; user-select: text; }
+
+/* boutique du jour */
+.dayinfo { display: inline-flex; align-items: center; gap: 9px; padding: 9px 14px; border-radius: 12px; background: rgba(var(--acc-rgb), .1); border: 1px solid rgba(var(--acc-rgb), .3); color: var(--muted); font-weight: 600; }
+.dayinfo b { color: var(--acc); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.dbadge { color: var(--acc) !important; font-weight: 700; }
+.card .dtag { position: absolute; right: 12px; top: 14px; z-index: 3; padding: 4px 10px; border-radius: 999px; background: var(--acc); color: #fff; font-size: 12px; font-weight: 800; box-shadow: 0 6px 18px rgba(var(--acc-rgb), .4); }
+.pill s.old, s.old { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 6px; }
