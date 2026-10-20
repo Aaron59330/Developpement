@@ -44,6 +44,7 @@ const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'p
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
 const saveCart = () => { try { localStorage.setItem('pb_cart', JSON.stringify(S.cart)); } catch (e) { } };
 const rpc = (name, ...args) => post('rpc', { name, args });
+const coreAdmin = (name, ...args) => post('coreadmin', { name, args });
 
 /* ───── images : fichier du dossier images → docs.fivem.net / ox_inventory → illustration générée ───── */
 function srcsFor(cat, it) {
@@ -250,6 +251,10 @@ function viewAdmin() {
         <label>Coins pour le parrain<input id="rp" type="number" min="0" value="${ref.ParrainCoins}"></label></div>
         <button class="btn pri" data-a="saveRef" style="margin-top:12px">Enregistrer</button>
         <p class="sub" style="margin-top:14px">Chaque joueur a un code unique « REF-<i>numéro boutique</i> » visible dans l'onglet Codes & parrainage.</p></div></div>
+      <div class="panel wide"><h3>${ic('users', 18)} Coins par joueur</h3>
+        <div class="promo big"><input id="plq" placeholder="Nom, ID serveur, code boutique…" maxlength="40" value="${esc((S.pl && S.pl.q) || '')}"><button data-a="plSearch">Chercher</button><button data-a="plOnline">En ligne</button><button data-a="plRecent">Récents</button></div>
+        ${S.pl && S.pl.list ? (S.pl.list.length ? `<table class="tbl"><tr><th>Joueur</th><th>ID</th><th>Code</th><th>Coins</th><th>Montant</th><th></th></tr>${S.pl.list.map((p, n) => `<tr><td><b>${esc(p.name)}</b><br><small>${p.online ? 'En ligne' : 'Hors ligne'}</small></td><td>${p.id != null ? p.id : '—'}</td><td>#${esc(p.boutique_id)}</td><td>${fmt(p.points)}</td>
+          <td><input class="amt" id="pa${n}" type="number" min="1" value="100" style="width:90px"></td><td style="text-align:right"><button class="mini2" data-a="plGive" data-n="${n}">Donner</button> <button class="mini2 bad" data-a="plTake" data-n="${n}">Retirer</button></td></tr>`).join('')}</table>` : '<p class="sub">Aucun joueur trouvé.</p>') : '<p class="sub">Cherche un joueur (en ligne ou hors ligne) pour lui donner ou lui retirer des coins, comme dans le menu de base.</p>'}</div>
       <div class="panel wide"><h3>${ic('users', 18)} Give à tous les joueurs en ligne</h3><div class="form">
         <label>Coins par joueur<input id="ga" type="number" min="1" max="1000000" value="100"></label>
         <label>Motif (affiché au joueur)<input id="gr" maxlength="60" placeholder="Événement, compensation…"></label></div>
@@ -291,6 +296,12 @@ function countTo(el, to) {
   const step = n => { const k = Math.min(1, (n - t0) / 600); el.textContent = fmt(Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+// confirmation dans l'interface (les boîtes confirm() du navigateur ne sont pas fiables dans le NUI de FiveM)
+const askConfirm = msg => new Promise(res => {
+  $modal.innerHTML = `<div class="cfbox"><h2>Confirmer</h2><p>${esc(msg)}</p><div class="cfb"><button class="btn" data-cf="0">Annuler</button><button class="btn pri" data-cf="1">Confirmer</button></div></div>`;
+  $modal.classList.remove('hidden');
+  $modal.onclick = e => { const b = e.target.closest('[data-cf]'); if (!b) return; $modal.onclick = null; $modal.classList.add('hidden'); $modal.innerHTML = ''; res(b.dataset.cf === '1'); };
+});
 const val = id => (document.getElementById(id) || {}).value;
 
 // couleur principale envoyée par le jeu (pickax_core/config.lua → AccentColor) : fonctionne même si theme.js n'a pas pu être chargé
@@ -381,11 +392,23 @@ document.addEventListener('click', async e => {
       return toast((r && r.error) || 'Erreur', 'bad');
     }
     case 'toggleCode': { await rpc('admin:toggleCode', Number(el.dataset.id)); return loadView('admin'); }
-    case 'delCode': { if (!confirm('Supprimer ce code ?')) return; await rpc('admin:deleteCode', Number(el.dataset.id)); return loadView('admin'); }
+    case 'delCode': { if (!await askConfirm('Supprimer ce code ?')) return; await rpc('admin:deleteCode', Number(el.dataset.id)); return loadView('admin'); }
+    case 'plOnline': { const r = await coreAdmin('online'); S.pl = { q: '', list: (r && r.list) || [] }; return render(); }
+    case 'plRecent': { const r = await coreAdmin('recent'); S.pl = { q: '', list: (r && r.list) || [] }; return render(); }
+    case 'plSearch': { const q = (val('plq') || '').trim(); if (q.length < 2 && !Number(q)) return toast('Saisis au moins 2 caractères ou un ID', 'bad'); const r = await coreAdmin('search', q); S.pl = { q, list: (r && r.list) || [] }; return render(); }
+    case 'plGive': case 'plTake': {
+      const p = S.pl && S.pl.list[Number(el.dataset.n)]; if (!p) return;
+      const n = Math.floor(Number(val('pa' + el.dataset.n)) || 0); if (n < 1) return toast('Montant invalide', 'bad');
+      const amount = a === 'plTake' ? -n : n;
+      if (!await askConfirm(`${a === 'plTake' ? 'Retirer' : 'Donner'} ${fmt(n)} coins à ${p.name} ?`)) return;
+      const r = await coreAdmin('coins', p.online && p.id != null ? Number(p.id) : p.identifier, amount);
+      if (r && r.ok) { p.points = r.points; toast(`${a === 'plTake' ? 'Retiré' : 'Donné'} : ${fmt(n)} coins (solde ${fmt(r.points)})`, 'ok'); return render(); }
+      return toast((r && r.error) || 'Erreur', 'bad');
+    }
     case 'giveAll': {
       const n = Math.floor(Number(val('ga')) || 0);
       if (n < 1) return toast('Montant invalide', 'bad');
-      if (!confirm(`Donner ${fmt(n)} coins à TOUS les joueurs en ligne ?`)) return;
+      if (!await askConfirm(`Donner ${fmt(n)} coins à TOUS les joueurs en ligne ?`)) return;
       const r = await rpc('admin:giveAll', { amount: n, reason: val('gr') });
       if (r && r.ok) { toast(`${fmt(n)} coins envoyés à ${r.given} joueur(s)`, 'ok'); return loadView('admin'); }
       return toast((r && r.error) || 'Erreur', 'bad');

@@ -188,3 +188,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .dbadge { color: var(--acc) !important; font-weight: 700; }
 .card .dtag { position: absolute; right: 12px; top: 14px; z-index: 3; padding: 4px 10px; border-radius: 999px; background: var(--acc); color: #fff; font-size: 12px; font-weight: 800; box-shadow: 0 6px 18px rgba(var(--acc-rgb), .4); }
 .pill s.old, s.old { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 6px; }
+
+.cfbox { background: #1b1c22; border: 1px solid var(--line); border-radius: 18px; padding: 24px; width: min(420px, 90vw); box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.cfbox h2 { font-size: 20px; margin-bottom: 8px; } .cfbox p { color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
+.cfb { display: flex; justify-content: flex-end; gap: 10px; }
+.tbl input.amt { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--text); border-radius: 9px; padding: 7px 9px; font: inherit; }
