@@ -45,7 +45,42 @@ end)
 
 RegisterNUICallback('close', function(_, cb) Close() cb({}) end)
 
+-- Appels serveur autorisés (historique, parrainage, codes, administration)
+local Remote = { history = true, overview = true, redeem = true, previewCode = true,
+    ['admin:data'] = true, ['admin:saveCode'] = true, ['admin:toggleCode'] = true, ['admin:deleteCode'] = true, ['admin:saveSettings'] = true }
+
+RegisterNUICallback('rpc', function(body, cb)
+    local name, args = body.name, body.args or {}
+    if not Remote[name] then return cb({ ok = false, error = 'Appel inconnu' }) end
+    ESX.TriggerServerCallback('pickax_boutique:' .. name, function(res) cb(res or { ok = false, error = 'Aucune réponse' }) end, table.unpack(args))
+end)
+
+-- Paiement du panier : le serveur contrôle les prix, la remise et le solde ; le client livre ensuite les articles un par un
+local paying = false
+RegisterNUICallback('checkout', function(body, cb)
+    if paying then return cb({ ok = false, error = 'Un paiement est déjà en cours' }) end
+    ESX.TriggerServerCallback('pickax_boutique:prepare', function(res)
+        if not res or not res.ok then return cb(res or { ok = false, error = 'Paiement impossible' }) end
+        paying = true
+        cb({ ok = true, count = #res.queue, final = res.final, total = res.total, pct = res.pct })
+        CreateThread(function()
+            local failed = 0
+            for i, it in ipairs(res.queue) do
+                SendNUIMessage({ action = 'checkoutProgress', i = i, n = #res.queue, name = it.name })
+                local ok, r = pcall(function() return exports['pickax_core']:BoutiqueBuy(it.cat, it.idx, true) end)
+                if not ok or not r or not r.ok then failed = failed + 1 end
+                Wait(Config.CheckoutSpacing or 3000)
+            end
+            TriggerServerEvent('pickax_boutique:done')
+            paying = false
+            SendNUIMessage({ action = 'checkoutDone', failed = failed })
+        end)
+    end, body.cart, body.code)
+end)
+
+-- achat direct d'un seul article = panier d'un article
 RegisterNUICallback('buy', function(body, cb)
+    if paying then return cb({ ok = false, error = 'Un paiement est déjà en cours' }) end
     local ok, res = pcall(function() return exports['pickax_core']:BoutiqueBuy(tostring(body.cat), tonumber(body.idx)) end)
     cb(ok and res or { ok = false, error = 'Achat impossible' })
 end)

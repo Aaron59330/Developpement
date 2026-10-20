@@ -6,7 +6,8 @@ name 'pickax_boutique'
 description 'Interface moderne de la boutique à coins (véhicules, motos, armes, caisses, packs, entreprises) avec images ; la logique d\'achat reste celle de pickax_core'
 version '1.0.0'
 
-shared_script 'pk_theme.lua'
+shared_scripts { 'pk_theme.lua', 'config.lua' }
+server_scripts { '@oxmysql/lib/MySQL.lua', 'server.lua' }
 client_script 'client.lua'
 
 ui_page 'html/index.html'
@@ -19,4 +20,4 @@ files {
     'images/**/*',
 }
 
-dependencies { 'es_extended', 'pickax_core' }
+dependencies { 'es_extended', 'oxmysql', 'pickax_core' }

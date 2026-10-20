@@ -179,12 +179,31 @@ BoutiqueFunction.SaveData = function(id, xPlayer)
 	TriggerClientEvent("CorePickax:ReceiveClientSideBoutique", id, PlayerCacheBoutique[xPlayer])
 end
 
+-- Remise temporaire (code promo de la nouvelle boutique) : pourcentage appliqué aux `left` prochains achats, valable jusqu'à `untilT`.
+-- Définie uniquement par la ressource pickax_boutique (export SetBoutiqueCoupon) après validation du code côté serveur.
+local BoutiqueCoupons = {}
+local BoutiqueCurrentLabel = nil
+
+local function BoutiqueDiscounted(identifier, price)
+    local c = BoutiqueCoupons[identifier]
+    price = tonumber(price) or 0
+    if c and c.left > 0 and os.time() <= c.untilT and price > 0 and price < 1000000000 then
+        return math.max(0, math.floor(price * (100 - c.pct) / 100 + 0.5))
+    end
+    return price
+end
+
 BoutiqueFunction.removePointsToPlayer = function(id, price)
     local xPlayer = ESX.GetPlayerFromId(id)
-    TriggerClientEvent(Config.Trigger.TriggerNotification, id, (ConfigBoutique.Notification["Ubuy"]):format(tostring(ESX.Math.GroupDigits(price))))
-    PlayerCacheBoutique[xPlayer.identifier].points = PlayerCacheBoutique[xPlayer.identifier].points - price
+    local full = tonumber(price) or 0
+    local paid = BoutiqueDiscounted(xPlayer.identifier, full)
+    local c = BoutiqueCoupons[xPlayer.identifier]
+    if paid ~= full and c then c.left = c.left - 1 end
+    TriggerClientEvent(Config.Trigger.TriggerNotification, id, (ConfigBoutique.Notification["Ubuy"]):format(tostring(ESX.Math.GroupDigits(paid))))
+    PlayerCacheBoutique[xPlayer.identifier].points = PlayerCacheBoutique[xPlayer.identifier].points - paid
 
     BoutiqueFunction.SaveData(id, xPlayer.identifier)
+    TriggerEvent('CorePickax:Boutique:Paid', id, paid, full, BoutiqueCurrentLabel)
 end
 
 BoutiqueFunction.addPointsToPlayerReward = function(source, amount)
@@ -229,7 +248,8 @@ AddEventHandler("CorePickax:Boutique:Add", function(table)
         if table.Interaction == "GiveVehPack" or table.Interaction == "GiveVehCaisse" then
             table.price = 79329539235472341523467
         end
-        if tonumber(table.price) == 79329539235472341523467 or PlayerCacheBoutique[xPlayer.identifier].points >= tonumber(table.price) then
+        BoutiqueCurrentLabel = table.name or table.veh or table.nameitem or table.Nameweapon or table.item
+        if tonumber(table.price) == 79329539235472341523467 or PlayerCacheBoutique[xPlayer.identifier].points >= BoutiqueDiscounted(xPlayer.identifier, tonumber(table.price) or 0) then
             if tonumber(table.price) >= 0 then
                 if table.Interaction == "weapon" then
                     if tonumber(PriceConfigBoutique.weapon[table.id].price) == tonumber(table.price) then
@@ -782,4 +802,51 @@ ESX.RegisterServerCallback('CorePickax:boutique:admin:coins', function(source, c
             cb(true, new)
         end)
     end)
+end)
+
+
+-- ═══════════════════════════ Exports pour pickax_boutique (panier, codes, historique) ═══════════════════════════
+local BoutiqueLists = function()
+    return { vehicle = ConfigBoutique.vehicle, moto = ConfigBoutique.Motos, other = ConfigBoutique.Autres, weapon = ConfigBoutique.weapon,
+        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, business = ConfigBoutique.Entreprise }
+end
+
+-- Prix / nom d'un article du catalogue (jamais fourni par le client)
+exports('BoutiqueItem', function(cat, idx)
+    local l = BoutiqueLists()[cat]
+    local v = l and l[tonumber(idx)]
+    if not v or v.Separator then return nil end
+    return { name = v.name, price = tonumber(v.price) or 0 }
+end)
+
+exports('BoutiquePointsOf', function(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local c = xPlayer and PlayerCacheBoutique[xPlayer.identifier]
+    return c and tonumber(c.points) or 0
+end)
+
+exports('BoutiqueIsAdmin', function(src) return BoutiqueIsAdmin(src) == true end)
+
+exports('SetBoutiqueCoupon', function(src, pct, uses, seconds)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return false end
+    pct = tonumber(pct) or 0
+    if pct <= 0 or pct > 100 or (tonumber(uses) or 0) <= 0 then
+        BoutiqueCoupons[xPlayer.identifier] = nil
+    else
+        BoutiqueCoupons[xPlayer.identifier] = { pct = pct, left = math.floor(uses), untilT = os.time() + (tonumber(seconds) or 600) }
+    end
+    return true
+end)
+
+-- Ajoute des coins à un joueur (en ligne ou non) via le cache de la boutique : le solde reste cohérent avec la base
+exports('BoutiqueGrantCoins', function(identifier, amount)
+    amount = math.floor(tonumber(amount) or 0)
+    local c = identifier and PlayerCacheBoutique[identifier]
+    if not c or amount == 0 then return false end
+    c.points = (tonumber(c.points) or 0) + amount
+    if c.boutique_id and PlayerCacheBoutique2[c.boutique_id] then PlayerCacheBoutique2[c.boutique_id].points = c.points end
+    MySQL.Async.execute('UPDATE `users` SET `points`=@points WHERE identifier=@identifier', { ['@identifier'] = identifier, ['@points'] = c.points })
+    if c.SourceID and GetPlayerName(c.SourceID) then TriggerClientEvent("CorePickax:ReceiveClientSideBoutique", c.SourceID, c) end
+    return true
 end)

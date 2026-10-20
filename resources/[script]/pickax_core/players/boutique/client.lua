@@ -1562,7 +1562,7 @@ end
 
 exports('BoutiqueCatalog', function()
     return {
-        points = tonumber(PlayerData.points) or 0, staff = PlayerData.Staff == true, link = ConfigBoutique.LinkShop,
+        points = tonumber(PlayerData.points) or 0, staff = PlayerData.Staff == true, link = ConfigBoutique.LinkShop, boutiqueId = PlayerData.boutique_id,
         vehicle = conv(ConfigBoutique.vehicle), moto = conv(ConfigBoutique.Motos), other = conv(ConfigBoutique.Autres), weapon = conv(ConfigBoutique.weapon),
         crate = conv(ConfigBoutique.caisse), pack = conv(ConfigBoutique.pack, 'pack'), business = conv(ConfigBoutique.Entreprise),
     }
@@ -1574,14 +1574,14 @@ exports('BoutiqueOpenClassic', function()
     if MenuStore == false then OpenMenuBoutique() end
 end)
 
-exports('BoutiqueBuy', function(cat, idx)
+exports('BoutiqueBuy', function(cat, idx, skipCheck)
     local lists = { vehicle = ConfigBoutique.vehicle, moto = ConfigBoutique.Motos, other = ConfigBoutique.Autres, weapon = ConfigBoutique.weapon,
         crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, business = ConfigBoutique.Entreprise }
     local k = tonumber(idx)
     local v = lists[cat] and k and lists[cat][k]
     if not v or v.Separator then return { ok = false, error = 'Article introuvable' } end
     local price = tonumber(v.price) or 0
-    if (tonumber(PlayerData.points) or 0) < price then return { ok = false, error = 'Tu n\'as pas assez de coins' } end
+    if not skipCheck and (tonumber(PlayerData.points) or 0) < price then return { ok = false, error = 'Tu n\'as pas assez de coins' } end      -- skipCheck : panier déjà contrôlé (remise) par le serveur
     CreateThread(function()
         if cat == 'vehicle' then vehicle_give(v.model, k, v.price)
         elseif cat == 'moto' then vehicleMotoGive(v.model, k, v.price)
