@@ -17,3 +17,15 @@ html, body { height: 100%; background: transparent; overflow: hidden; font-famil
 .deg { margin-top: 2px; font-size: 15px; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
 .deg span { color: var(--acc); margin-left: 1px; }
 .where { margin-top: 1px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.82); text-shadow: 0 2px 8px rgba(0,0,0,.9); letter-spacing: .03em; }
+
+/* Version compacte : petite boussole à droite des jauges faim / soif (position réglable dans config.lua) */
+body.compact #compass { top: auto; left: var(--cl, 19.6vw); bottom: var(--cb, 3.4vh); transform: none; width: var(--cw, 210px); animation: inc .25s ease-out; }
+@keyframes inc { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+body.compact .strip { height: 28px; border-radius: 10px; }
+body.compact .t span { top: 5px; font-size: 9.5px; }
+body.compact .t.c span { top: 3px; font-size: 12.5px; }
+body.compact .t i { bottom: 3px; height: 5px; }
+body.compact .t.m i { height: 8px; }
+body.compact .caret { border-left-width: 5px; border-right-width: 5px; border-top-width: 6px; margin-top: 1px; }
+body.compact .deg { font-size: 12px; margin-top: 0; }
+body.compact .where { display: none; }

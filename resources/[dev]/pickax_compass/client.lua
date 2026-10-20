@@ -17,8 +17,15 @@ exports('SetEnabled', function(v)
 end)
 RegisterCommand('boussole', function() exports[GetCurrentResourceName()]:SetEnabled(not enabled) end, false)
 
+local function sendCfg()
+    SendNUIMessage({ a = 'cfg', layout = Config.Layout, left = Config.Compact.left, bottom = Config.Compact.bottom, width = Config.Compact.width, street = Config.ShowStreet })
+end
 local function show(v)
-    if v ~= visible then visible = v SendNUIMessage({ a = 'show', v = v }) end
+    if v ~= visible then
+        visible = v
+        if v then sendCfg() end
+        SendNUIMessage({ a = 'show', v = v })
+    end
 end
 
 CreateThread(function()
