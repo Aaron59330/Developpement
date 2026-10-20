@@ -260,6 +260,16 @@ function countTo(el, to) {
 }
 const val = id => (document.getElementById(id) || {}).value;
 
+// couleur principale envoyée par le jeu (pickax_core/config.lua → AccentColor) : fonctionne même si theme.js n'a pas pu être chargé
+function applyAccent(hex) {
+  if (!/^#[0-9a-f]{6}$/i.test(String(hex || ''))) return;
+  const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const mix = (to, t) => '#' + rgb.map(v => { const n = Math.round(v + (to - v) * t); return (n < 16 ? '0' : '') + n.toString(16); }).join('');
+  const st = document.documentElement.style;
+  st.setProperty('--pk-accent', hex); st.setProperty('--pk-accent-rgb', rgb.join(','));
+  st.setProperty('--pk-accent-light', mix(255, 0.14)); st.setProperty('--pk-accent-dark', mix(0, 0.28));
+}
+
 async function loadView(v) {
   if (v === 'history') { S.history = null; render(); const r = await rpc('history'); S.history = (r && r.list) || []; }
   else if (v === 'codes') { S.overview = null; render(); const r = await rpc('overview'); S.overview = r && r.ok ? r : { referral: { enabled: false } }; }
@@ -338,7 +348,7 @@ document.addEventListener('input', e => {
 });
 window.addEventListener('message', e => {
   const d = e.data || {};
-  if (d.action === 'open') { S.data = d.data; S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
+  if (d.action === 'open') { applyAccent(d.data.accent); S.data = d.data; S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }

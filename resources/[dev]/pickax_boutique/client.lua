@@ -30,6 +30,7 @@ local function Open()
     points = tonumber(cat.points) or points
     SetNuiFocus(true, true)
     TriggerEvent('pickax:inventory', true)        -- masque les HUD pendant la boutique
+    cat.accent = PickaxTheme and PickaxTheme.hex or nil          -- couleur du serveur (pickax_core/config.lua → AccentColor)
     SendNUIMessage({ action = 'open', data = cat })
 end
 
