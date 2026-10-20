@@ -35,6 +35,9 @@ var LINKS = {
 		requestAnimationFrame(tick);
 	})();
 
+	var SV = window.PICKAX_SERVER || {};
+	if (!LINKS.discord && SV.discord) LINKS.discord = 'https://' + String(SV.discord).replace(/^https?:\/\//, '');   // Discord du config du core
+
 	// Boutons de liens
 	Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (el) {
 		el.addEventListener('click', function () {

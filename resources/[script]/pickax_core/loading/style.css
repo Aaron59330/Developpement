@@ -72,3 +72,26 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 .tab { display: inline-flex; align-items: center; gap: 9px; }
 .tab svg { width: 15px; height: 15px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ===== v2 : identité, boutons icônes, barre de progression ===== */
+/* boutons : pastille d'icône + libellé */
+.tabs { gap: 12px; }
+.tab { height: 50px; padding: 0 20px 0 8px; gap: 12px; border-radius: 16px; font-size: 12.5px; background: rgba(22,23,28,.82); border: 1px solid var(--line); }
+.tab svg { box-sizing: content-box; width: 18px; height: 18px; padding: 8px; border-radius: 11px; background: rgba(var(--accent-rgb), .16); stroke: var(--accent); transition: background .22s var(--ease), stroke .22s var(--ease), transform .22s var(--ease); }
+.tab:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 14px 34px rgba(0,0,0,.4), 0 0 22px rgba(var(--accent-rgb), .3); }
+.tab:hover svg { background: var(--accent); stroke: #fff; transform: rotate(-6deg) scale(1.06); }
+.volume-control { height: 50px; padding: 0 18px 0 8px; border-radius: 16px; gap: 14px; background: rgba(22,23,28,.82); }
+.volume-icon { width: 34px; height: 34px; border-radius: 11px; align-items: center; justify-content: center; background: rgba(var(--accent-rgb), .16); color: var(--accent); }
+.volume-icon:hover { background: var(--accent); color: #fff; transform: scale(1.06); }
+.volume-icon svg { width: 18px; height: 18px; }
+.volume-control kbd { font: 700 10px 'Montserrat', sans-serif; letter-spacing: .08em; color: var(--text-dim); padding: 4px 7px; border-radius: 7px; border: 1px solid var(--line); background: rgba(255,255,255,.04); }
+
+/* barre de progression */
+.loading-container { bottom: 64px; gap: 10px; }
+.loading-status { font-size: 12px; display: inline-flex; align-items: center; gap: 10px; }
+.loading-status::before { content: ''; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(var(--accent-rgb), .25); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-percent { font-size: 22px; font-weight: 800; line-height: 1; }
+.progress-percent span { font-variant-numeric: tabular-nums; }
+.loading-bar-container { height: 12px; padding: 2px; background: rgba(22,23,28,.85); }
+.loading-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(var(--accent-rgb), .65), var(--accent)); box-shadow: 0 0 18px rgba(var(--accent-rgb), .6); }
