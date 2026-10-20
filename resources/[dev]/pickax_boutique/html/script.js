@@ -6,13 +6,13 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const fmt = n => Number(n || 0).toLocaleString('fr-FR');
 
 const IC = {
-  car: '<path d="M5 16l1.6-6h10.8L19 16"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="19" r="1.4"/><circle cx="16.5" cy="19" r="1.4"/>',
-  moto: '<circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M6 16l4-7h4l4 7M10 9l-1-3H7"/>',
-  plane: '<path d="M21 4l-6 17-3-7-7-3z"/><path d="M12 14l9-10"/>',
-  gun: '<path d="M3 9h13l2 2h3v3h-6l-1 4H8l1-4H3z"/>',
-  box: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
-  gift: '<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18"/><path d="M12 9c-3 0-5-1-5-3a2 2 0 0 1 3.5-1.3L12 9zM12 9c3 0 5-1 5-3a2 2 0 0 0-3.5-1.3L12 9z"/>',
-  brief: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+  car: '<path d="M4 15.5V13l2-5.2A2 2 0 0 1 7.9 6.5h8.2A2 2 0 0 1 18 7.8L20 13v2.5"/><path d="M3.5 15.5h17V18a1 1 0 0 1-1 1H18a1 1 0 0 1-1-1v-.5H7V18a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1z"/><path d="M6 13h12M7.5 16h.01M16.5 16h.01"/>',
+  moto: '<circle cx="5.5" cy="16.5" r="3.2"/><circle cx="18.5" cy="16.5" r="3.2"/><path d="M5.5 16.5L9 9h5l2 3.5M14 9l1.5-2.5H18M9 9l-1.5-2H5"/><path d="M12 16.5l2-4h3"/>',
+  plane: '<path d="M2 14l7-2 5-8h2l-2 8 6 1.5a1.5 1.5 0 0 1 0 3L14 18l2 3h-2l-4-3-8 .5z"/>',
+  gun: '<path d="M3 8.5h13.5l1.5 2H21v3.5h-5.2l-.9 5H9.5l1-5H5a2 2 0 0 1-2-2z"/><path d="M7 11.5h4"/>',
+  box: '<path d="M3 7.5l9-4.5 9 4.5v9l-9 4.5-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9M7.5 5.2l9 4.5"/>',
+  gift: '<rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13.5h17"/><path d="M12 9C9.5 9 7.2 8 7.2 6A2.2 2.2 0 0 1 11 4.6L12 9zM12 9c2.5 0 4.8-1 4.8-3A2.2 2.2 0 0 0 13 4.6L12 9z"/>',
+  brief: '<rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8.5 7.5V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8v1.7"/><path d="M3 13h18M11 13h2v2h-2z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   bag: '<path d="M6 8h12l1 12H5z"/><path d="M9 8a3 3 0 0 1 6 0"/>', link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
@@ -21,15 +21,15 @@ const IC = {
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${IC[n] || IC.box}</svg>`;
 
 const CATS = [
-  { id: 'vehicle', label: 'Véhicules', sub: 'Voitures', icon: 'car', kind: 'Véhicule' },
-  { id: 'moto', label: 'Motos', sub: 'Deux-roues', icon: 'moto', kind: 'Moto' },
-  { id: 'other', label: 'Avions & bateaux', sub: 'Air et mer', icon: 'plane', kind: 'Véhicule' },
-  { id: 'weapon', label: 'Armes', sub: 'Armes permanentes', icon: 'gun', kind: 'Arme' },
-  { id: 'crate', label: 'Caisses', sub: 'Caisses surprise', icon: 'box', kind: 'Caisse' },
-  { id: 'pack', label: 'Packs', sub: 'Packs de départ et bonus', icon: 'gift', kind: 'Pack' },
-  { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises', icon: 'brief', kind: 'Entreprise' },
+  { id: 'vehicle', label: 'Véhicules', sub: 'Voitures et SUV, livrés dans ton garage', icon: 'car', kind: 'Véhicule', color: 'var(--pk-accent,#00a4ff)' },
+  { id: 'moto', label: 'Motos', sub: 'Deux-roues, sportives et tout-terrain', icon: 'moto', kind: 'Moto', color: '#fb923c' },
+  { id: 'other', label: 'Air & mer', sub: 'Avions, hélicoptères et bateaux', icon: 'plane', kind: 'Véhicule', color: '#38bdf8' },
+  { id: 'weapon', label: 'Armes', sub: 'Armes permanentes avec munitions', icon: 'gun', kind: 'Arme', color: '#f87171' },
+  { id: 'crate', label: 'Caisses', sub: 'Caisses surprise : véhicules, armes et argent', icon: 'box', kind: 'Caisse', color: '#fbbf24' },
+  { id: 'pack', label: 'Packs', sub: 'Packs de départ et bonus', icon: 'gift', kind: 'Pack', color: '#a78bfa' },
+  { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: '#34d399' },
 ];
-const S = { data: null, cat: 'vehicle', q: '', points: 0 };
+const S = { data: null, cat: 'vehicle', q: '', points: 0, sort: 'price' };
 
 /* ───── images : fichier du dossier images → docs.fivem.net / ox_inventory → illustration générée ───── */
 function srcsFor(cat, it) {
@@ -72,7 +72,12 @@ const picHtml = (cat, it, tag) => {
 
 /* ───── rendu ───── */
 const list = () => (S.data && S.data[S.cat]) || [];
-const filtered = () => { const q = S.q.trim().toLowerCase(); return list().filter(it => !q || String(it.name).toLowerCase().includes(q) || String(it.model || '').toLowerCase().includes(q)); };
+const filtered = () => {
+  const q = S.q.trim().toLowerCase();
+  const l = list().filter(it => !q || String(it.name).toLowerCase().includes(q) || String(it.model || '').toLowerCase().includes(q));
+  if (S.sort === 'priceDesc') l.sort((a, b) => b.price - a.price); else if (S.sort === 'name') l.sort((a, b) => String(a.name).localeCompare(String(b.name), 'fr')); else if (S.sort === 'price') l.sort((a, b) => a.price - b.price);
+  return l;
+};
 const cat = () => CATS.find(c => c.id === S.cat) || CATS[0];
 
 function tagOf(it) {
@@ -92,14 +97,18 @@ function render() {
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
   if (!cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
   const c = cat(), items = filtered();
+  const sorts = [['price', 'Prix croissant'], ['priceDesc', 'Prix décroissant'], ['name', 'Nom A-Z']];
+  $root.style.setProperty('--cc', c.color);
   $root.innerHTML = `<aside class="side"><div class="brand"><div class="mark">${ic('bag', 20)}</div><div><b>Boutique</b><span>Paiement en coins</span></div></div>
-    <nav class="nav">${cats.map(x => `<button class="${x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}">${ic(x.icon)}<span>${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}</nav>
-    <div class="foot">${S.data.link ? `<button data-a="link">${ic('link')} Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic">${ic('gear')} Administration</button>` : ''}</div></aside>
-    <section class="main"><div class="head"><div><h1>${esc(c.label)}</h1><p>${esc(c.sub)} · ${items.length} article(s)</p></div><div class="sp"></div>
-      <label class="search">${ic('search', 16)}<input id="q" placeholder="Rechercher…" value="${esc(S.q)}"></label>
-      <div class="coins"><span class="c">C</span><span id="pts">${fmt(S.points)}</span><small>coins</small></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div>
+    <div class="cap">Catégories</div>
+    <nav class="nav">${cats.map(x => `<button class="${x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb">${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}</nav>
+    <div class="foot">${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Administration</button>` : ''}</div></aside>
+    <section class="main"><div class="hero"><div class="wm">${ic(c.icon)}</div><div class="ht"><div class="hi">${ic(c.icon, 26)}</div><div><h1>${esc(c.label)}</h1><p>${esc(c.sub)}</p></div></div><div class="sp"></div>
+      <div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div>
+      <div class="tools"><label class="search">${ic('search', 16)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}"></label>
+        <div class="sort">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</div><div class="sp"></div><span class="count">${items.length} article${items.length > 1 ? 's' : ''}</span></div>
       <div class="scroll"><div class="grid">${items.length ? items.map((it, n) => `<div class="card" data-a="open" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(S.cat, it, tagOf(it))}
-        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it))}</div><div class="price"><span class="pill ${S.points < it.price ? 'short' : ''}"><i></i>${fmt(it.price)}</span><span class="go">${ic('arrow', 16)}</span></div></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article.</div>'}</div></div></section>`;
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it))}</div><div class="price"><span class="pill ${S.points < it.price ? 'short' : ''}"><i></i>${fmt(it.price)}</span><span class="see">Voir ${ic('arrow', 14)}</span></div></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div></section>`;
 }
 
 function sheet(it, confirm) {
@@ -130,6 +139,7 @@ document.addEventListener('click', async e => {
   const a = el.dataset.a;
   if (a === 'close') return post('close');
   if (a === 'cat') { S.cat = el.dataset.id; S.q = ''; return render(); }
+  if (a === 'sort') { S.sort = el.dataset.v; return render(); }
   if (a === 'open') { const it = itemOf(el.dataset.i); if (it) sheet(it, false); return; }
   if (a === 'closeSheet') return closeSheet();
   if (a === 'ask') { const it = itemOf(el.dataset.i); if (it) sheet(it, true); return; }
