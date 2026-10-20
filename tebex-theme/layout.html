@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Boutique{% endblock %} · {{ theme.server }}</title>
+  <link rel="stylesheet" href="{{ theme.asset('style.css') }}">
+  <style>:root { --acc: {{ theme.accent|default('#00a4ff') }}; }</style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap bar">
+      <a class="brand" href="{{ website.url }}">
+        <span class="mark"><img src="{{ theme.logo|default(theme.asset('logo.png')) }}" alt=""></span>
+        <span class="bt"><b>{{ theme.server }}</b><small>Boutique officielle</small></span>
+      </a>
+      <nav class="nav">
+        <a href="{{ website.url }}" class="{{ page == 'index' ? 'on' : '' }}">Accueil</a>
+        {% for c in categories %}<a href="{{ c.url }}" class="{{ category is defined and category.id == c.id ? 'on' : '' }}">{{ c.name }}</a>{% endfor %}
+      </nav>
+      <div class="sp"></div>
+      {% if theme.discord %}<a class="ghost" href="{{ theme.discord }}" target="_blank" rel="noopener">Discord</a>{% endif %}
+      <a class="cart" href="{{ basket_url }}">Panier <span class="n">{{ basket.count|default(0) }}</span></a>
+    </div>
+  </header>
+
+  <main class="wrap">{% block content %}{% endblock %}</main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div><b>{{ theme.server }}</b><span>{{ theme.tagline }}</span></div>
+      <div class="how"><span>1 · Choisis un pack</span><span>2 · Paie en sécurité</span><span>3 · Reçois tes coins en jeu</span></div>
+      <small>Paiement sécurisé par Tebex · Les achats sont des biens virtuels non remboursables.</small>
+    </div>
+  </footer>
+</body>
+</html>

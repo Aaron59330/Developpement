@@ -9,6 +9,7 @@ exports('GetGlobalStyle', function()
         hex = Config.AccentColor,
         name = Config.ServerName, short = Config.ServerShortName, tagline = Config.ServerTagline, discord = Config.ServerDiscord, logo = Config.ServerLogo,
         invColor = Config.InventoryColor,
+        tebex = Config.TebexStore,
         marker = gm.Type and {
             type = tonumber(gm.Type) or 25,
             scale = { x = tonumber(s.x) or 0.9, y = tonumber(s.y) or 0.9, z = tonumber(s.z) or 0.6 },

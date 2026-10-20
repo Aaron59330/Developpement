@@ -12,3 +12,12 @@ Config.Referral = {
     FilleulCoins = 100,              -- coins offerts au joueur qui saisit le code d'un parrain
     ParrainCoins = 200,              -- coins offerts au parrain
 }
+
+-- Tebex : la boutique web (dossier tebex-theme/) crédite des coins en jeu via une commande console.
+-- Dans Tebex, sur chaque pack de coins : Commande de jeu →   pickax_tebex {id} 500 {transaction}
+-- ({id} = ID serveur du joueur en ligne ; 500 = coins ; {transaction} = numéro de commande, évite les doublons)
+-- Alternative avec l'ID boutique du joueur (visible dans le menu boutique) :   pickax_tebex b{id boutique} 500 {transaction}
+Config.Tebex = {
+    Command    = 'pickax_tebex',
+    BonusPct   = 0,                  -- % de coins offerts en plus sur tous les achats (ex : 10 pour une promo +10 %)
+}

@@ -30,6 +30,8 @@ local function Open()
     points = tonumber(cat.points) or points
     SetNuiFocus(true, true)
     TriggerEvent('pickax:inventory', true)        -- masque les HUD pendant la boutique
+    local okS, st = pcall(function() return exports['pickax_core']:GetGlobalStyle() end)
+    if okS and type(st) == 'table' and type(st.tebex) == 'string' and st.tebex ~= '' then cat.link = st.tebex end   -- TebexStore (pickax_core/config.lua)
     cat.accent = PickaxTheme and PickaxTheme.hex or nil          -- couleur du serveur (pickax_core/config.lua → AccentColor)
     SendNUIMessage({ action = 'open', data = cat })
 end

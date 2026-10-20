@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Panier{% endblock %}
+{% block content %}
+<section class="sec">
+  <div class="sh"><h2>Mon panier</h2></div>
+  <div class="cartbox">
+    <div class="lines">
+      {% for l in basket.items %}
+      <div class="line">
+        <span class="coin sm">C</span>
+        <div class="lb"><b>{{ l.name }}</b><small>Quantité : {{ l.quantity }}</small></div>
+        <b class="lp">{{ l.price }}</b>
+        <a class="rm" href="{{ l.remove_url }}" title="Retirer">✕</a>
+      </div>
+      {% else %}<p class="empty">Ton panier est vide.</p>{% endfor %}
+    </div>
+    <aside class="summary">
+      <h3>Récapitulatif</h3>
+      <div class="sr"><span>Sous-total</span><b>{{ basket.subtotal }}</b></div>
+      <form class="coupon" method="post" action="{{ basket.coupon_url }}"><input name="coupon" placeholder="Code promo"><button>Appliquer</button></form>
+      <div class="sr tot"><span>Total</span><b>{{ basket.total }}</b></div>
+      <a class="btn full" href="{{ basket.checkout_url }}">Payer</a>
+      <small>Ton pseudo / ID de jeu est demandé lors du paiement pour livrer tes coins.</small>
+    </aside>
+  </div>
+</section>
+{% endblock %}

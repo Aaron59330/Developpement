@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block title %}{{ package.name }}{% endblock %}
+{% block content %}
+<section class="detail">
+  <div class="pic big">{% if package.image %}<img src="{{ package.image }}" alt="">{% else %}<span class="coin">C</span>{% endif %}</div>
+  <div class="info">
+    <a class="back" href="{{ category.url }}">← {{ category.name }}</a>
+    <h1>{{ package.name }}</h1>
+    <div class="price lg">{% if package.sale_active %}<s>{{ package.original_price }}</s>{% endif %}<b>{{ package.price }}</b></div>
+    <div class="desc">{{ package.description|raw }}</div>
+    <div class="cta"><a class="btn" href="{{ package.add_url }}">Ajouter au panier</a></div>
+    <ul class="perks"><li>Livraison automatique en jeu</li><li>Paiement sécurisé Tebex</li><li>Support sur Discord</li></ul>
+  </div>
+</section>
+{% endblock %}

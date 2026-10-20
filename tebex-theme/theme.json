@@ -1,0 +1,15 @@
+{
+  "name": "Pickax Store",
+  "description": "Thème Tebex aux couleurs du serveur (même style que la boutique en jeu)",
+  "version": "1.0.0",
+  "settings": [
+    { "key": "accent",   "label": "Couleur principale (#RRGGBB)", "type": "text", "default": "#00a4ff" },
+    { "key": "server",   "label": "Nom du serveur",               "type": "text", "default": "Bluebay Roleplay" },
+    { "key": "tagline",  "label": "Slogan",                       "type": "text", "default": "RP sérieux · Free-Access" },
+    { "key": "logo",     "label": "Lien du logo (laisser vide = logo du thème)", "type": "text", "default": "" },
+    { "key": "discord",  "label": "Lien Discord",                 "type": "text", "default": "https://discord.gg/bluebayrp" },
+    { "key": "connect",  "label": "Adresse de connexion (cfx.re/join/xxxx)", "type": "text", "default": "cfx.re/join/xxxxxx" },
+    { "key": "hero_title", "label": "Titre de l'accueil",         "type": "text", "default": "Soutiens le serveur, profite en jeu" },
+    { "key": "hero_text",  "label": "Texte de l'accueil",         "type": "text", "default": "Achète des coins, utilisables dans la boutique en jeu : véhicules, armes, caisses, packs et entreprises. Livraison instantanée." }
+  ]
+}

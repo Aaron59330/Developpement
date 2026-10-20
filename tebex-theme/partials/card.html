@@ -1,0 +1,11 @@
+<article class="card">
+  <a class="pic" href="{{ p.url }}">{% if p.image %}<img src="{{ p.image }}" alt="">{% else %}<span class="coin">C</span>{% endif %}</a>
+  <div class="body">
+    <a class="nm" href="{{ p.url }}">{{ p.name }}</a>
+    {% if p.short_description %}<small>{{ p.short_description }}</small>{% endif %}
+    <div class="row">
+      <div class="price">{% if p.sale_active %}<s>{{ p.original_price }}</s>{% endif %}<b>{{ p.price }}</b></div>
+      <a class="add" href="{{ p.add_url }}">Ajouter</a>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block content %}
+<section class="sec">
+  <div class="sh"><h2>{{ category.name }}</h2><span class="cnt">{{ category.packages|length }} article{{ category.packages|length > 1 ? 's' : '' }}</span></div>
+  {% if category.description %}<div class="desc">{{ category.description|raw }}</div>{% endif %}
+  <div class="grid">
+    {% for p in category.packages %}{% include "partials/card.html" %}{% else %}<p class="empty">Aucun article pour le moment.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

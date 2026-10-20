@@ -264,3 +264,44 @@ ESX.RegisterServerCallback('pickax_boutique:admin:saveSettings', function(src, c
     MySQL.update.await("INSERT INTO boutique_settings (name, value) VALUES ('referral', ?) ON DUPLICATE KEY UPDATE value = VALUES(value)", { json.encode(Settings.referral) })
     cb({ ok = true })
 end)
+
+
+-- ─────────────────────────────── Tebex ───────────────────────────────
+-- pickax_tebex <cible> <coins> [transaction]   (console / Tebex uniquement)
+--   cible : ID serveur d'un joueur en ligne (Tebex {id})  ou  b<ID boutique> (joueur en ligne ou non)
+CreateThread(function()
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS boutique_tebex (
+        transaction_id VARCHAR(64) NOT NULL, identifier VARCHAR(80) NOT NULL, coins INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (transaction_id, identifier, coins)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+
+RegisterCommand((Config.Tebex and Config.Tebex.Command) or 'pickax_tebex', function(src, args)
+    if src ~= 0 then return end                                        -- jamais utilisable par un joueur
+    local target, coins, tx = tostring(args[1] or ''), math.floor(tonumber(args[2]) or 0), args[3] and esc(args[3], 64) or nil
+    if target == '' or coins <= 0 or coins > 10000000 then print('^1[pickax_boutique] Tebex : usage  pickax_tebex <id|bID> <coins> [transaction]^7') return end
+
+    local identifier, name, online
+    local bid = target:match('^[bB](%d+)$')
+    if bid then
+        local row = MySQL.single.await('SELECT identifier FROM users WHERE boutique_id = ?', { tonumber(bid) })
+        identifier = row and row.identifier
+    else
+        local xPlayer = ESX.GetPlayerFromId(tonumber(target))
+        if xPlayer then identifier, name, online = xPlayer.identifier, nameOf(xPlayer), xPlayer.source end
+    end
+    if not identifier then print(('^1[pickax_boutique] Tebex : joueur introuvable (%s) — commande à rejouer depuis Tebex quand il est connecté^7'):format(target)) return end
+
+    if tx and MySQL.scalar.await('SELECT 1 FROM boutique_tebex WHERE transaction_id = ? AND identifier = ? AND coins = ?', { tx, identifier, coins }) then
+        print(('^3[pickax_boutique] Tebex : transaction %s déjà créditée, ignorée^7'):format(tx)) return
+    end
+    local total = coins + math.floor(coins * ((Config.Tebex and tonumber(Config.Tebex.BonusPct)) or 0) / 100)
+    if not exports['pickax_core']:BoutiqueGrantCoins(identifier, total) then print('^1[pickax_boutique] Tebex : crédit refusé (joueur absent du cache boutique)^7') return end
+    if tx then MySQL.insert('INSERT IGNORE INTO boutique_tebex (transaction_id, identifier, coins) VALUES (?, ?, ?)', { tx, identifier, coins }) end
+
+    name = name or identifier
+    MySQL.insert('INSERT INTO boutique_history (identifier, player_name, item_name, category, price, full_price) VALUES (?, ?, ?, ?, 0, 0)',
+        { identifier, esc(name, 80), ('+%d coins (achat Tebex)'):format(total), 'tebex' })
+    if online then TriggerClientEvent('esx:showNotification', online, ('~g~Merci pour ton achat !~s~ +%d coins ajoutés à ta boutique.'):format(total)) end
+    log(('Tebex : %s reçoit %d coins%s'):format(name, total, tx and (' (transaction ' .. tx .. ')') or ''))
+    print(('^2[pickax_boutique] Tebex : +%d coins pour %s^7'):format(total, name))
+end, true)
