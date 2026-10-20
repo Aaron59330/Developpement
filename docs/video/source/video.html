@@ -1,0 +1,113 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:PJS;src:url(assets/pjs.woff2) format('woff2');font-weight:400 800}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--acc:#00a4ff;--acc-rgb:0,164,255}
+html,body{width:1280px;height:720px;overflow:hidden;background:#0d0e12;font-family:PJS,'Segoe UI',sans-serif;color:#f5f6f8}
+#stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(900px 600px at 70% 20%,rgba(0,164,255,.10),transparent 60%),#0d0e12}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);background:rgba(0,164,255,.22)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at 60% 40%,#000,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 60% 40%,#000,transparent 75%)}
+#brand{position:absolute;left:60px;top:34px;display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.02em;opacity:.95}
+#brand .mk{width:38px;height:38px;border-radius:11px;background:rgba(0,164,255,.14);border:1px solid rgba(0,164,255,.4);display:grid;place-items:center;padding:5px}
+#brand .mk img{max-width:100%;max-height:100%}
+#brand small{display:block;font-weight:500;color:#8b8f9b;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#count{position:absolute;right:60px;top:40px;font-weight:800;font-size:15px;color:#8b8f9b;font-variant-numeric:tabular-nums}
+#count b{color:var(--acc)}
+#bar{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--acc),#6fd0ff);box-shadow:0 0 18px rgba(0,164,255,.7)}
+.sc{position:absolute;inset:0;opacity:0}
+.tag{position:absolute;left:60px;top:150px;display:inline-flex;gap:8px;align-items:center;padding:6px 14px;border-radius:999px;background:rgba(0,164,255,.14);border:1px solid rgba(0,164,255,.4);color:var(--acc);font-weight:700;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
+.ti{position:absolute;left:60px;top:196px;width:480px;font-size:48px;line-height:1.05;font-weight:800;letter-spacing:-.02em}
+.ti span{display:inline-block;margin-right:.26em}
+.tx{position:absolute;left:60px;top:370px;width:450px;font-size:19px;line-height:1.5;color:#c4c8d2}
+.bl{position:absolute;left:60px;top:520px;display:flex;flex-direction:column;gap:9px}
+.bl div{display:flex;align-items:center;gap:11px;font-size:16px;font-weight:600;color:#e8eaf0}
+.bl i{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc);flex:none}
+.fr{position:absolute;left:560px;top:132px;width:660px;height:371px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 100px rgba(0,0,0,.65),0 0 0 1px rgba(0,164,255,.2),0 0 80px rgba(0,164,255,.12);background:#111}
+.fr .im{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;will-change:transform}
+.fr::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 70%,rgba(0,0,0,.35));pointer-events:none}
+.ov{position:absolute;border-radius:16px;overflow:hidden;border:1px solid rgba(0,164,255,.5);box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 40px rgba(0,164,255,.25);background-size:cover}
+#wipe{position:absolute;top:0;height:100%;width:30%;background:linear-gradient(90deg,transparent,rgba(0,164,255,.0) 0%,rgba(0,164,255,.55) 55%,#6fd0ff 100%);opacity:0;mix-blend-mode:screen;pointer-events:none}
+#intro,#outro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;opacity:0}
+.big{font-size:84px;font-weight:800;letter-spacing:-.03em}
+.big em{font-style:normal;color:var(--acc);text-shadow:0 0 40px rgba(0,164,255,.6)}
+.sub{margin-top:14px;font-size:24px;color:#aeb2bd;letter-spacing:.04em}
+.lg{width:150px;height:150px;border-radius:38px;margin:0 auto 26px;display:grid;place-items:center;padding:20px;background:rgba(0,164,255,.12);border:1px solid rgba(0,164,255,.45);box-shadow:0 0 0 12px rgba(0,164,255,.06),0 30px 80px rgba(0,0,0,.6),0 0 90px rgba(0,164,255,.3)}
+.lg img{max-width:100%;max-height:100%}
+.disc{margin-top:30px;display:inline-block;padding:12px 26px;border-radius:999px;background:var(--acc);font-weight:800;font-size:20px;color:#fff;box-shadow:0 12px 40px rgba(0,164,255,.45)}
+</style></head><body><div id="stage">
+<div class="grid"></div><div class="orb" id="o1"></div><div class="orb" id="o2"></div>
+<div id="brand"><div class="mk"><img src="assets/logo.png"></div><div>Bluebay Roleplay<small>Visite des menus</small></div></div>
+<div id="count"></div>
+<div id="intro"><div><div class="lg"><img src="assets/logo.png"></div><div class="big">Tour des <em>menus</em></div><div class="sub">Tout ce que les joueurs et le staff peuvent faire sur le serveur</div></div></div>
+<div id="outro"><div><div class="lg"><img src="assets/logo.png"></div><div class="big">Bon jeu sur <em>Bluebay</em></div><div class="sub">Tout se règle en jeu · tout est à tes couleurs</div><div class="disc">discord.gg/bluebayrp</div></div></div>
+<div id="scenes"></div><div id="wipe"></div><div id="bar"></div></div>
+<script>
+const INTRO=4.0, SD=4.2, N=13, OUTRO_START=INTRO+SD*N, TOTAL=OUTRO_START+4.4;
+const SC=[
+ {k:'01',tag:'Connexion',t:'Écran de chargement',x:"Dès la connexion : musique, liens utiles, équipe du serveur et dernières mises à jour.",b:['Musique et volume','Équipe & mises à jour','Discord, boutique, règlement'],img:'loading',pos:'center'},
+ {k:'02',tag:'Premier pas',t:'Création du personnage',x:"Carte d'identité et création du personnage, avec l'identité visuelle du serveur.",b:['Carte d\'identité animée','Choix du nom et de l\'apparence'],img:'identity',pos:'center'},
+ {k:'03',tag:'Échap',t:'Menu pause',x:"Un menu pause moderne : reprendre, carte, paramètres et infos du joueur, sans le noir derrière.",b:['Infos du joueur et horloge','Couleur réglable partout'],img:'pause',pos:'center'},
+ {k:'04',tag:'À l\'écran',t:'HUD et boussole',x:"Faim, soif, argent, métier… et une petite boussole avec le nom de la rue.",b:['HUD haut droite configurable','Boussole près de la minimap'],img:'hud',pos:'right top',zoom:1.9,ov:{img:'compass',x:26,y:208,w:330,h:141}},
+ {k:'05',tag:'Touche F2',t:'Inventaire',x:"Glisser-déposer : objets, vêtements, sol et coffres, au look du serveur.",b:['Cases rapides à toi','Vêtements en objets'],img:'inv',pos:'center'},
+ {k:'06',tag:'Menu personnel',t:'Papiers et préférences',x:"Papiers, véhicules, facturation et préférences : sons, couleurs, HUD et boussole réglables.",b:['Un seul réglage de sons','Thème et arrondis au choix'],img:'menu',pos:'center'},
+ {k:'07',tag:'Clic droit',t:'Menu contextuel',x:"Interactions rapides, et « Gestion armes » : porte tes armes dans le dos, à la ceinture ou en poche.",b:['Armes visibles ou cachées','Interactions entre joueurs'],img:'ctx',pos:'center'},
+ {k:'08',tag:'Coins',t:'Boutique',x:"Panier, codes promo, parrainage, descriptifs et une boutique du jour qui change chaque jour.",b:['Véhicules, armes, packs','-15 % sur la sélection du jour'],img:'shop',pos:'center'},
+ {k:'09',tag:'PNJ',t:'Dialogues',x:"Fourrière, banque, auto-école, marché noir : le PNJ te parle puis tu acceptes ou refuses.",b:['Texte écrit en direct','Activable par point'],img:'dlg',pos:'center'},
+ {k:'10',tag:'Emploi',t:'Pôle emploi et quêtes',x:"Des petits jobs en libre accès : un clic pour être embauché, puis de petites quêtes payées.",b:['8 jobs créés automatiquement','Grades et promotions'],img:'jobs',pos:'center top'},
+ {k:'11',tag:'Illégal',t:'Gangs et territoires',x:"Tablette de gang : territoires, quêtes, guerres entre gangs, classement et trésorerie.",b:['Capture de zones','Marché noir, drogues, braquages'],img:'tablet',pos:'center'},
+ {k:'12',tag:'Staff',t:'Builders',x:"Jobs, gangs, boutiques, monde et événements : tout se crée en jeu, sans toucher au code.",b:['Événements toutes les 30 min','Un panneau pour tous les builders'],img:'hub',pos:'center'},
+ {k:'13',tag:'Web',t:'Site Tebex',x:"Un site Tebex complet aux mêmes couleurs, prêt à recevoir ton code boutique.",b:['Packs de coins livrés en jeu','Même style que le jeu'],img:'tebex',pos:'center top'}
+];
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const eo=x=>1-Math.pow(1-clamp(x),3), eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}, eb=x=>{x=clamp(x);const c=1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const host=$('scenes');
+SC.forEach((s,i)=>{
+ const d=document.createElement('div');d.className='sc';d.id='s'+i;
+ const words=s.t.split(' ').map(w=>`<span>${w}</span>`).join('');
+ d.innerHTML=`<div class="tag">${s.k} · ${s.tag}</div><div class="ti">${words}</div><div class="tx">${s.x}</div><div class="bl">${s.b.map(b=>`<div><i></i>${b}</div>`).join('')}</div>
+ <div class="fr"><div class="im" style="background-image:url(assets/${s.img}.jpg);background-position:${s.pos||'center'}"></div></div>${s.ov?`<div class="ov" style="left:${560+s.ov.x}px;top:${132+s.ov.y}px;width:${s.ov.w}px;height:${s.ov.h}px;background-image:url(assets/${s.ov.img}.jpg)"></div>`:''}`;
+ host.appendChild(d);
+});
+function render(t){
+ // fond animé
+ $('o1').style.cssText=`width:520px;height:520px;left:${700+Math.sin(t*.4)*120}px;top:${-120+Math.cos(t*.3)*60}px`;
+ $('o2').style.cssText=`width:420px;height:420px;left:${-120+Math.cos(t*.35)*80}px;top:${420+Math.sin(t*.45)*70}px;opacity:.7`;
+ $('bar').style.width=(t/TOTAL*100)+'%';
+ // intro
+ const it=t, ie=$('intro');
+ const iv=it<INTRO?1:0; ie.style.opacity=it<INTRO?clamp(it/.5)*(1-eo((it-(INTRO-.5))/.5)):0;
+ ie.firstElementChild.style.transform=`scale(${0.9+0.1*eo(it/1.1)+it*0.004})`;
+ $('brand').style.opacity=t<INTRO-.2?0:clamp((t-INTRO+.2)/.6);$('count').style.opacity=$('brand').style.opacity;
+ // scènes
+ let cur=-1;
+ SC.forEach((s,i)=>{
+  const st=INTRO+i*SD, lt=t-st, el=$('s'+i);
+  if(lt<-.2||lt>SD+.1){el.style.opacity=0;el.style.display='none';return}
+  el.style.display='block'; cur=i;
+  const out=eio((lt-(SD-.45))/.45), inn=clamp(lt/.55);
+  el.style.opacity=clamp(lt/.25)*(1-out);
+  el.style.transform=`translateX(${-70*out}px)`;
+  el.querySelector('.tag').style.cssText+=`;opacity:${eo((lt-.05)/.4)};transform:translateY(${(1-eo((lt-.05)/.4))*16}px)`;
+  el.querySelectorAll('.ti span').forEach((w,k)=>{const p=eb((lt-.15-k*.09)/.6);w.style.opacity=clamp((lt-.15-k*.09)/.3);w.style.transform=`translateY(${(1-p)*34}px)`});
+  const tx=el.querySelector('.tx');tx.style.opacity=eo((lt-.55)/.5);tx.style.transform=`translateY(${(1-eo((lt-.55)/.5))*14}px)`;
+  el.querySelectorAll('.bl div').forEach((b,k)=>{const p=eo((lt-1.25-k*.35)/.45);b.style.opacity=p;b.style.transform=`translateX(${(1-p)*-24}px)`});
+  const fr=el.querySelector('.fr'), p=eb((lt-.1)/.8);
+  fr.style.opacity=clamp((lt-.05)/.35);
+  fr.style.transform=`translateX(${(1-p)*120}px) scale(${.9+.1*p})`;
+  const im=el.querySelector('.im'), z=(s.zoom||1)+lt*.012;
+  im.style.transform=`scale(${z})`;im.style.transformOrigin=(s.pos||'center').includes('right')?'100% 0%':(s.pos||'').includes('top')?'50% 0%':'50% 50%';
+  const ov=el.querySelector('.ov'); if(ov){const q=eb((lt-1.4)/.7);ov.style.opacity=clamp((lt-1.4)/.3);ov.style.transform=`translateY(${(1-q)*40}px) scale(${.85+.15*q})`}
+ });
+ $('count').innerHTML=cur>=0?`<b>${String(cur+1).padStart(2,'0')}</b> / ${String(N).padStart(2,'0')}`:'';
+ // transitions (balayage)
+ let wp=-1; for(let i=0;i<=N;i++){const b=INTRO+i*SD;const p=(t-(b-.45))/.9;if(p>0&&p<1){wp=p}}
+ const w=$('wipe'); if(wp>0){w.style.opacity=Math.sin(wp*Math.PI)*.9;w.style.left=(-35+wp*160)+'%'} else w.style.opacity=0;
+ // outro
+ const ot=t-OUTRO_START, oe=$('outro');
+ oe.style.opacity=ot<0?0:clamp(ot/.6);
+ oe.firstElementChild.style.transform=`scale(${0.92+0.08*eo(ot/1.0)})`;
+ if(ot>-.5){$('count').style.opacity=0}
+}
+window.render=render;window.TOTAL=TOTAL;window.SCS=[INTRO,SD,N,OUTRO_START];
+render(0);
+</script></body></html>
