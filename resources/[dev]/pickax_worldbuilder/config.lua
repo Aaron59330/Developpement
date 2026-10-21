@@ -675,6 +675,12 @@ Config.JobCenter = {
             { id = 'soudure',  label = 'Soudure de poutres', desc = 'Soude des poutres métalliques.',                spots = 2, anim = 'weld',    secs = 11, go = 'Rends-toi sur le chantier',    work = 'Souder la poutre',      reward = { 75, 110 } },
             { id = 'coffrage', label = 'Coffrage',           desc = 'Assemble des coffrages en bois.',               spots = 3, anim = 'hammer',  secs = 9,  go = 'Rends-toi sur le chantier',    work = 'Assembler le coffrage', reward = { 90, 135 } },
           } },
+        { name = 'gazoline', label = 'Gazoline', icon = 'tool', desc = 'Ravitaille les stations-service : charge une citerne au dépôt et livre le carburant (/gazdepot pour définir le dépôt).',
+          grades = { { 'livreur', 'Livreur', 80 }, { 'chauffeur', 'Chauffeur citerne', 110 }, { 'chef', 'Chef de dépôt', 150 } },
+          quests = {
+            { id = 'pompes',  label = 'Contrôle des pompes', desc = 'Vérifie les pompes d\'une station.',            spots = 2, anim = 'clipboard', secs = 8,  go = 'Rends-toi à la station',      work = 'Contrôler les pompes', reward = { 40, 70 } },
+            { id = 'jauges',  label = 'Relevé des cuves',    desc = 'Relève le niveau des cuves.',                    spots = 2, anim = 'clipboard', secs = 8,  go = 'Rends-toi à la station',      work = 'Relever les cuves',    reward = { 40, 70 } },
+          } },
         { name = 'coursier', label = 'Coursier', icon = 'cart', desc = 'Livrer colis et courses aux particuliers.',
           grades = { { 'stagiaire', 'Coursier stagiaire', 15 }, { 'confirme', 'Coursier confirmé', 25 }, { 'maitre', 'Coursier expert', 40 } },
           quests = {
@@ -708,3 +714,36 @@ do
     local d = Config.JobCenterDefaults()
     Config.Templates.jobcenter.office.settings.jobs, Config.Templates.jobcenter.office.settings.locations = d.jobs, d.locations
 end
+
+-- ─────────────────────────────── Job Gazoline : ravitaillement des stations essence ───────────────────────────────
+-- Les stations (module « Station essence ») ont une cuve : elle se vide à chaque plein. Les livreurs du job « gazoline » chargent une citerne
+-- au dépôt puis la livrent à la station qui en a le plus besoin. Il y a TOUJOURS au moins une station avec du carburant (réserve de secours).
+-- Dépôt : place-toi à l'endroit voulu (idéalement devant un grand espace) et tape /gazdepot (groupe admin) ; le camion apparaît 10 m devant.
+Config.Gazoline = {
+    Enabled        = true,
+    Job            = 'gazoline',                       -- nom du job (créé automatiquement dans la base s'il n'existe pas)
+    Label          = 'Gazoline',
+    Grades         = {                                 -- { nom interne, libellé, salaire }
+        { 'livreur',   'Livreur',           80 },
+        { 'chauffeur', 'Chauffeur citerne', 110 },
+        { 'chef',      'Chef de dépôt',     150 },
+    },
+    Depot          = nil,                              -- { x =, y =, z =, h = } (sinon défini en jeu avec /gazdepot)
+    Truck          = 'phantom',                        -- tracteur
+    Trailer        = 'tanker2',                        -- citerne (tanker = Ron, tanker2 = Globe Oil)
+    TankerLiters   = 10000,                            -- litres livrés par chargement (limités au besoin de la station)
+    PayPerLiter    = 0.9,                              -- salaire par litre livré
+    UrgentBonus    = 0.5,                              -- +50 % si la station est presque vide
+    ReturnBonus    = 150,                              -- prime pour avoir rendu le camion au dépôt
+    PayAccount     = 'money',                          -- compte crédité : money | bank
+    OrderBelowPercent = 75,                            -- une station sous ce niveau (%) peut être livrée
+    LowAlertPercent   = 20,                            -- sous ce niveau, les livreurs en service sont prévenus
+    UnloadLitersPerSecond = 250,                       -- vitesse de déchargement (durée = litres / ce nombre, entre 8 et 40 s)
+    MinSeconds     = 25,                               -- durée mini entre le chargement et la livraison (anti-abus)
+    -- Garantie : au moins une station garde de l'essence
+    ReservePercent = 15,                               -- niveau mini (%) maintenu sur la station de réserve
+    CheckSeconds   = 30,
+    Marker         = { r = 255, g = 180, b = 0 },
+    DrawDistance   = 25.0,
+    Blip           = { sprite = 361, color = 5, scale = 0.9, label = 'Dépôt Gazoline' },
+}

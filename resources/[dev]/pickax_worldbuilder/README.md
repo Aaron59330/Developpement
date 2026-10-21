@@ -73,3 +73,10 @@ Le module **Courses poursuites** reprend `pickax_chase` : arrête l'ancienne res
 
 ## Migration depuis pickax_pvp
 Arrête `pickax_pvp` avant de lancer `worldbuilder`. Le module **Zones PVP** (modèle « Zones PVP ») reprend ses fonctions : PNJ d'accueil et zones deviennent des points du module (la zone est placée à ta position, centre = position). Les anciennes tables `pickax_pvp_*` ne sont pas lues ; le classement repart de zéro (`worldbuilder_pvp_stats`). Config des scripts d'ambulance : ignorer la mort quand `LocalPlayer.state.inPvpZone` est vrai, ou renseigner `Config.Pvp.ReviveEvents`.
+
+## Job Gazoline (ravitaillement des stations essence)
+- Le job `gazoline` (3 grades) est créé automatiquement et proposé au **Pôle emploi**. Le dépôt se définit en jeu : place-toi à l'endroit voulu et tape **`/gazdepot`** (groupe admin).
+- Les livreurs en service chargent une citerne au dépôt (**E**, camion + citerne apparaissent 10 m devant), reçoivent la station qui en a le plus besoin, la livrent (décharger avec **E**) et rendent le camion pour une prime. Paie au litre, majorée si la station est presque vide.
+- Les stations (module « Station essence ») se vident à chaque plein ; les livreurs sont prévenus sous 20 %.
+- **Réserve de secours** : il reste toujours au moins une station avec de l'essence (la station de plus grande cuve est remplie à 15 % si toutes sont à sec).
+- Tout se règle dans `Config.Gazoline` (`config.lua`).
