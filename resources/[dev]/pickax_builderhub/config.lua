@@ -33,6 +33,12 @@ Config.Builders = {
         stats = { { 'Événements', 'eventbuilder_events' }, { 'Historique', 'eventbuilder_logs' } },
     },
     {
+        id = 'minigames', resource = 'pickax_minigames', command = 'minigames', icon = 'minigames',
+        label = 'Mini-jeux Builder',
+        desc = 'Basket, football, tennis, boxe, paintball, laser game, courses : crée des mini-jeux avec lobby, scores, récompenses et classements.',
+        stats = { { 'Mini-jeux', 'minigames_defs' }, { 'Joueurs classés', 'minigames_stats' }, { 'Historique', 'minigames_logs' } },
+    },
+    {
         id = 'worldbuilder', resource = 'pickax_worldbuilder', command = 'worldbuilder', icon = 'world',
         label = 'World Builder',
         desc = 'Garages, fourrières, locations, stations, drogues, braquages, portes et zones PVP.',

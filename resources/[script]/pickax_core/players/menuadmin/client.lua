@@ -1330,6 +1330,9 @@ function MenuStaffOpen()
             RageUI.ButtonWithStyle("Event Builder", "Événements : braquage de fourgon, largage, livraison… (toutes les 30 min, réglable)", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("eventbuilder") end
             end)
+            RageUI.ButtonWithStyle("Mini-jeux Builder", "Basket, football, tennis, boxe, paintball, laser game, courses…", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("minigames") end
+            end)
         end)
 
         RageUI.IsVisible(Menu_cutscene,true,true,true, function()
