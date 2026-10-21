@@ -15,8 +15,9 @@ local function openUI(mode, data)
 end
 
 local placing = false
-function CloseUI()
+function CloseUI(reason)
     if not uiMode then return end
+    if placing then print(('^3[minigames]^7 fermeture du menu pendant le mode placement (%s)\n%s'):format(tostring(reason or 'inconnue'), debug.traceback())) end
     uiMode = nil
     placing = false          -- sort aussi du mode placement (sinon le curseur restait bloqué)
     SetNuiFocus(false, false)
@@ -26,12 +27,12 @@ end
 CreateThread(function()
     while true do
         Wait(250)
-        if uiMode and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then CloseUI() end
+        if uiMode and not placing and (IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true) then CloseUI('mort') end
     end
 end)
 
 RegisterCommand(Config.Command, function()
-    if uiMode then return CloseUI() end
+    if uiMode then return CloseUI('commande') end
     ESX.TriggerServerCallback('minigames:isAdmin', function(ok)
         if ok then openUI('builder') else ESX.ShowNotification('~r~Accès refusé : réservé à l\'équipe.') end
     end)
@@ -58,7 +59,12 @@ local NuiRemote = {
 }
 local NuiLocal = {}
 
-NuiLocal.close = function(_, cb) CloseUI() cb({}) end
+NuiLocal.close = function(_, cb)
+    -- pendant le mode placement, une demande de fermeture venue de l'interface est ignorée (seul « Retour » ramène au menu)
+    if placing then print('^3[minigames]^7 demande de fermeture ignorée pendant le mode placement') return cb({}) end
+    CloseUI('interface')
+    cb({})
+end
 
 NuiLocal.getCoords = function(_, cb)
     local ped = PlayerPedId()
