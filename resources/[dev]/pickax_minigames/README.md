@@ -46,3 +46,6 @@ Même identité que les autres builders (World / Event) : barre latérale, ongle
 ## Props et armes
 - Onglet **Props** : obstacles, abris, rampes, ballons, décor (catalogue + modèle libre, bouton **Tester**). Mode « seulement pendant la partie » ou « toujours visible » près du lobby.
 - Armes : une quinzaine de marqueurs (pistolets, SMG, fusils, sniper, pompe) + armes laser ; champ libre `WEAPON_…` possible. Paintball : teinte d'arme par équipe et **éclaboussures de peinture** à l'impact (visibles par tous les joueurs de la partie).
+
+## Pré-placement automatique
+Au premier démarrage, 10 mini-jeux sont créés et activés (basket ×2, tirs au but, fléchettes, bowling, tennis, ring de boxe, paintball, laser game, sprint), une seule fois. Les terrains sont **calculés autour d'une ancre** (lieu connu de GTA V + cap) : positions **approximatives**, à retoucher dans le builder (Emplacements / Props, mode placement). `Config.PresetGames` (liste et ancres), `/mgseed` (admin) pour recréer les manquants, `Config.AutoSeed = false` pour désactiver.

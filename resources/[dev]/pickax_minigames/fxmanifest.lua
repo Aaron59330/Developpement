@@ -16,6 +16,7 @@ server_scripts {
     'server/core.lua',
     'server/builder.lua',
     'server/progress.lua',
+    'server/preset.lua',
     'server/match.lua',
 }
 

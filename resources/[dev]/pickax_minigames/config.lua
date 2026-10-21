@@ -472,3 +472,23 @@ for _, k in ipairs({ 'paintball', 'lasertag' }) do
     f[#f + 1] = { key = 'tint', label = 'Teinte de l\'arme', kind = 'select', def = k == 'paintball' and 'team' or '0', options = Config.WeaponTints }
     f[#f + 1] = { key = 'splat', label = 'Éclaboussures de peinture à l\'impact', kind = 'bool', def = k == 'paintball' }
 end
+
+-- ─── Pré-placement : des mini-jeux déjà posés sur la carte ───────────────────────────────────────────────
+-- Au premier démarrage, ces mini-jeux sont créés et ACTIVÉS (une seule fois : si tu en supprimes un, il ne revient pas).
+-- Chaque terrain est calculé autour d'un point d'ancrage (x, y, z, cap) : le cap est la direction du terrain depuis l'entrée.
+-- ⚠️ Positions APPROXIMATIVES (lieux connus de GTA V, disposition calculée) : certaines devront être décalées ou tournées :
+--    ouvre le mini-jeu dans le builder → Emplacements / Props → mode placement (ou change simplement l'ancre ici et utilise /mgseed après suppression).
+-- /mgseed (groupe admin) recrée ceux qui manquent. Config.AutoSeed = false pour désactiver.
+Config.AutoSeed = true
+Config.PresetGames = {
+    { id = 'basket_legion',  layout = 'basket',    type = 'basket',    tpl = 'street', name = 'Basket · Legion Square', anchor = { x = 195.17, y = -933.77, z = 30.69, h = 70.0 } },
+    { id = 'basket_grove',   layout = 'basket',    type = 'basket',    tpl = 'versus', name = 'Basket 1c1 · Grove Street', anchor = { x = 110.50, y = -1944.00, z = 20.80, h = 40.0 } },
+    { id = 'penalty_beach',  layout = 'penalty',   type = 'football',  tpl = 'penalty', name = 'Tirs au but · Del Perro', anchor = { x = -1850.60, y = -1233.20, z = 13.02, h = 140.0 } },
+    { id = 'darts_sandy',    layout = 'darts',     type = 'darts',     tpl = 'board',  name = 'Fléchettes · Sandy Shores', anchor = { x = 1961.50, y = 3741.50, z = 32.34, h = 300.0 } },
+    { id = 'bowling_harmony', layout = 'bowling',  type = 'bowling',   tpl = 'lane',   name = 'Bowling · Harmony', anchor = { x = 549.00, y = 2671.00, z = 42.20, h = 100.0 } },
+    { id = 'tennis_chumash', layout = 'tennis',    type = 'tennis',    tpl = 'training', name = 'Tennis · Chumash', anchor = { x = -3040.00, y = 585.00, z = 7.90, h = 20.0 } },
+    { id = 'ring_downtown',  layout = 'ring',      type = 'boxing',    tpl = 'ring',   name = 'Ring de boxe · Downtown', anchor = { x = 909.00, y = -176.00, z = 74.20, h = 240.0 } },
+    { id = 'paintball_grapeseed', layout = 'arena', type = 'paintball', tpl = 'arena', name = 'Paintball · Grapeseed', anchor = { x = 1698.00, y = 4924.00, z = 42.10, h = 320.0 } },
+    { id = 'laser_paleto',   layout = 'ffa',       type = 'lasertag',  tpl = 'ffa',    name = 'Laser game · Paleto Bay', anchor = { x = -102.00, y = 6467.00, z = 31.60, h = 45.0 } },
+    { id = 'sprint_pier',    layout = 'sprint',    type = 'race',      tpl = 'run',    name = 'Sprint 100 m · Jetée', anchor = { x = -1850.60, y = -1233.20, z = 13.02, h = 320.0 } },
+}
