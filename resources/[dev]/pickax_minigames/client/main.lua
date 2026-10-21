@@ -176,9 +176,22 @@ local function makeProp(p)
 end
 MGC.makeProp = makeProp
 
+-- Props décidés par le jeu lui-même (ex : panier de basket posé au point « Panier »)
+local function derivedProps(def)
+    local out = {}
+    local s, h = def.settings, def.points and def.points.hoop
+    if s and h and h.x and s.hoopSpawn and s.hoopModel and s.hoopModel ~= '' then
+        out[#out + 1] = { model = s.hoopModel, x = h.x, y = h.y, z = h.z + (s.hoopOffsetZ or 0.0), h = (h.h or 0.0) + (s.hoopYaw or 0.0), rx = 0.0, ry = 0.0, freeze = true, collision = true, mode = 'always' }
+    end
+    return out
+end
+
 function MGC.spawnProps(def, mode)
     local list = {}
-    for _, p in ipairs(def.props or {}) do
+    local all = {}
+    for _, p in ipairs(def.props or {}) do all[#all + 1] = p end
+    for _, p in ipairs(derivedProps(def)) do all[#all + 1] = p end
+    for _, p in ipairs(all) do
         if (p.mode or 'match') == mode then
             local o = makeProp(p)
             if o then list[#list + 1] = o end

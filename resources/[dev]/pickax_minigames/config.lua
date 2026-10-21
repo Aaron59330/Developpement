@@ -42,6 +42,10 @@ Config.Types = {
             { key = 'ballModel',   label = 'Modèle du ballon',        kind = 'model', def = 'prop_bskball_01' },
             { key = 'targetKind',  label = 'Type de cible',            kind = 'select', def = 'hoop', options = { { 'hoop', 'Panier (par le haut)' }, { 'goal', 'But (traverse la zone)' } } },
             { key = 'holdBall',    label = 'Ballon en main',           kind = 'bool', def = true },
+            { key = 'hoopSpawn',   label = 'Afficher un panier (prop) au point « Panier »', kind = 'bool', def = true },
+            { key = 'hoopModel',   label = 'Modèle du panier',         kind = 'model', def = 'prop_basketball_net' },
+            { key = 'hoopOffsetZ', label = 'Hauteur du prop (décalage Z)', kind = 'number', min = -6, max = 6, step = .05, def = 0 },
+            { key = 'hoopYaw',     label = 'Rotation du prop (°)',     kind = 'number', min = -180, max = 180, step = 1, def = 0 },
             { key = 'hoopRadius',  label = 'Rayon de détection (m)',   kind = 'number', min = .2, max = 3, step = .05, def = .55 },
             { key = 'threeDist',   label = 'Distance « 3 points » (m)', kind = 'number', min = 1, max = 30, step = .5, def = 6.5 },
             { key = 'points2',     label = 'Points d\'un tir proche',  kind = 'number', min = 1, max = 20, def = 2 },
@@ -226,7 +230,7 @@ Config.Types.darts = {
     label = 'Fléchettes', icon = 'darts', engine = 'shoot',
     desc = 'Lance tes fléchettes sur la cible : plus tu vises près du centre, plus tu marques. Place les anneaux de la cible comme zones à points.',
     fields = {
-        { key = 'ballModel',   label = 'Modèle de la fléchette',    kind = 'model', def = 'prop_golf_ball' },
+        { key = 'ballModel',   label = 'Modèle de la fléchette',    kind = 'model', def = 'prop_dart_1' },
         { key = 'targetKind',  label = 'Type de cible',             kind = 'select', def = 'goal', options = { { 'goal', 'Zones à points' }, { 'hoop', 'Panier (par le haut)' } } },
         { key = 'holdBall',    label = 'Fléchette en main',         kind = 'bool', def = true },
         { key = 'balls',       label = 'Nombre de fléchettes',      kind = 'number', min = 1, max = 60, def = 9 },
@@ -435,18 +439,24 @@ Config.Models = {
 
 -- Props décoratifs / obstacles placables dans une arène (catégories du sélecteur)
 Config.Props = {
+    { 'Terrains & paniers', {
+        { 'prop_basketball_net', 'Panier de basket (filet)' }, { 'prop_goal_posts_01', 'Buts de foot' }, { 'prop_tennis_net_01', 'Filet de tennis' },
+        { 'prop_dart_bd_01', 'Cible de fléchettes' }, { 'prop_bball_arcade_01', 'Borne d\'arcade basket' }, { 'prop_table_tennis', 'Table de ping-pong' },
+        { 'prop_beachflag_01', 'Drapeau de plage' }, { 'bkr_prop_biker_target', 'Cible de tir' }, { 'bkr_prop_biker_target_small', 'Petite cible de tir' },
+    } },
     { 'Barrières & obstacles', {
         { 'prop_barrier_work05', 'Barrière de chantier' }, { 'prop_barrier_work06a', 'Barrière de chantier (A)' }, { 'prop_barrier_work06b', 'Barrière de chantier (B)' },
-        { 'prop_mp_barrier_02b', 'Barrière béton' }, { 'prop_barrier_wat_03b', 'Barrière à eau' }, { 'prop_roadcone02a', 'Cône' }, { 'prop_roadcone01a', 'Cône (petit)' },
-        { 'prop_roadcone02b', 'Cône (large)' }, { 'prop_mp_ramp_01', 'Rampe (petite)' }, { 'prop_mp_ramp_02', 'Rampe (moyenne)' }, { 'prop_mp_ramp_03', 'Rampe (grande)' },
+        { 'prop_barrier_wat_03b', 'Barrière à eau' }, { 'prop_roadcone02a', 'Cône' }, { 'prop_roadcone01a', 'Cône (petit)' }, { 'prop_roadcone02b', 'Cône (large)' },
+        { 'lts_prop_lts_ramp_01', 'Rampe (petite)' }, { 'lts_prop_lts_ramp_02', 'Rampe (moyenne)' }, { 'lts_prop_lts_ramp_03', 'Rampe (grande)' },
+        { 'prop_skate_flatramp', 'Rampe de skate' }, { 'prop_jetski_ramp_01', 'Rampe de jet-ski' }, { 'prop_offroad_tyres02', 'Pneus' },
     } },
     { 'Abris & couverts (paintball / laser)', {
         { 'prop_skip_08a', 'Benne' }, { 'prop_bin_01a', 'Poubelle' }, { 'prop_conc_sacks_02a', 'Sacs de sable' }, { 'prop_pallet_01a', 'Palette' },
-        { 'prop_boxpile_07d', 'Pile de cartons' }, { 'prop_cs_cardbox_01', 'Carton' }, { 'prop_offroad_tyres02', 'Pneus' }, { 'prop_cementbags01', 'Sacs de ciment' },
+        { 'prop_boxpile_07d', 'Pile de cartons' }, { 'prop_cementbags01', 'Sacs de ciment' },
     } },
-    { 'Sport & jeux', {
-        { 'prop_bskball_01', 'Ballon de basket' }, { 'p_ld_soc_ball_01', 'Ballon de foot' }, { 'prop_tennis_ball', 'Balle de tennis' }, { 'prop_beach_volball01', 'Ballon de volley' },
-        { 'prop_bowling_ball', 'Boule de bowling' }, { 'prop_bowling_pin', 'Quille' }, { 'prop_range_target_01', 'Cible de tir' }, { 'prop_beachflag_01', 'Drapeau' },
+    { 'Balles & quilles', {
+        { 'prop_bskball_01', 'Ballon de basket' }, { 'prop_tennis_ball', 'Balle de tennis' }, { 'prop_beach_volball01', 'Ballon de volley' }, { 'prop_golf_ball', 'Balle de golf' },
+        { 'prop_bowling_ball', 'Boule de bowling' }, { 'prop_bowling_pin', 'Quille' }, { 'prop_dart_1', 'Fléchette' },
     } },
     { 'Éclairage & déco', {
         { 'prop_worklight_03b', 'Projecteur de chantier' }, { 'prop_worklight_01a', 'Projecteur' }, { 'prop_generator_03b', 'Groupe électrogène' },

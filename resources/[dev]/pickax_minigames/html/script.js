@@ -124,6 +124,13 @@ async function refreshList() { const l = await rpc('list'); if (l.ok) S.list = l
 
 /* ── Gabarit principal ── */
 function render() {
+  try { renderInner(); } catch (err) {
+    console.error(err);
+    toast('Erreur d\'affichage : ' + err.message, 'err');
+    try { S.view = S.view === 'game' ? 'home' : S.view; S.cur = S.view === 'home' ? null : S.cur; renderInner(); } catch (e2) { $root.innerHTML = '<div class="shell"><section class="main"><div class="body"><div class="empty"><h2>Erreur d\'affichage</h2><p>' + esc(err.message) + '</p><button data-a="close">Fermer</button></div></div></section></div>'; }
+  }
+}
+function renderInner() {
   const items = S.list.map(g => {
     const live = g.state && g.state !== 'idle';
     const lbl = live ? `en jeu · ${g.players}` : (g.enabled ? 'actif' : (g.problems && g.problems.length ? 'incomplet' : 'off'));
@@ -289,11 +296,15 @@ async function newGame(type, tpl) {
 }
 async function guard() { return !S.dirty || await confirmBox('Modifications non enregistrées', 'Elles seront perdues si tu continues.', 'Continuer', true); }
 
+let saving = false;
 async function save() {
+  if (saving) return;
   const d = S.cur;
   if (!d.name || d.name.trim().length < 2) return toast('Donne un nom au mini-jeu (2 caractères minimum)', 'err');
   const wantsOn = d.enabled;
-  const r = await rpc('save', d, S.curId || 0);
+  saving = true;
+  let r;
+  try { r = await rpc('save', d, S.curId || 0); } finally { saving = false; }
   if (!r.ok) return toast(r.error || 'Enregistrement impossible', 'err');
   S.curId = r.id; S.dirty = false; S.stats = null;
   const g = await rpc('get', r.id); if (g.ok) S.cur = g.def;
@@ -429,13 +440,13 @@ function onInput(el, change) {
   else { val = el.value; if (el.dataset.ne && val === '') return; }
   setPath(root, p, val);
   mark();
-  if (change && (el.type === 'checkbox' || el.tagName === 'SELECT') && (el.dataset.r || /\.enabled$|^marker|^blip|weekly\.mode$/.test(p) || el.dataset.path === 'enabled')) render();
-  else if (change && el.tagName === 'SELECT') render();
+  // re-rendu différé (jamais pendant que la liste déroulante native est ouverte : ça fait planter / figer le menu)
+  if (change && (el.dataset.r || el.dataset.path === 'enabled' || /^marker\.enabled$|^blip\.enabled$|weekly\.mode$/.test(p))) setTimeout(render, 60);
 }
 document.addEventListener('input', e => { if (e.target.dataset && e.target.dataset.path) onInput(e.target, false); });
 document.addEventListener('change', e => {
   const el = e.target;
-  if (el.dataset && el.dataset.a === 'propCat') { S.propCat = Number(el.value); S.propSel = ''; return render(); }
+  if (el.dataset && el.dataset.a === 'propCat') { S.propCat = Number(el.value); S.propSel = ''; return setTimeout(render, 60); }
   if (el.dataset && el.dataset.path) onInput(el, true);
 });
 
@@ -720,3 +731,6 @@ document.addEventListener('keydown', e => {
   if (Placement.on) return;
   if (!$root.classList.contains('hidden') || !$('#lobby').classList.contains('hidden')) rpc('close');
 });
+
+window.addEventListener('error', e => { if (e && e.message && e.message !== 'Script error.') toast('Erreur : ' + e.message, 'err'); });
+window.addEventListener('unhandledrejection', e => { toast('Erreur : ' + ((e.reason && e.reason.message) || e.reason), 'err'); });

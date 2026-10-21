@@ -241,7 +241,9 @@ cbAdmin('draft', function(_, typ, tpl)
         end
     end
     local points = {}
-    for _, pt in ipairs(T.points) do points[pt.key] = pt.single and false or {} end
+    for _, pt in ipairs(T.points) do
+        if pt.single then points[pt.key] = false else points[pt.key] = {} end
+    end
     return { ok = true, def = { type = typ, name = name, description = desc, enabled = false, settings = s, points = points,
                                 blip = { enabled = true, shortRange = true, label = '' }, marker = { help = true }, props = {} } }
 end)
