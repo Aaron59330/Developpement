@@ -32,6 +32,8 @@ CreateThread(function()
 end)
 
 RegisterCommand(Config.Command, function()
+    -- ouvert depuis le menu admin : la touche Entrée du mode placement revalidait le bouton du menu et relançait /minigames (qui fermait tout)
+    if placing then return end
     if uiMode then return CloseUI('commande') end
     ESX.TriggerServerCallback('minigames:isAdmin', function(ok)
         if ok then openUI('builder') else ESX.ShowNotification('~r~Accès refusé : réservé à l\'équipe.') end
@@ -40,7 +42,8 @@ end, false)
 if Config.OpenKey then RegisterKeyMapping(Config.Command, 'Ouvrir le Mini-jeux Builder', 'keyboard', Config.OpenKey) end
 
 RegisterCommand(Config.ProfileCommand, function()
-    if uiMode then return CloseUI() end
+    if placing then return end
+    if uiMode then return CloseUI('commande') end
     openUI('lobby', { profileOnly = true })
 end, false)
 if Config.ProfileKey then RegisterKeyMapping(Config.ProfileCommand, 'Profil mini-jeux (niveau, défis, succès)', 'keyboard', Config.ProfileKey) end
