@@ -4,6 +4,13 @@ local G = -vector3(0.0, 0.0, 9.81)   -- gravité GTA
 
 local function dot(a, b) return a.x * b.x + a.y * b.y + a.z * b.z end
 
+-- SetEntityVelocity attend trois nombres (pas un vector3) ; appliquée deux fois pour survivre au détachement de la main
+local function setVel(e, v)
+    if not DoesEntityExist(e) then return end
+    SetEntityVelocity(e, v.x + 0.0, v.y + 0.0, v.z + 0.0)
+    SetTimeout(60, function() if DoesEntityExist(e) then SetEntityVelocity(e, v.x + 0.0, v.y + 0.0, v.z + 0.0) end end)
+end
+
 local function V(c) return vector3(c.x + 0.0, c.y + 0.0, (c.z or 0.0) + 0.0) end
 
 local function loadModel(name)
@@ -280,11 +287,12 @@ local function launch(s, ball, ped, level)
     target = target + randomOffset((S.scatter or 1.5) * err)
     if DoesEntityExist(ball) then
         DetachEntity(ball, true, true)
+        SetEntityNoCollisionEntity(ball, ped, false)   -- le ballon ne rebondit pas sur toi à la sortie de la main
         FreezeEntityPosition(ball, false)
         SetEntityDynamic(ball, true)
         ActivatePhysics(ball)
         SetEntityHasGravity(ball, true)
-        SetEntityVelocity(ball, ballistic(from, target, T))
+        setVel(ball, ballistic(from, target, T))
     end
     return from, target
 end
@@ -365,7 +373,7 @@ local function rallyFeed(s, ped)
     SetEntityDynamic(b, true) ActivatePhysics(b) SetEntityHasGravity(b, true)
     local p = GetEntityCoords(ped)
     local target = vector3(p.x, p.y, p.z + 0.4) + randomOffset(1.6)
-    SetEntityVelocity(b, ballistic(m + vector3(0.0, 0.0, 1.0), target, S.feedTime))
+    setVel(b, ballistic(m + vector3(0.0, 0.0, 1.0), target, S.feedTime))
     s.balls[#s.balls + 1] = { e = b, t0 = GetGameTimer(), hit = false, scored = false, prev = m }
     s.fed = s.fed + 1
     TriggerServerEvent('minigames:shot')
@@ -392,7 +400,7 @@ function rally.tick(s, ped)
                 local z = aimZone(s.points.zones, pos)
                 local target = z and V(z) or (pos + camDir() * 18.0)
                 target = target + randomOffset((S.scatter or 3.0) * (1.0 - acc))
-                SetEntityVelocity(b.e, ballistic(pos, target, S.returnTime))
+                setVel(b.e, ballistic(pos, target, S.returnTime))
                 PlaySoundFrontend(-1, 'CHECKPOINT_NORMAL', 'HUD_MINI_GAME_SOUNDSET', true)
                 b.t0 = t
             end
