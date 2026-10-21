@@ -10,6 +10,11 @@ local currentWeapon
 local lastToggle = 0
 local TOGGLE_COOLDOWN_MS = 500   -- 650 ms is usually ideal (adjust 500–800 if needed)
 
+-- Mini-jeux (pickax_minigames) : true = arme native donnée par un script conservée (les contrôles inventaire d'armes sont suspendus), false = retour normal
+exports('weaponWheel', function(state)
+	Utils.WeaponWheel(state == true)
+end)
+
 exports('getCurrentWeapon', function()
 	return currentWeapon
 end)

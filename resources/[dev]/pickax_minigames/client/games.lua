@@ -472,8 +472,14 @@ end
 -- ─── tag : paintball / laser game ─────────────────────────────────────────────
 local tag = {}
 
+-- ox_inventory retire toute arme qui n'est pas dans l'inventaire : on suspend ce contrôle pendant la partie
+local function oxWheel(state)
+    if GetResourceState('ox_inventory') == 'started' then pcall(function() exports.ox_inventory:weaponWheel(state) end) end
+end
+
 function tag.prepare(s)
     local ped = PlayerPedId()
+    oxWheel(true)
     s.weaponHash = GetHashKey(s.settings.weapon)
     GiveWeaponToPed(ped, s.weaponHash, 9999, false, true)
     SetPedInfiniteAmmo(ped, true, s.weaponHash)
@@ -487,6 +493,7 @@ end
 
 function tag.stop(s)
     local ped = PlayerPedId()
+    oxWheel(false)
     SetPedInfiniteAmmo(ped, false, s.weaponHash or 0)
     RemoveWeaponFromPed(ped, s.weaponHash or 0)
     SetPlayerWeaponDamageModifier(PlayerId(), 1.0)
@@ -499,6 +506,14 @@ function tag.respawn(s)
 end
 
 function tag.always(s, ped)
+    -- l'arme reste en main (aucun script ne doit la retirer pendant la partie)
+    local nowT = GetGameTimer()
+    if s.running and not s.down and nowT - (s.weaponCheck or 0) > 700 then
+        s.weaponCheck = nowT
+        if not HasPedGotWeapon(ped, s.weaponHash, false) then GiveWeaponToPed(ped, s.weaponHash, 9999, false, true) end
+        if GetSelectedPedWeapon(ped) ~= s.weaponHash then SetCurrentPedWeapon(ped, s.weaponHash, true) end
+        SetPedCurrentWeaponVisible(ped, true, false, false, false)
+    end
     -- éclaboussures de peinture
     local now = GetGameTimer()
     local life = Config.Splat.life * 1000
