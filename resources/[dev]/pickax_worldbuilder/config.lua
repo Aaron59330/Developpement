@@ -747,3 +747,27 @@ Config.Gazoline = {
     DrawDistance   = 25.0,
     Blip           = { sprite = 361, color = 5, scale = 0.9, label = 'Dépôt Gazoline' },
 }
+
+-- ─────────────────────────────── Pré-placement : tout est déjà posé sur la carte ───────────────────────────────
+-- Au premier démarrage, les stations essence et les agences bancaires de GTA V sont créées et activées automatiquement (une seule fois :
+-- si tu en supprimes une, elle ne revient pas). Tu peux ensuite tout modifier dans le builder comme d'habitude.
+-- /wbseed (groupe admin) recrée celles qui manquent. Les supérettes, armureries, vêtements, coiffeurs et quincailleries sont dans le Shop Builder.
+Config.Preset = {
+    Enabled = true,
+    FuelRestockMinutes = 45,    -- ravitaillement naturel des cuves (0 = seulement par le job Gazoline) ; la réserve de secours reste garantie
+    FuelRestockLiters  = 150,
+    -- { x, y, z } : position de la pompe (le joueur s'y place pour faire le plein)
+    FuelStations = {
+        { 49.42, 2778.79, 58.04 }, { 263.89, 2606.46, 44.98 }, { 1039.96, 2671.13, 39.55 }, { 1207.26, 2660.18, 37.90 }, { 2539.69, 2594.19, 37.94 },
+        { 2679.86, 3263.95, 55.24 }, { 2005.06, 3773.89, 32.40 }, { 1687.16, 4929.39, 42.08 }, { 1701.31, 6416.03, 32.76 }, { 179.86, 6602.84, 31.87 },
+        { -94.46, 6419.59, 31.49 }, { -2555.00, 2334.40, 33.08 }, { -1800.38, 803.66, 138.65 }, { -1437.62, -276.75, 46.21 }, { -2096.24, -320.29, 13.17 },
+        { -724.62, -935.16, 19.21 }, { -526.02, -1211.00, 18.18 }, { -70.21, -1761.79, 29.53 }, { 265.65, -1261.31, 29.29 }, { 819.65, -1028.85, 26.40 },
+        { 1208.95, -1402.57, 35.22 }, { 1181.38, -330.85, 69.32 }, { 620.84, 269.10, 103.09 }, { 2581.32, 362.04, 108.47 }, { 176.63, -1562.03, 29.26 },
+        { -319.29, -1471.72, 30.55 }, { 1784.32, 3330.55, 41.25 },
+    },
+    -- Agences bancaires (un seul module « Banque » avec toutes les agences)
+    Banks = {
+        { 149.05, -1041.30, 29.37 }, { 313.32, -280.03, 54.17 }, { -351.94, -50.72, 49.04 }, { -1212.68, -331.83, 37.78 },
+        { -2961.67, 482.31, 15.70 }, { 1175.64, 2707.71, 38.09 }, { 247.65, 223.87, 106.29 }, { -111.98, 6470.56, 31.63 },
+    },
+}

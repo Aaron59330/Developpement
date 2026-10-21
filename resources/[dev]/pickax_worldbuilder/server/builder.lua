@@ -407,24 +407,34 @@ ESX.RegisterServerCallback('worldbuilder:get', function(src, cb, id)
     cb({ ok = true, entity = e, missing = missingItems(e) })
 end)
 
-ESX.RegisterServerCallback('worldbuilder:create', function(src, cb, tp, tplId, label)
-    if not admin(src, cb) then return end
+-- Crée un module à partir d'un modèle. over = { settings = {...}, points = {...} } remplace des réglages / les points du modèle avant nettoyage.
+function WB.createFromTemplate(createdBy, tp, tplId, label, over)
     tp = tostring(tp)
     local type_ = Config.Types[tp]
     local tpl = Config.Templates[tp] and Config.Templates[tp][tostring(tplId)]
-    if not type_ or not tpl then return cb(fail('Modèle inconnu')) end
-    if WB.entityCount() >= Config.Max.Entities then return cb(fail('Nombre maximum de modules atteint')) end
+    if not type_ or not tpl then return nil, 'Modèle inconnu' end
+    if WB.entityCount() >= Config.Max.Entities then return nil, 'Nombre maximum de modules atteint' end
     label = str(label, 100, tpl.label)
     local name = uniqueName(label)
-    local settings = cleanSettings(tp, copy(tpl.settings or {}))
-    local points = cleanPoints(tp, copy(tpl.points or {}))
+    local rawSettings, rawPoints = copy(tpl.settings or {}), copy(tpl.points or {})
+    for k, v in pairs(over and over.settings or {}) do rawSettings[k] = v end
+    if over and over.points then rawPoints = over.points end
+    local settings = cleanSettings(tp, rawSettings)
+    local points = cleanPoints(tp, rawPoints)
     local id = MySQL.insert.await('INSERT INTO worldbuilder_entities (type, name, label, enabled, settings, points, stats, created_by) VALUES (?, ?, ?, 0, ?, ?, ?, ?)', {
-        tp, name, label, json.encode(settings), json.encode(points), '{}', GetPlayerName(src) or 'console',
+        tp, name, label, json.encode(settings), json.encode(points), '{}', createdBy or 'console',
     })
-    if not id then return cb(fail('Erreur base de données')) end
+    if not id then return nil, 'Erreur base de données' end
     local e = { id = id, type = tp, name = name, label = label, enabled = false, settings = settings, points = points, stats = {} }
     WB.Entities[id], WB.ByName[name] = e, id
-    WB.log(e, ESX.GetPlayerFromId(src), 'create', ('%s (%s)'):format(label, tplId))
+    return e
+end
+
+ESX.RegisterServerCallback('worldbuilder:create', function(src, cb, tp, tplId, label)
+    if not admin(src, cb) then return end
+    local e, err = WB.createFromTemplate(GetPlayerName(src), tp, tplId, label)
+    if not e then return cb(fail(err)) end
+    WB.log(e, ESX.GetPlayerFromId(src), 'create', ('%s (%s)'):format(e.label, tplId))
     cb({ ok = true, entity = e, missing = missingItems(e) })
 end)
 

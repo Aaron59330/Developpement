@@ -304,3 +304,30 @@ Config.Superettes = {
         { 'Grand Senora', 1165.17, 2710.88, 38.16, 179.43 }, { 'Murrieta Heights', 1134.2, -982.91, 46.42, 277.24 },
     } },
 }
+
+-- ─────────────────────────────── Pré-placement : toutes les boutiques déjà sur la carte ───────────────────────────────
+-- Au premier démarrage, les supérettes (ci-dessus) et les boutiques ci-dessous sont créées, placées (blip + marker) et activées
+-- automatiquement, UNE seule fois (si tu en supprimes une, elle ne revient pas). Tout reste modifiable dans le builder.
+-- /sbseed (groupe admin) recrée celles qui manquent. Mets Config.AutoSeed = false pour tout désactiver.
+Config.AutoSeed = true
+Config.PresetShops = {
+    { id = 'ammu', label = 'Ammu-Nation', type = 'weapons', blip = { sprite = 110, color = 1 }, locations = {
+        { 'Little Seoul', -661.96, -933.53, 21.83, 177.05 }, { 'Cypress Flats', 809.68, -2159.13, 29.62, 1.43 }, { 'Sandy Shores', 1692.67, 3761.38, 34.71, 227.65 },
+        { 'Paleto Bay', -331.23, 6085.37, 31.45, 228.02 }, { 'Hawick', 253.63, -51.02, 69.94, 72.91 }, { 'Pillbox Hill', 23.00, -1105.67, 29.80, 162.91 },
+        { 'Tataviam', 2567.48, 292.59, 108.73, 349.68 }, { 'Route 68', -1118.59, 2700.05, 18.55, 221.89 }, { 'La Mesa', 841.92, -1035.32, 28.19, 1.56 },
+        { 'Morningwood', -1304.19, -395.12, 36.70, 75.03 }, { 'Chumash', -3173.31, 1088.85, 20.84, 244.18 },
+    } },
+    { id = 'clothes', label = 'Magasin de vêtements', type = 'clothing', blip = { sprite = 73, color = 47 }, locations = {
+        { 'Grapeseed', 1693.32, 4823.48, 42.06 }, { 'Hawick', -712.22, -155.35, 38.42 }, { 'Vespucci', -1192.94, -772.69, 18.33 }, { 'Downtown Vinewood', 425.24, -806.01, 29.49 },
+        { 'Rockford Hills', -162.66, -303.40, 39.73 }, { 'Davis', 75.95, -1392.89, 29.38 }, { 'Del Perro', -822.19, -1074.13, 11.33 }, { 'Morningwood', -1450.71, -236.83, 49.81 },
+        { 'Paleto Bay', 4.25, 6512.81, 31.88 }, { 'Harmony', 615.18, 2762.93, 42.09 }, { 'Grand Senora', 1196.79, 2709.56, 38.22 }, { 'Chumash', -3171.45, 1043.86, 20.86 },
+        { 'Route 68', -1100.96, 2710.21, 19.11 }, { 'Vespucci Canals', -1207.65, -1456.88, 5.38 }, { 'Hawick Ouest', 121.76, -224.60, 54.56 },
+    } },
+    { id = 'barber', label = 'Coiffeur', type = 'barber', blip = { sprite = 71, color = 0 }, locations = {
+        { 'Hawick', -814.30, -183.80, 37.60 }, { 'Davis', 136.80, -1708.40, 29.30 }, { 'Vespucci', -1282.60, -1116.80, 7.00 }, { 'Sandy Shores', 1931.50, 3729.70, 32.80 },
+        { 'Mirror Park', 1212.80, -472.90, 66.20 }, { 'Rockford Hills', -32.90, -152.30, 57.10 }, { 'Paleto Bay', -278.10, 6228.50, 31.70 },
+    } },
+    { id = 'hardware', label = 'Quincaillerie', type = 'hardware', blip = { sprite = 402, color = 17 }, locations = {
+        { 'Strawberry', 45.68, -1749.04, 29.61, 53.13 }, { 'Grand Senora', 2747.71, 3472.85, 55.67, 255.08 }, { 'Paleto Bay', -421.83, 6136.13, 31.88, 228.20 },
+    } },
+}

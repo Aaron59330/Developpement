@@ -66,3 +66,6 @@ Avec `p_outfits` démarré (`Config.ClothingItems.mode = 'auto'`), valider une t
 
 ## Importer toutes les supérettes de GTA V
 `/shopbuilder` → **Nouvelle boutique** → **Importer les supérettes GTA** : crée en un clic **24/7** (9 points), **LTD Gasoline** (5) et **Rob's Liquor** (5), avec tous les emplacements déjà placés (blip + marker), **activées**. Les vendeurs (PNJ) sont désactivés par défaut. Les enseignes déjà importées (même nom) sont ignorées. Liste et coordonnées modifiables dans `Config.Superettes` (`config.lua`).
+
+## Pré-placement automatique
+Au premier démarrage, **supérettes, Ammu-Nation (11), magasins de vêtements (15), coiffeurs (7) et quincailleries (3)** sont créés, placés (blip + marker) et activés, une seule fois. `Config.PresetShops` / `Config.Superettes` pour modifier la liste, `Config.AutoSeed = false` pour désactiver, `/sbseed` (admin) pour recréer ce qui manque.

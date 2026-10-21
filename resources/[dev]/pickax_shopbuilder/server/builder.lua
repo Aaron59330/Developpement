@@ -470,3 +470,50 @@ end)
 AddEventHandler('onResourceStart', function(res)
     if res == 'ox_inventory' or res == 'es_extended' then catalogCache = nil end
 end)
+
+
+-- ─────────────────────────────── Pré-placement automatique ───────────────────────────────
+-- Crée les boutiques de Config.Superettes + Config.PresetShops (placées, avec blip, activées). Une seule fois, sauf /sbseed.
+local function seedShops(src, force)
+    local all = {}
+    for _, p in ipairs(Config.Superettes or {}) do all[#all + 1] = p end
+    for _, p in ipairs(Config.PresetShops or {}) do all[#all + 1] = p end
+    local row = MySQL.single.await("SELECT v FROM shopbuilder_settings WHERE k = 'seeded'")
+    local done = row and json.decode(row.v) or {}
+    if type(done) ~= 'table' then done = {} end
+    local made = {}
+    for _, preset in ipairs(all) do
+        if force or not done[preset.id] then
+            local exists = false
+            for _, sh in pairs(SB.Shops) do if sh.label == preset.label then exists = true break end end
+            if not exists then
+                local locs = {}
+                for _, l in ipairs(preset.locations) do
+                    locs[#locs + 1] = { label = l[1], tag = preset.label, coords = { x = l[2], y = l[3], z = l[4], h = l[5] or 0.0 } }
+                end
+                local shop = createShop(src, preset.type, preset.label, { locations = locs, enabled = true, settings = { tag = 'Préréglage', ped = { enabled = false }, blip = preset.blip } })
+                if shop then made[#made + 1] = ('%s (%d)'):format(preset.label, #shop.locations) end
+            end
+            done[preset.id] = true
+        end
+    end
+    MySQL.update.await("INSERT INTO shopbuilder_settings (k, v) VALUES ('seeded', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)", { json.encode(done) })
+    if #made > 0 then
+        SB.syncAll()
+        print(('^2[shopbuilder] Pré-placement : %s^0'):format(table.concat(made, ', ')))
+    end
+    return made
+end
+
+CreateThread(function()
+    while not SB.ready do Wait(500) end
+    Wait(1500)
+    if Config.AutoSeed then seedShops(0, false) end
+end)
+
+RegisterCommand('sbseed', function(src)
+    if src ~= 0 and not SB.isAdmin(src) then return end
+    local made = seedShops(src, true)
+    local msg = #made > 0 and ('Créées : ' .. table.concat(made, ', ')) or 'Rien à créer : tout est déjà en place.'
+    if src == 0 then print('[shopbuilder] ' .. msg) else TriggerClientEvent('esx:showNotification', src, msg) end
+end, false)

@@ -21,6 +21,7 @@ server_scripts {
     'server/driving.lua',
     'server/fuel.lua',
     'server/gazoline.lua',
+    'server/preset.lua',
     'server/carwash.lua',
     'server/locksmith.lua',
     'server/jobcenter.lua',

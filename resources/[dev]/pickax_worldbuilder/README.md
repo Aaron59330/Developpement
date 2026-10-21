@@ -80,3 +80,6 @@ Arrête `pickax_pvp` avant de lancer `worldbuilder`. Le module **Zones PVP** (mo
 - Les stations (module « Station essence ») se vident à chaque plein ; les livreurs sont prévenus sous 20 %.
 - **Réserve de secours** : il reste toujours au moins une station avec de l'essence (la station de plus grande cuve est remplie à 15 % si toutes sont à sec).
 - Tout se règle dans `Config.Gazoline` (`config.lua`).
+
+## Pré-placement automatique
+Au premier démarrage, **27 stations essence** (une cuve par station) et **8 agences bancaires** sont créées et activées, une seule fois. `Config.Preset` pour modifier, `/wbseed` (admin) pour recréer ce qui manque.
