@@ -117,6 +117,7 @@ AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
     installTables()
     MG.loadAll()
+    Progress.load()
     MG.ready = true
     MG.sync()
     print(('^2[minigames]^7 %d mini-jeu(x) chargé(s)'):format((function() local n = 0 for _ in pairs(MG.Defs) do n = n + 1 end return n end)()))

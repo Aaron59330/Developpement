@@ -36,6 +36,12 @@ RegisterCommand(Config.Command, function()
 end, false)
 if Config.OpenKey then RegisterKeyMapping(Config.Command, 'Ouvrir le Mini-jeux Builder', 'keyboard', Config.OpenKey) end
 
+RegisterCommand(Config.ProfileCommand, function()
+    if uiMode then return CloseUI() end
+    openUI('lobby', { profileOnly = true })
+end, false)
+if Config.ProfileKey then RegisterKeyMapping(Config.ProfileCommand, 'Profil mini-jeux (niveau, défis, succès)', 'keyboard', Config.ProfileKey) end
+
 RegisterCommand('minigames_leave', function()
     if MGC.joined or MGC.session then TriggerServerEvent('minigames:quit') end
 end, false)
@@ -46,6 +52,7 @@ local NuiRemote = {
     catalog = true, list = true, get = true, draft = true, save = true, delete = true, duplicate = true, toggle = true,
     resetStats = true, logs = true, stats = true,
     lobby = true, join = true, leave = true,
+    profile = true, progGet = true, progSave = true, seasonEnd = true, progReset = true,
 }
 local NuiLocal = {}
 

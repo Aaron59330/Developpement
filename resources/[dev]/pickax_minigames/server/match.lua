@@ -208,16 +208,32 @@ function MG.finish(g, why)
     for pos, r in ipairs(rows) do
         local p = g.players[r.src]
         local won = winners[r.src] == true
-        local gain = (won and S.rewardWin or S.rewardLose) + S.rewardPerPoint * math.max(0, r.score or 0) + (won and share or 0)
+        local ident = p and MG.identifier(r.src)
+        local mult = 1.0
+        if ident then mult = Progress.multiplier(ident, def, won) end
+        local gain = (won and S.rewardWin or S.rewardLose) + S.rewardPerPoint * math.max(0, r.score or 0)
         if T.engine == 'race' and not r.finished then gain = S.rewardLose end
-        gain = math.floor(gain)
+        gain = math.floor(gain * mult + (won and share or 0))
         local x = ESX.GetPlayerFromId(r.src)
         if x and gain > 0 then x.addAccountMoney(Config.RewardAccount, gain, 'minigames-reward') end
         r.won, r.gain, r.pos = won, gain, pos
-        summary[#summary + 1] = { name = r.name, team = r.team, score = r.score, kills = r.kills, deaths = r.deaths, time = r.time, finished = r.finished, won = won, gain = gain, pos = pos }
-        local ident = p and MG.identifier(r.src)
+        local entry = { name = r.name, team = r.team, score = r.score, kills = r.kills, deaths = r.deaths, time = r.time, finished = r.finished, won = won, gain = gain, pos = pos, mult = mult }
+        summary[#summary + 1] = entry
         if ident then
             local bt = (r.finished and r.time) or 0
+            -- record battu : annonce serveur
+            if Progress.cfg.settings.announce.records and (T.engine ~= 'race' or r.finished) then
+                local prev
+                if T.engine == 'race' then prev = MySQL.scalar.await('SELECT MIN(best_time) FROM minigames_stats WHERE game_id = ? AND best_time > 0', { g.id })
+                else prev = MySQL.scalar.await('SELECT MAX(best) FROM minigames_stats WHERE game_id = ?', { g.id }) end
+                prev = tonumber(prev)
+                local beaten = prev and prev > 0 and ((T.engine == 'race' and bt > 0 and bt < prev) or (T.engine ~= 'race' and r.score > prev))
+                if beaten then
+                    local v = T.engine == 'race' and ('%.2fs'):format(bt / 1000) or (r.score .. ' pts')
+                    TriggerClientEvent('esx:showNotification', -1, ('~y~Record !~s~ %s bat le record de ~b~%s~s~ : %s'):format(r.name, def.name, v))
+                end
+            end
+            entry.prog = Progress.record(ident, r.name, { def = def, won = won, score = r.score, kills = r.kills, mult = mult })
             MySQL.update('INSERT INTO minigames_stats (game_id, identifier, name, plays, wins, best, total, best_time) VALUES (?, ?, ?, 1, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), plays = plays + 1, wins = wins + VALUES(wins), best = GREATEST(best, VALUES(best)), total = total + VALUES(total), best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time)',
                 { g.id, ident, r.name, won and 1 or 0, math.max(0, r.score or 0), math.max(0, r.score or 0), bt })
         end
@@ -226,6 +242,7 @@ function MG.finish(g, why)
     local payload = { id = g.id, name = def.name, type = def.type, engine = T.engine, why = why, rows = summary, teams = teams, teamScore = g.teamScore, ret = Config.ReturnAfterEnd }
     for src in pairs(g.players) do
         MG.InGame[src] = nil
+        payload.you = g.players[src] and g.players[src].name or nil
         TriggerClientEvent('minigames:end', src, payload)
     end
     if #summary > 0 then
@@ -374,6 +391,7 @@ ESX.RegisterServerCallback('minigames:lobby', function(src, cb, id)
         engine = Config.Types[def.type].engine, settings = def.settings,
         state = g and g.state or 'idle', players = list, joined = MG.InGame[src] == id,
         top = MG.top(id), mine = mine, cooldown = cool, currency = Config.Currency,
+        me = Progress.brief(src), featured = Progress.featured() == id and Progress.cfg.settings.weekly.mult or nil,
         left = g and g.waitEnd and math.max(0, g.waitEnd - now()) or nil,
     })
 end)

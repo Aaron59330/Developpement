@@ -26,6 +26,11 @@ const IC = {
   moto: '<circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M6 16l4-6h5l3 6M10 10L9 7H7"/>',
   quad: '<circle cx="6" cy="17" r="2.6"/><circle cx="18" cy="17" r="2.6"/><path d="M6 17h12M8.5 17l2.5-6h4l2 6M11 11V8h3"/>',
   boat: '<path d="M3 15h18l-3 5H6zM12 15V4l6 9z"/>',
+  golf: '<path d="M8 21V4l8 4-8 4M5 21h8"/><circle cx="17" cy="19" r="1.6"/>',
+  drag: '<path d="M3 17h18M5 17l1.5-5h8l3 3.5M3 8h5M2 11h4"/><circle cx="8" cy="17.5" r="1.7"/><circle cx="16" cy="17.5" r="1.7"/>',
+  parkour: '<circle cx="14" cy="5" r="1.8"/><path d="M8 21l3-6-2-3 4-3 3 2 3 1M11 15l4 1 1 5M9 12l-3 1"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -40,9 +45,9 @@ const IC = {
   trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/>',
 };
 const ic = n => `<svg class="ic" viewBox="0 0 24 24">${IC[n] || ''}</svg>`;
-const TCOL = { basket: ['#ff9f0a', '#ff6a00'], football: ['#34c759', '#1f9d45'], tennis: ['#c8e61f', '#8fb300'], boxing: ['#ff453a', '#c9211a'], paintball: ['#ff375f', '#c4113a'], laser: ['#7d7aff', '#4a46d6'], race: ['#0a84ff', '#0558c4'], bowling: ['#5e5ce6', '#3634a3'], darts: ['#ff6482', '#c93a5a'], brawl: ['#ff9500', '#b85c00'], padel: ['#40c8e0', '#1a8fa8'], volley: ['#ffd60a', '#c79a00'], kart: ['#ff3b30', '#b0150d'], car: ['#64d2ff', '#2a8fbf'], moto: ['#bf5af2', '#7d2ea8'], quad: ['#a2845e', '#6b5236'], boat: ['#32ade6', '#1b6f99'] };
+const TCOL = { basket: ['#ff9f0a', '#ff6a00'], football: ['#34c759', '#1f9d45'], tennis: ['#c8e61f', '#8fb300'], boxing: ['#ff453a', '#c9211a'], paintball: ['#ff375f', '#c4113a'], laser: ['#7d7aff', '#4a46d6'], race: ['#0a84ff', '#0558c4'], bowling: ['#5e5ce6', '#3634a3'], darts: ['#ff6482', '#c93a5a'], brawl: ['#ff9500', '#b85c00'], padel: ['#40c8e0', '#1a8fa8'], volley: ['#ffd60a', '#c79a00'], kart: ['#ff3b30', '#b0150d'], car: ['#64d2ff', '#2a8fbf'], moto: ['#bf5af2', '#7d2ea8'], quad: ['#a2845e', '#6b5236'], boat: ['#32ade6', '#1b6f99'], golf: ['#30d158', '#1b8a3a'], drag: ['#ff9f0a', '#b86a00'], parkour: ['#ac8e68', '#6e5a3c'] };
 const ICON_OF = { lasertag: 'laser', karting: 'kart' };
-const tile = (type, cls = '') => { const t = ICON_OF[type] || type; const c = TCOL[t] || ['#8e8e93', '#636366']; return `<div class="tile ${cls}" style="background:linear-gradient(160deg,${c[0]},${c[1]})">${ic(t)}</div>`; };
+const tile = (type, cls = '') => { const t = ICON_OF[type] || type; const c = TCOL[type] || TCOL[t] || ['#8e8e93', '#636366']; return `<div class="tile ${cls}" style="background:linear-gradient(160deg,${c[0]},${c[1]})">${ic(t)}</div>`; };
 const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const fmtMs = ms => { ms = Math.max(0, Math.floor(ms)); const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60, c = Math.floor((ms % 1000) / 10); return m + ':' + String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0'); };
 
@@ -72,7 +77,7 @@ function askConfirm(title, text, label, fn, danger) {
 // ══════════════════════════════════════════════════════════════════════════════
 //  BUILDER
 // ══════════════════════════════════════════════════════════════════════════════
-const S = { catalog: null, list: [], cur: null, curId: null, dirty: false, tab: 'general', q: '', stats: null };
+const S = { mode: 'games', prog: null, pt: 'xp', pgames: [], pfeat: null, catalog: null, list: [], cur: null, curId: null, dirty: false, tab: 'general', q: '', stats: null };
 const typeOf = k => (S.catalog ? S.catalog.types.find(t => t.key === k) : null);
 
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
@@ -107,7 +112,7 @@ function renderBuilder() {
     const T = typeOf(g.type) || {};
     const st = g.state && g.state !== 'idle' ? 'live' : (g.enabled ? 'on' : (g.problems && g.problems.length ? 'warn' : ''));
     const lbl = g.state && g.state !== 'idle' ? `En jeu · ${g.players}` : (g.enabled ? 'Actif' : (g.problems && g.problems.length ? 'Incomplet' : 'Désactivé'));
-    return `<div class="item ${S.curId === g.id ? 'on' : ''}" data-open="${esc(g.id)}">${tile(g.type)}<div><div class="nm">${esc(g.name)}</div><div class="sb"><span class="dot ${st}"></span>${esc(T.label || g.type)} · ${lbl}</div></div></div>`;
+    return `<div class="item ${S.mode !== 'prog' && S.curId === g.id ? 'on' : ''}" data-open="${esc(g.id)}">${tile(g.type)}<div><div class="nm">${esc(g.name)}</div><div class="sb"><span class="dot ${st}"></span>${esc(T.label || g.type)} · ${lbl}</div></div></div>`;
   }).join('') || '<div class="empty" style="padding:30px 10px">Aucun mini-jeu.<br>Crée-en un avec le bouton ci-dessous.</div>';
 
   $('#builder').innerHTML = `<div class="window">
@@ -116,8 +121,8 @@ function renderBuilder() {
     <div class="body">
       <div class="side"><div class="search">${ic('search')}<input id="q" placeholder="Rechercher" value="${esc(S.q)}"></div>
         <div class="list">${items}</div>
-        <div class="sidefoot"><button class="btn pri" style="flex:1" data-act="new">${ic('plus')}Nouveau mini-jeu</button><button class="btn" data-act="logs" title="Journal">${ic('list')}</button></div></div>
-      <div class="main">${cur ? editorHtml() : homeHtml()}</div>
+        <div class="sidefoot"><button class="btn pri" style="flex:1" data-act="new">${ic('plus')}Nouveau mini-jeu</button><button class="btn ${S.mode === 'prog' ? 'on' : ''}" data-act="prog" title="Progression (XP, défis, succès, saison)">${ic('sparkle')}</button><button class="btn" data-act="logs" title="Journal">${ic('list')}</button></div></div>
+      <div class="main">${S.mode === 'prog' && S.prog ? progHtml() : (cur ? editorHtml() : homeHtml())}</div>
     </div></div>`;
   bindBuilder();
 }
@@ -263,19 +268,23 @@ function bindBuilder() {
   const q = $('#q', root);
   if (q) q.oninput = () => { S.q = q.value; const pos = q.selectionStart; renderBuilder(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); };
   root.onclick = async e => {
-    const t = e.target.closest('[data-act],[data-open],[data-tab],[data-sw],[data-new],[data-newtpl],[data-apply],[data-here],[data-aim],[data-tp],[data-clear],[data-del],[data-add],[data-team]');
+    const t = e.target.closest('[data-ptab],[data-psw],[data-padd],[data-pdel],[data-act],[data-open],[data-tab],[data-sw],[data-new],[data-newtpl],[data-apply],[data-here],[data-aim],[data-tp],[data-clear],[data-del],[data-add],[data-team]');
     if (!t) return;
     const ds = t.dataset;
+    if (ds.ptab || ds.psw || ds.padd || ds.pdel) return progClick(ds);
     if (ds.act === 'close') return rpc('close');
     if (ds.act === 'hub') return rpc('bbHub');
-    if (ds.act === 'new') return guard(newPicker);
+    if (ds.act === 'new') return guard(() => { S.mode = 'games'; newPicker(); });
+    if (ds.act === 'prog') return guard(loadProg);
     if (ds.act === 'logs') return showLogs();
     if (ds.act === 'back') return guard(() => { S.cur = null; S.curId = null; S.dirty = false; renderBuilder(); });
-    if (ds.act === 'save') return save();
+    if (ds.act === 'save') return S.mode === 'prog' ? progSave() : save();
+    if (ds.act === 'progReset') return askConfirm('Réinitialiser la progression ?', 'Tous les réglages XP, niveaux, défis, succès et saison reviennent aux valeurs par défaut du serveur.', 'Réinitialiser', async () => { const r = await rpc('progReset'); if (!r.ok) return toast(r.error, 'err'); S.prog = r.cfg; S.dirty = false; renderBuilder(); toast('Valeurs par défaut restaurées'); }, true);
+    if (ds.act === 'seasonEnd') return askConfirm('Terminer la saison maintenant ?', 'Les récompenses du top sont versées et les classements de saison repartent à zéro.', 'Terminer la saison', async () => { await rpc('seasonEnd'); toast('Saison terminée'); loadProg(); }, true);
     if (ds.act === 'del') return askConfirm('Supprimer ce mini-jeu ?', 'Sa définition et son classement seront définitivement effacés.', 'Supprimer', async () => { const r = await rpc('delete', S.curId); if (!r.ok) return toast(r.error, 'err'); S.cur = null; S.curId = null; S.dirty = false; await refreshList(); renderBuilder(); toast('Mini-jeu supprimé'); }, true);
     if (ds.act === 'dup') { const r = await rpc('duplicate', S.curId); if (!r.ok) return toast(r.error, 'err'); await refreshList(); await openGame(r.id); return toast('Copie créée (désactivée)'); }
     if (ds.act === 'reset') return askConfirm('Réinitialiser le classement ?', 'Toutes les statistiques de ce mini-jeu seront effacées.', 'Réinitialiser', async () => { await rpc('resetStats', S.curId); S.stats = []; renderBuilder(); toast('Classement réinitialisé'); }, true);
-    if (ds.open) return guard(() => openGame(ds.open));
+    if (ds.open) return guard(() => { S.mode = 'games'; return openGame(ds.open); });
     if (ds.tab) { S.tab = ds.tab; snd('tab'); return renderBuilder(); }
     if (ds.sw) { const p = ds.sw; setP(S.cur, p, !getP(S.cur, p)); S.dirty = true; snd(getP(S.cur, p) ? 'on' : 'off'); return renderBuilder(); }
     if (ds.new) return guard(() => newGame(ds.new));
@@ -294,7 +303,9 @@ function bindBuilder() {
     if (ds.team) { const [p, v] = ds.team.split('|'); setP(S.cur, p + '.team', +v); S.dirty = true; return renderBuilder(); }
   };
   root.oninput = e => {
-    const el = e.target; const p = el.dataset && el.dataset.p; if (!p || !S.cur) return;
+    const el = e.target;
+    if (el.dataset && el.dataset.pp) return progInput(el);
+    const p = el.dataset && el.dataset.p; if (!p || !S.cur) return;
     let v = el.value;
     if (el.dataset.num) { v = parseFloat(v); if (isNaN(v)) return; }
     setP(S.cur, p, v);
@@ -309,10 +320,132 @@ async function showLogs() {
   sheet('Journal', 'Dernières actions et parties.', `<div class="grp"><table class="tbl">${rows || '<tr><td class="empty">Rien pour le moment</td></tr>'}</table></div>`, [{ label: 'Fermer', cls: 'pri' }], true);
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  PROGRESSION (admin) : XP, niveaux, défis, succès, saison — tout est modifiable ici
+// ══════════════════════════════════════════════════════════════════════════════
+const PTABS = [['xp', 'XP & coins'], ['levels', 'Niveaux'], ['challenges', 'Défis'], ['ach', 'Succès'], ['season', 'Semaine & saison']];
+const CKINDS = [['plays', 'Parties jouées'], ['wins', 'Victoires'], ['points', 'Points marqués'], ['kills', 'Touches (paintball / laser)']];
+const AKINDS = [['plays_total', 'Parties jouées (total)'], ['wins_total', 'Victoires (total)'], ['points_total', 'Points (total)'], ['best_streak', 'Série de victoires'], ['level', 'Niveau atteint']];
+
+async function loadProg() {
+  const r = await rpc('progGet');
+  if (!r.ok) return toast(r.error || 'Erreur', 'err');
+  S.mode = 'prog'; S.prog = r.cfg; S.pgames = r.games || []; S.pfeat = r.featured; S.dirty = false;
+  renderBuilder();
+}
+async function progSave() {
+  const r = await rpc('progSave', S.prog);
+  if (!r.ok) return toast(r.error || 'Erreur', 'err');
+  S.prog = r.cfg; S.dirty = false; renderBuilder(); toast('Progression enregistrée');
+}
+const pn = (path, label, hint, min, max, step) => `<div class="row"><div class="l"><b>${esc(label)}</b>${hint ? `<small>${esc(hint)}</small>` : ''}</div><input type="number" data-pp="${path}" data-num="1" min="${min}" max="${max}" step="${step || 1}" value="${esc(getP(S.prog, path))}"></div>`;
+const pb = (path, label, hint) => `<div class="row"><div class="l"><b>${esc(label)}</b>${hint ? `<small>${esc(hint)}</small>` : ''}</div><div class="sw ${getP(S.prog, path) ? 'on' : ''}" data-psw="${path}"></div></div>`;
+const sel = (path, opts, v) => `<select data-pp="${path}">${opts.map(o => `<option value="${esc(o[0])}" ${String(v) === String(o[0]) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+const mini = (label, inner) => `<label class="mini">${label}${inner}</label>`;
+const mnum = (path, w, min, max) => `<input type="number" data-pp="${path}" data-num="1" min="${min}" max="${max}" style="width:${w}px" value="${esc(getP(S.prog, path))}">`;
+const gameOpts = () => [['any', 'Tous les jeux']].concat(S.catalog.types.map(t => [t.key, t.label])).concat(S.pgames.map(g => [g.id, '↳ ' + g.name]));
+
+function progHtml() {
+  const c = S.prog, st = c.settings;
+  let body = '';
+  if (S.pt === 'xp') {
+    body = `<div class="grp-t">Gain d'XP par partie</div><div class="grp">
+      ${pb('settings.xp.enabled', 'XP activée', 'Désactive pour couper toute la progression.')}
+      ${pn('settings.xp.perGame', 'XP de participation', 'Gagnée à chaque partie terminée.', 0, 10000)}
+      ${pn('settings.xp.win', 'XP bonus de victoire', '', 0, 10000)}
+      ${pn('settings.xp.perPoint', 'XP par point marqué', '', 0, 1000, .5)}
+      ${pn('settings.xp.maxPerGame', 'XP maximum par partie', 'Plafond avant bonus.', 0, 100000)}
+      ${pn('settings.xp.streakPct', 'Bonus par victoire consécutive (%)', 'S\'applique à l\'XP et aux gains d\'argent.', 0, 200)}
+      ${pn('settings.xp.streakMax', 'Série maximale prise en compte', '', 0, 20)}</div>
+    <div class="grp-t">Courbe de niveaux</div><div class="grp">
+      ${pn('settings.curve.base', 'XP du niveau 1 → 2', '', 10, 1000000)}
+      ${pn('settings.curve.growth', 'Multiplicateur par niveau', '1.25 = chaque niveau demande 25 % de plus.', 1, 3, .01)}
+      ${pn('settings.curve.maxLevel', 'Niveau maximum', '', 1, 200)}</div>
+    <div class="grp-t">Palier d'XP → coins boutique</div><div class="grp">
+      ${pb('settings.milestone.enabled', 'Paliers activés', 'Tous les X points d\'XP cumulés, le joueur reçoit des coins boutique.')}
+      ${pn('settings.milestone.xp', 'XP nécessaire par palier', '', 100, 10000000)}
+      ${pn('settings.milestone.coins', 'Coins boutique par palier', 'Crédités directement sur la boutique du joueur.', 0, 100000)}
+      ${pn('settings.milestone.money', 'Argent par palier', '', 0, 100000000)}</div>`;
+  } else if (S.pt === 'levels') {
+    body = `<div class="grp-t">Récompenses par niveau</div><div class="grp">${c.levels.map((l, i) => `<div class="pt"><span class="n">${i + 1}</span>
+      ${mini('Niveau', mnum(`levels.${i}.level`, 64, 1, 200))}
+      <label class="mini grow">Titre<input type="text" data-pp="levels.${i}.title" maxlength="24" style="width:100%;text-align:left;padding:0 8px" value="${esc(l.title)}"></label>
+      ${mini('Argent', mnum(`levels.${i}.money`, 90, 0, 100000000))}${mini('Coins', mnum(`levels.${i}.coins`, 70, 0, 100000))}
+      <button class="ibtn red" data-pdel="levels.${i}">${ic('trash')}</button></div>`).join('') || '<div class="empty" style="padding:18px">Aucun palier de niveau</div>'}
+      <div class="ptbar"><button class="btn sm" data-padd="levels">${ic('plus')}Ajouter un palier</button></div></div>
+      <div style="color:var(--sub);font-size:12.5px;line-height:1.5;padding:12px 16px">Le titre s'affiche dans le profil et le lobby. Il est conservé jusqu'au palier suivant.</div>`;
+  } else if (S.pt === 'challenges') {
+    const row = (e, i) => `<div class="pt"><span class="n ${e.scope === 'weekly' ? 't2' : ''}">${e.scope === 'weekly' ? 'S' : 'J'}</span>
+      <label class="mini grow">Nom<input type="text" data-pp="challenges.${i}.name" maxlength="50" style="width:100%;text-align:left;padding:0 8px" value="${esc(e.name)}"></label>
+      ${mini('Période', sel(`challenges.${i}.scope`, [['daily', 'Quotidien'], ['weekly', 'Hebdo']], e.scope))}
+      ${mini('Type', sel(`challenges.${i}.kind`, CKINDS, e.kind))}
+      ${mini('Jeu', sel(`challenges.${i}.game`, gameOpts(), e.game))}
+      ${mini('Objectif', mnum(`challenges.${i}.target`, 76, 1, 1000000))}
+      ${mini('XP', mnum(`challenges.${i}.xp`, 66, 0, 100000))}${mini('Argent', mnum(`challenges.${i}.money`, 80, 0, 100000000))}${mini('Coins', mnum(`challenges.${i}.coins`, 60, 0, 100000))}
+      <div class="sw ${e.enabled ? 'on' : ''}" data-psw="challenges.${i}.enabled" style="transform:scale(.8)"></div>
+      <button class="ibtn red" data-pdel="challenges.${i}">${ic('trash')}</button></div>`;
+    body = `<div class="grp-t">Défis (chaque joueur reçoit 3 défis quotidiens et 2 hebdo tirés dans cette liste)</div><div class="grp">${c.challenges.map(row).join('') || '<div class="empty" style="padding:18px">Aucun défi</div>'}
+      <div class="ptbar"><button class="btn sm" data-padd="challenges">${ic('plus')}Ajouter un défi</button></div></div>`;
+  } else if (S.pt === 'ach') {
+    const row = (e, i) => `<div class="pt"><span class="n">${ic('trophy').replace('class="ic"', 'class="ic" style="width:14px;height:14px"')}</span>
+      <label class="mini grow">Nom<input type="text" data-pp="achievements.${i}.name" maxlength="50" style="width:100%;text-align:left;padding:0 8px" value="${esc(e.name)}"></label>
+      <label class="mini grow">Description<input type="text" data-pp="achievements.${i}.desc" maxlength="80" style="width:100%;text-align:left;padding:0 8px" value="${esc(e.desc || '')}"></label>
+      ${mini('Condition', sel(`achievements.${i}.kind`, AKINDS, e.kind))}${mini('Valeur', mnum(`achievements.${i}.target`, 76, 1, 1000000))}
+      ${mini('XP', mnum(`achievements.${i}.xp`, 66, 0, 100000))}${mini('Argent', mnum(`achievements.${i}.money`, 80, 0, 100000000))}${mini('Coins', mnum(`achievements.${i}.coins`, 60, 0, 100000))}
+      <div class="sw ${e.enabled ? 'on' : ''}" data-psw="achievements.${i}.enabled" style="transform:scale(.8)"></div>
+      <button class="ibtn red" data-pdel="achievements.${i}">${ic('trash')}</button></div>`;
+    body = `<div class="grp-t">Succès débloquables</div><div class="grp">${c.achievements.map(row).join('') || '<div class="empty" style="padding:18px">Aucun succès</div>'}
+      <div class="ptbar"><button class="btn sm" data-padd="achievements">${ic('plus')}Ajouter un succès</button></div></div>`;
+  } else {
+    const w = st.weekly;
+    body = `<div class="grp-t">Mini-jeu de la semaine</div><div class="grp">
+      ${pb('settings.weekly.enabled', 'Activé', 'Les gains et l\'XP du jeu choisi sont multipliés toute la semaine.')}
+      <div class="row"><div class="l"><b>Choix du jeu</b><small>Aléatoire : tiré chaque semaine parmi les mini-jeux actifs.</small></div>${sel('settings.weekly.mode', [['random', 'Aléatoire'], ['fixed', 'Fixe']], w.mode)}</div>
+      ${w.mode === 'fixed' ? `<div class="row"><div class="l"><b>Mini-jeu</b></div>${sel('settings.weekly.gameId', [['', '—']].concat(S.pgames.map(g => [g.id, g.name])), w.gameId)}</div>` : ''}
+      ${pn('settings.weekly.mult', 'Multiplicateur', 'Ex : 2 = gains et XP doublés.', 1, 10, .5)}</div>
+    ${S.pfeat ? `<div style="color:var(--sub);font-size:12.5px;padding:8px 16px">Cette semaine : <b style="color:var(--txt)">${esc((S.pgames.find(g => g.id === S.pfeat) || {}).name || S.pfeat)}</b></div>` : ''}
+    <div class="grp-t">Saison</div><div class="grp">
+      ${pb('settings.season.enabled', 'Saisons activées', 'Classement général remis à zéro à chaque fin de saison, avec récompenses au podium.')}
+      ${pn('settings.season.days', 'Durée d\'une saison (jours)', '', 1, 365)}
+      ${c.settings.season.rewards.map((r, i) => `<div class="pt"><span class="n">${esc(r.rank)}</span>${mini('Rang', mnum(`settings.season.rewards.${i}.rank`, 60, 1, 100))}${mini('Argent', mnum(`settings.season.rewards.${i}.money`, 100, 0, 100000000))}${mini('Coins', mnum(`settings.season.rewards.${i}.coins`, 70, 0, 100000))}<div class="grow"></div><button class="ibtn red" data-pdel="settings.season.rewards.${i}">${ic('trash')}</button></div>`).join('')}
+      <div class="ptbar"><button class="btn sm" data-padd="settings.season.rewards">${ic('plus')}Ajouter une récompense de rang</button><button class="btn sm red" data-act="seasonEnd">Terminer la saison maintenant</button></div></div>
+    <div class="grp-t">Annonces serveur</div><div class="grp">
+      ${pb('settings.announce.records', 'Annoncer les records battus', 'Notification à tous les joueurs.')}
+      ${pb('settings.announce.levels', 'Annoncer les niveaux ronds (5, 10, 15…)', '')}</div>`;
+  }
+  return `<div class="head"><div class="tile xl" style="background:linear-gradient(160deg,#ffd60a,#ff9f0a)">${ic('sparkle')}</div><div class="ttl"><div style="font-size:26px;font-weight:700;letter-spacing:-.02em">Progression</div><div class="meta">XP, niveaux, coins boutique, défis, succès, saisons — réglages en direct</div></div></div>
+    <div class="seg">${PTABS.map(([k, l]) => `<button class="${S.pt === k ? 'on' : ''}" data-ptab="${k}">${l}</button>`).join('')}</div>
+    <div class="pane">${body}</div>
+    <div class="foot"><button class="btn red" data-act="progReset">Valeurs par défaut</button><span class="note">${S.dirty ? 'Modifications non enregistrées' : ''}</span><div class="spacer"></div><button class="btn pri" data-act="save">${ic('check')}Enregistrer</button></div>`;
+}
+
+function progClick(ds) {
+  if (ds.ptab) { S.pt = ds.ptab; snd('tab'); return renderBuilder(); }
+  if (ds.psw) { setP(S.prog, ds.psw, !getP(S.prog, ds.psw)); S.dirty = true; snd('click'); return renderBuilder(); }
+  if (ds.pdel) { const ks = ds.pdel.split('.'); const i = +ks.pop(); getP(S.prog, ks.join('.')).splice(i, 1); S.dirty = true; return renderBuilder(); }
+  if (ds.padd) {
+    const defs = {
+      levels: { level: 2, title: '', money: 0, coins: 0 },
+      challenges: { id: '', name: 'Nouveau défi', scope: 'daily', kind: 'plays', game: 'any', target: 3, xp: 50, money: 200, coins: 0, enabled: true },
+      achievements: { id: '', name: 'Nouveau succès', desc: '', kind: 'wins_total', target: 10, xp: 100, money: 500, coins: 0, enabled: true },
+      'settings.season.rewards': { rank: 4, money: 500, coins: 0 },
+    };
+    getP(S.prog, ds.padd).push(Object.assign({}, defs[ds.padd])); S.dirty = true; return renderBuilder();
+  }
+}
+function progInput(el) {
+  let v = el.value;
+  if (el.dataset.num) { v = parseFloat(v); if (isNaN(v)) return; }
+  setP(S.prog, el.dataset.pp, v);
+  if (!S.dirty) { S.dirty = true; const n = $('.foot .note'); if (n) n.textContent = 'Modifications non enregistrées'; }
+  if (/weekly\.mode$/.test(el.dataset.pp)) renderBuilder();
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 //  LOBBY
 // ══════════════════════════════════════════════════════════════════════════════
-const L = { data: null, joined: false };
+const L = { data: null, joined: false, tab: 'game', prof: null };
 function statusText() {
   const d = L.data; if (!d) return '';
   if (d.state === 'running' || d.state === 'countdown') return '<b>Partie en cours</b> — patiente quelques instants';
@@ -322,27 +455,19 @@ function statusText() {
   return 'Le lobby est libre';
 }
 function renderLobby() {
+  if (L.tab === 'profile') return renderProfile();
   const d = L.data, st = d.settings, cur = d.currency || '$', race = d.engine === 'race';
   const fmtB = m => (m && (race ? m.best_time : m.best)) ? (race ? fmtMs(m.best_time) : m.best) : '–';
   const top = (d.top || []).slice(0, 6).map((r, i) => `<div class="row"><span class="rk p${i + 1}">${i + 1}</span><div class="l"><b>${esc(r.name)}</b></div><span class="coord ok">${race ? fmtMs(r.best_time) : r.best + ' pts'}</span></div>`).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Personne n\'a encore joué</div></div>';
   const pl = d.players.map(p => `<div class="row"><span class="av">${esc((p.name || '?')[0].toUpperCase())}</span><div class="l"><b>${esc(p.name)}</b></div>${p.team ? `<span class="tdot t${p.team}"></span>` : ''}</div>`).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Aucun joueur dans le lobby</div></div>';
   const full = d.players.length >= st.maxPlayers, busy = d.state === 'running' || d.state === 'countdown';
   const act = L.joined ? `<button class="btn red block" style="width:auto;padding:0 28px" data-l="leave">Quitter la file</button>` : `<button class="btn pri block" style="width:auto;padding:0 28px" data-l="join" ${(full || busy || d.cooldown > 0) ? 'disabled' : ''}>Rejoindre${st.entryFee > 0 ? ` · ${cur}${st.entryFee}` : ''}</button>`;
-  $('#lobby').innerHTML = `<div class="lob"><div class="lob-top">${tile(d.type, 'xl')}<div><h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p></div><button class="ibtn lob-x" data-l="close">${ic('x')}</button></div>
+  $('#lobby').innerHTML = `<div class="lob"><div class="lob-top">${tile(d.type, 'xl')}<div><h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p></div><div class="seg" style="margin:0 0 0 auto"><button class="on" data-l="tab" data-t="game">Mini-jeu</button><button data-l="tab" data-t="profile">Mon profil</button></div><button class="ibtn lob-x" style="margin-left:10px" data-l="close">${ic('x')}</button></div>
+    ${d.featured ? `<div class="banner ok" style="margin:0 28px 14px"><b>Mini-jeu de la semaine ×${d.featured}</b>Gains et XP multipliés sur ce jeu.</div>` : ''}${d.me ? `<div style="padding:0 28px 14px"><div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><span class="pill on">Niv. ${d.me.level}</span><span style="color:var(--sub);font-size:12.5px">${esc(d.me.title || '')}</span><span style="margin-left:auto;color:var(--sub);font-size:12.5px">${d.me.need ? d.me.cur + ' / ' + d.me.need + ' XP' : 'Niveau max'}</span></div>${bar(d.me.cur, d.me.need)}</div>` : ''}
     <div class="stats"><div class="stat"><small>Joueurs</small><b>${st.minPlayers === st.maxPlayers ? st.maxPlayers : st.minPlayers + '–' + st.maxPlayers}</b></div><div class="stat"><small>Durée</small><b>${race ? 'Au temps' : fmtT(d.engine === 'fight' ? st.rounds * st.roundTime : st.duration)}</b></div><div class="stat"><small>${st.entryFee > 0 ? 'Mise' : 'Entrée'}</small><b>${st.entryFee > 0 ? cur + st.entryFee : 'Gratuite'}</b></div></div>
     <div class="lob-body"><div><div class="grp-t">Dans le lobby</div><div class="grp plist">${pl}</div></div><div><div class="grp-t">Classement</div><div class="grp plist">${top}</div><div class="grp-t">Ton record</div><div class="grp"><div class="row"><div class="l"><b>${fmtB(d.mine)}</b><small>${d.mine ? d.mine.wins + ' victoire(s) · ' + d.mine.plays + ' partie(s)' : 'Jamais joué'}</small></div></div></div></div></div>
     <div class="lob-foot"><div class="st">${d.cooldown > 0 ? `Patiente <b>${d.cooldown}s</b> avant de rejouer` : statusText()}</div>${act}</div></div>`;
-  $('#lobby').onclick = async e => {
-    const b = e.target.closest('[data-l]');
-    if (!b) { if (e.target.id === 'lobby') rpc('close'); return; }
-    if (b.dataset.l === 'close') return rpc('close');
-    if (b.dataset.l === 'join') {
-      const r = await rpc('join', d.id);
-      if (!r.ok) return toast(r.error || 'Impossible de rejoindre', 'err');
-      L.joined = true; GS.waitName = d.name; snd('confirm'); renderLobby();
-    }
-    if (b.dataset.l === 'leave') { await rpc('leave'); L.joined = false; GS.wait = null; drawGame(); renderLobby(); snd('close'); }
-  };
+  $('#lobby').onclick = lobbyClick;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -398,7 +523,7 @@ function resultsHtml() {
   const head = race ? 'Temps' : (fight ? 'Rounds' : 'Score');
   const rows = r.rows.map(x => `<tr class="${x.name === GS.myName ? 'you' : ''}"><td><span class="rk p${x.pos}">${x.pos}</span></td><td>${x.team ? `<span class="tdot t${x.team}" style="display:inline-block;margin-right:8px"></span>` : ''}${esc(x.name)}</td><td class="r">${race ? (x.finished ? fmtMs(x.time) : 'Abandon') : x.score}</td><td class="r gain">${x.gain > 0 ? '+' + (S.catalog ? S.catalog.currency : '$') + x.gain : ''}</td></tr>`).join('');
   const t2 = r.teams ? ` · ${r.teamScore[0]} – ${r.teamScore[1]}` : '';
-  return `<div class="res"><div class="resc"><div class="top"><h2>${title}</h2><p>${esc(r.name)}${t2} · ${esc(r.why || '')}</p></div><table class="tbl"><tr><th style="width:44px">#</th><th>Joueur</th><th class="r">${head}</th><th class="r">Gain</th></tr>${rows}</table><div class="foot2">Retour au lobby dans quelques secondes</div></div></div>`;
+  return `<div class="res"><div class="resc"><div class="top"><h2>${title}</h2><p>${esc(r.name)}${t2} · ${esc(r.why || '')}</p></div><table class="tbl"><tr><th style="width:44px">#</th><th>Joueur</th><th class="r">${head}</th><th class="r">Gain</th></tr>${rows}</table>${progResHtml(win)}<div class="foot2">Retour au lobby dans quelques secondes</div></div></div>`;
 }
 
 function overlay(html, ms) {
@@ -428,7 +553,7 @@ window.addEventListener('message', e => {
     case 'open':
       hideAll();
       if (m.mode === 'builder') { $('#builder').classList.remove('hidden'); snd('open'); loadBuilder(); }
-      else if (m.mode === 'lobby') { L.data = m.data; L.joined = !!m.data.joined; if (L.joined) GS.waitName = m.data.name; $('#lobby').classList.remove('hidden'); renderLobby(); startTick(); snd('open'); }
+      else if (m.mode === 'lobby') { L.data = m.data; L.tab = m.data.profileOnly ? 'profile' : 'game'; L.prof = null; if (L.tab === 'profile') loadProfile(); L.joined = !!m.data.joined; if (L.joined) GS.waitName = m.data.name; $('#lobby').classList.remove('hidden'); renderLobby(); startTick(); snd('open'); }
       break;
     case 'close': hideAll(); snd('close'); break;
     case 'lobbyState': {
@@ -459,7 +584,7 @@ window.addEventListener('message', e => {
     case 'hurt': snd('warn'); break;
     case 'round': overlay(`<div class="banner-c"><b>${m.data.winner ? 'Round ' + m.data.round + ' : ' + esc(m.data.winner) : 'Round ' + m.data.round + ' : égalité'}</b>${m.data.ko ? '<small>K.O. !</small>' : ''}</div>`, 3600); snd('announce'); break;
     case 'end':
-      GS.res = m.data; GS.playing = true; drawGame(); snd('announce');
+      if (m.data.you) GS.myName = m.data.you; GS.res = m.data; GS.playing = true; drawGame(); snd('announce');
       setTimeout(() => { GS.res = null; GS.playing = false; GS.hud = null; GS.wait = null; L.joined = false; drawGame(); }, ((m.data.ret || 6) + 0.5) * 1000);
       break;
     case 'pkSound': break;
@@ -471,3 +596,76 @@ document.addEventListener('keydown', e => {
     if (!$('#builder').classList.contains('hidden') || !$('#lobby').classList.contains('hidden')) rpc('close');
   }
 });
+
+async function lobbyClick(e) {
+  const b = e.target.closest('[data-l]');
+  const d = L.data;
+  if (!b) { if (e.target.id === 'lobby') rpc('close'); return; }
+  const a = b.dataset.l;
+  if (a === 'close') return rpc('close');
+  if (a === 'tab') { L.tab = b.dataset.t; if (L.tab === 'profile' && !L.prof) { loadProfile(); } return renderLobby(); }
+  if (a === 'join') {
+    const r = await rpc('join', d.id);
+    if (!r.ok) return toast(r.error || 'Impossible de rejoindre', 'err');
+    L.joined = true; GS.waitName = d.name; snd('confirm'); renderLobby();
+  }
+  if (a === 'leave') { await rpc('leave'); L.joined = false; GS.wait = null; drawGame(); renderLobby(); snd('close'); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  PROFIL JOUEUR : niveau, XP, défis, succès, classements
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadProfile() {
+  const r = await rpc('profile');
+  if (!r.ok) return toast('Profil indisponible', 'err');
+  L.prof = r;
+  if (L.tab === 'profile') renderLobby();
+}
+const bar = (v, max, cls = '') => `<div class="xbar ${cls}"><i style="width:${max > 0 ? Math.min(100, v / max * 100) : 100}%"></i></div>`;
+const rewTxt = (o, cur) => [o.xp > 0 ? '+' + o.xp + ' XP' : '', o.money > 0 ? '+' + cur + o.money : '', o.coins > 0 ? '+' + o.coins + ' coins' : ''].filter(Boolean).join(' · ') || '—';
+const fmtLeft = s => { const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600); return d > 0 ? d + ' j ' + h + ' h' : h + ' h'; };
+
+function profileHtml(P) {
+  const cur = P.currency || '$';
+  const ch = (c, j) => `<div class="row"><div class="l"><b>${esc(c.name)}</b>${bar(c.progress, c.target, c.done ? 'ok' : '')}<small>${c.progress}/${c.target} · ${esc(rewTxt(c, cur))}</small></div>${c.done ? `<span class="pill on">${ic('check')}Fait</span>` : ''}</div>`;
+  const ach = P.achievements.map(a => `<div class="ach ${a.unlocked ? 'on' : ''}"><div class="tile sm" style="background:${a.unlocked ? 'linear-gradient(160deg,#ffd60a,#ff9f0a)' : '#3a3a3c'}">${ic('trophy')}</div><div><b>${esc(a.name)}</b><small>${esc(a.desc || '')}</small><small>${esc(rewTxt(a, cur))}</small></div></div>`).join('');
+  const lv = P.levels.map(l => `<div class="row" style="${l.reached ? '' : 'opacity:.55'}"><span class="rk ${l.reached ? 'p1' : ''}">${l.level}</span><div class="l"><b>${esc(l.title || 'Niveau ' + l.level)}</b></div><span class="coord ok">${esc(rewTxt(l, cur))}</span></div>`).join('');
+  const topRow = (r, i, v) => `<div class="row"><span class="rk p${i + 1}">${i + 1}</span><div class="l"><b>${esc(r.name)}</b></div><span class="coord ok">${v}</span></div>`;
+  const seasonTop = P.season ? P.season.top.map((r, i) => topRow(r, i, r.season_xp + ' XP')).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Personne pour le moment</div></div>' : '';
+  const gTop = P.globalTop.map((r, i) => topRow(r, i, r.xp + ' XP')).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Aucun joueur classé</div></div>';
+  return `<div class="prof-h"><div class="lvl"><b>${P.level}</b><small>NIV.</small></div><div style="flex:1;min-width:0"><div style="font-size:24px;font-weight:700;letter-spacing:-.02em">${esc(P.name || 'Joueur')}</div>
+      <div style="color:var(--sub);margin:2px 0 8px">${esc(P.title || 'Sans titre')} · ${P.xp} XP au total${P.streak > 1 ? ` · série de ${P.streak} 🔥` : ''}</div>
+      ${P.level >= P.maxLevel ? bar(1, 1, 'ok') + '<small style="color:var(--sub)">Niveau maximum atteint</small>' : bar(P.cur, P.need) + `<small style="color:var(--sub)">${P.cur} / ${P.need} XP vers le niveau ${P.level + 1}</small>`}</div></div>
+    <div class="stats" style="padding:0 28px 14px"><div class="stat"><small>Parties</small><b>${P.plays}</b></div><div class="stat"><small>Victoires</small><b>${P.wins}</b></div><div class="stat"><small>Points</small><b>${P.points}</b></div></div>
+    <div class="lob-body" style="grid-template-columns:1fr 1fr;align-items:start">
+      <div>${P.featured ? `<div class="banner ok" style="margin-bottom:14px"><b>Mini-jeu de la semaine : ${esc(P.featured.name)}</b>Gains et XP ×${P.featured.mult} jusqu'à la fin de la semaine.</div>` : ''}
+        ${P.milestone ? `<div class="grp-t">Prochain palier de coins</div><div class="grp"><div class="row"><div class="l"><b>+${P.milestone.coins} coins boutique${P.milestone.money ? ' · +' + cur + P.milestone.money : ''}</b>${bar(P.milestone.into, P.milestone.xp)}<small>${P.milestone.into} / ${P.milestone.xp} XP · ${P.milestone.claimed} palier(s) déjà obtenu(s)</small></div></div></div>` : ''}
+        <div class="grp-t">Défis du jour</div><div class="grp">${P.daily.map(ch).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Aucun défi</div></div>'}</div>
+        <div class="grp-t">Défis de la semaine</div><div class="grp">${P.weekly.map(ch).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Aucun défi</div></div>'}</div>
+        <div class="grp-t">Paliers de niveau</div><div class="grp">${lv || '<div class="row"><div class="l" style="color:var(--sub)">Aucun palier</div></div>'}</div></div>
+      <div>${P.season ? `<div class="grp-t">Saison ${P.season.id} · fin dans ${fmtLeft(P.season.endsIn)}</div><div class="grp plist">${seasonTop}</div><div style="color:var(--sub);font-size:12px;padding:6px 14px 0">Tes points de saison : <b style="color:var(--txt)">${P.season.xp} XP</b> · Récompenses : ${P.season.rewards.map(r => '#' + r.rank + ' ' + (r.coins ? r.coins + ' coins' : '') + (r.money ? ' ' + cur + r.money : '')).join(' · ')}</div>` : ''}
+        <div class="grp-t">Classement général</div><div class="grp plist">${gTop}</div>
+        <div class="grp-t">Succès</div><div class="achs">${ach || '<div style="color:var(--sub)">Aucun succès</div>'}</div></div></div>`;
+}
+
+function renderProfile() {
+  const P = L.prof;
+  const only = L.data && L.data.profileOnly;
+  const tabs = only ? '' : `<div class="seg" style="margin:0 0 0 auto"><button data-l="tab" data-t="game">Mini-jeu</button><button class="on" data-l="tab" data-t="profile">Mon profil</button></div>`;
+  $('#lobby').innerHTML = `<div class="lob"><div class="lob-top" style="padding-bottom:10px"><div class="tile xl" style="background:linear-gradient(160deg,#ffd60a,#ff9f0a)">${ic('user')}</div><div><h2>Mon profil</h2><p>Niveau, défis, succès et classements.</p></div>${tabs}<button class="ibtn lob-x" data-l="close" ${tabs ? 'style="margin-left:10px"' : ''}>${ic('x')}</button></div>
+    <div style="overflow-y:auto">${P ? profileHtml(P) : '<div class="empty">Chargement…</div>'}</div></div>`;
+  $('#lobby').onclick = lobbyClick;
+}
+
+function progResHtml(me) {
+  const p = me && me.prog; if (!p) return '';
+  const cur = S.catalog ? S.catalog.currency : '$';
+  const lines = [];
+  if (p.levelUp) lines.push(`<div class="pr-l up"><b>Niveau ${p.level} !</b>${p.title ? ' · ' + esc(p.title) : ''}</div>`);
+  (p.levelUps || []).filter(l => l.money > 0 || l.coins > 0).forEach(l => lines.push(`<div class="pr-l">Palier niveau ${l.level} : ${esc(rewTxt({ money: l.money, coins: l.coins }, cur))}</div>`));
+  (p.done || []).forEach(n => lines.push(`<div class="pr-l">Défi terminé : <b>${esc(n)}</b></div>`));
+  (p.ach || []).forEach(n => lines.push(`<div class="pr-l">Succès débloqué : <b>${esc(n)}</b></div>`));
+  if (p.milestoneCount) lines.push(`<div class="pr-l up">Palier d'XP atteint : coins boutique reçus !</div>`);
+  if (me.mult && me.mult > 1) lines.push(`<div class="pr-l">Bonus ×${me.mult.toFixed(2).replace(/\.?0+$/, '')} (série / mini-jeu de la semaine)</div>`);
+  return `<div class="prog-res"><div style="display:flex;align-items:center;gap:12px"><span class="pill on">+${p.xp} XP</span><span style="font-weight:600">Niveau ${p.level}</span><div style="flex:1">${bar(p.cur, p.need)}</div><small style="color:var(--sub)">${p.need ? p.cur + '/' + p.need : 'MAX'}</small></div>${lines.join('')}</div>`;
+}

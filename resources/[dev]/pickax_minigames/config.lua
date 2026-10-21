@@ -325,3 +325,84 @@ for _, c in ipairs(cats) do
         Config.TypeOrder[#Config.TypeOrder + 1] = k
     end
 end
+
+-- ─── Nouveaux jeux simples (réutilisent les moteurs existants) ───────────────
+Config.Types.golf = {
+    label = 'Mini-golf', icon = 'golf', engine = 'shoot', cat = 'Précision',
+    desc = 'Charge avec E, relâche dans la zone verte et envoie la balle dans le trou. Chaque trou à points est une zone.',
+    fields = {
+        { key = 'ballModel',  label = 'Modèle de la balle',        kind = 'model', def = 'prop_golf_ball' },
+        { key = 'targetKind', label = 'Type de cible',             kind = 'select', def = 'goal', options = { { 'goal', 'Zones à points' }, { 'hoop', 'Panier (par le haut)' } } },
+        { key = 'holdBall',   label = 'Balle en main',             kind = 'bool', def = false },
+        { key = 'balls',      label = 'Nombre de coups',           kind = 'number', min = 1, max = 60, def = 9 },
+        { key = 'meterSpeed', label = 'Vitesse de la jauge',       kind = 'number', min = .4, max = 3, step = .1, def = 1.1 },
+        { key = 'sweet',      label = 'Largeur de la zone verte',  kind = 'number', min = .05, max = .5, step = .01, def = .16 },
+        { key = 'scatter',    label = 'Dispersion max (m)',        kind = 'number', min = 0, max = 4, step = .1, def = 1.2 },
+    },
+    points = {
+        { key = 'lobby',  label = 'Entrée du parcours', single = true },
+        { key = 'spawns', label = 'Départ du joueur', max = 4 },
+        { key = 'ball',   label = 'Point de départ de la balle', single = true },
+        { key = 'zones',  label = 'Trous / zones à points', max = 12, radius = true, pts = true },
+    },
+    templates = { { id = 'hole', label = 'Parcours de golf', desc = '9 coups, trous à points.', settings = { minPlayers = 1, maxPlayers = 1, balls = 9, duration = 240, arenaRadius = 60 } } },
+}
+Config.Types.drag = raceType('Drag race', 'drag', 'Ligne droite : le premier à franchir l\'arrivée gagne. Place seulement le départ et l\'arrivée.', 'sultan', 'Drag 1 contre 1', '1 tour, 2 pilotes, mise partagée.', { minPlayers = 2, maxPlayers = 2, waitSeconds = 25, duration = 120, arenaRadius = 700, entryFee = 100, pot = true })
+Config.Types.drag.cat = 'Courses'
+Config.Types.parkour = raceType('Parcours', 'parkour', 'Course d\'obstacles à pied : saute, grimpe, passe tous les checkpoints au plus vite.', '', 'Parcours chronométré', 'À pied, 1 tour.', { minPlayers = 1, maxPlayers = 8, waitSeconds = 20, duration = 300, arenaRadius = 500 })
+Config.Types.parkour.cat = 'Courses'
+Config.Types.drag.fields[2].def = 1
+Config.Types.parkour.fields[2].def = 1
+Config.Types.parkour.fields[1].def = ''
+for _, k in ipairs({ 'golf', 'drag', 'parkour' }) do Config.TypeOrder[#Config.TypeOrder + 1] = k end
+
+-- Modèle « Time attack » (contre-la-montre en solo) pour toutes les courses
+for _, k in ipairs(Config.TypeOrder) do
+    local T = Config.Types[k]
+    if T.engine == 'race' then
+        T.templates[#T.templates + 1] = { id = 'timeattack', label = 'Contre-la-montre', desc = 'Solo, départ immédiat : bats le record du classement.', settings = { minPlayers = 1, maxPlayers = 1, waitSeconds = 0, duration = 600, arenaRadius = 1500, entryFee = 0, pot = false } }
+    end
+end
+
+-- ─── Progression (XP, niveaux, défis, succès, saison) : valeurs par défaut ───
+-- Tout est modifiable en jeu depuis le builder (bouton « Progression ») ; la base de données prend le dessus sur ces valeurs.
+Config.ProfileCommand = 'mgprofil'      -- ouvre le profil joueur (niveau, défis, succès, classements)
+Config.ProfileKey     = false           -- touche optionnelle (ex : 'F10')
+Config.CoinsGrant     = true            -- crédite les coins de la boutique (pickax_core)
+
+Config.Progress = {
+    settings = {
+        xp        = { enabled = true, perGame = 20, win = 40, perPoint = 1, maxPerGame = 250, streakPct = 10, streakMax = 5 },
+        curve     = { base = 100, growth = 1.25, maxLevel = 50 },
+        milestone = { enabled = true, xp = 2000, coins = 5, money = 0 },
+        weekly    = { enabled = true, mode = 'random', gameId = '', mult = 2 },
+        season    = { enabled = true, days = 30, rewards = { { rank = 1, money = 5000, coins = 50 }, { rank = 2, money = 3000, coins = 25 }, { rank = 3, money = 1500, coins = 10 } } },
+        announce  = { records = true, levels = true },
+    },
+    levels = {
+        { level = 2,  title = 'Débutant',  money = 0,     coins = 0 },
+        { level = 5,  title = 'Amateur',   money = 500,   coins = 2 },
+        { level = 10, title = 'Confirmé',  money = 1500,  coins = 5 },
+        { level = 20, title = 'Expert',    money = 5000,  coins = 15 },
+        { level = 35, title = 'Champion',  money = 10000, coins = 30 },
+        { level = 50, title = 'Légende',   money = 25000, coins = 75 },
+    },
+    challenges = {
+        { id = 'd_plays',  name = 'Joue 3 parties',        scope = 'daily',  kind = 'plays',  game = 'any', target = 3,   xp = 60,  money = 300,  coins = 0, enabled = true },
+        { id = 'd_wins',   name = 'Gagne 1 partie',        scope = 'daily',  kind = 'wins',   game = 'any', target = 1,   xp = 80,  money = 400,  coins = 0, enabled = true },
+        { id = 'd_points', name = 'Marque 50 points',      scope = 'daily',  kind = 'points', game = 'any', target = 50,  xp = 70,  money = 300,  coins = 0, enabled = true },
+        { id = 'd_kart',   name = 'Fais 2 courses de karting', scope = 'daily', kind = 'plays', game = 'karting', target = 2, xp = 70, money = 300, coins = 0, enabled = true },
+        { id = 'w_plays',  name = 'Joue 15 parties',       scope = 'weekly', kind = 'plays',  game = 'any', target = 15,  xp = 300, money = 2000, coins = 3, enabled = true },
+        { id = 'w_wins',   name = 'Gagne 7 parties',       scope = 'weekly', kind = 'wins',   game = 'any', target = 7,   xp = 400, money = 3000, coins = 5, enabled = true },
+        { id = 'w_points', name = 'Marque 500 points',     scope = 'weekly', kind = 'points', game = 'any', target = 500, xp = 350, money = 2500, coins = 4, enabled = true },
+    },
+    achievements = {
+        { id = 'a_first',   name = 'Premier pas',      desc = 'Joue ta première partie',      kind = 'plays_total',  target = 1,   xp = 20,   money = 0,    coins = 0,  enabled = true },
+        { id = 'a_win',     name = 'Première victoire', desc = 'Gagne une partie',            kind = 'wins_total',   target = 1,   xp = 50,   money = 200,  coins = 0,  enabled = true },
+        { id = 'a_win25',   name = 'Habitué',          desc = 'Gagne 25 parties',             kind = 'wins_total',   target = 25,  xp = 300,  money = 2000, coins = 5,  enabled = true },
+        { id = 'a_plays100', name = 'Accro',           desc = 'Joue 100 parties',             kind = 'plays_total',  target = 100, xp = 400,  money = 3000, coins = 5,  enabled = true },
+        { id = 'a_pts1000', name = 'Marqueur',         desc = 'Marque 1000 points au total',  kind = 'points_total', target = 1000, xp = 400, money = 3000, coins = 5,  enabled = true },
+        { id = 'a_streak5', name = 'Invincible',       desc = 'Enchaîne 5 victoires',         kind = 'best_streak',  target = 5,   xp = 500,  money = 4000, coins = 10, enabled = true },
+        { id = 'a_lvl10',   name = 'Confirmé',         desc = 'Atteins le niveau 10',         kind = 'level',        target = 10,  xp = 0,    money = 1000, coins = 3,  enabled = true },
+    },
+}

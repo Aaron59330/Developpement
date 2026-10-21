@@ -31,3 +31,11 @@ Tables SQL créées automatiquement : `minigames_defs`, `minigames_stats`, `mini
 
 ## Ajouter un type
 Ajoute une entrée dans `Config.Types` (`config.lua`) en réutilisant un moteur existant (`shoot`, `rally`, `fight`, `tag`, `race`) : champs, emplacements et modèles apparaissent automatiquement dans le builder.
+
+## Progression (tout est modifiable en jeu : builder → bouton ✨ « Progression »)
+- **XP et niveaux** : XP par partie / victoire / point, bonus de série de victoires, courbe de niveaux, titres.
+- **Coins boutique** : palier d'XP répétable (ex : 5 coins tous les 2000 XP) + récompenses par niveau (argent et coins), crédités via `pickax_core` (`BoutiqueGrantCoins`). Hors-ligne, ils sont mis en attente et remis à la connexion.
+- **Défis** quotidiens (3) et hebdo (2) tirés dans une liste que tu édites ; **succès** à débloquer.
+- **Mini-jeu de la semaine** (gains et XP multipliés), **saisons** avec récompenses du podium, annonces des records.
+- Profil joueur : `/mgprofil` ou onglet « Mon profil » du lobby.
+- Tables : `minigames_players`, `minigames_settings`, `minigames_pending`.

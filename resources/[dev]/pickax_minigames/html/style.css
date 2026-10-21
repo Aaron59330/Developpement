@@ -221,3 +221,24 @@ svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-wid
 .resc .you td { background: rgba(var(--acc-rgb), .16); }
 .resc .gain { color: var(--green); font-weight: 700; }
 .resc .foot2 { text-align: center; color: var(--sub); font-size: 12.5px; padding: 0 0 18px; }
+
+/* progression */
+.btn.on { background: var(--acc); color: #fff; }
+.xbar { height: 8px; border-radius: 99px; background: rgba(118,118,128,.28); overflow: hidden; margin: 7px 0 4px; }
+.xbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), #5ac8fa); border-radius: 99px; transition: width .4s; }
+.xbar.ok i { background: var(--green); }
+.prof-h { display: flex; gap: 20px; align-items: center; padding: 0 28px 18px; }
+.lvl { width: 84px; height: 84px; border-radius: 50%; background: conic-gradient(var(--acc), #5ac8fa, var(--acc)); display: grid; place-items: center; flex: none; position: relative; }
+.lvl::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--win); }
+.lvl b, .lvl small { position: relative; display: block; text-align: center; line-height: 1; }
+.lvl b { font-size: 30px; letter-spacing: -.03em; } .lvl small { font-size: 10px; color: var(--sub); font-weight: 700; margin-top: 3px; }
+.achs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ach { display: flex; gap: 10px; align-items: center; background: var(--cell); border-radius: 12px; padding: 10px; opacity: .55; }
+.ach.on { opacity: 1; }
+.ach b { font-size: 13px; display: block; } .ach small { display: block; color: var(--sub); font-size: 11.5px; line-height: 1.3; }
+.prog-res { margin: 0 14px 12px; background: var(--cell); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.pr-l { font-size: 13px; color: var(--sub); } .pr-l b { color: var(--txt); } .pr-l.up { color: var(--green); font-weight: 600; }
+.lob .seg { margin-top: 0; }
+.pt select { height: 28px; border-radius: 7px; border: 0; background: rgba(118,118,128,.24); color: var(--txt); font-size: 12.5px; padding: 0 4px; }
+.pt select option { background: #2c2c2e; }
+.prof-h { padding-top: 14px; }
