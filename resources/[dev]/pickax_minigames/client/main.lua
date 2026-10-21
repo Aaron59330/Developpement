@@ -14,9 +14,11 @@ local function openUI(mode, data)
     SendNUIMessage({ action = 'open', mode = mode, data = data })
 end
 
+local placing = false
 function CloseUI()
     if not uiMode then return end
     uiMode = nil
+    placing = false          -- sort aussi du mode placement (sinon le curseur restait bloqué)
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
 end
@@ -171,6 +173,9 @@ local function makeProp(p)
     SetEntityRotation(o, (p.rx or 0.0) + 0.0, (p.ry or 0.0) + 0.0, (p.h or 0.0) + 0.0, 2, true)
     FreezeEntityPosition(o, p.freeze ~= false)
     SetEntityCollision(o, p.collision ~= false, p.collision ~= false)
+    -- un prop qui apparaît sur toi (ex : posé « à ma position » dans le builder) ne te bloque pas
+    local ped = PlayerPedId()
+    if #(GetEntityCoords(ped) - vector3(p.x + 0.0, p.y + 0.0, p.z + 0.0)) < 4.0 then SetEntityNoCollisionEntity(ped, o, false) end
     SetModelAsNoLongerNeeded(hash)
     return o
 end
@@ -213,7 +218,14 @@ end
 CreateThread(function()
     while true do
         Wait(2000)
-        local p = GetEntityCoords(PlayerPedId())
+        local ped = PlayerPedId()
+        local p = GetEntityCoords(ped)
+        -- si tu te retrouves collé à un prop (placement), la collision est coupée entre toi et lui
+        for _, e in pairs(always) do
+            for _, o in ipairs(e.objs) do
+                if DoesEntityExist(o) and #(GetEntityCoords(o) - p) < 3.0 then SetEntityNoCollisionEntity(ped, o, false) end
+            end
+        end
         for id, d in pairs(MGC.defs) do
             local l = d.points and d.points.lobby
             if l then
@@ -267,7 +279,6 @@ NuiLocal.bbPreview = function(args, cb)
 end
 
 -- Mode placement : le menu se réduit en HUD, le joueur se déplace librement (Entrée = enregistrer, ← → = cible, Retour = menu)
-local placing = false
 NuiLocal.placement = function(args, cb)
     if args[1] and not placing then
         placing = true
@@ -282,9 +293,10 @@ NuiLocal.placement = function(args, cb)
                 elseif IsControlJustReleased(0, 189) then SendNUIMessage({ action = 'placementNav', dir = -1 })
                 elseif IsControlJustReleased(0, 177) then
                     placing = false
-                    SetNuiFocus(true, true)
+                    if uiMode then SetNuiFocus(true, true) end
                     SendNUIMessage({ action = 'placementEnd' })
                 end
+                if not uiMode then placing = false end
                 Wait(0)
             end
         end)
