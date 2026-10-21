@@ -245,7 +245,7 @@ end)
 -- Callbacks serveur autorisés (nom JS -> 'shopbuilder:<nom>')
 local NuiRemote = {
     catalog = true, list = true, get = true, create = true, save = true, delete = true, duplicate = true, toggle = true,
-    restock = true, resetStats = true, logs = true, buy = true, ['settings:save'] = true,
+    restock = true, resetStats = true, logs = true, buy = true, ['settings:save'] = true, importSuperettes = true,
 }
 
 local NuiLocal = {}

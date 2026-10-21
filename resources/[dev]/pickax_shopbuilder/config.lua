@@ -282,3 +282,25 @@ end
 
 -- ═══════════════════════════════ Réglages modifiables en jeu ═══════════════════════════════
 -- Les valeurs ci-dessus sont les DÉFAUTS. L'apparence (couleur) se modifie en jeu via /shopbuilder → Paramètres.
+
+
+-- ─────────────────────────────── Supérettes de GTA V (import en un clic) ───────────────────────────────
+-- Builder → « Nouvelle boutique » → « Importer les supérettes GTA » : crée 3 boutiques (24/7, LTD Gasoline, Rob's Liquor)
+-- avec tous leurs emplacements déjà placés (marker + blip), activées. Coordonnées = position du joueur au comptoir.
+-- Les vendeurs (PNJ) sont désactivés par défaut : active-les et place-les depuis chaque boutique si tu veux.
+-- { nom du lieu, x, y, z, cap }
+Config.Superettes = {
+    { id = '247', label = '24/7', type = 'general', blip = { sprite = 52, color = 2 }, locations = {
+        { 'Strawberry', 24.47, -1346.62, 29.5, 271.66 }, { 'Banham Canyon', -3039.54, 584.38, 7.91, 17.27 }, { 'Chumash', -3242.97, 1000.01, 12.83, 357.57 },
+        { 'Paleto Bay', 1728.07, 6415.63, 35.04, 242.95 }, { 'Sandy Shores', 1959.82, 3740.48, 32.34, 301.57 }, { 'Harmony', 549.13, 2670.85, 42.16, 99.39 },
+        { 'Grand Senora', 2677.47, 3279.76, 55.24, 335.08 }, { 'Tataviam', 2556.66, 380.84, 108.62, 356.67 }, { 'Vinewood', 372.66, 326.98, 103.57, 253.73 },
+    } },
+    { id = 'ltd', label = 'LTD Gasoline', type = 'general', blip = { sprite = 361, color = 1 }, locations = {
+        { 'Davis', -47.02, -1758.23, 29.42, 45.05 }, { 'Little Seoul', -706.06, -913.97, 19.22, 88.04 }, { 'Richman Glen', -1820.02, 794.03, 138.09, 135.45 },
+        { 'Mirror Park', 1164.71, -322.94, 69.21, 101.72 }, { 'Grapeseed', 1697.87, 4922.96, 42.06, 324.71 },
+    } },
+    { id = 'liquor', label = "Rob's Liquor", type = 'bar', blip = { sprite = 93, color = 5 }, locations = {
+        { 'Del Perro', -1221.58, -908.15, 12.33, 35.49 }, { 'Morningwood', -1486.59, -377.68, 40.16, 139.51 }, { 'Pacific Bluffs', -2966.39, 391.42, 15.04, 87.48 },
+        { 'Grand Senora', 1165.17, 2710.88, 38.16, 179.43 }, { 'Murrieta Heights', 1134.2, -982.91, 46.42, 277.24 },
+    } },
+}

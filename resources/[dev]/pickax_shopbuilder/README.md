@@ -63,3 +63,6 @@ Crée **n'importe quelle boutique en jeu** : supérette, armurerie, magasin de v
 
 ## Tenue en item (p_outfits)
 Avec `p_outfits` démarré (`Config.ClothingItems.mode = 'auto'`), valider une tenue dans la cabine d'essayage **donne un item « Tenue »** dans l'inventaire (le look d'avant l'essayage est restauré). Le joueur glisse l'item sur la case **Tenue** (centre bas de l'inventaire) pour porter toutes les pièces, et la retire de la case pour tout enlever.
+
+## Importer toutes les supérettes de GTA V
+`/shopbuilder` → **Nouvelle boutique** → **Importer les supérettes GTA** : crée en un clic **24/7** (9 points), **LTD Gasoline** (5) et **Rob's Liquor** (5), avec tous les emplacements déjà placés (blip + marker), **activées**. Les vendeurs (PNJ) sont désactivés par défaut. Les enseignes déjà importées (même nom) sont ignorées. Liste et coordonnées modifiables dans `Config.Superettes` (`config.lua`).

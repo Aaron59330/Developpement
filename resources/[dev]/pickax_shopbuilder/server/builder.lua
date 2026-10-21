@@ -234,7 +234,7 @@ ESX.RegisterServerCallback('shopbuilder:catalog', function(src, cb)
     local scen = {}
     for _, sc in ipairs(Config.PedScenarios) do scen[#scen + 1] = sc end
     cb({ ok = true, types = types, items = itemCatalog(), jobs = jobList(), parts = parts, payments = pay, scenarios = scen,
-        inventory = SB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent,
+        presets = (function() local o = {} for _, p in ipairs(Config.Superettes) do o[#o + 1] = { id = p.id, label = p.label, count = #p.locations } end return o end)(), inventory = SB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent,
         limits = { items = Config.MaxItemsPerShop, locations = Config.MaxLocations, qty = Config.MaxQtyPerPurchase } })
 end)
 
@@ -256,13 +256,15 @@ ESX.RegisterServerCallback('shopbuilder:get', function(src, cb, id)
     cb({ ok = true, shop = s })
 end)
 
-ESX.RegisterServerCallback('shopbuilder:create', function(src, cb, typeId, label)
-    if not admin(src, cb) then return end
+-- Crée une boutique à partir d'un modèle (utilisé par « Nouvelle boutique » et par l'import des supérettes)
+-- opts = { locations = {...}, enabled = bool, settings = { ... surcharges ... } }
+local function createShop(src, typeId, label, opts)
+    opts = opts or {}
     local tpl = Config.ShopTypes[tostring(typeId)]
-    if not tpl then return cb(fail('Type inconnu')) end
+    if not tpl then return nil, 'Type inconnu' end
     local count = 0
     for _ in pairs(SB.Shops) do count = count + 1 end
-    if count >= Config.MaxShops then return cb(fail('Nombre maximum de boutiques atteint')) end
+    if count >= Config.MaxShops then return nil, 'Nombre maximum de boutiques atteint' end
     label = str(label, 100, tpl.label)
     local name = uniqueName(label)
 
@@ -275,24 +277,60 @@ ESX.RegisterServerCallback('shopbuilder:create', function(src, cb, typeId, label
         end
     end
 
-    local settings = cleanSettings({
+    local base = {
         mode = tpl.mode,
         blip = { enabled = tpl.blip ~= nil, sprite = tpl.blip and tpl.blip.sprite or 52, color = tpl.blip and tpl.blip.color or 0, scale = (PickaxTheme and PickaxTheme.blipScale or 0.8), shortRange = true },
         ped = { enabled = tpl.ped ~= nil, model = tpl.ped or '', scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
         payments = tpl.payments or { cash = true, bank = true },
         clothing = tpl.clothing or {},
         categories = tpl.categories or {},
-    })
+    }
+    for k, v in pairs(opts.settings or {}) do
+        if type(v) == 'table' and type(base[k]) == 'table' then for kk, vv in pairs(v) do base[k][kk] = vv end else base[k] = v end
+    end
+    local settings = cleanSettings(base)
+    local locations = cleanLocations(opts.locations)
+    local enabled = opts.enabled == true and #locations > 0
 
-    local id = MySQL.insert.await('INSERT INTO shopbuilder_shops (name, label, type, enabled, settings, items, locations, stats, created_by) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?)', {
-        name, label, tostring(typeId), json.encode(settings), json.encode(items), '[]', '{}', GetPlayerName(src) or 'console',
+    local id = MySQL.insert.await('INSERT INTO shopbuilder_shops (name, label, type, enabled, settings, items, locations, stats, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
+        name, label, tostring(typeId), enabled and 1 or 0, json.encode(settings), json.encode(items), json.encode(locations), '{}', GetPlayerName(src) or 'console',
     })
-    if not id then return cb(fail('Erreur base de données')) end
-    local shop = { id = id, name = name, label = label, type = tostring(typeId), enabled = false, settings = settings, items = items, locations = {}, stats = {} }
+    if not id then return nil, 'Erreur base de données' end
+    local shop = { id = id, name = name, label = label, type = tostring(typeId), enabled = enabled, settings = settings, items = items, locations = locations, stats = {} }
     SB.Shops[id] = shop
     SB.ByName[name] = id
-    SB.log(shop, ESX.GetPlayerFromId(src), 'create', ('%s (%s) — %d produit(s)'):format(label, typeId, #items))
+    SB.log(shop, ESX.GetPlayerFromId(src), 'create', ('%s (%s) — %d produit(s), %d emplacement(s)'):format(label, typeId, #items, #locations))
+    return shop
+end
+
+ESX.RegisterServerCallback('shopbuilder:create', function(src, cb, typeId, label)
+    if not admin(src, cb) then return end
+    local shop, err = createShop(src, typeId, label)
+    if not shop then return cb(fail(err)) end
     cb({ ok = true, shop = shop })
+end)
+
+-- Import des supérettes de GTA V (24/7, LTD, Rob's Liquor) : une boutique par enseigne, tous les emplacements déjà placés, activées.
+ESX.RegisterServerCallback('shopbuilder:importSuperettes', function(src, cb)
+    if not admin(src, cb) then return end
+    local created, skipped, points = {}, {}, 0
+    for _, preset in ipairs(Config.Superettes) do
+        local exists = false
+        for _, sh in pairs(SB.Shops) do if sh.label == preset.label then exists = true break end end
+        if exists then
+            skipped[#skipped + 1] = preset.label
+        else
+            local locs = {}
+            for _, l in ipairs(preset.locations) do
+                locs[#locs + 1] = { label = l[1], tag = preset.label, coords = { x = l[2], y = l[3], z = l[4], h = l[5] } }
+            end
+            local shop, err = createShop(src, preset.type, preset.label, { locations = locs, enabled = true, settings = { tag = 'Import GTA', ped = { enabled = false }, blip = preset.blip } })
+            if shop then created[#created + 1] = ('%s (%d)'):format(preset.label, #shop.locations) points = points + #shop.locations
+            else skipped[#skipped + 1] = preset.label .. ' : ' .. tostring(err) end
+        end
+    end
+    SB.syncAll()
+    cb({ ok = true, created = created, skipped = skipped, points = points })
 end)
 
 ESX.RegisterServerCallback('shopbuilder:save', function(src, cb, data)

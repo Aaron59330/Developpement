@@ -613,7 +613,10 @@ const Builder = {
 
   /* ── Nouvelle boutique ── */
   viewNew() {
-    return `<div class="card"><div class="card-h"><div class="t">${ic('tag', 17)} Modèle</div></div>
+    const pre = this.cat.presets || [];
+    return `${pre.length ? `<div class="card"><div class="card-h"><div class="t">${ic('cart', 17)} Supérettes de GTA V prêtes à l'emploi</div>${chip(pre.reduce((n, p) => n + p.count, 0) + ' points', 'info')}</div>
+        <div class="hint">Importe en un clic : ${pre.map(p => `<b>${esc(p.label)}</b> (${p.count})`).join(' · ')}. Une boutique par enseigne, tous les emplacements sont déjà placés avec leur blip et leur marker, et elles sont <b>activées</b>. Les vendeurs (PNJ) sont désactivés : tu peux les activer boutique par boutique. Les enseignes déjà importées sont ignorées.</div>
+        <div class="row mt"><button class="primary" data-a="importSuperettes">${ic('plus', 16)} Importer les supérettes GTA</button></div></div>` : ''}<div class="card"><div class="card-h"><div class="t">${ic('tag', 17)} Modèle</div></div>
         <div class="grid3">${this.cat.types.map(t => `<div class="tpl ${t.id === this.newType ? 'sel' : ''}" data-a="pickType" data-v="${esc(t.id)}">${ic(t.icon || 'store', 24)}<span>${esc(t.label)}</span><small class="muted">${t.mode === 'clothing' ? 'cabine d\'essayage' : (t.items ? `${t.items} produit${t.items > 1 ? 's' : ''} d'exemple` : 'catalogue vide')}</small></div>`).join('')}</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('edit', 17)} Nom de la boutique</div></div>
         <div class="row">${`<input data-path="__newLabel" placeholder="${esc(this.typeInfo(this.newType).label)}" value="${esc(this.newLabel)}" maxlength="100">`}<button class="primary" data-a="create">${ic('plus', 16)} Créer la boutique</button></div>
@@ -895,6 +898,13 @@ const Builder = {
         if (v.startsWith('shop:')) return this.go('shop', Number(v.slice(5)));
         return this.go(v);
       case 'tab': this.tab = v; if (v === 'stats') this.logs = null; this.render(true); return;
+      case 'importSuperettes': {
+        const r = await rpc('importSuperettes');
+        if (!r || !r.ok) return toast((r && r.error) || 'Import impossible', 'err');
+        await this.refreshList();
+        toast(r.created.length ? `Importé : ${r.created.join(', ')}` + (r.skipped.length ? ` · déjà présentes : ${r.skipped.join(', ')}` : '') : `Rien à importer (${r.skipped.join(', ')})`, r.created.length ? 'ok' : '');
+        this.go('home'); return;
+      }
       case 'pickType': this.newType = v; this.render(); return;
       case 'create': {
         const r = await rpc('create', this.newType, this.newLabel);
