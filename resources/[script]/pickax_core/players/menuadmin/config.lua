@@ -37,7 +37,6 @@ ConfigMenuAdmin = {
         ["ModeStaffNotif1"] = "Vous êtes désormais: ~g~en administration~s~.",
         ["ModeStaffNotif2"] = "Vous êtes désormais ~r~hors administration~s~.",
         ["StatsStaff"] = "Statut mode staff",
-        ["ChangeNoclip"] = "Pour accélérer faites ~b~molette haut~s~\nPour ralentir faites ~b~molette bas~s~",
         ["GiveItem"] = "Vous venez de donner ~g~%s %s ~w~à %s",
         ["AdminMessage"] = "~r~Admin\n~r~Vous n'avez pas fourni de message",
         ["UJail"] = "Vous avez jail : ~b~%s~s~ pendant : ~p~%s~s~ Minutes",

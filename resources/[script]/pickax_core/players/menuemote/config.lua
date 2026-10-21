@@ -38,7 +38,6 @@ ConfigMenuEmote = {
     PersistentExpression = true,
     WalkingStylesEnabled = true,
     PersistentWalk = true,
-    PersistencePollPeriod = 60000,
     SharedEmotesEnabled = true,
     SqlKeybinding = false,
 

@@ -113,7 +113,6 @@ ConfigContextMenu = {
         ColorTextDisable = {107, 110, 120},
         ColorBorder = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},         -- liseré bleu #00a4ff
         ColorSeparator = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},
-        ColorAccent = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},         -- (réservé)
         BorderAlpha = 190,-- opacité du liseré (0-255)
         SeparatorAlpha = 90 -- opacité des séparateurs (0-255)
     },
@@ -156,16 +155,10 @@ ConfigContextMenu = {
 
     Triggers = {
         TriggerhealLejoueur = 'esx_status:healPlayer',
-        TriggerGiveKeys = 'esx_vehiclelock:donnerkey',
-        TriggerDeleteKeys = 'esx_vehiclelock:deletekey',
-        TriggerChangeOwnedKeys = 'esx_vehiclelock:changeownerkey',
-        TriggerPreterKeys = 'esx_vehiclelock:preterkey',
         TriggerGiveInventoryItem = 'esx:giveInventoryItem',
     },
 
     Callback = {
-        CallBackCheckVehicle = 'esx_vehiclelock:mykey',
-        CallBackesxSkin = 'esx_skin:getPlayerSkin',
         CallBackCheckSocietyMoney = 'esx_society:getSocietyMoney',
         CallBackCheckGangMoney = 'CorePickax:getGangsInfo',
         CallBackPaidBilling = 'esx_billing:payBill',
@@ -177,7 +170,6 @@ ConfigContextMenu = {
     Drugs = {
         PoliceRequis = 0,--Mettre a 0 si vous voulez pas qu'il en faut pour vendre
         AppellePolice = true,--Appelle pas tout le temps c'est en random 1 chance sur 5
-        VenteArgent = "black_money",--type d'argent a la vente
         BlipsRemoveAfter = 20000,--remove apres 20 secondes
         DrugsList = {
             ["weed"] = {Item = "weed_pooch", Count = 2, ItemName = "weed", prix = 60, callback = "ContextMenu:HasDrogue", menu = "Vendre de la weed", vente = "~r~Vous êtes en train de vendre ~b~de la weed", error = "~r~Action Impossible~s~ : Vous devez avoir de la ~b~weed~s~ pour faire ceci !"},

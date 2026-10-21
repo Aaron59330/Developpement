@@ -1,7 +1,6 @@
 ConfigMenuF5 = {
 	Trigger = {
 		TriggerUseItem = 'esx:useItem',
-		TriggerGiveItem = 'esx:giveInventoryItem',
 		TriggerPayBill = 'esx_billing:payBill'
     },
 

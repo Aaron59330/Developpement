@@ -22,7 +22,6 @@ Config.Texts = {
     estimatedTime = "⏳ Temps d’attente estimé : %s sec",
     waitingListTitle = "📋 Liste des joueurs dans la liste d'attente",
     playHint = "Clique sur **Jouer** pour entrer en jeu",
-    cancelMessage = "Connexion annulée."
 }
 
 --  Boutons

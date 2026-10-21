@@ -15,38 +15,9 @@ Config = {
 	DisableMenuskin = false,--Mettre true si vous utiliser un autre skinMenu
 
 	Trigger = {
-        TriggerESX = "esx:getSharedObject",
 		TriggerNotification = "esx:showNotification",
 		TriggerAdvancedNotification = "esx:showAdvancedNotification",
-		TriggerBilling = 'esx_billing:sendBill',
     },
-
-	HandcuffFreezePlayer = false,--Si vous voulez que les menotte freeze les joueurs mettez en true.
-	DisableKeysWhenHandcuff = {--à ajouté pour que les joueurs soit brider.
-		{group = 2, key = 37},
-		{group = 0, key = 24},
-		{group = 0, key = 69},
-		{group = 0, key = 92},
-		{group = 0, key = 140},
-		{group = 0, key = 106},
-		{group = 0, key = 68},
-		{group = 0, key = 69},
-		{group = 0, key = 70},
-		{group = 0, key = 71},
-		{group = 0, key = 72},
-		{group = 0, key = 75},
-		{group = 0, key = 23},
-		{group = 0, key = 21},
-		{group = 1, key = 157},
-		{group = 1, key = 158},
-		{group = 1, key = 159},
-		{group = 1, key = 160},
-		{group = 1, key = 161},
-		{group = 1, key = 162},
-		{group = 1, key = 163},
-		{group = 1, key = 164},
-		{group = 1, key = 165},
-	},
 
 	WantToUseME = true,--Si vous ne voulez pas les /me automatique mettez en false.
 	HaveJob2SQL = true,--a mettre sur true si vous avez une base possdent le jobs2 & jobs2_grades sql
@@ -77,15 +48,6 @@ Config = {
 
 
     RageUI = {
-		NewRageUI = true,--Mettre false pour l'ancien menu
-		ColorStyle = {
-			R = 10,
-			G = 39,
-			B = 206,
-			A = 255
-		},
-
-		TitleStyle = 6,
 		TitleScale = 1.0,
 		ScaleText = 0.29,
 		MenuPose = {X = 0, Y = 25},
@@ -93,19 +55,6 @@ Config = {
 		Width = 0,
 		MaxBoutton = 10,
 
-		ColorButon = {
-			R = 0,
-			G = 168,
-			B = 255,
-			A = 255
-		},
-
-		Line = {
-			R = 0,
-			G = 168,
-			B = 255,
-			A = 255
-		},
 	}
 }
 
@@ -124,7 +73,6 @@ Config.GlobalMarker = {
 
     -- Placement automatique au sol.
     Grounded = true,
-    AutoGround = true,
 
     -- Décalage général après détection du sol. Laisse 0.0 pour coller au GroundZ réel.
     GroundOffset = 0.10,
@@ -145,8 +93,6 @@ Config.GlobalMarker = {
     -- Sondes progressives : la surface la plus proche du Z original gagne.
     GroundProbeSteps = { 0.35, 0.75, 1.25, 2.0, 3.0, 5.0, 8.0, 15.0, 30.0, 50.0 },
 
-    GroundCachePrecision = 1,
-    GroundCacheLimit = 4096
 }
 
 -- Blips de TOUT le serveur (Job / Gang / Shop / World Builder). Un réglage fait en jeu dans un builder (blip d'un point ou d'un module) reste prioritaire et n'est jamais écrasé.
