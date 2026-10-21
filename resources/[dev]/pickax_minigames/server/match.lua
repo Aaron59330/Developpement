@@ -2,6 +2,12 @@
 
 local function now() return os.time() end
 
+-- Anti-cheat : le joueur est marqué « en mini-jeu » (statebag lu par pickax_anticheat) et exempté quelques secondes à chaque téléportation
+local function acMark(src, on, seconds)
+    pcall(function() Player(src).state:set('inMinigame', on and true or nil, true) end)
+    if GetResourceState('pickax_anticheat') == 'started' then pcall(function() exports.pickax_anticheat:Exempt(src, seconds or 10, 'minigame') end) end
+end
+
 local function getGame(id)
     local g = MG.Games[id]
     if not g then
@@ -75,6 +81,7 @@ function MG.removePlayer(src, reason, silent)
     if not id then return end
     local g = MG.Games[id]
     MG.InGame[src] = nil
+    acMark(src, false, 12)
     if not g or not g.players[src] then return end
     local p = g.players[src]
     if g.state == 'waiting' then refund(p, src) end
@@ -103,6 +110,7 @@ function MG.closeGame(id, reason)
         local p = g.players[src]
         if g.state == 'waiting' or g.state == 'countdown' then refund(p, src) end
         MG.InGame[src] = nil
+        acMark(src, false, 12)
         TriggerClientEvent('minigames:kick', src, reason or 'Partie annulée.', true)
     end
     MG.Games[id] = nil
@@ -125,6 +133,7 @@ local function startCountdown(g)
         p.score, p.kills, p.deaths, p.shots, p.cp, p.finished, p.hp = 0, 0, 0, 0, 0, false, def.settings.hp
         p.lastAct = 0
         local sp = spawnFor(g, p, i)
+        acMark(src, true, 12)
         TriggerClientEvent('minigames:begin', src, {
             id = g.id, type = def.type, engine = T.engine, name = def.name, team = p.team, spawn = sp,
             countdown = def.settings.countdown, settings = def.settings, points = def.points, slot = i, props = def.props,
@@ -242,6 +251,7 @@ function MG.finish(g, why)
     local payload = { id = g.id, name = def.name, type = def.type, engine = T.engine, why = why, rows = summary, teams = teams, teamScore = g.teamScore, ret = Config.ReturnAfterEnd }
     for src in pairs(g.players) do
         MG.InGame[src] = nil
+        acMark(src, false, 20)
         payload.you = g.players[src] and g.players[src].name or nil
         TriggerClientEvent('minigames:end', src, payload)
     end
@@ -420,6 +430,7 @@ ESX.RegisterServerCallback('minigames:join', function(src, cb, id)
     g.players[src] = { name = MG.playerName(src), fee = fee, score = 0 }
     g.order[#g.order + 1] = src
     MG.InGame[src] = id
+    acMark(src, true, 12)
     if def.settings.minPlayers <= 1 and def.settings.waitSeconds == 0 then startCountdown(g) else pushLobby(g) end
     cb({ ok = true })
 end)
