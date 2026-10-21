@@ -12,6 +12,11 @@ Commande : `/minigames` (ou bouton « Mini-jeux Builder » du menu admin / du pa
 | Boxe | fight | duel, rounds, PV, K.O. (dégâts décidés par le serveur) |
 | Paintball / Laser game | tag | touches validées par le serveur (aucun vrai dégât), équipes ou solo |
 | Course | race | checkpoints, tours, à pied / vélo / voiture, classement au temps |
+| Padel / Volley-ball | rally | comme le tennis, autre balle et autre rythme |
+| Fléchettes | shoot | jauge de précision, anneaux de la cible en zones à points |
+| Bowling | bowling | 10 frames, quilles placées automatiquement, strike / spare bonifiés |
+| Combat libre | fight | comme la boxe, plus de vie et de dégâts |
+| Karting / Auto / Moto / Quad / Bateau | race | courses avec véhicule par défaut (modifiable) |
 
 ## Utilisation
 1. `/minigames` → **Nouveau mini-jeu** → choisis un type (ou un modèle).

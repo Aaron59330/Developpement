@@ -70,7 +70,7 @@ function MG.sanitize(d, existingId)
         points = {},
     }
     if out.blip.sprite == 0 then
-        local def = { basket = 357, football = 357, tennis = 357, boxing = 311, paintball = 110, lasertag = 110, race = 315 }
+        local def = { basket = 357, football = 357, tennis = 357, padel = 357, volley = 357, boxing = 311, brawl = 311, paintball = 110, lasertag = 110, bowling = 103, darts = 103, race = 315, karting = 315, car = 315, moto = 226, quad = 315, boat = 427 }
         out.blip.sprite = def[d.type] or 357
     end
 
@@ -160,7 +160,7 @@ cbAdmin('catalog', function()
     local types = {}
     for _, key in ipairs(Config.TypeOrder) do
         local T = Config.Types[key]
-        if T then types[#types + 1] = { key = key, label = T.label, icon = T.icon, engine = T.engine, desc = T.desc, fields = T.fields, points = T.points, templates = T.templates } end
+        if T then types[#types + 1] = { key = key, cat = T.cat, label = T.label, icon = T.icon, engine = T.engine, desc = T.desc, fields = T.fields, points = T.points, templates = T.templates } end
     end
     return { ok = true, types = types, common = Config.Common, weapons = Config.Weapons, currency = Config.Currency, teamColors = Config.TeamColors }
 end)

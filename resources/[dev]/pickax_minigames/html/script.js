@@ -16,6 +16,16 @@ const IC = {
   paintball: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/>',
   laser: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
   race: '<path d="M5 21V4M5 4h13l-2.5 4L18 12H5"/>',
+  bowling: '<circle cx="9" cy="15" r="6"/><path d="M7 13.5h.01M10 13h.01M9.5 16.2h.01M17 3c1.2 2 .6 3.2-.2 4.6S16.6 10 17.4 11.2 17.4 14 15.4 14.5"/>',
+  darts: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12L21 3M17 3h4v4"/>',
+  brawl: '<path d="M7 20v-5l-2-3V8l2-1 2 2 2-3 2 1 2-2 2 1v9l-3 4z"/>',
+  padel: '<ellipse cx="10" cy="9.5" rx="6" ry="7" transform="rotate(-35 10 9.5)"/><path d="M14.5 15L20.5 21M8 6.5l3 3M6.5 9l3 3"/>',
+  volley: '<circle cx="12" cy="12" r="9"/><path d="M12 3c-3 4-3 8 0 9s6 5 6 8M3.5 9c5 0 8 2 8.5 3M20.5 10c-4 1-6 4-6 8"/>',
+  kart: '<path d="M3 16l2-5h9l3 3h4v2M3 16v2h18v-2"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+  car: '<path d="M5 16l1.6-5a2 2 0 012-1.4h7a2 2 0 012 1.4L19 16M3 16h18v3H3z"/><circle cx="7.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/>',
+  moto: '<circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M6 16l4-6h5l3 6M10 10L9 7H7"/>',
+  quad: '<circle cx="6" cy="17" r="2.6"/><circle cx="18" cy="17" r="2.6"/><path d="M6 17h12M8.5 17l2.5-6h4l2 6M11 11V8h3"/>',
+  boat: '<path d="M3 15h18l-3 5H6zM12 15V4l6 9z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -30,8 +40,9 @@ const IC = {
   trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/>',
 };
 const ic = n => `<svg class="ic" viewBox="0 0 24 24">${IC[n] || ''}</svg>`;
-const TCOL = { basket: ['#ff9f0a', '#ff6a00'], football: ['#34c759', '#1f9d45'], tennis: ['#c8e61f', '#8fb300'], boxing: ['#ff453a', '#c9211a'], paintball: ['#ff375f', '#c4113a'], laser: ['#7d7aff', '#4a46d6'], race: ['#0a84ff', '#0558c4'] };
-const tile = (type, cls = '') => { const t = type === 'lasertag' ? 'laser' : type; const c = TCOL[t] || ['#8e8e93', '#636366']; return `<div class="tile ${cls}" style="background:linear-gradient(160deg,${c[0]},${c[1]})">${ic(t)}</div>`; };
+const TCOL = { basket: ['#ff9f0a', '#ff6a00'], football: ['#34c759', '#1f9d45'], tennis: ['#c8e61f', '#8fb300'], boxing: ['#ff453a', '#c9211a'], paintball: ['#ff375f', '#c4113a'], laser: ['#7d7aff', '#4a46d6'], race: ['#0a84ff', '#0558c4'], bowling: ['#5e5ce6', '#3634a3'], darts: ['#ff6482', '#c93a5a'], brawl: ['#ff9500', '#b85c00'], padel: ['#40c8e0', '#1a8fa8'], volley: ['#ffd60a', '#c79a00'], kart: ['#ff3b30', '#b0150d'], car: ['#64d2ff', '#2a8fbf'], moto: ['#bf5af2', '#7d2ea8'], quad: ['#a2845e', '#6b5236'], boat: ['#32ade6', '#1b6f99'] };
+const ICON_OF = { lasertag: 'laser', karting: 'kart' };
+const tile = (type, cls = '') => { const t = ICON_OF[type] || type; const c = TCOL[t] || ['#8e8e93', '#636366']; return `<div class="tile ${cls}" style="background:linear-gradient(160deg,${c[0]},${c[1]})">${ic(t)}</div>`; };
 const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const fmtMs = ms => { ms = Math.max(0, Math.floor(ms)); const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60, c = Math.floor((ms % 1000) / 10); return m + ':' + String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0'); };
 
@@ -112,9 +123,11 @@ function renderBuilder() {
 }
 
 function homeHtml() {
-  const cards = S.catalog.types.map(t => `<div class="card" data-new="${t.key}">${tile(t.key, 'xl')}<div><h3>${esc(t.label)}</h3><p>${esc(t.desc)}</p></div>
-    <div class="tpls">${(t.templates || []).map(x => `<span class="chip btnlike" data-newtpl="${t.key}|${x.id}">${esc(x.label)}</span>`).join('')}</div></div>`).join('');
-  return `<div class="pane"><div class="hero"><h1>Crée ton mini-jeu</h1><p>Choisis un type, place les points sur la carte, règle les règles et les récompenses : le lobby, les scores et le classement sont gérés automatiquement.</p></div><div class="cards">${cards}</div></div>`;
+  const card = t => `<div class="card" data-new="${t.key}">${tile(t.key, 'xl')}<div><h3>${esc(t.label)}</h3><p>${esc(t.desc)}</p></div>
+    <div class="tpls">${(t.templates || []).map(x => `<span class="chip btnlike" data-newtpl="${t.key}|${x.id}">${esc(x.label)}</span>`).join('')}</div></div>`;
+  const cats = [...new Set(S.catalog.types.map(t => t.cat || 'Autres'))];
+  const groups = cats.map(c => `<div class="grp-t" style="margin:26px 0 0 4px">${esc(c)}</div><div class="cards" style="margin-top:10px">${S.catalog.types.filter(t => (t.cat || 'Autres') === c).map(card).join('')}</div>`).join('');
+  return `<div class="pane"><div class="hero"><h1>Crée ton mini-jeu</h1><p>${S.catalog.types.length} types disponibles : choisis-en un, place les points sur la carte, règle les règles et les récompenses. Le lobby, les scores et le classement sont gérés automatiquement.</p></div>${groups}</div>`;
 }
 
 const TABS = [['general', 'Général'], ['rules', 'Règles'], ['rewards', 'Récompenses'], ['settings', 'Réglages'], ['points', 'Emplacements'], ['top', 'Classement']];
@@ -188,7 +201,7 @@ function tabPoints(d, T) {
 function tabTop() {
   if (!S.curId) return '<div class="empty">Enregistre le mini-jeu pour voir son classement.</div>';
   if (!S.stats) { rpc('stats', S.curId).then(r => { S.stats = r.ok ? r.top : []; if (S.tab === 'top') renderBuilder(); }); return '<div class="empty">Chargement…</div>'; }
-  const race = S.cur.type === 'race';
+  const race = typeOf(S.cur.type).engine === 'race';
   const rows = S.stats.map((r, i) => `<tr><td><span class="rk p${i + 1}">${i + 1}</span></td><td>${esc(r.name)}</td><td class="r">${race ? fmtMs(r.best_time) : r.best}</td><td class="r">${r.wins}</td><td class="r">${r.plays}</td></tr>`).join('');
   return `<div class="grp"><table class="tbl"><tr><th style="width:50px">#</th><th>Joueur</th><th class="r">${race ? 'Meilleur temps' : 'Meilleur score'}</th><th class="r">Victoires</th><th class="r">Parties</th></tr>${rows || '<tr><td colspan="5" class="empty">Aucune partie jouée</td></tr>'}</table></div>
     <div style="margin-top:16px"><button class="btn red" data-act="reset">${ic('trash')}Réinitialiser le classement</button></div>`;
@@ -309,7 +322,7 @@ function statusText() {
   return 'Le lobby est libre';
 }
 function renderLobby() {
-  const d = L.data, st = d.settings, cur = d.currency || '$', race = d.type === 'race';
+  const d = L.data, st = d.settings, cur = d.currency || '$', race = d.engine === 'race';
   const fmtB = m => (m && (race ? m.best_time : m.best)) ? (race ? fmtMs(m.best_time) : m.best) : '–';
   const top = (d.top || []).slice(0, 6).map((r, i) => `<div class="row"><span class="rk p${i + 1}">${i + 1}</span><div class="l"><b>${esc(r.name)}</b></div><span class="coord ok">${race ? fmtMs(r.best_time) : r.best + ' pts'}</span></div>`).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Personne n\'a encore joué</div></div>';
   const pl = d.players.map(p => `<div class="row"><span class="av">${esc((p.name || '?')[0].toUpperCase())}</span><div class="l"><b>${esc(p.name)}</b></div>${p.team ? `<span class="tdot t${p.team}"></span>` : ''}</div>`).join('') || '<div class="row"><div class="l" style="color:var(--sub)">Aucun joueur dans le lobby</div></div>';

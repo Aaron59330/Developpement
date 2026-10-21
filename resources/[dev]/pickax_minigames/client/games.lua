@@ -598,4 +598,115 @@ function race.tick(s, ped)
     end
 end
 
-MGC.engines = { shoot = shoot, rally = rally, fight = fight, tag = tag, race = race }
+
+-- ─── bowling ──────────────────────────────────────────────────────────────────
+local bowling = {}
+
+local function bwPins(s)
+    local S = s.settings
+    for _, pin in ipairs(s.pins or {}) do deleteEnt(pin.e) end
+    s.pins = {}
+    local model = loadModel(S.pinModel)
+    if not model or not s.points.pinhead or not s.points.ball then return end
+    local head, start = V(s.points.pinhead), V(s.points.ball)
+    local d = vector3(head.x - start.x, head.y - start.y, 0.0)
+    local len = #d
+    if len < 0.01 then d = vector3(0.0, 1.0, 0.0) else d = d / len end
+    local right = vector3(d.y, -d.x, 0.0)
+    local sp = S.pinSpacing or 0.32
+    for r = 0, 3 do
+        for i = 0, r do
+            local pos = head + d * (r * sp * 0.9) + right * ((i - r / 2.0) * sp)
+            local e = CreateObject(model, pos.x, pos.y, pos.z, true, true, false)
+            SetEntityAsMissionEntity(e, true, true)
+            PlaceObjectOnGroundProperly(e)
+            FreezeEntityPosition(e, true)
+            s.pins[#s.pins + 1] = { e = e, o = GetEntityCoords(e), down = false }
+            s.props[#s.props + 1] = e
+        end
+    end
+end
+
+local function bwHint(s, text) SendNUIMessage({ action = 'hint', text = text }) end
+
+function bowling.prepare(s) s.frame, s.throw, s.phase, s.cool, s.frameKnocked, s.charging = 1, 1, 'ready', 0, 0, false end
+
+function bowling.start(s)
+    bwPins(s)
+    bwHint(s, ('Frame 1/%d · maintiens E pour charger, relâche dans la zone verte'):format(s.settings.frames))
+end
+
+local function bwKnocked(pin)
+    if not DoesEntityExist(pin.e) then return true end
+    local c = GetEntityCoords(pin.e)
+    return math.abs(GetEntityPitch(pin.e)) > 35.0 or math.abs(GetEntityRoll(pin.e)) > 35.0
+        or #(vector3(c.x, c.y, 0.0) - vector3(pin.o.x, pin.o.y, 0.0)) > 0.45
+end
+
+function bowling.tick(s, ped)
+    local S = s.settings
+    DisableControlAction(0, 24, true) DisableControlAction(0, 25, true)
+    local t = GetGameTimer()
+    if s.phase == 'rolling' then
+        if t - s.rollT0 < 5500 then return end
+        deleteEnt(s.ball)
+        local k = 0
+        for _, pin in ipairs(s.pins) do
+            if not pin.down and bwKnocked(pin) then pin.down = true; k = k + 1; deleteEnt(pin.e) end
+        end
+        s.frameKnocked = s.frameKnocked + k
+        local pts = k
+        local frameOver = false
+        if s.throw == 1 and s.frameKnocked >= 10 then pts = pts + (S.strikeBonus or 0); frameOver = true; bwHint(s, 'STRIKE !')
+        elseif s.throw == 2 then
+            if s.frameKnocked >= 10 then pts = pts + (S.spareBonus or 0); bwHint(s, 'SPARE !') end
+            frameOver = true
+        end
+        if pts > 0 then TriggerServerEvent('minigames:score', pts) elseif k == 0 then bwHint(s, 'Raté…') end
+        if frameOver then
+            s.frame, s.throw, s.frameKnocked = s.frame + 1, 1, 0
+            if s.frame > S.frames then s.phase = 'done'; TriggerServerEvent('minigames:done') return end
+            bwPins(s)
+            Wait(1200)
+            bwHint(s, ('Frame %d/%d'):format(s.frame, S.frames))
+        else
+            s.throw = 2
+            bwHint(s, ('Frame %d/%d · deuxième lancer'):format(s.frame, S.frames))
+        end
+        s.phase, s.cool = 'ready', t + 500
+        return
+    end
+    if s.phase ~= 'ready' or t < s.cool then return end
+    if IsControlJustPressed(0, 38) then s.charging = true end
+    if s.charging then
+        local m = meterValue(S.meterSpeed or 1.2)
+        SendNUIMessage({ action = 'meter', show = true, v = m, sweet = S.sweet or 0.2 })
+        if IsControlJustReleased(0, 38) or not IsControlPressed(0, 38) then
+            s.charging = false
+            SendNUIMessage({ action = 'meter', show = false })
+            local model = loadModel(S.ballModel)
+            if not model or not s.points.ball or not s.points.pinhead then return end
+            local b0, head = V(s.points.ball), V(s.points.pinhead)
+            local d = vector3(head.x - b0.x, head.y - b0.y, 0.0)
+            d = d / math.max(#d, 0.01)
+            local sweet = S.sweet or 0.2
+            local err = math.max(0.0, math.abs(m - 0.5) - sweet / 2) / math.max(0.01, 0.5 - sweet / 2)
+            local ang = math.rad((m < 0.5 and -1 or 1) * err * (S.scatter or 7.0))
+            local c, sn = math.cos(ang), math.sin(ang)
+            local v = vector3(d.x * c - d.y * sn, d.x * sn + d.y * c, 0.0) * (S.rollSpeed or 13.0)
+            local ball = CreateObject(model, b0.x, b0.y, b0.z + 0.15, true, true, false)
+            SetEntityAsMissionEntity(ball, true, true)
+            SetEntityDynamic(ball, true) ActivatePhysics(ball) SetEntityHasGravity(ball, true)
+            SetEntityVelocity(ball, v.x, v.y, 0.0)
+            s.props[#s.props + 1] = ball
+            s.ball = ball
+            for _, pin in ipairs(s.pins) do if DoesEntityExist(pin.e) then FreezeEntityPosition(pin.e, false) ActivatePhysics(pin.e) end end
+            s.phase, s.rollT0 = 'rolling', t
+            TriggerServerEvent('minigames:shot')
+        end
+    end
+end
+
+function bowling.stop(s) SendNUIMessage({ action = 'meter', show = false }) end
+
+MGC.engines = { bowling = bowling, shoot = shoot, rally = rally, fight = fight, tag = tag, race = race }

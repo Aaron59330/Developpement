@@ -60,12 +60,13 @@ local function spawnFor(g, p, idx)
     local def = MG.Defs[g.id]
     local list = def.points.spawns or {}
     local pool = {}
+    local engine = Config.Types[def.type].engine
     if p.team then
         for _, s in ipairs(list) do if (s.team or 1) == p.team then pool[#pool + 1] = s end end
     end
     if #pool == 0 then pool = list end
     if #pool == 0 then return def.points.lobby end
-    if p.team or def.type == 'paintball' or def.type == 'lasertag' then return pool[math.random(#pool)] end
+    if p.team or engine == 'tag' then return pool[math.random(#pool)] end
     return pool[((idx - 1) % #pool) + 1]
 end
 
@@ -257,6 +258,8 @@ local function pushHud(g)
         extra = { limit = def.settings.scoreLimit, teamScore = g.teamScore, teams = tonumber(def.settings.teams) == 2 }
     elseif T.engine == 'shoot' or T.engine == 'rally' then
         extra = { balls = def.settings.balls }
+    elseif T.engine == 'bowling' then
+        extra = { frames = def.settings.frames }
     end
     for src in pairs(g.players) do
         TriggerClientEvent('minigames:hud', src, { left = left, rows = list, extra = extra, me = src })
@@ -301,7 +304,7 @@ CreateThread(function()
                 if T.engine == 'fight' then MG.fightTick(g, def) end
                 if g.state == 'running' then
                     local allDone = count(g) > 0
-                    if T.engine == 'shoot' or T.engine == 'rally' or T.engine == 'race' then
+                    if T.engine == 'shoot' or T.engine == 'rally' or T.engine == 'bowling' or T.engine == 'race' then
                         for _, p in pairs(g.players) do if not p.finished then allDone = false end end
                     else allDone = false end
                     if allDone then MG.finish(g, 'Terminé')
@@ -425,17 +428,19 @@ end
 
 RegisterNetEvent('minigames:shot', function()
     local g, p, def, T = running(source)
-    if not g or (T.engine ~= 'shoot' and T.engine ~= 'rally') then return end
+    if not g or (T.engine ~= 'shoot' and T.engine ~= 'rally' and T.engine ~= 'bowling') then return end
     p.shots = p.shots + 1
-    if (T.engine == 'rally' or def.type == 'football') and p.shots > def.settings.balls + 1 then p.shots = def.settings.balls + 1 end
+    local lim = T.engine == 'bowling' and def.settings.frames * 2 or def.settings.balls
+    if lim and p.shots > lim + 1 then p.shots = lim + 1 end
 end)
 
 RegisterNetEvent('minigames:score', function(pts)
     local g, p, def, T = running(source)
-    if not g or (T.engine ~= 'shoot' and T.engine ~= 'rally') then return end
+    if not g or (T.engine ~= 'shoot' and T.engine ~= 'rally' and T.engine ~= 'bowling') then return end
     pts = math.floor(tonumber(pts) or 0)
     if pts <= 0 then return end
     local max = math.max(def.settings.points2 or 0, def.settings.points3 or 0)
+    if T.engine == 'bowling' then max = 10 + math.max(def.settings.strikeBonus or 0, def.settings.spareBonus or 0) end
     for _, z in ipairs(def.points.zones or {}) do max = math.max(max, z.pts or 0) end
     if pts > max then return end
     local t = GetGameTimer()
@@ -450,7 +455,7 @@ end)
 RegisterNetEvent('minigames:done', function()
     local g, p, def, T = running(source)
     if not g then return end
-    if T.engine == 'shoot' or T.engine == 'rally' then p.finished = true end
+    if T.engine == 'shoot' or T.engine == 'rally' or T.engine == 'bowling' then p.finished = true end
 end)
 
 RegisterNetEvent('minigames:tagHit', function(victim)

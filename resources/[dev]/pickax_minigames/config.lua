@@ -194,3 +194,134 @@ Config.Weapons = {
     { 'WEAPON_PISTOL', 'Pistolet' }, { 'WEAPON_COMBATPISTOL', 'Pistolet de combat' }, { 'WEAPON_MICROSMG', 'Micro-SMG' }, { 'WEAPON_SMG', 'SMG' },
     { 'WEAPON_ASSAULTRIFLE', 'Fusil d\'assaut' }, { 'WEAPON_CARBINERIFLE', 'Carabine' }, { 'WEAPON_PUMPSHOTGUN', 'Fusil à pompe' }, { 'WEAPON_STUNGUN', 'Taser' },
 }
+
+-- ─── Mini-jeux supplémentaires ───────────────────────────────────────────────
+Config.Types.bowling = {
+    label = 'Bowling', icon = 'bowling', engine = 'bowling',
+    desc = 'Tes quilles se placent toutes seules : charge avec E, relâche dans la zone verte pour viser droit. 10 frames, 2 lancers, bonus strike et spare.',
+    fields = {
+        { key = 'pinModel',    label = 'Modèle des quilles',        kind = 'model', def = 'prop_bowling_pin' },
+        { key = 'ballModel',   label = 'Modèle de la boule',        kind = 'model', def = 'prop_bowling_ball' },
+        { key = 'frames',      label = 'Nombre de frames',          kind = 'number', min = 1, max = 10, def = 10 },
+        { key = 'pinSpacing',  label = 'Écart entre les quilles (m)', kind = 'number', min = .15, max = 1, step = .01, def = .32 },
+        { key = 'rollSpeed',   label = 'Vitesse de la boule (m/s)', kind = 'number', min = 5, max = 30, step = .5, def = 13 },
+        { key = 'meterSpeed',  label = 'Vitesse de la jauge',       kind = 'number', min = .4, max = 3, step = .1, def = 1.2 },
+        { key = 'sweet',       label = 'Largeur de la zone verte',  kind = 'number', min = .05, max = .5, step = .01, def = .2 },
+        { key = 'scatter',     label = 'Déviation max (degrés)',    kind = 'number', min = 0, max = 25, step = .5, def = 7 },
+        { key = 'strikeBonus', label = 'Bonus strike',              kind = 'number', min = 0, max = 50, def = 10 },
+        { key = 'spareBonus',  label = 'Bonus spare',               kind = 'number', min = 0, max = 50, def = 5 },
+    },
+    points = {
+        { key = 'lobby',   label = 'Entrée de la piste', single = true },
+        { key = 'spawns',  label = 'Position du joueur', max = 4 },
+        { key = 'ball',    label = 'Point de lancer de la boule', single = true },
+        { key = 'pinhead', label = 'Quille de tête (les 9 autres se placent derrière)', single = true },
+    },
+    templates = {
+        { id = 'lane', label = 'Piste de bowling', desc = '10 frames en solo, strikes et spares bonifiés.', settings = { minPlayers = 1, maxPlayers = 1, duration = 600, arenaRadius = 30 } },
+    },
+}
+
+Config.Types.darts = {
+    label = 'Fléchettes', icon = 'darts', engine = 'shoot',
+    desc = 'Lance tes fléchettes sur la cible : plus tu vises près du centre, plus tu marques. Place les anneaux de la cible comme zones à points.',
+    fields = {
+        { key = 'ballModel',   label = 'Modèle de la fléchette',    kind = 'model', def = 'prop_golf_ball' },
+        { key = 'targetKind',  label = 'Type de cible',             kind = 'select', def = 'goal', options = { { 'goal', 'Zones à points' }, { 'hoop', 'Panier (par le haut)' } } },
+        { key = 'holdBall',    label = 'Fléchette en main',         kind = 'bool', def = true },
+        { key = 'balls',       label = 'Nombre de fléchettes',      kind = 'number', min = 1, max = 60, def = 9 },
+        { key = 'meterSpeed',  label = 'Vitesse de la jauge',       kind = 'number', min = .4, max = 3, step = .1, def = 1.4 },
+        { key = 'sweet',       label = 'Largeur de la zone verte',  kind = 'number', min = .05, max = .5, step = .01, def = .12 },
+        { key = 'scatter',     label = 'Dispersion max (m)',        kind = 'number', min = 0, max = 3, step = .05, def = .6 },
+    },
+    points = {
+        { key = 'lobby',  label = 'Entrée', single = true },
+        { key = 'spawns', label = 'Ligne de lancer', max = 4 },
+        { key = 'zones',  label = 'Zones de la cible (centre, anneaux…)', max = 12, radius = true, pts = true },
+    },
+    templates = {
+        { id = 'board', label = 'Cible classique', desc = '9 fléchettes, centre à 50 points.', settings = { minPlayers = 1, maxPlayers = 1, balls = 9, duration = 180, arenaRadius = 20 } },
+    },
+}
+
+Config.Types.brawl = {
+    label = 'Combat libre', icon = 'brawl', engine = 'fight',
+    desc = 'Combat à mains nues plus brutal que la boxe : plus de vie, plus de dégâts, rounds longs.',
+    fields = {
+        { key = 'rounds',      label = 'Nombre de rounds',          kind = 'number', min = 1, max = 9, def = 3 },
+        { key = 'roundTime',   label = 'Durée d\'un round (s)',     kind = 'number', min = 20, max = 600, def = 90 },
+        { key = 'hp',          label = 'Points de vie',             kind = 'number', min = 20, max = 500, def = 150 },
+        { key = 'damageMin',   label = 'Dégâts minimum d\'un coup', kind = 'number', min = 1, max = 100, def = 6 },
+        { key = 'damageMax',   label = 'Dégâts maximum d\'un coup', kind = 'number', min = 1, max = 100, def = 14 },
+        { key = 'hitDelay',    label = 'Délai mini entre deux coups (ms)', kind = 'number', min = 100, max = 2000, step = 50, def = 400 },
+    },
+    points = {
+        { key = 'lobby',  label = 'Entrée / vestiaire', single = true },
+        { key = 'spawns', label = 'Points de départ (1 par combattant)', max = 2, team = true },
+        { key = 'center', label = 'Centre de l\'arène', single = true },
+    },
+    templates = {
+        { id = 'cage', label = 'Cage', desc = 'Duel 3 rounds, mise partagée.', settings = { minPlayers = 2, maxPlayers = 2, waitSeconds = 30, arenaRadius = 10, pot = true, entryFee = 200, duration = 900 } },
+    },
+}
+
+local function rally2(label, icon, desc, ball, fields, tplLabel, tplDesc)
+    return {
+        label = label, icon = icon, engine = 'rally', desc = desc,
+        fields = {
+            { key = 'ballModel',    label = 'Modèle de la balle',            kind = 'model', def = ball },
+            { key = 'balls',        label = 'Nombre de balles',              kind = 'number', min = 1, max = 100, def = fields.balls or 12 },
+            { key = 'feedInterval', label = 'Délai entre deux balles (s)',   kind = 'number', min = 2, max = 15, step = .5, def = fields.interval or 4.5 },
+            { key = 'feedTime',     label = 'Durée du vol de service (s)',   kind = 'number', min = .6, max = 3, step = .1, def = fields.feed or 1.5 },
+            { key = 'hitRadius',    label = 'Rayon de frappe (m)',           kind = 'number', min = 1, max = 5, step = .1, def = 2.4 },
+            { key = 'returnTime',   label = 'Durée du vol de retour (s)',    kind = 'number', min = .5, max = 3, step = .1, def = fields.ret or 1.2 },
+            { key = 'scatter',      label = 'Dispersion max (m)',            kind = 'number', min = 0, max = 8, step = .1, def = 3 },
+        },
+        points = {
+            { key = 'lobby',   label = 'Entrée du terrain', single = true },
+            { key = 'spawns',  label = 'Position du joueur', max = 4 },
+            { key = 'machine', label = 'Lanceur de balles', single = true },
+            { key = 'zones',   label = 'Zones cibles (côté adverse)', max = 12, radius = true, pts = true },
+        },
+        templates = { { id = 'training', label = tplLabel, desc = tplDesc, settings = { duration = 120, minPlayers = 1, maxPlayers = 1, balls = fields.balls or 12, arenaRadius = 30 } } },
+    }
+end
+Config.Types.padel  = rally2('Padel', 'padel', 'Comme le tennis mais en plus court : le lanceur envoie, tu renvoies avec E dans les zones.', 'prop_tennis_ball', { balls = 15, interval = 3.5, feed = 1.2, ret = 1.0 }, 'Entraînement de padel', '15 balles rapides, zones à points.')
+Config.Types.volley = rally2('Volley-ball', 'volley', 'Renvoie les ballons du lanceur de l\'autre côté du filet, dans les zones cibles.', 'prop_beach_volball01', { balls = 10, interval = 5, feed = 1.8, ret = 1.4 }, 'Entraînement de volley', '10 ballons, zones à points.')
+
+local function raceType(label, icon, desc, vehicle, tplLabel, tplDesc, extra)
+    return {
+        label = label, icon = icon, engine = 'race', desc = desc,
+        fields = {
+            { key = 'vehicle',  label = 'Véhicule (vide = à pied)',   kind = 'model', def = vehicle },
+            { key = 'laps',     label = 'Nombre de tours',            kind = 'number', min = 1, max = 20, def = 3 },
+            { key = 'cpRadius', label = 'Rayon des checkpoints (m)',  kind = 'number', min = 2, max = 30, step = .5, def = 7 },
+        },
+        points = {
+            { key = 'lobby',       label = 'Entrée / départ', single = true },
+            { key = 'spawns',      label = 'Places de la grille', max = 24 },
+            { key = 'checkpoints', label = 'Checkpoints (dans l\'ordre, le dernier = arrivée)', max = 60, radius = true },
+        },
+        templates = { { id = 'circuit', label = tplLabel, desc = tplDesc, settings = extra } },
+    }
+end
+Config.Types.karting = raceType('Karting', 'kart', 'Courses de karts sur circuit : grille de départ, tours, classement au meilleur temps.', 'veto2', 'Circuit de karting', '3 tours en kart, 8 pilotes maximum.', { minPlayers = 1, maxPlayers = 8, waitSeconds = 25, duration = 420, arenaRadius = 600, entryFee = 50, pot = true })
+Config.Types.car     = raceType('Course auto', 'car', 'Courses de voitures de rue ou de circuit.', 'sultan', 'Course de voitures', '3 tours, mise partagée.', { minPlayers = 1, maxPlayers = 10, waitSeconds = 30, duration = 480, arenaRadius = 900, entryFee = 100, pot = true })
+Config.Types.moto    = raceType('Course moto', 'moto', 'Course de motos sportives : trace, freine et gagne.', 'sanchez', 'Course de motos', '3 tours en moto.', { minPlayers = 1, maxPlayers = 10, waitSeconds = 30, duration = 420, arenaRadius = 900, entryFee = 100, pot = true })
+Config.Types.quad    = raceType('Course quad', 'quad', 'Course tout-terrain en quad ou en buggy.', 'blazer', 'Cross en quad', '2 tours de cross.', { minPlayers = 1, maxPlayers = 8, waitSeconds = 25, duration = 420, arenaRadius = 900 })
+Config.Types.boat    = raceType('Course bateau', 'boat', 'Course nautique : bouées en checkpoints, sur l\'eau.', 'seashark', 'Course de jet-ski', '2 tours en jet-ski.', { minPlayers = 1, maxPlayers = 8, waitSeconds = 25, duration = 420, arenaRadius = 1200 })
+
+-- catégories + ordre d'affichage
+local cats = {
+    { 'Balles & raquettes', { 'basket', 'football', 'tennis', 'padel', 'volley' } },
+    { 'Précision',          { 'bowling', 'darts' } },
+    { 'Combat & tir',       { 'boxing', 'brawl', 'paintball', 'lasertag' } },
+    { 'Courses',            { 'race', 'karting', 'car', 'moto', 'quad', 'boat' } },
+}
+Config.TypeOrder = {}
+for _, c in ipairs(cats) do
+    for _, k in ipairs(c[2]) do
+        Config.Types[k].cat = c[1]
+        Config.TypeOrder[#Config.TypeOrder + 1] = k
+    end
+end
