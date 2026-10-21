@@ -4,7 +4,6 @@ Config.Command       = 'eventbuilder'                     -- /eventbuilder ouvre
 Config.OpenKey       = false                              -- touche pour l'ouvrir sans commande (ex : 'F9')
 Config.AllowedGroups = { '_dev', 'admin', 'superadmin' }  -- groupes ESX autorisés à créer / lancer des événements
 Config.AcePermission = 'eventbuilder.admin'               -- (optionnel) permission ACE alternative
-Config.Webhook       = ''                                 -- (optionnel) webhook Discord : début / fin / butin des événements
 
 Config.PoliceJobs    = { 'police', 'sheriff', 'gendarmerie' }   -- métiers prévenus des événements (alerte + comptage « minPolice »)
 Config.Currency      = '$'

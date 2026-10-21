@@ -37,7 +37,6 @@ Config.Currency = '$'
 Config.ImagePath = 'nui://ox_inventory/web/images/%s.png'   -- image des produits ('%s' = nom de l'item) ; laisse '' pour désactiver
 Config.DefaultWeaponAmmo = 42    -- (inventaire ESX classique) munitions données avec une arme achetée
 
-Config.Webhook = ''              -- (optionnel) webhook Discord pour les logs d'achats / de gestion
 
 -- Moyens de paiement proposables (compte ESX correspondant)
 Config.Payments = {

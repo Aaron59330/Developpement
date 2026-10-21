@@ -29,6 +29,8 @@ function toast(msg, type = '') {
   setTimeout(() => el.remove(), 4200);
 }
 
+if (window.DLogs) DLogs.config({ rpc: (n, ...a) => rpc(n, ...a), toast: (m, t) => toast(m, t) });
+
 function confirmBox(title, text, okLabel = 'Confirmer', danger = true) {
   return new Promise(resolve => {
     const c = document.getElementById('confirm');
@@ -652,7 +654,7 @@ const Builder = {
 
   shopBody() {
     const c = this.cur;
-    const tabs = [['general', 'Général'], ...(this.isItems() ? [['products', `Produits (${c.items.length})`]] : []), ['locations', `Emplacements (${c.locations.length})`], ['access', 'Accès & paiement'], ['stats', 'Statistiques']];
+    const tabs = [['general', 'Général'], ...(this.isItems() ? [['products', `Produits (${c.items.length})`]] : []), ['locations', `Emplacements (${c.locations.length})`], ['access', 'Accès & paiement'], ['logs', 'Logs Discord'], ['stats', 'Statistiques']];
     if (!tabs.some(t => t[0] === this.tab)) this.tab = 'general';
     const warn = !c.locations.length ? `<div class="card" style="border-color:rgba(251,191,36,.35)"><div class="row">${ic('pin', 18)}<div class="hint"><b>Aucun emplacement</b> — la boutique n'apparaîtra nulle part. Ajoute-en un dans l'onglet « Emplacements ».</div><span class="spacer"></span><button class="sm" data-a="tab" data-v="locations">Ajouter</button></div></div>` : '';
     return `<div class="seg">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>${warn}${this['tab_' + this.tab]()}`;
@@ -786,6 +788,9 @@ const Builder = {
         <select data-path="__discjob" style="margin-top:6px"><option value="">+ Remise pour un métier…</option>${this.cat.jobs.filter(j => !(j.name in jd)).map(j => `<option value="${esc(j.name)}">${esc(j.label)}</option>`).join('')}</select>
         <div class="hint mt-s">Les remises s'additionnent (plafond 90 %) et se cumulent avec les promotions de chaque produit. Le compte société reçoit l'argent des ventes en espèces / par carte (esx_addonaccount).</div></div>`;
   },
+
+  /* Onglet : Logs Discord */
+  tab_logs() { return `<div class="dl-host" data-ref="${this.cur.id}"></div>`; },
 
   /* Onglet : Statistiques */
   tab_stats() {

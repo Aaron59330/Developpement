@@ -15,6 +15,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/core.lua',
     'server/builder.lua',
+    'server/dlogs.lua',
     'server/runtime.lua',
 }
 
@@ -29,7 +30,8 @@ ui_page 'html/index.html'
 files {
     'html/index.html',
     'html/style.css',
-    'html/script.js', 'html/pk-snd.js',
+    'html/script.js',
+    'html/dlogs-ui.js', 'html/pk-snd.js',
 }
 
 dependencies { 'es_extended', 'oxmysql' }

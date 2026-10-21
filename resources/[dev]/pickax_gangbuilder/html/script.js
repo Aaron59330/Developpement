@@ -32,6 +32,8 @@ function toast(msg, type = '') {
   setTimeout(() => el.remove(), 4200);
 }
 
+if (window.DLogs) DLogs.config({ rpc: (n, ...a) => rpc(n, ...a), toast: (m, t) => toast(m, t) });
+
 function confirmBox(title, text, okLabel = 'Confirmer', danger = true) {
   return new Promise(resolve => {
     const c = document.getElementById('confirm');
@@ -428,7 +430,7 @@ const Builder = {
 
   renderGang() {
     const c = this.cur, g = c.gang;
-    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip']];
+    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip'], ['logs', 'Logs Discord']];
     const acts = (!c.isNew ? `<select id="test-grade" style="width:140px">${c.grades.map((x, i) => `<option value="${i}">${esc(x.label)}</option>`).join('')}</select><button data-a="testGang">Me mettre dans ce gang</button><button data-a="leaveGang">Me retirer</button><button class="danger" data-a="deleteGang">${ic('trash', 15)}</button>` : '')
       + `<button class="primary" data-a="save" style="height:38px">${c.isNew ? 'Créer le gang' : 'Enregistrer'}</button>`;
     return {
@@ -490,6 +492,11 @@ const Builder = {
         <td><input type="number" min="0" data-path="grades.${i}.salary" data-t="n" value="${x.salary}"></td>
         <td><div class="row" style="gap:6px"><button class="icon" data-a="gradeUp" data-v="${i}">${ic('up', 15)}</button><button class="icon" data-a="gradeDown" data-v="${i}">${ic('down', 15)}</button><button class="icon danger" data-a="gradeDel" data-v="${i}">${ic('trash', 15)}</button></div></td></tr>`).join('')}</table>
       <div class="row mt"><button data-a="gradeAdd">${ic('plus', 15)} Ajouter un grade</button><span class="hint">L'ordre = niveau du grade (0 = plus bas) · ${this.catalog.maxGrades || 15} grades max · écrits dans <b>job2_grades</b>.</span></div></div>`;
+  },
+
+  tab_logs() {
+    const c = this.cur;
+    return c.isNew ? `<div class="card"><p class="hint">Enregistre d'abord ce gang : ses logs Discord se règlent ensuite ici.</p></div>` : `<div class="dl-host" data-ref="${esc(c.gang.name)}"></div>`;
   },
 
   tab_blip() {

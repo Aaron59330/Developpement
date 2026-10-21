@@ -52,11 +52,11 @@ function SB.log(shop, xPlayer, action, detail, amount)
         shop and shop.id or 0, label, xPlayer and xPlayer.identifier or nil, xPlayer and SB.playerName(xPlayer) or 'système',
         action, detail and tostring(detail):sub(1, 255) or nil, math.floor(tonumber(amount) or 0),
     })
-    if Config.Webhook and Config.Webhook ~= '' then
-        PerformHttpRequest(Config.Webhook, function() end, 'POST', json.encode({
-            username = 'ShopBuilder',
-            embeds = {{ title = ('[%s] %s'):format(label, action), description = ('%s\n%s'):format(xPlayer and SB.playerName(xPlayer) or 'système', detail or ''), color = 3447003 }},
-        }), { ['Content-Type'] = 'application/json' })
+    if GetResourceState('pickax_dlogs') == 'started' and shop and shop.id then
+        pcall(function()
+            exports.pickax_dlogs:Send('shop', shop.id, label, action,
+                xPlayer and { name = SB.playerName(xPlayer), identifier = xPlayer.identifier } or nil, detail, amount)
+        end)
     end
 end
 

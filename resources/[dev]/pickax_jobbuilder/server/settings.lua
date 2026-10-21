@@ -79,7 +79,6 @@ S.general = function(v, src)
         MaxItemsPerPoint = int(v.MaxItemsPerPoint, 1, 300, Config.MaxItemsPerPoint),
         PlatePrefixLength = int(v.PlatePrefixLength, 1, 4, Config.PlatePrefixLength),
         ReviveEvent = str(v.ReviveEvent, 80, Config.ReviveEvent),
-        Webhook = str(v.Webhook, 300, ''),
         AcePermission = str(v.AcePermission, 60, ''),
         Inventory = (v.Inventory == 'ox' or v.Inventory == 'esx') and v.Inventory or 'auto',
         ActionDuration = {

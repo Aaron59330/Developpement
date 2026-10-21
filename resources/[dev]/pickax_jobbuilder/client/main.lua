@@ -347,6 +347,7 @@ end
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'jobbuilder:<nom>')
 NuiRemote = {
+    dlogsGet = true, dlogsSave = true, dlogsTest = true,
     list = true, get = true, catalog = true, save = true, delete = true, setMyJob = true, leaveJob = true,
     ['cloak:wear'] = true, ['armory:take'] = true, ['shop:buy'] = true,
     ['boss:money'] = true, ['boss:recruit'] = true, ['boss:setGrade'] = true, ['boss:fire'] = true, ['boss:salary'] = true,

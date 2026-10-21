@@ -244,6 +244,7 @@ end)
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'shopbuilder:<nom>')
 local NuiRemote = {
+    dlogsGet = true, dlogsSave = true, dlogsTest = true,
     catalog = true, list = true, get = true, create = true, save = true, delete = true, duplicate = true, toggle = true,
     restock = true, resetStats = true, logs = true, buy = true, ['settings:save'] = true, importSuperettes = true,
 }

@@ -77,6 +77,9 @@ function ESXCustomServerUtils.sendToDiscord(name, message, color, WebhookLink, d
 	if message == nil or message == '' then
 		return false
 	end
+	if WebhookLink == nil or WebhookLink == '' then
+		return false
+	end
 
     local date = os.date("*t")
     if date.day < 10 then date.day = '0' .. tostring(date.day) end

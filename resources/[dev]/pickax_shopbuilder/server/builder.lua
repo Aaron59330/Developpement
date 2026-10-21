@@ -382,6 +382,7 @@ ESX.RegisterServerCallback('shopbuilder:delete', function(src, cb, id)
     SB.Shops[shop.id], SB.ByName[shop.name], SB.Dirty[shop.id] = nil, nil, nil
     SB.syncAll()
     SB.log(shop, ESX.GetPlayerFromId(src), 'delete', shop.label)
+    if GetResourceState('pickax_dlogs') == 'started' then pcall(function() exports.pickax_dlogs:Delete('shop', shop.id) end) end
     cb({ ok = true })
 end)
 

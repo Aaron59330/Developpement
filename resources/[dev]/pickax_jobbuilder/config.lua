@@ -38,7 +38,6 @@ Config.ActionDuration = { repair = 12000, clean = 6000 }
 -- société au DÉMARRAGE : sans redémarrage, ils ne connaissent pas les jobs créés en jeu. Ex : { 'pickax_core' }
 Config.RestartResources = {}
 
-Config.Webhook = ''  -- (optionnel) webhook Discord pour les logs (argent société, armurerie, gestion employés)
 
 -- ─────────────────────────────── Points ───────────────────────────────
 -- Types de points disponibles dans le builder
@@ -710,7 +709,7 @@ local function replace(dst, src)
 end
 
 JB_GENERAL_KEYS = { 'DrawDistance', 'InteractDistance', 'ServerDistance', 'TargetDistance', 'MaxGrades', 'MaxPoints', 'MaxItemsPerPoint',
-    'PlatePrefixLength', 'ReviveEvent', 'Webhook', 'Inventory', 'AcePermission' }
+    'PlatePrefixLength', 'ReviveEvent', 'Inventory', 'AcePermission' }
 JB_REAL_KEYS = { 'RentDays', 'MaxRentAhead', 'MaxPerPlayer', 'MaxKeys', 'MaxPointsPerProp', 'OutfitsPerPlayer', 'DefaultCommission',
     'RentCheckMinutes', 'ShowBlips' }
 

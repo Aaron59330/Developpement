@@ -60,15 +60,12 @@ function GB.log(gangName, xPlayer, action, detail)
     MySQL.insert('INSERT INTO gangbuilder_logs (gang_name, identifier, player_name, action, detail) VALUES (?, ?, ?, ?, ?)', {
         gangName, xPlayer and xPlayer.identifier or nil, xPlayer and GB.playerName(xPlayer) or 'système', action, detail and tostring(detail):sub(1, 255) or nil,
     })
-    if Config.Webhook and Config.Webhook ~= '' then
-        PerformHttpRequest(Config.Webhook, function() end, 'POST', json.encode({
-            username = 'GangBuilder',
-            embeds = {{
-                title = ('[%s] %s'):format(gangName, action),
-                description = ('%s\n%s'):format(xPlayer and GB.playerName(xPlayer) or 'système', detail or ''),
-                color = 15158332,
-            }},
-        }), { ['Content-Type'] = 'application/json' })
+    if GetResourceState('pickax_dlogs') == 'started' and gangName then
+        local g = GB.Gangs and GB.Gangs[gangName]
+        pcall(function()
+            exports.pickax_dlogs:Send('gang', gangName, g and g.label or gangName, action,
+                xPlayer and { name = GB.playerName(xPlayer), identifier = xPlayer.identifier } or nil, detail)
+        end)
     end
 end
 

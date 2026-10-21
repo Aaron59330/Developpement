@@ -15,6 +15,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/core.lua',
     'server/builder.lua',
+    'server/dlogs.lua',
     'server/shop.lua',
 }
 
@@ -31,6 +32,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
+    'html/dlogs-ui.js',
     'html/bb-ui.js',
 }
 

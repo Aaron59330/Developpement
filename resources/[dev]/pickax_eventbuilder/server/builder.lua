@@ -218,6 +218,7 @@ ESX.RegisterServerCallback('eventbuilder:delete', function(src, cb, id)
     MySQL.update.await('DELETE FROM eventbuilder_events WHERE id = ?', { cur.id })
     EB.Defs[cur.id], EB.ByName[cur.name] = nil, nil
     EB.log(cur, ESX.GetPlayerFromId(src), 'delete', cur.label)
+    if GetResourceState('pickax_dlogs') == 'started' then pcall(function() exports.pickax_dlogs:Delete('event', cur.id) end) end
     TriggerEvent('eventbuilder:internal:defsChanged')
     cb({ ok = true })
 end)

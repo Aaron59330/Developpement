@@ -33,6 +33,7 @@ if Config.OpenKey then RegisterKeyMapping(Config.Command, 'Ouvrir l\'Event Build
 
 -- Appels serveur autorisés depuis l'éditeur
 local NuiRemote = {
+    dlogsGet = true, dlogsSave = true, dlogsTest = true,
     catalog = true, list = true, get = true, draft = true, create = true, save = true, delete = true, duplicate = true, toggle = true,
     start = true, stop = true, active = true, logs = true, autoGet = true, autoSave = true, autoNow = true,
 }

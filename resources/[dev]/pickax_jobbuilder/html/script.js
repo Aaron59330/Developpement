@@ -34,6 +34,8 @@ function toast(msg, type = '') {
   setTimeout(() => el.remove(), 4200);
 }
 
+if (window.DLogs) DLogs.config({ rpc: (n, ...a) => rpc(n, ...a), toast: (m, t) => toast(m, t) });
+
 function confirmBox(title, text, okLabel = 'Confirmer', danger = true) {
   return new Promise(resolve => {
     const c = document.getElementById('confirm');
@@ -428,7 +430,7 @@ const Builder = {
 
   renderJob() {
     const c = this.cur, j = c.job;
-    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip']];
+    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip'], ['logs', 'Logs Discord']];
     const acts = (!c.isNew ? `<select id="test-grade" style="width:140px">${c.grades.map((g, i) => `<option value="${i}">${esc(g.label)}</option>`).join('')}</select><button data-a="testJob">Me mettre dans ce job</button><button class="danger" data-a="deleteJob">${ic('trash', 15)}</button>` : '')
       + `<button class="primary" data-a="save" style="height:38px">${c.isNew ? 'Créer le job' : 'Enregistrer'}</button>`;
     return {
@@ -624,6 +626,11 @@ const Builder = {
         <td><input type="number" min="0" data-path="grades.${i}.salary" data-t="n" value="${x.salary}"></td>
         <td><div class="row" style="gap:6px"><button class="icon" data-a="gradeUp" data-v="${i}">${ic('up', 15)}</button><button class="icon" data-a="gradeDown" data-v="${i}">${ic('down', 15)}</button><button class="icon danger" data-a="gradeDel" data-v="${i}">${ic('trash', 15)}</button></div></td></tr>`).join('')}</table>
       <div class="row mt"><button data-a="gradeAdd">${ic('plus', 15)} Ajouter un grade</button><span class="hint">L'ordre = niveau du grade (0 = plus bas) · 20 grades max.</span></div></div>`;
+  },
+
+  tab_logs() {
+    const c = this.cur;
+    return c.isNew ? `<div class="card"><p class="hint">Enregistre d'abord ce job : ses logs Discord se règlent ensuite ici.</p></div>` : `<div class="dl-host" data-ref="${esc(c.job.name)}"></div>`;
   },
 
   tab_blip() {
@@ -980,7 +987,6 @@ Object.assign(Builder, {
         ${fld('Groupes autorisés (séparés par des virgules)', `<input data-path="${b}.AllowedGroups" data-t="list" value="${esc((g.AllowedGroups || []).join(', '))}">`)}
         <div class="grid2 mt">${fld('Permission ACE (optionnel)', `<input data-path="${b}.AcePermission" value="${esc(g.AcePermission || '')}" maxlength="60">`)}
         ${fld('Inventaire', `<select data-path="${b}.Inventory">${['auto', 'ox', 'esx'].map(o => `<option value="${o}" ${g.Inventory === o ? 'selected' : ''}>${o === 'auto' ? 'Automatique' : o === 'ox' ? 'ox_inventory' : 'ESX'}</option>`).join('')}</select>`)}</div>
-        <div class="mt">${fld('Webhook Discord (logs)', `<input data-path="${b}.Webhook" value="${esc(g.Webhook || '')}" maxlength="300" placeholder="https://discord.com/api/webhooks/…">`)}</div>
         <div class="mt">${fld('Ressources à redémarrer après un changement de job (ex : pickax_core)', `<input data-path="${b}.RestartResources" data-t="list" value="${esc((g.RestartResources || []).join(', '))}" placeholder="pickax_core, esx_society, esx_addonaccount">`)}</div>
         <p class="hint mt">Ton esx_society / esx_addonaccount charge les jobs et les comptes société <b>au démarrage</b> : sans redémarrage, un job créé en jeu provoque « Compte partagé introuvable ». Indique ici la ressource à redémarrer automatiquement. Tu ne peux pas retirer ton propre groupe de la liste. La touche F6 et les noms de commandes se changent dans <b>config.lua</b> (redémarrage requis).</p></div></div>`;
   },

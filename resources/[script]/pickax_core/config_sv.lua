@@ -1,43 +1,6 @@
+-- Les logs Discord globaux ont été retirés.
+-- Les logs Discord se règlent maintenant depuis chaque builder (onglet « Logs Discord » d'un métier, gang, boutique ou événement), ressource pickax_dlogs.
+-- Cette table reste pour que les anciens appels ConfigSV.Logs["…"] du core continuent de fonctionner : ils renvoient simplement « pas de webhook », donc rien n'est envoyé.
 ConfigSV = {
-	Logs = {
-		["LogsCheat"] = "",
-		["LogsMessageAdmin"] = "",
-		["LogsConnexion"] = "",
-		["LogsDeconnexion"] = "",
-		["LogsMessageMort"] = "",
-		["LogsMessageMort2"] = "",
-		["LogsBoutique"] = "",
-        ["LogsHeal"] = "",
-        ["LogsDV"] = "",
-        ["LogsSpawnVehicle"] = "",
-        ["LogsGiveWeapon"] = "",
-        ["LogsGiveItem"] = "",
-        ["LogsGiveMoney"] = "",
-        ["LogsStaffMode"] = "",
-        ["LogsFacture"] = "",
-        ["LogsSetGroup"] = "",
-
-        --Armes PERM
-        ["LogsArmesPerm1"] = "",--Deposit
-        ["LogsArmesPerm2"] = "",--Remove
-
-
-
-        ["JailLogs"] = {
-            Nom = "Logs",
-            Title = "Logs Jail",
-            Webhook = ""
-        },
-
-        ["LogsChasseAuTresor"] = "",
-		["TentativedeCOBan"] = "",
-		["Ban"] = "",
-
-		["CustomVehicle"] = {--Script à payer
-            Nom = "Logs",
-            Title = "Logs Custom Vehicle",
-            Webhook = "",
-			Color = 1752220
-        },
-	}
+	Logs = setmetatable({}, { __index = function() return '' end }),
 }

@@ -412,6 +412,7 @@ ESX.RegisterServerCallback('gangbuilder:delete', function(src, cb, name)
     run('fiche builder', 'DELETE FROM gangbuilder_gangs WHERE name = ?', { name })
 
     GB.log('_deleted', ESX.GetPlayerFromId(src), 'gang_deleted', ('%s (%s)'):format(gang.label, name))
+    if GetResourceState('pickax_dlogs') == 'started' then pcall(function() exports.pickax_dlogs:Delete('gang', name) end) end
     GB.loadAll()
     GB.refreshJob2()
     GB.syncAll()

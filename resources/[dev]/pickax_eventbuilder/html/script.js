@@ -31,6 +31,8 @@ function toast(msg, kind) {
   $toasts.appendChild(t);
   setTimeout(() => t.remove(), 3200);
 }
+
+if (window.DLogs) DLogs.config({ rpc: (n, ...a) => rpc(n, ...a), toast: (m, t) => toast(m, t) });
 const ok = (r, msg) => { if (!r || !r.ok) { toast((r && r.error) || 'Erreur', 'bad'); return false; } if (msg) toast(msg, 'ok'); return true; };
 
 const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
@@ -155,6 +157,7 @@ function renderEditor() {
       ${fld('Rayon de la zone (m, 0 = aucun)', inp('blip.radius', 'number', 'min="0" max="500"'))}${fld('Taille du blip', inp('blip.scale', 'number', 'min="0.3" max="2" step="0.1"'))}
       <div></div>
       ${fld('Annonce au début (tous les joueurs, vide = aucune)', inp('announce.start', 'text', 'maxlength="140"'))}${fld('Annonce à la fin (vide = aucune)', inp('announce.finish', 'text', 'maxlength="140"'))}</div></div>
+    <div class="card"><h3>${ic('zap')} Logs Discord</h3>${S.isNew ? '<p class="hint">Crée d\'abord l\'événement : ses logs Discord se règlent ensuite ici.</p>' : `<div class="dl-host" data-ref="${S.curId}"></div>`}</div>
     <div class="save"><button data-a="back">Annuler</button><button class="pri" data-a="save">${S.isNew ? 'Créer l\'événement' : 'Enregistrer'}</button></div>`;
 }
 

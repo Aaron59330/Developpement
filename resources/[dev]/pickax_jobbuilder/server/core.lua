@@ -44,15 +44,12 @@ function JB.log(jobName, xPlayer, action, detail)
     MySQL.insert('INSERT INTO jobbuilder_logs (job_name, identifier, player_name, action, detail) VALUES (?, ?, ?, ?, ?)', {
         jobName, xPlayer and xPlayer.identifier or nil, xPlayer and JB.playerName(xPlayer) or 'système', action, detail and tostring(detail):sub(1, 255) or nil,
     })
-    if Config.Webhook and Config.Webhook ~= '' then
-        PerformHttpRequest(Config.Webhook, function() end, 'POST', json.encode({
-            username = 'JobBuilder',
-            embeds = {{
-                title = ('[%s] %s'):format(jobName, action),
-                description = ('%s\n%s'):format(xPlayer and JB.playerName(xPlayer) or 'système', detail or ''),
-                color = 3447003,
-            }},
-        }), { ['Content-Type'] = 'application/json' })
+    if GetResourceState('pickax_dlogs') == 'started' and jobName then
+        local j = JB.Jobs and JB.Jobs[jobName]
+        pcall(function()
+            exports.pickax_dlogs:Send('job', jobName, j and j.label or jobName, action,
+                xPlayer and { name = JB.playerName(xPlayer), identifier = xPlayer.identifier } or nil, detail)
+        end)
     end
 end
 

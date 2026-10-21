@@ -603,6 +603,7 @@ ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
     run('fiche builder', 'DELETE FROM jobbuilder_jobs WHERE name = ?', { name })
 
     JB.log('_deleted', ESX.GetPlayerFromId(src), 'job_deleted', ('%s (%s)'):format(job.label, name))
+    if GetResourceState('pickax_dlogs') == 'started' then pcall(function() exports.pickax_dlogs:Delete('job', name) end) end
     JB.loadAll()
     if JB.loadProps then JB.loadProps() JB.syncPropsAll() end
     JB.refreshESX()

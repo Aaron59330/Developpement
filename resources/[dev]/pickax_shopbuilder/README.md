@@ -42,7 +42,7 @@ Crée **n'importe quelle boutique en jeu** : supérette, armurerie, magasin de v
 | **Gestion** | Dupliquer, désactiver, supprimer, filtre produits, couleur d'interface globale (Paramètres) |
 | **Clavier** | Boutique : `↑↓` choisir un produit, `←→` quantité (`Maj` = ×5), `Entrée` payer. Cabine : `↑↓` choisir la pièce, `←→` modifier (`Maj` = ×5) |
 | **Interaction** | Marker + touche `E`, ou `ox_target` (`Config.Target = 'ox_target'`) |
-| **Logs Discord** | `Config.Webhook` |
+| **Logs Discord** | onglet « Logs Discord » de la boutique (ressource `pickax_dlogs`) |
 
 ## Sécurité
 - Tous les prix, stocks et accès sont recalculés **côté serveur** ; le client n'envoie qu'un panier `{index, nom, quantité}` validé (nom ↔ index, quantités, stock, métier, licence, horaires, distance au point, moyen de paiement).

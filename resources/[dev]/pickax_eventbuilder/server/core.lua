@@ -61,11 +61,11 @@ function EB.log(def, xPlayer, action, detail, amount)
         def and def.id or 0, def and def.label or '—', xPlayer and xPlayer.identifier or nil, xPlayer and EB.playerName(xPlayer) or 'système',
         action, detail and tostring(detail):sub(1, 255) or nil, math.floor(tonumber(amount) or 0),
     })
-    if Config.Webhook and Config.Webhook ~= '' then
-        PerformHttpRequest(Config.Webhook, function() end, 'POST', json.encode({
-            username = 'EventBuilder',
-            embeds = {{ title = ('[%s] %s'):format(def and def.label or '—', action), description = ('%s\n%s'):format(xPlayer and EB.playerName(xPlayer) or 'système', detail or ''), color = 15158332 }},
-        }), { ['Content-Type'] = 'application/json' })
+    if GetResourceState('pickax_dlogs') == 'started' and def and def.id then
+        pcall(function()
+            exports.pickax_dlogs:Send('event', def.id, def.label, action,
+                xPlayer and { name = EB.playerName(xPlayer), identifier = xPlayer.identifier } or nil, detail, amount)
+        end)
     end
 end
 

@@ -31,7 +31,6 @@ Config.MaxItemsPerPoint = 100
 Config.Inventory         = 'auto'  -- 'auto' | 'ox' | 'esx'
 Config.PlatePrefixLength = 3       -- plaque véhicule gang : 3 lettres du gang + 5 chiffres
 Config.UseGangColor      = true    -- les markers des points prennent la couleur du gang (sinon : couleur du type de point)
-Config.Webhook           = ''      -- (optionnel) webhook Discord pour les logs (argent, armurerie, gestion membres)
 
 -- Ressources redémarrées automatiquement après la création / modification / suppression d'un gang.
 -- Utile si ta ressource job2 charge la liste des jobs2 au DÉMARRAGE (voir Config.Job2.Refresh* plus bas). Ex : { 'pickax_core' }
@@ -404,7 +403,6 @@ Config.Schema = {
         { key = 'Inventory', label = 'Inventaire', t = 'enum', server = true, opts = opts({ 'auto', 'Automatique' }, { 'ox', 'ox_inventory' }, { 'esx', 'ESX' }) },
         { key = 'AllowedGroups', label = 'Groupes autorisés (le builder)', t = 'list', pat = '^[%w_%-]+$', max = 10, server = true },
         { key = 'AcePermission', label = 'Permission ACE (optionnel)', t = 'str', max = 60, server = true },
-        { key = 'Webhook', label = 'Webhook Discord (logs)', t = 'str', max = 300, server = true },
         { key = 'RestartResources', label = 'Ressources à redémarrer après un changement de gang', t = 'list', pat = '^[%w_%-%.]+$', max = 8, server = true },
     } },
     { id = 'gang', label = 'Gangs', fields = {
