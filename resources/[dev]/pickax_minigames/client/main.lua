@@ -112,18 +112,11 @@ RegisterNetEvent('minigames:sync', function(defs)
     blips = {}
     for id, d in pairs(MGC.defs) do
         local l = d.points and d.points.lobby
-        if l and d.blip and d.blip.enabled then
-            local b = AddBlipForCoord(l.x, l.y, l.z)
-            SetBlipSprite(b, d.blip.sprite or 357)
-            SetBlipColour(b, d.blip.color or 3)
-            SetBlipScale(b, 0.8)
-            SetBlipAsShortRange(b, true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName(d.name)
-            EndTextCommandSetBlipName(b)
-            blips[id] = b
+        if l and d.blip and d.blip.enabled ~= false then
+            blips[id] = BB.Blip(l, d.blip, { label = d.name, category = 'default' })
         end
     end
+    MGC.refreshProps()
 end)
 
 CreateThread(function()
@@ -132,7 +125,7 @@ CreateThread(function()
     TriggerServerEvent('minigames:requestSync')
 end)
 
--- ─── Markers de lobby ─────────────────────────────────────────────────────────
+-- ─── Markers de lobby (même rendu et même aide « E » que les autres builders) ─────────────────
 CreateThread(function()
     while true do
         local wait = 800
@@ -141,16 +134,13 @@ CreateThread(function()
             local p = GetEntityCoords(ped)
             for id, d in pairs(MGC.defs) do
                 local l = d.points and d.points.lobby
-                if l then
+                if l and (not d.marker or d.marker.enabled ~= false) then
                     local dist = #(p - vector3(l.x, l.y, l.z))
                     if dist < Config.DrawDistance then
                         wait = 0
-                        DrawMarker(1, l.x, l.y, l.z - 0.95, 0, 0, 0, 0, 0, 0, 1.4, 1.4, 0.5, ACC[1], ACC[2], ACC[3], 90, false, false, 2, false, nil, nil, false)
-                        DrawMarker(21, l.x, l.y, l.z + 0.2, 0, 0, 0, 0, 0, 0, 0.35, 0.35, 0.35, 255, 255, 255, 160, true, true, 2, false, nil, nil, false)
+                        BB.DrawMarker(d.marker, l)
                         if dist < Config.InteractDistance then
-                            BeginTextCommandDisplayHelp('STRING')
-                            AddTextComponentSubstringPlayerName(('~INPUT_CONTEXT~ Jouer : ~b~%s'):format(d.name))
-                            EndTextCommandDisplayHelp(0, false, true, -1)
+                            BB.ShowHelp(('Appuie sur ~INPUT_CONTEXT~ pour jouer : ~b~%s'):format(d.name), d.marker)
                             if IsControlJustPressed(0, 38) then
                                 ESX.TriggerServerCallback('minigames:lobby', function(res)
                                     if res and res.ok then openUI('lobby', res)
@@ -164,6 +154,137 @@ CreateThread(function()
         end
         Wait(wait)
     end
+end)
+
+-- ─── Props (décor / obstacles placés dans le builder) ─────────────────────────
+-- « always » : apparaissent à proximité du lobby ; « match » : seulement pendant la partie (voir games.lua)
+local always = {}   -- [id] = { objs }
+
+local function makeProp(p)
+    local hash = GetHashKey(p.model)
+    if not IsModelInCdimage(hash) then return nil end
+    RequestModel(hash)
+    local t = GetGameTimer() + 3000
+    while not HasModelLoaded(hash) and GetGameTimer() < t do Wait(10) end
+    if not HasModelLoaded(hash) then return nil end
+    local o = CreateObjectNoOffset(hash, p.x + 0.0, p.y + 0.0, p.z + 0.0, false, false, false)
+    SetEntityRotation(o, (p.rx or 0.0) + 0.0, (p.ry or 0.0) + 0.0, (p.h or 0.0) + 0.0, 2, true)
+    FreezeEntityPosition(o, p.freeze ~= false)
+    SetEntityCollision(o, p.collision ~= false, p.collision ~= false)
+    SetModelAsNoLongerNeeded(hash)
+    return o
+end
+MGC.makeProp = makeProp
+
+function MGC.spawnProps(def, mode)
+    local list = {}
+    for _, p in ipairs(def.props or {}) do
+        if (p.mode or 'match') == mode then
+            local o = makeProp(p)
+            if o then list[#list + 1] = o end
+        end
+    end
+    return list
+end
+
+function MGC.deleteProps(list)
+    for _, o in ipairs(list or {}) do
+        if DoesEntityExist(o) then SetEntityAsMissionEntity(o, true, true) DeleteEntity(o) end
+    end
+end
+
+function MGC.refreshProps()
+    for id, e in pairs(always) do MGC.deleteProps(e.objs) always[id] = nil end
+end
+
+CreateThread(function()
+    while true do
+        Wait(2000)
+        local p = GetEntityCoords(PlayerPedId())
+        for id, d in pairs(MGC.defs) do
+            local l = d.points and d.points.lobby
+            if l then
+                local dist = #(p - vector3(l.x, l.y, l.z))
+                local e = always[id]
+                if dist < Config.PropStream and not e then
+                    always[id] = { objs = MGC.spawnProps(d, 'always') }
+                elseif dist > Config.PropStream + 60.0 and e then
+                    MGC.deleteProps(e.objs) always[id] = nil
+                end
+            end
+        end
+    end
+end)
+
+-- Test d'un modèle (bouton « Tester » du builder) : apparaît 3 m devant toi pendant 8 s
+local previewObj
+NuiLocal.checkModel = function(args, cb)
+    local hash = GetHashKey(tostring(args[1] or ''))
+    cb({ valid = IsModelInCdimage(hash) and IsModelValid(hash) })
+end
+NuiLocal.previewProp = function(args, cb)
+    local model = tostring(args[1] or '')
+    local hash = GetHashKey(model)
+    if model == '' or not IsModelInCdimage(hash) then return cb({ ok = false }) end
+    cb({ ok = true })
+    CreateThread(function()
+        if previewObj and DoesEntityExist(previewObj) then DeleteEntity(previewObj) end
+        local ped = PlayerPedId()
+        local c = GetOffsetFromEntityInWorldCoords(ped, 0.0, 3.0, 0.0)
+        local isVeh = IsModelAVehicle(hash)
+        RequestModel(hash)
+        local t = GetGameTimer() + 4000
+        while not HasModelLoaded(hash) and GetGameTimer() < t do Wait(10) end
+        if not HasModelLoaded(hash) then return end
+        if isVeh then previewObj = CreateVehicle(hash, c.x, c.y, c.z, GetEntityHeading(ped), false, false)
+        else previewObj = CreateObjectNoOffset(hash, c.x, c.y, c.z - 0.9, false, false, false) end
+        SetEntityAlpha(previewObj, 190, false)
+        FreezeEntityPosition(previewObj, true)
+        SetEntityCollision(previewObj, false, false)
+        local untilT = GetGameTimer() + 8000
+        local o = previewObj
+        while GetGameTimer() < untilT and DoesEntityExist(o) do Wait(0) end
+        if DoesEntityExist(o) then DeleteEntity(o) end
+    end)
+end
+
+NuiLocal.bbPreview = function(args, cb)
+    cb({ ok = true })
+    if type(args[1]) == 'table' then BB.Preview(args[1], 8) end
+end
+
+-- Mode placement : le menu se réduit en HUD, le joueur se déplace librement (Entrée = enregistrer, ← → = cible, Retour = menu)
+local placing = false
+NuiLocal.placement = function(args, cb)
+    if args[1] and not placing then
+        placing = true
+        SetNuiFocus(false, false)
+        CreateThread(function()
+            while placing do
+                if IsControlJustReleased(0, 201) then
+                    local ped = PlayerPedId()
+                    local c = GetEntityCoords(ped)
+                    SendNUIMessage({ action = 'placementSave', coords = { x = c.x, y = c.y, z = c.z - 1.0, h = GetEntityHeading(ped) } })
+                elseif IsControlJustReleased(0, 190) then SendNUIMessage({ action = 'placementNav', dir = 1 })
+                elseif IsControlJustReleased(0, 189) then SendNUIMessage({ action = 'placementNav', dir = -1 })
+                elseif IsControlJustReleased(0, 177) then
+                    placing = false
+                    SetNuiFocus(true, true)
+                    SendNUIMessage({ action = 'placementEnd' })
+                end
+                Wait(0)
+            end
+        end)
+    end
+    cb({ ok = true })
+end
+
+-- Éclaboussures de peinture (paintball)
+MGC.splats = {}
+RegisterNetEvent('minigames:splat', function(x, y, z, r, g, b)
+    local list = MGC.splats
+    list[#list + 1] = { x = x, y = y, z = z, r = r, g = g, b = b, t = GetGameTimer() }
+    while #list > Config.Splat.max do table.remove(list, 1) end
 end)
 
 -- ─── Événements serveur → NUI / moteurs ──────────────────────────────────────
@@ -193,4 +314,5 @@ AddEventHandler('onResourceStop', function(res)
     if MGC.session then MGC.cleanup(true) end
     if uiMode then SetNuiFocus(false, false) end
     for _, b in pairs(blips) do RemoveBlip(b) end
+    MGC.refreshProps()
 end)

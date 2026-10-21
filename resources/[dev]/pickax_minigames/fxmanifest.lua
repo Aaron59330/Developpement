@@ -21,6 +21,7 @@ server_scripts {
 
 client_scripts {
     'pk_sound.lua',
+    'client/bb_map.lua',
     'client/main.lua',
     'client/games.lua',
 }
@@ -31,8 +32,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
-    'html/pk-snd.js',
-    'html/fonts/*.woff2',
+    'html/bb-ui.js',
 }
 
 dependencies { 'es_extended', 'oxmysql' }

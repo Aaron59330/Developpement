@@ -50,6 +50,52 @@ local function fieldValue(f, v)
     return f.def
 end
 
+-- Blip : champs vides = valeurs communes des builders (BB.Blip)
+function MG.cleanBlip(b)
+    b = type(b) == 'table' and b or {}
+    local o = { enabled = b.enabled ~= false, shortRange = b.shortRange ~= false, label = str(b.label, 60) }
+    if tonumber(b.sprite) and tonumber(b.sprite) > 0 then o.sprite = math.floor(num(b.sprite, 1, 900, 1)) end
+    if tonumber(b.color) then o.color = math.floor(num(b.color, 0, 85, 3)) end
+    if tonumber(b.scale) then o.scale = num(b.scale, 0.1, 3, 0.8) end
+    return o
+end
+
+-- Marker : champs vides = style commun du serveur (BB.Style)
+function MG.cleanMarker(m)
+    m = type(m) == 'table' and m or {}
+    local o = { help = m.help ~= false, enabled = m.enabled ~= false }
+    if tonumber(m.type) then o.type = math.floor(num(m.type, 0, 43, 25)) end
+    if type(m.color) == 'table' and tonumber(m.color[1]) and tonumber(m.color[2]) and tonumber(m.color[3]) then
+        o.color = { math.floor(num(m.color[1], 0, 255, 0)), math.floor(num(m.color[2], 0, 255, 0)), math.floor(num(m.color[3], 0, 255, 0)) }
+    end
+    if tonumber(m.alpha) then o.alpha = math.floor(num(m.alpha, 0, 255, 140)) end
+    if tonumber(m.offset) then o.offset = num(m.offset, -5, 5, -0.95) end
+    if type(m.scale) == 'table' then
+        local s = {}
+        for _, k in ipairs({ 'x', 'y', 'z' }) do if tonumber(m.scale[k]) then s[k] = num(m.scale[k], 0.05, 20, 0.9) end end
+        if next(s) then o.scale = s end
+    end
+    if m.bob ~= nil then o.bob = m.bob == true end
+    if m.rotate ~= nil then o.rotate = m.rotate == true end
+    return o
+end
+
+-- Props décoratifs / obstacles
+function MG.cleanProps(list)
+    local out = {}
+    if type(list) ~= 'table' then return out end
+    for i, p in ipairs(list) do
+        if i > 150 then break end
+        local model = type(p.model) == 'string' and p.model:match('^[%w_]+$') and p.model:sub(1, 64)
+        local c = coords(p)
+        if model and c then
+            out[#out + 1] = { model = model, x = c.x, y = c.y, z = c.z, h = c.h, rx = num(p.rx, -180, 180, 0), ry = num(p.ry, -180, 180, 0),
+                freeze = p.freeze ~= false, collision = p.collision ~= false, mode = p.mode == 'always' and 'always' or 'match' }
+        end
+    end
+    return out
+end
+
 function MG.sanitize(d, existingId)
     if type(d) ~= 'table' then return nil, 'Données invalides' end
     local T = Config.Types[d.type]
@@ -63,13 +109,13 @@ function MG.sanitize(d, existingId)
         name = name,
         description = str(d.description, 220),
         enabled = d.enabled == true,
-        blip = { enabled = not (type(d.blip) == 'table' and d.blip.enabled == false),
-                 sprite = math.floor(num(type(d.blip) == 'table' and d.blip.sprite, 1, 900, 0)),
-                 color = math.floor(num(type(d.blip) == 'table' and d.blip.color, 0, 85, 3)) },
+        blip = MG.cleanBlip(d.blip),
+        marker = MG.cleanMarker(d.marker),
+        props = MG.cleanProps(d.props),
         settings = {},
         points = {},
     }
-    if out.blip.sprite == 0 then
+    if not out.blip.sprite then
         local def = { basket = 357, football = 357, tennis = 357, padel = 357, volley = 357, boxing = 311, brawl = 311, paintball = 110, lasertag = 110, bowling = 103, darts = 103, race = 315, karting = 315, car = 315, moto = 226, quad = 315, boat = 427 }
         out.blip.sprite = def[d.type] or 357
     end
@@ -162,7 +208,8 @@ cbAdmin('catalog', function()
         local T = Config.Types[key]
         if T then types[#types + 1] = { key = key, cat = T.cat, label = T.label, icon = T.icon, engine = T.engine, desc = T.desc, fields = T.fields, points = T.points, templates = T.templates } end
     end
-    return { ok = true, types = types, common = Config.Common, weapons = Config.Weapons, currency = Config.Currency, teamColors = Config.TeamColors }
+    return { ok = true, types = types, common = Config.Common, weapons = Config.Weapons, models = Config.Models, props = Config.Props, tints = Config.WeaponTints,
+             currency = Config.Currency, teamColors = Config.TeamColors, propDefaults = Config.PropDefaults }
 end)
 
 cbAdmin('list', function()
@@ -196,7 +243,7 @@ cbAdmin('draft', function(_, typ, tpl)
     local points = {}
     for _, pt in ipairs(T.points) do points[pt.key] = pt.single and false or {} end
     return { ok = true, def = { type = typ, name = name, description = desc, enabled = false, settings = s, points = points,
-                                blip = { enabled = true, sprite = 0, color = 3 } } }
+                                blip = { enabled = true, shortRange = true, label = '' }, marker = { help = true }, props = {} } }
 end)
 
 local function persist(d)

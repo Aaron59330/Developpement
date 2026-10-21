@@ -90,6 +90,7 @@ function MGC.begin(d)
     s.prevInvincible = GetPlayerInvincible(PlayerId())
     SetEntityInvincible(ped, true)
     FreezeEntityPosition(ped, true)
+    for _, o in ipairs(MGC.spawnProps({ props = d.props }, 'match')) do s.props[#s.props + 1] = o end
     local E = MGC.engines[s.engine]
     if E and E.prepare then E.prepare(s) end
     SendNUIMessage({ action = 'begin', name = s.name, engine = s.engine, type = s.type, team = s.team, countdown = d.countdown })
@@ -469,6 +470,9 @@ function tag.prepare(s)
     GiveWeaponToPed(ped, s.weaponHash, 9999, false, true)
     SetPedInfiniteAmmo(ped, true, s.weaponHash)
     SetPlayerWeaponDamageModifier(PlayerId(), 0.0)
+    local tint = s.settings.tint
+    if tint == 'team' then tint = s.team and Config.TeamTints[s.team] or 0 end
+    SetPedWeaponTintIndex(ped, s.weaponHash, tonumber(tint) or 0)
     SetCurrentPedWeapon(ped, s.weaponHash, true)
     s.lastShot = 0
 end
@@ -487,6 +491,19 @@ function tag.respawn(s)
 end
 
 function tag.always(s, ped)
+    -- éclaboussures de peinture
+    local now = GetGameTimer()
+    local life = Config.Splat.life * 1000
+    local list = MGC.splats
+    for i = #list, 1, -1 do
+        local sp = list[i]
+        local age = now - sp.t
+        if age > life then table.remove(list, i)
+        else
+            local a = age > life - 4000 and math.floor(220 * (life - age) / 4000) or 220
+            DrawMarker(28, sp.x, sp.y, sp.z, 0, 0, 0, 0, 0, 0, 0.32, 0.32, 0.12, sp.r, sp.g, sp.b, a, false, false, 2, false, nil, nil, false)
+        end
+    end
     -- marqueur d'équipe au-dessus des autres joueurs
     local h = s.hud
     if not h or not h.extra or not h.extra.teams then return end
@@ -518,7 +535,8 @@ function tag.tick(s, ped)
         local from = GetGameplayCamCoord()
         local to = from + camDir() * (s.settings.hitRange or 60.0)
         local h = StartExpensiveSynchronousShapeTestLosProbe(from.x, from.y, from.z, to.x, to.y, to.z, 1 + 4 + 8, ped, 0)
-        local _, hit, _, _, ent = GetShapeTestResult(h)
+        local _, hit, endC, _, ent = GetShapeTestResult(h)
+        if hit == 1 and s.settings.splat then TriggerServerEvent('minigames:splat', endC.x, endC.y, endC.z) end
         if hit == 1 and ent ~= 0 and IsEntityAPed(ent) and IsPedAPlayer(ent) then
             local idx = NetworkGetPlayerIndexFromPed(ent)
             if idx and idx ~= -1 then TriggerServerEvent('minigames:tagHit', GetPlayerServerId(idx)) end

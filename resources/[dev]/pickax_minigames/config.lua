@@ -406,3 +406,59 @@ Config.Progress = {
         { id = 'a_lvl10',   name = 'Confirmé',         desc = 'Atteins le niveau 10',         kind = 'level',        target = 10,  xp = 0,    money = 1000, coins = 3,  enabled = true },
     },
 }
+
+-- ─── Armes, tints, props et modèles proposés dans le builder (liste de suggestions : tu peux aussi taper n'importe quel modèle) ───
+Config.Weapons = {
+    { 'WEAPON_PISTOL', 'Marqueur léger (pistolet)' }, { 'WEAPON_COMBATPISTOL', 'Marqueur combat (pistolet de combat)' }, { 'WEAPON_PISTOL50', 'Marqueur lourd (pistolet .50)' },
+    { 'WEAPON_SNSPISTOL', 'Mini-marqueur (SNS)' }, { 'WEAPON_VINTAGEPISTOL', 'Marqueur rétro' }, { 'WEAPON_MARKSMANPISTOL', 'Marqueur de précision' },
+    { 'WEAPON_MICROSMG', 'Marqueur rafale (micro-SMG)' }, { 'WEAPON_SMG', 'Marqueur SMG' }, { 'WEAPON_ASSAULTSMG', 'Marqueur SMG d\'assaut' }, { 'WEAPON_MACHINEPISTOL', 'Marqueur machine-pistolet' },
+    { 'WEAPON_ASSAULTRIFLE', 'Marqueur fusil d\'assaut' }, { 'WEAPON_CARBINERIFLE', 'Marqueur carabine' }, { 'WEAPON_COMPACTRIFLE', 'Marqueur compact' }, { 'WEAPON_BULLPUPRIFLE', 'Marqueur bullpup' }, { 'WEAPON_SPECIALCARBINE', 'Marqueur carabine spéciale' },
+    { 'WEAPON_MARKSMANRIFLE', 'Marqueur sniper léger' }, { 'WEAPON_SNIPERRIFLE', 'Marqueur sniper' },
+    { 'WEAPON_PUMPSHOTGUN', 'Marqueur à pompe' }, { 'WEAPON_SAWNOFFSHOTGUN', 'Marqueur à canon scié' },
+    { 'WEAPON_RAYPISTOL', 'Laser : pistolet (Up-n-Atomizer)' }, { 'WEAPON_RAYCARBINE', 'Laser : carabine' }, { 'WEAPON_RAYMINIGUN', 'Laser : minigun' },
+    { 'WEAPON_STUNGUN', 'Taser' }, { 'WEAPON_FLAREGUN', 'Pistolet de détresse' },
+}
+-- Teintes d'armes (index natifs GTA)
+Config.WeaponTints = { { '0', 'Aucune' }, { 'team', 'Couleur d\'équipe (bleu / orange)' }, { '1', 'Vert' }, { '2', 'Or' }, { '3', 'Rose' }, { '4', 'Armée' }, { '5', 'Bleu police' }, { '6', 'Orange' }, { '7', 'Platine' } }
+Config.TeamTints = { 5, 6 }
+
+-- Éclaboussures de peinture (paintball) : marqueurs colorés à l'impact, visibles par tous les joueurs de la partie
+Config.Splat = { life = 25, max = 80, team = { { 59, 130, 246 }, { 255, 140, 0 } }, ffa = { { 255, 64, 129 }, { 0, 229, 255 }, { 124, 252, 0 }, { 255, 214, 10 } } }
+
+-- Modèles suggérés (liste déroulante des champs « modèle ») — le bouton « Tester » vérifie qu'un modèle existe
+Config.Models = {
+    { 'prop_bskball_01', 'Ballon de basket' }, { 'p_ld_soc_ball_01', 'Ballon de foot' }, { 'prop_tennis_ball', 'Balle de tennis' }, { 'prop_golf_ball', 'Balle de golf' },
+    { 'prop_beach_volball01', 'Ballon de volley' }, { 'prop_bowling_ball', 'Boule de bowling' }, { 'prop_bowling_pin', 'Quille de bowling' },
+    { 'bmx', 'BMX' }, { 'cruiser', 'Vélo cruiser' }, { 'scorcher', 'VTT' }, { 'veto', 'Kart rétro' }, { 'veto2', 'Kart' }, { 'sultan', 'Sultan' }, { 'elegy', 'Elegy' }, { 'comet2', 'Comet' },
+    { 'sanchez', 'Sanchez (moto cross)' }, { 'bati', 'Bati (moto sport)' }, { 'blazer', 'Blazer (quad)' }, { 'seashark', 'Jet-ski' }, { 'dinghy', 'Zodiac' },
+}
+
+-- Props décoratifs / obstacles placables dans une arène (catégories du sélecteur)
+Config.Props = {
+    { 'Barrières & obstacles', {
+        { 'prop_barrier_work05', 'Barrière de chantier' }, { 'prop_barrier_work06a', 'Barrière de chantier (A)' }, { 'prop_barrier_work06b', 'Barrière de chantier (B)' },
+        { 'prop_mp_barrier_02b', 'Barrière béton' }, { 'prop_barrier_wat_03b', 'Barrière à eau' }, { 'prop_roadcone02a', 'Cône' }, { 'prop_roadcone01a', 'Cône (petit)' },
+        { 'prop_roadcone02b', 'Cône (large)' }, { 'prop_mp_ramp_01', 'Rampe (petite)' }, { 'prop_mp_ramp_02', 'Rampe (moyenne)' }, { 'prop_mp_ramp_03', 'Rampe (grande)' },
+    } },
+    { 'Abris & couverts (paintball / laser)', {
+        { 'prop_skip_08a', 'Benne' }, { 'prop_bin_01a', 'Poubelle' }, { 'prop_conc_sacks_02a', 'Sacs de sable' }, { 'prop_pallet_01a', 'Palette' },
+        { 'prop_boxpile_07d', 'Pile de cartons' }, { 'prop_cs_cardbox_01', 'Carton' }, { 'prop_offroad_tyres02', 'Pneus' }, { 'prop_cementbags01', 'Sacs de ciment' },
+    } },
+    { 'Sport & jeux', {
+        { 'prop_bskball_01', 'Ballon de basket' }, { 'p_ld_soc_ball_01', 'Ballon de foot' }, { 'prop_tennis_ball', 'Balle de tennis' }, { 'prop_beach_volball01', 'Ballon de volley' },
+        { 'prop_bowling_ball', 'Boule de bowling' }, { 'prop_bowling_pin', 'Quille' }, { 'prop_range_target_01', 'Cible de tir' }, { 'prop_beachflag_01', 'Drapeau' },
+    } },
+    { 'Éclairage & déco', {
+        { 'prop_worklight_03b', 'Projecteur de chantier' }, { 'prop_worklight_01a', 'Projecteur' }, { 'prop_generator_03b', 'Groupe électrogène' },
+        { 'prop_traffic_01a', 'Feu tricolore' }, { 'prop_beach_parasol_03', 'Parasol' }, { 'prop_table_03', 'Table' }, { 'prop_chair_01a', 'Chaise' },
+    } },
+}
+Config.PropDefaults = { freeze = true, collision = true, mode = 'match' }   -- mode : 'match' = seulement pendant la partie, 'always' = toujours visible près du lobby
+Config.PropStream = 120.0                                                  -- distance d'apparition des props « toujours visibles »
+
+-- Réglages supplémentaires des mini-jeux de tir
+for _, k in ipairs({ 'paintball', 'lasertag' }) do
+    local f = Config.Types[k].fields
+    f[#f + 1] = { key = 'tint', label = 'Teinte de l\'arme', kind = 'select', def = k == 'paintball' and 'team' or '0', options = Config.WeaponTints }
+    f[#f + 1] = { key = 'splat', label = 'Éclaboussures de peinture à l\'impact', kind = 'bool', def = k == 'paintball' }
+end

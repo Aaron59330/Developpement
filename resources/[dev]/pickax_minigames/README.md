@@ -39,3 +39,10 @@ Ajoute une entrée dans `Config.Types` (`config.lua`) en réutilisant un moteur 
 - **Mini-jeu de la semaine** (gains et XP multipliés), **saisons** avec récompenses du podium, annonces des records.
 - Profil joueur : `/mgprofil` ou onglet « Mon profil » du lobby.
 - Tables : `minigames_players`, `minigames_settings`, `minigames_pending`.
+
+## Interface
+Même identité que les autres builders (World / Event) : barre latérale, onglets, cartes, toasts, confirmations, dock de sons (`bb-ui.js`), éditeur commun **Blip & Marker** (`BBMap` + `client/bb_map.lua`), aide « E » activable par marker, barre de progression commune (attente avant le départ) et **mode placement** (Entrée = enregistrer ta position, ← → = cible, Retour = menu).
+
+## Props et armes
+- Onglet **Props** : obstacles, abris, rampes, ballons, décor (catalogue + modèle libre, bouton **Tester**). Mode « seulement pendant la partie » ou « toujours visible » près du lobby.
+- Armes : une quinzaine de marqueurs (pistolets, SMG, fusils, sniper, pompe) + armes laser ; champ libre `WEAPON_…` possible. Paintball : teinte d'arme par équipe et **éclaboussures de peinture** à l'impact (visibles par tous les joueurs de la partie).

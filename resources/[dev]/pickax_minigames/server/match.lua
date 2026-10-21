@@ -127,7 +127,7 @@ local function startCountdown(g)
         local sp = spawnFor(g, p, i)
         TriggerClientEvent('minigames:begin', src, {
             id = g.id, type = def.type, engine = T.engine, name = def.name, team = p.team, spawn = sp,
-            countdown = def.settings.countdown, settings = def.settings, points = def.points, slot = i,
+            countdown = def.settings.countdown, settings = def.settings, points = def.points, slot = i, props = def.props,
         })
     end
     g.teamScore = { 0, 0 }
@@ -500,6 +500,23 @@ RegisterNetEvent('minigames:tagHit', function(victim)
     TriggerClientEvent('minigames:scored', src, 1)
     local reached = p.team and g.teamScore[p.team] >= S.scoreLimit or p.score >= S.scoreLimit
     if reached then MG.finish(g, 'Limite de score atteinte') else pushHud(g) end
+end)
+
+RegisterNetEvent('minigames:splat', function(x, y, z)
+    local src = source
+    local g, p, def, T = running(src)
+    if not g or T.engine ~= 'tag' or not def.settings.splat then return end
+    x, y, z = tonumber(x), tonumber(y), tonumber(z)
+    if not x or not y or not z then return end
+    local t = GetGameTimer()
+    if p.lastSplat and t - p.lastSplat < 80 then return end
+    p.lastSplat = t
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 or #(GetEntityCoords(ped) - vector3(x, y, z)) > def.settings.hitRange + 12.0 then return end
+    local col
+    if p.team then col = Config.Splat.team[p.team] or Config.Splat.team[1]
+    else col = Config.Splat.ffa[(src % #Config.Splat.ffa) + 1] end
+    for dst in pairs(g.players) do TriggerClientEvent('minigames:splat', dst, x, y, z, col[1], col[2], col[3]) end
 end)
 
 RegisterNetEvent('minigames:fightHit', function(victim)
