@@ -25,7 +25,7 @@ end
 local function routeTo(c, label, color)
     clearBlip()
     destBlip = AddBlipForCoord(c.x + 0.0, c.y + 0.0, c.z + 0.0)
-    SetBlipSprite(destBlip, 361) SetBlipColour(destBlip, color or 5) SetBlipScale(destBlip, 1.0)
+    SetBlipSprite(destBlip, 361) SetBlipColour(destBlip, color or 5) SetBlipScale(destBlip, 0.5)
     SetBlipRoute(destBlip, true) SetBlipRouteColour(destBlip, color or 5)
     BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(label) EndTextCommandSetBlipName(destBlip)
 end
@@ -166,7 +166,7 @@ CreateThread(function()
         local show = G.Enabled and depot and isGazoline()
         if show and not depotBlip then
             depotBlip = AddBlipForCoord(depot.x + 0.0, depot.y + 0.0, depot.z + 0.0)
-            SetBlipSprite(depotBlip, G.Blip.sprite) SetBlipColour(depotBlip, G.Blip.color) SetBlipScale(depotBlip, G.Blip.scale) SetBlipAsShortRange(depotBlip, true)
+            SetBlipSprite(depotBlip, G.Blip.sprite) SetBlipColour(depotBlip, G.Blip.color) SetBlipScale(depotBlip, 0.5) SetBlipAsShortRange(depotBlip, true)
             BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(G.Blip.label) EndTextCommandSetBlipName(depotBlip)
         elseif not show and depotBlip then
             if DoesBlipExist(depotBlip) then RemoveBlip(depotBlip) end

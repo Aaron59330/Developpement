@@ -47,7 +47,7 @@ local function setBlip(key, x, y, sprite, colour, label)
     local b = blips[key]
     if not b or not DoesBlipExist(b) then
         b = AddBlipForCoord(x, y, 0.0)
-        SetBlipSprite(b, sprite) SetBlipColour(b, colour) SetBlipScale(b, 0.9) SetBlipAsShortRange(b, false)
+        SetBlipSprite(b, sprite) SetBlipColour(b, colour) SetBlipScale(b, 0.5) SetBlipAsShortRange(b, false)
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentSubstringPlayerName(label)
         EndTextCommandSetBlipName(b)

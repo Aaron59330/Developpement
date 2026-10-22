@@ -144,7 +144,7 @@ end
 function GoFastBlips(coordsToSellBlipS)
 	BlipsGoFast = AddBlipForCoord(coordsToSellBlipS)
 	SetBlipSprite(BlipsGoFast, 272)
-	SetBlipScale(BlipsGoFast, 0.85) -- set scale
+	SetBlipScale(BlipsGoFast, 0.5) -- set scale
 	SetBlipColour(BlipsGoFast, 1)
 	SetBlipAlpha(BlipsGoFast, 200)
 	PulseBlip(BlipsGoFast)

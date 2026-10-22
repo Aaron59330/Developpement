@@ -165,7 +165,7 @@ RegisterNetEvent('worldbuilder:client:alert', function(coords, title, message)
     Notify(('~r~[ALERTE]~s~ %s'):format(message or title or 'Activité suspecte'), 'error')
     if not coords then return end
     local blip = AddBlipForCoord(coords.x + 0.0, coords.y + 0.0, coords.z + 0.0)
-    SetBlipSprite(blip, 161) SetBlipColour(blip, 1) SetBlipScale(blip, 1.1) SetBlipAsShortRange(blip, false) SetBlipFlashes(blip, true)
+    SetBlipSprite(blip, 161) SetBlipColour(blip, 1) SetBlipScale(blip, 0.5) SetBlipAsShortRange(blip, false) SetBlipFlashes(blip, true)
     BeginTextCommandSetBlipName('STRING')
     AddTextComponentSubstringPlayerName(tostring(title or 'Alerte'))
     EndTextCommandSetBlipName(blip)

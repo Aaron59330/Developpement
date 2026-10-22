@@ -30,7 +30,7 @@ end
 local function setBlip(loc, label)
     if Q.blip and DoesBlipExist(Q.blip) then RemoveBlip(Q.blip) end
     Q.blip = AddBlipForCoord(loc.x + 0.0, loc.y + 0.0, loc.z + 0.0)
-    SetBlipSprite(Q.blip, 1) SetBlipColour(Q.blip, 5) SetBlipScale(Q.blip, 0.9)
+    SetBlipSprite(Q.blip, 1) SetBlipColour(Q.blip, 5) SetBlipScale(Q.blip, 0.5)
     SetBlipRoute(Q.blip, true) SetBlipRouteColour(Q.blip, 5)
     BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(label or 'Quête') EndTextCommandSetBlipName(Q.blip)
 end

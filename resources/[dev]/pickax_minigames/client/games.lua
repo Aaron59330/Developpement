@@ -594,7 +594,7 @@ local function raceBlip(s, idx)
     if not c then return end
     s.blip = AddBlipForCoord(c.x, c.y, c.z)
     SetBlipSprite(s.blip, 1)
-    SetBlipColour(s.blip, 5)
+    SetBlipColour(s.blip, 5) SetBlipScale(s.blip, 0.5)
     SetBlipRoute(s.blip, true)
 end
 

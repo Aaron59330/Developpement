@@ -4,9 +4,9 @@ Citizen.CreateThread(function()
         SetBlipSprite(blip, v.id)
         SetBlipDisplay(blip, 6)
         if v.scale ~= nil then
-            SetBlipScale(blip, v.scale)
+            SetBlipScale(blip, 0.5)
         else
-            SetBlipScale(blip, 0.8)
+            SetBlipScale(blip, 0.5)
         end
         SetBlipColour(blip, v.color)
         SetBlipAsShortRange(blip, true)

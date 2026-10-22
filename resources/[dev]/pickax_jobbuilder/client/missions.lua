@@ -51,7 +51,7 @@ local function setBlip(loc, label, entity)
     M.blip = entity and AddBlipForEntity(entity) or AddBlipForCoord(loc.x + 0.0, loc.y + 0.0, loc.z + 0.0)
     SetBlipSprite(M.blip, entity and 225 or 1)
     SetBlipColour(M.blip, 5)
-    SetBlipScale(M.blip, 0.9)
+    SetBlipScale(M.blip, 0.5)
     if not entity then SetBlipRoute(M.blip, true) SetBlipRouteColour(M.blip, 5) end
     BeginTextCommandSetBlipName('STRING')
     AddTextComponentSubstringPlayerName(label or 'Mission')

@@ -6,36 +6,36 @@ BB = BB or {}
 -- Style par défaut de chaque catégorie : une même catégorie a le même blip dans tous les builders.
 -- (utilisé uniquement quand le module / le point ne définit pas lui-même le champ)
 BB.Categories = {
-    garage      = { sprite = 357, color = 3,  scale = 0.8 },
-    impound     = { sprite = 68,  color = 47, scale = 0.8 },
-    rental      = { sprite = 225, color = 5,  scale = 0.8 },
-    dealer      = { sprite = 225, color = 3,  scale = 0.8 },
-    fuel        = { sprite = 361, color = 1,  scale = 0.8 },
-    carwash     = { sprite = 100, color = 3,  scale = 0.8 },
-    bank        = { sprite = 108, color = 2,  scale = 0.8 },
-    atm         = { sprite = 277, color = 2,  scale = 0.8 },
-    shop        = { sprite = 52,  color = 2,  scale = 0.8 },
-    pharmacy    = { sprite = 51,  color = 2,  scale = 0.8 },
-    weapons     = { sprite = 110, color = 1,  scale = 0.8 },
-    hardware    = { sprite = 402, color = 17, scale = 0.8 },
-    clothing    = { sprite = 73,  color = 47, scale = 0.8 },
-    barber      = { sprite = 71,  color = 0,  scale = 0.8 },
-    bar         = { sprite = 93,  color = 5,  scale = 0.8 },
-    electronics = { sprite = 521, color = 3,  scale = 0.8 },
-    police      = { sprite = 60,  color = 29, scale = 0.9 },
-    ems         = { sprite = 61,  color = 1,  scale = 0.9 },
-    mecano      = { sprite = 446, color = 5,  scale = 0.9 },
-    taxi        = { sprite = 198, color = 5,  scale = 0.9 },
-    realestate  = { sprite = 374, color = 2,  scale = 0.9 },
-    government  = { sprite = 419, color = 5,  scale = 0.9 },
-    school      = { sprite = 225, color = 3,  scale = 0.8 },
-    locksmith   = { sprite = 402, color = 5,  scale = 0.8 },
-    robbery     = { sprite = 52,  color = 1,  scale = 0.8 },
-    drug        = { sprite = 140, color = 2,  scale = 0.8 },
-    pvp         = { sprite = 311, color = 1,  scale = 0.8 },
-    chase       = { sprite = 315, color = 3,  scale = 0.8 },
-    gang        = { sprite = 310, color = 1,  scale = 0.9 },
-    default     = { sprite = 1,   color = 0,  scale = 0.8 },
+    garage      = { sprite = 357, color = 3,  scale = 0.5 },
+    impound     = { sprite = 68,  color = 47, scale = 0.5 },
+    rental      = { sprite = 225, color = 5,  scale = 0.5 },
+    dealer      = { sprite = 225, color = 3,  scale = 0.5 },
+    fuel        = { sprite = 361, color = 1,  scale = 0.5 },
+    carwash     = { sprite = 100, color = 3,  scale = 0.5 },
+    bank        = { sprite = 108, color = 2,  scale = 0.5 },
+    atm         = { sprite = 277, color = 2,  scale = 0.5 },
+    shop        = { sprite = 52,  color = 2,  scale = 0.5 },
+    pharmacy    = { sprite = 51,  color = 2,  scale = 0.5 },
+    weapons     = { sprite = 110, color = 1,  scale = 0.5 },
+    hardware    = { sprite = 402, color = 17, scale = 0.5 },
+    clothing    = { sprite = 73,  color = 47, scale = 0.5 },
+    barber      = { sprite = 71,  color = 0,  scale = 0.5 },
+    bar         = { sprite = 93,  color = 5,  scale = 0.5 },
+    electronics = { sprite = 521, color = 3,  scale = 0.5 },
+    police      = { sprite = 60,  color = 29, scale = 0.5 },
+    ems         = { sprite = 61,  color = 1,  scale = 0.5 },
+    mecano      = { sprite = 446, color = 5,  scale = 0.5 },
+    taxi        = { sprite = 198, color = 5,  scale = 0.5 },
+    realestate  = { sprite = 374, color = 2,  scale = 0.5 },
+    government  = { sprite = 419, color = 5,  scale = 0.5 },
+    school      = { sprite = 225, color = 3,  scale = 0.5 },
+    locksmith   = { sprite = 402, color = 5,  scale = 0.5 },
+    robbery     = { sprite = 52,  color = 1,  scale = 0.5 },
+    drug        = { sprite = 140, color = 2,  scale = 0.5 },
+    pvp         = { sprite = 311, color = 1,  scale = 0.5 },
+    chase       = { sprite = 315, color = 3,  scale = 0.5 },
+    gang        = { sprite = 310, color = 1,  scale = 0.5 },
+    default     = { sprite = 1,   color = 0,  scale = 0.5 },
 }
 
 -- Noms de types propres à un builder -> catégorie commune
@@ -115,17 +115,22 @@ end
 function BB.Blip(coords, b, opts)
     b, opts = b or {}, opts or {}
     local key = opts.category or ''
-    local cat = BB.Categories[BB.Alias[key] or key] or BB.Categories.default
+    local resolved = BB.Alias[key] or key
+    local cat = BB.Categories[resolved] or BB.Categories.default
+    -- Blips UNIFORMES : tous les points d'une même catégorie (stations, banques, garages, boutiques, métiers…) ont le même blip.
+    -- Seules les catégories inconnues / « default » (mini-jeux, boutique personnalisée…) gardent leur propre icône et couleur.
+    local uniform = BB.Categories[resolved] ~= nil and resolved ~= 'default' and opts.free ~= true
     local blip
     if opts.entity then
         blip = AddBlipForEntity(opts.entity)
     else
         blip = AddBlipForCoord(coords.x + 0.0, coords.y + 0.0, (coords.z or 0.0) + 0.0)
     end
-    SetBlipSprite(blip, tonumber(b.sprite) or cat.sprite)
-    -- ordre : réglage du point / module (en jeu) → réglage global du serveur (Config.GlobalBlip) → défaut de la catégorie
-    SetBlipColour(blip, tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color)
-    SetBlipScale(blip, (tonumber(b.scale) or (PickaxTheme and PickaxTheme.blipScale) or cat.scale) + 0.0)
+    SetBlipSprite(blip, uniform and cat.sprite or (tonumber(b.sprite) or cat.sprite))
+    -- couleur : catégorie (uniforme) → sinon réglage du point → global (Config.GlobalBlip.Color) → défaut
+    SetBlipColour(blip, (PickaxTheme and PickaxTheme.blipColor) or (uniform and cat.color) or tonumber(b.color) or cat.color)
+    -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
+    SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, b.shortRange ~= false)
     BeginTextCommandSetBlipName('STRING')
