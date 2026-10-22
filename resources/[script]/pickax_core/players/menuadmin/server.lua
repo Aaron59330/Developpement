@@ -1570,3 +1570,93 @@ CreateThread(function()
 		end
 	end
 end)
+
+-- ════════════ API pour le panel staff (pickax_staff) ════════════
+-- Le panel réutilise les droits, les reports et les sanctions déjà gérés ici : une seule source de vérité.
+exports('StaffRank', function(src) return getRank(src) end)
+exports('StaffPerm', function(src, key) return hasPermission(src, key) end)
+exports('StaffInService', function(src) return staffInService[src] == true end)
+
+-- kind : 'money' (espèces), 'black_money' (argent sale) → items ox_inventory ; 'bank' → compte ESX
+exports('StaffGiveMoney', function(who, kind, amount)
+    who, amount = tonumber(who), tonumber(amount)
+    local xPlayer = who and ESX.GetPlayerFromId(who)
+    if not xPlayer or not amount or amount <= 0 then return false, 'Montant ou joueur invalide' end
+    if kind == 'bank' then
+        xPlayer.addAccountMoney('bank', amount)
+        return true
+    end
+    if kind ~= 'money' and kind ~= 'black_money' then return false, 'Compte inconnu' end
+    return giveOxMoneyItem(who, kind, amount)
+end)
+
+-- duration : '30m', '12h', '3d' ou 'perm'
+exports('StaffBan', function(src, target, reason, duration)
+    target = tonumber(target)
+    local xTarget = target and ESX.GetPlayerFromId(target)
+    if not xTarget then return false, 'Joueur introuvable' end
+    reason = tostring(reason or ''):sub(1, 200)
+    if reason == '' then reason = ConfigBan.Locale.noreason end
+    if duration == 'perm' then
+        local license = ESX.GetIdentifierFromId(target, 'license:') or 'N/A'
+        local staff = src and src > 0 and GetPlayerName(src) or 'Console'
+        AddBan(target, license, 'N/A', GetPlayerName(target), staff, 0, reason, 1, xTarget.boutique_id)
+        DropPlayer(target, ('Vous êtes banni\nRaison : %s\nTemps Restant : Permanent\nAuteur : %s\nBan ID : %s'):format(reason, staff, tostring(xTarget.boutique_id)))
+    else
+        if type(duration) ~= 'string' or not duration:match('^%d+[mhdMHD]$') then return false, 'Durée invalide' end
+        ESXCustomServerUtils.BanPlayer(src, target, reason, duration)
+    end
+    return true
+end)
+
+exports('StaffReports', function()
+    local list = {}
+    for id, r in pairs(reportTable) do
+        list[#list + 1] = { id = id, nom = r.nom, args = r.args, isTake = r.isTake == true, staff = r.StaffName, created = r.CreateAT }
+    end
+    table.sort(list, function(a, b) return a.id < b.id end)
+    return list
+end)
+
+local function pushReports()
+    for _, id in ipairs(ESX.GetPlayers()) do
+        local x = ESX.GetPlayerFromId(id)
+        if x and x.getGroup() ~= 'user' then TriggerClientEvent('Admin:UpdateData', id, reportTable) end
+    end
+end
+
+exports('StaffTakeReport', function(src, id)
+    id = tonumber(id)
+    local r = id and reportTable[id]
+    if not r then return false, 'Report introuvable' end
+    r.isTake = true
+    r.StaffName = GetPlayerName(src)
+    TriggerClientEvent(Config.Trigger.TriggerNotification, id, ConfigMenuAdmin.Notification['ReportTaking'] or 'Votre report est pris en charge par le staff.')
+    TriggerClientEvent('menuadmin:sound', id, 'reportTaken')
+    pushReports()
+    return true
+end)
+
+exports('StaffCloseReport', function(src, id)
+    id = tonumber(id)
+    local r = id and reportTable[id]
+    if not r then return false, 'Report introuvable' end
+    reportTable[id] = nil
+    PlayerHasReport[id] = nil
+    if ConfigMenuAdmin.CooldownReport ~= nil then
+        PlayerHasCooldown[id] = true
+        SetTimeout(ConfigMenuAdmin.CooldownReport, function()
+            PlayerHasCooldown[id] = nil
+            TriggerClientEvent(Config.Trigger.TriggerNotification, id, ConfigMenuAdmin.Notification['CooldownReportGood'])
+        end)
+    end
+    pushReports()
+    return true
+end)
+
+exports('StaffGrades', function() return buildAdminGradeList() end)
+
+exports('StaffSetGrade', function(src, target, group)
+    if not isDev(src) then return false, 'Réservé au rôle _dev' end
+    return applyAdminGroup(target, group, GetPlayerName(src) or ('ID ' .. tostring(src)))
+end)

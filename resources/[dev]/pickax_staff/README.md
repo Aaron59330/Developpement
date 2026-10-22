@@ -1,0 +1,37 @@
+# pickax_staff — panel staff en jeu
+
+Remplace le menu admin RageUI (F11) par un panel simple, organisé par thème. L'ancien menu reste accessible : **Outils → Ancien menu** (wipe, capture d'écran, cutscenes, interactions développeur, gestion des permissions et grades).
+
+## Installation
+```
+ensure pickax_staff      # après es_extended, oxmysql et pickax_core
+restart pickax_core      # nécessaire une fois (nouvelles API pour le panel)
+```
+Touche **F11** (celle du menu admin) ou commande `/staff`. Tables créées seules : `staff_logs`, `staff_warns`, `staff_notes`, `staff_settings`.
+
+## Organisation
+| Onglet | Contenu |
+|---|---|
+| **Accueil** | joueurs / staff / reports / bans, actions rapides (soin, réanimation, TP marqueur…), équipe en ligne, dernières actions |
+| **Joueurs** | liste filtrable (tous, staff, proches, avertis) → **fiche joueur** : téléportation, santé, message, avertissement, spectate, prison, expulsion, bannissement, argent, objets, armes, vider l'inventaire, métier / gang, identité, grade staff, notes, historique, inventaire en lecture seule |
+| **Reports** | file d'attente et reports en cours : prendre, aller sur lui / l'amener, répondre, fermer |
+| **Véhicules** | apparition, réparer, nettoyer, retourner, plein, déverrouiller, custom max, plaque, néons, supprimer |
+| **Monde** | météo, heure, annonce serveur, nettoyage de zone, réanimer / soigner tout le monde |
+| **Sanctions** | avertissements du serveur, accès au panel anti-cheat (bans) |
+| **Équipe** | chat staff privé, droits par action (rang 4) |
+| **Journal** | toutes les actions du staff, filtrables (90 jours) |
+| **Outils** | coordonnées (copie vector3/4…), favoris de téléportation, lieux rapides, accès aux autres panels |
+
+Colonne de gauche, toujours visible : **mode administration** (tenue staff, comme avant) et réglages NoClip / invisible / invincible / noms / HUD.
+
+## Droits
+Le rang vient de `pickax_core` (mod = 1, admin = 2, superadmin = 3, _dev = 4 ; les grades personnalisés héritent de leur rang). `config.lua → Config.Perm` donne le **rang minimum par action** ; l'onglet Équipe → Droits (rang 4) les modifie en jeu sans redémarrage. Toutes les vérifications sont faites côté serveur. Un membre du staff ne peut pas sanctionner un rang égal ou supérieur.
+
+## Configurer (config.lua)
+Durées de ban, durées de prison, motifs rapides, météos, lieux rapides, seuil d'expulsion automatique par avertissements (`Config.Warn.KickAt`), rayon max de nettoyage.
+
+## Limites honnêtes
+- Non testé en jeu.
+- Prison, soin d'un autre joueur et spectate passent par les commandes existantes du core (exécutées depuis ton client).
+- Le « give véhicule avec clé » et le wipe restent dans l'ancien menu.
+- Le journal Discord n'est pas branché ici (les actions staff sont dans l'onglet Journal).

@@ -184,6 +184,11 @@ end)
 RegisterKeyMapping(ConfigMenuAdmin.Commande.CommandeName, ConfigMenuAdmin.Commande.Desc, 'keyboard', ConfigMenuAdmin.Commande.Bind)
 
 RegisterCommand(ConfigMenuAdmin.Commande.CommandeName, function()
+    -- Panel staff (pickax_staff) si démarré ; sinon l'ancien menu RageUI
+    if not MenuStaffOpenState and GetResourceState('pickax_staff') == 'started' then
+        exports['pickax_staff']:Toggle()
+        return
+    end
     if MenuStaffOpenState then
         MenuStaffOpenState = false
         RageUI.CloseAll()
@@ -675,6 +680,139 @@ function MenuStaffOpen5()
         end
     end
 end
+
+-- ════════════ API pour le panel staff (pickax_staff) : mêmes actions que les cases du menu RageUI ════════════
+local function staffServiceOn()
+    staffService = true
+    TriggerEvent("CorePickax:Staff:OnEnable")
+    StaffSound('staffOn')
+    ESX.ShowAdvancedNotification("Administration", ConfigMenuAdmin.Notification["StatsStaff"], ConfigMenuAdmin.Notification["ModeStaffNotif1"])
+    initializeText()
+    generateStaffOutfit(GetEntityModel(PlayerPedId()))
+    TriggerServerEvent('takeInfo', true)
+end
+
+local function staffServiceOff()
+    staffService = false
+    StaffSound('staffOff')
+    NoClip = false
+    ShowName = false
+    invisible = false
+    invincible = false
+    local ped = PlayerPedId()
+    SetEntityInvincible(ped, false)
+    SetPlayerInvincible(PlayerId(), false)
+    TriggerEvent("CorePickax:Staff:OnDisable")
+    FreezeEntityPosition(ped, false)
+    SetEntityCollision(ped, 1, 1)
+    SetEntityVisible(ped, 1, 0)
+    NetworkSetEntityInvisibleToNetwork(ped, 0)
+    for _, v in pairs(GetActivePlayers()) do RemoveMpGamerTag(gamerTags[v]) end
+    ESX.ShowAdvancedNotification("Administration", ConfigMenuAdmin.Notification["StatsStaff"], ConfigMenuAdmin.Notification["ModeStaffNotif2"])
+    if not (staffRank and ConfigMenuAdministrationAdmin.ranks[staffRank].outfit.peds) then
+        ESX.TriggerServerCallback("esx_skin:getPlayerSkin", function(skin)
+            TriggerEvent("skinchanger:loadSkin", skin)
+            ClearPedProp(PlayerPedId(), 0)
+        end)
+    else
+        ESX.TriggerServerCallback("esx_skin:getPlayerSkin", function(skin)
+            local isMale = skin.sex == 0
+            TriggerEvent("skinchanger:loadDefaultModel", isMale, function()
+                ESX.TriggerServerCallback("esx_skin:getPlayerSkin", function(skin2)
+                    TriggerEvent("skinchanger:loadSkin", skin2)
+                    TriggerEvent("esx:restoreLoadout")
+                end)
+            end)
+        end)
+    end
+    if NoClipF2 then
+        DisableNoclip(noclipEntity)
+        NoClipF2 = false
+    end
+    TriggerServerEvent('takeInfo', false)
+end
+
+exports('StaffState', function()
+    return {
+        rank = staffRank, label = currentAdminGroupLabel or (staffRank and ConfigMenuAdministrationAdmin.ranks[staffRank] and ConfigMenuAdministrationAdmin.ranks[staffRank].label) or nil,
+        service = staffService == true, noclip = NoClip == true or NoClipF2 == true, invisible = invisible == true, invincible = invincible == true, names = ShowName == true, hud = showStaffHud == true,
+    }
+end)
+
+exports('StaffSetService', function(on)
+    if staffRank == nil then return false end
+    on = on == true
+    if on == (staffService == true) then return true end
+    if on then staffServiceOn() else staffServiceOff() end
+    return true
+end)
+
+exports('StaffSetNoclip', function(on)
+    if not staffService then return false, "Active d'abord le mode administration" end
+    if NoClipF2 then return false, 'Désactive ton noclip (touche) avant' end
+    on = on == true
+    if on == NoClip then return true end
+    if on then
+        FreezeEntityPosition(PlayerPedId(), true)
+        NoClip = true
+        invisible = true
+        initializeNoclip()
+        initializeInvis()
+    else
+        local ped = PlayerPedId()
+        FreezeEntityPosition(ped, false)
+        SetEntityCollision(ped, 1, 1)
+        SetEntityVisible(ped, 1, 0)
+        NetworkSetEntityInvisibleToNetwork(ped, 0)
+        invisible = false
+        NoClip = false
+    end
+    return true
+end)
+
+exports('StaffSetInvisible', function(on)
+    if not staffService then return false, "Active d'abord le mode administration" end
+    if NoClip or NoClipF2 then return false, 'Invisible pendant le noclip' end
+    on = on == true
+    if on == invisible then return true end
+    if on then
+        invisible = true
+        initializeInvis()
+    else
+        invisible = false
+        SetEntityVisible(PlayerPedId(), 1, 0)
+        NetworkSetEntityInvisibleToNetwork(PlayerPedId(), 0)
+    end
+    return true
+end)
+
+exports('StaffSetInvincible', function(on)
+    if not staffService then return false, "Active d'abord le mode administration" end
+    invincible = on == true
+    SetEntityInvincible(PlayerPedId(), invincible)
+    SetPlayerInvincible(PlayerId(), invincible)
+    return true
+end)
+
+exports('StaffSetNames', function(on)
+    if not staffService then return false, "Active d'abord le mode administration" end
+    on = on == true
+    if on == ShowName then return true end
+    ShowName = on
+    if on then initializeNames() else for _, v in pairs(GetActivePlayers()) do RemoveMpGamerTag(gamerTags[v]) end end
+    return true
+end)
+
+exports('StaffSetHud', function(on) showStaffHud = on == true return true end)
+
+exports('StaffOpenLegacy', function()
+    if staffRank == nil or IsPedDeadOrDying(PlayerPedId(), 1) then return false end
+    if not MenuStaffOpenState then
+        MenuStaffOpenState = true
+        MenuStaffOpen()
+    end
+    return true
+end)
 
 function MenuStaffOpen()
     local textxte2 = nil
