@@ -30,7 +30,7 @@ end
 function MG.playerName(src)
     local xPlayer = ESX.GetPlayerFromId(src)
     if xPlayer and xPlayer.getName then return xPlayer.getName() end
-    return (src and GetPlayerName(src)) or ('Joueur ' .. tostring(src))
+    return (src and src > 0 and GetPlayerName(src)) or ('Joueur ' .. tostring(src))
 end
 
 function MG.identifier(src)
