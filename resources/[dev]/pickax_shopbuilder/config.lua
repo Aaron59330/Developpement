@@ -294,7 +294,7 @@ Config.Superettes = {
         { 'Paleto Bay', 1728.07, 6415.63, 35.04, 242.95 }, { 'Sandy Shores', 1959.82, 3740.48, 32.34, 301.57 }, { 'Harmony', 549.13, 2670.85, 42.16, 99.39 },
         { 'Grand Senora', 2677.47, 3279.76, 55.24, 335.08 }, { 'Tataviam', 2556.66, 380.84, 108.62, 356.67 }, { 'Vinewood', 372.66, 326.98, 103.57, 253.73 },
     } },
-    { id = 'ltd', label = 'LTD Gasoline', type = 'general', blip = { sprite = 361, color = 1 }, locations = {
+    { id = 'ltd', label = 'LTD Gasoline', type = 'general', blip = { sprite = 361, color = 1, label = 'Station essence' }, locations = {
         { 'Davis', -47.02, -1758.23, 29.42, 45.05 }, { 'Little Seoul', -706.06, -913.97, 19.22, 88.04 }, { 'Richman Glen', -1820.02, 794.03, 138.09, 135.45 },
         { 'Mirror Park', 1164.71, -322.94, 69.21, 101.72 }, { 'Grapeseed', 1697.87, 4922.96, 42.06, 324.71 },
     } },

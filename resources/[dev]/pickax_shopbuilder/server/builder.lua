@@ -498,6 +498,15 @@ local function seedShops(src, force)
             done[preset.id] = true
         end
     end
+    -- les LTD déjà créés prennent le même nom de blip que les stations essence du world builder
+    for _, sh in pairs(SB.Shops) do
+        local bl = sh.settings and sh.settings.blip
+        if sh.label == 'LTD Gasoline' and bl and (bl.label == nil or bl.label == '') then
+            bl.label = 'Station essence'
+            MySQL.update.await('UPDATE shopbuilder_shops SET settings = ? WHERE id = ?', { json.encode(sh.settings), sh.id })
+            made[#made + 1] = 'LTD : nom de blip mis à jour'
+        end
+    end
     MySQL.update.await("INSERT INTO shopbuilder_settings (k, v) VALUES ('seeded', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)", { json.encode(done) })
     if #made > 0 then
         SB.syncAll()
