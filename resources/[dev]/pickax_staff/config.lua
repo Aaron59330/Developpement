@@ -20,11 +20,11 @@ Config.Perm = {
     -- moi
     self_heal = 1, self_revive = 1, self_armor = 1, tp_waypoint = 1, tp_coords = 1, tp_back = 1, self_clothes = 2,
     -- véhicules
-    veh_spawn = 2, veh_repair = 1, veh_delete = 1, veh_clean = 1, veh_flip = 1, veh_max = 2, veh_plate = 2, veh_neon = 2, veh_unlock = 1, veh_fuel = 1,
+    veh_spawn = 2, veh_repair = 1, veh_delete = 1, veh_clean = 1, veh_flip = 1, veh_max = 2, veh_plate = 2, veh_neon = 2, veh_unlock = 1, veh_fuel = 1, veh_give = 3,
     -- monde
     weather = 2, time = 2, announce = 2, cleanup = 2, reviveAll = 3, healAll = 3,
     -- équipe
-    reports = 1, staffchat = 1, logs = 2, bookmarks = 2, perms = 4, legacy = 2,
+    reports = 1, staffchat = 1, logs = 2, bookmarks = 2, perms = 4, legacy = 2, devtools = 4,
 }
 
 -- Les actions « sanction » ne peuvent pas viser un membre du staff de rang égal ou supérieur.
@@ -71,9 +71,9 @@ Config.PermLabels = {
     self_heal = { 'Moi', 'Me soigner' }, self_revive = { 'Moi', 'Me réanimer' }, self_armor = { 'Moi', 'Me donner un gilet' }, tp_waypoint = { 'Moi', 'Téléportation sur le marqueur' },
     tp_coords = { 'Moi', 'Téléportation par coordonnées / favoris' }, tp_back = { 'Moi', 'Retour à ma position précédente' }, self_clothes = { 'Moi', 'Tenue staff' },
     veh_spawn = { 'Véhicules', 'Faire apparaître' }, veh_repair = { 'Véhicules', 'Réparer' }, veh_delete = { 'Véhicules', 'Supprimer' }, veh_clean = { 'Véhicules', 'Nettoyer' }, veh_flip = { 'Véhicules', 'Retourner' },
-    veh_max = { 'Véhicules', 'Custom au maximum' }, veh_plate = { 'Véhicules', 'Changer la plaque' }, veh_neon = { 'Véhicules', 'Néons' }, veh_unlock = { 'Véhicules', 'Déverrouiller' }, veh_fuel = { 'Véhicules', 'Faire le plein' },
+    veh_max = { 'Véhicules', 'Custom au maximum' }, veh_plate = { 'Véhicules', 'Changer la plaque' }, veh_neon = { 'Véhicules', 'Néons' }, veh_unlock = { 'Véhicules', 'Déverrouiller' }, veh_give = { 'Véhicules', 'Donner un véhicule avec clé (garage)' }, veh_fuel = { 'Véhicules', 'Faire le plein' },
     weather = { 'Monde', 'Changer la météo' }, time = { 'Monde', 'Changer l\'heure' }, announce = { 'Monde', 'Annonce serveur' }, cleanup = { 'Monde', 'Nettoyer une zone' },
     reviveAll = { 'Monde', 'Réanimer tout le monde' }, healAll = { 'Monde', 'Soigner tout le monde' },
     reports = { 'Équipe', 'Gérer les reports' }, staffchat = { 'Équipe', 'Chat staff' }, logs = { 'Équipe', 'Journal des actions staff' }, bookmarks = { 'Équipe', 'Gérer les favoris de téléportation' },
-    perms = { 'Équipe', 'Modifier ces droits (toujours rang 4)' }, legacy = { 'Équipe', 'Ancien menu (outils développeur)' },
+    perms = { 'Équipe', 'Modifier ces droits, grades et droits de l\'ancien menu (toujours rang 4)' }, devtools = { 'Équipe', 'Outils développeur (cutscenes, animations, intérieurs)' }, legacy = { 'Équipe', 'Ancien menu (outils développeur)' },
 }

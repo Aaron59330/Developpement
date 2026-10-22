@@ -183,12 +183,7 @@ end)
 
 RegisterKeyMapping(ConfigMenuAdmin.Commande.CommandeName, ConfigMenuAdmin.Commande.Desc, 'keyboard', ConfigMenuAdmin.Commande.Bind)
 
-RegisterCommand(ConfigMenuAdmin.Commande.CommandeName, function()
-    -- Panel staff (pickax_staff) si démarré ; sinon l'ancien menu RageUI
-    if not MenuStaffOpenState and GetResourceState('pickax_staff') == 'started' then
-        exports['pickax_staff']:Toggle()
-        return
-    end
+local function toggleLegacyMenu()
     if MenuStaffOpenState then
         MenuStaffOpenState = false
         RageUI.CloseAll()
@@ -198,7 +193,19 @@ RegisterCommand(ConfigMenuAdmin.Commande.CommandeName, function()
             MenuStaffOpen()
         end
     end
+end
+
+-- Deux menus complets : le panel moderne (pickax_staff) et l'ancien menu RageUI.
+-- ConfigMenuAdmin.DefaultMenu choisit celui de la touche F11 / de /menuadmin ; /staff ouvre le panel, /menuadmin_old l'ancien.
+RegisterCommand(ConfigMenuAdmin.Commande.CommandeName, function()
+    local panelUp = GetResourceState('pickax_staff') == 'started'
+    if panelUp and not MenuStaffOpenState and ConfigMenuAdmin.DefaultMenu ~= 'legacy' then
+        exports['pickax_staff']:Toggle()
+        return
+    end
+    toggleLegacyMenu()
 end)
+RegisterCommand('menuadmin_old', function() toggleLegacyMenu() end)
 
 local function starts(String, Start)
     return string.sub(String, 1, string.len(Start)) == Start
@@ -804,6 +811,75 @@ exports('StaffSetNames', function(on)
 end)
 
 exports('StaffSetHud', function(on) showStaffHud = on == true return true end)
+
+-- Outils développeur (cutscenes, animations, intérieurs) : recherche + lecture, pour le panel staff
+local function devList(kind)
+    if kind == 'cutscene' then
+        local o = {}
+        for _, v in ipairs(ConfigMenuAdminDev.Cutscenelist or {}) do o[#o + 1] = { label = tostring(v) } end
+        return o
+    elseif kind == 'animation' then
+        local o = {}
+        for _, v in ipairs(ConfigMenuAdminDev.Animationlist or {}) do o[#o + 1] = { label = tostring(v[2]), sub = tostring(v[1]), a = v[1], b = v[2] } end
+        return o
+    elseif kind == 'interior' then
+        local o = {}
+        for _, v in ipairs(ConfigMenuAdminDev.InteriorsList or {}) do o[#o + 1] = { label = tostring(v.Name) } end
+        return o
+    end
+    return {}
+end
+
+exports('StaffDevSearch', function(kind, query)
+    if staffRank ~= 4 then return {} end
+    query = tostring(query or ''):lower()
+    local out, list = {}, devList(kind)
+    for i, e in ipairs(list) do
+        if query == '' or e.label:lower():find(query, 1, true) or (e.sub and e.sub:lower():find(query, 1, true)) then
+            out[#out + 1] = { index = i, label = e.label, sub = e.sub }
+            if #out >= 80 then break end
+        end
+    end
+    return out, #list
+end)
+
+exports('StaffDevRun', function(kind, index)
+    if staffRank ~= 4 then return false end
+    index = tonumber(index)
+    if kind == 'cutscene' then
+        local v = ConfigMenuAdminDev.Cutscenelist[index]
+        if v then PlayCutscene(v) return true end
+    elseif kind == 'animation' then
+        local v = ConfigMenuAdminDev.Animationlist[index]
+        if v then TaskAnimESXCustom(PlayerPedId(), v[1], v[2]) return true end
+    elseif kind == 'interior' then
+        local v = ConfigMenuAdminDev.InteriorsList[index]
+        if v then ESX.Game.Teleport(PlayerPedId(), v.value) return true end
+    end
+    return false
+end)
+
+exports('StaffShowInterior', function() if staffRank ~= 4 then return false end Showinterior() return true end)
+
+exports('StaffGiveVehicle', function(model)
+    if not staffService then return false, "Active d'abord le mode administration" end
+    model = tostring(model or '')
+    if not model:match('^[%w_]+$') then return false, 'Modèle invalide' end
+    if not IsModelValid(model) or not IsModelAVehicle(model) then return false, 'Modèle de véhicule introuvable' end
+    RequestModel(model)
+    local t = GetGameTimer()
+    while not HasModelLoaded(model) do Wait(10) if GetGameTimer() - t > 5000 then return false, 'Chargement du modèle impossible' end end
+    give_vehi(model)
+    return true
+end)
+
+exports('StaffPedMenu', function()
+    if not staffService then return false end
+    TriggerEvent('CorePickax:peds', MonID())
+    return true
+end)
+
+exports('StaffCloseLegacy', function() MenuStaffOpenState = false RageUI.CloseAll() return true end)
 
 exports('StaffOpenLegacy', function()
     if staffRank == nil or IsPedDeadOrDying(PlayerPedId(), 1) then return false end

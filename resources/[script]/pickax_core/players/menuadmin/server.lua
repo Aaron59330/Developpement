@@ -1660,3 +1660,11 @@ exports('StaffSetGrade', function(src, target, group)
     if not isDev(src) then return false, 'Réservé au rôle _dev' end
     return applyAdminGroup(target, group, GetPlayerName(src) or ('ID ' .. tostring(src)))
 end)
+
+-- Matrice des droits de l'ancien menu (pour l'éditer depuis le panel staff, rang 4 seulement)
+exports('StaffPermMatrix', function(src)
+    if not isDev(src) then return nil end
+    local funcs = {}
+    for i, f in ipairs(ConfigMenuAdministrationAdmin.functions) do funcs[#funcs + 1] = { id = i, label = tostring(f.label or ('func_' .. i)):gsub('~%a~', ''), cat = f.cat } end
+    return { matrix = adminPermissionMatrix, funcs = funcs, grades = buildAdminGradeList() }
+end)

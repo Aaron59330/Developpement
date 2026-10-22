@@ -1,6 +1,8 @@
 ConfigMenuAdmin = {
     CooldownReport = 5*60000,--Nombre de temps que le joueur doit attendre pour faire un prochain report après avoir été cloturer
 
+    DefaultMenu = 'panel',--Menu ouvert par F11 / /menuadmin : 'panel' (panel moderne pickax_staff) ou 'legacy' (menu RageUI). /staff ouvre toujours le panel, /menuadmin_old toujours l'ancien menu.
+
     CheckByGroup = true,--Ici mettre false ou true, le true vous permet de détéct direct le group du joueur et l'atribuer au menu admin que le mettre en false vous devez mettre les license manuellement et cela require un reboot
     GroupList = {
         ["_dev"] = 4,--Correspond à en bas
@@ -1187,6 +1189,305 @@ ConfigMenuAdministrationAdmin = {
             end
         },
 
+        [39] = {
+            cat = "player",
+            sep = "↓ ~o~Staff (nouveautés) ~s~↓",
+            toSub = false,
+            label = "Geler / libérer le joueur",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Act("freeze", selectedPlayer.s, { state = not (selectedPlayer.frozen == true) })
+                selectedPlayer.frozen = not (selectedPlayer.frozen == true)
+            end
+        },
+
+        [40] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Tuer le joueur",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local c = ConfigMenuAdministrationAdmin.utils.keyboard("Confirmation", "Tapez OUI pour tuer ce joueur", 3)
+                if c and c:lower() == "oui" then exports["pickax_staff"]:Act("kill", selectedPlayer.s, {}) end
+            end
+        },
+
+        [41] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Avertir le joueur (enregistré)",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local r = ConfigMenuAdministrationAdmin.utils.keyboard("Motif de l'avertissement", "Entrez le motif", 120)
+                if r and r ~= "" then exports["pickax_staff"]:Act("warn", selectedPlayer.s, { reason = r }) end
+            end
+        },
+
+        [42] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Ajouter une note staff",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local r = ConfigMenuAdministrationAdmin.utils.keyboard("Note staff", "Visible par le staff uniquement", 200)
+                if r and r ~= "" then exports["pickax_staff"]:Act("notes", selectedPlayer.s, { text = r }) end
+            end
+        },
+
+        [43] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Renvoyer le joueur à sa position",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Act("sendback", selectedPlayer.s, {})
+            end
+        },
+
+        [44] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Téléporter le joueur à des coordonnées",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local x = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("X", "", 12))
+                local y = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Y", "", 12))
+                local z = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Z", "", 12))
+                if x and y and z then exports["pickax_staff"]:Act("tpcoords", selectedPlayer.s, { x = x, y = y, z = z }) end
+            end
+        },
+
+        [45] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Retirer de l'argent (cash)",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10))
+                if a then exports["pickax_staff"]:Act("takeMoney", selectedPlayer.s, { account = "cash", amount = a }) end
+            end
+        },
+
+        [46] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Retirer de l'argent (banque)",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10))
+                if a then exports["pickax_staff"]:Act("takeMoney", selectedPlayer.s, { account = "bank", amount = a }) end
+            end
+        },
+
+        [47] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Donner un objet",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local item = ConfigMenuAdministrationAdmin.utils.keyboard("Nom de l'objet", "ex : water", 40)
+                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6)) or 1
+                if item and item ~= "" then exports["pickax_staff"]:Act("giveItem", selectedPlayer.s, { item = item, count = n }) end
+            end
+        },
+
+        [48] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Retirer un objet",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local item = ConfigMenuAdministrationAdmin.utils.keyboard("Nom de l'objet", "ex : water", 40)
+                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6)) or 1
+                if item and item ~= "" then exports["pickax_staff"]:Act("takeItem", selectedPlayer.s, { item = item, count = n }) end
+            end
+        },
+
+        [49] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Donner une arme (ox_inventory)",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local w = ConfigMenuAdministrationAdmin.utils.keyboard("Nom de l'arme", "ex : WEAPON_PISTOL", 40)
+                if w and w ~= "" then exports["pickax_staff"]:Act("giveWeapon", selectedPlayer.s, { weapon = w }) end
+            end
+        },
+
+        [50] = {
+            cat = "player",
+            sep = nil,
+            toSub = false,
+            label = "Voir l'inventaire du joueur",
+            press = function(selectedPlayer)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:ShowInventory(selectedPlayer.s)
+            end
+        },
+
+        [51] = {
+            cat = "self",
+            sep = "↓ ~b~Monde ~s~↓",
+            toSub = false,
+            label = "Annonce serveur",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local t = ConfigMenuAdministrationAdmin.utils.keyboard("Annonce", "Texte envoyé à tous les joueurs", 160)
+                if t and t ~= "" then exports["pickax_staff"]:World("announce", t) end
+            end
+        },
+
+        [52] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Changer la météo",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local w = ConfigMenuAdministrationAdmin.utils.keyboard("Météo", "EXTRASUNNY, CLEAR, RAIN, THUNDER, FOGGY, SNOW…", 20)
+                if w and w ~= "" then exports["pickax_staff"]:World("weather", w) end
+            end
+        },
+
+        [53] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Changer l'heure",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local h = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Heure (0-23)", "", 2))
+                local m = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Minutes (0-59)", "0", 2)) or 0
+                if h then exports["pickax_staff"]:World("time", h, m) end
+            end
+        },
+
+        [54] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Nettoyer les véhicules vides autour de moi",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4)) or 50
+                exports["pickax_staff"]:World("cleanup", "vehicles", r)
+            end
+        },
+
+        [55] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Nettoyer les PNJ autour de moi",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4)) or 50
+                exports["pickax_staff"]:World("cleanup", "peds", r)
+            end
+        },
+
+        [56] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Réanimer tout le monde",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local c = ConfigMenuAdministrationAdmin.utils.keyboard("Confirmation", "Tapez OUI pour réanimer tout le serveur", 3)
+                if c and c:lower() == "oui" then exports["pickax_staff"]:World("reviveAll") end
+            end
+        },
+
+        [57] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Soigner tout le monde",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local c = ConfigMenuAdministrationAdmin.utils.keyboard("Confirmation", "Tapez OUI pour soigner tout le serveur", 3)
+                if c and c:lower() == "oui" then exports["pickax_staff"]:World("healAll") end
+            end
+        },
+
+        [58] = {
+            cat = "self",
+            sep = "↓ ~p~Équipe ~s~↓",
+            toSub = false,
+            label = "Écrire au chat staff",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                local t = ConfigMenuAdministrationAdmin.utils.keyboard("Chat staff", "Message pour l'équipe", 200)
+                if t and t ~= "" then exports["pickax_staff"]:World("chatSend", t) end
+            end
+        },
+
+        [59] = {
+            cat = "self",
+            sep = nil,
+            toSub = false,
+            label = "Ouvrir le panel moderne",
+            press = function()
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_core"]:StaffCloseLegacy()
+                exports["pickax_staff"]:Open()
+            end
+        },
+
+        [60] = {
+            cat = "veh",
+            sep = "↓ ~b~Entretien ~s~↓",
+            toSub = false,
+            label = "Faire le plein",
+            press = function(closestVeh)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Run("veh_fuel", {})
+            end
+        },
+
+        [61] = {
+            cat = "veh",
+            sep = nil,
+            toSub = false,
+            label = "Nettoyer le véhicule",
+            press = function(closestVeh)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Run("veh_clean", {})
+            end
+        },
+
+        [62] = {
+            cat = "veh",
+            sep = nil,
+            toSub = false,
+            label = "Retourner le véhicule",
+            press = function(closestVeh)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Run("veh_flip", {})
+            end
+        },
+
+        [63] = {
+            cat = "veh",
+            sep = nil,
+            toSub = false,
+            label = "Déverrouiller le véhicule",
+            press = function(closestVeh)
+                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
+                exports["pickax_staff"]:Run("veh_unlock", {})
+            end
+        },
+
     },
 
     ranks = {
@@ -1225,7 +1526,8 @@ ConfigMenuAdministrationAdmin = {
                 
                 11,12,13,14,15, -- Interactions sur soit mêmee
 
-                16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38 -- Interactions véhicule + vider inventaire
+                16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,
+                39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 -- Nouveautés (alignées sur pickax_staff)
             },
         },
         [3] = {
@@ -1258,7 +1560,8 @@ ConfigMenuAdministrationAdmin = {
                 }
             },
             permissions = {
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 24, 25, 26
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 24, 25, 26,
+                39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63
             },
         },
         [2] = {
@@ -1291,7 +1594,8 @@ ConfigMenuAdministrationAdmin = {
                 }
             },
             permissions = {
-                1, 2, 3, 4, 5, 6, 19, 20, 21, 25, 26
+                1, 2, 3, 4, 5, 6, 19, 20, 21, 25, 26,
+                39, 40, 41, 42, 43, 44, 50, 51, 52, 53, 54, 55, 58, 59, 60, 61, 62, 63
             },
         },
         [1] = {
@@ -1324,7 +1628,8 @@ ConfigMenuAdministrationAdmin = {
                 }
             },
             permissions = {
-                1, 2, 3, 4, 5, 6, 19, 20, 21, 25, 26
+                1, 2, 3, 4, 5, 6, 19, 20, 21, 25, 26,
+                39, 41, 42, 43, 44, 58, 59, 60, 61, 62, 63
             },
         }
     },

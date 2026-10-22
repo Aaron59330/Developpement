@@ -217,6 +217,11 @@ H.veh_max = function()
     SetVehicleWindowTint(veh, 1)
     return true
 end
+H.veh_give = function(a)
+    local ok, res, err = pcall(function() return exports.pickax_core:StaffGiveVehicle(tostring(a.model or '')) end)
+    if not ok or res == false then return false, (type(err) == 'string' and err) or 'Impossible de donner le véhicule' end
+    return true
+end
 H.self_clothes = function() return true end
 H.legacy = function()
     closeUI()
@@ -227,7 +232,7 @@ end
 -- ─────────────── Pont NUI ↔ serveur ───────────────
 local NuiRemote = {
     dash = true, players = true, player = true, inventory = true, items = true, jobs = true, grades = true, act = true, deleteEntry = true,
-    reports = true, reportTake = true, reportClose = true, reportReply = true,
+    permMatrix = true, audit = true, reports = true, reportTake = true, reportClose = true, reportReply = true,
     weather = true, time = true, announce = true, cleanup = true, reviveAll = true, healAll = true,
     chatList = true, chatSend = true, logs = true, warns = true, bookmarkSave = true, bookmarkDelete = true, permsGet = true, permsSave = true, permsReset = true,
 }
@@ -257,7 +262,7 @@ end
 
 -- ouvrir un autre panel staff (après fermeture de celui-ci)
 NuiLocal.openPanel = function(a, cb)
-    local allowed = { anticheat = 'anticheat', builders = 'builders' }
+    local allowed = { anticheat = 'anticheat', builders = 'builders', jobbuilder = 'jobbuilder', gangbuilder = 'gangbuilder', shopbuilder = 'shopbuilder', worldbuilder = 'worldbuilder', eventbuilder = 'eventbuilder', minigames = 'minigames' }
     local cmd = allowed[a[1]]
     if not cmd then return cb({ ok = false, error = 'Panel inconnu' }) end
     cb({ ok = true })
@@ -293,6 +298,49 @@ NuiLocal.act = function(a, cb)
     end, a[1], a[2], type(a[3]) == 'table' and a[3] or {})
 end
 
+-- actions qui restent gérées (et vérifiées) par pickax_core : wipe, capture d'écran
+NuiLocal.coreAction = function(a, cb)
+    local kind, id = a[1], tonumber(a[2])
+    if not id then return cb({ ok = false, error = 'Joueur invalide' }) end
+    if kind == 'screenshot' then TriggerServerEvent('CorePickax:TakeScreen', id)
+    elseif kind == 'wipe' then TriggerServerEvent('Admin:WipePlayer', id)
+    else return cb({ ok = false, error = 'Action inconnue' }) end
+    ESX.TriggerServerCallback('pickax_staff:audit', function() end, kind, id)
+    cb({ ok = true })
+end
+
+-- outils développeur (rang 4 vérifié côté core)
+NuiLocal.devSearch = function(a, cb)
+    local ok, list, total = pcall(function() return exports.pickax_core:StaffDevSearch(tostring(a[1] or ''), tostring(a[2] or '')) end)
+    cb({ ok = ok, list = ok and list or {}, total = ok and total or 0 })
+end
+NuiLocal.devRun = function(a, cb)
+    local kind = tostring(a[1] or '')
+    if kind == 'interiorInfo' then
+        local ok, r = pcall(function() return exports.pickax_core:StaffShowInterior() end)
+        return cb({ ok = ok and r == true, error = 'Réservé au rôle _dev' })
+    end
+    if kind == 'pedMenu' then
+        closeUI()
+        SetTimeout(200, function() pcall(function() exports.pickax_core:StaffPedMenu() end) end)
+        return cb({ ok = true })
+    end
+    local ok, r = pcall(function() return exports.pickax_core:StaffDevRun(kind, tonumber(a[2])) end)
+    if ok and r then closeUI() end
+    cb({ ok = ok and r == true, error = 'Impossible (rang 4 requis)' })
+end
+
+-- grades et droits de l'ancien menu : événements du core (le core vérifie le rang _dev)
+NuiLocal.gradeOp = function(a, cb)
+    local op = a[1]
+    if op == 'create' then TriggerServerEvent('CorePickax:createAdminGrade', tostring(a[2] or ''), tostring(a[3] or ''), tonumber(a[4]))
+    elseif op == 'delete' then TriggerServerEvent('CorePickax:deleteAdminGrade', tostring(a[2] or ''))
+    elseif op == 'color' then TriggerServerEvent('CorePickax:setAdminGradeColor', tostring(a[2] or ''), tostring(a[3] or ''))
+    elseif op == 'perm' then TriggerServerEvent('CorePickax:setPermission', a[2], tostring(a[3] or ''), a[4] == true)
+    else return cb({ ok = false, error = 'Opération inconnue' }) end
+    cb({ ok = true })
+end
+
 RegisterNUICallback('rpc', function(body, cb)
     local name, args = body.name, body.args or {}
     if NuiLocal[name] then return NuiLocal[name](args, cb) end
@@ -313,4 +361,49 @@ end)
 RegisterNetEvent('pickax_staff:chat', function(msg)
     if open then SendNUIMessage({ action = 'chat', message = msg })
     else ESX.ShowNotification(('~b~[Staff]~s~ %s : %s'):format(msg.name or '?', msg.text or '')) end
+end)
+
+-- ─────────────── API pour l'ancien menu (core) ───────────────
+local function toast(res)
+    if not res then return ESX.ShowNotification('~r~Aucune réponse') end
+    ESX.ShowNotification(res.ok and ('~g~' .. (res.msg or 'Fait')) or ('~r~' .. (res.error or 'Erreur')))
+end
+
+exports('Act', function(action, target, args)
+    ESX.TriggerServerCallback('pickax_staff:act', function(res)
+        toast(res)
+        if res and res.ok and res.client then runClient(res.client) end
+    end, action, target, type(args) == 'table' and args or {})
+end)
+
+exports('Run', function(action, args)
+    ESX.TriggerServerCallback('pickax_staff:self', function(res)
+        if not res or not res.ok then return toast(res) end
+        local h = H[action]
+        if h then
+            local ok, err = h(type(args) == 'table' and args or {})
+            if ok == false then return ESX.ShowNotification('~r~' .. (err or 'Impossible')) end
+        end
+        ESX.ShowNotification('~g~Fait')
+    end, action, type(args) == 'table' and args or {})
+end)
+
+local WORLD = { weather = true, time = true, announce = true, cleanup = true, reviveAll = true, healAll = true, chatSend = true }
+exports('World', function(name, ...)
+    if not WORLD[name] then return end
+    ESX.TriggerServerCallback('pickax_staff:' .. name, function(res)
+        if name == 'chatSend' and res and res.ok then return ESX.ShowNotification('~g~Message envoyé à l\'équipe') end
+        toast(res)
+    end, ...)
+end)
+
+exports('ShowInventory', function(target)
+    ESX.TriggerServerCallback('pickax_staff:inventory', function(res)
+        if not res or not res.ok then return toast(res) end
+        if #res.items == 0 then return ESX.ShowNotification('Inventaire vide') end
+        local lines = {}
+        for i = 1, math.min(#res.items, 14) do lines[#lines + 1] = ('%dx %s'):format(res.items[i].count, res.items[i].label) end
+        if #res.items > 14 then lines[#lines + 1] = ('… et %d autre(s)'):format(#res.items - 14) end
+        ESX.ShowNotification(table.concat(lines, '~n~'))
+    end, target)
 end)

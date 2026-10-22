@@ -101,6 +101,10 @@ S.reg('open', 'panel', function(src)
     for key, need in pairs(Config.Perm) do
         perms[key] = S.can(src, key)
     end
+    -- droits qui restent gérés par l'ancien système (wipe, capture d'écran)
+    local okW, w = pcall(function() return exports.pickax_core:StaffPerm(src, 'func_18') end)
+    local okS, sc = pcall(function() return exports.pickax_core:StaffPerm(src, 'take_screen') end)
+    perms.wipe, perms.screenshot = okW and w == true, okS and sc == true
     return { ok = true, rank = S.rank(src), name = S.name(src), id = src, perms = perms, service = exports.pickax_core:StaffInService(src) == true,
         cfg = { banDurations = Config.BanDurations, jailPresets = Config.JailPresets, reasons = Config.Reasons, weather = Config.Weather, quickTp = Config.QuickTP, cleanupMax = Config.CleanupMaxRadius,
                 announceMax = Config.AnnounceMax }, bookmarks = S.bookmarks }

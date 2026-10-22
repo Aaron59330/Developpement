@@ -146,6 +146,7 @@ const reasonOpts = () => (S.cfg.reasons || []).map(x => x);
 const ACTS = [
   ['Téléportation', [
     { k: 'gotoPlayer', l: 'Aller sur lui' }, { k: 'bringPlayer', l: 'L\'amener' }, { k: 'sendback', l: 'Le renvoyer' },
+    { k: 'tpquick', l: 'Envoyer à un lieu rapide', quick: true, perm: 'tpcoords' },
     { k: 'tpcoords', l: 'Téléporter à…', fields: () => [{ name: 'x', label: 'X', type: 'number' }, { name: 'y', label: 'Y', type: 'number' }, { name: 'z', label: 'Z', type: 'number' }] } ]],
   ['Santé', [
     { k: 'heal', l: 'Soigner' }, { k: 'revive', l: 'Réanimer' }, { k: 'armor', l: 'Gilet' },
@@ -154,6 +155,7 @@ const ACTS = [
     { k: 'message', l: 'Envoyer un message', fields: () => [{ name: 'text', label: 'Message', type: 'textarea', max: 200 }], ok: 'Envoyer' },
     { k: 'warn', l: 'Avertir', fields: () => [{ name: 'preset', label: 'Motif rapide', type: 'select', options: ['—', ...reasonOpts()] }, { name: 'reason', label: 'Précisions (remplace le motif rapide)', type: 'text', max: 250 }], ok: 'Avertir', prep: v => ({ reason: v.reason || (v.preset !== '—' ? v.preset : '') }) },
     { k: 'spectate', l: 'Spectate' },
+    { k: 'screenshot', l: 'Capture d\'écran', core: true },
     { k: 'jail', l: 'Prison', fields: () => [{ name: 'minutes', label: 'Minutes', type: 'select', options: S.cfg.jailPresets || [10] }], ok: 'Envoyer en prison', danger: true },
     { k: 'unjail', l: 'Sortir de prison' },
     { k: 'kick', l: 'Expulser', danger: true, fields: () => [{ name: 'preset', label: 'Motif rapide', type: 'select', options: ['—', ...reasonOpts()] }, { name: 'reason', label: 'Précisions', type: 'text' }], ok: 'Expulser', prep: v => ({ reason: v.reason || (v.preset !== '—' ? v.preset : '') }) },
@@ -167,7 +169,8 @@ const ACTS = [
     { k: 'clearInventory', l: 'Vider l\'inventaire', danger: true, confirm: 'Vider tout l\'inventaire de ce joueur ? Action irréversible.' } ]],
   ['Identité & métier', [
     { k: 'setJob', l: 'Changer le métier', job: 'jobs' }, { k: 'setJob2', l: 'Changer le gang / l\'orga', job: 'jobs2' },
-    { k: 'resetIdentity', l: 'Réinitialiser l\'identité', danger: true, confirm: 'Demander la réinitialisation de l\'identité ?' }, { k: 'setGrade', l: 'Grade staff', grade: true } ]],
+    { k: 'resetIdentity', l: 'Réinitialiser l\'identité', danger: true, confirm: 'Demander la réinitialisation de l\'identité ?' }, { k: 'setGrade', l: 'Grade staff', grade: true },
+    { k: 'wipe', l: 'Wipe le joueur', danger: true, core: true, typed: true } ]],
 ];
 async function ensureItems() {
   if (S.items) return;
@@ -184,6 +187,24 @@ async function runAct(def, p) {
   if (def.toggle) args.state = !p.frozen;
   if (def.confirm && !(await confirmBox(def.confirm, p.name, 'Confirmer', true))) return;
   if (def.items) await ensureItems();
+  if (def.core) {
+    if (def.typed) {
+      const v = await ask('Wipe de ' + p.name, 'Action IRRÉVERSIBLE : le personnage est effacé. Tape OUI pour confirmer.', [{ name: 'c', label: 'Confirmation', type: 'text', max: 3 }], 'Wiper', true);
+      if (!v || v.c.trim().toLowerCase() !== 'oui') return toast('Annulé', '');
+    }
+    const r = await rpc('coreAction', def.k, p.id);
+    return toast(r.ok ? 'Demande envoyée' : r.error, r.ok ? 'ok' : 'err');
+  }
+  if (def.quick) {
+    const q = S.cfg.quickTp || [];
+    if (!q.length) return toast('Aucun lieu rapide configuré', 'err');
+    const v = await ask('Lieu rapide', `Envoyer ${p.name} :`, [{ name: 'i', label: 'Lieu', type: 'select', options: q.map((x, i) => ({ value: i, label: x.label })) }], 'Envoyer');
+    if (!v) return;
+    const t = q[+v.i];
+    const r = await rpc('act', 'tpcoords', p.id, { x: t.x, y: t.y, z: t.z });
+    toast(r.ok ? r.msg : r.error, r.ok ? 'ok' : 'err');
+    return viewPlayer(p.id, true);
+  }
   if (def.job) {
     if (!S.jobs) { const r = await rpc('jobs'); S.jobs = r.ok ? r : { jobs: [], jobs2: [] }; }
     const list = S.jobs[def.job] || [];
@@ -220,7 +241,7 @@ async function viewPlayer(id, quiet) {
   const ids = Object.entries(r.identifiers || {}).map(([k, v]) => `<div class="kv"><span>${esc(k)}</span><span class="mono">${esc(v)}</span></div>`).join('');
   const acc = r.accounts;
   const act = ACTS.map(([g, list]) => {
-    const btns = list.filter(a => can(a.k)).map(a => `<button class="${a.danger ? 'danger' : ''}" data-a="act" data-k="${a.k}">${esc(a.k === 'freeze' ? (r.frozen ? 'Libérer' : 'Geler') : a.l)}</button>`).join('');
+    const btns = list.filter(a => can(a.perm || a.k)).map(a => `<button class="${a.danger ? 'danger' : ''}" data-a="act" data-k="${a.k}">${esc(a.k === 'freeze' ? (r.frozen ? 'Libérer' : 'Geler') : a.l)}</button>`).join('');
     return btns ? `<div class="grp-t">${g}</div><div class="acts-grid">${btns}</div>` : '';
   }).join('');
   const warns = r.warns.length ? r.warns.map(w => `<div class="logline"><b>${esc(w.reason)}</b> · ${esc(w.staff_name)} <span class="muted">${fmtDate(w.t)}</span>${can('warnDelete') ? ` <button class="sm danger" data-a="delEntry" data-kind="warn" data-eid="${w.id}">${ic('trash', 12)}</button>` : ''}</div>`).join('') : '<div class="hint">Aucun avertissement.</div>';
@@ -265,6 +286,7 @@ function viewVehicles() {
       <div class="chips mt-s">${FAV_VEH.map(m => `<span class="chip" data-a="vfav" data-m="${m}">${m}</span>`).join('')}</div><p class="hint">Le véhicule apparaît sous toi et tu y montes. Les plaques commencent par STAFF.</p></div>` : ''}
     <div class="card"><div class="card-h"><div class="t">Véhicule actuel (ou le plus proche, 8 m)</div></div><div class="acts-grid">
       ${B('veh_repair', 'Réparer')}${B('veh_clean', 'Nettoyer')}${B('veh_flip', 'Retourner')}${B('veh_fuel', 'Faire le plein')}${B('veh_unlock', 'Déverrouiller')}${B('veh_max', 'Custom au maximum')}${can('veh_delete') ? '<button class="danger" data-a="me" data-k="veh_delete">Supprimer</button>' : ''}</div></div>
+    ${can('veh_give') ? `<div class="card"><div class="card-h"><div class="t">Donner un véhicule (garage + clé)</div></div><div class="row"><div style="width:280px"><input id="vgive" placeholder="Nom du modèle (ex : sultan)" maxlength="40"></div><button data-a="vgive">Ajouter à mon garage</button></div><p class="hint">Le véhicule est créé, ajouté à ton garage avec sa clé et ta plaque est générée.</p></div>` : ''}
     ${can('veh_plate') ? `<div class="card"><div class="card-h"><div class="t">Plaque</div></div><div class="row"><div style="width:200px"><input id="vplate" placeholder="8 caractères max" maxlength="8"></div><button data-a="vplate">Changer la plaque</button></div></div>` : ''}
     ${can('veh_neon') ? `<div class="card"><div class="card-h"><div class="t">Néons</div></div><div class="row"><input type="color" id="vneon" value="#00a4ff" style="width:80px;padding:3px"><button data-a="vneon">Appliquer la couleur</button><button data-a="vneonoff">Éteindre</button></div></div>` : ''}`,
     'Véhicules', 'Actions sur ton véhicule', '', true);
@@ -295,10 +317,12 @@ async function viewSanctions() {
 
 /* ═══════════ Équipe ═══════════ */
 async function viewTeam() {
-  const R = [['chat', 'Chat staff'], ['perms', 'Droits']];
-  const seg = `<div class="seg">${R.filter(x => x[0] !== 'perms' || can('perms')).map(([k, l]) => `<button class="${S.rtab === k ? 'active' : ''}" data-a="rtab" data-k="${k}">${l}</button>`).join('')}</div>`;
+  const R = [['chat', 'Chat staff'], ['perms', 'Droits du panel'], ['grades', 'Grades staff'], ['legacy', 'Droits ancien menu']];
+  const seg = `<div class="seg">${R.filter(x => x[0] === 'chat' || can('perms')).map(([k, l]) => `<button class="${S.rtab === k ? 'active' : ''}" data-a="rtab" data-k="${k}">${l}</button>`).join('')}</div>`;
   let body = '';
-  if (S.rtab === 'perms' && can('perms')) {
+  if (S.rtab === 'grades' && can('perms')) body = await gradesHtml();
+  else if (S.rtab === 'legacy' && can('perms')) body = await legacyHtml();
+  else if (S.rtab === 'perms' && can('perms')) {
     const r = await rpc('permsGet');
     if (!r.ok) return toast(r.error, 'err');
     S.permList = r.perms;
@@ -316,6 +340,29 @@ async function viewTeam() {
   frame(seg + body, 'Équipe', 'Chat privé du staff et gestion des droits', '');
   const cb = $('#chatbox'); if (cb) cb.scrollTop = cb.scrollHeight;
 }
+const COLORS = [['~s~', 'Blanc'], ['~r~', 'Rouge'], ['~g~', 'Vert'], ['~b~', 'Bleu'], ['~y~', 'Jaune'], ['~p~', 'Violet'], ['~o~', 'Orange'], ['~c~', 'Gris'], ['~m~', 'Gris foncé']];
+async function gradesHtml() {
+  const r = await rpc('grades');
+  if (!r.ok) return `<div class="warnbox">${esc(r.error)}</div>`;
+  S.gradeList = r.grades;
+  const rows = r.grades.map(g => `<div class="item"><div class="grow"><b>${esc(g.label)} ${g.custom ? chip('personnalisé', 'info') : ''} ${g.protected ? chip('protégé', 'mute') : ''}</b><small>${esc(g.name)}${g.rank ? ' · rang ' + g.rank : ''}</small></div>
+    <select data-gcolor="${esc(g.name)}" style="width:130px">${COLORS.map(c => `<option value="${esc(c[0])}" ${g.color === c[0] ? 'selected' : ''}>${c[1]}</option>`).join('')}</select>
+    ${g.protected ? '' : `<button class="sm danger" data-a="gdel" data-n="${esc(g.name)}">${ic('trash', 13)}</button>`}</div>`).join('');
+  return `<div class="row" style="margin-bottom:12px"><button class="primary" data-a="gnew">${ic('plus', 16)} Créer un grade</button><span class="hint">Un grade personnalisé hérite des droits d'un rang (1 à 3) puis se règle séparément.</span></div>${rows}`;
+}
+async function legacyHtml() {
+  const r = await rpc('permMatrix');
+  if (!r.ok) return `<div class="warnbox">${esc(r.error)}</div>`;
+  S.mx = r;
+  const targets = [['1', 'Modérateur'], ['2', 'Admin'], ['3', 'Superadmin'], ...r.grades.filter(g => g.custom).map(g => [g.name, g.label])];
+  if (!S.mxT || !targets.some(t => t[0] === S.mxT)) S.mxT = '1';
+  const m = (r.matrix[S.mxT]) || {};
+  const sec = [['section_self', 'Section : moi'], ['section_players', 'Section : joueurs'], ['section_reports', 'Section : reports'], ['section_vehicle', 'Section : véhicules'], ['setjob', 'Changer le métier'], ['setjob2', 'Changer le gang / orga'], ['take_screen', 'Capture d\'écran']];
+  const cb = (k, l) => `<label class="chk perm"><input type="checkbox" data-mx="${esc(k)}" ${m[k] ? 'checked' : ''}> <span>${esc(l)}</span></label>`;
+  return `<p class="hint" style="margin-bottom:12px">Droits de l'<b>ancien menu RageUI</b> (le panel moderne utilise l'onglet « Droits du panel »). Chaque case est enregistrée tout de suite.</p>
+    <div class="row" style="margin-bottom:12px"><div style="width:260px"><select id="mxt">${targets.map(t => `<option value="${esc(t[0])}" ${t[0] === S.mxT ? 'selected' : ''}>${esc(t[1])}</option>`).join('')}</select></div></div>
+    <div class="card"><div class="grp-t">Sections</div><div class="grid2" style="gap:6px">${sec.map(x => cb(x[0], x[1])).join('')}</div><div class="grp-t">Actions</div><div class="grid2" style="gap:6px">${r.funcs.map(f => cb('func_' + f.id, `${f.label} (${f.cat})`)).join('')}</div></div>`;
+}
 const chatHtml = () => S.chat.length ? S.chat.map(m => `<div class="msg"><b>${esc(m.name)}</b> ${chip(RANKS[m.rank] || 'Staff', 'mute')}<small>${fmtDate(m.t)}</small><br>${esc(m.text)}</div>`).join('') : '<div class="hint">Aucun message.</div>';
 
 /* ═══════════ Journal ═══════════ */
@@ -324,7 +371,7 @@ const ACT_LABEL = { gotoPlayer: 'Téléportation sur un joueur', bringPlayer: 'J
   giveItem: 'Objet donné', takeItem: 'Objet retiré', giveWeapon: 'Arme donnée', clearInventory: 'Inventaire vidé', setJob: 'Métier changé', setJob2: 'Gang changé', resetIdentity: 'Identité réinitialisée',
   setGrade: 'Grade staff', notes: 'Note ajoutée', viewinv: 'Inventaire consulté', weather: 'Météo', time: 'Heure', announce: 'Annonce', cleanup: 'Nettoyage', reviveAll: 'Réanimation générale', healAll: 'Soin général',
   report_take: 'Report pris', report_close: 'Report fermé', report_reply: 'Réponse report', delete_warn: 'Avertissement supprimé', delete_note: 'Note supprimée', perms_save: 'Droits modifiés', perms_reset: 'Droits réinitialisés',
-  bookmark_add: 'Favori ajouté', veh_spawn: 'Véhicule apparu', veh_delete: 'Véhicule supprimé', veh_max: 'Véhicule custom', veh_plate: 'Plaque changée', veh_neon: 'Néons', self_heal: 'Auto-soin', self_revive: 'Auto-réanimation', self_armor: 'Auto-gilet', tp_coords: 'TP coordonnées (moi)' };
+  bookmark_add: 'Favori ajouté', core_wipe: 'Wipe', core_screenshot: 'Capture d\'écran', veh_spawn: 'Véhicule apparu', veh_delete: 'Véhicule supprimé', veh_max: 'Véhicule custom', veh_plate: 'Plaque changée', veh_neon: 'Néons', self_heal: 'Auto-soin', self_revive: 'Auto-réanimation', self_armor: 'Auto-gilet', tp_coords: 'TP coordonnées (moi)', veh_give: 'Véhicule donné (garage)' };
 const actLabel = a => ACT_LABEL[a] || a;
 async function viewLogs() {
   const f = S.logF;
@@ -346,6 +393,9 @@ async function viewTools() {
       <div class="row mt-s wrap"><button class="sm" data-a="copy" data-f="v3">Copier vector3</button><button class="sm" data-a="copy" data-f="v4">Copier vector4</button><button class="sm" data-a="copy" data-f="xyz">Copier x, y, z</button><button class="sm" data-a="copy" data-f="tbl">Copier {x, y, z}</button></div>
       ${can('bookmarks') ? '<div class="row mt-s"><button class="sm primary" data-a="bmadd">Ajouter ma position aux favoris</button></div>' : ''}</div>
       ${can('tp_coords') ? `<div class="card"><div class="card-h"><div class="t">Téléportation par coordonnées</div></div><div class="row"><input id="tx" placeholder="X"><input id="ty" placeholder="Y"><input id="tz" placeholder="Z"><button data-a="tpxyz">Aller</button></div></div>` : ''}
+      ${can('devtools') ? `<div class="card"><div class="card-h"><div class="t">Outils développeur</div></div><div class="row wrap"><button class="sm" data-a="dev" data-k="interiorInfo">Info intérieur (affichage)</button><button class="sm" data-a="dev" data-k="pedMenu">Menu PNJ</button></div>
+        ${[['cutscene', 'Cutscenes'], ['animation', 'Animations'], ['interior', 'Intérieurs']].map(([k, l]) => `<div class="grp-t">${l}</div><div class="row"><div style="width:260px"><input id="dq-${k}" data-dq="${k}" placeholder="Rechercher (Entrée)"></div></div><div id="dr-${k}" class="mt-s"></div>`).join('')}</div>` : ''}
+      <div class="card"><div class="card-h"><div class="t">Builders</div></div><div class="row wrap">${[['builders', 'Panel builders'], ['jobbuilder', 'Job'], ['gangbuilder', 'Gang'], ['shopbuilder', 'Shop'], ['worldbuilder', 'World'], ['eventbuilder', 'Event'], ['minigames', 'Mini-jeux']].map(([k, l]) => `<button class="sm" data-a="openPanel" data-k="${k}">${l}</button>`).join('')}</div></div>
       <div class="card"><div class="card-h"><div class="t">Autres panels</div></div><div class="row wrap"><button data-a="openPanel" data-k="builders">Panel builders</button><button data-a="openPanel" data-k="anticheat">Anti-cheat</button>${can('legacy') ? '<button data-a="me" data-k="legacy">Ancien menu (wipe, cutscenes, permissions…)</button>' : ''}</div></div></div>
     <div><div class="card"><div class="card-h"><div class="t">Favoris</div></div>${fav || '<div class="hint">Aucun favori.</div>'}</div><div class="card"><div class="card-h"><div class="t">Lieux rapides</div></div>${quick}</div></div></div>`, 'Outils', 'Coordonnées, favoris et accès rapides', refreshBtn);
 }
@@ -391,6 +441,7 @@ async function act(a, el) {
   // véhicules
   if (a === 'vfav') { $('#vmodel').value = d.m; return; }
   if (a === 'vspawn') { const m = $('#vmodel').value.trim(); if (!m) return toast('Indique un modèle', 'err'); return sendMe('veh_spawn', { model: m }); }
+  if (a === 'vgive') { const m = $('#vgive').value.trim(); if (!m) return toast('Indique un modèle', 'err'); return sendMe('veh_give', { model: m }); }
   if (a === 'vplate') return sendMe('veh_plate', { plate: $('#vplate').value });
   if (a === 'vneon') { const h = $('#vneon').value; return sendMe('veh_neon', { r: parseInt(h.slice(1, 3), 16), g: parseInt(h.slice(3, 5), 16), b: parseInt(h.slice(5, 7), 16) }); }
   if (a === 'vneonoff') return sendMe('veh_neon', { off: true });
@@ -408,14 +459,28 @@ async function act(a, el) {
   // équipe
   if (a === 'rtab') { S.rtab = d.k; return viewTeam(); }
   if (a === 'chatsend') { const i = $('#chatin'); const t = i.value.trim(); if (!t) return; const r = await rpc('chatSend', t); if (!r.ok) return toast(r.error, 'err'); S.chat.push(r.message); i.value = ''; $('#chatbox').innerHTML = chatHtml(); $('#chatbox').scrollTop = 1e6; return; }
+  if (a === 'gnew') {
+    const v = await ask('Nouveau grade staff', 'Nom interne en minuscules, sans espace.', [{ name: 'n', label: 'Nom interne', type: 'text', max: 24, placeholder: 'helper' }, { name: 'l', label: 'Nom affiché', type: 'text', max: 32, placeholder: 'Helper' }, { name: 'r', label: 'Droits hérités de', type: 'select', options: [{ value: 1, label: 'Modérateur' }, { value: 2, label: 'Admin' }, { value: 3, label: 'Superadmin' }] }], 'Créer', false);
+    if (!v) return;
+    await rpc('gradeOp', 'create', v.n, v.l, +v.r); setTimeout(viewTeam, 700); return;
+  }
+  if (a === 'gdel') { if (!(await confirmBox('Supprimer ce grade ?', `Les joueurs ayant « ${d.n} » repassent joueur.`, 'Supprimer'))) return; await rpc('gradeOp', 'delete', d.n); setTimeout(viewTeam, 700); return; }
   if (a === 'permsave') { const m = {}; $$('[data-perm]').forEach(s => { m[s.dataset.perm] = +s.value; }); const r = await rpc('permsSave', m); toast(r.ok ? 'Droits enregistrés' : r.error, r.ok ? 'ok' : 'err'); return; }
   if (a === 'permreset') { if (!(await confirmBox('Revenir à config.lua ?', 'Les droits modifiés en jeu seront effacés.', 'Réinitialiser'))) return; const r = await rpc('permsReset'); toast(r.ok ? 'Droits réinitialisés' : r.error, r.ok ? 'ok' : 'err'); return viewTeam(); }
   // outils
   if (a === 'copy') { const c = await rpc('coords'); const f = { v3: `vector3(${c.x}, ${c.y}, ${c.z})`, v4: `vector4(${c.x}, ${c.y}, ${c.z}, ${c.h})`, xyz: `${c.x}, ${c.y}, ${c.z}`, tbl: `{x = ${c.x}, y = ${c.y}, z = ${c.z}}` }[d.f]; copyText(f); return toast('Copié : ' + f, 'ok'); }
   if (a === 'bmadd') { const v = await ask('Nouveau favori', 'Ta position actuelle sera enregistrée.', [{ name: 'label', label: 'Nom', type: 'text', max: 40 }], 'Ajouter', false); if (!v) return; const c = await rpc('coords'); const r = await rpc('bookmarkSave', v.label, c.x, c.y, c.z); if (!r.ok) return toast(r.error, 'err'); S.bookmarks = r.bookmarks; return viewTools(); }
   if (a === 'bmdel') { const r = await rpc('bookmarkDelete', +d.i); if (!r.ok) return toast(r.error, 'err'); S.bookmarks = r.bookmarks; return viewTools(); }
+  if (a === 'dev') { const r = await rpc('devRun', d.k); if (!r.ok) toast(r.error || 'Impossible', 'err'); else if (d.k === 'interiorInfo') toast('Affichage basculé', 'ok'); return; }
+  if (a === 'devrun') { const r = await rpc('devRun', d.kind, +d.i); if (!r.ok) toast(r.error || 'Impossible', 'err'); return; }
   if (a === 'tpq') return sendMe('tp_coords', { x: +d.x, y: +d.y, z: +d.z });
   if (a === 'tpxyz') return sendMe('tp_coords', { x: +$('#tx').value, y: +$('#ty').value, z: +$('#tz').value });
+}
+async function devSearch(kind, q) {
+  const r = await rpc('devSearch', kind, q);
+  const box = $('#dr-' + kind);
+  if (!box) return;
+  box.innerHTML = r.list && r.list.length ? r.list.map(x => `<div class="item"><div class="grow"><b>${esc(x.label)}</b>${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</div><button class="sm" data-a="devrun" data-kind="${kind}" data-i="${x.index}">Lancer</button></div>`).join('') + `<div class="hint">${r.list.length} résultat(s) affiché(s) sur ${r.total}</div>` : '<div class="hint">Aucun résultat.</div>';
 }
 function copyText(t) {
   try { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } catch (e) {}
@@ -425,9 +490,13 @@ document.addEventListener('click', e => { const el = e.target.closest('[data-a]'
 document.addEventListener('input', e => { if (e.target.id === 'pq') { S.q = e.target.value; const l = $('#plist'); if (l) l.innerHTML = listHtml(); } });
 document.addEventListener('change', e => {
   if (e.target.id === 'lf-a') { S.logF.action = e.target.value; S.logF.page = 0; viewLogs(); }
+  if (e.target.dataset && e.target.dataset.gcolor) { rpc('gradeOp', 'color', e.target.dataset.gcolor, e.target.value); toast('Couleur enregistrée', 'ok'); }
+  if (e.target.id === 'mxt') { S.mxT = e.target.value; viewTeam(); }
+  if (e.target.dataset && e.target.dataset.mx) { const key = S.mxT; const k = e.target.dataset.mx; const num = ['1', '2', '3'].includes(key) ? +key : key; rpc('gradeOp', 'perm', num, k, e.target.checked); (S.mx.matrix[key] = S.mx.matrix[key] || {})[k] = e.target.checked; }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'lf-q') { S.logF.q = e.target.value; S.logF.page = 0; viewLogs(); }
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.dq) devSearch(e.target.dataset.dq, e.target.value);
   if (e.key === 'Enter' && e.target.id === 'chatin') act('chatsend', e.target);
   if (e.key === 'Escape') { const c = document.getElementById('confirm'); if (!c.classList.contains('hidden')) { $('#c-no', c) && $('#c-no', c).click(); return; } rpc('close'); }
 });

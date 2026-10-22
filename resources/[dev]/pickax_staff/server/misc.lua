@@ -52,13 +52,17 @@ end)
 
 -- ─────────────── Actions sur moi (droit + journal ; l'exécution se fait chez le staff) ───────────────
 local SELF = { self_heal = true, self_revive = true, self_armor = true, tp_waypoint = true, tp_coords = true, tp_back = true, self_clothes = true,
-    veh_spawn = true, veh_repair = true, veh_delete = true, veh_clean = true, veh_flip = true, veh_max = true, veh_plate = true, veh_neon = true, veh_unlock = true, veh_fuel = true, legacy = true }
+    veh_spawn = true, veh_repair = true, veh_delete = true, veh_clean = true, veh_flip = true, veh_max = true, veh_plate = true, veh_neon = true, veh_unlock = true, veh_fuel = true, veh_give = true, legacy = true }
 local QUIET = { tp_waypoint = true, tp_back = true, veh_repair = true, veh_clean = true, veh_flip = true, veh_fuel = true, self_clothes = true, legacy = true }
 
 ESX.RegisterServerCallback('pickax_staff:self', function(src, cb, action, args)
     if type(action) ~= 'string' or not SELF[action] then return cb(fail('Action inconnue')) end
     if not S.can(src, action) then return cb(fail('Accès refusé')) end
     args = type(args) == 'table' and args or {}
+    if action == 'veh_give' then
+        local m = tostring(args.model or '')
+        if not m:match('^[%w_]+$') or #m > 40 then return cb(fail('Modèle invalide')) end
+    end
     if action == 'veh_spawn' then
         local m = tostring(args.model or '')
         if not m:match('^[%w_]+$') or #m > 40 then return cb(fail('Modèle invalide')) end
@@ -224,5 +228,19 @@ S.reg('permsReset', 'perms', function(src)
     S.perms = {}
     S.saveSetting('perms', {})
     S.log(src, 'perms_reset')
+    return { ok = true }
+end)
+
+-- Matrice des droits de l'ancien menu (lecture ; l'écriture passe par les événements du core, vérifiés côté core)
+S.reg('permMatrix', 'perms', function(src)
+    local d = exports.pickax_core:StaffPermMatrix(src)
+    if not d then return fail('Réservé au rôle _dev') end
+    return { ok = true, matrix = d.matrix, funcs = d.funcs, grades = d.grades }
+end)
+
+-- Journal des actions déléguées au core (wipe, capture d'écran)
+S.reg('audit', 'panel', function(src, kind, id)
+    if kind ~= 'wipe' and kind ~= 'screenshot' then return fail('Action inconnue') end
+    S.log(src, 'core_' .. kind, tonumber(id))
     return { ok = true }
 end)
