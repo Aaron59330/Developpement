@@ -133,7 +133,7 @@ function applyTheme(rgb) {
 }
 
 /* ── Style : néon (par défaut) ou classique, mémorisé ── */
-function styleOf() { try { return localStorage.getItem('jb.style') === 'classic' ? 'classic' : 'neon'; } catch (e) { return 'neon'; } }
+function styleOf() { try { return localStorage.getItem('jb.style') === 'neon' ? 'neon' : 'classic'; } catch (e) { return 'classic'; } }
 function applyStyle() { document.body.classList.toggle('neon', styleOf() === 'neon'); }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-a=theme]');

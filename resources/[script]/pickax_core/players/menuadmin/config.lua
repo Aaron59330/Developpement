@@ -1,7 +1,7 @@
 ConfigMenuAdmin = {
     CooldownReport = 5*60000,--Nombre de temps que le joueur doit attendre pour faire un prochain report après avoir été cloturer
 
-    DefaultMenu = 'panel',--Menu ouvert par F11 / /menuadmin : 'panel' (panel moderne pickax_staff) ou 'legacy' (menu RageUI). /staff ouvre toujours le panel, /menuadmin_old toujours l'ancien menu.
+    DefaultMenu = 'legacy',--Menu ouvert par F11 / /menuadmin : 'panel' (panel moderne pickax_staff) ou 'legacy' (menu RageUI). /staff ouvre toujours le panel, /menuadmin_old toujours l'ancien menu.
 
     CheckByGroup = true,--Ici mettre false ou true, le true vous permet de détéct direct le group du joueur et l'atribuer au menu admin que le mettre en false vous devez mettre les license manuellement et cela require un reboot
     GroupList = {
