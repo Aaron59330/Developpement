@@ -1255,9 +1255,9 @@ ConfigMenuAdministrationAdmin = {
             label = "Téléporter le joueur à des coordonnées",
             press = function(selectedPlayer)
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
-                local x = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("X", "", 12))
-                local y = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Y", "", 12))
-                local z = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Z", "", 12))
+                local x = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("X", "", 12) or "")
+                local y = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Y", "", 12) or "")
+                local z = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Z", "", 12) or "")
                 if x and y and z then exports["pickax_staff"]:Act("tpcoords", selectedPlayer.s, { x = x, y = y, z = z }) end
             end
         },
@@ -1269,7 +1269,7 @@ ConfigMenuAdministrationAdmin = {
             label = "Retirer de l'argent (cash)",
             press = function(selectedPlayer)
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
-                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10))
+                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10) or "")
                 if a then exports["pickax_staff"]:Act("takeMoney", selectedPlayer.s, { account = "cash", amount = a }) end
             end
         },
@@ -1281,7 +1281,7 @@ ConfigMenuAdministrationAdmin = {
             label = "Retirer de l'argent (banque)",
             press = function(selectedPlayer)
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
-                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10))
+                local a = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Combien ?", "Montant", 10) or "")
                 if a then exports["pickax_staff"]:Act("takeMoney", selectedPlayer.s, { account = "bank", amount = a }) end
             end
         },
@@ -1294,7 +1294,7 @@ ConfigMenuAdministrationAdmin = {
             press = function(selectedPlayer)
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
                 local item = ConfigMenuAdministrationAdmin.utils.keyboard("Nom de l'objet", "ex : water", 40)
-                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6)) or 1
+                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6) or "") or 1
                 if item and item ~= "" then exports["pickax_staff"]:Act("giveItem", selectedPlayer.s, { item = item, count = n }) end
             end
         },
@@ -1307,7 +1307,7 @@ ConfigMenuAdministrationAdmin = {
             press = function(selectedPlayer)
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
                 local item = ConfigMenuAdministrationAdmin.utils.keyboard("Nom de l'objet", "ex : water", 40)
-                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6)) or 1
+                local n = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Quantité", "1", 6) or "") or 1
                 if item and item ~= "" then exports["pickax_staff"]:Act("takeItem", selectedPlayer.s, { item = item, count = n }) end
             end
         },
@@ -1379,7 +1379,7 @@ ConfigMenuAdministrationAdmin = {
             label = "Nettoyer les véhicules vides autour de moi",
             press = function()
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
-                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4)) or 50
+                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4) or "") or 50
                 exports["pickax_staff"]:World("cleanup", "vehicles", r)
             end
         },
@@ -1391,7 +1391,7 @@ ConfigMenuAdministrationAdmin = {
             label = "Nettoyer les PNJ autour de moi",
             press = function()
                 if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
-                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4)) or 50
+                local r = tonumber(ConfigMenuAdministrationAdmin.utils.keyboard("Rayon en mètres", "50", 4) or "") or 50
                 exports["pickax_staff"]:World("cleanup", "peds", r)
             end
         },
