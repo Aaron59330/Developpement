@@ -1,5 +1,6 @@
 Config = {}
 
+Config.Theme = 'neon'             -- style du panel : 'neon' (vert néon, onglets en haut) ou 'classic' (ancien style). Bouton de bascule dans le panel.
 Config.Command = 'staff'          -- /staff ouvre le panel (F11 l'ouvre aussi : touche du menu admin du core)
 
 -- ─────────────── Droits : rang minimum pour chaque action ───────────────

@@ -66,13 +66,36 @@ const RANKS = { 1: 'Modérateur', 2: 'Admin', 3: 'Superadmin', 4: 'Développeur'
 
 /* ───── État ───── */
 const S = { tab: 'dash', d: null, perms: {}, cfg: {}, state: {}, bookmarks: [], players: [], q: '', filter: 'all', sel: null, selId: null, reports: [], logF: { action: '', q: '', page: 0 }, warnPage: 0,
-  chat: [], items: null, jobs: null, rtab: 'chat', timer: null, me: 0 };
+  chat: [], items: null, jobs: null, rtab: 'chat', timer: null, me: 0, theme: 'neon', clock: null, nstaff: [], nTimer: null };
 const can = k => S.perms[k] === true;
 const TABS = [['dash', 'Accueil', 'home'], ['players', 'Joueurs', 'users'], ['reports', 'Reports', 'flag'], ['vehicles', 'Véhicules', 'car'], ['world', 'Monde', 'globe'], ['sanctions', 'Sanctions', 'gavel'], ['team', 'Équipe', 'shield'], ['logs', 'Journal', 'list'], ['tools', 'Outils', 'tool']];
 
 /* ───── Coque ───── */
 const TOG = [['noclip', 'NoClip'], ['invisible', 'Invisible'], ['invincible', 'Invincible'], ['names', 'Afficher les noms'], ['hud', 'HUD staff']];
+const QUICK = [['self_heal', 'Soin', 'shield', '#22c55e'], ['self_revive', 'Réanimer', 'shield', '#ef4444'], ['self_armor', 'Gilet', 'shield', '#3b82f6'], ['tp_waypoint', 'TP marqueur', 'pin', '#f59e0b'],
+  ['tp_back', 'Retour', 'back', '#a855f7'], ['veh_repair', 'Réparer', 'car', '#06b6d4'], ['veh_fuel', 'Plein', 'car', '#84cc16'], ['veh_flip', 'Retourner', 'car', '#14b8a6'], ['announce', 'Annonce', 'mega', '#ec4899'], ['legacy', 'Ancien menu', 'tool', '#64748b']];
+function sideNeon() {
+  const st = S.state || {};
+  const badge = S.reports.filter(r => !r.isTake).length;
+  $('#ntabs').innerHTML = TABS.map(([k, l, i]) => `<div class="n-tab ${S.tab === k ? 'active' : ''}" data-a="tab" data-k="${k}">${ic(i, 16)}<span>${l}</span>${k === 'reports' && badge ? `<b class="n-badge">${badge}</b>` : ''}</div>`).join('');
+  $('#side').innerHTML = `<div class="n-card"><div class="n-ct">Informations sur vous</div><div class="n-me"><div class="n-av">${esc((S.d.name || '?').slice(0, 1).toUpperCase())}</div><div><b>${esc(S.d.name)}</b><small>${esc(RANKS[S.d.rank] || 'Staff')}</small></div><span class="n-id">${S.d.id}</span></div>
+    <div class="kv"><span>Rang</span><b>${esc(RANKS[S.d.rank] || 'Staff')}</b></div><div class="kv"><span>Mode administration</span><b>${st.service ? 'Actif' : 'Inactif'}</b></div></div>
+    <div class="n-card"><div class="n-ct">Statut</div><div class="svc ${st.service ? 'on' : ''}" data-a="svc"><div class="grow"><div>Mode administration</div><small>${st.service ? 'Actif : tenue staff' : 'Désactivé'}</small></div><span class="sw"></span></div>
+    ${TOG.map(([k, l]) => `<div class="tg ${st[k] ? 'on' : ''}" data-a="tog" data-k="${k}"><span>${l}</span><span class="sw"></span></div>`).join('')}</div>`;
+  $('#nquick').innerHTML = `<div class="n-ct" style="margin:0 0 8px">Actions rapides</div><div class="n-qrow">${QUICK.filter(q => can(q[0]) || q[0] === 'announce' && can('announce')).map(q => `<div class="n-q" data-a="${q[0] === 'announce' ? 'announce' : 'me'}" data-k="${q[0]}"><i style="background:${q[3]}">${ic(q[2], 22)}</i><span>${q[1]}</span></div>`).join('')}</div>`;
+  nright();
+}
+function nright() {
+  const staff = (S.nstaff || []).map(s => `<div class="n-st"><span>${esc(s.name)} <small>#${s.id}</small></span><em class="${s.service ? 'on' : ''}">${esc(RANKS[s.rank] || 'Staff')}</em></div>`).join('') || '<div class="hint">Personne.</div>';
+  $('#nright').innerHTML = `<div class="n-card"><div class="n-ct">Heure du serveur</div><div class="n-clock" id="nclock">${clockText()}</div></div><div class="n-card" style="flex:1;overflow:auto"><div class="n-ct">Staff en ligne (${(S.nstaff || []).length})</div>${staff}</div>`;
+}
+const clockText = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
+async function refreshStaff() {
+  const r = await rpc('dash');
+  if (r && r.ok) { S.nstaff = r.staff; if (S.theme === 'neon' && $('#nright')) nright(); }
+}
 function side() {
+  if (S.theme === 'neon') return sideNeon();
   const st = S.state || {};
   const badge = S.reports.filter(r => !r.isTake).length;
   $('#side').innerHTML = `<div class="profile"><div class="avatar">${ic('shield', 20)}</div><div><b>${esc(S.d.name)}</b><small>${esc(RANKS[S.d.rank] || 'Staff')} · ID ${S.d.id}</small></div></div>
@@ -81,13 +104,25 @@ function side() {
     ${TOG.map(([k, l]) => `<div class="tg ${st[k] ? 'on' : ''}" data-a="tog" data-k="${k}"><span>${l}</span><span class="sw"></span></div>`).join('')}</div>`;
 }
 function shell() {
+  clearInterval(S.clock); clearInterval(S.nTimer);
+  document.body.classList.toggle('neon', S.theme === 'neon');
+  if (S.theme === 'neon') {
+    $root.innerHTML = `<div class="shell neon"><div class="n-top"><div class="n-logo">${ic('shield', 22)}</div><div class="n-title"><b>ADMIN <span>MENU</span></b><small>Panel staff</small></div><div class="n-tabs" id="ntabs"></div><div class="grow"></div>
+      <button class="sm" data-a="theme" title="Revenir à l'ancien style">Style classique</button><button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div>
+      <div class="n-mid"><div class="n-left" id="side"></div><div class="main"><div class="head" id="head"></div><div class="body" id="body"></div></div><div class="n-right" id="nright"></div></div><div class="n-quick" id="nquick"></div></div>`;
+    $root.classList.remove('hidden');
+    S.clock = setInterval(() => { const c = $('#nclock'); if (c) c.textContent = clockText(); }, 1000);
+    S.nTimer = setInterval(refreshStaff, 15000);
+    side(); refreshStaff();
+    return;
+  }
   $root.innerHTML = `<div class="shell"><div class="side" id="side"></div><div class="main"><div class="head" id="head"></div><div class="body" id="body"></div></div></div>`;
   $root.classList.remove('hidden');
   side();
 }
 function frame(inner, title, sub, acts = '', needSvc = false) {
   const t = TABS.find(x => x[0] === S.tab);
-  $('#head').innerHTML = `${tile(t ? t[2] : 'home', 'lg')}<div class="ttl"><h1>${esc(title)}</h1><p>${esc(sub || '')}</p></div><div class="acts">${acts}<button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div>`;
+  $('#head').innerHTML = `${tile(t ? t[2] : 'home', 'lg')}<div class="ttl"><h1>${esc(title)}</h1><p>${esc(sub || '')}</p></div><div class="acts">${acts}${S.theme === 'neon' ? '' : `<button class="sm" data-a="theme" title="Style néon">Style néon</button>`}${S.theme === 'neon' ? '' : `<button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button>`}</div>`;
   const banner = needSvc && !S.state.service ? `<div class="warnbox">${ic('shield', 18)}<span>Active le <b>mode administration</b> (colonne de gauche) pour utiliser ces actions.</span></div>` : '';
   $('#body').innerHTML = banner + inner;
   side();
@@ -419,6 +454,7 @@ const sendMe = async (k, args = {}) => { if (k !== 'legacy' && !needSvc()) retur
 
 async function act(a, el) {
   const d = el.dataset;
+  if (a === 'theme') { S.theme = S.theme === 'neon' ? 'classic' : 'neon'; try { localStorage.setItem('pkstaff.theme', S.theme); } catch (e) {} shell(); return show(S.tab); }
   if (a === 'close') return rpc('close');
   if (a === 'tab') { S.selId = null; return show(d.k); }
   if (a === 'refresh') return reload();
@@ -504,9 +540,11 @@ document.addEventListener('keydown', e => {
 window.addEventListener('message', ev => {
   const m = ev.data || {};
   if (m.action === 'open') {
+    let saved = null; try { saved = localStorage.getItem('pkstaff.theme'); } catch (e) {}
+    S.theme = saved === 'classic' || saved === 'neon' ? saved : (m.data.theme === 'classic' ? 'classic' : 'neon');
     S.d = m.data; S.perms = m.data.perms || {}; S.cfg = m.data.cfg || {}; S.bookmarks = m.data.bookmarks || []; S.state = m.state || {}; S.selId = null; S.tab = 'dash'; S.items = null; S.jobs = null;
     shell(); show('dash');
   }
-  if (m.action === 'close') { stopTimer(); $root.classList.add('hidden'); $root.innerHTML = ''; document.getElementById('confirm').classList.add('hidden'); }
+  if (m.action === 'close') { stopTimer(); clearInterval(S.clock); clearInterval(S.nTimer); $root.classList.add('hidden'); $root.innerHTML = ''; document.getElementById('confirm').classList.add('hidden'); }
   if (m.action === 'chat') { S.chat.push(m.message); const cb = $('#chatbox'); if (cb && S.tab === 'team') { cb.innerHTML = chatHtml(); cb.scrollTop = cb.scrollHeight; } else toast(`[Staff] ${m.message.name} : ${m.message.text}`); }
 });

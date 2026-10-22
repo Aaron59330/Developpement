@@ -390,3 +390,72 @@ textarea { font: inherit; color: var(--text); background: rgba(255, 255, 255, .0
 .shell .side .tg { padding: 4px; }
 .shell .side .svc { padding: 9px 12px; }
 .shell .side .profile { padding: 10px; margin-bottom: 4px; }
+
+/* ═══════════════ Thème NÉON (vert, onglets en haut) — body.neon ═══════════════ */
+body.neon { --accent: #8dff1f; --accent-rgb: 141, 255, 31; --bg: #0d0e11; --surface: #14161a; --surface-2: #1b1e23; --line: rgba(255, 255, 255, .07); --line-2: rgba(255, 255, 255, .13); --ok: #8dff1f; --muted: #7b808c; }
+body.neon .shell { flex-direction: column; background: #0d0e11; border: 1px solid rgba(141, 255, 31, .22); border-radius: 14px; box-shadow: 0 0 70px rgba(141, 255, 31, .07), 0 40px 120px rgba(0, 0, 0, .85); }
+body.neon .n-top { display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 60px; flex: none; border-bottom: 1px solid var(--line); background: #111216; }
+body.neon .n-logo { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: var(--accent); background: rgba(141, 255, 31, .12); border: 1px solid rgba(141, 255, 31, .4); box-shadow: 0 0 18px rgba(141, 255, 31, .18); }
+body.neon .n-title b { display: block; font-size: 17px; font-weight: 800; letter-spacing: .05em; }
+body.neon .n-title b span { color: var(--accent); }
+body.neon .n-title small { font-size: 10px; text-transform: uppercase; letter-spacing: .18em; color: var(--muted); }
+body.neon .n-tabs { display: flex; gap: 2px; margin-left: 14px; overflow-x: auto; }
+body.neon .n-tab { position: relative; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 13px; border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: color .12s, background .12s; }
+body.neon .n-tab:hover { color: var(--text); background: rgba(255, 255, 255, .04); }
+body.neon .n-tab.active { color: var(--accent); background: rgba(141, 255, 31, .09); }
+body.neon .n-tab.active::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -10px; height: 2px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+body.neon .n-badge { font-size: 10px; padding: 1px 7px; border-radius: 20px; background: var(--danger); color: #111; }
+body.neon .n-mid { flex: 1; display: flex; min-height: 0; gap: 14px; padding: 14px 14px 8px; }
+body.neon .n-left { width: 262px; flex: none; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+body.neon .n-right { width: 232px; flex: none; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+body.neon .n-mid .main { flex: 1; min-width: 0; background: rgba(255, 255, 255, .012); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+body.neon .n-mid .head { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+body.neon .n-mid .head h1 { font-size: 18px; }
+body.neon .n-mid .head .tile { background: rgba(141, 255, 31, .1); border-color: rgba(141, 255, 31, .3); color: var(--accent); }
+body.neon .n-mid .body { padding: 18px 20px; }
+body.neon .n-card { background: #14161a; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+body.neon .n-ct { font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(--accent); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+body.neon .n-ct::before { content: ''; width: 3px; height: 11px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+body.neon .n-me { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+body.neon .n-av { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 18px; color: #0b0c0e; background: linear-gradient(135deg, #b6ff5c, #5fc400); box-shadow: 0 0 16px rgba(141, 255, 31, .25); }
+body.neon .n-me b { display: block; font-size: 14px; } body.neon .n-me small { color: var(--muted); font-size: 11px; }
+body.neon .n-id { margin-left: auto; padding: 3px 10px; border-radius: 8px; background: rgba(141, 255, 31, .15); color: var(--accent); font-weight: 700; font-size: 12px; }
+body.neon .n-clock { text-align: center; padding: 14px 8px; border-radius: 10px; font: 800 30px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .08em; color: var(--accent); background: #0c0d10; border: 1px solid rgba(141, 255, 31, .28); text-shadow: 0 0 14px rgba(141, 255, 31, .55); }
+body.neon .n-st { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 9px; background: var(--surface-2); margin-bottom: 6px; font-size: 12.5px; }
+body.neon .n-st small { color: var(--muted); }
+body.neon .n-st em { font-style: normal; font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 6px; background: rgba(255, 255, 255, .07); color: var(--muted); }
+body.neon .n-st em.on { background: rgba(141, 255, 31, .16); color: var(--accent); }
+body.neon .n-quick { flex: none; padding: 10px 16px 12px; border-top: 1px solid var(--line); background: #111216; }
+body.neon .n-qrow { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 2px; }
+body.neon .n-q { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 76px; flex: none; cursor: pointer; font-size: 10.5px; color: var(--text-2); text-align: center; }
+body.neon .n-q i { width: 50px; height: 50px; border-radius: 13px; display: grid; place-items: center; color: #fff; box-shadow: inset 0 -8px 14px rgba(0, 0, 0, .22), 0 6px 16px rgba(0, 0, 0, .4); transition: transform .12s, filter .12s; }
+body.neon .n-q:hover i { transform: translateY(-3px); filter: brightness(1.18); }
+/* composants du contenu */
+body.neon .card, body.neon .stat, body.neon .item, body.neon .pl2, body.neon .msg { background: #14161a; border-color: var(--line); border-radius: 12px; }
+body.neon .pl2:hover, body.neon .item.click:hover { border-color: rgba(141, 255, 31, .4); background: #181b20; }
+body.neon .pl2.hd { background: transparent; }
+body.neon .eyebrow::before { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+body.neon .stat .v { color: var(--text); }
+body.neon button { border-color: var(--line-2); }
+body.neon button:hover { border-color: rgba(141, 255, 31, .55); background: rgba(141, 255, 31, .08); }
+body.neon button.primary { background: var(--accent); border-color: var(--accent); color: #0b0c0e; box-shadow: 0 0 18px rgba(141, 255, 31, .25); }
+body.neon button.primary:hover { background: #a3ff4d; }
+body.neon button.danger { color: #ff6b6b; border-color: rgba(255, 107, 107, .4); }
+body.neon button.danger:hover { background: rgba(255, 107, 107, .1); border-color: rgba(255, 107, 107, .7); }
+body.neon .seg { background: #14161a; }
+body.neon .seg button.active { background: rgba(141, 255, 31, .14); color: var(--accent); }
+body.neon input:focus, body.neon select:focus, body.neon textarea:focus { border-color: var(--accent); background: rgba(141, 255, 31, .04); }
+body.neon input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+body.neon input[type=checkbox]:checked::after { border-color: #0b0c0e; }
+body.neon .chips .chip.on { color: var(--accent); border-color: rgba(141, 255, 31, .5); }
+body.neon .chip.info { color: var(--accent); }
+body.neon .svc.on { border-color: rgba(141, 255, 31, .5); background: rgba(141, 255, 31, .08); color: var(--accent); }
+body.neon .tg.on .sw::before, body.neon .svc.on .sw::before { background: var(--accent); }
+body.neon .grp-t { color: var(--accent); opacity: .85; }
+body.neon .msg b { color: var(--accent); }
+body.neon .lgr, body.neon .perm { border-color: var(--line); }
+body.neon .acts-grid button:hover { box-shadow: 0 0 14px rgba(141, 255, 31, .12); }
+body.neon .toast::before { background: var(--accent); }
+body.neon #confirm .box { background: #14161a; border-color: rgba(141, 255, 31, .25); box-shadow: 0 0 50px rgba(141, 255, 31, .08); }
+body.neon .warnbox { border-color: rgba(251, 191, 36, .35); }
+body.neon ::-webkit-scrollbar { width: 6px; height: 6px; } body.neon ::-webkit-scrollbar-thumb { background: rgba(141, 255, 31, .25); border-radius: 6px; }
