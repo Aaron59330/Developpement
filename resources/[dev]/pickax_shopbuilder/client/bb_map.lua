@@ -115,20 +115,16 @@ end
 function BB.Blip(coords, b, opts)
     b, opts = b or {}, opts or {}
     local key = opts.category or ''
-    local resolved = BB.Alias[key] or key
-    local cat = BB.Categories[resolved] or BB.Categories.default
-    -- Blips UNIFORMES : tous les points d'une même catégorie (stations, banques, garages, boutiques, métiers…) ont le même blip.
-    -- Seules les catégories inconnues / « default » (mini-jeux, boutique personnalisée…) gardent leur propre icône et couleur.
-    local uniform = BB.Categories[resolved] ~= nil and resolved ~= 'default' and opts.free ~= true
+    local cat = BB.Categories[BB.Alias[key] or key] or BB.Categories.default
     local blip
     if opts.entity then
         blip = AddBlipForEntity(opts.entity)
     else
         blip = AddBlipForCoord(coords.x + 0.0, coords.y + 0.0, (coords.z or 0.0) + 0.0)
     end
-    SetBlipSprite(blip, uniform and cat.sprite or (tonumber(b.sprite) or cat.sprite))
-    -- couleur : catégorie (uniforme) → sinon réglage du point → global (Config.GlobalBlip.Color) → défaut
-    SetBlipColour(blip, (PickaxTheme and PickaxTheme.blipColor) or (uniform and cat.color) or tonumber(b.color) or cat.color)
+    SetBlipSprite(blip, tonumber(b.sprite) or cat.sprite)
+    -- icône / couleur : réglage du point (en jeu) → global (Config.GlobalBlip.Color) → défaut de la catégorie
+    SetBlipColour(blip, tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color)
     -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
