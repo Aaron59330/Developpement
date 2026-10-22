@@ -476,7 +476,7 @@ ESX.RegisterServerCallback('worldbuilder:duplicate', function(src, cb, id)
     local name = uniqueName(e.name .. '_copie')
     local settings, points = copy(e.settings), copy(e.points)
     local newId = MySQL.insert.await('INSERT INTO worldbuilder_entities (type, name, label, enabled, settings, points, stats, created_by) VALUES (?, ?, ?, 0, ?, ?, ?, ?)', {
-        e.type, name, label, json.encode(settings), json.encode(points), '{}', GetPlayerName(src) or 'console',
+        e.type, name, label, json.encode(settings), json.encode(points), '{}', createdBy or 'console',
     })
     if not newId then return cb(fail('Erreur base de données')) end
     local c = { id = newId, type = e.type, name = name, label = label, enabled = false, settings = settings, points = points, stats = {} }

@@ -147,7 +147,7 @@ function AC.canBan(src)
     return Config.Panel.Ace and Config.Panel.Ace ~= '' and IsPlayerAceAllowed(src, Config.Panel.Ace) or false
 end
 
-function AC.name(src) return GetPlayerName(src) or ('Joueur ' .. tostring(src)) end
+function AC.name(src) return (src and GetPlayerName(src)) or ('Joueur ' .. tostring(src)) end
 
 -- ─────────────────────────────── Exemptions ───────────────────────────────
 -- Délai de grâce : autres ressources → exports['pickax_anticheat']:Exempt(source, secondes, 'raison')

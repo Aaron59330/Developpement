@@ -293,7 +293,7 @@ local function createShop(src, typeId, label, opts)
     local enabled = opts.enabled == true and #locations > 0
 
     local id = MySQL.insert.await('INSERT INTO shopbuilder_shops (name, label, type, enabled, settings, items, locations, stats, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
-        name, label, tostring(typeId), enabled and 1 or 0, json.encode(settings), json.encode(items), json.encode(locations), '{}', GetPlayerName(src) or 'console',
+        name, label, tostring(typeId), enabled and 1 or 0, json.encode(settings), json.encode(items), json.encode(locations), '{}', (src and GetPlayerName(src)) or 'console',
     })
     if not id then return nil, 'Erreur base de données' end
     local shop = { id = id, name = name, label = label, type = tostring(typeId), enabled = enabled, settings = settings, items = items, locations = locations, stats = {} }
@@ -396,7 +396,7 @@ ESX.RegisterServerCallback('shopbuilder:duplicate', function(src, cb, id)
     settings.restock = settings.restock or {}
     settings.restock.last = os.time()
     local newId = MySQL.insert.await('INSERT INTO shopbuilder_shops (name, label, type, enabled, settings, items, locations, stats, created_by) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?)', {
-        name, label, shop.type, json.encode(settings), json.encode(shop.items), '[]', '{}', GetPlayerName(src) or 'console',
+        name, label, shop.type, json.encode(settings), json.encode(shop.items), '[]', '{}', (src and GetPlayerName(src)) or 'console',
     })
     if not newId then return cb(fail('Erreur base de données')) end
     local copy = { id = newId, name = name, label = label, type = shop.type, enabled = false, settings = settings, items = json.decode(json.encode(shop.items)), locations = {}, stats = {} }
