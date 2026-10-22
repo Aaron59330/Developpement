@@ -85,7 +85,7 @@
     if (!CFG.rpc) { host.innerHTML = '<div class="dl-warn">Logs Discord indisponibles (DLogs.config manquant).</div>'; return; }
     var key = dkey(host), st = drafts[key];
     var finish = function (res) {
-      if (!res || !res.ok) { host.innerHTML = '<div class="dl-warn">' + esc((res && res.error) || 'Impossible de charger les logs Discord') + '</div>'; return; }
+      if (!res || !res.ok || !res.cfg) { host.innerHTML = '<div class="dl-warn">' + esc((res && res.error) || 'Impossible de charger les logs Discord') + '</div>'; return; }
       st = { title: res.title, groups: res.groups, hasWebhook: !!res.cfg.hasWebhook, maskedWebhook: res.cfg.webhook, saved: res.cfg, draft: st ? st.draft : mkDraft(res.cfg), dirty: st ? st.dirty : false };
       drafts[key] = st;
       draw(host, st);

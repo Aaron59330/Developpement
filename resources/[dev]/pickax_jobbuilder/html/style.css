@@ -353,3 +353,49 @@ kbd { border-color: var(--accent-line); }
 #progress .pbar { height: 8px; border-radius: 8px; background: rgba(255, 255, 255, .09); overflow: hidden; }
 #progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--accent); box-shadow: 0 0 14px var(--accent-glow); animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
 @keyframes pfill { to { width: 100%; } }
+
+/* ═══════════ Style NÉON (vert, barre du haut) — body.neon ; sans lui : style classique inchangé ═══════════ */
+.n-top { display: none; }
+.n-row { display: contents; }
+body.neon .n-themebtn { display: none; }
+body.neon { --accent: #8dff1f; --accent-rgb: 141, 255, 31; --on-accent: #0b0c0e; --bg: #0d0e11; --surface: #14161a; --surface-2: #1b1e23; --line: rgba(255, 255, 255, .07); --line-2: rgba(255, 255, 255, .13); --ok: #8dff1f; --muted: #7b808c; }
+body.neon .shell, body.neon .panel { background: #0d0e11; border: 1px solid rgba(141, 255, 31, .22); border-radius: 14px; box-shadow: 0 0 70px rgba(141, 255, 31, .07), 0 40px 120px rgba(0, 0, 0, .85); }
+body.neon .shell { flex-direction: column; }
+body.neon .n-top { display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 60px; flex: none; border-bottom: 1px solid var(--line); background: #111216; }
+body.neon .n-logo { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: var(--accent); background: rgba(141, 255, 31, .12); border: 1px solid rgba(141, 255, 31, .4); box-shadow: 0 0 18px rgba(141, 255, 31, .18); }
+body.neon .n-title b { display: block; font-size: 17px; font-weight: 800; letter-spacing: .05em; }
+body.neon .n-title b span { color: var(--accent); }
+body.neon .n-title small { font-size: 10px; text-transform: uppercase; letter-spacing: .18em; color: var(--muted); }
+body.neon .n-row { display: flex; flex: 1; min-height: 0; gap: 14px; padding: 14px; }
+body.neon .side { width: 272px; border: 1px solid var(--line); border-radius: 14px; background: #14161a; padding: 12px; }
+body.neon .main { border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .012); overflow: hidden; }
+body.neon .main .head { padding: 14px 20px; }
+body.neon .head .acts [data-a=close] { display: none; }
+body.neon .head .tile { background: rgba(141, 255, 31, .1); border-color: rgba(141, 255, 31, .3); color: var(--accent); }
+body.neon .profile { background: #101216; border-color: var(--line); }
+body.neon .avatar { background: linear-gradient(135deg, #b6ff5c, #5fc400); color: #0b0c0e; border: 0; box-shadow: 0 0 16px rgba(141, 255, 31, .25); }
+body.neon .nav-label { color: var(--accent); opacity: .85; }
+body.neon .nav-item { border-radius: 10px; }
+body.neon .nav-item:hover { background: rgba(255, 255, 255, .04); }
+body.neon .nav-item.active { border-color: rgba(141, 255, 31, .45); background: rgba(141, 255, 31, .09); color: var(--accent); }
+body.neon .nav-item .count { color: var(--accent); }
+body.neon .card, body.neon .stat, body.neon .item, body.neon .pt, body.neon .toprow { background: #14161a; border-color: var(--line); border-radius: 12px; }
+body.neon .item.click:hover, body.neon .pt:hover { border-color: rgba(141, 255, 31, .4); background: #181b20; }
+body.neon .eyebrow::before { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+body.neon button { border-color: var(--line-2); }
+body.neon button:hover { border-color: rgba(141, 255, 31, .55); background: rgba(141, 255, 31, .08); }
+body.neon button.primary { background: var(--accent); border-color: var(--accent); color: #0b0c0e; box-shadow: 0 0 18px rgba(141, 255, 31, .25); }
+body.neon button.primary:hover { background: #a3ff4d; }
+body.neon button.danger { color: #ff6b6b; border-color: rgba(255, 107, 107, .4); }
+body.neon button.danger:hover { background: rgba(255, 107, 107, .1); }
+body.neon .seg { background: #14161a; border-color: var(--line); }
+body.neon .seg button.active { background: rgba(141, 255, 31, .14); color: var(--accent); }
+body.neon input:focus, body.neon select:focus, body.neon textarea:focus { border-color: var(--accent); background: rgba(141, 255, 31, .04); }
+body.neon input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+body.neon input[type=checkbox]:checked::after { border-color: #0b0c0e; }
+body.neon .chip.info { color: var(--accent); }
+body.neon .segs i.on { background: var(--accent); }
+body.neon #confirm .box { background: #14161a; border-color: rgba(141, 255, 31, .25); box-shadow: 0 0 50px rgba(141, 255, 31, .08); }
+body.neon .toast::before { background: var(--accent); }
+body.neon ::-webkit-scrollbar-thumb { background: rgba(141, 255, 31, .25); border-radius: 6px; }
+body.neon .n-sp { flex: 1; }
