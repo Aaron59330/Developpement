@@ -348,7 +348,7 @@ const GaragePanel = new (class extends PanelBase {
     const fl = [['all', 'Tous'], ['ok', 'Bon état'], ['bad', 'Abîmés']];
     $root.innerHTML = `<div class="gar"><div class="gtop"><div class="gbrand">${ic('car', 26)}<div><b>GARAGE</b><small>${esc(d.label)}</small></div></div>
         <div class="gtabs">${tabs.map(t => `<button class="gtab ${this.tab === t[0] ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[1], 20)}<span>${t[2]}</span></button>`).join('')}</div>
-        <div class="gsrv"><b>${esc(String(srv).toUpperCase())}</b><small>ROLEPLAY</small></div></div>
+        <div class="gsrv">${window.PICKAX_LOGO ? `<img class="glogo" src="${esc(window.PICKAX_LOGO)}" alt="" onerror="this.outerHTML='<b>${esc(String(srv).toUpperCase())}</b>'">` : `<b>${esc(String(srv).toUpperCase())}</b>`}</div></div>
       <div class="gmain"><div class="gleft"><div class="gbar"><input data-path="q" placeholder="Rechercher..." value="${esc(this.q)}">
         ${this.tab === 'perso' ? fl.map(f => `<button class="gflt ${this.filter === f[0] ? 'on' : ''}" data-a="flt" data-v="${f[0]}">${f[1]}</button>`).join('') : ''}</div>
         <div class="ggrid" id="ggrid">${this.cards(l)}</div></div><div class="gdet" id="gdet">${this.detail(l)}</div></div></div>`;
