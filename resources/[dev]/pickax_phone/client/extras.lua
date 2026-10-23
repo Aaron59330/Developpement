@@ -118,3 +118,52 @@ RegisterNUICallback('notifyGame', function(d, cb) if d and d.text then ESX.ShowN
 RegisterNUICallback('copy', function(d, cb) cb(1) end)
 RegisterNUICallback('usePowerbank', function(_, cb) cb(lib.callback.await('aura:usePowerbank', false)) end)
 RegisterNUICallback('gameTime', function(_, cb) cb({ h = GetClockHours(), m = GetClockMinutes(), d = GetClockDayOfWeek(), day = GetClockDayOfMonth(), mo = GetClockMonth() + 1, y = GetClockYear() }) end)
+
+-- ═════════ clés : commandes d'un véhicule possédé ═════════
+local function findByPlate(plate)
+    plate = tostring(plate or ''):gsub('%s+', ''):upper()
+    local me = GetEntityCoords(PlayerPedId())
+    for _, v in ipairs(GetGamePool('CVehicle')) do
+        local p = GetVehicleNumberPlateText(v):gsub('%s+', ''):upper()
+        if p == plate and #(GetEntityCoords(v) - me) < 150.0 then return v end
+    end
+end
+
+RegisterNUICallback('vehControl', function(d, cb)
+    local plate, action = d and d.plate, d and d.action
+    if not lib.callback.await('aura:vehOwns', false, plate) then cb({ ok = false, error = 'Ce véhicule ne vous appartient pas' }) return end
+    local v = findByPlate(plate)
+    if not v then cb({ ok = false, error = 'Véhicule hors de portée (150 m)' }) return end
+    NetworkRequestControlOfEntity(v)
+    local res = {}
+    if action == 'lock' then SetVehicleDoorsLocked(v, 2); SetVehicleDoorsLockedForAllPlayers(v, true); res.locked = true
+        StartVehicleHorn(v, 80, `HELDDOWN`, false); SetVehicleLights(v, 2); SetTimeout(250, function() SetVehicleLights(v, 0) end)
+    elseif action == 'unlock' then SetVehicleDoorsLocked(v, 1); SetVehicleDoorsLockedForAllPlayers(v, false); res.locked = false
+        SetVehicleLights(v, 2); SetTimeout(250, function() SetVehicleLights(v, 0) end)
+    elseif action == 'engine' then
+        local on = not GetIsVehicleEngineRunning(v); SetVehicleEngineOn(v, on, false, true); res.engine = on
+    elseif action == 'horn' then StartVehicleHorn(v, 1500, `HELDDOWN`, false)
+    elseif action == 'lights' then SetVehicleLights(v, 2); SetTimeout(3000, function() SetVehicleLights(v, 0) end)
+    elseif action == 'trunk' then
+        if GetVehicleDoorAngleRatio(v, 5) > 0.1 then SetVehicleDoorShut(v, 5, false) else SetVehicleDoorOpen(v, 5, false, false) end
+    end
+    local c = GetEntityCoords(v)
+    res.ok = true; res.x = c.x; res.y = c.y; res.distance = math.floor(#(c - GetEntityCoords(PlayerPedId())))
+    cb(res)
+end)
+
+-- ═════════ santé ═════════
+RegisterNUICallback('vitals', function(_, cb)
+    local ped = PlayerPedId()
+    local health = math.max(0, math.min(100, math.floor((GetEntityHealth(ped) - 100) / math.max(1, GetEntityMaxHealth(ped) - 100) * 100)))
+    local out = { health = health, armor = GetPedArmour(ped), stamina = math.floor(GetPlayerSprintStaminaRemaining(PlayerId())), speed = math.floor(GetEntitySpeed(ped) * 3.6) }
+    local got = 0
+    for _, s in ipairs({ 'hunger', 'thirst' }) do
+        pcall(function()
+            TriggerEvent('esx_status:getStatus', s, function(st) if st then out[s] = math.floor(st.getPercent()) end got = got + 1 end)
+        end)
+    end
+    local t = 0
+    while got < 2 and t < 15 do Wait(20); t = t + 1 end
+    cb(out)
+end)

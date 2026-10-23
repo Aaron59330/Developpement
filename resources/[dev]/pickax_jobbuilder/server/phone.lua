@@ -86,3 +86,12 @@ exports('PhoneAlert', function(src, jobName, message, anon)
     JB.log(jobName, x, 'phone_alert', msg)
     return { ok = true, members = list, handled = handled, name = by, coords = { x = c.x, y = c.y, z = c.z } }
 end)
+
+-- Infos d'un job pour l'application « Entreprise » du téléphone
+exports('GetJobInfo', function(jobName)
+    local job = JB.Jobs[tostring(jobName)]
+    if not job then return nil end
+    local grades = {}
+    for _, g in ipairs(job.grades or {}) do grades[#grades + 1] = { grade = g.grade, label = g.label, salary = g.salary } end
+    return { name = job.name, label = job.label, type = job.type, society = job.society and true or false, bossGrade = tonumber(job.boss_grade) or (#grades - 1), grades = grades }
+end)

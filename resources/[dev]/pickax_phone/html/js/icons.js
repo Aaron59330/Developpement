@@ -122,6 +122,13 @@ const ICONS = {
   zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
   utensils: '<path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v8a2 2 0 0 1-2 2M18 21V3c-3 2-4 5-4 8h4"/>',
   briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
+  compass: '<circle cx="12" cy="12" r="9"/><path d="m15.500 8.500-2 5-5 2 2-5z"/>',
+  ghost: '<path d="M5 21V11a7 7 0 0 1 14 0v10l-3-2-2 2-2-2-2 2-2-2z"/><path d="M9.500 11h.01M14.500 11h.01" stroke-width="2.600"/>',
+  gamepad: '<rect x="2.500" y="7" width="19" height="11" rx="5"/><path d="M7 10.500v4M5 12.500h4M15.500 11h.01M18 13.500h.01" stroke-width="2"/>',
+  unlock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.500-2"/>',
+  heartbeat: '<path d="M12 20s-8-4.800-8-11a4.500 4.500 0 0 1 8-2.700A4.500 4.500 0 0 1 20 9c0 6.200-8 11-8 11z"/><path d="M5 12h4l1.500-3 3 6 1.500-3h4"/>',
+  checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12.500 3 3 5-6"/>',
+  circle: '<circle cx="12" cy="12" r="9"/>',
   swipe: '<path d="M9 11V5a2 2 0 0 1 4 0v5l5 1.500a2 2 0 0 1 1.500 2.300L18.500 19a2 2 0 0 1-2 1.500H11a2 2 0 0 1-1.600-.8L5 14a1.800 1.800 0 0 1 2.600-2.500z"/>',
 };
 (function(){ for (const k in ICONS) ICONS[k] = ICONS[k].replace(/(\d)\.(\d)00(?!\d)/g, '$1.$2'); })();

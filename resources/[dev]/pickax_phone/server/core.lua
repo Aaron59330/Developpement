@@ -482,7 +482,7 @@ lib.callback.register('aura:appInstall', function(src, appId, install)
     return p.apps
 end)
 
-local KV_KEYS = { notes = true, events = true, alarms = true, places = true, playlist = true, lastweather = true, widgets = true, home = true, recents = true, fm_share = true }
+local KV_KEYS = { notes = true, events = true, alarms = true, places = true, playlist = true, lastweather = true, widgets = true, home = true, recents = true, fm_share = true, todos = true, scores = true }
 lib.callback.register('aura:kvGet', function(src, key)
     local id = Aura.ident[src]; if not id or not KV_KEYS[key] then return nil end
     return Aura.Unjson(MySQL.scalar.await('SELECT v FROM aura_kv WHERE owner = ? AND k = ?', { id, key }), nil)

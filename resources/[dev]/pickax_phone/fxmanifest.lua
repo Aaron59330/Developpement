@@ -30,6 +30,7 @@ server_scripts {
     'server/finance.lua',
     'server/services.lua',
     'server/misc.lua',
+    'server/extras.lua',
     'server/api.lua',
 }
 

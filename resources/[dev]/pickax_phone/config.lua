@@ -126,6 +126,31 @@ Config.Dispatch = {
     sprite = 280, color = 1,
 }
 
+-- ═══════════════════════════ DARKCHAT (salons anonymes) ═══════════════════════════
+Config.Darkchat = {
+    enabled      = true,
+    item         = '',                   -- objet requis pour ouvrir l'app (ex. 'usb_key', ox_inventory). Vide = aucun objet requis
+    maxRoomsOwn  = 3,                    -- salons créés par joueur
+    ttlOptions   = { 0, 1, 6, 24, 168 }, -- durées de vie des messages proposées (heures, 0 = illimité)
+    messageMax   = 500,
+    aliasCooldown = 600,                 -- secondes entre deux changements de pseudo
+    idleRoomDays = 7,                    -- un salon sans message depuis N jours est supprimé
+    publicRooms  = {                     -- salons publics créés au démarrage
+        { id = 'marche-noir', name = 'Marché noir', ttl = 24 },
+        { id = 'general',     name = 'Général',     ttl = 24 },
+        { id = 'rumeurs',     name = 'Rumeurs',     ttl = 6 },
+    },
+}
+
+-- ═══════════════════════════ ENTREPRISE (jobs du Job Builder) ═══════════════════════════
+Config.Business = {
+    enabled       = true,
+    billDistance  = 6.0,                 -- distance max au client pour facturer
+    maxBill       = 250000,
+    billGrade     = 0,                   -- grade minimum pour facturer
+    hireDistance  = 6.0,
+}
+
 -- ═══════════════════════════ AIRSHARE ═══════════════════════════
 Config.AirShare = { distance = 8.0, timeout = 25 }
 
@@ -171,6 +196,13 @@ Config.Apps = {
     { id = 'market',    enabled = true, default = false, store = true },
     { id = 'airshare',  enabled = true, default = true },
     { id = 'wallet',    enabled = true, default = true },
+    { id = 'business',  enabled = true, default = true },                  -- entreprise : facturation, employés, société (jobs du Job Builder)
+    { id = 'keys',      enabled = true, default = true },                  -- clés : verrouiller / démarrer / klaxonner ses véhicules
+    { id = 'reminders', enabled = true, default = true },
+    { id = 'compass',   enabled = true, default = true },
+    { id = 'health',    enabled = true, default = true },
+    { id = 'darkchat',  enabled = true, default = false, store = true },   -- salons anonymes (voir Config.Darkchat)
+    { id = 'games',     enabled = true, default = false, store = true },
 }
 
 -- ═══════════════════════════ FONDS D'ÉCRAN ═══════════════════════════

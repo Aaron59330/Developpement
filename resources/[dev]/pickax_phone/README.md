@@ -19,6 +19,12 @@ Téléphone (clavier, récents, favoris, numéro masqué `*31#`, appels vocaux) 
 
 Système : écran verrouillé avec code, centre de contrôle, notifications, Ne pas déranger, mode avion, thèmes clair/sombre, couleur d'accentuation, fonds d'écran (galerie / lien), batterie (recharge en véhicule ou batterie externe), multitâche.
 
+## Nouveautés : Shadow (darkchat) et apps en plus
+- **Shadow** (darkchat) : pseudo anonyme aléatoire (modifiable), salons publics ou privés (code + mot de passe), messages et images, effacement automatique selon la durée du salon, salons publics créés au démarrage (`Config.Darkchat.publicRooms`). Accès en option avec un objet (`Config.Darkchat.item`, ex. `'usb_key'`). Modération : `/phone_dclog <salon> [n]` (affiche pseudo + identifiant réel, admin/console) et `/phone_dcclose <salon>`.
+- **Entreprise** (jobs du Job Builder) : facturer un client proche (la facture arrive dans sa Banque et l'argent va au compte société du job), recruter, changer le grade, licencier (direction), solde de la société.
+- **Clés** : verrouiller / déverrouiller, démarrer le moteur, klaxon, phares, coffre sur ses véhicules possédés (150 m).
+- **Rappels**, **Boussole** (cap, rue), **Santé** (vie, armure, faim, soif), **Jeux** (Snake avec record, morpion).
+
 ## Appeler les jobs du Job Builder
 - Tous les jobs créés dans le **Job Builder** sont des lignes joignables dans l'application **Services** (lus en direct : un job créé ou modifié apparaît **tout de suite**, sans redémarrage).
 - Réglages par job : Job Builder → job → carte **« Téléphone des joueurs (Aura) »** : joignable ou non, numéro d'appel court (ex. 17, 555123), nom affiché, mode (appel + alerte / appel seul / alerte seule), grade minimum pour recevoir, alerte anonyme, aide affichée.
@@ -44,4 +50,4 @@ exports.pickax_phone:HasPhone(source)
 Exports client : `Open`, `Close`, `IsOpen`, `HasPhone`.
 
 ## Commandes admin
-`/phone_number [id]` · `/phone_give [id]` · `/phone_reset [id]` · `/phone_verify <app> <pseudo> [0]`
+`/phone_number [id]` · `/phone_give [id]` · `/phone_reset [id]` · `/phone_verify <app> <pseudo> [0]` · `/phone_dclog <salon> [n]` · `/phone_dcclose <salon>`
