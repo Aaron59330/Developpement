@@ -438,6 +438,7 @@ const OS = {
     // taille choisie par le joueur (Réglages › Affichage) : multiplicateur de la taille automatique, jamais plus grand que l'écran
     const pct = Math.max(u.userMin || 60, Math.min(u.userMax || 125, (S.settings && S.settings.phoneScale) || 100)) / 100;
     const k = Math.max(0.4, Math.min(base * pct, (window.innerHeight - 8) / 864));
+    document.documentElement.classList.toggle('noblur', u.blur === false);   // Config.UI.blur = false : supprime tous les flous d'arrière-plan
     const st = $('#stage');
     st.style.setProperty('--scale', String(k));
     const left = u.side === 'left';
