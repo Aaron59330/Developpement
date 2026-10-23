@@ -38,7 +38,7 @@ local function openHub()
     data.stats = readStats()
     local theme = PickaxTheme or {}
     open = true; SetNuiFocus(true, true)
-    nui('open', { data = data, shortcuts = sc, activities = acts, server = { name = theme.name, short = theme.short, tagline = theme.tagline, discord = theme.discord } })
+    nui('open', { accent = Config.Accent, data = data, shortcuts = sc, activities = acts, server = { name = theme.name, short = theme.short, tagline = theme.tagline, discord = theme.discord } })
 end
 
 local function closeHub() open = false; SetNuiFocus(false, false); nui('close') end

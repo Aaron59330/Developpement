@@ -1,7 +1,8 @@
 Config = {}
 
 Config.Command = 'hub'
-Config.Key     = 'F1'                 -- touche d'ouverture (modifiable par le joueur dans les paramètres FiveM)
+Config.Key     = 'F1'
+Config.Accent  = '#d9a3f5'           -- couleur du menu (lilas). nil = couleur du serveur (pickax_core/config.lua)                 -- touche d'ouverture (modifiable par le joueur dans les paramètres FiveM)
 
 -- Raccourcis de l'écran d'accueil : chaque entrée lance une commande. Les commandes qui n'existent pas sur le serveur sont masquées automatiquement.
 Config.Shortcuts = {
