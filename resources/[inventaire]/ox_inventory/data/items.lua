@@ -346,7 +346,7 @@ return {
         stack = false,
         consume = 0,
         close = true,
-     -- LB Phone handles ox_inventory:usedItem and the phone metadata.
+     -- Aura (pickax_phone) gère ox_inventory:usedItem (ouvre le téléphone).
     },
 
     -- Cartes / permis (CorePickax > players/jsfour-idcard)
