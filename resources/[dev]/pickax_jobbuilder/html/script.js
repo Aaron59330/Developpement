@@ -134,7 +134,7 @@ function applyTheme(rgb) {
 }
 
 /* ── Style : néon (par défaut) ou classique, mémorisé ── */
-function styleOf() { try { return localStorage.getItem('jb.style') === 'neon' ? 'neon' : 'classic'; } catch (e) { return 'classic'; } }
+function styleOf() { return 'classic'; }   // un seul style (le style néon est retiré)
 function applyStyle() { document.body.classList.toggle('neon', styleOf() === 'neon'); }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-a=theme]');
@@ -156,10 +156,10 @@ function header({ icon, title, sub, acts = '' }) {
 }
 
 function shellSide({ profile, nav, active, foot = '', head, body }) {
-  return `<div class="shell"><div class="n-top"><div class="n-logo">${ic('briefcase', 22)}</div><div class="n-title"><b>JOB <span>BUILDER</span></b><small>${esc(profile.sub)}</small></div><div class="n-sp"></div><button class="sm" data-a="theme" title="Revenir à l'ancien style">Style classique</button><button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div><div class="n-row"><aside class="side">
+  return `<div class="shell"><div class="n-top"><div class="n-logo">${ic('briefcase', 22)}</div><div class="n-title"><b>JOB <span>BUILDER</span></b><small>${esc(profile.sub)}</small></div><div class="n-sp"></div><button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div><div class="n-row"><aside class="side">
     <div class="profile"><div class="avatar">${esc(profile.initials)}</div><div><b>${esc(profile.title)}</b><small>${esc(profile.sub)}</small></div></div>
     <div class="nav">${nav.map(sec => `${sec.label ? `<div class="nav-label">${esc(sec.label)}</div>` : ''}${sec.items.map(it => `<div class="nav-item ${it.id === active ? 'active' : ''}" data-a="nav" data-v="${esc(it.id)}">${ic(it.icon)}<span class="grow">${esc(it.text)}</span>${it.count != null ? `<span class="count">${it.count}</span>` : ''}</div>`).join('')}`).join('')}</div>
-    <div class="side-foot">${foot}<button class="sm n-themebtn" data-a="theme">Style néon</button></div></aside>
+    <div class="side-foot">${foot}</div></aside>
     <section class="main">${header(head)}<div class="body">${body}</div></section></div></div>`;
 }
 

@@ -1,7 +1,7 @@
 /* Style « Atelier » : palette sombre dérivée de la couleur du serveur + tuiles d'icônes colorées. Actif par défaut ; bouton « Style » pour revenir à l'ancien. */
 (function () {
   const KEY = 'bb.atelier';
-  const on = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (e) { return true; } };
+  const on = () => true;   // un seul style : Atelier (plus de bouton « Style »)
   const root = document.documentElement;
   const hsl = (r, g, b) => { r /= 255; g /= 255; b /= 255; const M = Math.max(r, g, b), m = Math.min(r, g, b); let h = 0; if (M !== m) { const d = M - m; h = M === r ? (g - b) / d + (g < b ? 6 : 0) : M === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return h; };
   const hex = (h, s, l) => { s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); }; return '#' + f(0) + f(8) + f(4); };
@@ -38,6 +38,7 @@
   }
   function sweep() { document.querySelectorAll('.tile:not([data-atl])').forEach(paint); sw(); }
   function sw() {
+    return;
     if (document.querySelector('.atl-sw')) return;
     const acts = document.querySelector('.head .acts'); if (!acts) return;
     const b = document.createElement('button'); b.className = 'sm atl-sw'; b.title = "Basculer entre le style Atelier et l'ancien style";
