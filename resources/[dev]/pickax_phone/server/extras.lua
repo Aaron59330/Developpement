@@ -43,8 +43,7 @@ end
 
 local function hasItem(src)
     if not DC.item or DC.item == '' then return true end
-    local ok, n = pcall(function() return exports.ox_inventory:Search(src, 'count', DC.item) end)
-    return ok and (n or 0) > 0
+    return Bridge.HasItem(src, DC.item)
 end
 
 local function inRoom(id, room) return MySQL.scalar.await('SELECT 1 FROM aura_dc_members WHERE room = ? AND identifier = ?', { room, id }) ~= nil end
@@ -181,28 +180,39 @@ RegisterCommand('phone_dcclose', function(src, args)
 end, false)
 
 -- ═════════════════ ENTREPRISE ═════════════════
-local function jbInfo(jobName)
-    if GetResourceState('pickax_jobbuilder') ~= 'started' then return nil end
-    local ok, info = pcall(function() return exports.pickax_jobbuilder:GetJobInfo(jobName) end)
-    return ok and info or nil
+local function ignored(jobName)
+    for _, n in ipairs(Config.JobLines.ignore or {}) do if n == jobName then return true end end
+    return false
+end
+
+-- Infos d'un métier : Job Builder si disponible, sinon framework (ESX / QBCore / Qbox)
+local function jobInfo(jobName)
+    if not jobName or ignored(jobName) then return nil end
+    local mode = (Config.Business.source or 'auto'):lower()
+    if (mode == 'auto' or mode == 'jobbuilder') and GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, info = pcall(function() return exports.pickax_jobbuilder:GetJobInfo(jobName) end)
+        if ok and info then return info end
+    end
+    if mode == 'jobbuilder' then return nil end
+    local j = Bridge.Jobs()[jobName]
+    if not j then return nil end
+    return { name = jobName, label = j.label, society = Bridge.HasSociety(jobName), bossGrade = j.bossGrade, grades = j.grades }
 end
 local function gradeLabel(info, g) for _, x in ipairs(info.grades) do if x.grade == g then return x.label end end return tostring(g) end
+local function isBossOf(job, info) return job and ((job.grade or 0) >= info.bossGrade or job.isBoss == true) end
 
 lib.callback.register('aura:biz', function(src)
     if not Config.Business.enabled then return nil end
-    local x = ESX.GetPlayerFromId(src); if not x then return nil end
-    local info = jbInfo(x.job.name)
+    local job = Bridge.Job(src); if not job then return nil end
+    local info = jobInfo(job.name)
     if not info then return { none = true } end
-    local grade = x.job.grade or 0
-    local isBoss = grade >= info.bossGrade
-    local out = { job = info.name, label = info.label, grade = grade, gradeLabel = gradeLabel(info, grade), isBoss = isBoss, grades = info.grades, society = info.society, canBill = grade >= Config.Business.billGrade, maxBill = Config.Business.maxBill }
-    if info.society and isBoss then
-        local ok, m = pcall(function() return exports.pickax_jobbuilder:GetJobMoney(info.name) end)
-        out.money = ok and m or 0
-    end
+    local grade = job.grade or 0
+    local isBoss = isBossOf(job, info)
+    local out = { job = info.name, label = info.label, grade = grade, gradeLabel = gradeLabel(info, grade), isBoss = isBoss, grades = info.grades, society = info.society, canBill = grade >= Config.Business.billGrade, maxBill = Config.Business.maxBill, canManage = Config.Business.allowFire }
+    if info.society and isBoss then out.money = Bridge.SocietyBalance(info.name) end
     local team = {}
-    for _, m in ipairs(ESX.GetExtendedPlayers('job', info.name)) do
-        team[#team + 1] = { src = m.source, name = m.getName(), grade = m.job.grade, gradeLabel = gradeLabel(info, m.job.grade), me = m.source == src }
+    for _, m in ipairs(Bridge.PlayersByJob(info.name)) do
+        team[#team + 1] = { src = m.source, name = Bridge.Name(m.source) or '?', grade = m.grade, gradeLabel = gradeLabel(info, m.grade), me = m.source == src }
     end
     table.sort(team, function(a, b) return a.grade > b.grade end)
     out.team = team
@@ -218,18 +228,19 @@ lib.callback.register('aura:bizNearby', function(src)
     local out = {}
     for tid, tsrc in pairs(Aura.src) do
         if tsrc ~= src and nearTo(src, tsrc, math.max(Config.Business.billDistance, Config.Business.hireDistance)) then
-            local x = ESX.GetPlayerFromId(tsrc)
-            out[#out + 1] = { src = tsrc, name = x and x.getName() or Aura.Name(tid), job = x and x.job.label or '' }
+            local j = Bridge.Job(tsrc)
+            out[#out + 1] = { src = tsrc, name = Bridge.Name(tsrc) or Aura.Name(tid), job = j and j.label or '' }
         end
     end
     return out
 end)
 
 lib.callback.register('aura:bizBill', function(src, target, amount, reason)
-    local x = ESX.GetPlayerFromId(src); if not x or not Config.Business.enabled then return false end
-    local info = jbInfo(x.job.name)
+    if not Config.Business.enabled then return false end
+    local job = Bridge.Job(src); if not job then return false end
+    local info = jobInfo(job.name)
     if not info then return false, 'Votre métier ne peut pas facturer' end
-    if (x.job.grade or 0) < Config.Business.billGrade then return false, 'Votre grade ne permet pas de facturer' end
+    if (job.grade or 0) < Config.Business.billGrade then return false, 'Votre grade ne permet pas de facturer' end
     amount = math.floor(tonumber(amount) or 0)
     if amount < 1 or amount > Config.Business.maxBill then return false, 'Montant invalide' end
     if not nearTo(src, target, Config.Business.billDistance) then return false, 'Le client est trop loin' end
@@ -240,53 +251,52 @@ lib.callback.register('aura:bizBill', function(src, target, amount, reason)
 end)
 
 local function bossCtx(src, target)
-    local x = ESX.GetPlayerFromId(src); if not x then return nil, 'Indisponible' end
-    local info = jbInfo(x.job.name); if not info then return nil, 'Aucune entreprise' end
-    if (x.job.grade or 0) < info.bossGrade then return nil, 'Réservé à la direction' end
-    local t = target and ESX.GetPlayerFromId(target)
-    return x, info, t
+    if not Config.Business.allowFire then return nil, 'Gestion désactivée' end
+    local job = Bridge.Job(src); if not job then return nil, 'Indisponible' end
+    local info = jobInfo(job.name); if not info then return nil, 'Aucune entreprise' end
+    if not isBossOf(job, info) then return nil, 'Réservé à la direction' end
+    return job, info, target and Bridge.Job(target)
 end
 
 lib.callback.register('aura:bizGrade', function(src, target, grade)
-    local x, info, t = bossCtx(src, tonumber(target))
-    if not x then return false, info end
-    if not t or t.job.name ~= info.name then return false, 'Employé introuvable' end
+    target = tonumber(target)
+    local job, info, tj = bossCtx(src, target)
+    if not job then return false, info end
+    if not tj or tj.name ~= info.name then return false, 'Employé introuvable' end
     grade = math.floor(tonumber(grade) or -1)
     local ok = false
     for _, g in ipairs(info.grades) do if g.grade == grade then ok = true end end
     if not ok then return false, 'Grade invalide' end
-    if t.source == src then return false, 'Impossible de modifier votre propre grade' end
-    t.setJob(info.name, grade)
-    TriggerClientEvent('aura:push', t.source, 'notify', { app = 'business', title = info.label, body = 'Votre grade est désormais : ' .. gradeLabel(info, grade) })
+    if target == src then return false, 'Impossible de modifier votre propre grade' end
+    if not Bridge.SetJob(target, info.name, grade) then return false, 'Modification impossible' end
+    TriggerClientEvent('aura:push', target, 'notify', { app = 'business', title = info.label, body = 'Votre grade est désormais : ' .. gradeLabel(info, grade) })
     return true
 end)
 
 lib.callback.register('aura:bizFire', function(src, target)
-    local x, info, t = bossCtx(src, tonumber(target))
-    if not x then return false, info end
-    if not t or t.job.name ~= info.name or t.source == src then return false, 'Employé introuvable' end
-    t.setJob('unemployed', 0)
-    TriggerClientEvent('aura:push', t.source, 'notify', { app = 'business', title = info.label, body = 'Vous ne faites plus partie de l\'entreprise' })
+    target = tonumber(target)
+    local job, info, tj = bossCtx(src, target)
+    if not job then return false, info end
+    if not tj or tj.name ~= info.name or target == src then return false, 'Employé introuvable' end
+    if not Bridge.SetJob(target, 'unemployed', 0) then return false, 'Licenciement impossible' end
+    TriggerClientEvent('aura:push', target, 'notify', { app = 'business', title = info.label, body = 'Vous ne faites plus partie de l\'entreprise' })
     return true
 end)
 
 lib.callback.register('aura:bizHire', function(src, target, grade)
-    local x, info, t = bossCtx(src, tonumber(target))
-    if not x then return false, info end
-    if not t or not nearTo(src, t.source, Config.Business.hireDistance) then return false, 'La personne est trop loin' end
-    if t.job.name == info.name then return false, 'Déjà employé(e) ici' end
+    target = tonumber(target)
+    local job, info, tj = bossCtx(src, target)
+    if not job then return false, info end
+    if not tj or not nearTo(src, target, Config.Business.hireDistance) then return false, 'La personne est trop loin' end
+    if tj.name == info.name then return false, 'Déjà employé(e) ici' end
     grade = math.floor(tonumber(grade) or 0)
-    t.setJob(info.name, grade)
-    TriggerClientEvent('aura:push', t.source, 'notify', { app = 'business', title = info.label, body = 'Bienvenue ! Vous avez été recruté(e) : ' .. gradeLabel(info, grade) })
+    if not Bridge.SetJob(target, info.name, grade) then return false, 'Recrutement impossible' end
+    TriggerClientEvent('aura:push', target, 'notify', { app = 'business', title = info.label, body = 'Bienvenue ! Vous avez été recruté(e) : ' .. gradeLabel(info, grade) })
     return true
 end)
 
 -- ═════════════════ CLÉS DE VÉHICULES ═════════════════
 lib.callback.register('aura:vehOwns', function(src, plate)
     local id = Aura.ident[src]; if not id then return false end
-    plate = tostring(plate or ''):gsub('%s+', ''):upper()
-    local ok, rows = pcall(function() return MySQL.query.await('SELECT plate FROM owned_vehicles WHERE owner = ?', { id }) end)
-    if not ok or not rows then return false end
-    for _, r in ipairs(rows) do if (r.plate or ''):gsub('%s+', ''):upper() == plate then return true end end
-    return false
+    return Bridge.OwnsPlate(id, plate)
 end)

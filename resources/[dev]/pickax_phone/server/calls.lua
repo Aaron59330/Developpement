@@ -54,7 +54,7 @@ function Aura.StartLineCall(src, line, hidden)
         return { ok = true, state = 'unavailable' }
     end
     nextId = nextId + 1
-    local call = { id = nextId, line = line, hidden = (hidden and Config.Calls.allowHidden) or me.settings.hideNumber or false, group = group,
+    local call = { id = nextId, line = line, hidden = (hidden and Config.Calls.allowHidden and (Config.Limits or {}).hideNumber ~= false) or (me.settings.hideNumber and (Config.Limits or {}).hideNumber ~= false) or false, group = group,
         caller = { src = src, id = Aura.ident[src], number = me.number }, channel = Config.Calls.channelBase + nextId }
     calls[call.id] = call; byPlayer[src] = call.id
     for m in pairs(group) do
@@ -80,13 +80,12 @@ lib.callback.register('aura:callStart', function(src, number, hidden)
     if me.settings.airplane then return { ok = false, error = 'Mode avion activé' } end
     if number == me.number then return { ok = false, error = 'Impossible de s\'appeler soi-même' } end
     if Config.Calls.price > 0 then
-        local x = ESX.GetPlayerFromId(src)
-        if not x or x.getAccount(Config.Bank.account).money < Config.Calls.price then return { ok = false, error = 'Solde insuffisant' } end
+        if Bridge.Money(src, 'bank') < Config.Calls.price then return { ok = false, error = 'Solde insuffisant' } end
     end
     local tid = Aura.byNumber[number]
     local tsrc = tid and Aura.src[tid]
     nextId = nextId + 1
-    local call = { id = nextId, hidden = (hidden and Config.Calls.allowHidden) or me.settings.hideNumber or false,
+    local call = { id = nextId, hidden = (hidden and Config.Calls.allowHidden and (Config.Limits or {}).hideNumber ~= false) or (me.settings.hideNumber and (Config.Limits or {}).hideNumber ~= false) or false,
         caller = { src = src, id = Aura.ident[src], number = me.number }, callee = { src = tsrc, id = tid, number = number }, channel = Config.Calls.channelBase + nextId }
     local tp = tid and Aura.phones[tid]
     local unavailable = (not tsrc) or (tp and tp.settings.airplane) or (tp and tp.battery <= 0)
@@ -127,13 +126,12 @@ lib.callback.register('aura:callAnswer', function(src, callId)
         c.group = nil
     end
     if Config.Calls.price > 0 then
-        local x = ESX.GetPlayerFromId(c.caller.src)
-        if x and x.getAccount(Config.Bank.account).money >= Config.Calls.price then x.removeAccountMoney(Config.Bank.account, Config.Calls.price) end
+        Bridge.RemoveMoney(c.caller.src, 'bank', Config.Calls.price, 'Aura : appel')
     end
     c.answeredAt = os.time()
     local calleeKey = c.line and lineKey(c.line) or c.callee.number
-    TriggerClientEvent('aura:push', c.caller.src, 'callConnect', { id = c.id, channel = c.channel, number = calleeKey, service = c.line and c.line.label or nil })
-    TriggerClientEvent('aura:push', c.callee.src, 'callConnect', { id = c.id, channel = c.channel, number = c.hidden and '' or c.caller.number, service = c.line and c.line.label or nil })
+    TriggerClientEvent('aura:push', c.caller.src, 'callConnect', { id = c.id, channel = c.channel, number = calleeKey, service = c.line and c.line.label or nil, peer = c.callee.src })
+    TriggerClientEvent('aura:push', c.callee.src, 'callConnect', { id = c.id, channel = c.channel, number = c.hidden and '' or c.caller.number, service = c.line and c.line.label or nil, peer = c.caller.src })
     return true
 end)
 

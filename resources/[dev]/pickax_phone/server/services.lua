@@ -1,40 +1,58 @@
 -- Services : lignes des jobs (Job Builder) ou liste fixe, alertes avec position, garage
 local lastAlert, alerts, nextAlert = {}, {}, 0
 
-local function onDuty(x, jobs)
-    if not x or not x.job then return false end
-    local name = x.job.name or ''
-    if x.job.onDuty == false then return false end
-    if name:sub(1, 3) == 'off' then return false end
-    for _, j in ipairs(jobs) do if j == name then return true end end
-    return false
-end
-
-local function staticMembers(svc)
+local function membersOfJobs(jobs, minGrade)
     local list = {}
-    for _, x in ipairs(ESX.GetExtendedPlayers()) do
-        if onDuty(x, svc.jobs) then list[#list + 1] = x.source end
+    for _, job in ipairs(jobs) do
+        for _, e in ipairs(Bridge.PlayersByJob(job)) do
+            local offName = job:sub(1, 3) == 'off'
+            local dutyOk = (not Config.JobLines.dutyOnly) or (e.onDuty ~= false and not offName)
+            if dutyOk and (e.grade or 0) >= (minGrade or 0) then list[#list + 1] = e.source end
+        end
     end
     return list
 end
 
+local function jbAvailable()
+    return GetResourceState('pickax_jobbuilder') == 'started'
+end
 local function jbLines()
-    if not Config.JobLines.enabled or GetResourceState('pickax_jobbuilder') ~= 'started' then return nil end
+    if not jbAvailable() then return nil end
     local ok, lines = pcall(function() return exports.pickax_jobbuilder:GetPhoneLines() end)
     if ok and type(lines) == 'table' then return lines end
 end
 
--- Toutes les lignes joignables (jobs du builder en direct, sinon liste fixe)
+local function lineSource()
+    local s = (Config.JobLines.source or 'auto'):lower()
+    if s ~= 'auto' then return s end
+    if jbAvailable() then return 'jobbuilder' end
+    if Bridge.fw ~= 'standalone' then return 'framework' end
+    return 'config'
+end
+
+-- Toutes les lignes joignables (Job Builder en direct, métiers du framework, ou liste fixe)
 function Aura.Lines()
     local out = {}
-    local jb = jbLines()
-    if jb then
-        for _, l in ipairs(jb) do
-            out[#out + 1] = { id = 'job:' .. l.job, job = l.job, jb = true, label = l.label, number = l.number or '', icon = l.icon, color = l.color, type = l.type,
-                mode = l.mode or 'both', anon = l.anon, hint = l.hint or '', minGrade = l.minGrade or 0 }
+    if not Config.JobLines.enabled then return out end
+    local src = lineSource()
+    local covered = false
+    if src == 'jobbuilder' then
+        local jb = jbLines()
+        if jb then
+            covered = true
+            for _, l in ipairs(jb) do
+                out[#out + 1] = { id = 'job:' .. l.job, job = l.job, jb = true, label = l.label, number = l.number or '', icon = l.icon, color = l.color, type = l.type,
+                    mode = l.mode or 'both', anon = l.anon, hint = l.hint or '', minGrade = l.minGrade or 0 }
+            end
+        end
+    elseif src == 'framework' then
+        covered = true
+        for _, l in ipairs(Bridge.FrameworkLines()) do
+            out[#out + 1] = { id = 'job:' .. l.job, job = l.job, fw = true, label = l.label, number = l.number, icon = l.icon, color = l.color, type = l.type,
+                mode = l.mode, anon = l.anon, hint = l.hint, minGrade = l.minGrade }
         end
     end
-    if not jb or Config.JobLines.keepStatic then
+    if not covered or Config.JobLines.keepStatic then
         for _, s in ipairs(Config.Services) do
             out[#out + 1] = { id = s.id, static = s, label = s.label, number = s.number or '', icon = s.icon, color = s.color, mode = 'both', anon = s.anon, hint = '', minGrade = 0 }
         end
@@ -65,7 +83,8 @@ function Aura.LineMembers(line)
         local ok, list = pcall(function() return exports.pickax_jobbuilder:GetJobMembers(line.job, line.minGrade) end)
         return ok and list or {}
     end
-    return staticMembers(line.static)
+    if line.fw then return membersOfJobs({ line.job }, line.minGrade) end
+    return membersOfJobs(line.static.jobs or {}, 0)
 end
 
 lib.callback.register('aura:serviceLines', function(src)
@@ -128,10 +147,9 @@ end)
 
 lib.callback.register('aura:dispatchAccept', function(src, aid)
     local a = alerts[tonumber(aid)]
-    local x = ESX.GetPlayerFromId(src)
-    if not a or not x then return false end
+    if not a then return false end
     if a.from and GetPlayerName(a.from) then
-        TriggerClientEvent('aura:push', a.from, 'notify', { app = 'services', title = a.label, body = x.getName() .. ' prend votre appel en charge' })
+        TriggerClientEvent('aura:push', a.from, 'notify', { app = 'services', title = a.label, body = (Bridge.Name(src) or 'Un employé') .. ' prend votre appel en charge' })
     end
     return a.coords
 end)
@@ -150,12 +168,5 @@ end
 -- ═════════════════ GARAGE ═════════════════
 lib.callback.register('aura:garage', function(src)
     local id = Aura.ident[src]; if not id then return {} end
-    local ok, rows = pcall(function() return MySQL.query.await('SELECT plate, vehicle, stored FROM owned_vehicles WHERE owner = ?', { id }) end)
-    if not ok or not rows then return {} end
-    local out = {}
-    for _, r in ipairs(rows) do
-        local props = Aura.Unjson(r.vehicle, {})
-        out[#out + 1] = { plate = r.plate, model = props.model, stored = r.stored == 1 or r.stored == true, fuel = props.fuelLevel, engine = props.engineHealth, body = props.bodyHealth, color = props.color1 }
-    end
-    return out
+    return Bridge.Vehicles(id)
 end)

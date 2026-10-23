@@ -124,6 +124,9 @@ local function sendMessage(src, data)
     local kind = data.kind or 'text'
     if kind ~= 'text' and kind ~= 'image' and kind ~= 'location' and kind ~= 'contact' and kind ~= 'system' then kind = 'text' end
     if kind == 'system' then kind = 'text' end
+    local L = Config.Limits or {}
+    if kind == 'image' and L.messageImages == false then return { ok = false, error = 'Images désactivées' } end
+    if kind == 'location' and L.messageLocation == false then return { ok = false, error = 'Partage de position désactivé' } end
     local body = Aura.Clamp(data.body, Config.Messages.maxLength)
     if kind == 'text' and Aura.Trim(body) == '' then return { ok = false, error = 'Message vide' } end
     local meta = nil
@@ -204,6 +207,7 @@ end)
 lib.callback.register('aura:groupCreate', function(src, name, numbers, avatar)
     local number = myNumber(src)
     if not number then return false end
+    if (Config.Limits or {}).groups == false then return false, 'Les groupes sont désactivés' end
     local list, seen = { number }, { [number] = true }
     for _, n in ipairs(numbers or {}) do
         n = Aura.CleanNumber(n)

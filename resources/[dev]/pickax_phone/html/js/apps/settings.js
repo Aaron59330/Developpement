@@ -89,7 +89,7 @@ const Settings = {
   },
   privacy(p) {
     const st = S.settings;
-    p.body.appendChild(Group(null, [{ title: 'Confirmations de lecture', toggle: { on: st.readReceipts !== false, onchange: v => this.save({ readReceipts: v }) } }, { title: 'Masquer mon numéro', toggle: { on: st.hideNumber, onchange: v => this.save({ hideNumber: v }) } }], 'Avec le numéro masqué, vos appels s\'affichent « Numéro masqué ».'));
+    p.body.appendChild(Group(null, [{ title: 'Confirmations de lecture', toggle: { on: st.readReceipts !== false, onchange: v => this.save({ readReceipts: v }) } }, (S.config.limits || {}).hideNumber === false ? null : { title: 'Masquer mon numéro', toggle: { on: st.hideNumber, onchange: v => this.save({ hideNumber: v }) } }], 'Avec le numéro masqué, vos appels s\'affichent « Numéro masqué ».'));
     const blocked = S.contactList.filter(c => c.blocked);
     p.body.appendChild(Group('Contacts bloqués', blocked.length ? blocked.map(c => ({ left: avatar(c.name, 34), title: c.name, sub: fmtNum(c.number), onclick: () => ActionSheet(c.name, [{ label: 'Débloquer', onclick: async () => { await rpc('contactFlag', c.id, 'blocked', false); await Core.reloadContacts(); p.body.parentNode && (clear(p.body), this.privacy(p)); } }]) })) : [{ title: 'Aucun contact bloqué' }]));
   },

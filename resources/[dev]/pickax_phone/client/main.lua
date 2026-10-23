@@ -1,19 +1,17 @@
-ESX = exports['es_extended']:getSharedObject()
-
 Phone = { open = false, loaded = false, typing = false, inCall = false, ringing = false, camera = false }
 local prop, animDict, animName
 
-local function hasPhone()
-    if not Config.RequireItem then return true end
-    local ok, n = pcall(function() return exports.ox_inventory:Search('count', Config.Item) end)
-    return ok and (n or 0) > 0
-end
+local function hasPhone(force) return Bridge.HasPhone(force) end
 Phone.HasPhone = hasPhone
 
 local function canUse()
     local ped = PlayerPedId()
-    if IsPedDeadOrDying(ped, true) or IsPedRagdoll(ped) or IsPedCuffed(ped) or IsPedBeingStunned(ped, 0) then return false end
-    if LocalPlayer.state.isDead or LocalPlayer.state.invBusy then return false end
+    local R = Config.Restrictions or {}
+    if R.dead ~= false and (IsPedDeadOrDying(ped, true) or Bridge.IsDead()) then return false end
+    if R.ragdoll ~= false and (IsPedRagdoll(ped) or IsPedBeingStunned(ped, 0)) then return false end
+    if R.cuffed ~= false and Bridge.IsCuffed() then return false end
+    if R.inVehicleDriver and IsPedInAnyVehicle(ped, false) and GetPedInVehicleSeat(GetVehiclePedIsIn(ped, false), -1) == ped and GetEntitySpeed(GetVehiclePedIsIn(ped, false)) > 3.0 then return false end
+    if LocalPlayer.state.invBusy then return false end
     return true
 end
 
@@ -73,7 +71,7 @@ end
 
 function Phone.Open()
     if Phone.open then return end
-    if not hasPhone() then ESX.ShowNotification('Vous n\'avez pas de téléphone.') return end
+    if not hasPhone(true) then Bridge.Notify('Vous n\'avez pas de téléphone.') return end
     if not canUse() then return end
     if not Phone.loaded and not sendInit() then return end
     Phone.open = true
@@ -103,6 +101,7 @@ RegisterKeyMapping(Config.Command, 'Ouvrir le téléphone (' .. Config.Brand .. 
 AddEventHandler('ox_inventory:usedItem', function(name)
     if Config.UseItem and name == Config.Item then Phone.Toggle() end
 end)
+RegisterNetEvent('aura:useItem', function() if Config.UseItem then Phone.Toggle() end end)   -- ESX / QBCore / qs-inventory
 
 -- Fermeture automatique : mort, menotté, ragdoll, perte de l'objet
 CreateThread(function()
@@ -176,7 +175,7 @@ AddEventHandler('onResourceStop', function(res)
     end
 end)
 
-RegisterNetEvent('esx:onPlayerLogout', function() Phone.loaded = false; Phone.Close() end)
+Bridge.OnLogout(function() Phone.loaded = false; Phone.Close() end)
 
 exports('Open', Phone.Open)
 exports('Close', Phone.Close)

@@ -74,6 +74,7 @@ const Messages = {
       if (inp.value.replace(/\D/g, '').length >= 3) { to.add(inp.value.replace(/\D/g, '')); inp.value = ''; }
       const nums = [...to]; if (!nums.length) { Toast('Choisissez un destinataire', 'warning'); return; }
       if (nums.length === 1) { ctx.pop(); Messages.openWith(nums[0]); return; }
+      if ((S.config.limits || {}).groups === false) { Toast('Les groupes sont désactivés', 'warning'); return; }
       const name = await Prompt('Nom du groupe', null, { placeholder: 'Groupe' }); if (name === null) return;
       const cid = await rpc('groupCreate', name || 'Groupe', nums);
       if (!cid) { Toast(rpc.err || 'Impossible de créer le groupe', 'warning'); return; }
@@ -146,10 +147,11 @@ const Messages = {
       if (!r || !r.ok) { Toast((r && r.error) || rpc.err || 'Message non envoyé', 'warning'); return; }
       if (!c.id) { c.id = r.conv; }
     }
+    const LIM = S.config.limits || {};
     const attachMenu = () => ActionSheet('Joindre', [
-      { label: '📷  Photo de la galerie', onclick: () => Messages.pickPhoto(url => send({ kind: 'image', body: url })) },
-      { label: '🔗  Image par lien', onclick: async () => { const u = await Prompt('Lien de l\'image', null, { placeholder: 'https://…' }); if (u && /^https?:/.test(u)) send({ kind: 'image', body: u }); } },
-      { label: '📍  Ma position', onclick: async () => { const p = await post('position'); if (p) send({ kind: 'location', body: 'Position', meta: { x: p.x, y: p.y, label: p.street || 'Position' } }); } },
+      LIM.messageImages === false ? null : { label: '📷  Photo de la galerie', onclick: () => Messages.pickPhoto(url => send({ kind: 'image', body: url })) },
+      LIM.messageImages === false ? null : { label: '🔗  Image par lien', onclick: async () => { const u = await Prompt('Lien de l\'image', null, { placeholder: 'https://…' }); if (u && /^https?:/.test(u)) send({ kind: 'image', body: u }); } },
+      LIM.messageLocation === false ? null : { label: '📍  Ma position', onclick: async () => { const p = await post('position'); if (p) send({ kind: 'location', body: 'Position', meta: { x: p.x, y: p.y, label: p.street || 'Position' } }); } },
       { label: '👤  Un contact', onclick: async () => { const k = await pickContact(); if (k) send({ kind: 'contact', body: k.name, meta: { name: k.name, number: k.number } }); } },
       { label: '😀  Emoji', onclick: () => { Sheet({ title: 'Emoji', render: (b, close) => { const g = h('div', { style: 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:10px 16px;font-size:28px;text-align:center' }, EMOJI_PICK.map(e => h('div', { style: 'cursor:pointer', onclick: () => { input.value += e; sendBtn.classList.remove('hidden'); close(); input.focus(); } }, e))); b.appendChild(g); } }); } },
     ]);

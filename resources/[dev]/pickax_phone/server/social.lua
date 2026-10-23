@@ -9,8 +9,8 @@ local function acctByHandle(app, handle)
 end
 
 local function isVerifiedJob(src)
-    local x = ESX.GetPlayerFromId(src)
-    return x and x.job and Config.Social.verifiedJobs[x.job.name] or false
+    local j = Bridge.Job(src)
+    return j and Config.Social.verifiedJobs[j.name] or false
 end
 
 local function notify(identifier, app, title, body)

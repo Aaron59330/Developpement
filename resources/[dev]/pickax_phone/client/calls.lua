@@ -1,23 +1,16 @@
--- Appels vocaux (pma-voice) et réponse rapide hors interface
-local channel = 0
+-- Appels vocaux (pma-voice, mumble-voip, saltychat ou hooks perso) et réponse rapide hors interface
 local muted = false
-
-local function setChannel(id)
-    channel = id
-    local ok = pcall(function() exports[Config.Calls.voiceResource]:setCallChannel(id) end)
-    if not ok and Config.Debug then print('^3[pickax_phone] ' .. Config.Calls.voiceResource .. ' introuvable : pas de voix pour les appels^7') end
-end
 
 RegisterNetEvent('aura:client:callConnect', function(d)
     Phone.inCall = true; Phone.ringing = false
     muted = false
-    setChannel(d.channel)
+    Bridge.VoiceStart(d.channel, d.peer)
     Phone.UpdateAnim()
 end)
 
 RegisterNetEvent('aura:client:callEnd', function()
     Phone.inCall = false; Phone.ringing = false
-    setChannel(0)
+    Bridge.VoiceStop()
     if muted then muted = false; NetworkSetVoiceActive(true) end
     Phone.UpdateAnim()
 end)

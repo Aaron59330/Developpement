@@ -1,25 +1,14 @@
 -- Banque, factures, crypto, annonces (marché), mails
-local ACC = Config.Bank.account
-
 local function logTx(identifier, kind, amount, other, label)
     MySQL.insert('INSERT INTO aura_bank_tx (identifier, kind, amount, other, label, created) VALUES (?,?,?,?,?,?)', { identifier, kind, amount, other and Aura.Clamp(other, 80) or nil, label and Aura.Clamp(label, 120) or nil, Aura.Now() })
 end
 Aura.LogTx = logTx
 
-local function balanceOf(src)
-    local x = ESX.GetPlayerFromId(src)
-    if not x then return 0, 0 end
-    return x.getAccount(ACC).money, x.getMoney()
-end
-
-local function addOffline(identifier, delta)
-    -- ESX stocke les comptes dans users.accounts (JSON)
-    local row = MySQL.single.await('SELECT accounts FROM users WHERE identifier = ?', { identifier })
-    if not row then return false end
-    local acc = Aura.Unjson(row.accounts, {})
-    acc[ACC] = (tonumber(acc[ACC]) or 0) + delta
-    MySQL.update.await('UPDATE users SET accounts = ? WHERE identifier = ?', { json.encode(acc), identifier })
-    return true
+local function balanceOf(src) return Bridge.Money(src, 'bank'), Bridge.Money(src, 'cash') end
+function Aura.CreditBank(identifier, amount, reason)
+    local src = Aura.src[identifier]
+    if src then return Bridge.AddMoney(src, 'bank', amount, reason) end
+    return Bridge.AddMoneyOffline(identifier, 'bank', amount)
 end
 
 lib.callback.register('aura:bank', function(src)
@@ -39,13 +28,10 @@ lib.callback.register('aura:bankTransfer', function(src, number, amount, label)
     if amount > Config.Bank.maxTransfer then return { ok = false, error = 'Montant maximal dépassé' } end
     local tid = Aura.byNumber[number]
     if not tid or tid == id then return { ok = false, error = 'Destinataire introuvable' } end
-    local x = ESX.GetPlayerFromId(src)
     local fee = math.floor(amount * (Config.Bank.transferFee or 0) / 100)
-    if not x or x.getAccount(ACC).money < amount + fee then return { ok = false, error = 'Solde insuffisant' } end
-    x.removeAccountMoney(ACC, amount + fee)
-    local tsrc = Aura.src[tid]
-    local tx = tsrc and ESX.GetPlayerFromId(tsrc)
-    if tx then tx.addAccountMoney(ACC, amount) else addOffline(tid, amount) end
+    if Bridge.Money(src, 'bank') < amount + fee then return { ok = false, error = 'Solde insuffisant' } end
+    if not Bridge.RemoveMoney(src, 'bank', amount + fee, 'Aura : virement') then return { ok = false, error = 'Virement refusé' } end
+    Aura.CreditBank(tid, amount, 'Aura : virement reçu')
     label = Aura.Clamp(label, 100)
     local myName = Aura.Name(id)
     logTx(id, 'out', -(amount + fee), Aura.FormatNumber(number), label ~= '' and label or 'Virement')
@@ -59,13 +45,10 @@ lib.callback.register('aura:billPay', function(src, bid)
     local id = Aura.ident[src]; if not id then return { ok = false } end
     local b = MySQL.single.await("SELECT id, issuer, society, amount, reason FROM aura_bills WHERE id = ? AND identifier = ? AND status = 'open'", { tonumber(bid) or 0, id })
     if not b then return { ok = false, error = 'Facture introuvable' } end
-    local x = ESX.GetPlayerFromId(src)
-    if not x or x.getAccount(ACC).money < b.amount then return { ok = false, error = 'Solde insuffisant' } end
-    x.removeAccountMoney(ACC, b.amount)
+    if Bridge.Money(src, 'bank') < b.amount then return { ok = false, error = 'Solde insuffisant' } end
+    if not Bridge.RemoveMoney(src, 'bank', b.amount, 'Aura : facture') then return { ok = false, error = 'Paiement refusé' } end
     MySQL.update.await("UPDATE aura_bills SET status = 'paid' WHERE id = ?", { b.id })
-    if b.society and b.society ~= '' then
-        TriggerEvent('esx_addonaccount:getSharedAccount', 'society_' .. b.society, function(acc) if acc then acc.addMoney(b.amount) end end)
-    end
+    if b.society and b.society ~= '' then Bridge.SocietyAdd(b.society, b.amount, b.reason or 'Facture') end
     logTx(id, 'bill', -b.amount, b.issuer, b.reason)
     local bank, cash = balanceOf(src)
     return { ok = true, bank = bank, cash = cash }
@@ -126,7 +109,6 @@ end)
 
 lib.callback.register('aura:cryptoTrade', function(src, coin, side, value, mode)
     local id = Aura.ident[src]; if not id or not coins[coin] then return { ok = false } end
-    local x = ESX.GetPlayerFromId(src); if not x then return { ok = false } end
     local price = prices[coin]
     value = tonumber(value) or 0
     if value <= 0 then return { ok = false, error = 'Montant invalide' } end
@@ -135,9 +117,9 @@ lib.callback.register('aura:cryptoTrade', function(src, coin, side, value, mode)
         local fiat = mode == 'units' and value * price or value
         fiat = math.floor(fiat * 100) / 100
         if fiat < 1 then return { ok = false, error = 'Minimum 1 $' } end
-        if x.getAccount(ACC).money < fiat then return { ok = false, error = 'Solde insuffisant' } end
+        if Bridge.Money(src, 'bank') < math.ceil(fiat) then return { ok = false, error = 'Solde insuffisant' } end
         local units = (fiat * (1 - feeRate)) / price
-        x.removeAccountMoney(ACC, math.ceil(fiat))
+        if not Bridge.RemoveMoney(src, 'bank', math.ceil(fiat), 'Aura : achat crypto') then return { ok = false, error = 'Ordre refusé' } end
         MySQL.query.await('INSERT INTO aura_crypto (identifier, coin, amount, invested) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount), invested = invested + VALUES(invested)', { id, coin, units, fiat })
         logTx(id, 'crypto', -math.ceil(fiat), coin, ('Achat %s'):format(coin))
     elseif side == 'sell' then
@@ -147,7 +129,7 @@ lib.callback.register('aura:cryptoTrade', function(src, coin, side, value, mode)
         local fiat = units * price * (1 - feeRate)
         local ratio = units / row.amount
         MySQL.update.await('UPDATE aura_crypto SET amount = amount - ?, invested = invested * (1 - ?) WHERE identifier = ? AND coin = ?', { units, ratio, id, coin })
-        x.addAccountMoney(ACC, math.floor(fiat))
+        Bridge.AddMoney(src, 'bank', math.floor(fiat), 'Aura : vente crypto')
         logTx(id, 'crypto', math.floor(fiat), coin, ('Vente %s'):format(coin))
     else return { ok = false } end
     return { ok = true }
@@ -183,9 +165,7 @@ lib.callback.register('aura:marketCreate', function(src, d)
     local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_market WHERE identifier = ? AND sold = 0', { id }) or 0
     if n >= Config.Market.maxActive then return false, 'Limite d\'annonces atteinte' end
     if Config.Market.fee > 0 then
-        local x = ESX.GetPlayerFromId(src)
-        if not x or x.getAccount(ACC).money < Config.Market.fee then return false, 'Frais de publication insuffisants' end
-        x.removeAccountMoney(ACC, Config.Market.fee)
+        if not Bridge.RemoveMoney(src, 'bank', Config.Market.fee, 'Aura : annonce') then return false, 'Frais de publication insuffisants' end
     end
     local imgs = {}
     for _, u in ipairs(d.images or {}) do if type(u) == 'string' and u:match('^https?://') and #imgs < Config.Market.maxImages then imgs[#imgs + 1] = Aura.Clamp(u, 500) end end

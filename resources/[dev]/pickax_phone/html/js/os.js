@@ -402,7 +402,7 @@ const OS = {
     const stage = $('#stage'); stage.classList.remove('hidden'); requestAnimationFrame(() => stage.classList.add('open'));
     $('#peek').innerHTML = '';
     clearTimeout(this.lockTimer);
-    if (!this.started) { this.started = true; Screen().appendChild(h('div.boot', h('b', (S.config.brand || 'Aura').toUpperCase()))); setTimeout(() => $$('.boot').forEach(b => b.remove()), 1900); }
+    if (!this.started) { this.started = true; if (!S.config.ui || S.config.ui.showBootLogo !== false) Screen().appendChild(h('div.boot', h('b', (S.config.brand || 'Aura').toUpperCase()))); setTimeout(() => $$('.boot').forEach(b => b.remove()), 1900); }
     this.drawStatus(); this.drawLockNotifs(); Bus.emit('show');
   },
   hide() {
@@ -415,8 +415,16 @@ const OS = {
     Bus.emit('hide');
   },
   fit() {
-    const k = Math.min(1, (window.innerHeight - 24) / 864);
-    $('#stage').style.setProperty('--scale', String(k));
+    const u = (S.config && S.config.ui) || {};
+    const k = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - 24) / 864));
+    const st = $('#stage');
+    st.style.setProperty('--scale', String(k));
+    const left = u.side === 'left';
+    st.style.right = left ? 'auto' : (u.marginX == null ? 28 : u.marginX) + 'px';
+    st.style.left = left ? (u.marginX == null ? 28 : u.marginX) + 'px' : 'auto';
+    st.style.bottom = (u.marginY == null ? -8 : u.marginY) + 'px';
+    st.style.transformOrigin = left ? 'bottom left' : 'bottom right';
+    const peek = $('#peek'); if (peek) { peek.style.right = left ? 'auto' : '38px'; peek.style.left = left ? '38px' : 'auto'; }
   },
 };
 window.addEventListener('resize', () => OS.fit());

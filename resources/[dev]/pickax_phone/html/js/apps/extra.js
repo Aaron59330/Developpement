@@ -85,9 +85,9 @@ const Biz = {
     pg.body.appendChild(h('div.bankcard', { style: 'background:linear-gradient(135deg,#232526,#414345)' }, h('small', d.gradeLabel), h('div.amount', { style: 'font-size:30px' }, d.label), d.money != null ? h('div', { style: 'margin-top:12px;opacity:.9' }, 'Compte société : ', h('b', money(d.money))) : h('div', { style: 'margin-top:12px;opacity:.7;font-size:14px' }, d.team.length + ' collègue' + (d.team.length > 1 ? 's' : '') + ' en ligne')));
     pg.body.appendChild(Group(null, [
       d.canBill ? { icon: 'receipt', color: '#ff9f0a', title: 'Facturer un client', sub: 'Facture payable dans l\'app Banque du client', chev: true, onclick: () => this.bill() } : null,
-      d.isBoss ? { icon: 'userPlus', color: '#30d158', title: 'Recruter', sub: 'Personne à proximité', chev: true, onclick: () => this.hire() } : null,
+      d.isBoss && d.canManage !== false ? { icon: 'userPlus', color: '#30d158', title: 'Recruter', sub: 'Personne à proximité', chev: true, onclick: () => this.hire() } : null,
     ].filter(Boolean)));
-    pg.body.appendChild(Group('Équipe en ligne', d.team.map(m => ({ left: avatar(m.name, 36), title: m.name + (m.me ? ' (vous)' : ''), sub: m.gradeLabel, chev: d.isBoss && !m.me, onclick: () => d.isBoss && !m.me && this.member(m) }))));
+    pg.body.appendChild(Group('Équipe en ligne', d.team.map(m => ({ left: avatar(m.name, 36), title: m.name + (m.me ? ' (vous)' : ''), sub: m.gradeLabel, chev: d.isBoss && d.canManage !== false && !m.me, onclick: () => d.isBoss && d.canManage !== false && !m.me && this.member(m) }))));
   },
   async pickNearby(title) {
     const near = (await rpc('bizNearby')) || [];

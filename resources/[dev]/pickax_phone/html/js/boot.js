@@ -4,6 +4,7 @@ async function bootPhone(data) {
   S.battery = data.battery == null ? 100 : data.battery; S.config = data.config || {}; S.charging = false;
   S.lines = S.config.lines || []; S.contactList = data.contacts || []; S.contacts = {}; S.contactList.forEach(c => { S.contacts[String(c.number).replace(/\D/g, '')] = c; });
   if (!S.settings.notifOff) S.settings.notifOff = {}; if (!S.settings.badgeOff) S.settings.badgeOff = {};
+  (S.catalog || []).forEach(c => { const d = Apps.get(c.id); if (!d) return; if (!d.base) d.base = { name: d.name, grad: d.grad, icon: d.icon }; d.name = c.name || d.base.name; d.grad = (c.grad && c.grad.length === 2) ? c.grad : d.base.grad; d.icon = (c.icon && ICONS[c.icon]) ? c.icon : d.base.icon; });
   S.locked = true; S.notifs = []; S.badges = {}; OS.running = {}; OS.current = null; OS.order = [];
   OS.fit(); OS.build();
   await pollGameTime(); OS.drawStatus(); OS.drawLock();

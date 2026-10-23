@@ -22,6 +22,5 @@ exports('SetBattery', function(src, level)
 end)
 exports('HasPhone', function(src)
     if not Config.RequireItem then return true end
-    local ok, n = pcall(function() return exports.ox_inventory:Search(src, 'count', Config.Item) end)
-    return ok and (n or 0) > 0
+    return Bridge.HasItem(src, Config.Item)
 end)

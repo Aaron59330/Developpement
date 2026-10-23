@@ -114,7 +114,7 @@ CreateThread(function()
 end)
 
 -- ═════════ divers ═════════
-RegisterNUICallback('notifyGame', function(d, cb) if d and d.text then ESX.ShowNotification(tostring(d.text)) end cb(1) end)
+RegisterNUICallback('notifyGame', function(d, cb) if d and d.text then Bridge.Notify(tostring(d.text)) end cb(1) end)
 RegisterNUICallback('copy', function(d, cb) cb(1) end)
 RegisterNUICallback('usePowerbank', function(_, cb) cb(lib.callback.await('aura:usePowerbank', false)) end)
 RegisterNUICallback('gameTime', function(_, cb) cb({ h = GetClockHours(), m = GetClockMinutes(), d = GetClockDayOfWeek(), day = GetClockDayOfMonth(), mo = GetClockMonth() + 1, y = GetClockYear() }) end)
@@ -157,14 +157,7 @@ RegisterNUICallback('vitals', function(_, cb)
     local ped = PlayerPedId()
     local health = math.max(0, math.min(100, math.floor((GetEntityHealth(ped) - 100) / math.max(1, GetEntityMaxHealth(ped) - 100) * 100)))
     local out = { health = health, armor = GetPedArmour(ped), stamina = math.floor(GetPlayerSprintStaminaRemaining(PlayerId())), speed = math.floor(GetEntitySpeed(ped) * 3.6) }
-    local got = 0
-    for _, s in ipairs({ 'hunger', 'thirst' }) do
-        pcall(function()
-            TriggerEvent('esx_status:getStatus', s, function(st) if st then out[s] = math.floor(st.getPercent()) end got = got + 1 end)
-        end)
-    end
-    local t = 0
-    while got < 2 and t < 15 do Wait(20); t = t + 1 end
+    for k, v in pairs(Bridge.Status()) do out[k] = v end
     cb(out)
 end)
 

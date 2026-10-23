@@ -2,10 +2,30 @@
 
 Smartphone complet pour ESX (interface type smartphone moderne, marque « Aura »). 100 % français, sans dépendance payante.
 
+## Compatibilité : ESX · QBCore · Qbox · standalone
+Le téléphone détecte tout seul ce qui tourne sur ton serveur (`config.lua`, section « COMPATIBILITÉ »). Il n'appelle jamais ESX ou QBCore directement : tout passe par `bridge/server.lua` et `bridge/client.lua`.
+
+| Élément | Pris en charge | Réglage |
+|---|---|---|
+| Framework | ESX (legacy), QBCore, Qbox, standalone (sans framework : pas de métiers ni d'argent) | `Config.Framework` |
+| Inventaire | ox_inventory, qb-inventory / ps / lj, qs-inventory, inventaire ESX natif, aucun | `Config.Inventory` |
+| Voix des appels | pma-voice, mumble-voip, saltychat, ou fonctions perso (`custom`) | `Config.Voice` |
+| Notifications | ox_lib, ESX, QBCore, Qbox, natives, ou fonction perso | `Config.Notify` |
+| Comptes société | Job Builder, esx_addonaccount, qb-banking, qb-management, Renewed-Banking, okokBanking, ou fonctions perso | `Config.Society` |
+| Faim / soif | esx_status, métadonnées QBCore, ou fonction perso | `Config.Status` |
+| Véhicules possédés | `owned_vehicles` (ESX), `player_vehicles` (QBCore / Qbox), ou tes propres tables | `Config.Database.vehicles` |
+| Métiers joignables | Job Builder, métiers du framework, ou liste fixe | `Config.JobLines.source` |
+
+**Objet téléphone** : crée l'objet `phone` dans ton inventaire (ox_inventory : `data/items.lua`, qb-core : `shared/items.lua`, ESX : table `items`). Le nom se change dans `Config.Item`. Pour essayer sans objet : `Config.RequireItem = false`.
+
+**Qbox / QBCore** : les métiers (`jobs`), grades et le compte `bank` / `cash` sont lus automatiquement. Si ton serveur utilise d'autres noms de comptes, règle `Config.Accounts`.
+
+**Autre voix, autre inventaire, autre banque** : renseigne les fonctions de `Config.Hooks` (voiceStart, societyAdd, hasItem…).
+
 ## Installation
-1. Dépendances : `es_extended`, `oxmysql`, `ox_lib`, `ox_inventory` (objet `phone`), `pma-voice` (appels vocaux).
+1. Dépendances : `oxmysql` et `ox_lib` (obligatoires). Selon ton serveur : un framework (ESX / QBCore / Qbox), un inventaire et une ressource vocale (pma-voice…) : détectés automatiquement.
 2. Les tables `aura_*` sont créées automatiquement au premier démarrage (aucun SQL à importer).
-3. `ensure pickax_phone` (déjà couvert par `ensure [dev]`). **Ne pas lancer lb-phone en même temps.**
+3. `ensure pickax_phone` **après** ton framework, ton inventaire et ta voix (déjà le cas avec `ensure [dev]` ici). **Ne pas lancer lb-phone en même temps.**
 4. Photos / Appareil photo : installer `screenshot-basic` et renseigner `Config.Camera` (webhook Discord ou FiveManage).
 5. Réglages : `config.lua` (numéros, applications, banque, crypto, services, batterie, radios…).
 

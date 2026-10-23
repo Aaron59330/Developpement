@@ -39,8 +39,8 @@ end)
 -- ═════════════════ ACTUALITÉS ═════════════════
 local function canPost(src)
     if Config.News.adminCanPost and Aura.IsAdmin(src) then return true, 'Rédaction' end
-    local x = ESX.GetPlayerFromId(src)
-    if x and x.job then for _, j in ipairs(Config.News.jobs) do if j == x.job.name then return true, x.job.label end end end
+    local j = Bridge.Job(src)
+    if j then for _, n in ipairs(Config.News.jobs) do if n == j.name then return true, j.label end end end
     return false
 end
 
@@ -84,15 +84,7 @@ local function saveState()
 end
 
 local function creditBank(identifier, amount)
-    local src = Aura.src[identifier]
-    local x = src and ESX.GetPlayerFromId(src)
-    if x then x.addAccountMoney(Config.Bank.account, amount) return true end
-    local row = MySQL.single.await('SELECT accounts FROM users WHERE identifier = ?', { identifier })
-    if not row then return false end
-    local acc = Aura.Unjson(row.accounts, {})
-    acc[Config.Bank.account] = (tonumber(acc[Config.Bank.account]) or 0) + amount
-    MySQL.update.await('UPDATE users SET accounts = ? WHERE identifier = ?', { json.encode(acc), identifier })
-    return true
+    return Aura.CreditBank(identifier, amount, 'Aura : loto')
 end
 
 local function parseNums(s) local t = {} for n in tostring(s):gmatch('%d+') do t[#t + 1] = tonumber(n) end return t end
@@ -154,7 +146,6 @@ end)
 
 lib.callback.register('aura:lotoBuy', function(src, nums)
     local id = Aura.ident[src]; if not id or not L.enabled then return false end
-    local x = ESX.GetPlayerFromId(src); if not x then return false end
     local chosen, seen = {}, {}
     if type(nums) == 'table' and #nums > 0 then
         for _, n in ipairs(nums) do n = math.floor(tonumber(n) or 0); if n >= 1 and n <= L.max and not seen[n] then seen[n] = true; chosen[#chosen + 1] = n end end
@@ -167,8 +158,7 @@ lib.callback.register('aura:lotoBuy', function(src, nums)
     table.sort(chosen)
     local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_loto_tickets WHERE identifier = ? AND draw = ?', { id, state.draw }) or 0
     if n >= 10 then return false, 'Maximum 10 tickets par tirage' end
-    if x.getAccount(Config.Bank.account).money < L.price then return false, 'Solde insuffisant' end
-    x.removeAccountMoney(Config.Bank.account, L.price)
+    if not Bridge.RemoveMoney(src, 'bank', L.price, 'Aura : ticket de loto') then return false, 'Solde insuffisant' end
     Aura.LogTx(id, 'out', -L.price, 'Loto', 'Ticket de loto')
     state.pool = state.pool + math.floor(L.price * L.sharePool)
     MySQL.insert.await('INSERT INTO aura_loto_tickets (identifier, nums, draw, created) VALUES (?,?,?,?)', { id, table.concat(chosen, ' '), state.draw, Aura.Now() })

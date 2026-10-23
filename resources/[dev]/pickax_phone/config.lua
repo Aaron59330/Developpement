@@ -1,12 +1,95 @@
 Config = {}
 
+-- ╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
+-- ║  AURA — COMPATIBILITÉ : fonctionne sur ESX, QBCore, Qbox, ou sans framework (standalone)      ║
+-- ║  Tout est en « auto » par défaut : le téléphone détecte ce qui tourne sur ton serveur.        ║
+-- ║  Change une valeur seulement si la détection ne te convient pas.                              ║
+-- ╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+Config.Framework = 'auto'      -- 'auto' | 'esx' | 'qb' | 'qbox' | 'standalone'
+Config.Inventory = 'auto'      -- 'auto' | 'ox' (ox_inventory) | 'qb' (qb/ps/lj-inventory) | 'qs' (qs-inventory) | 'esx' (inventaire ESX natif) | 'none'
+Config.Voice     = 'auto'      -- appels vocaux : 'auto' | 'pma-voice' | 'mumble-voip' | 'saltychat' | 'custom' | 'none'
+Config.Notify    = 'ox_lib'    -- notifications en jeu : 'ox_lib' | 'esx' | 'qb' | 'qbox' | 'native' | 'custom'
+Config.Status    = 'auto'      -- faim / soif de l'app Santé : 'auto' | 'esx_status' | 'qb' | 'none' | 'custom'
+Config.Society   = 'auto'      -- compte société (factures, app Entreprise) :
+                               --   'auto' | 'jobbuilder' | 'esx_addonaccount' | 'qb-banking' | 'qb-management' | 'renewed' | 'okok' | 'none' | 'custom'
+
+-- Noms des comptes du framework. 'auto' = valeur habituelle (ESX : bank / money · QBCore : bank / cash)
+Config.Accounts = { bank = 'auto', cash = 'auto' }
+
+-- Tables SQL utilisées (hors tables aura_*). 'auto' = réglage habituel du framework détecté.
+-- Pour une base personnalisée, remplace 'auto' par un tableau, exemple :
+--   Config.Database.vehicles = { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', model = nil, stored = 'stored', storedValue = 1 }
+--   Config.Database.players  = { table = 'users', identifier = 'identifier', money = 'accounts', moneyFormat = 'esx' }   -- argent hors ligne
+Config.Database = { vehicles = 'auto', players = 'auto' }
+
+-- Groupes / permissions administrateur (commandes /phone_*, modération des réseaux, suppression d'annonces…)
+Config.Admin = {
+    groups = { 'admin', 'superadmin', 'god', 'mod' },   -- ESX : groupes · QBCore / Qbox : permissions
+    ace    = 'aura.admin',                              -- ou permission ACE : add_ace group.admin aura.admin allow
+}
+
+-- Fonctions personnalisées (pour les ressources non gérées en standard). Laisse nil si inutile.
+-- Elles s'exécutent côté serveur, sauf notify / voiceStart / voiceStop / status qui s'exécutent côté client.
+Config.Hooks = {
+    societyAdd     = nil,   -- function(jobName, amount, reason) end
+    societyBalance = nil,   -- function(jobName) return 0 end
+    notify         = nil,   -- function(message) end                      (Config.Notify = 'custom')
+    voiceStart     = nil,   -- function(channel, peerServerId) end        (Config.Voice = 'custom')
+    voiceStop      = nil,   -- function(channel, peerServerId) end
+    status         = nil,   -- function() return { hunger = 0-100, thirst = 0-100 } end   (Config.Status = 'custom')
+    hasItem        = nil,   -- function(source, itemName) return count end                (inventaire non géré)
+}
+
+-- ╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
+-- ║  PERSONNALISATION GÉNÉRALE                                                                    ║
+-- ╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+-- Position et taille du téléphone à l'écran
+Config.UI = {
+    side     = 'right',    -- 'right' | 'left'
+    marginX  = 28,         -- distance au bord (px)
+    marginY  = -8,         -- distance au bas de l'écran (px, négatif = légèrement sous l'écran)
+    maxScale = 1.0,        -- taille maximale (1.0 = 100 %)
+    minScale = 0.55,       -- taille minimale sur petits écrans
+    showBootLogo = true,   -- animation de démarrage à la première ouverture
+}
+
+-- Réglages donnés à chaque nouveau téléphone (le joueur peut ensuite les changer dans Réglages)
+Config.Defaults = {
+    wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = '#0a84ff', ringtone = 'Marimba', texttone = 'Cristal',
+    volume = 70, brightness = 100, textSize = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
+    dnd = false, vibrate = true,
+}
+
+-- Quand le joueur ne peut PAS sortir son téléphone
+Config.Restrictions = {
+    dead     = true,       -- mort / à terre
+    cuffed   = true,       -- menotté
+    ragdoll  = true,       -- au sol / assommé
+    inVehicleDriver = false, -- true : interdit au conducteur d'un véhicule en mouvement
+}
+
+-- Limites et verrous divers
+Config.Limits = {
+    contacts       = 500,
+    callLogDays    = 0,    -- purge de l'historique d'appels (0 = jamais)
+    messageImages  = true, -- autoriser les images dans les messages
+    messageLocation = true,
+    groups         = true, -- autoriser les groupes de messages
+    hideNumber     = true,
+}
+
+-- Règles d'accès à une application : ajoute dans Config.Apps  jobs = { 'police' }  (seuls ces métiers la voient)
+-- ou  item = 'usb_key'  (il faut cet objet), ou  grade = 2  (grade minimum, avec jobs).
+
 -- ═══════════════════════════ GÉNÉRAL ═══════════════════════════
 Config.Brand        = 'Aura'            -- nom affiché (écran de démarrage, À propos…)
 Config.Model        = 'Aura 15 Pro'     -- modèle affiché dans Réglages → Général → Informations
 Config.Command      = 'phone'           -- commande pour ouvrir/fermer le téléphone
 Config.Key          = 'F1'              -- touche par défaut (modifiable par le joueur dans les paramètres FiveM)
-Config.RequireItem  = true              -- true : il faut l'objet ci-dessous dans l'inventaire (ox_inventory)
-Config.Item         = 'phone'           -- nom de l'objet téléphone
+Config.RequireItem  = true              -- true : il faut l'objet ci-dessous dans l'inventaire
+Config.Item         = 'phone'           -- nom de l'objet téléphone (à créer dans ton inventaire si besoin)
 Config.UseItem      = true              -- true : utiliser l'objet ouvre aussi le téléphone
 Config.Debug        = false
 
@@ -21,7 +104,6 @@ Config.MailDomain = 'aura.mail'         -- adresse mail : prenom.nom@aura.mail
 -- ═══════════════════════════ APPELS ═══════════════════════════
 Config.Calls = {
     ringTimeout   = 30,                 -- secondes avant « appel manqué »
-    voiceResource = 'pma-voice',        -- résolution vocale (setCallChannel)
     channelBase   = 90000,              -- canal de départ pour les appels (évite les canaux radio)
     allowHidden   = true,               -- numéro masqué (*31# avant le numéro)
     price         = 0,                  -- prix par appel (compte bancaire), 0 = gratuit
@@ -70,7 +152,6 @@ Config.Social = {
 
 -- ═══════════════════════════ BANQUE & CRYPTO ═══════════════════════════
 Config.Bank = {
-    account       = 'bank',             -- compte ESX utilisé
     maxTransfer   = 5000000,
     transferFee   = 0,                  -- % de frais sur les virements
     historyLimit  = 80,
@@ -98,19 +179,38 @@ Config.Market = {
     expireDays = 14,
 }
 
--- ═══════════════════════════ LIGNES DES JOBS (Job Builder) ═══════════════════════════
--- Quand pickax_jobbuilder tourne, TOUS les jobs créés dans le builder deviennent des lignes joignables depuis l'app Services
--- (appel vocal + alerte avec position). Ils se règlent dans le Job Builder → job → carte « Téléphone des joueurs ».
--- Les jobs créés/modifiés apparaissent tout de suite, sans redémarrage.
+-- ═══════════════════════════ LIGNES DES MÉTIERS (app Services) ═══════════════════════════
+-- D'où viennent les métiers joignables par les joueurs ?
+--   'auto'       : le Job Builder s'il tourne (pickax_jobbuilder), sinon les métiers du framework (ESX / QBCore / Qbox)
+--   'jobbuilder' : uniquement les jobs du Job Builder (réglage dans le builder → carte « Téléphone des joueurs »)
+--   'framework'  : tous les métiers du framework (ESX jobs / QBCore jobs), réglés ci-dessous
+--   'config'     : seulement la liste fixe Config.Services plus bas
 Config.JobLines = {
-    enabled       = true,      -- false : on revient à la liste fixe Config.Services ci-dessous
-    voice         = true,      -- autorise les appels vocaux vers les jobs (le premier employé qui décroche)
-    keepStatic    = false,     -- true : garde aussi les services fixes de Config.Services en plus des jobs du builder
+    enabled       = true,
+    source        = 'auto',
+    voice         = true,      -- appels vocaux vers les métiers (le premier employé qui décroche)
+    keepStatic    = false,     -- true : garde aussi Config.Services en plus des métiers détectés
     ringTimeout   = 30,        -- secondes de sonnerie chez les employés
+    dutyOnly      = true,      -- framework : seuls les employés « en service » reçoivent les appels (si le framework gère le service)
+    -- Source 'framework' : filtre et réglages par métier
+    only          = {},        -- liste blanche ( { 'police', 'ambulance' } ). Vide = tous les métiers sauf « ignore »
+    ignore        = { 'unemployed', 'unemployed2' },
+    -- Réglages par métier : label, number (court), icon, color, mode ('both' | 'voice' | 'alert'), anon, minGrade, hint
+    jobs = {
+        police    = { number = '17', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?' },
+        sheriff   = { number = '', icon = 'shield', color = '#92400e', anon = true },
+        ambulance = { number = '15', icon = 'heart', color = '#ef4444' },
+        ems       = { number = '15', icon = 'heart', color = '#ef4444' },
+        mechanic  = { icon = 'wrench', color = '#f59e0b' },
+        mecano    = { icon = 'wrench', color = '#f59e0b' },
+        taxi      = { icon = 'car', color = '#eab308', type = 'taxi' },
+        realestate = { icon = 'home', color = '#14b8a6' },
+    },
+    default = { icon = 'briefcase', color = '#8b5cf6', mode = 'both', anon = false, minGrade = 0 },   -- métiers non listés ci-dessus
 }
 
 -- ═══════════════════════════ SERVICES (URGENCES, JOBS) ═══════════════════════════
--- Liste de secours, utilisée seulement si pickax_jobbuilder n'est pas démarré (ou Config.JobLines.keepStatic = true)
+-- Liste fixe, utilisée si Config.JobLines.source = 'config' (ou keepStatic = true)
 -- number : numéro composable au clavier ; jobs : métiers qui reçoivent l'alerte (en service)
 Config.Services = {
     { id = 'police',   label = 'Police',        number = '17',  icon = 'shield', color = '#2563eb', jobs = { 'police', 'sheriff' },           anon = true },
@@ -142,9 +242,11 @@ Config.Darkchat = {
     },
 }
 
--- ═══════════════════════════ ENTREPRISE (jobs du Job Builder) ═══════════════════════════
+-- ═══════════════════════════ ENTREPRISE (facturation, équipe, société) ═══════════════════════════
 Config.Business = {
     enabled       = true,
+    source        = 'auto',              -- 'auto' (Job Builder sinon framework) | 'jobbuilder' | 'framework'
+    allowFire     = true,                -- la direction peut licencier / promouvoir / recruter
     billDistance  = 6.0,                 -- distance max au client pour facturer
     maxBill       = 250000,
     billGrade     = 0,                   -- grade minimum pour facturer
@@ -156,7 +258,7 @@ Config.Taxi = { enabled = true, base = 15, ratePerKm = 45 }   -- estimation affi
 
 -- ═══════════════════════════ ACTUALITÉS ═══════════════════════════
 Config.News = {
-    jobs = { 'weazel', 'journalist', 'journaliste', 'news' },   -- noms de jobs (Job Builder) autorisés à publier
+    jobs = { 'weazel', 'journalist', 'journaliste', 'news' },   -- noms de métiers autorisés à publier
     adminCanPost = true,
     breakingToAll = true,                                      -- une info « urgente » notifie tous les joueurs
 }
@@ -186,6 +288,9 @@ Config.Radios = {
 -- ═══════════════════════════ APPLICATIONS ═══════════════════════════
 -- default = installée d'office ; store = visible dans l'App Store ; system = ne peut pas être désinstallée
 -- Pour retirer une app du téléphone : mets enabled = false.
+-- Options par app (facultatives) : name = 'Nom affiché', grad = { '#couleur1', '#couleur2' }, icon = 'nom-icône',
+--   jobs = { 'police' } (réservée à ces métiers), grade = 2 (grade minimum), item = 'nom_objet' (objet requis).
+-- L'ordre de cette liste = l'ordre des icônes sur l'écran d'accueil.
 Config.Apps = {
     { id = 'phone',     enabled = true, default = true,  system = true,  dock = true },
     { id = 'messages',  enabled = true, default = true,  system = true,  dock = true },
@@ -240,5 +345,4 @@ Config.Wallpapers = {
 -- ═══════════════════════════ SONNERIES (sons du navigateur NUI, générés en WebAudio) ═══════════════════════════
 Config.Ringtones = { 'Marimba', 'Cristal', 'Radar', 'Pulse', 'Classique', 'Silence' }
 
--- ═══════════════════════════ ADMIN ═══════════════════════════
-Config.Admin = { groups = { 'admin', 'superadmin' } }   -- commandes /phone_give, /phone_reset, /phone_number
+-- ═══════════════════════════ FIN ═══════════════════════════

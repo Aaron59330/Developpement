@@ -1,5 +1,3 @@
-ESX = exports['es_extended']:getSharedObject()
-
 Aura = {
     phones   = {},   -- [identifier] = données du téléphone
     byNumber = {},   -- [numéro]     = identifier
@@ -217,7 +215,8 @@ CreateThread(function()
     end
     MySQL.query('DELETE FROM aura_posts WHERE app = "snap" AND kind = "story" AND created < ?', { (os.time() - Config.Social.storyHours * 3600) * 1000 })
     MySQL.query('DELETE FROM aura_market WHERE created < ?', { (os.time() - Config.Market.expireDays * 86400) * 1000 })
-    for _, p in ipairs(ESX.GetExtendedPlayers()) do Aura.OnLoaded(p.source, p) end
+    Bridge.Wait()
+    for _, src in ipairs(Bridge.Players()) do Aura.OnLoaded(src) end
 end)
 
 -- ═════════════════ UTILITAIRES ═════════════════
@@ -240,27 +239,17 @@ end
 
 function Aura.Identifier(src)
     if Aura.ident[src] then return Aura.ident[src] end
-    local x = ESX.GetPlayerFromId(src)
-    return x and x.identifier or nil
+    return Bridge.Identifier(src)
 end
-function Aura.Xplayer(src) return ESX.GetPlayerFromId(src) end
 
 function Aura.Name(identifier)
     local s = Aura.src[identifier]
-    local x = s and ESX.GetPlayerFromId(s)
-    if x then return x.getName() end
-    local r = MySQL.single.await('SELECT firstname, lastname FROM users WHERE identifier = ?', { identifier })
-    if r then return ((r.firstname or '') .. ' ' .. (r.lastname or '')):gsub('^%s+', '') end
-    return 'Inconnu'
+    local n = s and Bridge.Name(s)
+    if n and n ~= '' then return n end
+    return Bridge.OfflineName(identifier) or 'Inconnu'
 end
 
-function Aura.IsAdmin(src)
-    local x = ESX.GetPlayerFromId(src)
-    if not x then return src == 0 end
-    local g = x.getGroup()
-    for _, a in ipairs(Config.Admin.groups) do if a == g then return true end end
-    return false
-end
+function Aura.IsAdmin(src) return Bridge.IsAdmin(src) end
 
 function Aura.FormatNumber(n)
     n = tostring(n or '')
@@ -280,6 +269,7 @@ local DEFAULT_SETTINGS = {
     vibrate = true, autoLock = 30, notifOff = {}, badgeOff = {}, readReceipts = true, focusMode = 'none', bold = false,
     reduceMotion = false, lang = 'fr',
 }
+for k, v in pairs(Config.Defaults or {}) do if DEFAULT_SETTINGS[k] ~= nil and type(v) == type(DEFAULT_SETTINGS[k]) then DEFAULT_SETTINGS[k] = v end end
 
 local function defaultApps()
     local t = {}
@@ -336,17 +326,18 @@ function Aura.SaveSettings(identifier)
     MySQL.update('UPDATE aura_phones SET settings = ?, apps = ?, battery = ? WHERE identifier = ?', { Aura.Json(p.settings), Aura.Json(p.apps), math.floor(p.battery), identifier })
 end
 
-function Aura.OnLoaded(src, xPlayer)
-    xPlayer = xPlayer or ESX.GetPlayerFromId(src)
-    if not xPlayer then return end
-    local id = xPlayer.identifier
+function Aura.OnLoaded(src)
+    local id = Bridge.Identifier(src)
+    if not id then return end
     Aura.src[id] = src; Aura.ident[src] = id
-    local p = Aura.EnsurePhone(id, xPlayer.getName())
+    local p = Aura.EnsurePhone(id, Bridge.Name(src))
     if p then TriggerEvent('aura:phoneLoaded', src, p.number) end
 end
 
-AddEventHandler('esx:playerLoaded', function(src, xPlayer) Aura.OnLoaded(src, xPlayer) end)
-AddEventHandler('esx:playerDropped', function(src) end)
+CreateThread(function()
+    Bridge.Wait()
+    Bridge.OnLoaded(function(src) SetTimeout(500, function() Aura.OnLoaded(src) end) end)
+end)
 AddEventHandler('playerDropped', function()
     local src = source
     local id = Aura.ident[src]
@@ -398,8 +389,7 @@ end)
 lib.callback.register('aura:usePowerbank', function(src)
     local id = Aura.ident[src]; local p = id and Aura.phones[id]
     if not p or not Config.Battery.powerbankItem then return false end
-    local ok = pcall(function() return exports.ox_inventory:RemoveItem(src, Config.Battery.powerbankItem, 1) end)
-    if not ok then return false end
+    if not Bridge.RemoveItem(src, Config.Battery.powerbankItem, 1) then return false end
     p.battery = 100
     TriggerClientEvent('aura:push', src, 'battery', { level = 100, charging = p.charging or false })
     return true
@@ -432,7 +422,7 @@ lib.callback.register('aura:contactSave', function(src, c)
         return c.id
     end
     local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_contacts WHERE owner = ?', { id })
-    if (n or 0) >= 500 then return false, 'Limite de contacts atteinte' end
+    if (n or 0) >= (Config.Limits.contacts or 500) then return false, 'Limite de contacts atteinte' end
     return MySQL.insert.await('INSERT INTO aura_contacts (owner, name, number, email, avatar, favorite, blocked, note) VALUES (?,?,?,?,?,?,?,?)',
         { id, name, number, email, avatar, c.favorite and 1 or 0, c.blocked and 1 or 0, note })
 end)
@@ -473,7 +463,7 @@ lib.callback.register('aura:appInstall', function(src, appId, install)
     if not p then return false end
     local def
     for _, a in ipairs(Config.Apps) do if a.id == appId and a.enabled then def = a end end
-    if not def then return false end
+    if not def or not Aura.AppAllowed(src, def, Bridge.Job(src)) then return false end
     local has = false
     for i, a in ipairs(p.apps) do if a == appId then has = i end end
     if install and not has then p.apps[#p.apps + 1] = appId
@@ -501,25 +491,47 @@ lib.callback.register('aura:pinCheck', function(src, pin)
     return tostring(pin) == tostring(p.settings.pin)
 end)
 
+-- Règles d'accès d'une application (Config.Apps : jobs / grade / item)
+function Aura.AppAllowed(src, app, job)
+    if app.jobs and #app.jobs > 0 then
+        local ok = false
+        for _, j in ipairs(app.jobs) do if job and job.name == j then ok = true end end
+        if not ok then return false end
+        if app.grade and (not job or job.grade < app.grade) then return false end
+    end
+    if app.item and app.item ~= '' and not Bridge.HasItem(src, app.item) then return false end
+    return true
+end
+
+local phoneCache = {}
+lib.callback.register('aura:hasPhone', function(src)
+    if not Config.RequireItem then return true end
+    return Bridge.HasItem(src, Config.Item)
+end)
+
 -- ═════════════════ INITIALISATION CLIENT ═════════════════
 lib.callback.register('aura:init', function(src)
     local id = Aura.Identifier(src)
     if not id then return nil end
     Aura.ident[src] = id; Aura.src[id] = src
-    local xp = ESX.GetPlayerFromId(src)
-    local p = Aura.EnsurePhone(id, xp and xp.getName())
+    local p = Aura.EnsurePhone(id, Bridge.Name(src))
     if not p then return nil end
+    local job = Bridge.Job(src)
     local apps = {}
-    for _, a in ipairs(Config.Apps) do if a.enabled then apps[#apps + 1] = { id = a.id, default = a.default, system = a.system, dock = a.dock, store = a.store } end end
+    for _, a in ipairs(Config.Apps) do if a.enabled and Aura.AppAllowed(src, a, job) then apps[#apps + 1] = { id = a.id, default = a.default, system = a.system, dock = a.dock, store = a.store, name = a.name, grad = a.grad, icon = a.icon } end end
+    local allowed = {}
+    for _, a in ipairs(apps) do allowed[a.id] = true end
+    local installed = {}
+    for _, appId in ipairs(p.apps) do if allowed[appId] then installed[#installed + 1] = appId end end
     local hasPin = p.settings.pinEnabled and p.settings.pin ~= ''
     local settings = {}
     for k, v in pairs(p.settings) do if k ~= 'pin' then settings[k] = v end end
     return {
-        me = { number = p.number, display = Aura.FormatNumber(p.number), name = xp and xp.getName() or 'Joueur', mail = p.mail, job = xp and xp.job and xp.job.name or nil,
-               jobLabel = xp and xp.job and xp.job.label or nil, identifier = id, admin = Aura.IsAdmin(src) },
-        settings = settings, hasPin = hasPin, installed = p.apps, catalog = apps,
+        me = { number = p.number, display = Aura.FormatNumber(p.number), name = Bridge.Name(src) or 'Joueur', mail = p.mail, job = job and job.name or nil,
+               jobLabel = job and job.label or nil, identifier = id, admin = Aura.IsAdmin(src) },
+        settings = settings, hasPin = hasPin, installed = installed, catalog = apps,
         battery = p.battery, contacts = contactsOf(id),
-        config = { brand = Config.Brand, model = Config.Model, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
+        config = { brand = Config.Brand, model = Config.Model, ui = Config.UI, limits = Config.Limits, framework = Bridge.fw, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
                    lines = Aura.LinesPublic(), taxi = Config.Taxi, market = Config.Market.categories, crypto = Config.Crypto.coins, social = { max = Config.Social.postMaxLength, images = Config.Social.maxImages },
                    numberGroup = Config.Number.group, messages = Config.Messages, camera = Config.Camera.mode, maxMarketImages = Config.Market.maxImages, storyHours = Config.Social.storyHours },
     }
@@ -551,5 +563,5 @@ RegisterCommand('phone_give', function(src, args)
     if src ~= 0 and not Aura.IsAdmin(src) then return end
     local target = tonumber(args[1]) or src
     if target == 0 then return end
-    pcall(function() exports.ox_inventory:AddItem(target, Config.Item, 1) end)
+    Bridge.AddItem(target, Config.Item, 1)
 end, false)
