@@ -19,7 +19,7 @@ Config.Society   = 'auto'      -- compte société : Job Builder en priorité, s
 -- Noms des comptes du framework : ESX = bank (banque) / money (espèces)
 Config.Accounts = { bank = 'bank', cash = 'money' }
 
--- Tables SQL utilisées (hors tables aura_*). 'auto' = réglage habituel du framework détecté.
+-- Tables SQL utilisées (hors tables aero_*). 'auto' = réglage habituel du framework détecté.
 -- Pour une base personnalisée, remplace 'auto' par un tableau, exemple :
 --   Config.Database.vehicles = { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', model = nil, stored = 'stored', storedValue = 1 }
 --   Config.Database.players  = { table = 'users', identifier = 'identifier', money = 'accounts', moneyFormat = 'esx' }   -- argent hors ligne

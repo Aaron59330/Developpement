@@ -11,7 +11,7 @@ Aura.dbg = dbg
 
 -- ═════════════════ BASE DE DONNÉES ═════════════════
 local SCHEMA = {
-[[CREATE TABLE IF NOT EXISTS aura_phones (
+[[CREATE TABLE IF NOT EXISTS aero_phones (
     identifier VARCHAR(80) NOT NULL PRIMARY KEY,
     number VARCHAR(20) NOT NULL UNIQUE,
     mail VARCHAR(120) NULL,
@@ -20,13 +20,13 @@ local SCHEMA = {
     battery TINYINT UNSIGNED NOT NULL DEFAULT 100,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_kv (
+[[CREATE TABLE IF NOT EXISTS aero_kv (
     owner VARCHAR(80) NOT NULL,
     k VARCHAR(40) NOT NULL,
     v LONGTEXT NULL,
     PRIMARY KEY (owner, k)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_contacts (
+[[CREATE TABLE IF NOT EXISTS aero_contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(80) NOT NULL,
     name VARCHAR(60) NOT NULL,
@@ -38,7 +38,7 @@ local SCHEMA = {
     note VARCHAR(255) NULL,
     INDEX (owner)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_calls (
+[[CREATE TABLE IF NOT EXISTS aero_calls (
     id INT AUTO_INCREMENT PRIMARY KEY,
     caller VARCHAR(20) NOT NULL,
     callee VARCHAR(20) NOT NULL,
@@ -48,7 +48,7 @@ local SCHEMA = {
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX (caller), INDEX (callee)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_conv (
+[[CREATE TABLE IF NOT EXISTS aero_conv (
     id VARCHAR(60) NOT NULL PRIMARY KEY,
     kind VARCHAR(8) NOT NULL DEFAULT 'direct',
     name VARCHAR(60) NULL,
@@ -56,7 +56,7 @@ local SCHEMA = {
     owner VARCHAR(20) NULL,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_conv_members (
+[[CREATE TABLE IF NOT EXISTS aero_conv_members (
     conv VARCHAR(60) NOT NULL,
     number VARCHAR(20) NOT NULL,
     muted TINYINT(1) NOT NULL DEFAULT 0,
@@ -66,7 +66,7 @@ local SCHEMA = {
     PRIMARY KEY (conv, number),
     INDEX (number)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_messages (
+[[CREATE TABLE IF NOT EXISTS aero_messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conv VARCHAR(60) NOT NULL,
     sender VARCHAR(20) NOT NULL,
@@ -78,7 +78,7 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (conv, id)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_photos (
+[[CREATE TABLE IF NOT EXISTS aero_photos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(80) NOT NULL,
     url TEXT NOT NULL,
@@ -87,7 +87,7 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (owner)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_accounts (
+[[CREATE TABLE IF NOT EXISTS aero_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     app VARCHAR(12) NOT NULL,
     identifier VARCHAR(80) NOT NULL,
@@ -101,7 +101,7 @@ local SCHEMA = {
     UNIQUE KEY uq_handle (app, handle),
     UNIQUE KEY uq_owner (app, identifier)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_posts (
+[[CREATE TABLE IF NOT EXISTS aero_posts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     app VARCHAR(12) NOT NULL,
     handle VARCHAR(30) NOT NULL,
@@ -113,19 +113,19 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (app, created), INDEX (parent), INDEX (handle)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_likes (
+[[CREATE TABLE IF NOT EXISTS aero_likes (
     app VARCHAR(12) NOT NULL,
     post BIGINT NOT NULL,
     handle VARCHAR(30) NOT NULL,
     PRIMARY KEY (app, post, handle)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_follows (
+[[CREATE TABLE IF NOT EXISTS aero_follows (
     app VARCHAR(12) NOT NULL,
     follower VARCHAR(30) NOT NULL,
     followee VARCHAR(30) NOT NULL,
     PRIMARY KEY (app, follower, followee)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_match (
+[[CREATE TABLE IF NOT EXISTS aero_match (
     identifier VARCHAR(80) NOT NULL PRIMARY KEY,
     name VARCHAR(40) NOT NULL,
     age TINYINT UNSIGNED NOT NULL DEFAULT 25,
@@ -135,14 +135,14 @@ local SCHEMA = {
     photos TEXT NULL,
     active TINYINT(1) NOT NULL DEFAULT 1
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_swipes (
+[[CREATE TABLE IF NOT EXISTS aero_swipes (
     identifier VARCHAR(80) NOT NULL,
     target VARCHAR(80) NOT NULL,
     liked TINYINT(1) NOT NULL,
     created BIGINT NOT NULL,
     PRIMARY KEY (identifier, target)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_bank_tx (
+[[CREATE TABLE IF NOT EXISTS aero_bank_tx (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     kind VARCHAR(12) NOT NULL,
@@ -152,7 +152,7 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (identifier, id)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_bills (
+[[CREATE TABLE IF NOT EXISTS aero_bills (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     issuer VARCHAR(80) NOT NULL,
@@ -163,19 +163,19 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (identifier, status)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_crypto (
+[[CREATE TABLE IF NOT EXISTS aero_crypto (
     identifier VARCHAR(80) NOT NULL,
     coin VARCHAR(10) NOT NULL,
     amount DOUBLE NOT NULL DEFAULT 0,
     invested DOUBLE NOT NULL DEFAULT 0,
     PRIMARY KEY (identifier, coin)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_crypto_prices (
+[[CREATE TABLE IF NOT EXISTS aero_crypto_prices (
     coin VARCHAR(10) NOT NULL PRIMARY KEY,
     price DOUBLE NOT NULL,
     history TEXT NULL
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_market (
+[[CREATE TABLE IF NOT EXISTS aero_market (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     number VARCHAR(20) NOT NULL,
@@ -189,7 +189,7 @@ local SCHEMA = {
     created BIGINT NOT NULL,
     INDEX (category), INDEX (identifier)
 )]],
-[[CREATE TABLE IF NOT EXISTS aura_mail (
+[[CREATE TABLE IF NOT EXISTS aero_mail (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(120) NOT NULL,
     from_addr VARCHAR(120) NOT NULL,
@@ -204,17 +204,36 @@ local SCHEMA = {
 )]],
 }
 
+-- Migration : les anciennes tables aura_* deviennent aero_* (les données sont conservées)
+local RENAMED = { 'phones', 'kv', 'contacts', 'calls', 'conv', 'conv_members', 'messages', 'photos', 'accounts', 'posts', 'likes', 'follows', 'match', 'swipes',
+    'bank_tx', 'bills', 'crypto', 'crypto_prices', 'market', 'mail', 'dc_users', 'dc_rooms', 'dc_members', 'dc_msgs', 'scores', 'news', 'loto_tickets', 'loto_state', 'findmy' }
+local function tableExists(n) return MySQL.scalar.await('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?', { n }) ~= nil end
+local function migrateTables()
+    for _, n in ipairs(RENAMED) do
+        local old, new = 'aura_' .. n, 'aero_' .. n
+        if tableExists(old) then
+            if not tableExists(new) then
+                MySQL.query.await(('RENAME TABLE `%s` TO `%s`'):format(old, new))
+            elseif (MySQL.scalar.await(('SELECT COUNT(*) FROM `%s`'):format(new)) or 0) == 0 then   -- nouvelle table vide (créée par le SQL) : on récupère l'ancienne
+                MySQL.query.await(('DROP TABLE `%s`'):format(new))
+                MySQL.query.await(('RENAME TABLE `%s` TO `%s`'):format(old, new))
+            end
+        end
+    end
+end
+
 CreateThread(function()
+    pcall(migrateTables)
     for _, q in ipairs(SCHEMA) do MySQL.query.await(q) end
     -- charge les numéros existants
-    local rows = MySQL.query.await('SELECT identifier, number, mail, settings, apps, battery FROM aura_phones') or {}
+    local rows = MySQL.query.await('SELECT identifier, number, mail, settings, apps, battery FROM aero_phones') or {}
     for _, r in ipairs(rows) do Aura.LoadRow(r) end
     dbg(('%d téléphones chargés'):format(#rows))
     if Config.Messages.historyDays and Config.Messages.historyDays > 0 then
-        MySQL.query('DELETE FROM aura_messages WHERE created < ?', { (os.time() - Config.Messages.historyDays * 86400) * 1000 })
+        MySQL.query('DELETE FROM aero_messages WHERE created < ?', { (os.time() - Config.Messages.historyDays * 86400) * 1000 })
     end
-    MySQL.query('DELETE FROM aura_posts WHERE app = "snap" AND kind = "story" AND created < ?', { (os.time() - Config.Social.storyHours * 3600) * 1000 })
-    MySQL.query('DELETE FROM aura_market WHERE created < ?', { (os.time() - Config.Market.expireDays * 86400) * 1000 })
+    MySQL.query('DELETE FROM aero_posts WHERE app = "snap" AND kind = "story" AND created < ?', { (os.time() - Config.Social.storyHours * 3600) * 1000 })
+    MySQL.query('DELETE FROM aero_market WHERE created < ?', { (os.time() - Config.Market.expireDays * 86400) * 1000 })
     Bridge.Wait()
     for _, src in ipairs(Bridge.Players()) do Aura.OnLoaded(src) end
 end)
@@ -315,7 +334,7 @@ function Aura.EnsurePhone(identifier, name)
     while Aura.byAddr[mail] do i = i + 1; mail = slug(name or '') .. i .. '@' .. Config.MailDomain end
     local settings = {}
     for k, v in pairs(DEFAULT_SETTINGS) do settings[k] = v end
-    MySQL.insert.await('INSERT INTO aura_phones (identifier, number, mail, settings, apps, battery) VALUES (?, ?, ?, ?, ?, 100)', { identifier, number, mail, Aura.Json(settings), Aura.Json(defaultApps()) })
+    MySQL.insert.await('INSERT INTO aero_phones (identifier, number, mail, settings, apps, battery) VALUES (?, ?, ?, ?, ?, 100)', { identifier, number, mail, Aura.Json(settings), Aura.Json(defaultApps()) })
     p = { identifier = identifier, number = number, mail = mail, settings = settings, apps = defaultApps(), battery = 100 }
     Aura.phones[identifier] = p; Aura.byNumber[number] = identifier; Aura.byAddr[mail] = identifier
     return p
@@ -323,7 +342,7 @@ end
 
 function Aura.SaveSettings(identifier)
     local p = Aura.phones[identifier]; if not p then return end
-    MySQL.update('UPDATE aura_phones SET settings = ?, apps = ?, battery = ? WHERE identifier = ?', { Aura.Json(p.settings), Aura.Json(p.apps), math.floor(p.battery), identifier })
+    MySQL.update('UPDATE aero_phones SET settings = ?, apps = ?, battery = ? WHERE identifier = ?', { Aura.Json(p.settings), Aura.Json(p.apps), math.floor(p.battery), identifier })
 end
 
 function Aura.OnLoaded(src)
@@ -397,12 +416,12 @@ end)
 
 -- ═════════════════ CONTACTS ═════════════════
 local function contactsOf(id)
-    return MySQL.query.await('SELECT id, name, number, email, avatar, favorite, blocked, note FROM aura_contacts WHERE owner = ? ORDER BY name', { id }) or {}
+    return MySQL.query.await('SELECT id, name, number, email, avatar, favorite, blocked, note FROM aero_contacts WHERE owner = ? ORDER BY name', { id }) or {}
 end
 Aura.ContactsOf = contactsOf
 
 function Aura.ContactName(owner, number)
-    local r = MySQL.scalar.await('SELECT name FROM aura_contacts WHERE owner = ? AND number = ? LIMIT 1', { owner, number })
+    local r = MySQL.scalar.await('SELECT name FROM aero_contacts WHERE owner = ? AND number = ? LIMIT 1', { owner, number })
     return r
 end
 
@@ -417,31 +436,31 @@ lib.callback.register('aura:contactSave', function(src, c)
     local email = c.email and Aura.Clamp(c.email, 120) or nil
     local note = c.note and Aura.Clamp(c.note, 255) or nil
     if c.id then
-        MySQL.update.await('UPDATE aura_contacts SET name=?, number=?, email=?, avatar=?, favorite=?, blocked=?, note=? WHERE id=? AND owner=?',
+        MySQL.update.await('UPDATE aero_contacts SET name=?, number=?, email=?, avatar=?, favorite=?, blocked=?, note=? WHERE id=? AND owner=?',
             { name, number, email, avatar, c.favorite and 1 or 0, c.blocked and 1 or 0, note, c.id, id })
         return c.id
     end
-    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_contacts WHERE owner = ?', { id })
+    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aero_contacts WHERE owner = ?', { id })
     if (n or 0) >= (Config.Limits.contacts or 500) then return false, 'Limite de contacts atteinte' end
-    return MySQL.insert.await('INSERT INTO aura_contacts (owner, name, number, email, avatar, favorite, blocked, note) VALUES (?,?,?,?,?,?,?,?)',
+    return MySQL.insert.await('INSERT INTO aero_contacts (owner, name, number, email, avatar, favorite, blocked, note) VALUES (?,?,?,?,?,?,?,?)',
         { id, name, number, email, avatar, c.favorite and 1 or 0, c.blocked and 1 or 0, note })
 end)
 
 lib.callback.register('aura:contactDelete', function(src, cid)
     local id = Aura.ident[src]; if not id then return false end
-    MySQL.update.await('DELETE FROM aura_contacts WHERE id = ? AND owner = ?', { tonumber(cid) or 0, id })
+    MySQL.update.await('DELETE FROM aero_contacts WHERE id = ? AND owner = ?', { tonumber(cid) or 0, id })
     return true
 end)
 
 lib.callback.register('aura:contactFlag', function(src, cid, field, value)
     local id = Aura.ident[src]; if not id then return false end
     if field ~= 'favorite' and field ~= 'blocked' then return false end
-    MySQL.update.await(('UPDATE aura_contacts SET %s = ? WHERE id = ? AND owner = ?'):format(field), { value and 1 or 0, tonumber(cid) or 0, id })
+    MySQL.update.await(('UPDATE aero_contacts SET %s = ? WHERE id = ? AND owner = ?'):format(field), { value and 1 or 0, tonumber(cid) or 0, id })
     return true
 end)
 
 function Aura.IsBlocked(owner, number)
-    return (MySQL.scalar.await('SELECT 1 FROM aura_contacts WHERE owner = ? AND number = ? AND blocked = 1 LIMIT 1', { owner, number })) ~= nil
+    return (MySQL.scalar.await('SELECT 1 FROM aero_contacts WHERE owner = ? AND number = ? AND blocked = 1 LIMIT 1', { owner, number })) ~= nil
 end
 
 -- ═════════════════ PARAMÈTRES / APPLICATIONS / KV ═════════════════
@@ -475,13 +494,13 @@ end)
 local KV_KEYS = { notes = true, events = true, alarms = true, places = true, playlist = true, lastweather = true, widgets = true, home = true, recents = true, fm_share = true, todos = true, scores = true }
 lib.callback.register('aura:kvGet', function(src, key)
     local id = Aura.ident[src]; if not id or not KV_KEYS[key] then return nil end
-    return Aura.Unjson(MySQL.scalar.await('SELECT v FROM aura_kv WHERE owner = ? AND k = ?', { id, key }), nil)
+    return Aura.Unjson(MySQL.scalar.await('SELECT v FROM aero_kv WHERE owner = ? AND k = ?', { id, key }), nil)
 end)
 lib.callback.register('aura:kvSet', function(src, key, value)
     local id = Aura.ident[src]; if not id or not KV_KEYS[key] then return false end
     local s = Aura.Json(value)
     if #s > 200000 then return false, 'Trop volumineux' end
-    MySQL.query.await('INSERT INTO aura_kv (owner, k, v) VALUES (?,?,?) ON DUPLICATE KEY UPDATE v = VALUES(v)', { id, key, s })
+    MySQL.query.await('INSERT INTO aero_kv (owner, k, v) VALUES (?,?,?) ON DUPLICATE KEY UPDATE v = VALUES(v)', { id, key, s })
     return true
 end)
 
@@ -551,9 +570,9 @@ RegisterCommand('phone_reset', function(src, args)
     local target = tonumber(args[1]); local id = target and Aura.ident[target]
     if not id then return end
     local p = Aura.phones[id]
-    MySQL.query.await('DELETE FROM aura_kv WHERE owner = ?', { id })
-    MySQL.query.await('DELETE FROM aura_contacts WHERE owner = ?', { id })
-    MySQL.query.await('DELETE FROM aura_photos WHERE owner = ?', { id })
+    MySQL.query.await('DELETE FROM aero_kv WHERE owner = ?', { id })
+    MySQL.query.await('DELETE FROM aero_contacts WHERE owner = ?', { id })
+    MySQL.query.await('DELETE FROM aero_photos WHERE owner = ?', { id })
     for k, v in pairs(DEFAULT_SETTINGS) do p.settings[k] = v end
     p.apps = defaultApps(); Aura.SaveSettings(id)
     TriggerClientEvent('aura:push', target, 'reset', {})

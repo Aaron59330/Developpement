@@ -1,6 +1,6 @@
 -- Localiser (partage de position) et AirShare
 CreateThread(function()
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_findmy (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_findmy (
         owner VARCHAR(80) NOT NULL, viewer VARCHAR(80) NOT NULL, PRIMARY KEY (owner, viewer))]])
 end)
 
@@ -11,7 +11,7 @@ end
 
 lib.callback.register('aura:fmMine', function(src)
     local id = Aura.ident[src]; if not id then return {} end
-    local rows = MySQL.query.await('SELECT viewer FROM aura_findmy WHERE owner = ?', { id }) or {}
+    local rows = MySQL.query.await('SELECT viewer FROM aero_findmy WHERE owner = ?', { id }) or {}
     local out = {}
     for _, r in ipairs(rows) do local p = Aura.phones[r.viewer]; if p then out[#out + 1] = p.number end end
     return out
@@ -22,15 +22,15 @@ lib.callback.register('aura:fmShare', function(src, number, state)
     number = Aura.CleanNumber(number)
     local tid = Aura.byNumber[number]; if not tid or tid == id then return false end
     if state then
-        MySQL.insert.await('INSERT IGNORE INTO aura_findmy (owner, viewer) VALUES (?, ?)', { id, tid })
+        MySQL.insert.await('INSERT IGNORE INTO aero_findmy (owner, viewer) VALUES (?, ?)', { id, tid })
         Aura.Push(tid, 'notify', { app = 'findmy', title = 'Localiser', body = Aura.Name(id) .. ' partage sa position avec vous' })
-    else MySQL.update.await('DELETE FROM aura_findmy WHERE owner = ? AND viewer = ?', { id, tid }) end
+    else MySQL.update.await('DELETE FROM aero_findmy WHERE owner = ? AND viewer = ?', { id, tid }) end
     return true
 end)
 
 lib.callback.register('aura:fmList', function(src)
     local id = Aura.ident[src]; if not id then return {} end
-    local rows = MySQL.query.await('SELECT owner FROM aura_findmy WHERE viewer = ?', { id }) or {}
+    local rows = MySQL.query.await('SELECT owner FROM aero_findmy WHERE viewer = ?', { id }) or {}
     local out = {}
     for _, r in ipairs(rows) do
         local p = Aura.phones[r.owner]; local s = Aura.src[r.owner]

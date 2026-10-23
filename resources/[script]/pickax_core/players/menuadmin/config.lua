@@ -670,11 +670,11 @@ local WipeTables = {
     { 'gangbuilder_stats', 'identifier' },
     { 'worldbuilder_chase_stats', 'identifier' }, { 'worldbuilder_licenses', 'identifier' },
     { 'worldbuilder_pvp_stats', 'identifier' }, { 'worldbuilder_payouts', 'identifier' },
-    -- Téléphone Aero (pickax_phone) et braquages (pickax_heists)
-    { 'aura_phones', 'identifier' }, { 'aura_kv', 'owner' }, { 'aura_contacts', 'owner' }, { 'aura_conv', 'owner' },
-    { 'aura_photos', 'owner' }, { 'aura_accounts', 'identifier' }, { 'aura_match', 'identifier' }, { 'aura_swipes', 'identifier' },
-    { 'aura_bank_tx', 'identifier' }, { 'aura_bills', 'identifier' }, { 'aura_crypto', 'identifier' }, { 'aura_market', 'identifier' },
-    { 'aura_mail', 'owner' }, { 'aura_dc_users', 'identifier' }, { 'aura_findmy', 'owner' }, { 'pk_heists', 'identifier' },
+    -- Téléphone Aero (pickax_phone)
+    { 'aero_phones', 'identifier' }, { 'aero_kv', 'owner' }, { 'aero_contacts', 'owner' }, { 'aero_conv', 'owner' },
+    { 'aero_photos', 'owner' }, { 'aero_accounts', 'identifier' }, { 'aero_match', 'identifier' }, { 'aero_swipes', 'identifier' },
+    { 'aero_bank_tx', 'identifier' }, { 'aero_bills', 'identifier' }, { 'aero_crypto', 'identifier' }, { 'aero_market', 'identifier' },
+    { 'aero_mail', 'owner' }, { 'aero_dc_users', 'identifier' }, { 'aero_findmy', 'owner' },
     { 'account_info', 'license' },
     { 'users', 'identifier' },               -- en dernier
 }

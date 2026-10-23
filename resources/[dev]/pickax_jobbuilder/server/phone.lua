@@ -95,17 +95,3 @@ exports('GetJobInfo', function(jobName)
     for _, g in ipairs(job.grades or {}) do grades[#grades + 1] = { grade = g.grade, label = g.label, salary = g.salary } end
     return { name = job.name, label = job.label, type = job.type, society = job.society and true or false, bossGrade = tonumber(job.boss_grade) or (#grades - 1), grades = grades }
 end)
-
--- Statut des entreprises pour le menu personnel (pickax_hub) : un job est « disponible » dès qu'un employé est connecté.
--- Réglage par job : settings.status_hidden = true pour le masquer de la liste.
-exports('GetJobsStatus', function()
-    local out = {}
-    for name, job in pairs(JB.Jobs) do
-        local s = job.settings or {}
-        if s.status_hidden ~= true then
-            out[#out + 1] = { name = name, label = job.label or name, type = job.type, online = #members(name, 0) }
-        end
-    end
-    table.sort(out, function(a, b) if (a.online > 0) ~= (b.online > 0) then return a.online > 0 end return a.label < b.label end)
-    return out
-end)

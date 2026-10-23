@@ -34,7 +34,7 @@ Le téléphone détecte tout seul ce qui tourne sur ton serveur (`config.lua`, s
 
 ## Installation
 1. Dépendances : `oxmysql` et `ox_lib` (obligatoires). Selon ton serveur : un framework (ESX / QBCore / Qbox), un inventaire et une ressource vocale (pma-voice…) : détectés automatiquement.
-2. Les tables `aura_*` sont créées automatiquement au premier démarrage (aucun SQL à importer).
+2. Les tables `aero_*` sont créées automatiquement au premier démarrage (ou importe `sql_smartphone.sql`). Les anciennes tables `aura_*` sont renommées automatiquement.
 3. `ensure pickax_phone` **après** ton framework, ton inventaire et ta voix (déjà le cas avec `ensure [dev]` ici). **Ne pas lancer lb-phone en même temps.**
 4. Photos / Appareil photo : installer `screenshot-basic` et renseigner `Config.Camera` (webhook Discord ou FiveManage).
 5. Réglages : `config.lua` (numéros, applications, banque, crypto, services, batterie, radios…).

@@ -3,27 +3,27 @@ local DC = Config.Darkchat
 
 -- ═════════════════ DARKCHAT ═════════════════
 CreateThread(function()
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_dc_users (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_dc_users (
         identifier VARCHAR(80) NOT NULL PRIMARY KEY, alias VARCHAR(24) NOT NULL, color VARCHAR(8) NOT NULL, changed BIGINT NOT NULL DEFAULT 0, UNIQUE KEY uq_alias (alias))]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_dc_rooms (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_dc_rooms (
         id VARCHAR(32) NOT NULL PRIMARY KEY, name VARCHAR(40) NOT NULL, public TINYINT(1) NOT NULL DEFAULT 1, pass VARCHAR(64) NULL,
         ttl INT NOT NULL DEFAULT 24, creator VARCHAR(80) NULL, created BIGINT NOT NULL, last BIGINT NOT NULL)]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_dc_members (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_dc_members (
         room VARCHAR(32) NOT NULL, identifier VARCHAR(80) NOT NULL, PRIMARY KEY (room, identifier), INDEX (identifier))]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_dc_msgs (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_dc_msgs (
         id BIGINT AUTO_INCREMENT PRIMARY KEY, room VARCHAR(32) NOT NULL, alias VARCHAR(24) NOT NULL, color VARCHAR(8) NOT NULL, body TEXT NULL, image TEXT NULL,
         created BIGINT NOT NULL, identifier VARCHAR(80) NOT NULL, INDEX (room, id))]])
     for _, r in ipairs(DC.publicRooms or {}) do
-        MySQL.query.await('INSERT IGNORE INTO aura_dc_rooms (id, name, public, ttl, created, last) VALUES (?,?,1,?,?,?)', { r.id, r.name, r.ttl or 24, Aura.Now(), Aura.Now() })
+        MySQL.query.await('INSERT IGNORE INTO aero_dc_rooms (id, name, public, ttl, created, last) VALUES (?,?,1,?,?,?)', { r.id, r.name, r.ttl or 24, Aura.Now(), Aura.Now() })
     end
     while true do   -- nettoyage : messages expirés, salons inactifs
         Wait(300000)
-        local rooms = MySQL.query.await('SELECT id, ttl FROM aura_dc_rooms WHERE ttl > 0') or {}
-        for _, r in ipairs(rooms) do MySQL.query('DELETE FROM aura_dc_msgs WHERE room = ? AND created < ?', { r.id, Aura.Now() - r.ttl * 3600000 }) end
+        local rooms = MySQL.query.await('SELECT id, ttl FROM aero_dc_rooms WHERE ttl > 0') or {}
+        for _, r in ipairs(rooms) do MySQL.query('DELETE FROM aero_dc_msgs WHERE room = ? AND created < ?', { r.id, Aura.Now() - r.ttl * 3600000 }) end
         local idle = Aura.Now() - (DC.idleRoomDays or 7) * 86400000
-        local dead = MySQL.query.await('SELECT id FROM aura_dc_rooms WHERE last < ? AND creator IS NOT NULL', { idle }) or {}
+        local dead = MySQL.query.await('SELECT id FROM aero_dc_rooms WHERE last < ? AND creator IS NOT NULL', { idle }) or {}
         for _, r in ipairs(dead) do
-            MySQL.query('DELETE FROM aura_dc_msgs WHERE room = ?', { r.id }); MySQL.query('DELETE FROM aura_dc_members WHERE room = ?', { r.id }); MySQL.query('DELETE FROM aura_dc_rooms WHERE id = ?', { r.id })
+            MySQL.query('DELETE FROM aero_dc_msgs WHERE room = ?', { r.id }); MySQL.query('DELETE FROM aero_dc_members WHERE room = ?', { r.id }); MySQL.query('DELETE FROM aero_dc_rooms WHERE id = ?', { r.id })
         end
     end
 end)
@@ -32,12 +32,12 @@ local COLORS = { '#ff6b6b', '#f59f00', '#40c057', '#15aabf', '#4c6ef5', '#7950f2
 local ADJ = { 'Fantôme', 'Ombre', 'Corbeau', 'Spectre', 'Renard', 'Loup', 'Masque', 'Brume', 'Lynx', 'Vipère', 'Faucon', 'Nocturne' }
 
 local function userOf(id)
-    local u = MySQL.single.await('SELECT alias, color, changed FROM aura_dc_users WHERE identifier = ?', { id })
+    local u = MySQL.single.await('SELECT alias, color, changed FROM aero_dc_users WHERE identifier = ?', { id })
     if u then return u end
     for _ = 1, 20 do
         local alias = ADJ[math.random(#ADJ)] .. '-' .. math.random(1000, 9999)
-        local ok = MySQL.insert.await('INSERT IGNORE INTO aura_dc_users (identifier, alias, color, changed) VALUES (?,?,?,0)', { id, alias, COLORS[math.random(#COLORS)] })
-        if ok and ok ~= 0 then return MySQL.single.await('SELECT alias, color, changed FROM aura_dc_users WHERE identifier = ?', { id }) end
+        local ok = MySQL.insert.await('INSERT IGNORE INTO aero_dc_users (identifier, alias, color, changed) VALUES (?,?,?,0)', { id, alias, COLORS[math.random(#COLORS)] })
+        if ok and ok ~= 0 then return MySQL.single.await('SELECT alias, color, changed FROM aero_dc_users WHERE identifier = ?', { id }) end
     end
 end
 
@@ -46,7 +46,7 @@ local function hasItem(src)
     return Bridge.HasItem(src, DC.item)
 end
 
-local function inRoom(id, room) return MySQL.scalar.await('SELECT 1 FROM aura_dc_members WHERE room = ? AND identifier = ?', { room, id }) ~= nil end
+local function inRoom(id, room) return MySQL.scalar.await('SELECT 1 FROM aero_dc_members WHERE room = ? AND identifier = ?', { room, id }) ~= nil end
 
 lib.callback.register('aura:dcAccess', function(src)
     if not DC.enabled then return false, 'Application indisponible' end
@@ -63,19 +63,19 @@ lib.callback.register('aura:dcAlias', function(src, alias)
     alias = tostring(alias or ''):gsub('%s', ''):sub(1, 20)
     if alias == '' then alias = ADJ[math.random(#ADJ)] .. '-' .. math.random(1000, 9999) end
     if #alias < 3 or alias:find('[^%w_%-éèàùûôîç]') then return false, 'Pseudo : 3 à 20 caractères (lettres, chiffres, - _)' end
-    local taken = MySQL.scalar.await('SELECT 1 FROM aura_dc_users WHERE LOWER(alias) = LOWER(?) AND identifier <> ?', { alias, id })
+    local taken = MySQL.scalar.await('SELECT 1 FROM aero_dc_users WHERE LOWER(alias) = LOWER(?) AND identifier <> ?', { alias, id })
     if taken then return false, 'Pseudo déjà pris' end
-    MySQL.update.await('UPDATE aura_dc_users SET alias = ?, changed = ? WHERE identifier = ?', { alias, Aura.Now(), id })
+    MySQL.update.await('UPDATE aero_dc_users SET alias = ?, changed = ? WHERE identifier = ?', { alias, Aura.Now(), id })
     return alias
 end)
 
 lib.callback.register('aura:dcRooms', function(src)
     local id = Aura.ident[src]; if not id or not DC.enabled or not hasItem(src) then return {} end
     local rows = MySQL.query.await([[SELECT r.id, r.name, r.public, r.ttl, r.last, (r.pass IS NOT NULL) AS locked, (r.creator = ?) AS mine,
-        EXISTS(SELECT 1 FROM aura_dc_members m WHERE m.room = r.id AND m.identifier = ?) AS joined,
-        (SELECT COUNT(*) FROM aura_dc_members m2 WHERE m2.room = r.id) AS members,
-        (SELECT body FROM aura_dc_msgs g WHERE g.room = r.id ORDER BY g.id DESC LIMIT 1) AS preview
-        FROM aura_dc_rooms r WHERE r.public = 1 OR EXISTS(SELECT 1 FROM aura_dc_members m3 WHERE m3.room = r.id AND m3.identifier = ?) ORDER BY r.last DESC]], { id, id, id }) or {}
+        EXISTS(SELECT 1 FROM aero_dc_members m WHERE m.room = r.id AND m.identifier = ?) AS joined,
+        (SELECT COUNT(*) FROM aero_dc_members m2 WHERE m2.room = r.id) AS members,
+        (SELECT body FROM aero_dc_msgs g WHERE g.room = r.id ORDER BY g.id DESC LIMIT 1) AS preview
+        FROM aero_dc_rooms r WHERE r.public = 1 OR EXISTS(SELECT 1 FROM aero_dc_members m3 WHERE m3.room = r.id AND m3.identifier = ?) ORDER BY r.last DESC]], { id, id, id }) or {}
     for _, r in ipairs(rows) do r.joined = r.joined == 1 or r.joined == true; r.locked = r.locked == 1 or r.locked == true; r.mine = r.mine == 1 or r.mine == true; r.public = r.public == 1 or r.public == true end
     return rows
 end)
@@ -83,7 +83,7 @@ end)
 lib.callback.register('aura:dcCreate', function(src, name, public, pass, ttl)
     local id = Aura.ident[src]; if not id or not DC.enabled or not hasItem(src) then return false end
     name = Aura.Clamp(Aura.Trim(name), 40); if #name < 3 then return false, 'Nom trop court' end
-    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_dc_rooms WHERE creator = ?', { id }) or 0
+    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aero_dc_rooms WHERE creator = ?', { id }) or 0
     if n >= DC.maxRoomsOwn then return false, 'Limite de salons atteinte' end
     ttl = tonumber(ttl) or 24
     local okTtl = false
@@ -92,30 +92,30 @@ lib.callback.register('aura:dcCreate', function(src, name, public, pass, ttl)
     local rid = ('r%d%d'):format(os.time() % 100000, math.random(100, 999))
     pass = Aura.Trim(pass)
     if pass ~= '' then
-        MySQL.insert.await('INSERT INTO aura_dc_rooms (id, name, public, pass, ttl, creator, created, last) VALUES (?,?,?,SHA2(?,256),?,?,?,?)', { rid, name, public and 1 or 0, pass, ttl, id, Aura.Now(), Aura.Now() })
+        MySQL.insert.await('INSERT INTO aero_dc_rooms (id, name, public, pass, ttl, creator, created, last) VALUES (?,?,?,SHA2(?,256),?,?,?,?)', { rid, name, public and 1 or 0, pass, ttl, id, Aura.Now(), Aura.Now() })
     else
-        MySQL.insert.await('INSERT INTO aura_dc_rooms (id, name, public, ttl, creator, created, last) VALUES (?,?,?,?,?,?,?)', { rid, name, public and 1 or 0, ttl, id, Aura.Now(), Aura.Now() })
+        MySQL.insert.await('INSERT INTO aero_dc_rooms (id, name, public, ttl, creator, created, last) VALUES (?,?,?,?,?,?,?)', { rid, name, public and 1 or 0, ttl, id, Aura.Now(), Aura.Now() })
     end
-    MySQL.insert.await('INSERT IGNORE INTO aura_dc_members (room, identifier) VALUES (?,?)', { rid, id })
+    MySQL.insert.await('INSERT IGNORE INTO aero_dc_members (room, identifier) VALUES (?,?)', { rid, id })
     return rid
 end)
 
 lib.callback.register('aura:dcJoin', function(src, room, pass)
     local id = Aura.ident[src]; if not id or not DC.enabled or not hasItem(src) then return false end
-    local r = MySQL.single.await('SELECT id, public, pass FROM aura_dc_rooms WHERE id = ?', { tostring(room) })
+    local r = MySQL.single.await('SELECT id, public, pass FROM aero_dc_rooms WHERE id = ?', { tostring(room) })
     if not r then return false, 'Salon introuvable' end
     if r.pass then
-        local ok = MySQL.scalar.await('SELECT 1 FROM aura_dc_rooms WHERE id = ? AND pass = SHA2(?,256)', { r.id, tostring(pass or '') })
+        local ok = MySQL.scalar.await('SELECT 1 FROM aero_dc_rooms WHERE id = ? AND pass = SHA2(?,256)', { r.id, tostring(pass or '') })
         if not ok then return false, 'Mot de passe incorrect' end
     elseif r.public == 0 then return false, 'Salon privé : un code est nécessaire' end
-    MySQL.insert.await('INSERT IGNORE INTO aura_dc_members (room, identifier) VALUES (?,?)', { r.id, id })
+    MySQL.insert.await('INSERT IGNORE INTO aero_dc_members (room, identifier) VALUES (?,?)', { r.id, id })
     return true
 end)
 
 -- rejoindre un salon privé avec son identifiant + mot de passe (salons non listés)
 lib.callback.register('aura:dcLeave', function(src, room)
     local id = Aura.ident[src]; if not id then return false end
-    MySQL.update.await('DELETE FROM aura_dc_members WHERE room = ? AND identifier = ?', { tostring(room), id })
+    MySQL.update.await('DELETE FROM aero_dc_members WHERE room = ? AND identifier = ?', { tostring(room), id })
     return true
 end)
 
@@ -123,9 +123,9 @@ lib.callback.register('aura:dcMessages', function(src, room, before)
     local id = Aura.ident[src]; if not id or not DC.enabled or not hasItem(src) or not inRoom(id, room) then return {} end
     local rows
     if before and tonumber(before) then
-        rows = MySQL.query.await('SELECT id, alias, color, body, image, created, (identifier = ?) AS mine FROM aura_dc_msgs WHERE room = ? AND id < ? ORDER BY id DESC LIMIT 50', { id, room, tonumber(before) })
+        rows = MySQL.query.await('SELECT id, alias, color, body, image, created, (identifier = ?) AS mine FROM aero_dc_msgs WHERE room = ? AND id < ? ORDER BY id DESC LIMIT 50', { id, room, tonumber(before) })
     else
-        rows = MySQL.query.await('SELECT id, alias, color, body, image, created, (identifier = ?) AS mine FROM aura_dc_msgs WHERE room = ? ORDER BY id DESC LIMIT 50', { id, room })
+        rows = MySQL.query.await('SELECT id, alias, color, body, image, created, (identifier = ?) AS mine FROM aero_dc_msgs WHERE room = ? ORDER BY id DESC LIMIT 50', { id, room })
     end
     rows = rows or {}
     local out = {}
@@ -143,10 +143,10 @@ lib.callback.register('aura:dcSend', function(src, room, body, image)
     if body == '' and not image then return false, 'Message vide' end
     local u = userOf(id)
     local created = Aura.Now()
-    local mid = MySQL.insert.await('INSERT INTO aura_dc_msgs (room, alias, color, body, image, created, identifier) VALUES (?,?,?,?,?,?,?)', { room, u.alias, u.color, body, image, created, id })
-    MySQL.update('UPDATE aura_dc_rooms SET last = ? WHERE id = ?', { created, room })
+    local mid = MySQL.insert.await('INSERT INTO aero_dc_msgs (room, alias, color, body, image, created, identifier) VALUES (?,?,?,?,?,?,?)', { room, u.alias, u.color, body, image, created, id })
+    MySQL.update('UPDATE aero_dc_rooms SET last = ? WHERE id = ?', { created, room })
     local msg = { id = mid, alias = u.alias, color = u.color, body = body, image = image, created = created }
-    for _, m in ipairs(MySQL.query.await('SELECT identifier FROM aura_dc_members WHERE room = ?', { room }) or {}) do
+    for _, m in ipairs(MySQL.query.await('SELECT identifier FROM aero_dc_members WHERE room = ?', { room }) or {}) do
         if Aura.src[m.identifier] then
             local out = {}
             for k, v in pairs(msg) do out[k] = v end
@@ -159,8 +159,8 @@ end)
 
 lib.callback.register('aura:dcDelete', function(src, mid)
     local id = Aura.ident[src]; if not id then return false end
-    if Aura.IsAdmin(src) then MySQL.update.await('DELETE FROM aura_dc_msgs WHERE id = ?', { tonumber(mid) or 0 })
-    else MySQL.update.await('DELETE FROM aura_dc_msgs WHERE id = ? AND identifier = ?', { tonumber(mid) or 0, id }) end
+    if Aura.IsAdmin(src) then MySQL.update.await('DELETE FROM aero_dc_msgs WHERE id = ?', { tonumber(mid) or 0 })
+    else MySQL.update.await('DELETE FROM aero_dc_msgs WHERE id = ? AND identifier = ?', { tonumber(mid) or 0, id }) end
     return true
 end)
 
@@ -168,14 +168,14 @@ end)
 local function say(src, msg) if src == 0 then print(msg) else TriggerClientEvent('chat:addMessage', src, { args = { 'Darkchat', msg } }) end end
 RegisterCommand('phone_dclog', function(src, args)
     if src ~= 0 and not Aura.IsAdmin(src) then return end
-    local rows = MySQL.query.await('SELECT alias, identifier, body, image, created FROM aura_dc_msgs WHERE room = ? ORDER BY id DESC LIMIT ?', { tostring(args[1] or ''), tonumber(args[2]) or 20 }) or {}
+    local rows = MySQL.query.await('SELECT alias, identifier, body, image, created FROM aero_dc_msgs WHERE room = ? ORDER BY id DESC LIMIT ?', { tostring(args[1] or ''), tonumber(args[2]) or 20 }) or {}
     if #rows == 0 then say(src, 'Aucun message (ou salon inconnu).') end
     for i = #rows, 1, -1 do local r = rows[i]; say(src, ('[%s] %s (%s) : %s %s'):format(os.date('%H:%M', r.created // 1000), r.alias, r.identifier, r.body or '', r.image or '')) end
 end, false)
 RegisterCommand('phone_dcclose', function(src, args)
     if src ~= 0 and not Aura.IsAdmin(src) then return end
     local room = tostring(args[1] or '')
-    MySQL.update.await('DELETE FROM aura_dc_msgs WHERE room = ?', { room }); MySQL.update.await('DELETE FROM aura_dc_members WHERE room = ?', { room }); MySQL.update.await('DELETE FROM aura_dc_rooms WHERE id = ?', { room })
+    MySQL.update.await('DELETE FROM aero_dc_msgs WHERE room = ?', { room }); MySQL.update.await('DELETE FROM aero_dc_members WHERE room = ?', { room }); MySQL.update.await('DELETE FROM aero_dc_rooms WHERE id = ?', { room })
     say(src, 'Salon supprimé : ' .. room)
 end, false)
 

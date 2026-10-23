@@ -2,7 +2,7 @@
 local calls, byPlayer, nextId = {}, {}, 0
 
 local function logCall(caller, callee, status, duration, hidden)
-    MySQL.insert('INSERT INTO aura_calls (caller, callee, status, duration, hidden) VALUES (?,?,?,?,?)', { caller, callee, status, duration or 0, hidden and 1 or 0 })
+    MySQL.insert('INSERT INTO aero_calls (caller, callee, status, duration, hidden) VALUES (?,?,?,?,?)', { caller, callee, status, duration or 0, hidden and 1 or 0 })
 end
 
 local function lineKey(line) return line.number ~= '' and line.number or ('srv-' .. line.id):sub(1, 20) end
@@ -162,13 +162,13 @@ end)
 lib.callback.register('aura:callLog', function(src)
     local p = phoneOf(src)
     if not p then return {} end
-    return MySQL.query.await([[SELECT id, caller, callee, status, duration, hidden, UNIX_TIMESTAMP(created) * 1000 AS created FROM aura_calls
+    return MySQL.query.await([[SELECT id, caller, callee, status, duration, hidden, UNIX_TIMESTAMP(created) * 1000 AS created FROM aero_calls
         WHERE caller = ? OR callee = ? ORDER BY id DESC LIMIT 100]], { p.number, p.number }) or {}
 end)
 
 lib.callback.register('aura:callLogClear', function(src)
     local p = phoneOf(src)
     if not p then return false end
-    MySQL.update.await('DELETE FROM aura_calls WHERE caller = ? OR callee = ?', { p.number, p.number })
+    MySQL.update.await('DELETE FROM aero_calls WHERE caller = ? OR callee = ?', { p.number, p.number })
     return true
 end)

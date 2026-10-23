@@ -2,14 +2,14 @@
 local function say(src, msg) if src == 0 then print(msg) else TriggerClientEvent('chat:addMessage', src, { args = { 'Aura', msg } }) end end
 
 CreateThread(function()
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_scores (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_scores (
         game VARCHAR(16) NOT NULL, identifier VARCHAR(80) NOT NULL, name VARCHAR(40) NOT NULL, score INT NOT NULL, updated BIGINT NOT NULL, PRIMARY KEY (game, identifier), INDEX (game, score))]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_news (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_news (
         id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100) NOT NULL, body TEXT NULL, image TEXT NULL, author VARCHAR(60) NOT NULL, author_id VARCHAR(80) NULL,
         source VARCHAR(40) NULL, breaking TINYINT(1) NOT NULL DEFAULT 0, created BIGINT NOT NULL, INDEX (created))]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_loto_tickets (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_loto_tickets (
         id INT AUTO_INCREMENT PRIMARY KEY, identifier VARCHAR(80) NOT NULL, nums VARCHAR(40) NOT NULL, draw INT NOT NULL, won INT NOT NULL DEFAULT 0, matches TINYINT NOT NULL DEFAULT 0, created BIGINT NOT NULL, INDEX (identifier, draw))]])
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aura_loto_state (
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS aero_loto_state (
         id TINYINT NOT NULL PRIMARY KEY, pool BIGINT NOT NULL, next_draw BIGINT NOT NULL, draw INT NOT NULL, last TEXT NULL)]])
 end)
 
@@ -25,13 +25,13 @@ lib.callback.register('aura:scoreSubmit', function(src, game, score)
     local id = Aura.ident[src]; if not id or not GAMES[game] then return false end
     score = math.floor(tonumber(score) or 0)
     if score < 1 or score > GAMES[game] then return false end
-    MySQL.query.await('INSERT INTO aura_scores (game, identifier, name, score, updated) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE score = GREATEST(score, VALUES(score)), name = VALUES(name), updated = VALUES(updated)', { game, id, shortName(id), score, Aura.Now() })
+    MySQL.query.await('INSERT INTO aero_scores (game, identifier, name, score, updated) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE score = GREATEST(score, VALUES(score)), name = VALUES(name), updated = VALUES(updated)', { game, id, shortName(id), score, Aura.Now() })
     return true
 end)
 
 lib.callback.register('aura:scoreTop', function(src, game)
     local id = Aura.ident[src]; if not id or not GAMES[game] then return {} end
-    local rows = MySQL.query.await('SELECT name, score, (identifier = ?) AS me FROM aura_scores WHERE game = ? ORDER BY score DESC LIMIT 10', { id, game }) or {}
+    local rows = MySQL.query.await('SELECT name, score, (identifier = ?) AS me FROM aero_scores WHERE game = ? ORDER BY score DESC LIMIT 10', { id, game }) or {}
     for _, r in ipairs(rows) do r.me = r.me == 1 or r.me == true end
     return rows
 end)
@@ -47,8 +47,8 @@ end
 lib.callback.register('aura:newsList', function(src, before)
     local id = Aura.ident[src]; if not id then return nil end
     local rows
-    if before and tonumber(before) then rows = MySQL.query.await('SELECT id, title, body, image, author, source, breaking, created FROM aura_news WHERE id < ? ORDER BY id DESC LIMIT 20', { tonumber(before) })
-    else rows = MySQL.query.await('SELECT id, title, body, image, author, source, breaking, created FROM aura_news ORDER BY id DESC LIMIT 20') end
+    if before and tonumber(before) then rows = MySQL.query.await('SELECT id, title, body, image, author, source, breaking, created FROM aero_news WHERE id < ? ORDER BY id DESC LIMIT 20', { tonumber(before) })
+    else rows = MySQL.query.await('SELECT id, title, body, image, author, source, breaking, created FROM aero_news ORDER BY id DESC LIMIT 20') end
     return { list = rows or {}, canPost = canPost(src) and true or false, admin = Aura.IsAdmin(src) }
 end)
 
@@ -58,7 +58,7 @@ lib.callback.register('aura:newsPost', function(src, d)
     local title = Aura.Clamp(Aura.Trim(d.title), 100); if #title < 4 then return false, 'Titre trop court' end
     local image = (type(d.image) == 'string' and d.image:match('^https?://')) and Aura.Clamp(d.image, 500) or nil
     local breaking = d.breaking and true or false
-    local nid = MySQL.insert.await('INSERT INTO aura_news (title, body, image, author, author_id, source, breaking, created) VALUES (?,?,?,?,?,?,?,?)', { title, Aura.Clamp(d.body, 2000), image, shortName(id), id, source, breaking and 1 or 0, Aura.Now() })
+    local nid = MySQL.insert.await('INSERT INTO aero_news (title, body, image, author, author_id, source, breaking, created) VALUES (?,?,?,?,?,?,?,?)', { title, Aura.Clamp(d.body, 2000), image, shortName(id), id, source, breaking and 1 or 0, Aura.Now() })
     if breaking and Config.News.breakingToAll then
         for pid in pairs(Aura.src) do
             local p = Aura.phones[pid]
@@ -70,8 +70,8 @@ end)
 
 lib.callback.register('aura:newsDelete', function(src, nid)
     local id = Aura.ident[src]; if not id then return false end
-    if Aura.IsAdmin(src) then MySQL.update.await('DELETE FROM aura_news WHERE id = ?', { tonumber(nid) or 0 })
-    else MySQL.update.await('DELETE FROM aura_news WHERE id = ? AND author_id = ?', { tonumber(nid) or 0, id }) end
+    if Aura.IsAdmin(src) then MySQL.update.await('DELETE FROM aero_news WHERE id = ?', { tonumber(nid) or 0 })
+    else MySQL.update.await('DELETE FROM aero_news WHERE id = ? AND author_id = ?', { tonumber(nid) or 0, id }) end
     return true
 end)
 
@@ -80,7 +80,7 @@ local L = Config.Loto
 local state = { pool = L.jackpotSeed, next = os.time() + L.drawEveryMinutes * 60, draw = 1, last = nil }
 
 local function saveState()
-    MySQL.query('INSERT INTO aura_loto_state (id, pool, next_draw, draw, last) VALUES (1,?,?,?,?) ON DUPLICATE KEY UPDATE pool = VALUES(pool), next_draw = VALUES(next_draw), draw = VALUES(draw), last = VALUES(last)', { state.pool, state.next, state.draw, state.last and Aura.Json(state.last) or nil })
+    MySQL.query('INSERT INTO aero_loto_state (id, pool, next_draw, draw, last) VALUES (1,?,?,?,?) ON DUPLICATE KEY UPDATE pool = VALUES(pool), next_draw = VALUES(next_draw), draw = VALUES(draw), last = VALUES(last)', { state.pool, state.next, state.draw, state.last and Aura.Json(state.last) or nil })
 end
 
 local function creditBank(identifier, amount)
@@ -97,7 +97,7 @@ local function runDraw()
     table.sort(nums)
     local set = {}
     for _, n in ipairs(nums) do set[n] = true end
-    local tickets = MySQL.query.await('SELECT id, identifier, nums FROM aura_loto_tickets WHERE draw = ?', { state.draw }) or {}
+    local tickets = MySQL.query.await('SELECT id, identifier, nums FROM aero_loto_tickets WHERE draw = ?', { state.draw }) or {}
     local jackpotWinners, total = {}, 0
     for _, t in ipairs(tickets) do
         local m = 0
@@ -111,7 +111,7 @@ local function runDraw()
         local gain = 0
         if t.m == L.pick then gain = jackpotEach
         elseif L.payouts[t.m] then gain = L.price * L.payouts[t.m] end
-        MySQL.update('UPDATE aura_loto_tickets SET matches = ?, won = ? WHERE id = ?', { t.m, gain, t.id })
+        MySQL.update('UPDATE aero_loto_tickets SET matches = ?, won = ? WHERE id = ?', { t.m, gain, t.id })
         if gain > 0 then
             winners = winners + 1; total = total + gain
             if creditBank(t.identifier, gain) then
@@ -130,7 +130,7 @@ end
 CreateThread(function()
     if not L.enabled then return end
     Wait(2500)
-    local r = MySQL.single.await('SELECT pool, next_draw, draw, last FROM aura_loto_state WHERE id = 1')
+    local r = MySQL.single.await('SELECT pool, next_draw, draw, last FROM aero_loto_state WHERE id = 1')
     if r then state.pool = r.pool; state.next = r.next_draw; state.draw = r.draw; state.last = Aura.Unjson(r.last, nil) else saveState() end
     while true do
         Wait(10000)
@@ -140,7 +140,7 @@ end)
 
 lib.callback.register('aura:lotoInfo', function(src)
     local id = Aura.ident[src]; if not id or not L.enabled then return nil end
-    local mine = MySQL.query.await('SELECT id, nums, draw, won, matches, created FROM aura_loto_tickets WHERE identifier = ? ORDER BY id DESC LIMIT 15', { id }) or {}
+    local mine = MySQL.query.await('SELECT id, nums, draw, won, matches, created FROM aero_loto_tickets WHERE identifier = ? ORDER BY id DESC LIMIT 15', { id }) or {}
     return { price = L.price, pick = L.pick, max = L.max, pool = state.pool, next = state.next * 1000, now = os.time() * 1000, draw = state.draw, last = state.last, tickets = mine, payouts = L.payouts }
 end)
 
@@ -156,12 +156,12 @@ lib.callback.register('aura:lotoBuy', function(src, nums)
         for _ = 1, L.pick do chosen[#chosen + 1] = table.remove(pool, math.random(#pool)) end
     end
     table.sort(chosen)
-    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aura_loto_tickets WHERE identifier = ? AND draw = ?', { id, state.draw }) or 0
+    local n = MySQL.scalar.await('SELECT COUNT(*) FROM aero_loto_tickets WHERE identifier = ? AND draw = ?', { id, state.draw }) or 0
     if n >= 10 then return false, 'Maximum 10 tickets par tirage' end
     if not Bridge.RemoveMoney(src, 'bank', L.price, 'Aura : ticket de loto') then return false, 'Solde insuffisant' end
     Aura.LogTx(id, 'out', -L.price, 'Loto', 'Ticket de loto')
     state.pool = state.pool + math.floor(L.price * L.sharePool)
-    MySQL.insert.await('INSERT INTO aura_loto_tickets (identifier, nums, draw, created) VALUES (?,?,?,?)', { id, table.concat(chosen, ' '), state.draw, Aura.Now() })
+    MySQL.insert.await('INSERT INTO aero_loto_tickets (identifier, nums, draw, created) VALUES (?,?,?,?)', { id, table.concat(chosen, ' '), state.draw, Aura.Now() })
     saveState()
     return { nums = chosen }
 end)

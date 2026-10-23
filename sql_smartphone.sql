@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- Tables du smartphone (pickax_phone) et des braquages (pickax_heists)
+-- Tables du smartphone Aero (pickax_phone)
 -- Facultatif : les ressources créent ces tables automatiquement au démarrage
 -- (CREATE TABLE IF NOT EXISTS). Ce fichier permet de les créer à l'avance ou
 -- de les inclure dans une installation propre. Peut être importé plusieurs fois.
@@ -8,7 +8,7 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ── pickax_phone ──
-CREATE TABLE IF NOT EXISTS aura_phones (
+CREATE TABLE IF NOT EXISTS aero_phones (
     identifier VARCHAR(80) NOT NULL PRIMARY KEY,
     number VARCHAR(20) NOT NULL UNIQUE,
     mail VARCHAR(120) NULL,
@@ -18,14 +18,14 @@ CREATE TABLE IF NOT EXISTS aura_phones (
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_kv (
+CREATE TABLE IF NOT EXISTS aero_kv (
     owner VARCHAR(80) NOT NULL,
     k VARCHAR(40) NOT NULL,
     v LONGTEXT NULL,
     PRIMARY KEY (owner, k)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_contacts (
+CREATE TABLE IF NOT EXISTS aero_contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(80) NOT NULL,
     name VARCHAR(60) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS aura_contacts (
     INDEX (owner)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_calls (
+CREATE TABLE IF NOT EXISTS aero_calls (
     id INT AUTO_INCREMENT PRIMARY KEY,
     caller VARCHAR(20) NOT NULL,
     callee VARCHAR(20) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS aura_calls (
     INDEX (caller), INDEX (callee)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_conv (
+CREATE TABLE IF NOT EXISTS aero_conv (
     id VARCHAR(60) NOT NULL PRIMARY KEY,
     kind VARCHAR(8) NOT NULL DEFAULT 'direct',
     name VARCHAR(60) NULL,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS aura_conv (
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_conv_members (
+CREATE TABLE IF NOT EXISTS aero_conv_members (
     conv VARCHAR(60) NOT NULL,
     number VARCHAR(20) NOT NULL,
     muted TINYINT(1) NOT NULL DEFAULT 0,
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS aura_conv_members (
     INDEX (number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_messages (
+CREATE TABLE IF NOT EXISTS aero_messages (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conv VARCHAR(60) NOT NULL,
     sender VARCHAR(20) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS aura_messages (
     INDEX (conv, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_photos (
+CREATE TABLE IF NOT EXISTS aero_photos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(80) NOT NULL,
     url TEXT NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS aura_photos (
     INDEX (owner)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_accounts (
+CREATE TABLE IF NOT EXISTS aero_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     app VARCHAR(12) NOT NULL,
     identifier VARCHAR(80) NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS aura_accounts (
     UNIQUE KEY uq_owner (app, identifier)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_posts (
+CREATE TABLE IF NOT EXISTS aero_posts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     app VARCHAR(12) NOT NULL,
     handle VARCHAR(30) NOT NULL,
@@ -120,21 +120,21 @@ CREATE TABLE IF NOT EXISTS aura_posts (
     INDEX (app, created), INDEX (parent), INDEX (handle)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_likes (
+CREATE TABLE IF NOT EXISTS aero_likes (
     app VARCHAR(12) NOT NULL,
     post BIGINT NOT NULL,
     handle VARCHAR(30) NOT NULL,
     PRIMARY KEY (app, post, handle)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_follows (
+CREATE TABLE IF NOT EXISTS aero_follows (
     app VARCHAR(12) NOT NULL,
     follower VARCHAR(30) NOT NULL,
     followee VARCHAR(30) NOT NULL,
     PRIMARY KEY (app, follower, followee)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_match (
+CREATE TABLE IF NOT EXISTS aero_match (
     identifier VARCHAR(80) NOT NULL PRIMARY KEY,
     name VARCHAR(40) NOT NULL,
     age TINYINT UNSIGNED NOT NULL DEFAULT 25,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS aura_match (
     active TINYINT(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_swipes (
+CREATE TABLE IF NOT EXISTS aero_swipes (
     identifier VARCHAR(80) NOT NULL,
     target VARCHAR(80) NOT NULL,
     liked TINYINT(1) NOT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS aura_swipes (
     PRIMARY KEY (identifier, target)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_bank_tx (
+CREATE TABLE IF NOT EXISTS aero_bank_tx (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     kind VARCHAR(12) NOT NULL,
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS aura_bank_tx (
     INDEX (identifier, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_bills (
+CREATE TABLE IF NOT EXISTS aero_bills (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     issuer VARCHAR(80) NOT NULL,
@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS aura_bills (
     INDEX (identifier, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_crypto (
+CREATE TABLE IF NOT EXISTS aero_crypto (
     identifier VARCHAR(80) NOT NULL,
     coin VARCHAR(10) NOT NULL,
     amount DOUBLE NOT NULL DEFAULT 0,
@@ -184,13 +184,13 @@ CREATE TABLE IF NOT EXISTS aura_crypto (
     PRIMARY KEY (identifier, coin)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_crypto_prices (
+CREATE TABLE IF NOT EXISTS aero_crypto_prices (
     coin VARCHAR(10) NOT NULL PRIMARY KEY,
     price DOUBLE NOT NULL,
     history TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_market (
+CREATE TABLE IF NOT EXISTS aero_market (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(80) NOT NULL,
     number VARCHAR(20) NOT NULL,
@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS aura_market (
     INDEX (category), INDEX (identifier)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_mail (
+CREATE TABLE IF NOT EXISTS aero_mail (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner VARCHAR(120) NOT NULL,
     from_addr VARCHAR(120) NOT NULL,
@@ -219,40 +219,34 @@ CREATE TABLE IF NOT EXISTS aura_mail (
     INDEX (owner, folder)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_dc_users (
+CREATE TABLE IF NOT EXISTS aero_dc_users (
         identifier VARCHAR(80) NOT NULL PRIMARY KEY, alias VARCHAR(24) NOT NULL, color VARCHAR(8) NOT NULL, changed BIGINT NOT NULL DEFAULT 0, UNIQUE KEY uq_alias (alias)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_dc_rooms (
+CREATE TABLE IF NOT EXISTS aero_dc_rooms (
         id VARCHAR(32) NOT NULL PRIMARY KEY, name VARCHAR(40) NOT NULL, public TINYINT(1) NOT NULL DEFAULT 1, pass VARCHAR(64) NULL,
         ttl INT NOT NULL DEFAULT 24, creator VARCHAR(80) NULL, created BIGINT NOT NULL, last BIGINT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_dc_members (
+CREATE TABLE IF NOT EXISTS aero_dc_members (
         room VARCHAR(32) NOT NULL, identifier VARCHAR(80) NOT NULL, PRIMARY KEY (room, identifier), INDEX (identifier)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_dc_msgs (
+CREATE TABLE IF NOT EXISTS aero_dc_msgs (
         id BIGINT AUTO_INCREMENT PRIMARY KEY, room VARCHAR(32) NOT NULL, alias VARCHAR(24) NOT NULL, color VARCHAR(8) NOT NULL, body TEXT NULL, image TEXT NULL,
         created BIGINT NOT NULL, identifier VARCHAR(80) NOT NULL, INDEX (room, id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_scores (
+CREATE TABLE IF NOT EXISTS aero_scores (
         game VARCHAR(16) NOT NULL, identifier VARCHAR(80) NOT NULL, name VARCHAR(40) NOT NULL, score INT NOT NULL, updated BIGINT NOT NULL, PRIMARY KEY (game, identifier), INDEX (game, score)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_news (
+CREATE TABLE IF NOT EXISTS aero_news (
         id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100) NOT NULL, body TEXT NULL, image TEXT NULL, author VARCHAR(60) NOT NULL, author_id VARCHAR(80) NULL,
         source VARCHAR(40) NULL, breaking TINYINT(1) NOT NULL DEFAULT 0, created BIGINT NOT NULL, INDEX (created)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_loto_tickets (
+CREATE TABLE IF NOT EXISTS aero_loto_tickets (
         id INT AUTO_INCREMENT PRIMARY KEY, identifier VARCHAR(80) NOT NULL, nums VARCHAR(40) NOT NULL, draw INT NOT NULL, won INT NOT NULL DEFAULT 0, matches TINYINT NOT NULL DEFAULT 0, created BIGINT NOT NULL, INDEX (identifier, draw)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_loto_state (
+CREATE TABLE IF NOT EXISTS aero_loto_state (
         id TINYINT NOT NULL PRIMARY KEY, pool BIGINT NOT NULL, next_draw BIGINT NOT NULL, draw INT NOT NULL, last TEXT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS aura_findmy (
+CREATE TABLE IF NOT EXISTS aero_findmy (
         owner VARCHAR(80) NOT NULL, viewer VARCHAR(80) NOT NULL, PRIMARY KEY (owner, viewer)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ── pickax_heists ──
-CREATE TABLE IF NOT EXISTS pk_heists (
-        identifier VARCHAR(60) NOT NULL, heist VARCHAR(40) NOT NULL,
-        done LONGTEXT NULL, finales INT NOT NULL DEFAULT 0, last_finale INT NOT NULL DEFAULT 0,
-        PRIMARY KEY (identifier, heist)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS=1;
