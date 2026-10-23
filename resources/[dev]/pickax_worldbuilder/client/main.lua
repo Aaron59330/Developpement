@@ -423,6 +423,8 @@ CreateThread(function()
             end
             if near and Config.Target ~= 'ox_target' then
                 local label = (near.label and near.label ~= '' and near.kind ~= 'store' and near.kind ~= 'return' and near.kind ~= 'exit') and (' — ' .. near.label) or ''
+                -- pas de répétition : « Ouvrir le garage — Garage » devient « Ouvrir le garage »
+                if label ~= '' and near.text and near.text:lower():find(near.label:lower(), 1, true) then label = '' end
                 BB.ShowHelp(('Appuie sur ~INPUT_CONTEXT~ : %s%s'):format(near.text, label), Config.Marker, near.entity.marker)
                 if IsControlJustReleased(0, Config.InteractKey or 38) then interact(near) end
             end
