@@ -670,8 +670,11 @@ local WipeTables = {
     { 'gangbuilder_stats', 'identifier' },
     { 'worldbuilder_chase_stats', 'identifier' }, { 'worldbuilder_licenses', 'identifier' },
     { 'worldbuilder_pvp_stats', 'identifier' }, { 'worldbuilder_payouts', 'identifier' },
-    { 'phone_last_phone', 'id' }, { 'phone_backups', 'id' },
-    { 'phone_phones', 'owner_id' },          -- les autres tables du téléphone suivent via ON DELETE CASCADE
+    -- Téléphone Aero (pickax_phone) et braquages (pickax_heists)
+    { 'aura_phones', 'identifier' }, { 'aura_kv', 'owner' }, { 'aura_contacts', 'owner' }, { 'aura_conv', 'owner' },
+    { 'aura_photos', 'owner' }, { 'aura_accounts', 'identifier' }, { 'aura_match', 'identifier' }, { 'aura_swipes', 'identifier' },
+    { 'aura_bank_tx', 'identifier' }, { 'aura_bills', 'identifier' }, { 'aura_crypto', 'identifier' }, { 'aura_market', 'identifier' },
+    { 'aura_mail', 'owner' }, { 'aura_dc_users', 'identifier' }, { 'aura_findmy', 'owner' }, { 'pk_heists', 'identifier' },
     { 'account_info', 'license' },
     { 'users', 'identifier' },               -- en dernier
 }
