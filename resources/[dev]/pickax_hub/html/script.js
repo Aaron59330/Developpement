@@ -49,11 +49,7 @@ const views = {
       h('div.h', null, h('span', { html: ic('doc') }), `Factures (${bills.length})`, bills.length ? h('span', { style: 'margin-left:auto;color:var(--ac);letter-spacing:0;font-size:13px' }, money(dueTotal) + ' à payer') : null),
       bills.length ? h('div.scroll', { style: 'overflow:auto;min-height:0;flex:1;padding-right:6px' }, bills.map(b => h('div.bill', null, h('div', null, h('b', null, b.label), h('small', null, 'Facture n°' + b.id)), h('span.amt', null, money(b.amount)), h('button.btn.pri.sm', { onclick: () => act('payBill', { id: b.id }) }, 'Payer'))))
         : h('div.ok', null, h('span', { html: ic('check') }), h('b', null, 'Tout est à jour'), h('small', null, 'Aucune facture en attente.')));
-    const go = (t, s) => () => { tab = t; if (s) sub = s; draw(); };
-    const tile = (icon, label, desc, fn) => h('button.qt', { onclick: fn }, h('span', { html: ic(icon) }), h('div', null, h('b', null, label), h('small', null, desc)));
-    const quick = h('div.quick', null, tile('id', 'Documents', 'Identité, permis', go('docs')), tile('car', 'Véhicule', 'Portes et moteur', go('veh')), tile('cog', 'Préférences', 'HUD, apparence, FPS', go('prefs', 'menu')),
-      tile('key', 'Touches', 'Raccourcis du serveur', go('keys')), tile('term', 'Commandes', 'Commandes utiles', go('cmds')), tile('link', 'Liens', 'Discord et boutique', go('links')));
-    return h('div.info', null, hero, h('div.mid', null, left, right), quick);
+    return h('div.info', null, hero, h('div.mid', null, left, right));
   },
   docs() {
     const d = S.data;
