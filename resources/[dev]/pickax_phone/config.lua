@@ -53,6 +53,7 @@ Config.Hooks = {
 
 -- Position et taille du téléphone à l'écran
 Config.UI = {
+    crisp    = true,       -- true = la taille du téléphone change sa vraie taille (texte net à toutes les tailles) ; false = ancien mode (image mise à l'échelle, peut être flou)
     side     = 'right',    -- 'right' | 'left'
     marginX  = 28,         -- distance au bord (px)
     marginY  = 0,          -- distance entre le bas du téléphone et le bas de l'écran (px) : le téléphone reste toujours posé en bas, quelle que soit sa taille. 'auto' = centré verticalement

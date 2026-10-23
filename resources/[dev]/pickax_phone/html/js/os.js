@@ -447,11 +447,14 @@ const OS = {
     void st.offsetWidth;
     st.style.transition = prevTr;
     const left = u.side === 'left';
-    st.style.right = left ? 'auto' : (u.marginX == null ? 28 : u.marginX) + 'px';
-    st.style.left = left ? (u.marginX == null ? 28 : u.marginX) + 'px' : 'auto';
+    const crisp = u.crisp !== false;                       // vraie taille (zoom) : les distances de l'élément sont aussi multipliées par le zoom → on les divise par k
+    document.documentElement.classList.toggle('crisp', crisp);
+    const dz = crisp ? 1 / k : 1;
+    st.style.right = left ? 'auto' : ((u.marginX == null ? 28 : u.marginX) * dz) + 'px';
+    st.style.left = left ? ((u.marginX == null ? 28 : u.marginX) * dz) + 'px' : 'auto';
     // 'auto' (défaut) : téléphone centré verticalement, décalé de offsetY (positif = plus haut, négatif = plus bas)
     const auto = u.marginY === 'auto';
-    st.style.bottom = (auto ? Math.round((window.innerHeight - 864 * k) / 2 + (u.offsetY == null ? -10 : u.offsetY)) : (Number(u.marginY) || 0)) + 'px';
+    st.style.bottom = ((auto ? Math.round((window.innerHeight - 864 * k) / 2 + (u.offsetY == null ? -10 : u.offsetY)) : (Number(u.marginY) || 0)) * dz) + 'px';
     st.style.transformOrigin = left ? 'bottom left' : 'bottom right';
     const peek = $('#peek'); if (peek) { peek.style.right = left ? 'auto' : '38px'; peek.style.left = left ? '38px' : 'auto'; }
   },
