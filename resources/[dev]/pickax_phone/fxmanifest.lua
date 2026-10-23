@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'pickax_phone'
 author 'Pickax'
-description 'Aura — smartphone complet (ESX · QBCore · Qbox · standalone) : appels vocaux, messages, réseaux sociaux, banque, crypto, photos, mails, GPS, services, AirShare, App Store…'
+description 'Aero Smartphone — smartphone complet (ESX · QBCore · Qbox · standalone) : appels vocaux, messages, réseaux sociaux, banque, crypto, photos, mails, GPS, services, AirShare, App Store…'
 version '1.0.0'
 
 ui_page 'html/index.html'

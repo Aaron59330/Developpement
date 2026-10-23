@@ -612,7 +612,7 @@ const Builder = {
   phoneCard(s) {
     const c = this.cur;
     const on = s.phone_enabled !== false;
-    return `<div class="card"><div class="card-h"><div class="t">${ic('phone', 16)} Téléphone des joueurs (Aura)</div>${chip(on ? 'Joignable' : 'Non joignable', on ? 'ok' : 'mute')}</div>
+    return `<div class="card"><div class="card-h"><div class="t">${ic('phone', 16)} Téléphone des joueurs (Aero)</div>${chip(on ? 'Joignable' : 'Non joignable', on ? 'ok' : 'mute')}</div>
       <p class="hint" style="margin-bottom:12px">Les joueurs trouvent ce métier dans l'application <b>Services</b> du téléphone : ils peuvent <b>l'appeler</b> (appel vocal, le premier employé qui décroche) ou lui <b>envoyer une alerte</b> avec leur position. Les métiers créés ici apparaissent <b>tout de suite</b>, sans redémarrage. Les employés reçoivent l'alerte sur leur téléphone (GPS en un clic).</p>
       <div class="grid4"><label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="job.settings.phone_enabled" data-t="b" ${on ? 'checked' : ''}> Joignable par téléphone</label>
         ${fld('Numéro d\'appel (facultatif)', `<input data-path="job.settings.phone_number" value="${esc(s.phone_number || '')}" maxlength="10" placeholder="ex : 17, 555123">`)}

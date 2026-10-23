@@ -1,14 +1,14 @@
-# Aura — téléphone pickax_phone
+# Aero — téléphone pickax_phone
 
-Smartphone complet pour ESX (interface type smartphone moderne, marque « Aura »). 100 % français, sans dépendance payante.
+Smartphone complet pour ESX (interface type smartphone moderne, marque « Aero »). 100 % français, sans dépendance payante.
 
-## Config prête pour Bluebay Roleplay
+## Config prête (préréglage ESX)
 `config.lua` est déjà réglé pour ta base : ESX + ox_inventory + pma-voice + pickax_core + Job Builder.
 - Groupes admin `_dev / superadmin / admin`, notifications via `pickax_notify`, faim / soif via l'`esx_status` de pickax_core.
 - Comptes `bank` / `money`, société : Job Builder puis `esx_addonaccount` de pickax_core.
 - Véhicules : colonne `state` d'`owned_vehicles` (1 garage, 0 sorti, 2 fourrière).
 - Métiers joignables : ceux du Job Builder ; liste de secours avec tes jobs `lspd`, `ambulance`, `pillboxhopital`, `bennys`, `LsCustoms`, `pdm`, `banque`.
-- Couleur par défaut = couleur du serveur (`pickax_core/config.lua` → `AccentColor`), adresses mail en `@bluebay.mail`.
+- Couleur par défaut = couleur du serveur (`pickax_core/config.lua` → `AccentColor`), adresses mail en `@aero.mail`.
 - Objets : `phone` et `powerbank` existent déjà dans ton `ox_inventory`.
 - **Reste à renseigner** : `Config.Camera.webhook` (webhook Discord pour les photos) et installer `screenshot-basic`.
 
@@ -45,7 +45,7 @@ Le téléphone détecte tout seul ce qui tourne sur ton serveur (`config.lua`, s
 - Appui long (clic droit) sur une conversation, un message ou une icône de l'accueil pour les options.
 
 ## Applications
-Téléphone (clavier, récents, favoris, numéro masqué `*31#`, appels vocaux) · Messages (privé, groupes, photos, position, contact, réactions, réponses, lu/distribué, écriture en cours) · Contacts · Appareil photo (arrière / selfie, zoom) · Photos · Aura Bank (virements, factures, historique) · Crypto · Wallet · Plans (GPS, lieux) · Localiser · Garage · Mail · Notes · Calendrier (rappels) · Horloge (réveils, chrono, minuteur) · Calculette · Météo · Services (police, SAMU, dépanneur, taxi…) · Musique · AirShare · App Store · Réglages · Pulse (micro-blog) · Snapgram (photos & stories) · Match (rencontres) · Annonces (petites annonces).
+Téléphone (clavier, récents, favoris, numéro masqué `*31#`, appels vocaux) · Messages (privé, groupes, photos, position, contact, réactions, réponses, lu/distribué, écriture en cours) · Contacts · Appareil photo (arrière / selfie, zoom) · Photos · Aero Bank (virements, factures, historique) · Crypto · Wallet · Plans (GPS, lieux) · Localiser · Garage · Mail · Notes · Calendrier (rappels) · Horloge (réveils, chrono, minuteur) · Calculette · Météo · Services (police, SAMU, dépanneur, taxi…) · Musique · AirShare · App Store · Réglages · Pulse (micro-blog) · Snapgram (photos & stories) · Match (rencontres) · Annonces (petites annonces).
 
 Système : écran verrouillé avec code, centre de contrôle, notifications, Ne pas déranger, mode avion, thèmes clair/sombre, couleur d'accentuation, fonds d'écran (galerie / lien), batterie (recharge en véhicule ou batterie externe), multitâche.
 
@@ -64,7 +64,7 @@ Système : écran verrouillé avec code, centre de contrôle, notifications, Ne 
 
 ## Appeler les jobs du Job Builder
 - Tous les jobs créés dans le **Job Builder** sont des lignes joignables dans l'application **Services** (lus en direct : un job créé ou modifié apparaît **tout de suite**, sans redémarrage).
-- Réglages par job : Job Builder → job → carte **« Téléphone des joueurs (Aura) »** : joignable ou non, numéro d'appel court (ex. 17, 555123), nom affiché, mode (appel + alerte / appel seul / alerte seule), grade minimum pour recevoir, alerte anonyme, aide affichée.
+- Réglages par job : Job Builder → job → carte **« Téléphone des joueurs (Aero) »** : joignable ou non, numéro d'appel court (ex. 17, 555123), nom affiché, mode (appel + alerte / appel seul / alerte seule), grade minimum pour recevoir, alerte anonyme, aide affichée.
 - **Appel vocal** : sonne chez tous les employés en ligne (grade suffisant) ; le premier qui décroche prend l'appel (pma-voice), les autres arrêtent de sonner. Appel manqué si personne ne répond.
 - **Alerte** : message + position envoyés aux employés ; la **tablette police** reçoit un appel citoyen, les **EMS** un appel d'urgence, les autres jobs une notification téléphone avec bouton GPS.
 - Numéros par défaut : 17 au premier job de type police, 15 au premier job de type EMS (modifiable dans le job). Un numéro court se compose aussi au clavier.
@@ -78,7 +78,7 @@ exports.pickax_phone:GetSourceByNumber(number)
 exports.pickax_phone:Notify(source, titre, texte, app)
 exports.pickax_phone:SendMail(identifier, expediteur, objet, texte)
 exports.pickax_phone:SendMessage(numeroExpediteur, numeroDestinataire, texte)
-exports.pickax_phone:CreateBill(identifier, emetteur, montant, motif, societe)   -- facture payable dans Aura Bank
+exports.pickax_phone:CreateBill(identifier, emetteur, montant, motif, societe)   -- facture payable dans Aero Bank
 exports.pickax_phone:Dispatch('job:lspd', message, vector3, label)               -- alerte aux employés d'un job (ou id d'un service fixe)
 exports.pickax_phone:AddPhoto(identifier, url)
 exports.pickax_phone:SetBattery(source, 0-100)

@@ -1,12 +1,12 @@
 Config = {}
 
 -- ╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
--- ║  AURA — COMPATIBILITÉ : fonctionne sur ESX, QBCore, Qbox, ou sans framework (standalone)      ║
+-- ║  AERO SMARTPHONE — COMPATIBILITÉ : fonctionne sur ESX, QBCore, Qbox, ou sans framework (standalone)      ║
 -- ║  Tout est en « auto » par défaut : le téléphone détecte ce qui tourne sur ton serveur.        ║
 -- ║  Change une valeur seulement si la détection ne te convient pas.                              ║
 -- ╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
 
--- ▼▼▼ DÉJÀ RÉGLÉ POUR BLUEBAY ROLEPLAY (ESX + ox_inventory + pma-voice + pickax_core + Job Builder). Rien à changer. ▼▼▼
+-- ▼▼▼ PRÉRÉGLÉ ESX (ESX + ox_inventory + pma-voice + pickax_core + Job Builder). Rien à changer. ▼▼▼
 -- (les autres valeurs possibles sont indiquées en commentaire, au cas où tu changes de base un jour)
 Config.Framework = 'esx'       -- 'auto' | 'esx' | 'qb' | 'qbox' | 'standalone'
 Config.Inventory = 'ox'        -- 'auto' | 'ox' (ox_inventory) | 'qb' (qb/ps/lj-inventory) | 'qs' (qs-inventory) | 'esx' (inventaire ESX natif) | 'none'
@@ -90,9 +90,9 @@ Config.Limits = {
 -- ou  item = 'usb_key'  (il faut cet objet), ou  grade = 2  (grade minimum, avec jobs).
 
 -- ═══════════════════════════ GÉNÉRAL ═══════════════════════════
-Config.Brand        = 'Aura'            -- nom affiché (écran de démarrage, À propos…)
-Config.Carrier      = (PickaxTheme and PickaxTheme.short) or 'Aura'   -- « opérateur » affiché dans Réglages → Général (nom court du serveur : pickax_core/config.lua)
-Config.Model        = 'Aura 15 Pro'     -- modèle affiché dans Réglages → Général → Informations
+Config.Brand        = 'Aero'            -- nom affiché (écran de démarrage, À propos…)
+Config.Carrier      = (PickaxTheme and PickaxTheme.short) or 'Aero'   -- « opérateur » affiché dans Réglages → Général (nom court du serveur : pickax_core/config.lua)
+Config.Model        = 'Aero Phone Pro'     -- modèle affiché dans Réglages → Général → Informations
 Config.Command      = 'phone'           -- commande pour ouvrir/fermer le téléphone
 Config.Key          = 'F1'              -- touche par défaut (modifiable par le joueur dans les paramètres FiveM)
 Config.RequireItem  = true              -- true : il faut l'objet ci-dessous dans l'inventaire
@@ -106,7 +106,7 @@ Config.Number = {
     length   = 10,                      -- longueur totale (chiffres)
     group    = 2,                       -- affichage par groupes de N chiffres (06 12 34 56 78)
 }
-Config.MailDomain = 'bluebay.mail'      -- adresse mail : prenom.nom@bluebay.mail
+Config.MailDomain = 'aero.mail'      -- adresse mail : prenom.nom@aero.mail
 
 -- ═══════════════════════════ APPELS ═══════════════════════════
 Config.Calls = {
@@ -173,7 +173,7 @@ Config.Crypto = {
         { id = 'ETH', name = 'Ethereum', price = 2400,  color = '#627eea' },
         { id = 'SOL', name = 'Solana',   price = 95,    color = '#14f195' },
         { id = 'DOGE', name = 'Dogecoin', price = 0.12, color = '#c2a633' },
-        { id = 'AUR', name = 'Aura Coin', price = 12,   color = '#00a4ff' },
+        { id = 'AER', name = 'Aero Coin', price = 12,   color = '#00a4ff' },
     },
 }
 
@@ -293,7 +293,7 @@ Config.FindMy = { refresh = 5 }         -- secondes entre deux mises à jour de 
 -- ═══════════════════════════ MUSIQUE ═══════════════════════════
 -- Flux audio directs (mp3/aac/ogg). Les joueurs peuvent aussi ajouter leurs propres URL.
 Config.Radios = {
-    { name = 'Aura FM',      url = 'https://icecast.radiofrance.fr/fip-midfi.mp3',  color = '#ef4444' },
+    { name = 'Aero FM',      url = 'https://icecast.radiofrance.fr/fip-midfi.mp3',  color = '#ef4444' },
     { name = 'Lofi Beats',   url = 'https://streams.ilovemusic.de/iloveradio17.mp3', color = '#8b5cf6' },
     { name = 'Hits',         url = 'https://streams.ilovemusic.de/iloveradio1.mp3',  color = '#f97316' },
     { name = 'Chill',        url = 'https://streams.ilovemusic.de/iloveradio10.mp3', color = '#14b8a6' },

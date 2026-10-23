@@ -402,7 +402,7 @@ const OS = {
     const stage = $('#stage'); stage.classList.remove('hidden'); requestAnimationFrame(() => stage.classList.add('open'));
     $('#peek').innerHTML = '';
     clearTimeout(this.lockTimer);
-    if (!this.started) { this.started = true; if (!S.config.ui || S.config.ui.showBootLogo !== false) Screen().appendChild(h('div.boot', h('b', (S.config.brand || 'Aura').toUpperCase()))); setTimeout(() => $$('.boot').forEach(b => b.remove()), 1900); }
+    if (!this.started) { this.started = true; if (!S.config.ui || S.config.ui.showBootLogo !== false) Screen().appendChild(h('div.boot', h('b', (S.config.brand || 'Aero').toUpperCase()))); setTimeout(() => $$('.boot').forEach(b => b.remove()), 1900); }
     this.drawStatus(); this.drawLockNotifs(); Bus.emit('show');
   },
   hide() {

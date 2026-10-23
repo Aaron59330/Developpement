@@ -1,4 +1,4 @@
-/* ═══════════ Aura Bank & Crypto ═══════════ */
+/* ═══════════ Aero Bank & Crypto ═══════════ */
 const Bank = {
   data: null,
   async open(ctx) {
@@ -57,7 +57,7 @@ const Bank = {
     pg.body.appendChild(Spinner()); this.ctx.push(pg); draw();
   },
 };
-registerApp({ id: 'bank', name: 'Aura Bank', icon: 'bank', grad: ['#34c759', '#0a8f3c'], open: ctx => Bank.open(ctx) });
+registerApp({ id: 'bank', name: 'Aero Bank', icon: 'bank', grad: ['#34c759', '#0a8f3c'], open: ctx => Bank.open(ctx) });
 Bus.on('push:notify', d => { if (d.app === 'bank' && Bank.ctx && Bank.ctx.alive && Bank.pg && Bank.ctx.stack[0] === Bank.pg) Bank.load().then(() => Bank.draw()); });
 
 /* ───────────── Crypto ───────────── */

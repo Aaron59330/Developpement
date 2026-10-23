@@ -309,10 +309,10 @@ const Wallet = {
     const me = S.me;
     const card = (bg, top, mid, bot, ic) => h('div.wcard', { style: `background:${bg}` }, h('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-weight:700;letter-spacing:.06em' }, h('span', top), h('span', { html: icon(ic, 26) })), h('div', { style: 'font-size:30px;font-weight:600;margin-top:auto' }, mid), h('div', { style: 'display:flex;justify-content:space-between;font-size:13px;opacity:.85;margin-top:8px' }, bot));
     pg.body.appendChild(h('div', { style: 'padding:6px 16px;display:grid;gap:14px' },
-      card('linear-gradient(135deg,#0f2027,#2c5364)', (S.config.brand || 'Aura').toUpperCase() + ' BANK', money(b.bank), [h('span', me.name), h('span', '•••• ' + String(me.number).slice(-4))], 'card'),
+      card('linear-gradient(135deg,#0f2027,#2c5364)', (S.config.brand || 'Aero').toUpperCase() + ' BANK', money(b.bank), [h('span', me.name), h('span', '•••• ' + String(me.number).slice(-4))], 'card'),
       card('linear-gradient(135deg,#134e5e,#71b280)', 'ESPÈCES', money(b.cash), [h('span', 'Argent liquide'), h('span', '')], 'money'),
       card('linear-gradient(135deg,#373b44,#4286f4)', 'IDENTITÉ', me.name, [h('span', me.jobLabel || 'Citoyen'), h('span', fmtNum(me.number))], 'user')));
-    pg.body.appendChild(Group(null, [{ icon: 'bank', color: '#30d158', title: 'Ouvrir Aura Bank', chev: true, onclick: () => OS.openApp('bank') }]));
+    pg.body.appendChild(Group(null, [{ icon: 'bank', color: '#30d158', title: 'Ouvrir Aero Bank', chev: true, onclick: () => OS.openApp('bank') }]));
   },
 };
 registerApp({ id: 'wallet', name: 'Wallet', icon: 'wallet', grad: ['#3a3a3c', '#000'], dark: true, open: ctx => Wallet.open(ctx) });

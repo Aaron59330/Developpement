@@ -35,4 +35,4 @@ setInterval(() => { if (!S.me) return; OS.drawStatus(); OS.tickLock(); OS.tickAn
 setInterval(() => { if (S.me) pollGameTime(); }, 6000);
 setInterval(() => { Calls.tick && Calls.tick(); }, 1000);
 
-if (!IN_GAME && !window.__MOCK) document.body.innerHTML = '<div style="color:#fff;padding:20px;font-family:sans-serif">Interface Aura : à ouvrir depuis le jeu.</div>';
+if (!IN_GAME && !window.__MOCK) document.body.innerHTML = '<div style="color:#fff;padding:20px;font-family:sans-serif">Interface Aero : à ouvrir depuis le jeu.</div>';
