@@ -106,6 +106,7 @@ const P = {
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
   logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
 };
+P.building = '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M10 21v-4h4v4"/>';
 P.bolt = '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
 P.tool = '<path d="M4 20l9-9"/><path d="M14 4l6 6-3 3-6-6z"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
@@ -328,13 +329,13 @@ const GaragePanel = new (class extends PanelBase {
     return `<div class="gcar">${ic('car', 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>${bars}${pay}
       <div class="gacts"><button class="gbtn gprim" data-a="take">${ic('logout', 16)} Sortir le véhicule${fee ? ` · ${money(fee)}` : ''}</button>
       <button class="gbtn" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('box', 16)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>
-      <div class="gfoot">Modèle : ${esc(v.model || v.sub)} &nbsp;·&nbsp; Garage : ${esc(d.label)}</div>`;
+      <div class="gfoot">Modèle: ${esc(v.model || v.sub)} &nbsp;&nbsp; Garage: ${esc(d.label)}</div>`;
   }
   render() {
     const d = this.d, l = this.list();
     if (this.sel == null || !l.some(x => x.key === this.sel)) this.sel = l[0] ? l[0].key : null;
     const srv = (window.PICKAX_SERVER && (window.PICKAX_SERVER.short || window.PICKAX_SERVER.name)) || '';
-    const tabs = [['perso', 'users', 'Personnel']]; if ((d.fleet || []).length || d.mode === 'job') tabs.push(['fleet', 'shield', 'Service']);
+    const tabs = [['perso', 'user', 'Personnel']]; if ((d.fleet || []).length || d.mode === 'job') tabs.push(['fleet', 'building', 'Entreprise']);
     const fl = [['all', 'Tous'], ['ok', 'Bon état'], ['bad', 'Abîmés']];
     $root.innerHTML = `<div class="gar"><div class="gtop"><div class="gbrand">${ic('car', 26)}<div><b>GARAGE</b><small>${esc(d.label)}</small></div></div>
         <div class="gtabs">${tabs.map(t => `<button class="gtab ${this.tab === t[0] ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[1], 20)}<span>${t[2]}</span></button>`).join('')}</div>
