@@ -10,4 +10,4 @@ version '1.0.0'
 --  • theme.js  : valeurs de secours + application automatique aux interfaces NUI (couleur, nom, logo)
 --  • logo/     : logo du serveur (logo/logo.png par défaut, remplaçable)
 --  • theme.lua : inclus par les autres ressources ('@pickax_theme/theme.lua') pour lire la même couleur côté Lua
-files { 'theme.js', 'theme.lua', 'logo/*' }
+files { 'theme.js', 'theme.lua', 'design.css', 'logo/*' }

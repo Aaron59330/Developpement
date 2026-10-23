@@ -1,0 +1,37 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PICKAX — DESIGN SYSTEM  (style commun à toutes les interfaces du serveur)
+   Sombre, épuré, une seule couleur d'accent (celle du serveur, via theme.js).
+   Utilisation dans une page NUI :
+     <script src="https://cfx-nui-pickax_theme/theme.js"></script>
+     <link rel="stylesheet" href="https://cfx-nui-pickax_theme/design.css">
+   Composants : .pk-panel .pk-card .pk-btn(.pri/.grn/.red) .pk-chip .pk-tag .pk-seg .pk-input .pk-switch .pk-eyebrow .pk-h1 .pk-muted .pk-grid
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root{
+  --pk-bg:#07080b; --pk-bg2:#0d0f14; --pk-card:#12141a; --pk-card2:#1a1d25; --pk-line:rgba(255,255,255,.08);
+  --pk-fg:#f5f6f8; --pk-fg2:#9aa3b2; --pk-fg3:#5b6477;
+  --pk-ok:#30d158; --pk-warn:#ff9f0a; --pk-bad:#ff453a;
+  --pk-r-s:10px; --pk-r-m:16px; --pk-r-l:24px;
+  --pk-font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  --pk-shadow:0 40px 120px rgba(0,0,0,.65);
+}
+.pk-root{font-family:var(--pk-font);color:var(--pk-fg);-webkit-font-smoothing:antialiased}
+.pk-root *{box-sizing:border-box}
+.pk-panel{background:linear-gradient(180deg,var(--pk-bg2),var(--pk-bg));border:1px solid var(--pk-line);border-radius:var(--pk-r-l);box-shadow:var(--pk-shadow);overflow:hidden}
+.pk-card{background:var(--pk-card);border:1px solid var(--pk-line);border-radius:var(--pk-r-m);padding:16px}
+.pk-eyebrow{font-size:11px;letter-spacing:.28em;font-weight:700;text-transform:uppercase;color:var(--pk-accent,#0a84ff)}
+.pk-h1{font-size:30px;line-height:1.1;letter-spacing:-.03em;font-weight:700}
+.pk-muted{color:var(--pk-fg2)}
+.pk-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.pk-btn{font:inherit;border:0;cursor:pointer;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;background:var(--pk-card2);color:#fff;transition:.15s}
+.pk-btn:hover{filter:brightness(1.15)}.pk-btn:disabled{opacity:.35;cursor:not-allowed}
+.pk-btn.pri{background:var(--pk-accent,#0a84ff)}.pk-btn.grn{background:var(--pk-ok);color:#04210d}.pk-btn.red{background:rgba(255,69,58,.16);color:var(--pk-bad)}
+.pk-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid var(--pk-line);color:#d6dbe6}
+.pk-tag{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;background:rgba(var(--pk-accent-rgb,10,132,255),.16);color:var(--pk-accent,#0a84ff)}
+.pk-seg{display:flex;background:var(--pk-card);border-radius:12px;padding:3px}
+.pk-seg button{font:inherit;flex:1;border:0;background:none;cursor:pointer;padding:9px 0;border-radius:9px;font-size:13px;font-weight:600;color:var(--pk-fg2)}
+.pk-seg button.on{background:var(--pk-card2);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.pk-input{font:inherit;width:100%;background:var(--pk-card);border:1px solid var(--pk-line);border-radius:12px;padding:10px 12px;color:#fff;font-size:13px;outline:none}
+.pk-input:focus{border-color:var(--pk-accent,#0a84ff)}
+.pk-switch{position:relative;width:46px;height:28px;border-radius:14px;background:#3a3d46;cursor:pointer;transition:.2s;flex:none;border:0}
+.pk-switch:after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.pk-switch.on{background:var(--pk-ok)}.pk-switch.on:after{left:21px}

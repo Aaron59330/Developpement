@@ -1,0 +1,36 @@
+*{margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent}
+.hidden{display:none!important}
+#hub{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);animation:fade .2s}
+.shell{width:min(1120px,95vw);height:min(690px,92vh);display:grid;grid-template-columns:230px 1fr}
+.rail{border-right:1px solid var(--pk-line);padding:26px 16px;display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.015)}
+.brand{display:flex;align-items:center;gap:12px;padding:0 10px 22px}
+.brand .lg{width:38px;height:38px;border-radius:12px;background:var(--pk-accent);display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;box-shadow:0 8px 24px rgba(var(--pk-accent-rgb),.4)}
+.brand b{display:block;font-size:15px;letter-spacing:-.01em}.brand small{font-size:11px;color:var(--pk-fg3)}
+.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;font:inherit;font-size:14px;font-weight:600;color:var(--pk-fg2);background:none;border:0;cursor:pointer;text-align:left;transition:.15s}
+.nav svg{width:19px;height:19px;flex:none}.nav:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav.on{background:rgba(var(--pk-accent-rgb),.16);color:var(--pk-accent)}
+.rail .sp{flex:1}.hint{font-size:11px;color:var(--pk-fg3);padding:0 12px;line-height:1.5}
+.hint kbd{background:var(--pk-card2);border-radius:6px;padding:1px 6px;font-family:inherit;color:var(--pk-fg2)}
+.main{padding:30px 34px;overflow:auto;position:relative}
+.top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.x{width:34px;height:34px;border-radius:50%;background:var(--pk-card2);display:grid;place-items:center;font-size:15px;color:var(--pk-fg2);border:0;cursor:pointer}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.stat small{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--pk-fg3);font-weight:600}
+.stat b{display:block;font-size:26px;letter-spacing:-.03em;margin-top:6px}
+.sec{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--pk-fg2);font-weight:700;margin:0 0 12px;display:flex;gap:12px;align-items:center}.sec:after{content:'';flex:1;height:1px;background:var(--pk-line)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.tile{background:var(--pk-card);border:1px solid var(--pk-line);border-radius:18px;padding:18px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:.2s;display:block;width:100%}
+.tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22)}
+.tile .ic{width:42px;height:42px;border-radius:13px;background:rgba(var(--pk-accent-rgb),.16);color:var(--pk-accent);display:grid;place-items:center;margin-bottom:14px}
+.tile .ic svg{width:22px;height:22px}.tile b{display:block;font-size:15px;letter-spacing:-.01em}.tile small{font-size:12px;color:var(--pk-fg2)}
+.row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--pk-card);border:1px solid var(--pk-line);border-radius:16px;margin-bottom:8px}
+.row .grow{flex:1;min-width:0}.row b{display:block;font-size:14px}.row small{font-size:12px;color:var(--pk-fg2)}
+.plate{font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:700;background:#f1d34a;color:#111;padding:3px 8px;border-radius:6px;letter-spacing:.06em}
+.big{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.empty{padding:50px 20px;text-align:center;color:var(--pk-fg2);font-size:14px}
+ol.rules{list-style:none;counter-reset:r}ol.rules li{counter-increment:r;display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--pk-line);font-size:14px;color:#d6dbe6}
+ol.rules li:before{content:counter(r);flex:none;width:24px;height:24px;border-radius:50%;background:var(--pk-card2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--pk-fg2)}
+@keyframes fade{from{opacity:0}}
