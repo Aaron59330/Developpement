@@ -3,8 +3,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent}
 .hidden{display:none!important}
 #hub{--ac:var(--pk-accent);--acrgb:var(--pk-accent-rgb);position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);animation:fade .2s}
 .shell{width:min(1320px,96vw);height:min(760px,93vh);display:flex;flex-direction:column;position:relative;background:radial-gradient(900px 300px at 50% -80px,rgba(var(--acrgb),.16),transparent),#09090b;border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 40px 120px rgba(0,0,0,.75);overflow:hidden}
-.head{padding:22px 28px 0;display:flex;flex-direction:column;align-items:center;gap:14px;position:relative}
-.logo{position:absolute;left:28px;top:18px;height:54px;display:flex;align-items:center}
+.head{padding:44px 28px 6px;display:flex;flex-direction:column;align-items:center;gap:14px;position:relative}
+.logo{position:absolute;left:32px;top:30px;height:54px;display:flex;align-items:center}
 .logo img{height:52px;max-width:200px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(var(--acrgb),.4))}
 .logo .lg{width:46px;height:46px;border-radius:14px;border:2px solid var(--ac);display:grid;place-items:center;font-weight:800;color:var(--ac);font-size:16px}
 .tabs{margin-top:6px;display:flex;gap:4px;padding:5px;background:#101013;border:1px solid rgba(255,255,255,.06);border-radius:999px;flex-wrap:wrap;justify-content:center}
@@ -12,8 +12,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent}
 .tab svg{width:15px;height:15px;stroke-width:1.8}.tab:hover{color:#fff}
 .tab.on{background:rgba(var(--acrgb),.16);color:var(--ac);box-shadow:inset 0 0 0 1px rgba(var(--acrgb),.35)}
 .tab.dis{opacity:.4}
-.x{position:absolute;right:20px;top:20px;width:34px;height:34px;display:grid;place-items:center;color:#fff;background:#14141a;border:1px solid rgba(255,255,255,.07);border-radius:50%;cursor:pointer;font-size:18px}
-.body{flex:1;overflow:auto;padding:22px 28px 26px}
+.x{position:absolute;right:26px;top:34px;width:34px;height:34px;display:grid;place-items:center;color:#fff;background:#14141a;border:1px solid rgba(255,255,255,.07);border-radius:50%;cursor:pointer;font-size:18px}
+.body{flex:1;overflow:auto;padding:30px 28px 26px}
 .body::-webkit-scrollbar,.scroll::-webkit-scrollbar{width:4px}.body::-webkit-scrollbar-thumb,.scroll::-webkit-scrollbar-thumb{background:rgba(var(--acrgb),.6);border-radius:4px}
 .card{background:linear-gradient(180deg,#121216,#0e0e11);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px}
 .h{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#8d8d99;margin-bottom:14px;display:flex;align-items:center;gap:10px}
