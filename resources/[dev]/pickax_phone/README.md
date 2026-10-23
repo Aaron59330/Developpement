@@ -19,6 +19,14 @@ Téléphone (clavier, récents, favoris, numéro masqué `*31#`, appels vocaux) 
 
 Système : écran verrouillé avec code, centre de contrôle, notifications, Ne pas déranger, mode avion, thèmes clair/sombre, couleur d'accentuation, fonds d'écran (galerie / lien), batterie (recharge en véhicule ou batterie externe), multitâche.
 
+## Appeler les jobs du Job Builder
+- Tous les jobs créés dans le **Job Builder** sont des lignes joignables dans l'application **Services** (lus en direct : un job créé ou modifié apparaît **tout de suite**, sans redémarrage).
+- Réglages par job : Job Builder → job → carte **« Téléphone des joueurs (Aura) »** : joignable ou non, numéro d'appel court (ex. 17, 555123), nom affiché, mode (appel + alerte / appel seul / alerte seule), grade minimum pour recevoir, alerte anonyme, aide affichée.
+- **Appel vocal** : sonne chez tous les employés en ligne (grade suffisant) ; le premier qui décroche prend l'appel (pma-voice), les autres arrêtent de sonner. Appel manqué si personne ne répond.
+- **Alerte** : message + position envoyés aux employés ; la **tablette police** reçoit un appel citoyen, les **EMS** un appel d'urgence, les autres jobs une notification téléphone avec bouton GPS.
+- Numéros par défaut : 17 au premier job de type police, 15 au premier job de type EMS (modifiable dans le job). Un numéro court se compose aussi au clavier.
+- Si `pickax_jobbuilder` n'est pas démarré, la liste fixe `Config.Services` sert de secours (`Config.JobLines`).
+
 ## Exports serveur
 ```lua
 exports.pickax_phone:GetPhoneNumber(source)
@@ -28,7 +36,7 @@ exports.pickax_phone:Notify(source, titre, texte, app)
 exports.pickax_phone:SendMail(identifier, expediteur, objet, texte)
 exports.pickax_phone:SendMessage(numeroExpediteur, numeroDestinataire, texte)
 exports.pickax_phone:CreateBill(identifier, emetteur, montant, motif, societe)   -- facture payable dans Aura Bank
-exports.pickax_phone:Dispatch('police', message, vector3, label)                 -- alerte aux agents en service
+exports.pickax_phone:Dispatch('job:lspd', message, vector3, label)               -- alerte aux employés d'un job (ou id d'un service fixe)
 exports.pickax_phone:AddPhoto(identifier, url)
 exports.pickax_phone:SetBattery(source, 0-100)
 exports.pickax_phone:HasPhone(source)

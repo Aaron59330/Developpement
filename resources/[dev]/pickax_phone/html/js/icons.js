@@ -120,6 +120,8 @@ const ICONS = {
   bag2: '<path d="M6 7h12l-1 13H7zM9 7V5a3 3 0 0 1 6 0v2"/>',
   flag: '<path d="M5 21V4M5 5h12l-2 4 2 4H5"/>',
   zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  utensils: '<path d="M6 3v8a2 2 0 0 0 2 2v8M10 3v8a2 2 0 0 1-2 2M18 21V3c-3 2-4 5-4 8h4"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
   swipe: '<path d="M9 11V5a2 2 0 0 1 4 0v5l5 1.500a2 2 0 0 1 1.500 2.300L18.500 19a2 2 0 0 1-2 1.500H11a2 2 0 0 1-1.600-.8L5 14a1.800 1.800 0 0 1 2.600-2.500z"/>',
 };
 (function(){ for (const k in ICONS) ICONS[k] = ICONS[k].replace(/(\d)\.(\d)00(?!\d)/g, '$1.$2'); })();

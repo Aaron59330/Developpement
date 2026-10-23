@@ -30,6 +30,7 @@ server_scripts {
     'server/emstablet.lua',
     'server/bank.lua',
     'server/announce.lua',
+    'server/phone.lua',
     'server/compat.lua',
 }
 

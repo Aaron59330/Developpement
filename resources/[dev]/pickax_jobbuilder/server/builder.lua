@@ -367,6 +367,14 @@ local function cleanJob(payload)
             tuning_grade = math.floor(num(settings.tuning_grade, 0, maxGrade, 0)),
             tuning_billing = ({ customer = true, society = true, free = true })[settings.tuning_billing] and settings.tuning_billing or 'customer',
             tuning_markup = math.floor(num(settings.tuning_markup, 10, 500, 100)),
+            -- Téléphone Aura (pickax_phone) : le job devient joignable par les joueurs
+            phone_enabled = settings.phone_enabled ~= false,
+            phone_number = (str(settings.phone_number, 10):gsub('%D', '')),
+            phone_label = str(settings.phone_label, 40),
+            phone_mode = ({ both = true, alert = true, voice = true })[settings.phone_mode] and settings.phone_mode or 'both',
+            phone_grade = math.floor(num(settings.phone_grade, 0, maxGrade, 0)),
+            phone_anon = settings.phone_anon == true,
+            phone_hint = str(settings.phone_hint, 80),
             -- Annonces d'entreprise
             announce_enabled = settings.announce_enabled ~= false,
             announce_grade = math.floor(num(settings.announce_grade, 0, maxGrade, maxGrade)),

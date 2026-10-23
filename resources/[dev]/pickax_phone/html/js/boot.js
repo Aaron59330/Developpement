@@ -2,7 +2,7 @@
 async function bootPhone(data) {
   S.me = data.me; S.settings = data.settings || {}; S.hasPin = !!data.hasPin; S.installed = data.installed || []; S.catalog = data.catalog || [];
   S.battery = data.battery == null ? 100 : data.battery; S.config = data.config || {}; S.charging = false;
-  S.contactList = data.contacts || []; S.contacts = {}; S.contactList.forEach(c => { S.contacts[String(c.number).replace(/\D/g, '')] = c; });
+  S.lines = S.config.lines || []; S.contactList = data.contacts || []; S.contacts = {}; S.contactList.forEach(c => { S.contacts[String(c.number).replace(/\D/g, '')] = c; });
   if (!S.settings.notifOff) S.settings.notifOff = {}; if (!S.settings.badgeOff) S.settings.badgeOff = {};
   S.locked = true; S.notifs = []; S.badges = {}; OS.running = {}; OS.current = null; OS.order = [];
   OS.fit(); OS.build();

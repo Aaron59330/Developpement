@@ -117,6 +117,8 @@ local function addCall(jobName, data)
     return call
 end
 
+JB.tabletAddCall = addCall   -- utilisé par le téléphone Aura (appels citoyens)
+
 local function callView(call)
     local units = {}
     for _, u in ipairs(call.units) do units[#units + 1] = { src = u.src, name = u.name } end
@@ -163,6 +165,11 @@ RegisterCommand(P.PanicCommand, function(src)
     JBNotifyClient( src, '~g~Appel à l\'aide envoyé à tes collègues.')
     JB.log(job.name, x, 'panic')
 end, false)
+
+function JB.tabletHandles(job)
+    local s = job.settings or {}
+    return job.type == 'police' and s.tablet_enabled ~= false and s.tablet_dispatch ~= false
+end
 
 -- API pour les autres scripts (alarmes, braquages…) : target = nom d'un job OU « police » (tous les jobs police)
 exports('SendDispatch', function(target, title, message, coords, kind)

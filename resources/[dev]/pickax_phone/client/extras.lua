@@ -85,12 +85,14 @@ end)
 local blips = {}
 RegisterNetEvent('aura:dispatch', function(a)
     SendNUIMessage({ action = 'push', event = 'dispatch', data = a })
-    local blip = AddBlipForCoord(a.coords.x, a.coords.y, a.coords.z)
-    SetBlipSprite(blip, Config.Dispatch.sprite); SetBlipColour(blip, Config.Dispatch.color); SetBlipScale(blip, 0.9)
-    SetBlipFlashes(blip, true); SetBlipAsShortRange(blip, false)
-    BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName(a.label .. ' — ' .. (a.name or '')); EndTextCommandSetBlipName(blip)
-    blips[#blips + 1] = blip
-    SetTimeout(Config.Dispatch.blipSeconds * 1000, function() if DoesBlipExist(blip) then RemoveBlip(blip) end end)
+    if not a.noBlip and a.coords then   -- noBlip : la tablette du job place déjà son propre blip
+        local blip = AddBlipForCoord(a.coords.x, a.coords.y, a.coords.z)
+        SetBlipSprite(blip, Config.Dispatch.sprite); SetBlipColour(blip, Config.Dispatch.color); SetBlipScale(blip, 0.9)
+        SetBlipFlashes(blip, true); SetBlipAsShortRange(blip, false)
+        BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName(a.label .. ' — ' .. (a.name or '')); EndTextCommandSetBlipName(blip)
+        blips[#blips + 1] = blip
+        SetTimeout(Config.Dispatch.blipSeconds * 1000, function() if DoesBlipExist(blip) then RemoveBlip(blip) end end)
+    end
     PlaySoundFrontend(-1, 'Event_Message_Purple', 'GTAO_FM_Events_Soundset', true)
 end)
 

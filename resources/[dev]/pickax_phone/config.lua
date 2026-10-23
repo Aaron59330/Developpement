@@ -98,7 +98,19 @@ Config.Market = {
     expireDays = 14,
 }
 
+-- ═══════════════════════════ LIGNES DES JOBS (Job Builder) ═══════════════════════════
+-- Quand pickax_jobbuilder tourne, TOUS les jobs créés dans le builder deviennent des lignes joignables depuis l'app Services
+-- (appel vocal + alerte avec position). Ils se règlent dans le Job Builder → job → carte « Téléphone des joueurs ».
+-- Les jobs créés/modifiés apparaissent tout de suite, sans redémarrage.
+Config.JobLines = {
+    enabled       = true,      -- false : on revient à la liste fixe Config.Services ci-dessous
+    voice         = true,      -- autorise les appels vocaux vers les jobs (le premier employé qui décroche)
+    keepStatic    = false,     -- true : garde aussi les services fixes de Config.Services en plus des jobs du builder
+    ringTimeout   = 30,        -- secondes de sonnerie chez les employés
+}
+
 -- ═══════════════════════════ SERVICES (URGENCES, JOBS) ═══════════════════════════
+-- Liste de secours, utilisée seulement si pickax_jobbuilder n'est pas démarré (ou Config.JobLines.keepStatic = true)
 -- number : numéro composable au clavier ; jobs : métiers qui reçoivent l'alerte (en service)
 Config.Services = {
     { id = 'police',   label = 'Police',        number = '17',  icon = 'shield', color = '#2563eb', jobs = { 'police', 'sheriff' },           anon = true },

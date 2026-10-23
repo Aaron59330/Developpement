@@ -103,6 +103,7 @@ const P = {
   route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
   landmark: '<path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M12 2 3 7h18z"/>',
   percent: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
   megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
   gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
   utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
@@ -501,6 +502,7 @@ const Builder = {
       ${this.appearanceCard(s)}
       <div style="grid-column:1/-1;margin:14px 0">${this.jobMarkerCard(s)}</div>
       ${j.type === 'mecano' || c.points.some(p => p.type === 'tuning') ? this.tuningCard(s) : ''}
+      ${this.phoneCard(s)}
       ${this.announceCard(s)}
       <div class="card"><div class="card-h"><div class="t">${ic('route', 16)} Missions PNJ</div>${chip(s.missions_enabled === false ? 'Désactivées' : 'Activées', s.missions_enabled === false ? 'mute' : 'ok')}</div>
         <div class="grid3"><label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="job.settings.missions_enabled" data-t="b" ${s.missions_enabled === false ? '' : 'checked'}> Activer les missions pour ce job</label>
@@ -605,6 +607,20 @@ const Builder = {
         ${fld('Facturation', `<select data-path="job.settings.tuning_billing"><option value="customer" ${(s.tuning_billing || 'customer') === 'customer' ? 'selected' : ''}>Facturé au client (argent → société)</option><option value="society" ${s.tuning_billing === 'society' ? 'selected' : ''}>Payé par la société</option><option value="free" ${s.tuning_billing === 'free' ? 'selected' : ''}>Gratuit</option></select>`)}
         ${num('job.settings.tuning_markup', 'Majoration sur les prix (%)', s.tuning_markup ?? 100, 'min="10" max="500"')}</div>
       <p class="hint mt">100 % = prix de base (Paramètres → Tuning). Les modifications sont enregistrées dans <b>owned_vehicles</b> pour les véhicules possédés par un joueur.</p></div>`;
+  },
+
+  phoneCard(s) {
+    const c = this.cur;
+    const on = s.phone_enabled !== false;
+    return `<div class="card"><div class="card-h"><div class="t">${ic('phone', 16)} Téléphone des joueurs (Aura)</div>${chip(on ? 'Joignable' : 'Non joignable', on ? 'ok' : 'mute')}</div>
+      <p class="hint" style="margin-bottom:12px">Les joueurs trouvent ce métier dans l'application <b>Services</b> du téléphone : ils peuvent <b>l'appeler</b> (appel vocal, le premier employé qui décroche) ou lui <b>envoyer une alerte</b> avec leur position. Les métiers créés ici apparaissent <b>tout de suite</b>, sans redémarrage. Les employés reçoivent l'alerte sur leur téléphone (GPS en un clic).</p>
+      <div class="grid4"><label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="job.settings.phone_enabled" data-t="b" ${on ? 'checked' : ''}> Joignable par téléphone</label>
+        ${fld('Numéro d\'appel (facultatif)', `<input data-path="job.settings.phone_number" value="${esc(s.phone_number || '')}" maxlength="10" placeholder="ex : 17, 555123">`)}
+        ${fld('Nom affiché (facultatif)', `<input data-path="job.settings.phone_label" value="${esc(s.phone_label || '')}" maxlength="40" placeholder="${esc(c.job.label || '')}">`)}
+        ${fld('Mode', `<select data-path="job.settings.phone_mode"><option value="both" ${(s.phone_mode || 'both') === 'both' ? 'selected' : ''}>Appel + alerte</option><option value="voice" ${s.phone_mode === 'voice' ? 'selected' : ''}>Appel vocal seulement</option><option value="alert" ${s.phone_mode === 'alert' ? 'selected' : ''}>Alerte seulement</option></select>`)}</div>
+      <div class="grid4 mt">${fld('Grade min. pour recevoir les appels', this.gradeSelect('job.settings.phone_grade', s.phone_grade ?? 0))}
+        <label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="job.settings.phone_anon" data-t="b" ${s.phone_anon ? 'checked' : ''}> Alerte anonyme autorisée</label>
+        <div style="grid-column:span 2">${fld('Aide affichée au joueur (facultatif)', `<input data-path="job.settings.phone_hint" value="${esc(s.phone_hint || '')}" maxlength="80" placeholder="Décrivez la situation…">`)}</div></div></div>`;
   },
 
   announceCard(s) {

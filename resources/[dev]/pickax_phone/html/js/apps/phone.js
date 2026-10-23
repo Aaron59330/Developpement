@@ -13,6 +13,7 @@ const Calls = {
     const r = await rpc('callStart', number, !!hidden);
     if (!r || !r.ok) { this.end(); Alert('Appel impossible', (r && r.error) || rpc.err || 'Réseau indisponible', [{ label: 'OK', bold: true }]); return; }
     if (r.service) { this.end(); OS.openApp('services'); Bus.emit('serviceDial', r.service); return; }
+    if (r.line) S.call.service = r.line;
     if (r.state === 'busy') { this.setState(Object.assign(S.call, { state: 'busy' })); this.show(); Sound.busy(); setTimeout(() => this.end(), 2400); return; }
     if (r.state === 'unavailable') { this.setState(Object.assign(S.call, { state: 'unavailable' })); this.show(); Sound.busy(); setTimeout(() => this.end(), 2400); return; }
     S.call.id = r.id; S.call.state = 'ringing'; this.show(); Sound.ringback();
@@ -20,7 +21,7 @@ const Calls = {
 
   incoming(d) {
     if (S.call) return;
-    this.setState({ state: 'incoming', number: d.number, hidden: d.hidden, id: d.id, silent: d.silent });
+    this.setState({ state: 'incoming', number: d.number, hidden: d.hidden, id: d.id, silent: d.silent, service: d.service });
     if (!d.silent) Sound.ring();
     if (S.open && !S.locked && OS.current) this.banner(); else this.show();
     if (!S.open) this.peek();
@@ -31,7 +32,7 @@ const Calls = {
   hang() { return this.decline(); },
   connected(d) {
     Sound.stop(); const c = S.call || { number: d.number };
-    c.state = 'active'; c.since = Date.now(); c.id = d.id; c.number = d.number || c.number; c.muted = false;
+    c.state = 'active'; c.since = Date.now(); c.id = d.id; c.number = d.number || c.number; c.muted = false; if (d.service) c.service = d.service;
     this.setState(c); $$('.callbanner', Screen()).forEach(b => b.remove()); $('#peek') && clear($('#peek')); if (!S.open) this.peek(); this.show();
     clearInterval(this.timer); this.timer = setInterval(() => { OS.drawIsland(); this.tick(); }, 1000);
   },
@@ -55,7 +56,7 @@ const Calls = {
     $$('.callbanner', Screen()).forEach(b => b.remove());
     const c = S.call; if (!c) return;
     const b = h('div.callbanner.incoming', { style: 'position:absolute;left:10px;right:10px;top:12px;z-index:186' },
-      avatar(contactName(c.number), 44, (contactOf(c.number) || {}).avatar), h('div.nm', contactName(c.number), h('small', 'Appel entrant')),
+      avatar(contactName(c.number), 44, (contactOf(c.number) || {}).avatar), h('div.nm', contactName(c.number), h('small', c.service ? 'Appel pour : ' + c.service : 'Appel entrant')),
       h('button.cb.r', { html: icon('phoneDown', 22), onclick: () => this.decline() }), h('button.cb.g', { html: icon('phoneUp', 22), onclick: () => { b.remove(); this.answer(); } }));
     Screen().appendChild(b);
   },
@@ -63,7 +64,7 @@ const Calls = {
     const peek = $('#peek'); if (!peek) return; clear(peek);
     const c = S.call; if (!c) return;
     const nm = contactName(c.number);
-    if (c.state === 'incoming') peek.appendChild(h('div.callbanner.incoming', avatar(nm, 44, (contactOf(c.number) || {}).avatar), h('div.nm', nm, h('small', 'Appel entrant · ↑ décrocher · ↓ refuser')), h('button.cb.r', { html: icon('phoneDown', 22), onclick: () => this.decline() }), h('button.cb.g', { html: icon('phoneUp', 22), onclick: () => this.answer() })));
+    if (c.state === 'incoming') peek.appendChild(h('div.callbanner.incoming', avatar(nm, 44, (contactOf(c.number) || {}).avatar), h('div.nm', nm, h('small', (c.service ? 'Appel pour : ' + c.service : 'Appel entrant') + ' · ↑ décrocher · ↓ refuser')), h('button.cb.r', { html: icon('phoneDown', 22), onclick: () => this.decline() }), h('button.cb.g', { html: icon('phoneUp', 22), onclick: () => this.answer() })));
     else if (c.state === 'active') peek.appendChild(h('div.callbanner', h('div.nm', nm, h('small', 'Appel en cours · ↓ raccrocher')), h('button.cb.r', { html: icon('phoneDown', 22), onclick: () => this.decline() })));
   },
 
@@ -76,7 +77,7 @@ const Calls = {
     const nm = c.hidden && c.state === 'incoming' ? 'Numéro masqué' : contactName(c.number);
     const ct = contactOf(c.number);
     const labels = { dialing: 'Appel en cours…', ringing: 'Sonnerie…', incoming: 'Appel entrant', active: '', busy: 'Occupé', unavailable: 'Indisponible', ended: 'Appel terminé' };
-    el.appendChild(h('div.cs-top', avatar(nm, 110, ct && ct.avatar), h('div.cs-name', nm), c.number && !ct ? null : h('div.cs-sub', fmtNum(c.number)), h('div.cs-state' + (c.state === 'active' ? '.cs-time' : ''), c.state === 'active' ? dur((Date.now() - c.since) / 1000) : labels[c.state])));
+    el.appendChild(h('div.cs-top', avatar(nm, 110, ct && ct.avatar), h('div.cs-name', nm), c.service ? h('div.cs-sub', (c.state === 'incoming' ? 'Appel pour : ' : 'Service : ') + c.service) : (c.number && !ct ? null : h('div.cs-sub', fmtNum(c.number))), h('div.cs-state' + (c.state === 'active' ? '.cs-time' : ''), c.state === 'active' ? dur((Date.now() - c.since) / 1000) : labels[c.state])));
     if (c.state === 'incoming') {
       el.appendChild(h('div.cs-incoming',
         h('div', h('button.cs-btn.r', { html: icon('phoneDown', 32), onclick: () => this.decline() }), h('small', 'Refuser')),
@@ -109,7 +110,7 @@ Bus.on('push:callConnect', d => Calls.connected(d));
 Bus.on('push:callEnd', d => Calls.ended(d));
 Bus.on('push:missedCall', d => {
   S.missed = (S.missed || 0) + 1; OS.setBadge('phone', S.missed);
-  OS.notify({ app: 'phone', title: 'Appel manqué', body: d.hidden ? 'Numéro masqué' : contactName(d.number), icon: 'phoneMissed' });
+  OS.notify({ app: 'phone', title: d.service ? 'Appel manqué — ' + d.service : 'Appel manqué', body: d.hidden ? 'Numéro masqué' : contactName(d.number), icon: 'phoneMissed' });
 });
 window.addEventListener('message', e => {
   const d = e.data || {};

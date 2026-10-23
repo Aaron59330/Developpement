@@ -70,9 +70,16 @@ function fmtNum(n) {
   return out.join(' ');
 }
 function contactOf(number) { return S.contacts[String(number || '').replace(/\D/g, '')]; }
+function lineOf(number) {
+  const n = String(number || '');
+  return (S.lines || []).find(l => (l.number && l.number === n) || l.key === n);
+}
 function contactName(number) {
   if (!number) return 'Numéro masqué';
-  const c = contactOf(number); return c ? c.name : fmtNum(number);
+  const c = contactOf(number); if (c) return c.name;
+  const l = lineOf(number); if (l) return l.label;
+  if (String(number).startsWith('srv-')) return 'Service';
+  return fmtNum(number);
 }
 function initials(name) {
   const p = String(name || '?').trim().split(/\s+/); return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
