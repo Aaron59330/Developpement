@@ -294,7 +294,7 @@ const Mail = {
   compose(to, subject) {
     const v = { to: to || '', subject: subject || '', body: '' };
     const pg = Page({ title: 'Nouveau message', large: false, modal: true, left: [{ label: 'Annuler', onclick: () => this.ctx.pop() }], right: [{ label: 'Envoyer', bold: true, onclick: async () => { const ok = await rpc('mailSend', v.to, v.subject, v.body); if (!ok) { Toast(rpc.err || 'Envoi impossible', 'warning'); return; } Toast('Message envoyé', 'send'); this.ctx.pop(); } }] });
-    pg.body.appendChild(Group(null, [{ label: 'À', input: true, left: true, placeholder: 'adresse@' + 'aura.mail', value: v.to, onInput: x => v.to = x }, { label: 'Objet', input: true, left: true, placeholder: 'Objet', value: v.subject, onInput: x => v.subject = x }, { input: true, multiline: true, left: true, rows: 10, placeholder: 'Votre message', onInput: x => v.body = x }]));
+    pg.body.appendChild(Group(null, [{ label: 'À', input: true, left: true, placeholder: 'adresse@' + ((S.config && S.config.mailDomain) || 'aero.mail'), value: v.to, onInput: x => v.to = x }, { label: 'Objet', input: true, left: true, placeholder: 'Objet', value: v.subject, onInput: x => v.subject = x }, { input: true, multiline: true, left: true, rows: 10, placeholder: 'Votre message', onInput: x => v.body = x }]));
     this.ctx.push(pg);
   },
 };

@@ -58,6 +58,8 @@ Config.UI = {
     marginY  = 'auto',     -- 'auto' = téléphone centré verticalement ; ou un nombre = distance au bas de l'écran (px)
     offsetY  = -10,        -- (mode auto) décalage vertical : négatif = plus bas, positif = plus haut
     padY     = 56,         -- marge verticale totale réservée autour du téléphone (px) : plus grand = téléphone plus petit
+    userMin  = 60,         -- taille minimale choisissable par le joueur (% de la taille automatique)
+    userMax  = 125,        -- taille maximale choisissable (% ; limitée par la hauteur de l'écran)
     maxScale = 1.0,        -- taille maximale (1.0 = 100 %)
     minScale = 0.55,       -- taille minimale sur petits écrans
     showBootLogo = true,   -- animation de démarrage à la première ouverture
@@ -66,7 +68,7 @@ Config.UI = {
 -- Réglages donnés à chaque nouveau téléphone (le joueur peut ensuite les changer dans Réglages)
 Config.Defaults = {
     wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = (PickaxTheme and PickaxTheme.hex) or '#0a84ff', ringtone = 'Marimba', texttone = 'Cristal',
-    volume = 70, brightness = 100, textSize = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
+    volume = 70, brightness = 100, textSize = 100, phoneScale = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
     dnd = false, vibrate = true,
 }
 

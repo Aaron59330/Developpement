@@ -425,7 +425,10 @@ const OS = {
   },
   fit() {
     const u = (S.config && S.config.ui) || {};
-    const k = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - (u.padY == null ? 56 : u.padY)) / 864));
+    const base = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - (u.padY == null ? 56 : u.padY)) / 864));
+    // taille choisie par le joueur (Réglages › Affichage) : multiplicateur de la taille automatique, jamais plus grand que l'écran
+    const pct = Math.max(u.userMin || 60, Math.min(u.userMax || 125, (S.settings && S.settings.phoneScale) || 100)) / 100;
+    const k = Math.max(0.4, Math.min(base * pct, (window.innerHeight - 8) / 864));
     const st = $('#stage');
     st.style.setProperty('--scale', String(k));
     const left = u.side === 'left';
