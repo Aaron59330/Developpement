@@ -29,7 +29,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .dim { display: none; position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 190; transition: opacity .25s; }
 
 .wall { position: absolute; inset: 0; background-size: cover; background-position: center; transition: filter .35s, transform .35s var(--ease); }
-.wall.blur { filter: blur(26px) brightness(.75) saturate(1.2); transform: scale(1.12); }
+.wall.blur { filter: brightness(.7); }
 
 #island { position: absolute; top: 11px; left: 50%; width: 118px; height: 34px; margin-left: -59px; border-radius: 20px; background: #000; z-index: 180; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; overflow: hidden; transition: width .35s var(--ease), margin .35s var(--ease), height .35s var(--ease), border-radius .35s; color: #fff; }
 #island.call { width: 190px; margin-left: -95px; }
@@ -79,7 +79,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 
 /* ───────── accueil ───────── */
 .home { position: absolute; inset: 0; z-index: 10; transition: transform .4s var(--ease), opacity .3s; }
-.home.under { transform: scale(.9); opacity: 0; pointer-events: none; }
+.home.under { opacity: 0; pointer-events: none; }
 .home .pages { position: absolute; top: 62px; left: 0; right: 0; bottom: 140px; display: flex; transition: transform .35s var(--ease); }
 .home .hpage { flex: none; width: 390px; padding: 0 22px; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 96px; gap: 8px 0; align-content: start; }
 .home .widgets { grid-column: 1 / -1; grid-row: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -90,7 +90,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .appicon { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative; width: 74px; }
 .appicon .ico { position: relative; width: 60px; height: 60px; border-radius: 14.5px; display: grid; place-items: center; color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 4px 10px rgba(0,0,0,.28); transition: transform .12s; overflow: hidden; }
 .appicon .ico::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.22), transparent 50%); pointer-events: none; }
-.appicon:active .ico { transform: scale(.88); }
+.appicon:active .ico { opacity: .72; }
 .appicon .ico svg.ic { width: 32px; height: 32px; stroke-width: 1.7; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .appicon .nm { font-size: 11.5px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.55); white-space: nowrap; }
 .dock .appicon .nm { display: none; }
@@ -113,8 +113,8 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 /* ───────── vue application ───────── */
 .appview { position: absolute; inset: 0; z-index: 30; background: var(--bg); color: var(--fg); transform-origin: var(--ox, 50%) var(--oy, 50%); animation: appopen .38s var(--ease); overflow: hidden; border-radius: 0; }
 .appview.closing { animation: appclose .3s var(--ease) forwards; }
-@keyframes appopen { from { transform: scale(.2); opacity: 0; border-radius: 40px; } }
-@keyframes appclose { to { transform: scale(.2); opacity: 0; border-radius: 40px; } }
+@keyframes appopen { from { opacity: 0; } }
+@keyframes appclose { to { opacity: 0; } }
 .appview.dark { --bg: #000; --fg: #fff; --fg2: rgba(235,235,245,.62); --fg3: rgba(235,235,245,.3); --sep: rgba(84,84,88,.55); --card: #1c1c1e; --card2: #2c2c2e; --bg2: #1c1c1e; --bg3: #2c2c2e; }
 
 .page { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; isolation: isolate; }
@@ -187,7 +187,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .actions .grp { background: var(--glass); backdrop-filter: blur(30px); border-radius: 14px; overflow: hidden; } .actions .grp.c { background: var(--bg2); }
 .actions button { width: 100%; height: 56px; font-size: 20px; color: var(--accent); display: block; } .actions button + button { border-top: .5px solid var(--sep); } .actions button.red { color: var(--red); } .actions button.bold { font-weight: 600; } .actions .head { padding: 14px; font-size: 13px; color: var(--fg2); text-align: center; border-bottom: .5px solid var(--sep); }
 .alert { position: absolute; left: 50%; top: 50%; width: 270px; margin: -80px 0 0 -135px; z-index: 152; background: var(--glass); backdrop-filter: blur(40px) saturate(1.5); border-radius: 14px; text-align: center; animation: alertin .25s var(--ease); overflow: hidden; }
-@keyframes alertin { from { transform: scale(1.15); opacity: 0; } }
+@keyframes alertin { from { opacity: 0; } }
 .alert .ab { padding: 20px 16px 16px; } .alert h4 { font-size: 17px; font-weight: 600; margin-bottom: 4px; } .alert p { font-size: 13px; line-height: 1.35; }
 .alert .ac { display: flex; border-top: .5px solid var(--sep); } .alert .ac button { flex: 1; height: 44px; font-size: 17px; color: var(--accent); } .alert .ac button + button { border-left: .5px solid var(--sep); } .alert .ac button.bold { font-weight: 600; } .alert .ac button.red { color: var(--red); }
 .alert input { margin-top: 12px; width: 100%; height: 30px; border-radius: 6px; background: var(--card2); padding: 0 8px; font-size: 14px; color: var(--fg); }
@@ -196,7 +196,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 
 /* ───────── notifications, centre de contrôle, multitâche ───────── */
 .notif { background: rgba(60,60,64,.62); backdrop-filter: blur(30px) saturate(1.5); border-radius: 22px; padding: 12px 14px; display: flex; gap: 10px; color: #fff; cursor: pointer; animation: notifin .45s var(--ease); width: 100%; }
-@keyframes notifin { from { transform: translateY(-60px) scale(.9); opacity: 0; } }
+@keyframes notifin { from { transform: translateY(-60px); opacity: 0; } }
 .notif .ni { width: 38px; height: 38px; border-radius: 9px; display: grid; place-items: center; flex: none; } .notif .ni svg.ic { width: 21px; height: 21px; }
 .notif .nt { flex: 1; min-width: 0; } .notif .nt b { font-size: 15px; display: block; } .notif .nt p { font-size: 14px; opacity: .92; margin-top: 1px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .notif .nm { font-size: 12px; opacity: .6; }
 .notif .na { display: flex; gap: 8px; margin-top: 8px; } .notif .na button { height: 30px; padding: 0 14px; border-radius: 15px; background: rgba(255,255,255,.2); font-size: 14px; }
@@ -209,7 +209,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .nc .nch { display: flex; justify-content: space-between; align-items: center; padding: 0 22px 10px; } .nc .nch h2 { font-size: 24px; } .nc .nch button { font-size: 13px; background: rgba(255,255,255,.22); padding: 6px 12px; border-radius: 14px; }
 .nc .list { flex: 1; overflow: auto; padding: 0 14px; display: flex; flex-direction: column; gap: 8px; } .nc .grab { position: absolute; bottom: 10px; left: 50%; width: 138px; margin-left: -69px; height: 5px; border-radius: 3px; background: #fff; opacity: .6; cursor: pointer; }
 .nc .grab::before { content: ''; position: absolute; inset: -14px -30px; }
-.cc { position: absolute; inset: 0; z-index: 141; background: rgba(0,0,0,.35); backdrop-filter: blur(36px); color: #fff; padding: 66px 20px 0; opacity: 0; pointer-events: none; transform: scale(1.06); transition: .3s var(--ease), visibility 0s .3s; visibility: hidden; }
+.cc { position: absolute; inset: 0; z-index: 141; background: rgba(0,0,0,.35); backdrop-filter: blur(36px); color: #fff; padding: 66px 20px 0; opacity: 0; pointer-events: none; transition: .3s var(--ease), visibility 0s .3s; visibility: hidden; }
 .cc.open { opacity: 1; pointer-events: auto; transform: none; visibility: visible; transition-delay: 0s; }
 .cc .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; } .cc .grid > * { min-width: 0; }
 .cc .tile { background: rgba(80,80,84,.5); border-radius: 26px; padding: 12px; }
@@ -263,7 +263,7 @@ input[type=range], input[type=checkbox], input[type=radio] { accent-color: var(-
 .sz-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
 .sz-val { flex: 1; text-align: center; font-size: 30px; font-weight: 600; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
 .sz-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--card2); color: var(--accent); font-size: 28px; line-height: 1; display: grid; place-items: center; border: 0; cursor: pointer; }
-.sz-btn:active { transform: scale(.94); background: var(--fg3); }
+.sz-btn:active { opacity: .7; background: var(--fg3); }
 .sizer .seg { display: flex; gap: 4px; } .sizer .seg button { flex: 1; height: 36px; padding: 0 4px; font-size: 14px; }
 .sizer { flex: 1; min-width: 0; } .sizer .seg { margin: 0; }
 
