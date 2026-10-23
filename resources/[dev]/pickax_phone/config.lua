@@ -62,7 +62,7 @@ Config.UI = {
     userMax  = 125,        -- taille maximale choisissable (% ; limitée par la hauteur de l'écran)
     maxScale = 1.0,        -- taille maximale (1.0 = 100 %)
     minScale = 0.55,       -- taille minimale sur petits écrans
-    blur     = true,       -- false : aucun flou d'arrière-plan sur le téléphone (à essayer si des coins sombres carrés dépassent du cadre dans le jeu)
+    blur     = false,      -- false (recommandé) : pas de flou d'arrière-plan. Le flou (true) fait apparaître des coins noirs carrés autour du téléphone dans le jeu
     showBootLogo = true,   -- animation de démarrage à la première ouverture
 }
 
