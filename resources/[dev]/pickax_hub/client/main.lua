@@ -5,6 +5,15 @@ CreateThread(function()
 end)
 
 local open = false
+
+-- type de menu choisi par le joueur : 'new' (ce menu) ou 'classic' (ancien menu RageUI)
+local function getMode()
+    local m = GetResourceKvpString('pkhub_mode')
+    if m == 'new' or m == 'classic' then return m end
+    return Config.DefaultMode or 'new'
+end
+exports('UseNew', function() return getMode() == 'new' end)
+exports('SetMode', function(m) if m == 'new' or m == 'classic' then SetResourceKvp('pkhub_mode', m) end end)
 local function nui(a, d) d = d or {}; d.action = a; SendNUIMessage(d) end
 local function started(r) return GetResourceState(r) == 'started' end
 local function call(res, fn, ...) if not started(res) then return nil end local ok, v = pcall(function(...) return exports[res][fn](exports[res], ...) end, ...) return ok and v or nil end
@@ -66,6 +75,7 @@ function OpenHub()
     if open or not ESX then return end
     local data = collect()
     local theme = PickaxTheme or {}
+    data.mode = getMode()
     open = true; SetNuiFocus(true, true)
     nui('open', { accent = Config.Accent, data = data, server = { name = theme.name, short = theme.short, logo = theme.logo } })
 end
@@ -176,6 +186,13 @@ function A.editor(d)
     else
         if not IsRecording() then ESX.ShowNotification("Vous n'êtes pas en train d'enregistrer un clip.") else StopRecordingAndSaveClip() end
     end
+end
+
+function A.mode(d)
+    if d.value ~= 'new' and d.value ~= 'classic' then return end
+    SetResourceKvp('pkhub_mode', d.value)
+    if d.value == 'classic' then closeHub(); SetTimeout(250, function() ExecuteCommand(Config.ClassicCommand) end) end
+    return { mode = d.value }
 end
 
 function A.link(d)

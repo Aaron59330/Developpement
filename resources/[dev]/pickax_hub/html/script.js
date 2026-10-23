@@ -16,7 +16,7 @@ const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const logoUrl = () => { const l = String((window.PICKAX_SERVER && window.PICKAX_SERVER.logo) || 'logo.png'); return /^(https?:)?\/\//i.test(l) || /^(data|nui):/i.test(l) ? l : 'https://cfx-nui-pickax_theme/logo/' + l.replace(/^\/+/, ''); };
 const initials = n => (n || '?').split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
 
-let S = null, tab = 'info', sub = 'look';
+let S = null, tab = 'info', sub = 'menu';
 const TABS = [['info', 'Informations', 'user'], ['docs', 'Documents', 'id'], ['veh', 'Véhicule', 'car'], ['prefs', 'Préférences', 'cog'], ['keys', 'Touches', 'key'], ['cmds', 'Commandes', 'term'], ['links', 'Liens', 'link']];
 
 async function act(name, payload, redraw = true) {
@@ -63,9 +63,15 @@ const views = {
   },
   prefs() {
     const p = S.data.prefs, L = S.data.lists, ui = p.ui || {}, hud = p.hud || {};
-    const NAV = [['look', 'Apparence des menus', 'palette'], ['hud', 'Affichage du HUD', 'monitor'], ['perf', 'Performances (FPS)', 'bolt'], ['game', 'Jeu', 'gamepad'], ['rec', 'Rockstar Editor', 'video']];
+    const NAV = [['menu', 'Type de menu', 'cog'], ['look', 'Apparence des menus', 'palette'], ['hud', 'Affichage du HUD', 'monitor'], ['perf', 'Performances (FPS)', 'bolt'], ['game', 'Jeu', 'gamepad'], ['rec', 'Rockstar Editor', 'video']];
     const nav = h('div.side', null, NAV.map(n => h('button.sn' + (sub === n[0] ? '.on' : ''), { onclick: () => { sub = n[0]; draw(); } }, h('span', { html: ic(n[2]) }), n[1])));
     const panes = {
+      menu() {
+        const mode = S.data.mode || 'new';
+        const opt = (id, t, d) => h('button.mode' + (mode === id ? '.on' : ''), { onclick: () => act('mode', { value: id }) }, h('b', null, t), h('small', null, d));
+        return h('div', null, h('div.modes', null, opt('new', 'Nouveau menu', 'Interface moderne (celle-ci)'), opt('classic', 'Ancien menu', 'Menu RageUI d\u2019origine (touche F5)')),
+          h('div', { style: 'color:#8d8d99;font-size:12px;padding-top:12px' }, 'Votre choix est mémorisé. Vous pouvez revenir ici depuis l\u2019ancien menu (bouton « Passer au nouveau menu »).'));
+      },
       look() {
         if (!p.hasUi) return h('div.empty', null, 'Module d’interface indisponible (pickax_ui).');
         const U = (k, v) => act('pref', { key: k, value: v });
@@ -145,8 +151,11 @@ function draw() {
 window.addEventListener('message', e => {
   const m = e.data || {};
   if (m.action === 'open') {
-    S = m; tab = 'info'; sub = 'look'; $('#hub').classList.remove('hidden');
+    S = m; tab = 'info'; sub = 'menu'; $('#hub').classList.remove('hidden');
     if (m.accent) { const r = document.documentElement.style; r.setProperty('--pk-accent', m.accent); r.setProperty('--pk-accent-rgb', [1, 3, 5].map(i => parseInt(m.accent.slice(i, i + 2), 16)).join(',')); }
+    const hex = (getComputedStyle(document.documentElement).getPropertyValue('--pk-accent') || '#0a84ff').trim();
+    const rgb = /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)) : [10, 132, 255];
+    document.documentElement.style.setProperty('--onac', (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) > 150 ? '#12081a' : '#ffffff');
     draw();
   } else if (m.action === 'close') $('#hub').classList.add('hidden');
 });

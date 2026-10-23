@@ -285,6 +285,15 @@ local function OpenMenu()
 		Wait(0)
 		RageUI.IsVisible(mainmenu, true, true, true, function()
 			RageUI.Separator("Connecté en tant qu'id [~p~"..GetPlayerServerId(PlayerId()).."~s~]")
+			if ConfigMenuF5.UseHub ~= false and GetResourceState('pickax_hub') == 'started' then
+				RageUI.ButtonWithStyle("Passer au nouveau menu", "Interface moderne (réversible dans Préférences > Type de menu)", {RightLabel = "→→→"}, true, function(_, _, s)
+					if s then
+						exports['pickax_hub']:SetMode('new')
+						RageUI.CloseAll()
+						CreateThread(function() Wait(300) exports['pickax_hub']:Open() end)
+					end
+				end)
+			end
 			RageUI.ButtonWithStyle("Informations", "Votre profil, votre argent et vos factures", {RightLabel = "→→→"}, true, function() end, Informations)
 			RageUI.ButtonWithStyle("Documents officiels", "Carte d'identité, permis de conduire et port d'armes", {RightLabel = "→→→"}, true, function() end, Docs)
 			local inVeh = IsPedInAnyVehicle(PlayerPedId(), false)
@@ -798,7 +807,7 @@ exports('HubPerfSet', function(key, value)
 end)
 
 RegisterCommand(ConfigMenuF5.Commande.CommandeName, function()
-	if ConfigMenuF5.UseHub ~= false and GetResourceState('pickax_hub') == 'started' then
+	if ConfigMenuF5.UseHub ~= false and GetResourceState('pickax_hub') == 'started' and exports['pickax_hub']:UseNew() then
 		exports['pickax_hub']:Open()
 		return
 	end

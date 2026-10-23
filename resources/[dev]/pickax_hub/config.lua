@@ -2,7 +2,10 @@ Config = {}
 
 Config.Command = 'hub'                -- /hub ouvre le menu (F5 l'ouvre aussi : pickax_core/players/menupersonnel → ConfigMenuF5.UseHub)
 Config.Key     = nil                  -- touche propre au hub (nil = aucune, on garde F5 du menu personnel)
-Config.Accent  = '#d9a3f5'            -- couleur du menu (lilas). nil = couleur du serveur (pickax_core/config.lua)
+Config.Accent  = nil                  -- nil = couleur du serveur (pickax_core/config.lua → AccentColor). Mets '#RRGGBB' pour forcer une autre couleur
+
+Config.DefaultMode = 'new'            -- menu proposé par défaut : 'new' (ce menu) ou 'classic' (ancien menu RageUI). Chaque joueur peut changer dans Préférences
+Config.ClassicCommand = 'menuF5'      -- commande de l'ancien menu (pickax_core/players/menupersonnel)
 
 Config.Links = {                      -- onglet « Liens » (https uniquement)
     Discord  = 'https://' .. ((PickaxTheme and PickaxTheme.discord) or 'discord.gg/bluebayrp'),
