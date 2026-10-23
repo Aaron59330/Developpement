@@ -48,35 +48,15 @@ function rightLabel(r) {
 
 function badge(name) { return name ? (ICONS[name] || ICONS.dot) : ''; }
 
-var ICOMAP = [
-  [/informations|profil/i,'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>'],
-  [/document|identit|permis/i,'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M15 10h3M15 13h3M6 16c.5-1.5 1.7-2 3-2s2.5.5 3 2"/>'],
-  [/v[ée]hicule|moteur|capot|coffre|portes|fen[êe]tre|limit/i,'<path d="M5 17h14M3 13l2-6h14l2 6v4H3zM7 17v2M17 17v2"/>'],
-  [/pr[ée]f[ée]rence|r[ée]glage|apparence|hud|performance|style/i,'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1.3l2-1.5-2-3.4-2.3 1a7 7 0 00-2.2-1.3L14 3h-4l-.4 2.5a7 7 0 00-2.2 1.3l-2.3-1-2 3.4 2 1.5A7 7 0 005 12c0 .4 0 .9.1 1.3l-2 1.5 2 3.4 2.3-1a7 7 0 002.2 1.3L10 21h4l.4-2.5a7 7 0 002.2-1.3l2.3 1 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z"/>'],
-  [/touche|raccourci/i,'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>'],
-  [/commande/i,'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/>'],
-  [/boussole|compass/i,'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'],
-  [/m[ée]tier|argent|portefeuille/i,'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>'],
-  [/discord/i,'<path d="M7 7c3-1 7-1 10 0l2 9c-2 1.5-4 2-7 2s-5-.5-7-2zM9.5 12h.01M14.5 12h.01"/>'],
-  [/boutique/i,'<path d="M6 7h12l1 13H5zM9 7a3 3 0 016 0"/>'],
-  [/serveur|joueur/i,'<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>'],
-  [/facture/i,'<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>'],
-  [/crosse|radar|hud|jeu/i,'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 12h4M9 10v4M15.5 11h.01M18 13h.01"/>'],
-  [/record|editor/i,'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>'],
-  [/son|volume/i,'<path d="M3 9h5l5-4v14l-5-4H3zM16.5 8.5a5 5 0 010 7"/>'],
-  [/couleur|bord|taille|banni/i,'<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.3.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-9.5-9-9.5z"/>'],
-  [/r[ée]initialiser/i,'<path d="M3 12a9 9 0 109-9M3 4v5h5"/>']
-];
-function icoFor(label){ var t=String(label||'').replace(/~[a-zA-Z]~/g,''); for(var i=0;i<ICOMAP.length;i++){ if(ICOMAP[i][0].test(t)) return '<span class="ico"><svg viewBox="0 0 24 24">'+ICOMAP[i][1]+'</svg></span>'; } return '<span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span>'; }
 function item(it) {
   if (it.k === 'ln') return '<div class="ln"></div>';
-  if (it.k === 's') return '<div class="sep">' + (it.l ? '<span>' + gta(it.l) + '</span>' : '') + '</div>';
+  if (it.k === 's') return '<div class="sep">' + gta(it.l) + '</div>';
   var cls = 'it' + (it.act ? ' act' : '') + (it.en === false ? ' off' : '');
   var style = '';
   var col = it.act ? it.hl : it.bg;
   if (col) style = ' style="background:rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.28);border-color:rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.7)"';
   var h = '<div class="' + cls + '"' + style + '>';
-  h += badge(it.lb) || icoFor(it.l);
+  h += badge(it.lb);
   h += '<span class="lb">' + gta(it.l) + '</span>';
   if (it.k === 'l') h += '<span class="lst"><i>‹</i>' + gta(it.v) + '<i>›</i></span>';
   if (it.r) h += rightLabel(it.r);
@@ -93,19 +73,12 @@ function hexRgb(h) {
 }
 
 var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96 };
-var OVERRIDES = ['--sel', '--sel-bd', '--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
+var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
 
-var designClassic = false;
 function applyCfg(c) {
   if (!c) return;
   [$('wrap'), $('dlgwrap'), $('chwrap')].forEach(function (w) { applyCfgTo(w, c); });
   $('banner').classList.toggle('hidden', c.banner === false);
-  $('banner-old').classList.toggle('hidden', c.banner === false);
-  var classic = c.design === 'classique';
-  $('css-new').disabled = c.design === 'classique' || c.design === 'aqua';
-  $('css-old').disabled = !classic;
-  $('css-aqua').disabled = c.design !== 'aqua';
-  designClassic = classic;
 }
 
 function applyCfgTo(w, c) {
@@ -123,8 +96,8 @@ function applyCfgTo(w, c) {
     st.setProperty('--muted', 'rgba(' + t + ',.5)');
     st.setProperty('--act-text', 'rgb(' + t + ')');
   }
-  if (c.selbg) { st.setProperty('--act-bg', 'rgba(' + hexRgb(c.selbg) + ',.3)'); st.setProperty('--sel', hexRgb(c.selbg).split(',').length === 3 ? 'rgb(' + hexRgb(c.selbg) + ')' : ''); }
-  if (c.selborder) { st.setProperty('--act-border', c.selborder); st.setProperty('--sel-bd', c.selborder); }
+  if (c.selbg) st.setProperty('--act-bg', 'rgba(' + hexRgb(c.selbg) + ',.3)');
+  if (c.selborder) st.setProperty('--act-border', c.selborder);
   if (c.btnRadius !== undefined) st.setProperty('--r-btn', c.btnRadius + 'px');
   if (c.cardRadius !== undefined) st.setProperty('--r-card', c.cardRadius + 'px');
 }
@@ -136,36 +109,11 @@ function render(d) {
   $('count').textContent = d.c || '';
   $('count').classList.toggle('hidden', !d.c);
   $('items').innerHTML = (d.i || []).map(item).join('');
-  var items = d.i || [], act = null;
-  if (designClassic) {
-    $('info').classList.toggle('hidden', !d.inf);
-    if (d.inf) $('info').innerHTML = infoHtml(d.inf);
-    var ds = $('desc');
-    if (d.ds) { ds.innerHTML = '<span class="dt">' + gta(d.ds) + '</span>'; ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
-    return;
-  }
-  $('desc').classList.add('hidden');
-  items.forEach(function (it) { if (it.act) act = it; });
-  var p = '';
-  if (act && act.k !== 's' && act.k !== 'ln') {
-    p += '<div class="pico">' + icoFor(act.l) + '</div>';
-    p += '<h2>' + gta(act.l) + '</h2>';
-    if (act.k === 'c') p += '<div class="state ' + (act.ck ? 'on' : '') + '"><i></i>' + (act.ck ? 'Activé' : 'Désactivé') + '</div>';
-    else if (act.k === 'l') p += '<div class="state on"><i></i>' + gta(act.v) + '</div>';
-    else if (act.r && !/^(→+|⇒|▶|►|>>|↗)$/.test(plain(act.r))) p += '<div class="state on"><i></i>' + gta(act.r) + '</div>';
-    if (d.ds) p += '<p class="pd">' + gta(d.ds) + '</p>';
-    p += '<div class="hint">' + (act.k === 'c' ? 'Entrée pour activer / désactiver' : act.k === 'l' ? '← → pour changer la valeur' : (/↗/.test(String(act.r || '')) ? 'Entrée pour ouvrir le lien' : 'Entrée pour valider')) + '</div>';
-  } else if (d.ds) {
-    p += '<p class="pd" style="margin-top:20px">' + gta(d.ds) + '</p>';
-  }
-  if (d.inf) p += '<div class="infb">' + infoHtml(d.inf) + '</div>';
+  var ds = $('desc');
+  if (d.ds) { ds.innerHTML = '<span class="dt">' + gta(d.ds) + '</span>'; ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
   var inf = $('info');
-  if (p) { inf.innerHTML = p; inf.classList.remove('hidden'); } else { inf.classList.add('hidden'); }
-  var a = document.querySelector('#items .it.act');
-  if (a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
+  if (d.inf) { inf.innerHTML = infoHtml(d.inf); inf.classList.remove('hidden'); } else { inf.classList.add('hidden'); }
 }
-
-function plain(t) { return String(t || '').replace(/~[a-zA-Z_0-9]+~/g, '').trim(); }
 
 // Panneau d'infos : "Libellé : valeur" -> ligne libellé / valeur ; "Titre :" -> intitulé ; reste -> paragraphe
 function infoHtml(inf) {

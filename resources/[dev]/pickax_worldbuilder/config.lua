@@ -9,11 +9,6 @@ Config.AcePermission   = 'worldbuilder.admin'                -- (optionnel) perm
 Config.Command         = 'worldbuilder'                      -- /worldbuilder ouvre le builder
 Config.OpenKey         = false                               -- touche pour ouvrir le builder sans taper la commande (ex : 'F6') — utile si un autre script bloque le chat
 
--- Images des véhicules dans les garages : %s = nom du modèle en minuscules (ex : sultan). '' = silhouette seulement.
--- Par défaut : banque d'images publique GitHub (nécessite internet côté joueur). Pour héberger tes images : mets un lien du même format
--- (https://ton-site/img/%s.png) ou un dossier de ta ressource (nui://pickax_worldbuilder/html/cars/%s.png, à ajouter dans fxmanifest 'files').
-Config.VehicleImageUrl = 'https://raw.githubusercontent.com/MericcaN41/gta5carimages/main/images/%s.png'
-
 Config.DrawDistance     = 18.0   -- distance d'affichage des markers
 Config.InteractDistance = 1.8    -- distance pour interagir (E)
 Config.ServerDistance   = 14.0   -- tolérance côté serveur (anti-triche)

@@ -106,7 +106,6 @@ const P = {
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
   logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
 };
-P.building = '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M10 21v-4h4v4"/>';
 P.bolt = '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
 P.tool = '<path d="M4 20l9-9"/><path d="M14 4l6 6-3 3-6-6z"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
@@ -305,69 +304,25 @@ class PanelBase {
   }
 }
 
-/* ── Garage (tableau plein écran : onglets, recherche, grille de véhicules, fiche à droite) ── */
+/* ── Garage ── */
 const GaragePanel = new (class extends PanelBase {
-  init(d) { this.tab = d.mode === 'job' ? 'fleet' : 'perso'; this.q = ''; this.filter = 'all'; this.sel = null; }
-  list() {
-    const d = this.d, q = (this.q || '').trim().toLowerCase();
-    if (this.tab === 'gang') return [];
-    let l = this.tab === 'fleet' ? (d.fleet || []).map(f => ({ key: String(f.i), name: f.name || f.label, sub: f.model, spawn: f.spawn || f.model, price: f.price || 0, fleet: true })) : (d.vehicles || []).map(v => ({ key: v.plate, name: v.name, sub: v.plate, engine: v.engine ?? 1000, body: v.body ?? 1000, fuel: v.fuel ?? 100, model: v.model, spawn: v.spawn }));
-    if (this.tab !== 'fleet' && this.filter === 'ok') l = l.filter(v => v.engine >= 700 && v.body >= 700);
-    if (this.tab !== 'fleet' && this.filter === 'bad') l = l.filter(v => v.engine < 700 || v.body < 700);
-    if (q) l = l.filter(v => (v.name + ' ' + v.sub).toLowerCase().includes(q));
-    return l;
-  }
-  img(v, size) {
-    const sil = ic('car', size), u = this.d.img && v.spawn && /^[a-z0-9_]+$/.test(String(v.spawn)) ? String(this.d.img).replace('%s', v.spawn) : '';
-    if (!u) return sil;
-    window.__garSil = sil;
-    return `<img class="gphoto" src="${esc(u)}" alt="" loading="lazy" onload="this.classList.add('ok')" onerror="this.outerHTML=window.__garSil">`;
-  }
-  cards(l) {
-    const none = this.tab === 'gang' ? ['Aucun véhicule de groupe', 'Aucun véhicule n\'est attribué à ton groupe illégal.'] : this.tab === 'fleet' ? ['Aucun véhicule de service', 'Rien de disponible pour ton grade.'] : ['Aucun véhicule', 'Aucun véhicule rangé dans ce garage.'];
-    return l.map(v => `<div class="gv ${v.key === this.sel ? 'on' : ''}" data-a="pick" data-v="${esc(v.key)}"><div class="gimg">${this.img(v, 40)}</div><b>${esc(v.name)}</b><small>${esc(v.sub)}</small></div>`).join('')
-      || `<div class="gempty">${ic('car', 34)}<b>${none[0]}</b><small>${none[1]}</small></div>`;
-  }
-  detail(l) {
-    const d = this.d, v = l.find(x => x.key === this.sel);
-    if (!v) return `<div class="gempty">${ic('car', 34)}<small>Sélectionne un véhicule</small></div>`;
-    const fee = v.fleet ? v.price : d.fee;
-    const pay = fee ? payRow(d.payments, this.method) : '';
-    return `<div class="gcar">${this.img(v, 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>
-      <div class="gacts"><button class="gbtn gprim" data-a="take">${ic('logout', 16)} Sortir le véhicule${fee ? ` · ${money(fee)}` : ''}</button>
-      <button class="gbtn" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('box', 16)} Ranger le véhicule</button>
-      <button class="gbtn" disabled title="Bientôt disponible">${ic('pin', 16)} Localiser</button>
-      <button class="gbtn" disabled title="Bientôt disponible">${ic('edit', 16)} Renommer</button></div>${pay}
-      <div class="gfoot">Modèle: ${esc(v.model && typeof v.model === 'string' ? v.model : (v.spawn || v.sub))} &nbsp;&nbsp; Garage: ${esc(d.label)}</div>`;
-  }
   render() {
-    const d = this.d, l = this.list();
-    if (this.sel == null || !l.some(x => x.key === this.sel)) this.sel = l[0] ? l[0].key : null;
-    const srv = (window.PICKAX_SERVER && (window.PICKAX_SERVER.short || window.PICKAX_SERVER.name)) || '';
-    const tabs = [['fleet', 'building', 'Entreprise'], ['perso', 'user', 'Personnel'], ['gang', 'users', 'Groupe illégal']];
-    const fl = [['all', 'Tous'], ['ok', 'Bon état'], ['bad', 'Abîmés']];
-    $root.innerHTML = `<div class="gar"><div class="gtop"><div class="gbrand">${ic('car', 26)}<div><b>GARAGE</b><small>${esc(d.label)}</small></div></div>
-        <div class="gtabs">${tabs.map(t => `<button class="gtab ${this.tab === t[0] ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[1], 20)}<span>${t[2]}</span></button>`).join('')}</div>
-        <div class="gsrv">${window.PICKAX_LOGO ? `<img class="glogo" src="${esc(window.PICKAX_LOGO)}" alt="" onerror="this.outerHTML='<b>${esc(String(srv).toUpperCase())}</b>'">` : `<b>${esc(String(srv).toUpperCase())}</b>`}</div></div>
-      <div class="gmain"><div class="gleft"><div class="gbar"><input data-path="q" placeholder="Rechercher..." value="${esc(this.q)}">
-        ${this.tab === 'perso' ? fl.map(f => `<button class="gflt ${this.filter === f[0] ? 'on' : ''}" data-a="flt" data-v="${f[0]}">${f[1]}</button>`).join('') : ''}</div>
-        <div class="ggrid" id="ggrid">${this.cards(l)}</div></div><div class="gdet" id="gdet">${this.detail(l)}</div></div></div>`;
+    const d = this.d, job = d.mode === 'job';
+    const rows = job
+      ? d.fleet.map(f => `<div class="item"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(f.name)}</b><small class="mono">${esc(f.model)}</small></div>${f.price ? `<span class="price">${money(f.price)}</span>` : chip('Gratuit', 'ok')}<button class="primary sm" data-a="take" data-v="${f.i}">Sortir</button></div>`).join('')
+      : d.vehicles.map(v => `<div class="item"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(v.name)}</b><small class="mono">${esc(v.plate)}</small>
+          <div class="minis">${pctBar('Moteur', v.engine ?? 1000, 1000)}${pctBar('Carrosserie', v.body ?? 1000, 1000)}${pctBar('Essence', v.fuel ?? 100, 100)}</div></div>
+          <button class="primary sm" data-a="take" data-v="${esc(v.plate)}">Sortir${d.fee ? ` · ${money(d.fee)}` : ''}</button></div>`).join('');
+    const empty = job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.';
+    const needPay = job ? d.fleet.some(f => f.price > 0) : d.fee > 0;
+    $root.innerHTML = panel({ icon: job ? 'shield' : 'car', title: d.label, sub: job ? 'Flotte de service' : `${d.vehicles.length} véhicule${d.vehicles.length > 1 ? 's' : ''} disponible${d.vehicles.length > 1 ? 's' : ''}`, cls: 'md',
+      body: `${needPay ? payRow(d.payments, this.method) : ''}<div class="list">${rows || emptyState('car', 'Garage vide', empty)}</div>
+        <button class="wide" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 16)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun véhicule à proximité)'}</button>` });
   }
-  refresh() {
-    const l = this.list();
-    if (this.sel == null || !l.some(x => x.key === this.sel)) this.sel = l[0] ? l[0].key : null;
-    const g = document.getElementById('ggrid'), t = document.getElementById('gdet');
-    if (g) g.innerHTML = this.cards(l);
-    if (t) t.innerHTML = this.detail(l);
-  }
-  afterInput(p) { if (p === 'q') this.refresh(); }
   async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'pay') { this.method = v; return this.refresh(); }
-    if (a === 'tab') { this.tab = v; this.sel = null; return this.render(); }
-    if (a === 'flt') { this.filter = v; return this.render(); }
-    if (a === 'pick') { this.sel = v; return this.refresh(); }
-    if (a === 'take' && this.sel != null) { const r = await this.act('garage:take', this.sel, this.method); if (r && r.ok) $root.classList.add('hidden'); }
+    const a = el.dataset.a;
+    if (a === 'pay') { this.method = el.dataset.v; return this.render(); }
+    if (a === 'take') { const r = await this.act('garage:take', el.dataset.v, this.method); if (r && r.ok) $root.classList.add('hidden'); }
     if (a === 'store') { const r = await this.act('garage:store'); if (r && r.ok) $root.classList.add('hidden'); }
   }
 })();

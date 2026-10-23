@@ -44,14 +44,7 @@ local function findVehicle(c, radius)
 end
 
 local function enrich(list)
-    for _, v in ipairs(list or {}) do
-        v.name = VehicleLabel(v.model)
-        if v.model then
-            local hash = type(v.model) == 'string' and joaat(v.model) or v.model
-            local n = GetDisplayNameFromVehicleModel(hash)
-            v.spawn = (n and n ~= 'CARNOTFOUND') and n:lower() or nil
-        end
-    end
+    for _, v in ipairs(list or {}) do v.name = VehicleLabel(v.model) end
 end
 
 local function reportSpawned(veh, plate)
@@ -82,7 +75,6 @@ Handlers.garage = function(node)
         if not res or not res.ok then return Notify((res and res.error) or 'Garage indisponible', 'error') end
         enrich(res.vehicles) enrich(res.fleet)
         res.eid, res.pi = node.eid, node.pi
-        res.img = Config.VehicleImageUrl
         res.inVehicle = GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 or findVehicle(point.store or point.coords, 12.0) ~= nil
         OpenPanel('garage', res, { type = 'garage', eid = node.eid, pi = node.pi })
     end, node.eid, node.pi)
