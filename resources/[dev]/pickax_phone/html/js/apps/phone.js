@@ -191,7 +191,7 @@ const Phone = {
     '123456789*0#'.split('').forEach(k => padEl.appendChild(h('button', { onclick: () => press(k) }, k, h('small', letters[k] || ' '))));
     const call = h('button.dp-call', { html: icon('phoneUp', 32), onclick: () => { if (!buf) return; let n = buf, hid = false; if (n.startsWith('*31#')) { hid = true; n = n.slice(4); } Calls.dial(n, hid); buf = ''; upd(); } });
     const del = h('button.dp-del', { html: icon('x', 26), onclick: () => { buf = buf.slice(0, -1); upd(); }, ondblclick: () => { buf = ''; upd(); } });
-    pg.body.appendChild(h('div.dp-wrap', h('div', { style: 'height:56px' }), disp, addBtn, padEl, h('div.dp-row', h('span'), call, del)));
+    pg.body.appendChild(h('div.dp-wrap', disp, addBtn, padEl, h('div.dp-row', h('span'), call, del)));
     pg.opts.onShow = () => { const f = (e) => { if (!$('.dp-wrap')) { document.removeEventListener('keydown', f); return; } if (/^[0-9*#]$/.test(e.key) && !(e.target.tagName === 'INPUT')) press(e.key); else if (e.key === 'Backspace' && e.target.tagName !== 'INPUT') { buf = buf.slice(0, -1); upd(); } else if (e.key === 'Enter' && e.target.tagName !== 'INPUT') call.click(); }; document.addEventListener('keydown', f); };
     return pg;
   },
