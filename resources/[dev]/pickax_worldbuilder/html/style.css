@@ -566,3 +566,4 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gar .gmain { grid-template-columns: 1fr calc(620 * var(--u)); }
 .gar .gdet { align-self: start; height: auto; max-height: 100%; }
 .gar .gfoot { margin-top: calc(14 * var(--u)); padding-top: 0; }
+.gar .gdet { margin-top: calc(80 * var(--u)); }
