@@ -90,6 +90,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent}
 .bigempty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:420px;color:#8d8d99}
 .bigempty span svg{width:64px;height:64px;color:var(--ac);opacity:.7;stroke-width:1.2}.bigempty b{color:#fff;font-size:20px}.bigempty small{font-size:14px;max-width:360px;text-align:center}
 .rows.two{max-height:100%;overflow:auto}
-.grid2{height:100%;align-items:stretch}.grid2 .doc{min-height:0;padding:24px}.grid2 .doc .idc{height:auto;flex:1;min-height:210px;align-items:flex-start;margin-bottom:20px}
-.grid2 .doc h3{font-size:20px}.grid2 .doc p{font-size:13px;line-height:1.5;margin-bottom:20px}
+.grid2{align-items:stretch}.grid2 .doc{padding:24px}.grid2 .doc .idc{height:240px;margin-bottom:20px;align-items:flex-start}
+.grid2 .doc h3{font-size:20px}.grid2 .doc p{font-size:13px;line-height:1.5;margin-bottom:20px;min-height:40px}
 .grid2 .doc .ph{width:72px;height:92px}.grid2 .doc .ln b{font-size:20px}
