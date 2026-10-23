@@ -440,7 +440,12 @@ const OS = {
     const k = Math.max(0.4, Math.min(base * pct, (window.innerHeight - 8) / 864));
     document.documentElement.classList.toggle('noblur', u.blur !== true);   // flou d'arrière-plan : désactivé par défaut (il fait dépasser des coins noirs dans le jeu) ; Config.UI.blur = true pour le réactiver
     const st = $('#stage');
+    // Changement de taille sans transition : une transition sur l'échelle laisse le navigateur du jeu garder le texte
+    // dessiné à l'ancienne taille (téléphone flou après un changement de taille)
+    const prevTr = st.style.transition; st.style.transition = 'none';
     st.style.setProperty('--scale', String(k));
+    void st.offsetWidth;
+    st.style.transition = prevTr;
     const left = u.side === 'left';
     st.style.right = left ? 'auto' : (u.marginX == null ? 28 : u.marginX) + 'px';
     st.style.left = left ? (u.marginX == null ? 28 : u.marginX) + 'px' : 'auto';
