@@ -349,12 +349,12 @@ const OS = {
       rb('wifi', st.wifi && !st.airplane, '', () => save({ wifi: !st.wifi })), rb('bluetooth', st.bluetooth, '', () => save({ bluetooth: !st.bluetooth })));
     const music = h('div.tile', { style: 'padding:14px;display:flex;flex-direction:column;justify-content:center;cursor:pointer', onclick: () => this.openApp('music') }, h('small', { style: 'opacity:.7' }, 'Lecture en cours'), h('b', { style: 'font-size:15px;margin:6px 0' }, (window.MusicState && MusicState.title) || 'Aucun titre'), h('div', { style: 'display:flex;gap:14px;font-size:22px;opacity:.9' }, h('span', { html: icon((window.MusicState && MusicState.playing) ? 'pause' : 'play', 24) })));
     const slider = (ic, val, on) => {
-      const el = h('div.slider', { html: icon(ic) }, h('i', { style: `height:${val}%` }));
-      const setFrom = (e) => { const r = el.getBoundingClientRect(), k = r.height / 150 || 1; let v = Math.round(100 - ((e.clientY - r.top) / r.height) * 100); v = Math.max(5, Math.min(100, v)); $('i', el).style.height = v + '%'; on(v); };
+      const el = h('div.slider', h('i', { style: `width:${val}%` }), h('span', { html: icon(ic, 24) }));
+      const setFrom = (e) => { const r = el.getBoundingClientRect(); let v = Math.round(((e.clientX - r.left) / (r.width || 1)) * 100); v = Math.max(5, Math.min(100, v)); $('i', el).style.width = v + '%'; on(v); };
       let drag = false; el.addEventListener('pointerdown', e => { drag = true; el.setPointerCapture(e.pointerId); setFrom(e); }); el.addEventListener('pointermove', e => drag && setFrom(e)); el.addEventListener('pointerup', () => { drag = false; });
       return el;
     };
-    const sl = h('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:12px' }, slider('sun', st.brightness == null ? 100 : st.brightness, v => { S.settings.brightness = v; this.applyTheme(); clearTimeout(this.bt); this.bt = setTimeout(() => rpc('settingsSet', { brightness: v }), 400); }), slider('volume', st.volume == null ? 70 : st.volume, v => { S.settings.volume = v; clearTimeout(this.vt); this.vt = setTimeout(() => rpc('settingsSet', { volume: v }), 400); }));
+    const sl = h('div.sliders', slider('sun', st.brightness == null ? 100 : st.brightness, v => { S.settings.brightness = v; this.applyTheme(); clearTimeout(this.bt); this.bt = setTimeout(() => rpc('settingsSet', { brightness: v }), 400); }), slider('volume', st.volume == null ? 70 : st.volume, v => { S.settings.volume = v; clearTimeout(this.vt); this.vt = setTimeout(() => rpc('settingsSet', { volume: v }), 400); }));
     const cts = (ic, label, on, fn) => h('div.tile.wide', { onclick: () => { fn(); this.drawCC(); } }, h('div', { style: 'width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:' + (on ? 'var(--accent)' : 'rgba(120,120,128,.5)'), html: icon(ic, 20) }), h('span', label));
     const small = h('div.small-row',
       ...[['torch', 'Lampe', this.torch, () => { this.torch = !this.torch; post('flashlight', { state: this.torch }); }],
@@ -365,8 +365,8 @@ const OS = {
     const small2 = h('div.small-row',
       ...[['calc', 'Calculette', () => this.openApp('calculator')], ['camera', 'Appareil photo', () => this.openApp('camera')], ['alarm', 'Réveil', () => this.openApp('clock')], ['lightning', 'Batterie externe', async () => { const ok = await post('usePowerbank'); Toast(ok ? 'Batterie rechargée' : 'Aucune batterie externe', 'lightning'); }]]
         .map(x => h('div.tile', { title: x[1], onclick: () => { this.closeCC(); x[2](); }, html: icon(x[0] === 'calc' ? 'calc' : x[0], 26) })));
-    cc.appendChild(h('div.grid', tile, h('div', { style: 'display:grid;gap:12px' }, music, h('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:12px' }, sl.children[0], sl.children[1]))));
-    cc.appendChild(small); cc.appendChild(small2);
+    cc.appendChild(h('div.grid', tile, music));
+    cc.appendChild(sl); cc.appendChild(small); cc.appendChild(small2);
     cc.appendChild(h('div', { style: 'text-align:center;margin-top:26px;opacity:.75;font-size:14px' }, 'Batterie ' + Math.round(S.battery) + '%' + (S.charging ? ' · en charge' : '')));
     cc.appendChild(h('div.grab', { style: 'position:absolute;bottom:10px;left:50%;width:138px;margin-left:-69px;height:5px;border-radius:3px;background:#fff;opacity:.6;cursor:pointer', onclick: () => this.closeCC() }));
   },

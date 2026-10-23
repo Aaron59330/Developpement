@@ -210,12 +210,16 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .nc .grab::before { content: ''; position: absolute; inset: -14px -30px; }
 .cc { position: absolute; inset: 0; z-index: 141; background: rgba(0,0,0,.35); backdrop-filter: blur(36px); color: #fff; padding: 66px 20px 0; opacity: 0; pointer-events: none; transform: scale(1.06); transition: .3s var(--ease); }
 .cc.open { opacity: 1; pointer-events: auto; transform: none; }
-.cc .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cc .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; } .cc .grid > * { min-width: 0; }
 .cc .tile { background: rgba(80,80,84,.5); border-radius: 26px; padding: 12px; }
-.cc .conn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; aspect-ratio: 1; }
+.cc .conn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; aspect-ratio: 1; min-width: 0; align-content: stretch; }
 .cc .rb { width: 100%; aspect-ratio: 1; border-radius: 50%; background: rgba(120,120,128,.5); display: grid; place-items: center; color: #fff; } .cc .rb.on { background: var(--accent); } .cc .rb.on.orange { background: var(--orange); } .cc .rb.on.green { background: var(--green); } .cc .rb svg.ic { width: 24px; height: 24px; }
 .cc .tog { aspect-ratio: 1; display: grid; place-items: center; padding: 0; cursor: pointer; } .cc .tog.on { background: #fff; color: #000; }
-.cc .slider { position: relative; height: 150px; border-radius: 22px; background: rgba(80,80,84,.5); overflow: hidden; touch-action: none; cursor: pointer; } .cc .slider i { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; } .cc .slider svg.ic { position: absolute; bottom: 14px; left: 50%; margin-left: -12px; color: #555; z-index: 1; }
+.cc .sliders { display: grid; gap: 12px; margin-top: 12px; }
+.cc .slider { position: relative; height: 58px; border-radius: 22px; background: rgba(80,80,84,.5); overflow: hidden; touch-action: none; cursor: pointer; }
+.cc .slider i { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+.cc .slider span { position: absolute; left: 18px; top: 0; bottom: 0; display: flex; align-items: center; z-index: 1; color: #fff; mix-blend-mode: difference; pointer-events: none; }
+.cc .slider span svg.ic { width: 24px; height: 24px; }
 .cc .wide { padding: 14px; display: flex; align-items: center; gap: 12px; margin-top: 12px; cursor: pointer; } .cc .wide span { font-size: 15px; font-weight: 600; }
 .cc .small-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
 .cc .small-row .tile { aspect-ratio: 1; display: grid; place-items: center; padding: 0; cursor: pointer; } .cc .small-row .tile.on { background: #fff; color: #000; }
