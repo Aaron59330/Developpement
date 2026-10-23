@@ -25,6 +25,13 @@ Système : écran verrouillé avec code, centre de contrôle, notifications, Ne 
 - **Clés** : verrouiller / déverrouiller, démarrer le moteur, klaxon, phares, coffre sur ses véhicules possédés (150 m).
 - **Rappels**, **Boussole** (cap, rue), **Santé** (vie, armure, faim, soif), **Jeux** (Snake avec record, morpion).
 
+## Encore plus d'apps
+- **Jeux** : Snake, 2048, Démineur, Puissance 4 (contre l'ordinateur), Flappy, Mémoire, Morpion, dés / pile ou face, avec **classements du serveur** (top 10 par jeu).
+- **Taxi** : choisir une destination (point GPS ou lieu), voir distance et prix estimé, commander une course aux chauffeurs d'un job de type taxi du Job Builder (`Config.Taxi` pour le tarif).
+- **Actualités** : articles du serveur, photo, « information urgente » qui notifie tout le monde. Publient : les jobs de `Config.News.jobs` (ex. `weazel`) et les admins.
+- **Loto** : tickets (choix des numéros ou ticket flash), tirage régulier, cagnotte qui grossit, gains crédités sur le compte bancaire (`Config.Loto`). Commande admin : `/phone_lotodraw`.
+- **Convertisseur** : longueur, poids, volume, vitesse, température, durée.
+
 ## Appeler les jobs du Job Builder
 - Tous les jobs créés dans le **Job Builder** sont des lignes joignables dans l'application **Services** (lus en direct : un job créé ou modifié apparaît **tout de suite**, sans redémarrage).
 - Réglages par job : Job Builder → job → carte **« Téléphone des joueurs (Aura) »** : joignable ou non, numéro d'appel court (ex. 17, 555123), nom affiché, mode (appel + alerte / appel seul / alerte seule), grade minimum pour recevoir, alerte anonyme, aide affichée.

@@ -92,7 +92,7 @@ function SearchBar(o) {
 function Row(r) {
   const el = h('div.row' + (r.icon || r.color ? '.ic-row' : '') + (r.danger ? '.danger' : '') + (r.accent ? '.accent' : '') + (r.center ? '.center' : '') + (r.class ? '.' + r.class : ''));
   if (r.icon) el.appendChild(h('div.rico', { style: `background:${r.color || 'var(--accent)'}`, html: icon(r.icon) }));
-  else if (r.left) el.appendChild(r.left);
+  else if (r.left instanceof Node) el.appendChild(r.left);
   if (r.label) el.appendChild(h('div.lbl', r.label));
   if (r.title != null || r.sub != null) el.appendChild(h('div.main', h('b', r.titleHtml ? { html: r.title } : null, r.titleHtml ? null : r.title), r.sub ? h('small', r.sub) : null));
   if (r.el) el.appendChild(r.el);

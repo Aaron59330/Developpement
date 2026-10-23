@@ -129,6 +129,10 @@ const ICONS = {
   heartbeat: '<path d="M12 20s-8-4.800-8-11a4.500 4.500 0 0 1 8-2.700A4.500 4.500 0 0 1 20 9c0 6.200-8 11-8 11z"/><path d="M5 12h4l1.500-3 3 6 1.500-3h4"/>',
   checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12.500 3 3 5-6"/>',
   circle: '<circle cx="12" cy="12" r="9"/>',
+  newspaper: '<path d="M5 4h12a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1zM8 8h7M8 12h7M8 16h4"/><path d="M19 8h1a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/>',
+  ticket: '<path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3z"/><path d="M10 6v12" stroke-dasharray="2 2"/>',
+  convert: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
+  dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.500 8.500h.01M15.500 8.500h.01M12 12h.01M8.500 15.500h.01M15.500 15.500h.01" stroke-width="2.600"/>',
   swipe: '<path d="M9 11V5a2 2 0 0 1 4 0v5l5 1.500a2 2 0 0 1 1.500 2.300L18.500 19a2 2 0 0 1-2 1.500H11a2 2 0 0 1-1.600-.8L5 14a1.800 1.800 0 0 1 2.600-2.500z"/>',
 };
 (function(){ for (const k in ICONS) ICONS[k] = ICONS[k].replace(/(\d)\.(\d)00(?!\d)/g, '$1.$2'); })();

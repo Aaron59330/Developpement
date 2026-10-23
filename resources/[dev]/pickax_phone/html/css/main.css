@@ -117,7 +117,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 @keyframes appclose { to { transform: scale(.2); opacity: 0; border-radius: 40px; } }
 .appview.dark { --bg: #000; --fg: #fff; --fg2: rgba(235,235,245,.62); --fg3: rgba(235,235,245,.3); --sep: rgba(84,84,88,.55); --card: #1c1c1e; --card2: #2c2c2e; --bg2: #1c1c1e; --bg3: #2c2c2e; }
 
-.page { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; }
+.page { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; isolation: isolate; }
 .page.in { animation: pushin .35s var(--ease); }
 .page.out { animation: pushout .3s var(--ease) forwards; }
 @keyframes pushin { from { transform: translateX(100%); } }

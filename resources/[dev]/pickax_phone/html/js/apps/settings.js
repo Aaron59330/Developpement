@@ -5,6 +5,7 @@ const APP_INFO = {
   maps: ['Navigation', 'Itinéraires et lieux enregistrés.'], mail: ['Productivité', 'Votre boîte mail.'], notes: ['Productivité', 'Notez vos idées.'], calendar: ['Productivité', 'Vos événements et rappels.'],
   clock: ['Utilitaires', 'Réveils, chrono, minuteur.'], calculator: ['Utilitaires', 'Calculette.'], weather: ['Météo', 'Prévisions pour Los Santos.'], services: ['Utilité', 'Contactez la police, le SAMU, les dépanneurs…'],
   darkchat: ['Anonyme', 'Salons de discussion anonymes qui s\'effacent tout seuls.'], games: ['Jeux', 'Snake, morpion et plus.'], business: ['Productivité', 'Facturez, recrutez, gérez votre équipe.'], keys: ['Auto', 'Verrouillez et démarrez vos véhicules à distance.'], reminders: ['Productivité', 'Vos tâches à faire.'], compass: ['Utilitaires', 'Cap, rue et coordonnées.'], health: ['Santé', 'Santé, armure, faim et soif.'],
+  taxi: ['Transport', 'Commandez une course auprès des chauffeurs.'], news: ['Actualités', 'Les informations du serveur en direct.'], loto: ['Jeux', 'Tentez de gagner la cagnotte.'], converter: ['Utilitaires', 'Unités et conversions.'],
   garage: ['Auto', 'Retrouvez vos véhicules.'], music: ['Musique', 'Radios et liens audio.'], findmy: ['Utilitaires', 'Localisez vos proches.'], airshare: ['Utilitaires', 'Partage à proximité.'], wallet: ['Finance', 'Vos cartes et votre identité.'],
 };
 const Settings = {

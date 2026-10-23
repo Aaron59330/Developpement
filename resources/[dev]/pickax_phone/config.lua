@@ -151,6 +151,23 @@ Config.Business = {
     hireDistance  = 6.0,
 }
 
+-- ═══════════════════════════ TAXI ═══════════════════════════
+Config.Taxi = { enabled = true, base = 15, ratePerKm = 45 }   -- estimation affichée au client ($)
+
+-- ═══════════════════════════ ACTUALITÉS ═══════════════════════════
+Config.News = {
+    jobs = { 'weazel', 'journalist', 'journaliste', 'news' },   -- noms de jobs (Job Builder) autorisés à publier
+    adminCanPost = true,
+    breakingToAll = true,                                      -- une info « urgente » notifie tous les joueurs
+}
+
+-- ═══════════════════════════ LOTO ═══════════════════════════
+Config.Loto = {
+    enabled = true, price = 50, drawEveryMinutes = 30, pick = 5, max = 30,
+    jackpotSeed = 5000, sharePool = 0.7,          -- 70 % des mises alimentent la cagnotte
+    payouts = { [3] = 15, [4] = 250 },            -- multiples de la mise pour 3 et 4 bons numéros ; 5 = cagnotte partagée
+}
+
 -- ═══════════════════════════ AIRSHARE ═══════════════════════════
 Config.AirShare = { distance = 8.0, timeout = 25 }
 
@@ -203,6 +220,10 @@ Config.Apps = {
     { id = 'health',    enabled = true, default = true },
     { id = 'darkchat',  enabled = true, default = false, store = true },   -- salons anonymes (voir Config.Darkchat)
     { id = 'games',     enabled = true, default = false, store = true },
+    { id = 'taxi',      enabled = true, default = true },                  -- commander une course (jobs de type taxi du Job Builder)
+    { id = 'news',      enabled = true, default = true },                  -- actualités du serveur (journalistes / admins)
+    { id = 'loto',      enabled = true, default = false, store = true },   -- loto avec tirage régulier
+    { id = 'converter', enabled = true, default = true },
 }
 
 -- ═══════════════════════════ FONDS D'ÉCRAN ═══════════════════════════

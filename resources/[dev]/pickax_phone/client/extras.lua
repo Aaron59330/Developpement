@@ -167,3 +167,12 @@ RegisterNUICallback('vitals', function(_, cb)
     while got < 2 and t < 15 do Wait(20); t = t + 1 end
     cb(out)
 end)
+
+-- ═════════ taxi : point GPS actuel du joueur ═════════
+RegisterNUICallback('getWaypoint', function(_, cb)
+    if not IsWaypointActive() then cb({ active = false }) return end
+    local blip = GetFirstBlipInfoId(8)
+    local c = GetBlipInfoIdCoord(blip)
+    local me = GetEntityCoords(PlayerPedId())
+    cb({ active = true, x = c.x, y = c.y, distance = math.floor(#(vector2(c.x, c.y) - vector2(me.x, me.y))) })
+end)

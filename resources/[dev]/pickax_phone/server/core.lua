@@ -520,7 +520,7 @@ lib.callback.register('aura:init', function(src)
         settings = settings, hasPin = hasPin, installed = p.apps, catalog = apps,
         battery = p.battery, contacts = contactsOf(id),
         config = { brand = Config.Brand, model = Config.Model, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
-                   lines = Aura.LinesPublic(), market = Config.Market.categories, crypto = Config.Crypto.coins, social = { max = Config.Social.postMaxLength, images = Config.Social.maxImages },
+                   lines = Aura.LinesPublic(), taxi = Config.Taxi, market = Config.Market.categories, crypto = Config.Crypto.coins, social = { max = Config.Social.postMaxLength, images = Config.Social.maxImages },
                    numberGroup = Config.Number.group, messages = Config.Messages, camera = Config.Camera.mode, maxMarketImages = Config.Market.maxImages, storyHours = Config.Social.storyHours },
     }
 end)
