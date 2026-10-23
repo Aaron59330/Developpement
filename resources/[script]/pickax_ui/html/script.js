@@ -102,8 +102,9 @@ function applyCfg(c) {
   $('banner').classList.toggle('hidden', c.banner === false);
   $('banner-old').classList.toggle('hidden', c.banner === false);
   var classic = c.design === 'classique';
-  $('css-new').disabled = classic;
+  $('css-new').disabled = c.design === 'classique' || c.design === 'aqua';
   $('css-old').disabled = !classic;
+  $('css-aqua').disabled = c.design !== 'aqua';
   designClassic = classic;
 }
 

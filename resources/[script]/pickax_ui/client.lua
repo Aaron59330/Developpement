@@ -6,7 +6,7 @@ local DEFAULTS = {
     btnRadius = 12, cardRadius = 18,
     sound = true, volume = 60,
 }
-local DESIGNS = { nouveau = true, classique = true }
+local DESIGNS = { nouveau = true, classique = true, aqua = true }
 local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true }
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }

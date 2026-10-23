@@ -15,6 +15,7 @@ files {
     'html/style.css',
     'html/menu-nouveau.css',
     'html/menu-classique.css',
+    'html/menu-aqua.css',
     'html/script.js',
     'html/snd.js',
     'html/banner.jpg',

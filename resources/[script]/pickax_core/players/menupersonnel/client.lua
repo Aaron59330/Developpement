@@ -71,8 +71,8 @@ local function PrefsNames(list, nameIdx)
 	return t
 end
 
-local PrefsDesigns = { { 'nouveau', 'Nouveau' }, { 'classique', 'Classique' } }
-local PrefsDesignNames = { 'Nouveau', 'Classique' }
+local PrefsDesigns = { { 'nouveau', 'Nouveau' }, { 'aqua', 'Aqua' }, { 'classique', 'Classique' } }
+local PrefsDesignNames = { 'Nouveau', 'Aqua', 'Classique' }
 local PrefsStyleNames, PrefsSizeNames = {}, {}
 for i, v in ipairs(Prefs.Styles) do PrefsStyleNames[i] = v.name end
 for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
@@ -310,7 +310,7 @@ local function OpenMenu()
 			end, function()
 				PrefsSet('banner', false)
 			end)
-			RageUI.List("Design des menus", PrefsDesignNames, PrefsCfg.design == 'classique' and 2 or 1, "Nouveau (noir mat, un fond par bouton) ou Classique (ancien design). Les couleurs ci-dessous s'appliquent aux deux.", {}, true, function() end, function(Index)
+			RageUI.List("Design des menus", PrefsDesignNames, PrefsCfg.design == 'classique' and 3 or (PrefsCfg.design == 'aqua' and 2 or 1), "Nouveau (noir mat, icônes), Aqua (bannière image, barres plates) ou Classique (ancien design). Les couleurs ci-dessous s'appliquent aux deux.", {}, true, function() end, function(Index)
 				PrefsSet('design', PrefsDesigns[Index][1])
 			end)
 			RageUI.List("Style", PrefsStyleNames, PrefsStyleIndex(Prefs.Styles, PrefsCfg.style), "Change le design de tous les menus", {}, true, function() end, function(Index)
