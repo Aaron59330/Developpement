@@ -281,7 +281,10 @@ const OS = {
       // aperçu réel : copie de la dernière page de l'application (repli sur l'icône si la copie échoue)
       try {
         const th = h('div.thumb' + (this.running[id].dark ? '.dark' : '')), cl = this.running[id].el.cloneNode(true);
-        cl.classList.remove('closing'); cl.style.animation = 'none'; th.appendChild(cl); snap.appendChild(th); snap.classList.add('live');
+        cl.classList.remove('closing'); cl.style.animation = 'none';
+        // cloneNode ne copie pas le contenu des <canvas> (jeux) : on le recopie
+        const src = this.running[id].el.querySelectorAll('canvas'), dst = cl.querySelectorAll('canvas');
+        src.forEach((cv, i) => { try { dst[i].getContext('2d').drawImage(cv, 0, 0); } catch (e) {} }); th.appendChild(cl); snap.appendChild(th); snap.classList.add('live');
       } catch (e) { snap.innerHTML = icon(d.icon); }
       const c = h('div.card', snap, h('span', { html: icon(d.icon, 15) }, ' ' + d.name));
       c.addEventListener('wheel', e => { if (e.deltaY < -20) { c.classList.add('kill'); setTimeout(() => { OS.quit(id); c.remove(); }, 250); } });
