@@ -230,7 +230,7 @@ local function openJobMenu()
     end
     if not jc then
         local pd = ESX.GetPlayerData() or {}
-        JBNotify(('~r~Ton métier actuel (%s) n\'a pas de menu : il doit être créé avec le Job Builder (/jobbuilder) et tu dois y être embauché.'):format(pd.job and pd.job.name or '?'))
+        JBNotify('~r~Vous n\'avez pas de métier.')
         return
     end
     local actions = {}
