@@ -21,8 +21,8 @@ const Settings = {
     const sub = (title, fn) => () => { const p = Page({ title, back: 'Réglages' }); fn(p); this.ctx.push(p); };
     pg.body.appendChild(Group(null, [
       { icon: 'plane', color: '#ff9f0a', title: 'Mode avion', toggle: { on: st.airplane, onchange: v => this.save({ airplane: v }) } },
-      { icon: 'wifi', color: '#0a84ff', title: 'Wi-Fi', toggle: { on: st.wifi, onchange: v => this.save({ wifi: v }) } },
-      { icon: 'bluetooth', color: '#0a84ff', title: 'Bluetooth', toggle: { on: st.bluetooth, onchange: v => this.save({ bluetooth: v }) } },
+      { icon: 'wifi', color: 'var(--accent)', title: 'Wi-Fi', toggle: { on: st.wifi, onchange: v => this.save({ wifi: v }) } },
+      { icon: 'bluetooth', color: 'var(--accent)', title: 'Bluetooth', toggle: { on: st.bluetooth, onchange: v => this.save({ bluetooth: v }) } },
     ]));
     pg.body.appendChild(Group(null, [
       { icon: 'bell', color: '#ff453a', title: 'Notifications', chev: true, onclick: sub('Notifications', p => this.notifs(p)) },
@@ -31,13 +31,13 @@ const Settings = {
     ]));
     pg.body.appendChild(Group(null, [
       { icon: 'gear', color: '#8e8e93', title: 'Général', chev: true, onclick: sub('Général', p => this.general(p)) },
-      { icon: 'sun', color: '#0a84ff', title: 'Affichage et luminosité', chev: true, onclick: sub('Affichage', p => this.display(p)) },
+      { icon: 'sun', color: 'var(--accent)', title: 'Affichage et luminosité', chev: true, onclick: sub('Affichage', p => this.display(p)) },
       { icon: 'image', color: '#32ade6', title: 'Fond d\'écran', chev: true, onclick: sub('Fond d\'écran', p => this.wallpaper(p)) },
       { icon: 'lock', color: '#30d158', title: 'Code et sécurité', chev: true, onclick: sub('Code', p => this.passcode(p)) },
       { icon: 'lightning', color: '#30d158', title: 'Batterie', chev: true, onclick: sub('Batterie', p => this.battery(p)) },
-      { icon: 'shield', color: '#0a84ff', title: 'Confidentialité', chev: true, onclick: sub('Confidentialité', p => this.privacy(p)) },
+      { icon: 'shield', color: 'var(--accent)', title: 'Confidentialité', chev: true, onclick: sub('Confidentialité', p => this.privacy(p)) },
     ]));
-    pg.body.appendChild(Group(null, [{ icon: 'store', color: '#0a84ff', title: 'App Store', chev: true, onclick: () => OS.openApp('appstore') }]));
+    pg.body.appendChild(Group(null, [{ icon: 'store', color: 'var(--accent)', title: 'App Store', chev: true, onclick: () => OS.openApp('appstore') }]));
   },
   notifs(p) {
     const off = S.settings.notifOff || {}, bd = S.settings.badgeOff || {};
@@ -59,10 +59,12 @@ const Settings = {
   display(p) {
     const st = S.settings;
     p.body.appendChild(Seg([{ value: 'dark', label: 'Sombre' }, { value: 'light', label: 'Clair' }], st.theme === 'light' ? 'light' : 'dark', v => this.save({ theme: v })));
-    const cols = [...new Set([S.config.accent, '#0a84ff', '#30d158', '#ff453a', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff'].filter(Boolean))];
-    p.body.appendChild(Group('Couleur d\'accentuation', [{ el: h('div', { style: 'display:flex;gap:12px;padding:12px 0' }, cols.map(c => h('div', { style: `width:32px;height:32px;border-radius:50%;background:${c};border:3px solid ${c === st.accent ? 'var(--fg)' : 'transparent'}`, onclick: (e) => { this.save({ accent: c }); $$('div', e.target.parentNode).forEach(d => d.style.borderColor = 'transparent'); e.target.style.borderColor = 'var(--fg)'; } }))) }]));
+    const srv = S.config.accent || '#0a84ff';
+    const cols = [['', srv, 'Couleur du serveur'], ...['#30d158', '#ff453a', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff'].filter(c => c.toLowerCase() !== srv.toLowerCase()).map(c => [c, c, ''])];
+    const cur = c => (c[0] === '' ? OS.followsServer() : (!OS.followsServer() && (st.accent || '').toLowerCase() === c[0]));
+    p.body.appendChild(Group('Couleur d\'accentuation', [{ el: h('div', { style: 'display:flex;gap:12px;padding:12px 0;align-items:center;flex-wrap:wrap' }, cols.map(c => h('div', { title: c[2], style: `width:32px;height:32px;border-radius:50%;background:${c[1]};border:3px solid ${cur(c) ? 'var(--fg)' : 'transparent'}`, onclick: (e) => { this.save({ accent: c[0] }); $$('div', e.target.parentNode).forEach(d => d.style.borderColor = 'transparent'); e.target.style.borderColor = 'var(--fg)'; } }))) }], 'Le premier rond suit la couleur du serveur.'));
     p.body.appendChild(Group('Luminosité', [{ el: h('input', { type: 'range', min: 20, max: 100, value: st.brightness, style: 'width:100%', oninput: e => { S.settings.brightness = +e.target.value; OS.applyTheme(); }, onchange: e => this.save({ brightness: +e.target.value }) }) }]));
-    const sz = h('span', { style: 'float:right;color:var(--fg2)' }, (st.phoneScale || 100) + ' %');
+    const sz = h('span', { style: 'display:block;text-align:right;color:var(--fg2);margin-bottom:6px;font-size:14px' }, (st.phoneScale || 100) + ' %');
     p.body.appendChild(Group('Taille du téléphone', [{ el: h('div', null, sz, h('input', { type: 'range', min: 60, max: 125, step: 5, value: st.phoneScale || 100, style: 'width:100%', oninput: e => { S.settings.phoneScale = +e.target.value; sz.textContent = e.target.value + ' %'; OS.fit(); }, onchange: e => this.save({ phoneScale: +e.target.value }) })) }], 'Agrandit ou réduit tout l\u2019écran du téléphone.'));
     p.body.appendChild(Group('Taille du texte', [{ el: h('input', { type: 'range', min: 85, max: 120, step: 5, value: st.textSize, style: 'width:100%', onchange: e => this.save({ textSize: +e.target.value }) }) }]));
     p.body.appendChild(Group(null, [{ title: 'Format 24 heures', toggle: { on: st.hour24 !== false, onchange: v => { this.save({ hour24: v }); OS.drawStatus(); } } }, { title: 'Texte en gras', toggle: { on: st.bold, onchange: v => { this.save({ bold: v }); document.body.style.fontWeight = v ? 600 : ''; } } }]));
@@ -97,7 +99,7 @@ const Settings = {
   },
   general(p) {
     p.body.appendChild(Group(null, [{ title: 'Nom', value: S.me.name }, { title: 'Modèle', value: S.config.model || 'Aero' }, { title: 'Opérateur', value: S.config.serverName || S.config.carrier || 'Aero' }, { title: 'Numéro de téléphone', value: fmtNum(S.me.number) }, { title: 'Adresse mail', value: S.me.mail }, { title: 'Version', value: 'AuraOS 1.0' }, { title: 'Applications', value: String(S.installed.length) }]));
-    p.body.appendChild(Group(null, [{ title: 'Réinitialiser les réglages', danger: true, onclick: async () => { if (await Confirm('Réinitialiser les réglages ?', 'Vos données (contacts, photos, messages) sont conservées.', 'Réinitialiser', true)) { await rpc('settingsSet', { wallpaper: 'aurora', lockWallpaper: 'aurora', customWallpaper: '', theme: 'dark', accent: '#0a84ff', ringtone: 'Marimba', dnd: false, airplane: false, wifi: true, volume: 70, brightness: 100, textSize: 100, phoneScale: 100, notifOff: {}, badgeOff: {} }); Toast('Réglages réinitialisés — rouvrez le téléphone', 'check'); post('close'); S.reload = true; } } }]));
+    p.body.appendChild(Group(null, [{ title: 'Réinitialiser les réglages', danger: true, onclick: async () => { if (await Confirm('Réinitialiser les réglages ?', 'Vos données (contacts, photos, messages) sont conservées.', 'Réinitialiser', true)) { await rpc('settingsSet', { wallpaper: 'aurora', lockWallpaper: 'aurora', customWallpaper: '', theme: 'dark', accent: '', ringtone: 'Marimba', dnd: false, airplane: false, wifi: true, volume: 70, brightness: 100, textSize: 100, phoneScale: 100, notifOff: {}, badgeOff: {} }); Toast('Réglages réinitialisés — rouvrez le téléphone', 'check'); post('close'); S.reload = true; } } }]));
   },
 };
 registerApp({ id: 'settings', name: 'Réglages', icon: 'gear', grad: ['#9a9aa0', '#5b5b61'], open: ctx => Settings.open(ctx) });

@@ -256,3 +256,4 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .switcher .card .snap .thumb > * { position: absolute; inset: 0; animation: none !important; transform: none !important; opacity: 1 !important; }
 .switcher .card > span { display: inline-flex; align-items: center; gap: 6px; }
 .switcher .card > span svg.ic { width: 15px; height: 15px; }
+input[type=range], input[type=checkbox], input[type=radio] { accent-color: var(--accent); }

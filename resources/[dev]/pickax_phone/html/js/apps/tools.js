@@ -263,7 +263,7 @@ const Mail = {
   root() {
     const pg = this.pg; clear(pg.body);
     pg.body.appendChild(Group(null, [
-      { icon: 'inbox', color: '#0a84ff', title: 'Réception', value: S.unreadMail ? String(S.unreadMail) : '', chev: true, onclick: () => this.list('inbox', 'Réception') },
+      { icon: 'inbox', color: 'var(--accent)', title: 'Réception', value: S.unreadMail ? String(S.unreadMail) : '', chev: true, onclick: () => this.list('inbox', 'Réception') },
       { icon: 'send', color: '#ff9f0a', title: 'Envoyés', chev: true, onclick: () => this.list('sent', 'Envoyés') },
       { icon: 'trash', color: '#8e8e93', title: 'Corbeille', chev: true, onclick: () => this.list('trash', 'Corbeille') },
     ], 'Votre adresse : ' + S.me.mail));

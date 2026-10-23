@@ -74,7 +74,7 @@
   }
 
   function mkDraft(cfg) {
-    return { enabled: !!cfg.enabled, webhookNew: '', clearWebhook: false, name: cfg.name || '', color: cfg.color || '#00a4ff', mention: cfg.mention || '', events: Object.assign({}, cfg.events || {}), fields: Object.assign({}, cfg.fields || {}) };
+    return { enabled: !!cfg.enabled, webhookNew: '', clearWebhook: false, name: cfg.name || '', color: cfg.color || (window.PICKAX_ACCENT || '#00a4ff'), mention: cfg.mention || '', events: Object.assign({}, cfg.events || {}), fields: Object.assign({}, cfg.fields || {}) };
   }
 
   function mount(host) {

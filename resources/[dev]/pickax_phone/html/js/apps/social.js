@@ -211,7 +211,7 @@ const Social = {
     const lim = (S.config.social && S.config.social.images) || 4;
     pg.body.appendChild(Group(null, [
       { icon: 'image', color: '#34c759', title: 'Photo de la galerie', chev: true, onclick: () => Messages.pickPhoto(u => { if (v.images.length < (app === 'snap' ? 1 : lim)) { v.images.push(u); drawImgs(); } else Toast('Limite atteinte', 'warning'); }) },
-      { icon: 'link', color: '#0a84ff', title: 'Image par lien', chev: true, onclick: async () => { const u = await Prompt('Lien de l\'image', null, { placeholder: 'https://…' }); if (u && /^https?:/.test(u)) { v.images.length < (app === 'snap' ? 1 : lim) ? v.images.push(u) : Toast('Limite atteinte', 'warning'); drawImgs(); } } },
+      { icon: 'link', color: 'var(--accent)', title: 'Image par lien', chev: true, onclick: async () => { const u = await Prompt('Lien de l\'image', null, { placeholder: 'https://…' }); if (u && /^https?:/.test(u)) { v.images.length < (app === 'snap' ? 1 : lim) ? v.images.push(u) : Toast('Limite atteinte', 'warning'); drawImgs(); } } },
       app === 'snap' ? { title: 'Publier en story (24 h)', toggle: { on: v.story, onchange: x => v.story = x } } : null,
     ]));
     st.ctx.push(pg); setTimeout(() => { const t = $('textarea', pg.body); t && t.focus(); }, 420);

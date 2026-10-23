@@ -69,7 +69,7 @@ const Photos = {
     if (this.tab === 'albums') {
       const cnt = (f) => this.list.filter(f).length;
       pg.body.appendChild(Group(null, [
-        { icon: 'image', color: '#0a84ff', title: 'Récents', value: cnt(() => true), chev: true, onclick: () => { this.tab = 'all'; this.draw(); } },
+        { icon: 'image', color: 'var(--accent)', title: 'Récents', value: cnt(() => true), chev: true, onclick: () => { this.tab = 'all'; this.draw(); } },
         { icon: 'heart', color: '#ff375f', title: 'Favoris', value: cnt(p => p.favorite), chev: true, onclick: () => { this.tab = 'favs'; this.draw(); } },
       ]));
       return pg;

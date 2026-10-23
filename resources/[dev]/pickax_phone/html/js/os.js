@@ -29,10 +29,19 @@ const OS = {
     $('#home').classList.add('under');
   },
 
+  // Couleur du téléphone : celle du serveur (pickax_core/config.lua → AccentColor) tant que le joueur n'en a pas choisi une autre
+  followsServer() { const a = (S.settings.accent || '').toLowerCase(); return !a || a === '#0a84ff' || a === String((S.config && S.config.accent) || '').toLowerCase(); },
+  accentColor() {
+    const srv = /^#[0-9a-f]{6}$/i.test((S.config && S.config.accent) || '') ? S.config.accent : '#0a84ff';
+    const a = S.settings.accent || '';
+    return this.followsServer() || !/^#[0-9a-f]{6}$/i.test(a) ? srv : a;
+  },
   applyTheme() {
     const t = S.settings.theme === 'light' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    document.documentElement.style.setProperty('--accent', S.settings.accent || '#0a84ff');
+    const ac = this.accentColor();
+    document.documentElement.style.setProperty('--accent', ac);
+    document.documentElement.style.setProperty('--accent-rgb', [1, 3, 5].map(i => parseInt(ac.slice(i, i + 2), 16)).join(','));
     const dim = $('#dim'); if (dim) dim.style.opacity = String(Math.max(0, (100 - (S.settings.brightness == null ? 100 : S.settings.brightness)) / 100 * .75));
     document.documentElement.style.fontSize = ((S.settings.textSize || 100) / 100 * 16) + 'px';
     this.updateBars();

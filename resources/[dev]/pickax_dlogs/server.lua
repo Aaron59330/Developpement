@@ -1,3 +1,10 @@
+-- couleur par défaut des embeds Discord = couleur principale du serveur (pickax_core/config.lua)
+local function themeHex()
+    local ok, st = pcall(function() return exports['pickax_core']:GetGlobalStyle() end)
+    if ok and type(st) == 'table' and type(st.hex) == 'string' and st.hex:match('^#%x%x%x%x%x%x$') then return st.hex end
+    return '#00a4ff'
+end
+
 -- ─────────────────────────────── Logs Discord par élément ───────────────────────────────
 -- Configuration enregistrée en base (table pickax_dlogs), modifiée depuis l'onglet « Logs Discord » de chaque builder.
 local cache = {}          -- ['job:police'] = cfg
@@ -34,7 +41,7 @@ local function sanitize(kind, d, old)
     d = type(d) == 'table' and d or {}
     old = old or {}
     local keys = catalogKeys(kind) or {}
-    local out = { enabled = d.enabled == true, webhook = old.webhook or '', name = '', color = '#00a4ff', mention = '', events = {}, fields = {} }
+    local out = { enabled = d.enabled == true, webhook = old.webhook or '', name = '', color = themeHex(), mention = '', events = {}, fields = {} }
     if d.clearWebhook == true then out.webhook = '' end
     if type(d.webhook) == 'string' and d.webhook ~= '' and not d.webhook:find('•', 1, true) then
         if not validWebhook(d.webhook) then return nil, 'Lien de webhook invalide (doit commencer par https://discord.com/api/webhooks/)' end
@@ -151,7 +158,7 @@ end)
 local function View(kind, ref)
     local keys = catalogKeys(kind)
     if not keys then return { ok = false, error = 'Type inconnu' } end
-    local cfg = cache[key(kind, ref)] or { enabled = false, webhook = '', name = '', color = '#00a4ff', mention = '', events = {}, fields = DEFAULT_FIELDS }
+    local cfg = cache[key(kind, ref)] or { enabled = false, webhook = '', name = '', color = themeHex(), mention = '', events = {}, fields = DEFAULT_FIELDS }
     local groups = {}
     for _, g in ipairs(DLogsCatalog[kind].groups) do
         local ev = {}
@@ -164,7 +171,7 @@ local function View(kind, ref)
         if v == nil then v = DEFAULT_FIELDS[k] end
         fields[k] = v == true
     end
-    return { ok = true, cfg = { enabled = cfg.enabled == true, hasWebhook = cfg.webhook ~= '', webhook = mask(cfg.webhook), name = cfg.name or '', color = cfg.color or '#00a4ff', mention = cfg.mention or '',
+    return { ok = true, cfg = { enabled = cfg.enabled == true, hasWebhook = cfg.webhook ~= '', webhook = mask(cfg.webhook), name = cfg.name or '', color = cfg.color or themeHex(), mention = cfg.mention or '',
         events = cfg.events or {}, fields = fields }, groups = groups, title = DLogsCatalog[kind].title }
 end
 

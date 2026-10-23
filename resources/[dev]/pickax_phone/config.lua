@@ -67,7 +67,7 @@ Config.UI = {
 
 -- Réglages donnés à chaque nouveau téléphone (le joueur peut ensuite les changer dans Réglages)
 Config.Defaults = {
-    wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = (PickaxTheme and PickaxTheme.hex) or '#0a84ff', ringtone = 'Marimba', texttone = 'Cristal',
+    wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = '',  -- '' = suit la couleur du serveur (pickax_core → AccentColor) ; le joueur peut en choisir une autre ringtone = 'Marimba', texttone = 'Cristal',
     volume = 70, brightness = 100, textSize = 100, phoneScale = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
     dnd = false, vibrate = true,
 }
