@@ -479,7 +479,7 @@ end
 -- ⚠️ Positions APPROXIMATIVES (lieux connus de GTA V, disposition calculée) : certaines devront être décalées ou tournées :
 --    ouvre le mini-jeu dans le builder → Emplacements / Props → mode placement (ou change simplement l'ancre ici et utilise /mgseed après suppression).
 -- /mgseed (groupe admin) recrée ceux qui manquent. Config.AutoSeed = false pour désactiver.
-Config.AutoSeed = true
+Config.AutoSeed = false   -- false = aucun mini-jeu créé tout seul ; /mgseed (admin) les crée à la demande
 Config.PresetGames = {
     { id = 'basket_legion',  layout = 'basket',    type = 'basket',    tpl = 'street', name = 'Basket · Legion Square', anchor = { x = 195.17, y = -933.77, z = 30.69, h = 70.0 } },
     { id = 'basket_grove',   layout = 'basket',    type = 'basket',    tpl = 'versus', name = 'Basket 1c1 · Grove Street', anchor = { x = 110.50, y = -1944.00, z = 20.80, h = 40.0 } },

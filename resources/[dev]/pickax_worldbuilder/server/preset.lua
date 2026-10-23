@@ -14,6 +14,7 @@ end
 -- Crée ce qui manque ; force = ignore le drapeau « déjà fait »
 local function seed(force)
     if not P or not P.Enabled then return 0 end
+    if not P.Auto and not force then return 0 end
     local made = 0
     local row = MySQL.single.await("SELECT v FROM worldbuilder_seed WHERE k = 'v1'")
     if row and not force then return 0 end

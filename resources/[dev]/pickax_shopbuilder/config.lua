@@ -308,7 +308,7 @@ Config.Superettes = {
 -- Au premier démarrage, les supérettes (ci-dessus) et les boutiques ci-dessous sont créées, placées (blip + marker) et activées
 -- automatiquement, UNE seule fois (si tu en supprimes une, elle ne revient pas). Tout reste modifiable dans le builder.
 -- /sbseed (groupe admin) recrée celles qui manquent. Mets Config.AutoSeed = false pour tout désactiver.
-Config.AutoSeed = true
+Config.AutoSeed = false   -- false = aucune boutique créée toute seule ; /sbseed (admin) les crée à la demande
 Config.PresetShops = {
     { id = 'ammu', label = 'Ammu-Nation', type = 'weapons', blip = { sprite = 110, color = 1 }, locations = {
         { 'Little Seoul', -661.96, -933.53, 21.83, 177.05 }, { 'Cypress Flats', 809.68, -2159.13, 29.62, 1.43 }, { 'Sandy Shores', 1692.67, 3761.38, 34.71, 227.65 },

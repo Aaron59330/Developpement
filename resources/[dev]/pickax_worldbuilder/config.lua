@@ -754,6 +754,7 @@ Config.Gazoline = {
 -- /wbseed (groupe admin) recrée celles qui manquent. Les supérettes, armureries, vêtements, coiffeurs et quincailleries sont dans le Shop Builder.
 Config.Preset = {
     Enabled = true,
+    Auto    = false,            -- false = rien n'est créé tout seul au démarrage ; /wbseed (admin) crée stations essence et banques à la demande
     FuelRestockMinutes = 45,    -- ravitaillement naturel des cuves (0 = seulement par le job Gazoline) ; la réserve de secours reste garantie
     FuelRestockLiters  = 150,
     -- { x, y, z } : position de la pompe (le joueur s'y place pour faire le plein)
