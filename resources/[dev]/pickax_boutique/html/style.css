@@ -193,3 +193,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .cfbox h2 { font-size: 20px; margin-bottom: 8px; } .cfbox p { color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
 .cfb { display: flex; justify-content: flex-end; gap: 10px; }
 .tbl input.amt { background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--text); border-radius: 9px; padding: 7px 9px; font: inherit; }
+
+/* Espacement : les blocs ne se touchent plus (admin, codes, historique…) */
+.panel { margin-bottom: 20px; } .two { margin-bottom: 20px; } .two > .panel, .panel:last-child, .two:last-child { margin-bottom: 0; }
+.panel .tbl { margin-top: 10px; } .panel .form { margin-top: 12px; } .panel .promo { margin-top: 12px; }
+.panel > .sub { margin-top: 10px; line-height: 1.5; }

@@ -93,6 +93,7 @@ const P = {
   gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
   card: '<rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>',
 };
+P.first = '<path d="m18 11-6-6-6 6M18 19l-6-6-6 6"/>'; P.last = '<path d="m6 13 6 6 6-6M6 5l6 6 6-6"/>'; P.up = '<path d="m18 15-6-6-6 6"/>'; P.down = '<path d="m6 9 6 6 6-6"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
 const PAY_ICON = { cash: 'dollar', bank: 'card', black_money: 'lock' };
 
@@ -719,6 +720,13 @@ const Builder = {
         <div id="items-list">${this.itemRows()}</div></div>`;
   },
 
+  moveItem(from, to) {
+    const it = this.cur.items;
+    if (from === to || from < 0 || to < 0 || from >= it.length || to >= it.length) return this.render();
+    const [x] = it.splice(from, 1); it.splice(to, 0, x);
+    this.openItems = {}; this.markDirty(); this.render();
+  },
+
   itemRows() {
     const c = this.cur, q = this.itemQ.trim().toLowerCase();
     const cats = c.settings.categories || [];
@@ -737,6 +745,7 @@ const Builder = {
         <input type="number" data-path="${P}.stock" data-t="n" min="0" placeholder="∞" title="Stock (vide = illimité)" value="${it.stock < 0 ? '' : it.stock}">
         <div class="pcent"><input type="number" data-path="${P}.promo" data-t="n" min="0" max="90" title="Promotion %" value="${it.promo || 0}"><span>%</span></div>
         <input type="checkbox" data-path="${P}.enabled" data-t="b" title="En vente" ${it.enabled === false ? '' : 'checked'}>
+        <div class="ord"><button class="icon" data-a="itemMove" data-v="${i}:first" title="Mettre en premier" ${i === 0 ? 'disabled' : ''}>${ic('first', 15)}</button><button class="icon" data-a="itemMove" data-v="${i}:up" title="Monter" ${i === 0 ? 'disabled' : ''}>${ic('up', 14)}</button><input class="pos" type="number" min="1" max="${c.items.length}" data-path="__pos:${i}" value="${i + 1}" title="Place dans la boutique (1 = en premier)"><button class="icon" data-a="itemMove" data-v="${i}:down" title="Descendre" ${i === c.items.length - 1 ? 'disabled' : ''}>${ic('down', 14)}</button><button class="icon" data-a="itemMove" data-v="${i}:last" title="Mettre en dernier" ${i === c.items.length - 1 ? 'disabled' : ''}>${ic('last', 15)}</button></div>
         <button class="icon" data-a="itemOpen" data-v="${i}" title="Options">${ic('settings', 15)}</button>
         <button class="icon" data-a="itemDel" data-v="${i}" title="Retirer">${ic('trash', 15)}</button>
         ${open ? `<div class="idet">
@@ -753,7 +762,7 @@ const Builder = {
     });
     if (!c.items.length) return emptyState('box', 'Aucun produit', 'Ajoute des produits depuis le catalogue de ton serveur ou saisis-les à la main.');
     if (!rows.length) return `<div class="hint">Aucun produit ne correspond au filtre.</div>`;
-    return `<div class="ihead"><span></span><span>Produit</span><span>Prix</span><span>Rayon</span><span>Stock</span><span>Promo</span><span>Vente</span><span></span><span></span></div>${rows.join('')}`;
+    return `<div class="ihead"><span></span><span>Produit</span><span>Prix</span><span>Rayon</span><span>Stock</span><span>Promo</span><span>Vente</span><span>Place</span><span></span><span></span></div>${rows.join('')}`;
   },
 
   /* Onglet : Emplacements */
@@ -889,6 +898,7 @@ const Builder = {
       if (el.checked) cl.parts.push(id);
       this.markDirty(); return;
     }
+    if (p.startsWith('__pos:')) { if (final) this.moveItem(Number(p.slice(6)), Math.max(1, Math.min(this.cur.items.length, Math.round(Number(el.value) || 1))) - 1); return; }
     if (!final || !v) return;
     if (p.startsWith('__itemjob:')) { const it = this.cur.items[Number(p.slice(10))]; if (it) { it.jobs = it.jobs || []; if (!it.jobs.includes(v)) it.jobs.push(v); this.markDirty(); this.render(); } return; }
     if (p === '__accessjob') { const a = this.cur.settings.access = this.cur.settings.access || { jobs: {} }; a.jobs = a.jobs || {}; a.jobs[v] = 0; this.markDirty(); this.render(); return; }
@@ -964,6 +974,7 @@ const Builder = {
         if (c.items.length >= this.cat.limits.items) return toast('Nombre maximum de produits atteint', 'err');
         c.items.unshift(NEW_ITEM()); this.openItems = { 0: true }; this.itemQ = ''; this.markDirty(); this.render(); return;
       case 'itemDel': c.items.splice(Number(v), 1); this.openItems = {}; this.markDirty(); this.render(); return;
+      case 'itemMove': { const [i, dir] = v.split(':'), from = Number(i), n = c.items.length; const to = dir === 'first' ? 0 : dir === 'last' ? n - 1 : dir === 'up' ? from - 1 : from + 1; this.moveItem(from, to); return; }
       case 'itemOpen': this.openItems[v] = !this.openItems[v]; this.render(); return;
       case 'itemJobDel': { const [i, k] = v.split(':').map(Number); c.items[i].jobs.splice(k, 1); this.markDirty(); this.render(); return; }
       case 'accDel': delete c.settings.access.jobs[v]; this.markDirty(); this.render(); return;

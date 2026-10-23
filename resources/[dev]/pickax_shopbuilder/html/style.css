@@ -312,7 +312,7 @@ button.wide { width: 100%; }
 .paybox .muted { margin-left: auto; font-size: 12px; }
 
 /* ── Builder : lignes produit ── */
-.ihead, .irow { display: grid; grid-template-columns: 40px minmax(150px, 1.7fr) 88px minmax(110px, 1fr) 72px 78px 40px 34px 34px; gap: 8px; align-items: center; }
+.ihead, .irow { display: grid; grid-template-columns: 40px minmax(150px, 1.7fr) 88px minmax(110px, 1fr) 72px 78px 40px 170px 34px 34px; gap: 8px; align-items: center; }
 .ihead { padding: 0 10px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; }
 .irow { padding: 9px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-bottom: 7px; }
 .irow:focus-within { border-color: var(--accent-line); }
@@ -358,3 +358,9 @@ button.wide { width: 100%; }
 .keyhint { font-size: 11px; color: var(--muted); text-align: center; line-height: 2; }
 .keyhint kbd { min-width: 20px; padding: 1px 5px; margin-right: 2px; }
 .nav-item.has-sub { height: auto; min-height: 44px; padding-top: 6px; padding-bottom: 6px; } .navsub { display: block; font-size: 10.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ordre des produits dans la boutique */
+.irow .ord { display: flex; align-items: center; gap: 3px; }
+.irow .ord .icon { width: 28px; height: 30px; padding: 0; position: relative; }
+.irow .ord .icon i { position: absolute; right: 1px; bottom: 0; font-style: normal; font-size: 8px; font-weight: 700; color: var(--muted); }
+.irow .ord input.pos { width: 46px; height: 30px; padding: 0 4px; text-align: center; font-weight: 700; }
