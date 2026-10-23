@@ -2038,6 +2038,8 @@ const TUN_GROUP = { modFrontWheels: 'wheels', modBackWheels: 'wheels', wheels: '
 const TUN_LEVELS = { modEngine: 'engine', modBrakes: 'brakes', modTransmission: 'transmission', modSuspension: 'suspension', modArmor: 'armor' };
 const TUN_NAMES = { modEngine: 'Moteur', modBrakes: 'Freins', modTransmission: 'Transmission', modSuspension: 'Suspension', modArmor: 'Blindage', modTurbo: 'Turbo', modXenon: 'Phares xénon', xenonColor: 'Couleur des phares', color1: 'Peinture principale', color2: 'Peinture secondaire', pearlescentColor: 'Nacrage', wheelColor: 'Couleur des jantes', wheels: 'Type de jantes', neonEnabled: 'Néons', neonColor: 'Couleur des néons', windowTint: 'Vitres teintées', plateIndex: 'Style de plaque', modSmokeEnabled: 'Fumée de pneus', tyreSmokeColor: 'Couleur de la fumée', livery: 'Livrée', modLivery: 'Livrée' };
 const TUN_CATS = { engine: 'Moteur', brakes: 'Freins', transmission: 'Transmission', suspension: 'Suspension', armor: 'Blindage', turbo: 'Turbo', xenon: 'Xénon', cosmetic: 'Carrosserie', wheels: 'Roues', paint: 'Peinture', pearl: 'Nacré', wheelColor: 'Couleur de jantes', neon: 'Néons', tint: 'Vitres teintées', plate: 'Plaque', smoke: 'Fumée de pneus', livery: 'Livrée', horn: 'Klaxon' };
+const TUN_EMO = { modEngine: '⚙️', modBrakes: '🛑', modTransmission: '🔩', modSuspension: '🧰', modArmor: '🛡️', modTurbo: '🌀', wheels: '🛞', modFrontWheels: '🛞', modBackWheels: '🛞', wheelColor: '🎨', modSmokeEnabled: '💨', tyreSmokeColor: '💨', neonColor: '🌈', neonEnabled: '🌈', modXenon: '💡', xenonColor: '💡', windowTint: '🕶️', plateIndex: '🔢', color1: '🎨', color2: '🎨', pearlescentColor: '✨', modLivery: '🏷️', livery: '🏷️', modSpoilers: '🏎️', modFrontBumper: '🚘', modRearBumper: '🚘', modSideSkirt: '🚗', modExhaust: '💨', modHood: '🚗', modRoof: '🚙' };
+const tunIc = k => `<span class="tun-ic">${TUN_EMO[k] || '🔧'}</span>`;
 const colName = id => (GTA_COLORS.find(c => c[0] === id) || [id, 'Couleur ' + id])[1];
 
 const Tuning = {
@@ -2082,8 +2084,10 @@ const Tuning = {
   // « Sélecteur » avec flèches : liste de valeurs [valeur, libellé]
   stepper(key, label, list, opts = {}) {
     const i = Math.max(0, list.findIndex(x => x[0] === this.cur[key]));
-    return `<div class="tun-row"><div class="tun-lbl"><b>${esc(label)}</b>${opts.price === false ? '' : this.priceTag(key)}</div>
-      <div class="stepper"><button class="icon" data-a="step" data-k="${key}" data-d="-1">${ic('left', 16)}</button><div class="sv">${esc(list[i] ? list[i][1] : '—')}<small>${i + 1}/${list.length}</small></div><button class="icon" data-a="step" data-k="${key}" data-d="1">${ic('chevron', 16)}</button></div></div>`;
+    const lvl = ['modEngine', 'modBrakes', 'modTransmission', 'modSuspension', 'modArmor'].includes(key);
+    const sub = lvl && list.length <= 8 ? `<span class="pips">${list.map((_, n) => `<i class="${n <= i ? 'on' : ''}"></i>`).join('')}</span>` : `<small>${i + 1}/${list.length}</small>`;
+    return `<div class="tun-row"><div class="tun-lbl">${tunIc(key)}<div class="tun-nm"><b>${esc(label)}</b>${opts.price === false ? '' : this.priceTag(key)}</div></div>
+      <div class="stepper"><button class="icon" data-a="step" data-k="${key}" data-d="-1">${ic('left', 16)}</button><div class="sv">${esc(list[i] ? list[i][1] : '—')}${sub}</div><button class="icon" data-a="step" data-k="${key}" data-d="1">${ic('chevron', 16)}</button></div></div>`;
   },
 
   modList(key) {
@@ -2095,17 +2099,17 @@ const Tuning = {
   },
 
   toggle(key, label) {
-    return `<div class="tun-row"><div class="tun-lbl"><b>${esc(label)}</b>${this.priceTag(key)}</div><label class="sw-tg"><input type="checkbox" data-a="tog" data-k="${key}" ${this.cur[key] ? 'checked' : ''}><span></span></label></div>`;
+    return `<div class="tun-row"><div class="tun-lbl">${tunIc(key)}<div class="tun-nm"><b>${esc(label)}</b>${this.priceTag(key)}</div></div><label class="sw-tg"><input type="checkbox" data-a="tog" data-k="${key}" ${this.cur[key] ? 'checked' : ''}><span></span></label></div>`;
   },
 
   palette(key, label) {
-    return `<div class="tun-row col"><div class="tun-lbl"><b>${esc(label)}</b><small style="color:var(--muted)">${esc(colName(this.cur[key]))}</small>${this.priceTag(key)}</div>
+    return `<div class="tun-row col"><div class="tun-lbl">${tunIc(key)}<div class="tun-nm"><b>${esc(label)}</b><small style="color:var(--muted)">${esc(colName(this.cur[key]))}</small>${this.priceTag(key)}</div></div>
       <div class="tun-grid">${GTA_COLORS.map(c => `<button class="sw ${this.cur[key] === c[0] ? 'on' : ''}" title="${esc(c[1])}" style="background:${c[2]}" data-a="setv" data-k="${key}" data-v="${c[0]}"></button>`).join('')}</div></div>`;
   },
 
   colorInput(key, label, enabledKey) {
     const c = this.cur[key] || [255, 255, 255], hex = rgbHex(c);
-    return `<div class="tun-row"><div class="tun-lbl"><b>${esc(label)}</b></div><input type="color" data-path="tuning.color" data-tcolor="${key}" value="${hex}" style="width:64px;height:34px;padding:0;border-radius:8px"></div>`;
+    return `<div class="tun-row"><div class="tun-lbl">${tunIc(key)}<div class="tun-nm"><b>${esc(label)}</b></div></div><input type="color" data-path="tuning.color" data-tcolor="${key}" value="${hex}" style="width:64px;height:34px;padding:0;border-radius:8px"></div>`;
   },
 
   tabBody() {
@@ -2123,7 +2127,7 @@ const Tuning = {
       ${d.vehicle.bike ? this.stepper('modBackWheels', 'Jantes arrière', this.modList('modBackWheels') || [[-1, 'Origine']]) : ''}
       ${this.palette('wheelColor', 'Couleur des jantes')}${this.toggle('modSmokeEnabled', 'Fumée de pneus')}${c.modSmokeEnabled ? this.colorInput('tyreSmokeColor', 'Couleur de la fumée') : ''}`;
     if (t === 'paint') return `${this.palette('color1', 'Couleur principale')}${this.palette('color2', 'Couleur secondaire')}${this.palette('pearlescentColor', 'Nacrage')}`;
-    if (t === 'lights') return `<div class="tun-row col"><div class="tun-lbl"><b>Néons</b>${this.priceTag('neonEnabled')}</div><div class="neon-grid">${['Gauche', 'Droite', 'Avant', 'Arrière'].map((n, i) => `<label class="chk"><input type="checkbox" data-a="neon" data-i="${i}" ${(c.neonEnabled || [])[i] ? 'checked' : ''}> ${n}</label>`).join('')}</div></div>
+    if (t === 'lights') return `<div class="tun-row col"><div class="tun-lbl">${tunIc('neonEnabled')}<div class="tun-nm"><b>Néons</b>${this.priceTag('neonEnabled')}</div></div><div class="neon-grid">${['Gauche', 'Droite', 'Avant', 'Arrière'].map((n, i) => `<label class="chk"><input type="checkbox" data-a="neon" data-i="${i}" ${(c.neonEnabled || [])[i] ? 'checked' : ''}> ${n}</label>`).join('')}</div></div>
       ${this.colorInput('neonColor', 'Couleur des néons')}${this.toggle('modXenon', 'Phares xénon')}${c.modXenon ? this.stepper('xenonColor', 'Couleur des phares', XENON, { price: false }) : ''}
       ${this.stepper('windowTint', 'Vitres teintées', TINTS.map((n, i) => [i, n]))}${this.stepper('plateIndex', 'Style de plaque', PLATE_STYLES.map((n, i) => [i, n]))}`;
     const q = this.quote();
@@ -2135,11 +2139,11 @@ const Tuning = {
 
   render() {
     const d = this.d, q = this.quote(), n = this.changes().length;
-    const tabs = [['perf', 'wrench', 'Perf.'], ['body', 'car', 'Carrosserie'], ['wheels', 'bike', 'Roues'], ['paint', 'droplet', 'Peinture'], ['lights', 'sliders', 'Éclairage'], ['sum', 'file', 'Devis']];
+    const tabs = [['perf', '🔧', 'Perf.'], ['body', '🚗', 'Carrosserie'], ['wheels', '🛞', 'Roues'], ['paint', '🎨', 'Peinture'], ['lights', '💡', 'Éclairage'], ['sum', '🧾', 'Devis']];
     $root.classList.remove('corner'); $root.classList.add('tuning');
     $root.innerHTML = `<div class="tun-view" id="tun-view"></div><div class="tun-panel">
-      <div class="tun-head">${tile('wrench', 'lg')}<div class="ttl"><h1>${esc(d.vehicle.name || 'Véhicule')}</h1><p>${esc(d.vehicle.plate)} · ${esc(d.jobLabel)}</p></div><button class="icon" data-a="close" title="Fermer">${ic('x', 16)}</button></div>
-      <div class="tun-tabs">${tabs.map(([k, i, l]) => `<button class="${this.tab === k ? 'active' : ''}" data-a="tab" data-v="${k}">${ic(i, 15)}<span>${l}</span></button>`).join('')}</div>
+      <div class="tun-head">${tile('wrench', 'lg')}<div class="ttl"><h1>${esc(d.vehicle.name || 'Véhicule')}</h1><p><span class="plate">${esc(d.vehicle.plate)}</span> ${esc(d.jobLabel)}</p></div><button class="icon" data-a="close" title="Fermer">${ic('x', 16)}</button></div>
+      <div class="tun-tabs">${tabs.map(([k, i, l]) => `<button class="${this.tab === k ? 'active' : ''}" data-a="tab" data-v="${k}"><em>${i}</em><span>${l}</span></button>`).join('')}</div>
       <div class="tun-body">${this.waiting ? `<div class="empty">${tile('clock')}<h2>En attente du client…</h2><p>Le client doit accepter et payer la facture à l'écran (60 s).</p></div>` : this.tabBody()}</div>
       <div class="tun-foot"><div><small>Total</small><b>${money(q.total)}</b><small>${n} modification(s)</small></div><button class="primary" data-a="validate" ${n === 0 || this.waiting ? 'disabled' : ''}>${ic('check', 15)} Valider</button></div></div>`;
     const v = document.getElementById('tun-view');
