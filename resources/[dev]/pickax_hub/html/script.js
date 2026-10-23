@@ -10,6 +10,7 @@ const P = {
   doc: '<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>', palette: '<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.5-2.2-.5-1.3.3-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-9.5-9-9.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>', bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', gamepad: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 12h4M9 10v4M15.5 11h.01M18 13h.01"/>',
   video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>', music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>', discord: '<path d="M7 7c3-1 7-1 10 0l2 9c-2 1.5-4 2-7 2s-5-.5-7-2zM9.5 12h.01M14.5 12h.01"/>', bag: '<path d="M6 7h12l1 13H5zM9 7a3 3 0 016 0"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>',
   home: '<path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/>'
 };
 const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n] || P.home}</svg>`;
@@ -33,10 +34,13 @@ const views = {
   info() {
     const d = S.data, m = d.money;
     const cell = (icon, label, val, c) => h('div', { style: `--c:${c || 'var(--ac)'}` }, h('small', { html: ic(icon) + label }), h('b', null, money(val)));
-    const left = h('div.card', null,
+    const jobs = d.jobs || [];
+    const left = h('div.card', { style: 'display:flex;flex-direction:column;min-height:0' },
       h('div.hero', null, h('div.av', null, initials(d.name)), h('div', null, h('h2', null, d.name), h('div.chips', null, h('span.chip.ac', null, d.job.label), d.job.grade ? h('span.chip', null, d.job.grade) : null, h('span.chip', null, 'ID ' + d.id)))),
       h('div.h', null, h('span', { html: ic('cash') }), 'Portefeuille'),
-      h('div.wal', null, cell('cash', 'Liquide', m.cash, '#34d058'), cell('bank', 'Banque', m.bank, 'var(--ac)'), d.showDirty ? cell('skull', 'Argent sale', m.black, '#ff4d4d') : null));
+      h('div.wal', null, cell('cash', 'Liquide', m.cash, '#34d058'), cell('bank', 'Banque', m.bank, 'var(--ac)'), d.showDirty ? cell('skull', 'Argent sale', m.black, '#ff4d4d') : null),
+      h('div.h', { style: 'margin-top:22px' }, h('span', { html: ic('briefcase') }), `Entreprises (${jobs.filter(c => c.online > 0).length} disponibles)`),
+      jobs.length ? h('div.jobs.scroll', null, jobs.map(c => h('div.co' + (c.online > 0 ? '.up' : ''), null, h('div.lt', null, (c.label || '?').slice(0, 2).toUpperCase()), h('div', null, h('b', null, c.label), h('small', null, c.online > 0 ? `Disponible · ${c.online} en service` : 'Indisponible')), h('span.dot')))) : h('div.empty', { style: 'padding:20px' }, 'Aucune entreprise.'));
     const bills = d.bills || [];
     const right = h('div.card', { style: 'display:flex;flex-direction:column;min-height:0' }, h('div.h', null, h('span', { html: ic('doc') }), `Mes factures (${bills.length})`),
       bills.length ? h('div.scroll', { style: 'overflow:auto;min-height:0;flex:1;padding-right:6px' }, bills.map(b => h('div.bill', null, h('div', null, h('b', null, b.label), h('small', null, 'Facture n°' + b.id)), h('span.amt', null, money(b.amount)), h('button.btn.pri.sm', { onclick: () => act('payBill', { id: b.id }) }, 'Payer')))) : h('div.empty', null, 'Aucune facture.'));
@@ -157,6 +161,7 @@ window.addEventListener('message', e => {
     const rgb = /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)) : [10, 132, 255];
     document.documentElement.style.setProperty('--onac', (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) > 150 ? '#12081a' : '#ffffff');
     draw();
-  } else if (m.action === 'close') $('#hub').classList.add('hidden');
+    clearInterval(window.__jobsTimer); window.__jobsTimer = setInterval(() => { if (tab === 'info' && !$('#hub').classList.contains('hidden')) act('jobs'); }, 10000);
+  } else if (m.action === 'close') { $('#hub').classList.add('hidden'); clearInterval(window.__jobsTimer); }
 });
 document.addEventListener('keydown', e => { if ((e.key === 'Escape' || e.key === 'F5') && !$('#hub').classList.contains('hidden')) post('close'); });

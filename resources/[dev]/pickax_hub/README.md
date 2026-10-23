@@ -1,7 +1,7 @@
 # pickax_hub — menu personnel central (F5)
 
 Remplace le menu RageUI de base (touche **F5**) par une interface moderne, **avec uniquement les fonctions du menu d'origine** :
-- **Informations** : profil, ID, métier, portefeuille (liquide / banque / argent sale) et **factures** (paiement).
+- **Informations** : profil, ID, métier, portefeuille, **statut des entreprises** (Job Builder : un job est « disponible » dès qu'un employé est connecté ; actualisé toutes les 10 s) et **factures** (paiement).
 - **Documents** : carte d'identité, permis de conduire, port d'armes — montrer au joueur proche ou regarder.
 - **Véhicule** : nom, plaque, état moteur, CarPlay, moteur, capot, coffre, portes, fenêtres, limitateur.
 - **Préférences** : apparence des menus (pickax_ui), HUD (pickax_hud2 + boussole), performances (FPS), jeu (crosse, radar, HUD), Rockstar Editor.

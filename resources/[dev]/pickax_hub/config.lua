@@ -28,3 +28,6 @@ Config.Colors = {
     { key = 'bg', label = 'Fond du menu', def = true, presets = { { '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' }, { '#0d1f17', 'Vert foncé' }, { '#2a0f14', 'Bordeaux' }, { '#f7f7f5', 'Blanc' } } },
     { key = 'text', label = 'Texte', def = true, presets = { { '#f4f4f5', 'Blanc' }, { '#c9c9ce', 'Gris clair' }, { '#111114', 'Noir' }, { '#cfe6ff', 'Bleu clair' }, { '#fde68a', 'Doré' } } },
 }
+
+-- Statut des entreprises (onglet Informations) : jobs jamais affichés
+Config.HideJobs = { 'unemployed', 'unemployed2' }

@@ -64,7 +64,7 @@ local function collect()
         name = name, id = GetPlayerServerId(PlayerId()),
         job = { label = job.label or job.name or '—', grade = job.grade_label },
         money = { cash = cash, bank = bank, black = black }, showDirty = Config.ShowDirty,
-        bills = bills, keys = keys, commands = cmds, vehicle = vehicleInfo(), prefs = prefs(),
+        bills = bills, jobs = lib.callback.await('pkhub:jobs', false) or {}, keys = keys, commands = cmds, vehicle = vehicleInfo(), prefs = prefs(),
         lists = { styles = Config.Styles, sizes = Config.Sizes, btn = Config.BtnRadius, card = Config.CardRadius, notify = Config.NotifyRadius, hudRadius = Config.HudRadius, hudScale = Config.HudScale, colors = Config.Colors },
         links = { discord = Config.Links.Discord ~= nil, shop = Config.Links.Boutique ~= nil }, limiter = Config.Limiter,
     }
@@ -111,6 +111,8 @@ function A.payBill(d)
     Citizen.Await(p)
     return { bills = fetch(function(done) ESX.TriggerServerCallback('CorePickax:GetBills', done) end) or {} }
 end
+
+function A.jobs() return { jobs = lib.callback.await('pkhub:jobs', false) or {} } end
 
 function A.carplay() closeHub(); SetTimeout(300, function() TriggerEvent('carplay:client:open') end) end
 
