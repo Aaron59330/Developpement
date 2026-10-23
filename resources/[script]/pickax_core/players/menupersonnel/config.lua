@@ -1,4 +1,5 @@
 ConfigMenuF5 = {
+	UseHub = true,   -- true : F5 ouvre le menu central NUI (pickax_hub) s'il est démarré ; false : ancien menu RageUI
 	Trigger = {
 		TriggerUseItem = 'esx:useItem',
 		TriggerPayBill = 'esx_billing:payBill'

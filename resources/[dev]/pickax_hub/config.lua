@@ -1,54 +1,27 @@
 Config = {}
 
-Config.Command = 'hub'
-Config.Key     = 'F1'
-Config.Accent  = '#d9a3f5'           -- couleur du menu (lilas). nil = couleur du serveur (pickax_core/config.lua)                 -- touche d'ouverture (modifiable par le joueur dans les paramètres FiveM)
+Config.Command = 'hub'                -- /hub ouvre le menu (F5 l'ouvre aussi : pickax_core/players/menupersonnel → ConfigMenuF5.UseHub)
+Config.Key     = nil                  -- touche propre au hub (nil = aucune, on garde F5 du menu personnel)
+Config.Accent  = '#d9a3f5'            -- couleur du menu (lilas). nil = couleur du serveur (pickax_core/config.lua)
 
--- Raccourcis de l'écran d'accueil : chaque entrée lance une commande. Les commandes qui n'existent pas sur le serveur sont masquées automatiquement.
-Config.Shortcuts = {
-    { id = 'phone',   label = 'Téléphone',      icon = 'phone',   command = 'phone',    desc = 'Appels, messages, banque' },
-    { id = 'job',     label = 'Menu métier',    icon = 'briefcase', command = 'jobmenu', desc = 'Actions et factures du métier' },
-    { id = 'gang',    label = 'Menu du gang',   icon = 'shield',  command = 'gangmenu', desc = 'Organisation et activités' },
-    { id = 'emotes',  label = 'Animations',     icon = 'smile',   command = 'emoteui',  desc = 'Emotes et démarches' },
-    { id = 'carplay', label = 'CarPlay',        icon = 'music',   command = 'carplay',  desc = 'Autoradio du véhicule' },
-    { id = 'boutique',label = 'Boutique',       icon = 'bag',     command = 'menuboutique', desc = 'Véhicules, armes, packs' },
+Config.Links = {                      -- onglet « Liens » (https uniquement)
+    Discord  = 'https://' .. ((PickaxTheme and PickaxTheme.discord) or 'discord.gg/bluebayrp'),
+    Boutique = 'https://bluebayrp.tebex.io/',
 }
 
--- Activités (onglet « Activités ») : le bouton GPS pose un point sur la carte.
--- ⚠ Coordonnées à adapter à ta carte (commande /heistpos de pickax_heists pour les relever).
-Config.Activities = {
-    { label = 'Braquage : Le problème Bogdan', desc = 'Préparatifs, mises en place et finale à 2 équipes.', tag = 'Équipe 2-4', coords = vec3(-1267.2, -3013.1, 13.9) },
-    { label = 'Mini-jeux',                      desc = 'Basket, football, paintball, laser game…',          tag = 'Arène' },
-    { label = 'Événements du serveur',          desc = 'Largages, braquages de fourgon, épaves…',           tag = 'Aléatoire' },
+Config.Limiter = { 50, 80, 120 }      -- vitesses proposées pour le limitateur (km/h)
+Config.ShowDirty = true               -- afficher l'argent sale dans le portefeuille
+
+-- Listes des réglages d'apparence (identiques au menu personnel d'origine)
+Config.Styles = { { 'noir', 'Noir' }, { 'verre', 'Verre' }, { 'clair', 'Clair' }, { 'neon', 'Néon' }, { 'bleu', 'Couleur du serveur' } }
+Config.Sizes  = { { 'sm', 'Petit' }, { 'md', 'Moyen' }, { 'lg', 'Grand' } }
+Config.BtnRadius  = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond' } }
+Config.CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } }
+Config.NotifyRadius = { { -1, 'Défaut' }, { 0, 'Carré' }, { 6, 'Léger' }, { 11, 'Arrondi' }, { 18, 'Très arrondi' }, { 26, 'Fort arrondi' } }
+Config.HudRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' } }
+Config.HudScale  = { { 70, 'Très petit' }, { 85, 'Petit' }, { 100, 'Normal' }, { 115, 'Grand' }, { 130, 'Très grand' } }
+Config.Colors = {
+    { key = 'accent', label = 'Couleur principale', presets = { { '#00a4ff', 'Serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
+    { key = 'bg', label = 'Fond du menu', def = true, presets = { { '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' }, { '#0d1f17', 'Vert foncé' }, { '#2a0f14', 'Bordeaux' }, { '#f7f7f5', 'Blanc' } } },
+    { key = 'text', label = 'Texte', def = true, presets = { { '#f4f4f5', 'Blanc' }, { '#c9c9ce', 'Gris clair' }, { '#111114', 'Noir' }, { '#cfe6ff', 'Bleu clair' }, { '#fde68a', 'Doré' } } },
 }
-
-Config.Rules = {                       -- onglet « Serveur »
-    'Respecte les autres joueurs et le staff.',
-    'Reste dans ton rôle : pas de métagaming ni de powergaming.',
-    'Pas de RDM / VDM : une scène de violence doit avoir une raison RP.',
-    'En cas de problème, ouvre un report plutôt que de te faire justice.',
-}
-
-Config.Accounts = { bank = 'Banque', money = 'Espèces', black_money = 'Argent sale' }
-Config.ShowBlackMoney = false
-
--- Propriétés du joueur (onglet « Propriétés ») : requête SQL de TON système de logements, qui doit renvoyer les colonnes `label` et `info`.
--- Laisser nil = onglet masqué. Exemples :
---   esx_property : 'SELECT name AS label, "Propriété" AS info FROM owned_properties WHERE owner = ?'
---   autre        : 'SELECT label, address AS info FROM mes_logements WHERE identifier = ?'
-Config.PropertiesQuery = nil
-
--- Entreprises affichées dans « Entreprises actives » (nom du job → on affiche seulement ceux-là ; vide = tous sauf Config.HideJobs)
-Config.ShowJobs = {}
-Config.HideJobs = { 'unemployed', 'unemployed2' }
-Config.MaxJobs  = 14
-
--- Statistiques du personnage (barres de l'accueil) : natives GTA
-Config.Stats = {
-    { label = 'Endurance', stat = 'STAMINA' },       { label = 'Pilotage',  stat = 'FLYING_ABILITY' },
-    { label = 'Tir',       stat = 'SHOOTING_ABILITY' }, { label = 'Conduite',  stat = 'WHEELIE_ABILITY' },
-    { label = 'Force',     stat = 'STRENGTH' },      { label = 'Apnée',     stat = 'LUNG_CAPACITY' },
-    { label = 'Furtivité', stat = 'STEALTH_ABILITY' },
-}
-
-Config.PayBillsFrom = 'bank'                     -- compte débité pour payer une facture ('bank' | 'money')

@@ -1,15 +1,15 @@
-# pickax_hub — menu central du serveur
+# pickax_hub — menu personnel central (F5)
 
-Une touche (**F1** par défaut, modifiable dans les raccourcis FiveM) ouvre un seul menu :
-- **Accueil** : identité (nom, ID, heures de jeu), stats du personnage, portefeuille (liquide, banque, points boutique), accès rapide, entreprises actives (disponible si au moins un employé en ligne).
-- **Vos factures** : factures en attente (table `billing`) avec paiement.
-- **Vos véhicules** : liste (`owned_vehicles`) + « Localiser ».
-- **Activités** : braquage, mini-jeux, événements, avec point GPS.
-- **Serveur** : joueurs, staff, durée de fonctionnement, Discord, règles.
-- **Réglages** : masquer le HUD.
+Remplace le menu RageUI de base (touche **F5**) par une interface moderne, **avec uniquement les fonctions du menu d'origine** :
+- **Informations** : profil, ID, métier, portefeuille (liquide / banque / argent sale) et **factures** (paiement).
+- **Documents** : carte d'identité, permis de conduire, port d'armes — montrer au joueur proche ou regarder.
+- **Véhicule** : nom, plaque, état moteur, CarPlay, moteur, capot, coffre, portes, fenêtres, limitateur.
+- **Préférences** : apparence des menus (pickax_ui), HUD (pickax_hud2 + boussole), performances (FPS), jeu (crosse, radar, HUD), Rockstar Editor.
+- **Touches** et **Commandes** du serveur (listes lues dans la config réelle).
+- **Liens** : Discord et boutique.
 
-Réglages dans `config.lua` : touche, raccourcis (les commandes inexistantes sont masquées automatiquement), activités (coordonnées GPS à adapter), règles.
-Le style vient de `pickax_theme/design.css` (système de design commun) et de la couleur du serveur (`pickax_core/config.lua` → `AccentColor`).
-`ensure pickax_theme` doit démarrer avant (c'est déjà le cas dans `resources.cfg`).
+Fonctionnement : `pickax_core/players/menupersonnel` redirige F5 vers `exports['pickax_hub']:Open()` si la ressource est démarrée
+(`ConfigMenuF5.UseHub = false` pour revenir à l'ancien menu). Les données passent par les exports de `pickax_ui`, `pickax_hud2`, `pickax_compass`, `pickax_notify`
+et par de nouveaux exports de `pickax_core` (`HubKeys`, `HubCommands`, `HubPerf`, `HubPerfSet`).
 
-Onglets : Accueil · Vos factures · Vos véhicules · Vos propriétés (masqué tant que `Config.PropertiesQuery` n'est pas renseigné) · Activités · Serveur · Paramètres · Boutique.
+Réglages : `config.lua` (couleur `Config.Accent`, liens, vitesses du limitateur). Le style vient de `pickax_theme/design.css`.

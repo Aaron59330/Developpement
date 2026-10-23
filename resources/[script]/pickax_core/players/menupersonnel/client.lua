@@ -781,6 +781,26 @@ end
 --Register
 RegisterKeyMapping(ConfigMenuF5.Commande.CommandeName, ConfigMenuF5.Commande.DescCommande, 'keyboard', ConfigMenuF5.Commande.Bind)
 
+-- Données et actions fournies au menu central (pickax_hub), qui remplace ce menu RageUI quand il est démarré
+exports('HubKeys', function() return MenuKeys() end)
+exports('HubCommands', function() return MenuCommands() end)
+exports('HubPerf', function()
+	if not PickaxPerf then return nil end
+	local presets = {}
+	for i, p in ipairs(PickaxPerf.Presets) do presets[i] = { id = p.id, name = p.name, desc = p.desc } end
+	local g = PickaxPerf.Get()
+	return { presets = presets, preset = g.preset, fps = g.fps }
+end)
+exports('HubPerfSet', function(key, value)
+	if not PickaxPerf then return false end
+	if key == 'preset' then PickaxPerf.SetPreset(value) elseif key == 'fps' then PickaxPerf.SetFps(value == true) end
+	return true
+end)
+
 RegisterCommand(ConfigMenuF5.Commande.CommandeName, function()
+	if ConfigMenuF5.UseHub ~= false and GetResourceState('pickax_hub') == 'started' then
+		exports['pickax_hub']:Open()
+		return
+	end
 	OpenMenu()
 end)
