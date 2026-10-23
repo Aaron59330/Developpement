@@ -567,3 +567,16 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gar .gdet { align-self: start; height: auto; max-height: 100%; }
 .gar .gfoot { margin-top: calc(14 * var(--u)); padding-top: 0; }
 .gar .gdet { margin-top: calc(80 * var(--u)); }
+/* Garage : fenêtre centrée (pas plein écran), sans voile ni flou sur le reste de l'écran */
+.gar { width: calc(1560 * var(--u)); height: calc(880 * var(--u)); padding: 0 calc(24 * var(--u)) calc(24 * var(--u)); background: rgba(16, 17, 22, .72); border: 1px solid rgba(255, 255, 255, .08); border-radius: calc(6 * var(--u)); box-shadow: 0 calc(30 * var(--u)) calc(90 * var(--u)) rgba(0, 0, 0, .55); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.gar::before { display: none; }
+.gar .gtop { padding-top: calc(22 * var(--u)); }
+.gar .gdet { margin-top: calc(40 * var(--u)); }
+.gar { width: calc(1700 * var(--u)); height: calc(900 * var(--u)); }
+.gar .gbrand { width: calc(300 * var(--u)); }
+.gar .gtabs { gap: calc(16 * var(--u)); }
+.gar .gtab { flex: 0 0 calc(320 * var(--u)); height: calc(100 * var(--u)); }
+.gar .gmain { grid-template-columns: minmax(0, 1fr) calc(560 * var(--u)); gap: calc(24 * var(--u)); padding-top: calc(22 * var(--u)); }
+.gar .gleft { min-width: 0; }
+.gar .gdet { margin-top: calc(10 * var(--u)); max-height: calc(100% - 10 * var(--u)); overflow-y: auto; }
+.gar .gcar, .gar .gcar .gphoto { height: calc(230 * var(--u)); }
