@@ -1,21 +1,21 @@
 /* ===== Menu pickax : ardoise, un fond par bouton, carte d'infos à droite ===== */
 :root {
-  --card-bg: rgba(52, 59, 75, .98);
-  --card-border: rgba(255, 255, 255, .1);
-  --card-shadow: 0 22px 50px rgba(0, 0, 0, .5);
+  --card-bg: #121216;
+  --card-border: rgba(255, 255, 255, .05);
+  --card-shadow: 0 22px 50px rgba(0, 0, 0, .55);
   --r-btn: 12px;
   --r-card: 18px;
   --surface: rgba(255, 255, 255, .06);
   --surface-2: rgba(255, 255, 255, .1);
-  --row-a: rgba(255, 255, 255, .11);
-  --row-b: rgba(255, 255, 255, .05);
-  --row-bd: rgba(255, 255, 255, .09);
-  --foot: rgba(0, 0, 0, .22);
+  --row-a: #1c1c22;
+  --row-b: #1c1c22;
+  --row-bd: transparent;
+  --foot: #0c0c10;
   --line: rgba(255, 255, 255, .12);
   --line-2: rgba(255, 255, 255, .2);
   --text: #f1f3f9;
-  --text-2: #cdd3e1;
-  --muted: #9ba5ba;
+  --text-2: #d6d8e0;
+  --muted: #85888f;
   --act-bg: rgba(255, 255, 255, .1);
   --act-border: rgba(255, 255, 255, .5);
   --act-text: #fff;
@@ -59,8 +59,8 @@ html, body { height: 100%; background: transparent; color: var(--text); font-fam
 #items::-webkit-scrollbar { display: none; }
 
 /* Un fond par bouton ; le bouton sélectionné se remplit de la couleur du core */
-.it { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 7px 14px 7px 8px; margin-bottom: 7px; border-radius: var(--r-btn); border: 1px solid var(--row-bd); background: linear-gradient(180deg, var(--row-a), var(--row-b)); box-shadow: 0 2px 6px rgba(0,0,0,.16); color: var(--text); font-weight: 500; font-size: 14.5px; }
-.it .ico { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border-radius: calc(var(--r-btn) * .75); background: rgba(0,0,0,.2); color: var(--muted); }
+.it { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 7px 14px 7px 8px; margin-bottom: 7px; border-radius: var(--r-btn); border: 1px solid var(--row-bd); background: linear-gradient(180deg, var(--row-a), var(--row-b)); box-shadow: none; color: var(--text); font-weight: 500; font-size: 14.5px; }
+.it .ico { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border-radius: calc(var(--r-btn) * .75); background: rgba(255,255,255,.06); color: var(--muted); }
 .it .ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .it .lb { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .it .rt { color: var(--muted); font-size: 12.5px; white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis; }
