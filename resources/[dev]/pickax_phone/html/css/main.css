@@ -266,3 +266,12 @@ input[type=range], input[type=checkbox], input[type=radio] { accent-color: var(-
 .sz-btn:active { transform: scale(.94); background: var(--fg3); }
 .sizer .seg { display: flex; gap: 4px; } .sizer .seg button { flex: 1; height: 36px; padding: 0 4px; font-size: 14px; }
 .sizer { flex: 1; min-width: 0; } .sizer .seg { margin: 0; }
+
+/* Coins arrondis : chaque couche plein écran porte elle-même le rayon de l'écran.
+   Le navigateur du jeu laisse parfois dépasser en carré les éléments à flou d'arrière-plan (backdrop-filter) :
+   sans rayon propre, on voyait des coins sombres sortir du cadre du téléphone. */
+#screen > :not(#statusbar):not(#homebar):not(#peek) { border-radius: 54px; }
+.appview, .home, .lock, .cc, .nc, .switcher, .pin, .wall, .dim { border-radius: 54px; overflow: hidden; }
+.sheet { border-radius: 22px 22px 54px 54px; }
+.tabbar { border-radius: 0 0 54px 54px; }
+.dock { border-radius: 34px; }
