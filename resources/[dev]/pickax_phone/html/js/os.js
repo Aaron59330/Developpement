@@ -42,7 +42,7 @@ const OS = {
     const ac = this.accentColor();
     document.documentElement.style.setProperty('--accent', ac);
     document.documentElement.style.setProperty('--accent-rgb', [1, 3, 5].map(i => parseInt(ac.slice(i, i + 2), 16)).join(','));
-    const dim = $('#dim'); if (dim) dim.style.opacity = String(Math.max(0, (100 - (S.settings.brightness == null ? 100 : S.settings.brightness)) / 100 * .75));
+    const dim = $('#dim'); if (dim) { const o = Math.max(0, (100 - (S.settings.brightness == null ? 100 : S.settings.brightness)) / 100 * .75); dim.style.opacity = String(o); dim.style.display = o > 0 ? 'block' : 'none'; }
     document.documentElement.style.fontSize = ((S.settings.textSize || 100) / 100 * 16) + 'px';
     this.updateBars();
   },
