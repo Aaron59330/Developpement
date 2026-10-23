@@ -13,6 +13,19 @@ local function vehicleLabel(model)
     return lbl
 end
 
+local function readStats()
+    local out = {}
+    for _, s in ipairs(Config.Stats) do
+        local v = 0
+        for _, pre in ipairs({ 'MP0_', 'SP0_' }) do
+            local ok, val = StatGetInt(joaat(pre .. s.stat), 0, true)
+            if ok and val and val > 0 then v = val break end
+        end
+        out[#out + 1] = { label = s.label, value = math.min(100, v) }
+    end
+    return out
+end
+
 local function openHub()
     if open then return end
     local data = lib.callback.await('pkhub:data', false)
@@ -22,6 +35,7 @@ local function openHub()
     for _, s in ipairs(Config.Shortcuts) do if hasCommand(s.command) then sc[#sc + 1] = s end end
     local acts = {}
     for i, a in ipairs(Config.Activities) do acts[i] = { label = a.label, desc = a.desc, tag = a.tag, gps = a.coords ~= nil, cmd = a.command and hasCommand(a.command) or false } end
+    data.stats = readStats()
     local theme = PickaxTheme or {}
     open = true; SetNuiFocus(true, true)
     nui('open', { data = data, shortcuts = sc, activities = acts, server = { name = theme.name, short = theme.short, tagline = theme.tagline, discord = theme.discord } })
@@ -53,6 +67,11 @@ RegisterNUICallback('locate', function(d, cb)
         end
     end
     lib.notify({ title = 'GPS', description = 'Véhicule introuvable : il est probablement au garage.', type = 'warning' }); cb(1)
+end)
+RegisterNUICallback('payBill', function(d, cb)
+    local ok, err = lib.callback.await('pkhub:payBill', false, d.id)
+    lib.notify({ title = 'Facture', description = ok and 'Facture payée.' or (err or 'Impossible.'), type = ok and 'success' or 'error' })
+    cb(ok and 1 or 0)
 end)
 RegisterNUICallback('pref', function(d, cb)
     if d.key == 'hidehud' then ExecuteCommand('hidehud') end

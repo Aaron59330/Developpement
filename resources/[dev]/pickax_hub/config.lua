@@ -30,3 +30,24 @@ Config.Rules = {                       -- onglet « Serveur »
 
 Config.Accounts = { bank = 'Banque', money = 'Espèces', black_money = 'Argent sale' }
 Config.ShowBlackMoney = false
+
+-- Propriétés du joueur (onglet « Propriétés ») : requête SQL de TON système de logements, qui doit renvoyer les colonnes `label` et `info`.
+-- Laisser nil = onglet masqué. Exemples :
+--   esx_property : 'SELECT name AS label, "Propriété" AS info FROM owned_properties WHERE owner = ?'
+--   autre        : 'SELECT label, address AS info FROM mes_logements WHERE identifier = ?'
+Config.PropertiesQuery = nil
+
+-- Entreprises affichées dans « Entreprises actives » (nom du job → on affiche seulement ceux-là ; vide = tous sauf Config.HideJobs)
+Config.ShowJobs = {}
+Config.HideJobs = { 'unemployed', 'unemployed2' }
+Config.MaxJobs  = 14
+
+-- Statistiques du personnage (barres de l'accueil) : natives GTA
+Config.Stats = {
+    { label = 'Endurance', stat = 'STAMINA' },       { label = 'Pilotage',  stat = 'FLYING_ABILITY' },
+    { label = 'Tir',       stat = 'SHOOTING_ABILITY' }, { label = 'Conduite',  stat = 'WHEELIE_ABILITY' },
+    { label = 'Force',     stat = 'STRENGTH' },      { label = 'Apnée',     stat = 'LUNG_CAPACITY' },
+    { label = 'Furtivité', stat = 'STEALTH_ABILITY' },
+}
+
+Config.PayBillsFrom = 'bank'                     -- compte débité pour payer une facture ('bank' | 'money')
