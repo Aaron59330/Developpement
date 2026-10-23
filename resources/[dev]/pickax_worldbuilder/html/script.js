@@ -310,6 +310,7 @@ const GaragePanel = new (class extends PanelBase {
   init(d) { this.tab = d.mode === 'job' ? 'fleet' : 'perso'; this.q = ''; this.filter = 'all'; this.sel = null; }
   list() {
     const d = this.d, q = (this.q || '').trim().toLowerCase();
+    if (this.tab === 'gang') return [];
     let l = this.tab === 'fleet' ? (d.fleet || []).map(f => ({ key: String(f.i), name: f.name || f.label, sub: f.model, spawn: f.spawn || f.model, price: f.price || 0, fleet: true })) : (d.vehicles || []).map(v => ({ key: v.plate, name: v.name, sub: v.plate, engine: v.engine ?? 1000, body: v.body ?? 1000, fuel: v.fuel ?? 100, model: v.model, spawn: v.spawn }));
     if (this.tab !== 'fleet' && this.filter === 'ok') l = l.filter(v => v.engine >= 700 && v.body >= 700);
     if (this.tab !== 'fleet' && this.filter === 'bad') l = l.filter(v => v.engine < 700 || v.body < 700);
@@ -323,33 +324,34 @@ const GaragePanel = new (class extends PanelBase {
     return `<img class="gphoto" src="${esc(u)}" alt="" loading="lazy" onerror="this.outerHTML=window.__garSil">`;
   }
   cards(l) {
+    const none = this.tab === 'gang' ? ['Aucun véhicule de groupe', 'Aucun véhicule n\'est attribué à ton groupe illégal.'] : this.tab === 'fleet' ? ['Aucun véhicule de service', 'Rien de disponible pour ton grade.'] : ['Aucun véhicule', 'Aucun véhicule rangé dans ce garage.'];
     return l.map(v => `<div class="gv ${v.key === this.sel ? 'on' : ''}" data-a="pick" data-v="${esc(v.key)}"><div class="gimg">${this.img(v, 40)}</div><b>${esc(v.name)}</b><small>${esc(v.sub)}</small></div>`).join('')
-      || `<div class="gempty">${ic('car', 34)}<b>${this.tab === 'fleet' ? 'Aucun véhicule de service' : 'Aucun véhicule'}</b><small>${this.tab === 'fleet' ? 'Rien de disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.'}</small></div>`;
+      || `<div class="gempty">${ic('car', 34)}<b>${none[0]}</b><small>${none[1]}</small></div>`;
   }
   detail(l) {
     const d = this.d, v = l.find(x => x.key === this.sel);
     if (!v) return `<div class="gempty">${ic('car', 34)}<small>Sélectionne un véhicule</small></div>`;
-    const bars = v.fleet ? '' : `<div class="gbars">${pctBar('Moteur', v.engine, 1000)}${pctBar('Carrosserie', v.body, 1000)}${pctBar('Essence', v.fuel, 100)}</div>`;
     const fee = v.fleet ? v.price : d.fee;
     const pay = fee ? payRow(d.payments, this.method) : '';
-    return `<div class="gcar">${this.img(v, 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>${bars}${pay}
+    return `<div class="gcar">${this.img(v, 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>
       <div class="gacts"><button class="gbtn gprim" data-a="take">${ic('logout', 16)} Sortir le véhicule${fee ? ` · ${money(fee)}` : ''}</button>
-      <button class="gbtn" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('box', 16)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>
-      <div class="gfoot">Modèle: ${esc(v.model || v.sub)} &nbsp;&nbsp; Garage: ${esc(d.label)}</div>`;
+      <button class="gbtn" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('box', 16)} Ranger le véhicule</button>
+      <button class="gbtn" disabled title="Bientôt disponible">${ic('pin', 16)} Localiser</button>
+      <button class="gbtn" disabled title="Bientôt disponible">${ic('edit', 16)} Renommer</button></div>${pay}
+      <div class="gfoot">Modèle: ${esc(v.model && typeof v.model === 'string' ? v.model : (v.spawn || v.sub))} &nbsp;&nbsp; Garage: ${esc(d.label)}</div>`;
   }
   render() {
     const d = this.d, l = this.list();
     if (this.sel == null || !l.some(x => x.key === this.sel)) this.sel = l[0] ? l[0].key : null;
     const srv = (window.PICKAX_SERVER && (window.PICKAX_SERVER.short || window.PICKAX_SERVER.name)) || '';
-    const tabs = [['perso', 'user', 'Personnel']]; if ((d.fleet || []).length || d.mode === 'job') tabs.push(['fleet', 'building', 'Entreprise']);
+    const tabs = [['fleet', 'building', 'Entreprise'], ['perso', 'user', 'Personnel'], ['gang', 'users', 'Groupe illégal']];
     const fl = [['all', 'Tous'], ['ok', 'Bon état'], ['bad', 'Abîmés']];
     $root.innerHTML = `<div class="gar"><div class="gtop"><div class="gbrand">${ic('car', 26)}<div><b>GARAGE</b><small>${esc(d.label)}</small></div></div>
         <div class="gtabs">${tabs.map(t => `<button class="gtab ${this.tab === t[0] ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[1], 20)}<span>${t[2]}</span></button>`).join('')}</div>
-        <div class="gsrv"><b>${esc(String(srv).toUpperCase())}</b><small>ROLEPLAY</small></div><button class="icon gx" data-a="close" title="Fermer">${ic('x', 16)}</button></div>
-      <div class="gbar"><input data-path="q" placeholder="Rechercher…" value="${esc(this.q)}">
-        ${this.tab === 'fleet' ? '' : fl.map(f => `<button class="gflt ${this.filter === f[0] ? 'on' : ''}" data-a="flt" data-v="${f[0]}">${f[1]}</button>`).join('')}
-        <span class="gcount">${l.length} véhicule${l.length > 1 ? 's' : ''}</span></div>
-      <div class="gmain"><div class="ggrid" id="ggrid">${this.cards(l)}</div><div class="gdet" id="gdet">${this.detail(l)}</div></div></div>`;
+        <div class="gsrv"><b>${esc(String(srv).toUpperCase())}</b><small>ROLEPLAY</small></div></div>
+      <div class="gmain"><div class="gleft"><div class="gbar"><input data-path="q" placeholder="Rechercher..." value="${esc(this.q)}">
+        ${this.tab === 'perso' ? fl.map(f => `<button class="gflt ${this.filter === f[0] ? 'on' : ''}" data-a="flt" data-v="${f[0]}">${f[1]}</button>`).join('') : ''}</div>
+        <div class="ggrid" id="ggrid">${this.cards(l)}</div></div><div class="gdet" id="gdet">${this.detail(l)}</div></div></div>`;
   }
   refresh() {
     const l = this.list();
@@ -357,7 +359,6 @@ const GaragePanel = new (class extends PanelBase {
     const g = document.getElementById('ggrid'), t = document.getElementById('gdet');
     if (g) g.innerHTML = this.cards(l);
     if (t) t.innerHTML = this.detail(l);
-    const c = $root.querySelector('.gcount'); if (c) c.textContent = `${l.length} véhicule${l.length > 1 ? 's' : ''}`;
   }
   afterInput(p) { if (p === 'q') this.refresh(); }
   async onA(el) {
