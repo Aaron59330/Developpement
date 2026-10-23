@@ -47,7 +47,7 @@ const Garage = {
     const rows = (await rpc('garage')) || []; clear(pg.body);
     if (!rows.length) { pg.body.appendChild(Empty('car', 'Aucun véhicule', 'Les véhicules que vous possédez apparaîtront ici.')); return; }
     const named = await Promise.all(rows.map(async r => { const n = await post('vehicleName', { model: r.model }); return Object.assign(r, { name: (n && n.name) || 'Véhicule' }); }));
-    pg.body.appendChild(Group(null, named.map(v => ({ icon: 'car', color: v.stored ? '#34c759' : '#ff9f0a', title: v.name, sub: v.plate + ' · ' + (v.stored ? 'Au garage' : 'Sorti'), chev: true, onclick: () => ActionSheet(v.name + ' — ' + v.plate, [
+    pg.body.appendChild(Group(null, named.map(v => ({ icon: 'car', color: v.impounded ? '#ff453a' : v.stored ? '#34c759' : '#ff9f0a', title: v.name, sub: v.plate + ' · ' + (v.impounded ? 'À la fourrière' : v.stored ? 'Au garage' : 'Sorti'), chev: true, onclick: () => ActionSheet(v.name + ' — ' + v.plate, [
       { label: 'Localiser sur la carte', onclick: async () => { const r = await post('locateVehicle', { plate: v.plate }); Toast(r && r.found ? 'Véhicule localisé : GPS activé' : v.stored ? 'Le véhicule est rangé au garage' : 'Véhicule introuvable à proximité', 'pin'); } },
       { label: 'Carburant : ' + (v.fuel != null ? Math.round(v.fuel) + ' %' : '—') }, { label: 'État : ' + (v.engine != null ? Math.round(v.engine / 10) + ' %' : '—') }]) }))));
   },

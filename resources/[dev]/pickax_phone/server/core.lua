@@ -531,7 +531,7 @@ lib.callback.register('aura:init', function(src)
                jobLabel = job and job.label or nil, identifier = id, admin = Aura.IsAdmin(src) },
         settings = settings, hasPin = hasPin, installed = installed, catalog = apps,
         battery = p.battery, contacts = contactsOf(id),
-        config = { brand = Config.Brand, model = Config.Model, ui = Config.UI, limits = Config.Limits, framework = Bridge.fw, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
+        config = { brand = Config.Brand, model = Config.Model, carrier = Config.Carrier, accent = Config.Defaults.accent, serverName = PickaxTheme and PickaxTheme.name or nil, ui = Config.UI, limits = Config.Limits, framework = Bridge.fw, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
                    lines = Aura.LinesPublic(), taxi = Config.Taxi, market = Config.Market.categories, crypto = Config.Crypto.coins, social = { max = Config.Social.postMaxLength, images = Config.Social.maxImages },
                    numberGroup = Config.Number.group, messages = Config.Messages, camera = Config.Camera.mode, maxMarketImages = Config.Market.maxImages, storyHours = Config.Social.storyHours },
     }

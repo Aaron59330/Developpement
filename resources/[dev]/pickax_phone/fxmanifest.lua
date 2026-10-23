@@ -11,6 +11,7 @@ ui_page 'html/index.html'
 
 shared_scripts {
     '@ox_lib/init.lua',
+    'pk_theme.lua',   -- couleur / nom du serveur (pickax_theme)
     'config.lua',
 }
 

@@ -247,7 +247,7 @@ local function societyMode(jobName)
     if started('qb-banking') then return 'qb-banking' end
     if started('qb-management') then return 'qb-management' end
     if started('okokBanking') then return 'okok' end
-    if started('esx_addonaccount') then return 'esx_addonaccount' end
+    if started('esx_addonaccount') or (Bridge.fw == 'esx' and started('pickax_core')) then return 'esx_addonaccount' end
     return 'none'
 end
 
@@ -286,7 +286,14 @@ function Bridge.HasSociety(jobName) return societyMode(jobName) ~= 'none' end
 local function vehCfg()
     local c = Config.Database and Config.Database.vehicles
     if type(c) == 'table' then return c end
-    if Bridge.fw == 'esx' then return { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', stored = 'stored', storedValue = 1 } end
+    if Bridge.fw == 'esx' then
+        -- colonne « stored » (ESX d'origine) ou « state » (CorePickax) : détectée une fois
+        if Bridge._esxVeh == nil then
+            local col = MySQL.scalar.await("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'owned_vehicles' AND COLUMN_NAME IN ('stored','state') ORDER BY COLUMN_NAME = 'state' DESC LIMIT 1")
+            Bridge._esxVeh = { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', stored = col or 'stored', storedValue = 1, impoundValue = col == 'state' and 2 or nil }
+        end
+        return Bridge._esxVeh
+    end
     if Bridge.fw == 'qb' or Bridge.fw == 'qbox' then return { table = 'player_vehicles', owner = 'citizenid', plate = 'plate', props = 'mods', model = 'hash', stored = 'state', storedValue = 1 } end
     return nil
 end
@@ -303,9 +310,12 @@ function Bridge.Vehicles(identifier)
         local props = type(r.props) == 'string' and (json.decode(r.props) or {}) or {}
         local model = tonumber(r.model) or props.model
         if not model and type(r.model) == 'string' then model = joaat(r.model) end
-        local stored = true
-        if c.stored then stored = tostring(r.stored) == tostring(c.storedValue or 1) or r.stored == true end
-        out[#out + 1] = { plate = r.plate, model = model, stored = stored, fuel = props.fuelLevel or props.fuel, engine = props.engineHealth, body = props.bodyHealth }
+        local stored, impounded = true, false
+        if c.stored then
+            stored = tostring(r.stored) == tostring(c.storedValue or 1) or r.stored == true
+            if c.impoundValue and tostring(r.stored) == tostring(c.impoundValue) then impounded = true; stored = false end
+        end
+        out[#out + 1] = { plate = r.plate, model = model, stored = stored, impounded = impounded, fuel = props.fuelLevel or props.fuel, engine = props.engineHealth, body = props.bodyHealth }
     end
     return out
 end

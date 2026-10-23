@@ -2,6 +2,16 @@
 
 Smartphone complet pour ESX (interface type smartphone moderne, marque « Aura »). 100 % français, sans dépendance payante.
 
+## Config prête pour Bluebay Roleplay
+`config.lua` est déjà réglé pour ta base : ESX + ox_inventory + pma-voice + pickax_core + Job Builder.
+- Groupes admin `_dev / superadmin / admin`, notifications via `pickax_notify`, faim / soif via l'`esx_status` de pickax_core.
+- Comptes `bank` / `money`, société : Job Builder puis `esx_addonaccount` de pickax_core.
+- Véhicules : colonne `state` d'`owned_vehicles` (1 garage, 0 sorti, 2 fourrière).
+- Métiers joignables : ceux du Job Builder ; liste de secours avec tes jobs `lspd`, `ambulance`, `pillboxhopital`, `bennys`, `LsCustoms`, `pdm`, `banque`.
+- Couleur par défaut = couleur du serveur (`pickax_core/config.lua` → `AccentColor`), adresses mail en `@bluebay.mail`.
+- Objets : `phone` et `powerbank` existent déjà dans ton `ox_inventory`.
+- **Reste à renseigner** : `Config.Camera.webhook` (webhook Discord pour les photos) et installer `screenshot-basic`.
+
 ## Compatibilité : ESX · QBCore · Qbox · standalone
 Le téléphone détecte tout seul ce qui tourne sur ton serveur (`config.lua`, section « COMPATIBILITÉ »). Il n'appelle jamais ESX ou QBCore directement : tout passe par `bridge/server.lua` et `bridge/client.lua`.
 

@@ -59,7 +59,7 @@ const Settings = {
   display(p) {
     const st = S.settings;
     p.body.appendChild(Seg([{ value: 'dark', label: 'Sombre' }, { value: 'light', label: 'Clair' }], st.theme === 'light' ? 'light' : 'dark', v => this.save({ theme: v })));
-    const cols = ['#0a84ff', '#30d158', '#ff453a', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff'];
+    const cols = [...new Set([S.config.accent, '#0a84ff', '#30d158', '#ff453a', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff'].filter(Boolean))];
     p.body.appendChild(Group('Couleur d\'accentuation', [{ el: h('div', { style: 'display:flex;gap:12px;padding:12px 0' }, cols.map(c => h('div', { style: `width:32px;height:32px;border-radius:50%;background:${c};border:3px solid ${c === st.accent ? 'var(--fg)' : 'transparent'}`, onclick: (e) => { this.save({ accent: c }); $$('div', e.target.parentNode).forEach(d => d.style.borderColor = 'transparent'); e.target.style.borderColor = 'var(--fg)'; } }))) }]));
     p.body.appendChild(Group('Luminosité', [{ el: h('input', { type: 'range', min: 20, max: 100, value: st.brightness, style: 'width:100%', oninput: e => { S.settings.brightness = +e.target.value; OS.applyTheme(); }, onchange: e => this.save({ brightness: +e.target.value }) }) }]));
     p.body.appendChild(Group('Taille du texte', [{ el: h('input', { type: 'range', min: 85, max: 120, step: 5, value: st.textSize, style: 'width:100%', onchange: e => this.save({ textSize: +e.target.value }) }) }]));
@@ -94,7 +94,7 @@ const Settings = {
     p.body.appendChild(Group('Contacts bloqués', blocked.length ? blocked.map(c => ({ left: avatar(c.name, 34), title: c.name, sub: fmtNum(c.number), onclick: () => ActionSheet(c.name, [{ label: 'Débloquer', onclick: async () => { await rpc('contactFlag', c.id, 'blocked', false); await Core.reloadContacts(); p.body.parentNode && (clear(p.body), this.privacy(p)); } }]) })) : [{ title: 'Aucun contact bloqué' }]));
   },
   general(p) {
-    p.body.appendChild(Group(null, [{ title: 'Nom', value: S.me.name }, { title: 'Modèle', value: S.config.model || 'Aura' }, { title: 'Numéro de téléphone', value: fmtNum(S.me.number) }, { title: 'Adresse mail', value: S.me.mail }, { title: 'Version', value: 'AuraOS 1.0' }, { title: 'Applications', value: String(S.installed.length) }]));
+    p.body.appendChild(Group(null, [{ title: 'Nom', value: S.me.name }, { title: 'Modèle', value: S.config.model || 'Aura' }, { title: 'Opérateur', value: S.config.serverName || S.config.carrier || 'Aura' }, { title: 'Numéro de téléphone', value: fmtNum(S.me.number) }, { title: 'Adresse mail', value: S.me.mail }, { title: 'Version', value: 'AuraOS 1.0' }, { title: 'Applications', value: String(S.installed.length) }]));
     p.body.appendChild(Group(null, [{ title: 'Réinitialiser les réglages', danger: true, onclick: async () => { if (await Confirm('Réinitialiser les réglages ?', 'Vos données (contacts, photos, messages) sont conservées.', 'Réinitialiser', true)) { await rpc('settingsSet', { wallpaper: 'aurora', lockWallpaper: 'aurora', customWallpaper: '', theme: 'dark', accent: '#0a84ff', ringtone: 'Marimba', dnd: false, airplane: false, wifi: true, volume: 70, brightness: 100, textSize: 100, notifOff: {}, badgeOff: {} }); Toast('Réglages réinitialisés — rouvrez le téléphone', 'check'); post('close'); S.reload = true; } } }]));
   },
 };

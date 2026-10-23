@@ -6,26 +6,32 @@ Config = {}
 -- ║  Change une valeur seulement si la détection ne te convient pas.                              ║
 -- ╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
 
-Config.Framework = 'auto'      -- 'auto' | 'esx' | 'qb' | 'qbox' | 'standalone'
-Config.Inventory = 'auto'      -- 'auto' | 'ox' (ox_inventory) | 'qb' (qb/ps/lj-inventory) | 'qs' (qs-inventory) | 'esx' (inventaire ESX natif) | 'none'
-Config.Voice     = 'auto'      -- appels vocaux : 'auto' | 'pma-voice' | 'mumble-voip' | 'saltychat' | 'custom' | 'none'
-Config.Notify    = 'ox_lib'    -- notifications en jeu : 'ox_lib' | 'esx' | 'qb' | 'qbox' | 'native' | 'custom'
-Config.Status    = 'auto'      -- faim / soif de l'app Santé : 'auto' | 'esx_status' | 'qb' | 'none' | 'custom'
-Config.Society   = 'auto'      -- compte société (factures, app Entreprise) :
+-- ▼▼▼ DÉJÀ RÉGLÉ POUR BLUEBAY ROLEPLAY (ESX + ox_inventory + pma-voice + pickax_core + Job Builder). Rien à changer. ▼▼▼
+-- (les autres valeurs possibles sont indiquées en commentaire, au cas où tu changes de base un jour)
+Config.Framework = 'esx'       -- 'auto' | 'esx' | 'qb' | 'qbox' | 'standalone'
+Config.Inventory = 'ox'        -- 'auto' | 'ox' (ox_inventory) | 'qb' (qb/ps/lj-inventory) | 'qs' (qs-inventory) | 'esx' (inventaire ESX natif) | 'none'
+Config.Voice     = 'pma-voice' -- appels vocaux : 'auto' | 'pma-voice' | 'mumble-voip' | 'saltychat' | 'custom' | 'none'
+Config.Notify    = 'esx'       -- notifications en jeu (passent par pickax_notify) : 'ox_lib' | 'esx' | 'qb' | 'qbox' | 'native' | 'custom'
+Config.Status    = 'esx_status'-- faim / soif de l'app Santé (esx_status fourni par pickax_core) : 'auto' | 'esx_status' | 'qb' | 'none' | 'custom'
+Config.Society   = 'auto'      -- compte société : Job Builder en priorité, sinon esx_addonaccount (pickax_core)
                                --   'auto' | 'jobbuilder' | 'esx_addonaccount' | 'qb-banking' | 'qb-management' | 'renewed' | 'okok' | 'none' | 'custom'
 
--- Noms des comptes du framework. 'auto' = valeur habituelle (ESX : bank / money · QBCore : bank / cash)
-Config.Accounts = { bank = 'auto', cash = 'auto' }
+-- Noms des comptes du framework : ESX = bank (banque) / money (espèces)
+Config.Accounts = { bank = 'bank', cash = 'money' }
 
 -- Tables SQL utilisées (hors tables aura_*). 'auto' = réglage habituel du framework détecté.
 -- Pour une base personnalisée, remplace 'auto' par un tableau, exemple :
 --   Config.Database.vehicles = { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', model = nil, stored = 'stored', storedValue = 1 }
 --   Config.Database.players  = { table = 'users', identifier = 'identifier', money = 'accounts', moneyFormat = 'esx' }   -- argent hors ligne
-Config.Database = { vehicles = 'auto', players = 'auto' }
+Config.Database = {
+    -- Ta table owned_vehicles : colonne `state` (1 = garage, 0 = sorti, 2 = fourrière), comme pickax_core et le World Builder
+    vehicles = { table = 'owned_vehicles', owner = 'owner', plate = 'plate', props = 'vehicle', stored = 'state', storedValue = 1, impoundValue = 2 },
+    players  = 'auto',     -- argent des joueurs hors ligne : users.accounts (ESX)
+}
 
 -- Groupes / permissions administrateur (commandes /phone_*, modération des réseaux, suppression d'annonces…)
 Config.Admin = {
-    groups = { 'admin', 'superadmin', 'god', 'mod' },   -- ESX : groupes · QBCore / Qbox : permissions
+    groups = { '_dev', 'superadmin', 'admin' },         -- groupes ESX de ta base (mêmes que le Builder Hub et l'anticheat)
     ace    = 'aura.admin',                              -- ou permission ACE : add_ace group.admin aura.admin allow
 }
 
@@ -57,7 +63,7 @@ Config.UI = {
 
 -- Réglages donnés à chaque nouveau téléphone (le joueur peut ensuite les changer dans Réglages)
 Config.Defaults = {
-    wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = '#0a84ff', ringtone = 'Marimba', texttone = 'Cristal',
+    wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = (PickaxTheme and PickaxTheme.hex) or '#0a84ff', ringtone = 'Marimba', texttone = 'Cristal',
     volume = 70, brightness = 100, textSize = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
     dnd = false, vibrate = true,
 }
@@ -85,6 +91,7 @@ Config.Limits = {
 
 -- ═══════════════════════════ GÉNÉRAL ═══════════════════════════
 Config.Brand        = 'Aura'            -- nom affiché (écran de démarrage, À propos…)
+Config.Carrier      = (PickaxTheme and PickaxTheme.short) or 'Aura'   -- « opérateur » affiché dans Réglages → Général (nom court du serveur : pickax_core/config.lua)
 Config.Model        = 'Aura 15 Pro'     -- modèle affiché dans Réglages → Général → Informations
 Config.Command      = 'phone'           -- commande pour ouvrir/fermer le téléphone
 Config.Key          = 'F1'              -- touche par défaut (modifiable par le joueur dans les paramètres FiveM)
@@ -99,7 +106,7 @@ Config.Number = {
     length   = 10,                      -- longueur totale (chiffres)
     group    = 2,                       -- affichage par groupes de N chiffres (06 12 34 56 78)
 }
-Config.MailDomain = 'aura.mail'         -- adresse mail : prenom.nom@aura.mail
+Config.MailDomain = 'bluebay.mail'      -- adresse mail : prenom.nom@bluebay.mail
 
 -- ═══════════════════════════ APPELS ═══════════════════════════
 Config.Calls = {
@@ -146,8 +153,8 @@ Config.Social = {
     postMaxLength = 280,
     maxImages     = 4,
     storyHours    = 24,                 -- durée d'une story (Snapgram)
-    verifiedJobs  = { police = true, ambulance = true, ems = true },   -- badge vérifié automatique
-    adminGroups   = { 'admin', 'superadmin', 'mod' },                 -- peuvent supprimer / vérifier
+    verifiedJobs  = { lspd = true, ambulance = true, pillboxhopital = true, banque = true, police = true, ems = true },   -- badge vérifié automatique (jobs de ta base)
+    adminGroups   = { '_dev', 'superadmin', 'admin' },                -- peuvent supprimer / vérifier
 }
 
 -- ═══════════════════════════ BANQUE & CRYPTO ═══════════════════════════
@@ -194,9 +201,16 @@ Config.JobLines = {
     dutyOnly      = true,      -- framework : seuls les employés « en service » reçoivent les appels (si le framework gère le service)
     -- Source 'framework' : filtre et réglages par métier
     only          = {},        -- liste blanche ( { 'police', 'ambulance' } ). Vide = tous les métiers sauf « ignore »
-    ignore        = { 'unemployed', 'unemployed2' },
+    ignore        = { 'unemployed', 'unemployed2' },   -- chômeur / aucun métier de ta base
     -- Réglages par métier : label, number (court), icon, color, mode ('both' | 'voice' | 'alert'), anon, minGrade, hint
     jobs = {
+        lspd      = { number = '17', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?', type = 'police' },
+        ambulance = { number = '15', icon = 'heart', color = '#ef4444', type = 'ems' },
+        pillboxhopital = { number = '', icon = 'heart', color = '#f43f5e', type = 'ems' },
+        bennys    = { icon = 'wrench', color = '#f59e0b', type = 'mecano' },
+        LsCustoms = { icon = 'wrench', color = '#f97316', type = 'mecano' },
+        pdm       = { icon = 'car', color = '#22c55e', type = 'dealer' },
+        banque    = { icon = 'bank', color = '#16a34a', type = 'bank' },
         police    = { number = '17', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?' },
         sheriff   = { number = '', icon = 'shield', color = '#92400e', anon = true },
         ambulance = { number = '15', icon = 'heart', color = '#ef4444' },
@@ -213,10 +227,10 @@ Config.JobLines = {
 -- Liste fixe, utilisée si Config.JobLines.source = 'config' (ou keepStatic = true)
 -- number : numéro composable au clavier ; jobs : métiers qui reçoivent l'alerte (en service)
 Config.Services = {
-    { id = 'police',   label = 'Police',        number = '17',  icon = 'shield', color = '#2563eb', jobs = { 'police', 'sheriff' },           anon = true },
-    { id = 'ems',      label = 'Ambulance',     number = '15',  icon = 'heart',  color = '#ef4444', jobs = { 'ambulance', 'ems' },            anon = false },
-    { id = 'fire',     label = 'Pompiers',      number = '18',  icon = 'flame',  color = '#f97316', jobs = { 'fire', 'ambulance' },           anon = false },
-    { id = 'mecano',   label = 'Dépanneur',     number = '',    icon = 'wrench', color = '#f59e0b', jobs = { 'mechanic', 'mecano', 'bennys' }, anon = false },
+    { id = 'police',   label = 'Police',        number = '17',  icon = 'shield', color = '#2563eb', jobs = { 'lspd', 'police', 'sheriff' },    anon = true },
+    { id = 'ems',      label = 'Ambulance',     number = '15',  icon = 'heart',  color = '#ef4444', jobs = { 'ambulance', 'pillboxhopital', 'ems' }, anon = false },
+    { id = 'fire',     label = 'Pompiers',      number = '18',  icon = 'flame',  color = '#f97316', jobs = { 'fire', 'ambulance', 'pillboxhopital' }, anon = false },
+    { id = 'mecano',   label = 'Dépanneur',     number = '',    icon = 'wrench', color = '#f59e0b', jobs = { 'bennys', 'LsCustoms', 'mechanic', 'mecano' }, anon = false },
     { id = 'taxi',     label = 'Taxi',          number = '',    icon = 'car',    color = '#eab308', jobs = { 'taxi' },                        anon = false },
     { id = 'realestate', label = 'Agence immobilière', number = '', icon = 'home', color = '#14b8a6', jobs = { 'realestate' },              anon = false },
 }
