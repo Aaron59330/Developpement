@@ -11,6 +11,7 @@ const P = {
   monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>', bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', gamepad: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 12h4M9 10v4M15.5 11h.01M18 13h.01"/>',
   video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>', music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>', discord: '<path d="M7 7c3-1 7-1 10 0l2 9c-2 1.5-4 2-7 2s-5-.5-7-2zM9.5 12h.01M14.5 12h.01"/>', bag: '<path d="M6 7h12l1 13H5zM9 7a3 3 0 016 0"/>',
   briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
   home: '<path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/>'
 };
 const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n] || P.home}</svg>`;
@@ -32,28 +33,39 @@ const hasNum = (list, v) => list.find(x => x[0] === v) ? v : list[0][0];
 
 const views = {
   info() {
-    const d = S.data, m = d.money;
+    const d = S.data, m = d.money, jobs = d.jobs || [], bills = d.bills || [];
+    const total = m.cash + m.bank + (d.showDirty ? m.black : 0), dueTotal = bills.reduce((s, x) => s + x.amount, 0);
+    const seg = (v, c) => total > 0 && v > 0 ? h('i', { style: `width:${(v / total) * 100}%;background:${c}` }) : null;
     const cell = (icon, label, val, c) => h('div', { style: `--c:${c || 'var(--ac)'}` }, h('small', { html: ic(icon) + label }), h('b', null, money(val)));
-    const jobs = d.jobs || [];
+    const hero = h('div.card.herocard', null,
+      h('div.hero', { style: 'margin:0' }, h('div.av', null, initials(d.name)), h('div', null, h('h2', null, d.name), h('div.chips', null, h('span.chip.ac', null, d.job.label), d.job.grade ? h('span.chip', null, d.job.grade) : null, h('span.chip', null, 'ID ' + d.id)))),
+      h('div.worth', null, h('small', null, 'Patrimoine total'), h('b', null, money(total)), h('div.wbar', null, seg(m.cash, '#34d058'), seg(m.bank, 'var(--ac)'), d.showDirty ? seg(m.black, '#ff4d4d') : null)));
     const left = h('div.card', { style: 'display:flex;flex-direction:column;min-height:0' },
-      h('div.hero', null, h('div.av', null, initials(d.name)), h('div', null, h('h2', null, d.name), h('div.chips', null, h('span.chip.ac', null, d.job.label), d.job.grade ? h('span.chip', null, d.job.grade) : null, h('span.chip', null, 'ID ' + d.id)))),
       h('div.h', null, h('span', { html: ic('cash') }), 'Portefeuille'),
       h('div.wal', null, cell('cash', 'Liquide', m.cash, '#34d058'), cell('bank', 'Banque', m.bank, 'var(--ac)'), d.showDirty ? cell('skull', 'Argent sale', m.black, '#ff4d4d') : null),
-      h('div.h', { style: 'margin-top:22px' }, h('span', { html: ic('briefcase') }), `Entreprises (${jobs.filter(c => c.online > 0).length} disponibles)`),
+      h('div.h', { style: 'margin-top:20px' }, h('span', { html: ic('briefcase') }), `Entreprises · ${jobs.filter(c => c.online > 0).length} disponibles`),
       jobs.length ? h('div.jobs.scroll', null, jobs.map(c => h('div.co' + (c.online > 0 ? '.up' : ''), null, h('div.lt', null, (c.label || '?').slice(0, 2).toUpperCase()), h('div', null, h('b', null, c.label), h('small', null, c.online > 0 ? `Disponible · ${c.online} en service` : 'Indisponible')), h('span.dot')))) : h('div.empty', { style: 'padding:20px' }, 'Aucune entreprise.'));
-    const bills = d.bills || [];
-    const right = h('div.card', { style: 'display:flex;flex-direction:column;min-height:0' }, h('div.h', null, h('span', { html: ic('doc') }), `Mes factures (${bills.length})`),
-      bills.length ? h('div.scroll', { style: 'overflow:auto;min-height:0;flex:1;padding-right:6px' }, bills.map(b => h('div.bill', null, h('div', null, h('b', null, b.label), h('small', null, 'Facture n°' + b.id)), h('span.amt', null, money(b.amount)), h('button.btn.pri.sm', { onclick: () => act('payBill', { id: b.id }) }, 'Payer')))) : h('div.empty', null, 'Aucune facture.'));
-    return h('div.home', null, left, right);
+    const right = h('div.card', { style: 'display:flex;flex-direction:column;min-height:0' },
+      h('div.h', null, h('span', { html: ic('doc') }), `Factures (${bills.length})`, bills.length ? h('span', { style: 'margin-left:auto;color:var(--ac);letter-spacing:0;font-size:13px' }, money(dueTotal) + ' à payer') : null),
+      bills.length ? h('div.scroll', { style: 'overflow:auto;min-height:0;flex:1;padding-right:6px' }, bills.map(b => h('div.bill', null, h('div', null, h('b', null, b.label), h('small', null, 'Facture n°' + b.id)), h('span.amt', null, money(b.amount)), h('button.btn.pri.sm', { onclick: () => act('payBill', { id: b.id }) }, 'Payer'))))
+        : h('div.ok', null, h('span', { html: ic('check') }), h('b', null, 'Tout est à jour'), h('small', null, 'Aucune facture en attente.')));
+    const go = (t, s) => () => { tab = t; if (s) sub = s; draw(); };
+    const tile = (icon, label, desc, fn) => h('button.qt', { onclick: fn }, h('span', { html: ic(icon) }), h('div', null, h('b', null, label), h('small', null, desc)));
+    const quick = h('div.quick', null, tile('id', 'Documents', 'Identité, permis', go('docs')), tile('car', 'Véhicule', 'Portes et moteur', go('veh')), tile('cog', 'Préférences', 'HUD, apparence, FPS', go('prefs', 'menu')),
+      tile('key', 'Touches', 'Raccourcis du serveur', go('keys')), tile('term', 'Commandes', 'Commandes utiles', go('cmds')), tile('link', 'Liens', 'Discord et boutique', go('links')));
+    return h('div.info', null, hero, h('div.mid', null, left, right), quick);
   },
   docs() {
-    const mk = (kind, title, desc, icon) => h('div.card.doc', null, h('div.ic', { html: ic(icon) }), h('h3', null, title), h('p', null, desc),
+    const d = S.data;
+    const mk = (kind, title, desc, color, label) => h('div.card.doc', null,
+      h('div.idc', { style: `--c:${color}` }, h('div.ph', { html: ic('user') }), h('div.ln', null, h('small', null, label), h('b', null, d.name), h('small', null, 'ID ' + d.id)), h('div.stripe')),
+      h('h3', null, title), h('p', null, desc),
       h('div.b', null, h('button.btn.pri', { onclick: () => act('doc', { kind, mode: 'show' }, false) }, 'Montrer'), h('button.btn', { onclick: () => act('doc', { kind, mode: 'look' }, false) }, 'Regarder')));
-    return h('div.grid2', null, mk('id', 'Carte d’identité', 'Montrez-la au joueur le plus proche (moins de 3 m) ou regardez-la.', 'id'), mk('driver', 'Permis de conduire', 'Présentez votre permis lors d’un contrôle.', 'car'), mk('weapon', 'Port d’armes', 'Présentez votre permis de port d’armes.', 'doc'));
+    return h('div.grid2', null, mk('id', 'Carte d\u2019identité', 'Montrez-la au joueur le plus proche (moins de 3 m) ou regardez-la.', 'var(--ac)', 'CARTE D\u2019IDENTITÉ'), mk('driver', 'Permis de conduire', 'Présentez votre permis lors d\u2019un contrôle.', '#34d058', 'PERMIS DE CONDUIRE'), mk('weapon', 'Port d\u2019armes', 'Présentez votre permis de port d\u2019armes.', '#ff6b4a', 'PORT D\u2019ARMES'));
   },
   veh() {
     const v = S.data.vehicle;
-    if (!v || !v.inVehicle) return h('div.card', null, h('div.empty', null, 'Vous devez être dans un véhicule pour utiliser ces commandes.'));
+    if (!v || !v.inVehicle) return h('div.card.bigempty', null, h('span', { html: ic('car') }), h('b', null, 'Aucun véhicule'), h('small', null, 'Montez dans un véhicule pour accéder aux portes, au moteur, au limitateur et à CarPlay.'));
     const kv = h('div.kv', null, h('div', null, h('small', null, 'Véhicule'), h('b', null, v.name)), h('div', null, h('small', null, 'Plaque'), h('b', null, v.plate)), h('div', null, h('small', null, 'État du moteur'), h('b', null, v.engine + '%')));
     const car = h('div', { style: 'margin-bottom:18px' }, h('button.btn.pri', { onclick: () => act('carplay', {}, false) }, 'Ouvrir CarPlay'));
     if (!v.driver) return h('div', null, kv, car, h('div.card', null, h('div.empty', null, 'Les actions sont réservées au conducteur.')));
