@@ -123,6 +123,9 @@ local function cleanSettings(s, old)
         if known[name] then jobs[name] = int(grade, 0, 50, 0) end
     end
     out.access = { jobs = jobs, license = str(a.license, 30, '') }
+    local wl = type(s.weaponLicense) == 'table' and s.weaponLicense or {}
+    out.weaponLicense = { enabled = wl.enabled == true, license = str(wl.license, 30, Config.WeaponLicense or 'weapon') }
+    if out.weaponLicense.license == '' then out.weaponLicense.license = Config.WeaponLicense or 'weapon' end
 
     local pay = type(s.payments) == 'table' and s.payments or {}
     out.payments = {}

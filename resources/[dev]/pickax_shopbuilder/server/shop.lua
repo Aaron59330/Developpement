@@ -29,6 +29,16 @@ local function access(src, shopId, locIdx)
     return shop, xPlayer, loc
 end
 
+-- Licence exigée pour un produit : celle du produit, sinon le permis de port d'arme si la boutique l'impose (armes à feu et munitions)
+local function itemLicense(shop, it)
+    if it.license and it.license ~= '' then return it.license end
+    local wl = shop.settings and shop.settings.weaponLicense
+    if wl and wl.enabled and Config.NeedsWeaponLicense(it.name) then
+        return (wl.license and wl.license ~= '') and wl.license or (Config.WeaponLicense or 'weapon')
+    end
+    return nil
+end
+
 -- ─────────────────────────────── Prix & paiement ───────────────────────────────
 local function discountFor(shop, xPlayer)
     local s = shop.settings
@@ -138,7 +148,7 @@ ESX.RegisterServerCallback('shopbuilder:open', function(src, cb, shopId, locIdx)
         if it.enabled ~= false and jobOk then
             items[#items + 1] = {
                 i = i, name = it.name, label = it.label, category = it.category, price = finalPrice(it, disc), base = it.price,
-                promo = it.promo or 0, stock = it.stock, max = it.max or Config.MaxQtyPerPurchase, locked = not hasLic(it.license) or nil, license = it.license ~= '' and it.license or nil,
+                promo = it.promo or 0, stock = it.stock, max = it.max or Config.MaxQtyPerPurchase, locked = not hasLic(itemLicense(shop, it)) or nil, license = itemLicense(shop, it),
             }
         end
     end
@@ -178,9 +188,10 @@ local function doBuy(src, shopId, locIdx, cart, method)
             for _, j in ipairs(it.jobs) do if j == xPlayer.job.name then okJob = true break end end
             if not okJob then return fail(('« %s » est réservé'):format(it.label)) end
         end
-        if it.license and it.license ~= '' then
-            if licCache[it.license] == nil then licCache[it.license] = Config.HasLicense(src, it.license) end
-            if not licCache[it.license] then return fail(('Licence requise pour « %s »'):format(it.label)) end
+        local needLic = itemLicense(shop, it)
+        if needLic then
+            if licCache[needLic] == nil then licCache[needLic] = Config.HasLicense(src, needLic) end
+            if not licCache[needLic] then return fail(('Permis requis pour « %s »'):format(it.label)) end
         end
         if qty > math.min(it.max or Config.MaxQtyPerPurchase, Config.MaxQtyPerPurchase) then return fail(('Quantité maximale dépassée pour « %s »'):format(it.label)) end
         if it.stock >= 0 and qty > it.stock then return fail(it.stock == 0 and ('« %s » est en rupture de stock'):format(it.label) or ('Stock insuffisant pour « %s » (%d restant)'):format(it.label, it.stock)) end

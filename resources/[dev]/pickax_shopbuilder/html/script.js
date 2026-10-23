@@ -790,6 +790,10 @@ const Builder = {
         ${Object.keys(jobs).length ? Object.keys(jobs).map(jn => `<div class="cat-row" style="grid-template-columns:1fr 1.2fr auto"><b>${esc(this.jobLabel(jn))}</b>${this.sel(`settings.access.jobs.${jn}`, gradeOpts(jn), jobs[jn], { t: 'n' })}<button class="icon" data-a="accDel" data-v="${esc(jn)}">${ic('trash', 15)}</button></div>`).join('') : `<div class="hint" style="margin:6px 0">Tout le monde peut utiliser cette boutique.</div>`}
         <select data-path="__accessjob" style="margin-top:6px"><option value="">+ Réserver à un métier…</option>${this.cat.jobs.filter(j => !(j.name in jobs)).map(j => `<option value="${esc(j.name)}">${esc(j.label)}</option>`).join('')}</select>
         <div class="mt">${fld('Licence requise pour entrer (optionnel)', this.inp('settings.access.license', a.license, { ph: 'ex : weapon (via esx_license)' }))}</div></div>
+      <div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Armes : permis obligatoire</div></div>
+        ${this.chk('settings.weaponLicense.enabled', 'Exiger le permis de port d\'arme pour acheter une arme à feu ou des munitions', (s.weaponLicense || {}).enabled)}
+        <div class="grid2 mt-s">${fld('Licence requise (esx_license)', this.inp('settings.weaponLicense.license', (s.weaponLicense || {}).license || 'weapon', { ph: 'weapon' }))}</div>
+        <div class="hint mt-s">Sans le permis, les armes à feu et les munitions sont verrouillées (« Licence requise »). Les armes de corps à corps (couteau, batte, marteau…) restent en vente. Le gilet et les accessoires ne sont pas concernés.</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('percent', 17)} Remises</div></div>
         <div class="grid2">${fld('Remise générale (%)', this.inp('settings.discount', s.discount, { t: 'n', type: 'number', extra: 'min="0" max="90"' }))}${fld('Compte société crédité (optionnel)', this.inp('settings.society', s.society, { ph: 'ex : society_ammunation' }))}</div>
         <div class="lbl mt">Remises par métier (%)</div>

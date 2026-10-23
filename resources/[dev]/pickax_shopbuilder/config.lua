@@ -204,6 +204,21 @@ Config.ShopTypes = {
 }
 
 -- ─────────────────────────────── Hooks (adapter à ton serveur) ───────────────────────────────
+-- ─────────────────────────────── Permis de port d'arme (réglage par boutique dans le Shop Builder) ───────────────────────────────
+-- Boutique → Réglages → « Armes : permis obligatoire » : sans le permis, aucune arme à feu ni munition n'est accessible ; seules les armes de corps à corps (liste ci-dessous) restent en vente.
+Config.WeaponLicense = 'weapon'   -- nom de la licence esx_license par défaut
+Config.MeleeWeapons = {
+    weapon_knife = true, weapon_nightstick = true, weapon_hammer = true, weapon_bat = true, weapon_golfclub = true, weapon_crowbar = true, weapon_bottle = true,
+    weapon_dagger = true, weapon_hatchet = true, weapon_knuckle = true, weapon_machete = true, weapon_flashlight = true, weapon_switchblade = true,
+    weapon_poolcue = true, weapon_wrench = true, weapon_battleaxe = true, weapon_stone_hatchet = true,
+}
+-- Vrai pour une arme à feu / munition (donc soumise au permis) ; faux pour le corps à corps et tout autre produit
+function Config.NeedsWeaponLicense(name)
+    name = tostring(name or ''):lower()
+    if name:find('^ammo') then return true end
+    return name:find('^weapon_') ~= nil and not Config.MeleeWeapons[name]
+end
+
 -- Vérifie une licence côté serveur (ex : 'weapon'). Par défaut : esx_license si démarré, sinon la condition est ignorée.
 if IsDuplicityVersion() then
     Config.HasLicense = function(src, license)
