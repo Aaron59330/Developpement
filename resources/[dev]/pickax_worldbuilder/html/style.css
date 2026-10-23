@@ -478,3 +478,6 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gbtn:disabled { background: rgba(255, 255, 255, .25); color: rgba(255, 255, 255, .8); }
 .gfoot { margin-top: auto; font-size: 9px; font-weight: 700; color: rgba(255, 255, 255, .85); padding-top: 14px; }
 .gempty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: rgba(255, 255, 255, .6); padding: 40px; text-align: center; } .gempty b { color: #fff; }
+
+.gphoto { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); }
+.gcar .gphoto { width: 100%; height: 100%; }

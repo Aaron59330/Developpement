@@ -310,14 +310,20 @@ const GaragePanel = new (class extends PanelBase {
   init(d) { this.tab = d.mode === 'job' ? 'fleet' : 'perso'; this.q = ''; this.filter = 'all'; this.sel = null; }
   list() {
     const d = this.d, q = (this.q || '').trim().toLowerCase();
-    let l = this.tab === 'fleet' ? (d.fleet || []).map(f => ({ key: String(f.i), name: f.name || f.label, sub: f.model, price: f.price || 0, fleet: true })) : (d.vehicles || []).map(v => ({ key: v.plate, name: v.name, sub: v.plate, engine: v.engine ?? 1000, body: v.body ?? 1000, fuel: v.fuel ?? 100, model: v.model }));
+    let l = this.tab === 'fleet' ? (d.fleet || []).map(f => ({ key: String(f.i), name: f.name || f.label, sub: f.model, spawn: f.spawn || f.model, price: f.price || 0, fleet: true })) : (d.vehicles || []).map(v => ({ key: v.plate, name: v.name, sub: v.plate, engine: v.engine ?? 1000, body: v.body ?? 1000, fuel: v.fuel ?? 100, model: v.model, spawn: v.spawn }));
     if (this.tab !== 'fleet' && this.filter === 'ok') l = l.filter(v => v.engine >= 700 && v.body >= 700);
     if (this.tab !== 'fleet' && this.filter === 'bad') l = l.filter(v => v.engine < 700 || v.body < 700);
     if (q) l = l.filter(v => (v.name + ' ' + v.sub).toLowerCase().includes(q));
     return l;
   }
+  img(v, size) {
+    const sil = ic('car', size), u = this.d.img && v.spawn && /^[a-z0-9_]+$/.test(String(v.spawn)) ? String(this.d.img).replace('%s', v.spawn) : '';
+    if (!u) return sil;
+    window.__garSil = sil;
+    return `<img class="gphoto" src="${esc(u)}" alt="" loading="lazy" onerror="this.outerHTML=window.__garSil">`;
+  }
   cards(l) {
-    return l.map(v => `<div class="gv ${v.key === this.sel ? 'on' : ''}" data-a="pick" data-v="${esc(v.key)}"><div class="gimg">${ic('car', 40)}</div><b>${esc(v.name)}</b><small>${esc(v.sub)}</small></div>`).join('')
+    return l.map(v => `<div class="gv ${v.key === this.sel ? 'on' : ''}" data-a="pick" data-v="${esc(v.key)}"><div class="gimg">${this.img(v, 40)}</div><b>${esc(v.name)}</b><small>${esc(v.sub)}</small></div>`).join('')
       || `<div class="gempty">${ic('car', 34)}<b>${this.tab === 'fleet' ? 'Aucun véhicule de service' : 'Aucun véhicule'}</b><small>${this.tab === 'fleet' ? 'Rien de disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.'}</small></div>`;
   }
   detail(l) {
@@ -326,7 +332,7 @@ const GaragePanel = new (class extends PanelBase {
     const bars = v.fleet ? '' : `<div class="gbars">${pctBar('Moteur', v.engine, 1000)}${pctBar('Carrosserie', v.body, 1000)}${pctBar('Essence', v.fuel, 100)}</div>`;
     const fee = v.fleet ? v.price : d.fee;
     const pay = fee ? payRow(d.payments, this.method) : '';
-    return `<div class="gcar">${ic('car', 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>${bars}${pay}
+    return `<div class="gcar">${this.img(v, 88)}</div><h2>${esc(v.name)}</h2><small class="mono">${esc(v.sub)}</small>${bars}${pay}
       <div class="gacts"><button class="gbtn gprim" data-a="take">${ic('logout', 16)} Sortir le véhicule${fee ? ` · ${money(fee)}` : ''}</button>
       <button class="gbtn" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('box', 16)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>
       <div class="gfoot">Modèle: ${esc(v.model || v.sub)} &nbsp;&nbsp; Garage: ${esc(d.label)}</div>`;
