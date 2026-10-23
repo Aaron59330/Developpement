@@ -272,6 +272,11 @@ function Aura.IsAdmin(src) return Bridge.IsAdmin(src) end
 
 function Aura.FormatNumber(n)
     n = tostring(n or '')
+    if (Config.Number.format or 'us') == 'us' then
+        if #n == 10 then return ('(%s) %s-%s'):format(n:sub(1, 3), n:sub(4, 6), n:sub(7)) end
+        if #n == 7 then return n:sub(1, 3) .. '-' .. n:sub(4) end
+        return n
+    end
     local g = Config.Number.group or 2
     local first = n:sub(1, g)
     local rest = n:sub(g + 1)
@@ -308,8 +313,10 @@ end
 
 local function genNumber()
     local pre = Config.Number.prefixes
+    local us = (Config.Number.format or 'us') == 'us'
     for _ = 1, 200 do
         local n = pre[math.random(#pre)]
+        if us then n = n .. (Config.Number.exchange or '555') end
         while #n < Config.Number.length do n = n .. tostring(math.random(0, 9)) end
         if not Aura.byNumber[n] then return n end
     end
@@ -552,7 +559,7 @@ lib.callback.register('aura:init', function(src)
         battery = p.battery, contacts = contactsOf(id),
         config = { mailDomain = Config.MailDomain, brand = Config.Brand, model = Config.Model, carrier = Config.Carrier, accent = (PickaxTheme and PickaxTheme.hex) or '#0a84ff', serverName = PickaxTheme and PickaxTheme.name or nil, ui = Config.UI, limits = Config.Limits, framework = Bridge.fw, wallpapers = Config.Wallpapers, ringtones = Config.Ringtones, radios = Config.Radios,
                    lines = Aura.LinesPublic(), taxi = Config.Taxi, market = Config.Market.categories, crypto = Config.Crypto.coins, social = { max = Config.Social.postMaxLength, images = Config.Social.maxImages },
-                   numberGroup = Config.Number.group, messages = Config.Messages, camera = Config.Camera.mode, maxMarketImages = Config.Market.maxImages, storyHours = Config.Social.storyHours },
+                   numberGroup = Config.Number.group, numberFormat = Config.Number.format or 'us', region = Config.Region, messages = Config.Messages, camera = Config.Camera.mode, maxMarketImages = Config.Market.maxImages, storyHours = Config.Social.storyHours },
     }
 end)
 

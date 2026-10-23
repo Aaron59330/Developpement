@@ -62,7 +62,7 @@ const Contacts = {
     drawPrev();
     pg.body.appendChild(prev);
     const inp = (label, k, ph, type) => ({ label, input: true, left: true, placeholder: ph, value: val[k], type: type || 'text', onInput: v => { val[k] = v; if (k === 'name' || k === 'avatar') drawPrev(); } });
-    pg.body.appendChild(Group(null, [inp('Nom', 'name', 'Nom complet'), inp('Téléphone', 'number', '06 00 00 00 00', 'tel'), inp('E-mail', 'email', 'adresse@' + ((S.config && S.config.mailDomain) || 'aero.mail') + ''), inp('Photo', 'avatar', 'Lien d\'image (https://…)'), inp('Note', 'note', 'Note')]));
+    pg.body.appendChild(Group(null, [inp('Nom', 'name', 'Nom complet'), inp('Téléphone', 'number', NUM_EXAMPLE(), 'tel'), inp('E-mail', 'email', 'adresse@' + ((S.config && S.config.mailDomain) || 'aero.mail') + ''), inp('Photo', 'avatar', 'Lien d\'image (https://…)'), inp('Note', 'note', 'Note')]));
     async function save() {
       if (!val.name.trim() || !val.number.replace(/\D/g, '')) { Toast('Nom et numéro requis', 'warning'); return; }
       const r = await rpc('contactSave', Object.assign({}, c, val, { id: c.id }));

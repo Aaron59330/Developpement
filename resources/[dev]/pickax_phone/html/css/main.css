@@ -22,9 +22,9 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 #stage { position: absolute; right: 28px; bottom: -8px; width: 410px; height: 864px; transform-origin: bottom right; transform: translateY(105%) scale(var(--scale)); transition: transform .45s var(--ease); pointer-events: auto; }
 #stage.open { transform: translateY(0) scale(var(--scale)); }
 #stage.peekmode { transform: translateY(calc(100% - 0px)) scale(var(--scale)); }
-#device { position: relative; width: 410px; height: 864px; border-radius: 64px; padding: 10px; background: linear-gradient(145deg, #3a3a3f, #0e0e10 40%, #2b2b30); box-shadow: 0 0 0 2px #1a1a1d, 0 0 0 3px #5a5a62, 0 30px 80px rgba(0,0,0,.7), inset 0 0 6px rgba(255,255,255,.12); }
+#device { position: relative; width: 410px; height: 864px; border-radius: 64px; padding: 10px; background: linear-gradient(145deg, #3a3a3f, #0e0e10 40%, #2b2b30); box-shadow: 0 0 0 2px #1a1a1d, 0 0 0 3px #5a5a62, 0 10px 28px rgba(0,0,0,.32), inset 0 0 6px rgba(255,255,255,.12); }
 #btn-side { position: absolute; right: -4px; top: 190px; width: 4px; height: 90px; border-radius: 0 3px 3px 0; background: linear-gradient(#55555c, #2b2b30); }
-#screen { position: relative; width: 390px; height: 844px; border-radius: 54px; overflow: hidden; background: #000; isolation: isolate; font-size: 15px; }
+#screen { position: relative; width: 390px; height: 844px; border-radius: 54px; overflow: hidden; background: #000; isolation: isolate; font-size: 15px; clip-path: inset(0 round 54px); }
 #screen::after { content: ''; position: absolute; inset: 0; border-radius: 54px; pointer-events: none; z-index: 200; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
 .dim { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 190; transition: opacity .25s; }
 
@@ -257,3 +257,12 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 .switcher .card > span { display: inline-flex; align-items: center; gap: 6px; }
 .switcher .card > span svg.ic { width: 15px; height: 15px; }
 input[type=range], input[type=checkbox], input[type=radio] { accent-color: var(--accent); }
+
+.row.has-left { padding-top: 9px; padding-bottom: 9px; }
+.sizer { padding: 12px 0 4px; }
+.sz-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.sz-val { flex: 1; text-align: center; font-size: 30px; font-weight: 600; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+.sz-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--card2); color: var(--accent); font-size: 28px; line-height: 1; display: grid; place-items: center; border: 0; cursor: pointer; }
+.sz-btn:active { transform: scale(.94); background: var(--fg3); }
+.sizer .seg { display: flex; gap: 4px; } .sizer .seg button { flex: 1; height: 36px; padding: 0 4px; font-size: 14px; }
+.sizer { flex: 1; min-width: 0; } .sizer .seg { margin: 0; }

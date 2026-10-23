@@ -64,8 +64,16 @@ const Settings = {
     const cur = c => (c[0] === '' ? OS.followsServer() : (!OS.followsServer() && (st.accent || '').toLowerCase() === c[0]));
     p.body.appendChild(Group('Couleur d\'accentuation', [{ el: h('div', { style: 'display:flex;gap:12px;padding:12px 0;align-items:center;flex-wrap:wrap' }, cols.map(c => h('div', { title: c[2], style: `width:32px;height:32px;border-radius:50%;background:${c[1]};border:3px solid ${cur(c) ? 'var(--fg)' : 'transparent'}`, onclick: (e) => { this.save({ accent: c[0] }); $$('div', e.target.parentNode).forEach(d => d.style.borderColor = 'transparent'); e.target.style.borderColor = 'var(--fg)'; } }))) }], 'Le premier rond suit la couleur du serveur.'));
     p.body.appendChild(Group('Luminosité', [{ el: h('input', { type: 'range', min: 20, max: 100, value: st.brightness, style: 'width:100%', oninput: e => { S.settings.brightness = +e.target.value; OS.applyTheme(); }, onchange: e => this.save({ brightness: +e.target.value }) }) }]));
-    const sz = h('span', { style: 'display:block;text-align:right;color:var(--fg2);margin-bottom:6px;font-size:14px' }, (st.phoneScale || 100) + ' %');
-    p.body.appendChild(Group('Taille du téléphone', [{ el: h('div', null, sz, h('input', { type: 'range', min: 60, max: 125, step: 5, value: st.phoneScale || 100, style: 'width:100%', oninput: e => { S.settings.phoneScale = +e.target.value; sz.textContent = e.target.value + ' %'; OS.fit(); }, onchange: e => this.save({ phoneScale: +e.target.value }) })) }], 'Agrandit ou réduit tout l\u2019écran du téléphone.'));
+    // Taille du téléphone : boutons − / + (pas de 5 %) et préréglages, aperçu en direct
+    const MIN = 60, MAX = 125; let szCur = st.phoneScale || 100, tmr;
+    const szVal = h('div.sz-val', szCur + ' %'), slot = h('div');
+    const apply = (v, save) => {
+      szCur = Math.max(MIN, Math.min(MAX, v)); S.settings.phoneScale = szCur; szVal.textContent = szCur + ' %'; OS.fit(); drawSeg();
+      clearTimeout(tmr); tmr = setTimeout(() => this.save({ phoneScale: szCur }), 350);
+    };
+    const drawSeg = () => { clear(slot); slot.appendChild(Seg([{ value: 70, label: 'Petit' }, { value: 85, label: 'Moyen' }, { value: 100, label: 'Normal' }, { value: 115, label: 'Grand' }, { value: 125, label: 'Max' }], szCur, v => apply(v))); };
+    drawSeg();
+    p.body.appendChild(Group('Taille du téléphone', [{ el: h('div.sizer', h('div.sz-top', h('button.sz-btn', { onclick: () => { Sound.click(); apply(szCur - 5); } }, '−'), szVal, h('button.sz-btn', { onclick: () => { Sound.click(); apply(szCur + 5); } }, '+')), slot) }], 'Le téléphone reste posé en bas de l\u2019écran.'));
     p.body.appendChild(Group('Taille du texte', [{ el: h('input', { type: 'range', min: 85, max: 120, step: 5, value: st.textSize, style: 'width:100%', onchange: e => this.save({ textSize: +e.target.value }) }) }]));
     p.body.appendChild(Group(null, [{ title: 'Format 24 heures', toggle: { on: st.hour24 !== false, onchange: v => { this.save({ hour24: v }); OS.drawStatus(); } } }, { title: 'Texte en gras', toggle: { on: st.bold, onchange: v => { this.save({ bold: v }); document.body.style.fontWeight = v ? 600 : ''; } } }]));
   },

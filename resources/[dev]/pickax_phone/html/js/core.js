@@ -65,10 +65,19 @@ const pad = n => String(n).padStart(2, '0');
 function fmtNum(n) {
   n = String(n || '').replace(/\D/g, '');
   if (!n) return '';
+  if (!S.config || (S.config.numberFormat || 'us') === 'us') {
+    if (n.length === 10) return '(' + n.slice(0, 3) + ') ' + n.slice(3, 6) + '-' + n.slice(6);
+    if (n.length === 7) return n.slice(0, 3) + '-' + n.slice(3);
+    return n;
+  }
   const g = (S.config && S.config.numberGroup) || 2;
   const out = [n.slice(0, g)]; for (let i = g; i < n.length; i += g) out.push(n.slice(i, i + g));
   return out.join(' ');
 }
+const NUM_EXAMPLE = () => ((S.config && S.config.numberFormat) === 'fr' ? '06 00 00 00 00' : '(310) 555-0100');
+const REGION = () => (S.config && S.config.region) || { locale: 'en-US', temperature: 'F', dateOrder: 'mdy' };
+function fmtTemp(c) { c = Number(c) || 0; return (REGION().temperature === 'F' ? Math.round(c * 9 / 5 + 32) : Math.round(c)) + '°'; }
+function fmtWind(kmh) { kmh = Number(kmh) || 0; return REGION().temperature === 'F' ? Math.round(kmh / 1.609344) + ' mph' : Math.round(kmh) + ' km/h'; }
 function contactOf(number) { return S.contacts[String(number || '').replace(/\D/g, '')]; }
 function lineOf(number) {
   const n = String(number || '');
@@ -102,14 +111,14 @@ function fmtDay(ms) {
   const y = new Date(n); y.setDate(n.getDate() - 1);
   if (sameDay(d, y)) return 'Hier';
   if (n - d < 6 * 864e5) return DAYS[d.getDay()][0].toUpperCase() + DAYS[d.getDay()].slice(1);
-  return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + String(d.getFullYear()).slice(2);
+  return (REGION().dateOrder === 'dmy' ? pad(d.getDate()) + '/' + pad(d.getMonth() + 1) : pad(d.getMonth() + 1) + '/' + pad(d.getDate())) + '/' + String(d.getFullYear()).slice(2);
 }
 function fmtLong(ms) { const d = new Date(ms); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
 function ago(ms) {
   const s = Math.max(1, Math.round((Date.now() - ms) / 1000));
   if (s < 60) return 'à l\'instant'; if (s < 3600) return Math.floor(s / 60) + ' min'; if (s < 86400) return Math.floor(s / 3600) + ' h'; return Math.floor(s / 86400) + ' j';
 }
-function money(n, d) { return (Number(n) || 0).toLocaleString('fr-FR', { minimumFractionDigits: d || 0, maximumFractionDigits: d == null ? 0 : d }) + ' $'; }
+function money(n, d) { const v = (Number(n) || 0).toLocaleString((S.config && S.config.region && S.config.region.locale) || 'en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d == null ? 0 : d }); return (S.config && S.config.region && S.config.region.locale === 'fr-FR') ? v + ' $' : '$' + v; }
 function dur(s) { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + pad(s % 60); }
 function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a class="lnk" data-url="$1">$1</a>').replace(/(^|\s)#([\wÀ-ÿ]+)/g, '$1<a class="tag" data-tag="$2">#$2</a>').replace(/(^|\s)@([\w]+)/g, '$1<a class="tag" data-user="$2">@$2</a>'); }
 

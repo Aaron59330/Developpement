@@ -55,7 +55,7 @@ Config.Hooks = {
 Config.UI = {
     side     = 'right',    -- 'right' | 'left'
     marginX  = 28,         -- distance au bord (px)
-    marginY  = 'auto',     -- 'auto' = téléphone centré verticalement ; ou un nombre = distance au bas de l'écran (px)
+    marginY  = 0,          -- distance entre le bas du téléphone et le bas de l'écran (px) : le téléphone reste toujours posé en bas, quelle que soit sa taille. 'auto' = centré verticalement
     offsetY  = -10,        -- (mode auto) décalage vertical : négatif = plus bas, positif = plus haut
     padY     = 56,         -- marge verticale totale réservée autour du téléphone (px) : plus grand = téléphone plus petit
     userMin  = 60,         -- taille minimale choisissable par le joueur (% de la taille automatique)
@@ -68,7 +68,7 @@ Config.UI = {
 -- Réglages donnés à chaque nouveau téléphone (le joueur peut ensuite les changer dans Réglages)
 Config.Defaults = {
     wallpaper = 'aurora', lockWallpaper = 'aurora', theme = 'dark', accent = '',  -- '' = suit la couleur du serveur (pickax_core → AccentColor) ; le joueur peut en choisir une autre ringtone = 'Marimba', texttone = 'Cristal',
-    volume = 70, brightness = 100, textSize = 100, phoneScale = 100, hour24 = true, autoLock = 30, wifi = true, previews = true, readReceipts = true,
+    volume = 70, brightness = 100, textSize = 100, phoneScale = 100, hour24 = false, autoLock = 30, wifi = true, previews = true, readReceipts = true,
     dnd = false, vibrate = true,
 }
 
@@ -106,9 +106,18 @@ Config.Debug        = false
 
 -- ═══════════════════════════ NUMÉROS ═══════════════════════════
 Config.Number = {
-    prefixes = { '06', '07' },          -- début des numéros générés
-    length   = 10,                      -- longueur totale (chiffres)
-    group    = 2,                       -- affichage par groupes de N chiffres (06 12 34 56 78)
+    format   = 'us',                                       -- 'us' : (310) 555-0142 · 'fr' : 06 12 34 56 78
+    prefixes = { '213', '310', '323', '424', '747', '818' },   -- format 'us' : indicatifs de Los Angeles ; format 'fr' : début des numéros (ex. '06', '07')
+    exchange = '555',                                      -- format 'us' : 3 chiffres suivants (555 = numéros fictifs réservés au cinéma)
+    length   = 10,                                         -- longueur totale (chiffres)
+    group    = 2,                                          -- format 'fr' : affichage par groupes de N chiffres
+}
+
+-- Réglages régionaux (mode Amérique par défaut)
+Config.Region = {
+    locale      = 'en-US',      -- séparateurs d'argent : 12,345 $
+    temperature = 'F',          -- 'F' (°F, vent en mph) ou 'C' (°C, vent en km/h)
+    dateOrder   = 'mdy',        -- 'mdy' (10/22/26) ou 'dmy' (22/10/26)
 }
 Config.MailDomain = 'aero.mail'      -- adresse mail : prenom.nom@aero.mail
 
@@ -208,17 +217,17 @@ Config.JobLines = {
     ignore        = { 'unemployed', 'unemployed2' },   -- chômeur / aucun métier de ta base
     -- Réglages par métier : label, number (court), icon, color, mode ('both' | 'voice' | 'alert'), anon, minGrade, hint
     jobs = {
-        lspd      = { number = '17', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?', type = 'police' },
-        ambulance = { number = '15', icon = 'heart', color = '#ef4444', type = 'ems' },
+        lspd      = { number = '911', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?', type = 'police' },
+        ambulance = { number = '912', icon = 'heart', color = '#ef4444', type = 'ems' },
         pillboxhopital = { number = '', icon = 'heart', color = '#f43f5e', type = 'ems' },
         bennys    = { icon = 'wrench', color = '#f59e0b', type = 'mecano' },
         LsCustoms = { icon = 'wrench', color = '#f97316', type = 'mecano' },
         pdm       = { icon = 'car', color = '#22c55e', type = 'dealer' },
         banque    = { icon = 'bank', color = '#16a34a', type = 'bank' },
-        police    = { number = '17', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?' },
+        police    = { number = '911', icon = 'shield', color = '#2563eb', anon = true, hint = 'Que se passe-t-il ?' },
         sheriff   = { number = '', icon = 'shield', color = '#92400e', anon = true },
-        ambulance = { number = '15', icon = 'heart', color = '#ef4444' },
-        ems       = { number = '15', icon = 'heart', color = '#ef4444' },
+        ambulance = { number = '912', icon = 'heart', color = '#ef4444' },
+        ems       = { number = '912', icon = 'heart', color = '#ef4444' },
         mechanic  = { icon = 'wrench', color = '#f59e0b' },
         mecano    = { icon = 'wrench', color = '#f59e0b' },
         taxi      = { icon = 'car', color = '#eab308', type = 'taxi' },
@@ -231,9 +240,9 @@ Config.JobLines = {
 -- Liste fixe, utilisée si Config.JobLines.source = 'config' (ou keepStatic = true)
 -- number : numéro composable au clavier ; jobs : métiers qui reçoivent l'alerte (en service)
 Config.Services = {
-    { id = 'police',   label = 'Police',        number = '17',  icon = 'shield', color = '#2563eb', jobs = { 'lspd', 'police', 'sheriff' },    anon = true },
-    { id = 'ems',      label = 'Ambulance',     number = '15',  icon = 'heart',  color = '#ef4444', jobs = { 'ambulance', 'pillboxhopital', 'ems' }, anon = false },
-    { id = 'fire',     label = 'Pompiers',      number = '18',  icon = 'flame',  color = '#f97316', jobs = { 'fire', 'ambulance', 'pillboxhopital' }, anon = false },
+    { id = 'police',   label = 'Police',        number = '911',  icon = 'shield', color = '#2563eb', jobs = { 'lspd', 'police', 'sheriff' },    anon = true },
+    { id = 'ems',      label = 'Ambulance',     number = '912',  icon = 'heart',  color = '#ef4444', jobs = { 'ambulance', 'pillboxhopital', 'ems' }, anon = false },
+    { id = 'fire',     label = 'Pompiers',      number = '913',  icon = 'flame',  color = '#f97316', jobs = { 'fire', 'ambulance', 'pillboxhopital' }, anon = false },
     { id = 'mecano',   label = 'Dépanneur',     number = '',    icon = 'wrench', color = '#f59e0b', jobs = { 'bennys', 'LsCustoms', 'mechanic', 'mecano' }, anon = false },
     { id = 'taxi',     label = 'Taxi',          number = '',    icon = 'car',    color = '#eab308', jobs = { 'taxi' },                        anon = false },
     { id = 'realestate', label = 'Agence immobilière', number = '', icon = 'home', color = '#14b8a6', jobs = { 'realestate' },              anon = false },

@@ -4,8 +4,8 @@
 -- un job créé ou modifié apparaît tout de suite, sans redémarrage.
 
 local TYPE_STYLE = {
-    police     = { icon = 'shield',   color = '#2563eb', number = '17' },
-    ems        = { icon = 'heart',    color = '#ef4444', number = '15' },
+    police     = { icon = 'shield',   color = '#2563eb', number = '911' },
+    ems        = { icon = 'heart',    color = '#ef4444', number = '912' },
     mecano     = { icon = 'wrench',   color = '#f59e0b' },
     taxi       = { icon = 'car',      color = '#eab308' },
     realestate = { icon = 'home',     color = '#14b8a6' },

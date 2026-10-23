@@ -9,6 +9,8 @@ Smartphone complet pour ESX (interface type smartphone moderne, marque « Aero �
 - Véhicules : colonne `state` d'`owned_vehicles` (1 garage, 0 sorti, 2 fourrière).
 - Métiers joignables : ceux du Job Builder ; liste de secours avec tes jobs `lspd`, `ambulance`, `pillboxhopital`, `bennys`, `LsCustoms`, `pdm`, `banque`.
 - Couleur par défaut = couleur du serveur (`pickax_core/config.lua` → `AccentColor`), adresses mail en `@aero.mail`.
+- **Mode Amérique** (par défaut) : numéros `(310) 555-0142`, heure 12 h AM/PM, dates `MM/JJ/AA`, argent `$12,345`, météo en °F et vent en mph. Réglable dans `config.lua` : `Config.Number` (format `'us'` ou `'fr'`) et `Config.Region`. Numéros d'urgence par défaut : 911 (police), 912 (ambulance), 913 (pompiers).
+- La taille du téléphone se règle dans Réglages › Affichage ; il reste toujours posé en bas de l'écran (`Config.UI.marginY`).
 - Objets : `phone` et `powerbank` existent déjà dans ton `ox_inventory`.
 - **Reste à renseigner** : `Config.Camera.webhook` (webhook Discord pour les photos) et installer `screenshot-basic`.
 

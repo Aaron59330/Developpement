@@ -213,7 +213,7 @@ const OS = {
   async refreshWidgetWeather() {
     const w = await post('weather'); if (!w) return;
     S.weather = w;
-    const t = $('#w-temp'); if (t) { t.textContent = w.temp + '°'; $('#w-lbl').textContent = w.label; $('#w-hl').textContent = 'Ensuite : ' + w.next; }
+    const t = $('#w-temp'); if (t) { t.textContent = fmtTemp(w.temp); $('#w-lbl').textContent = w.label; $('#w-hl').textContent = 'Ensuite : ' + w.next; }
   },
   spotlight() {
     const sh = Sheet({
@@ -444,8 +444,8 @@ const OS = {
     st.style.right = left ? 'auto' : (u.marginX == null ? 28 : u.marginX) + 'px';
     st.style.left = left ? (u.marginX == null ? 28 : u.marginX) + 'px' : 'auto';
     // 'auto' (défaut) : téléphone centré verticalement, décalé de offsetY (positif = plus haut, négatif = plus bas)
-    const auto = u.marginY == null || u.marginY === 'auto';
-    st.style.bottom = (auto ? Math.round((window.innerHeight - 864 * k) / 2 + (u.offsetY == null ? -10 : u.offsetY)) : u.marginY) + 'px';
+    const auto = u.marginY === 'auto';
+    st.style.bottom = (auto ? Math.round((window.innerHeight - 864 * k) / 2 + (u.offsetY == null ? -10 : u.offsetY)) : (Number(u.marginY) || 0)) + 'px';
     st.style.transformOrigin = left ? 'bottom left' : 'bottom right';
     const peek = $('#peek'); if (peek) { peek.style.right = left ? 'auto' : '38px'; peek.style.left = left ? '38px' : 'auto'; }
   },
