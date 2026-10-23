@@ -1,11 +1,12 @@
 -- Affichage des menus (aucune prise de focus NUI) + fenêtre de saisie exports.pickax_ui:Input (seul moment où le focus est pris).
 local KVP = 'pickax_ui:settings2'
 local DEFAULTS = {
-    banner = true, style = 'noir', size = 'md',
+    banner = true, design = 'nouveau', style = 'noir', size = 'md',
     accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '',
     btnRadius = 12, cardRadius = 18,
     sound = true, volume = 60,
 }
+local DESIGNS = { nouveau = true, classique = true }
 local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true }
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }
@@ -20,6 +21,7 @@ local function inList(list, v) for i = 1, #list do if list[i] == v then return t
 local function validate(key, value)
     if key == 'banner' or key == 'sound' then return true, value and true or false end
     if key == 'volume' then value = tonumber(value) return value ~= nil and value >= 10 and value <= 100, value and math.floor(value / 10 + 0.5) * 10 end
+    if key == 'design' then return DESIGNS[value] == true, value end
     if key == 'style' then return STYLES[value] == true, value end
     if key == 'size' then return SIZES[value] == true, value end
     if COLOR_KEYS[key] then

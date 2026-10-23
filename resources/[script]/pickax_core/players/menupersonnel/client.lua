@@ -49,7 +49,7 @@ local Prefs = {
 	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
 
-local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
+local PrefsCfg = { sound = true, volume = 60, banner = true, design = 'nouveau', style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end
@@ -71,6 +71,8 @@ local function PrefsNames(list, nameIdx)
 	return t
 end
 
+local PrefsDesigns = { { 'nouveau', 'Nouveau' }, { 'classique', 'Classique' } }
+local PrefsDesignNames = { 'Nouveau', 'Classique' }
 local PrefsStyleNames, PrefsSizeNames = {}, {}
 for i, v in ipairs(Prefs.Styles) do PrefsStyleNames[i] = v.name end
 for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
@@ -307,6 +309,9 @@ local function OpenMenu()
 				PrefsSet('banner', true)
 			end, function()
 				PrefsSet('banner', false)
+			end)
+			RageUI.List("Design des menus", PrefsDesignNames, PrefsCfg.design == 'classique' and 2 or 1, "Nouveau (noir mat, un fond par bouton) ou Classique (ancien design). Les couleurs ci-dessous s'appliquent aux deux.", {}, true, function() end, function(Index)
+				PrefsSet('design', PrefsDesigns[Index][1])
 			end)
 			RageUI.List("Style", PrefsStyleNames, PrefsStyleIndex(Prefs.Styles, PrefsCfg.style), "Change le design de tous les menus", {}, true, function() end, function(Index)
 				PrefsSet('style', Prefs.Styles[Index].id)

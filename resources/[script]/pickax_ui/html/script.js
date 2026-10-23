@@ -95,10 +95,16 @@ function hexRgb(h) {
 var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96 };
 var OVERRIDES = ['--sel', '--sel-bd', '--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
 
+var designClassic = false;
 function applyCfg(c) {
   if (!c) return;
   [$('wrap'), $('dlgwrap'), $('chwrap')].forEach(function (w) { applyCfgTo(w, c); });
   $('banner').classList.toggle('hidden', c.banner === false);
+  $('banner-old').classList.toggle('hidden', c.banner === false);
+  var classic = c.design === 'classique';
+  $('css-new').disabled = classic;
+  $('css-old').disabled = !classic;
+  designClassic = classic;
 }
 
 function applyCfgTo(w, c) {
@@ -130,6 +136,14 @@ function render(d) {
   $('count').classList.toggle('hidden', !d.c);
   $('items').innerHTML = (d.i || []).map(item).join('');
   var items = d.i || [], act = null;
+  if (designClassic) {
+    $('info').classList.toggle('hidden', !d.inf);
+    if (d.inf) $('info').innerHTML = infoHtml(d.inf);
+    var ds = $('desc');
+    if (d.ds) { ds.innerHTML = '<span class="dt">' + gta(d.ds) + '</span>'; ds.classList.remove('hidden'); } else { ds.classList.add('hidden'); }
+    return;
+  }
+  $('desc').classList.add('hidden');
   items.forEach(function (it) { if (it.act) act = it; });
   var p = '';
   if (act && act.k !== 's' && act.k !== 'ln') {
