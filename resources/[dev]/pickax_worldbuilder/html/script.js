@@ -321,7 +321,7 @@ const GaragePanel = new (class extends PanelBase {
     const sil = ic('car', size), u = this.d.img && v.spawn && /^[a-z0-9_]+$/.test(String(v.spawn)) ? String(this.d.img).replace('%s', v.spawn) : '';
     if (!u) return sil;
     window.__garSil = sil;
-    return `<img class="gphoto" src="${esc(u)}" alt="" loading="lazy" onerror="this.outerHTML=window.__garSil">`;
+    return `<img class="gphoto" src="${esc(u)}" alt="" loading="lazy" onload="this.classList.add('ok')" onerror="this.outerHTML=window.__garSil">`;
   }
   cards(l) {
     const none = this.tab === 'gang' ? ['Aucun véhicule de groupe', 'Aucun véhicule n\'est attribué à ton groupe illégal.'] : this.tab === 'fleet' ? ['Aucun véhicule de service', 'Rien de disponible pour ton grade.'] : ['Aucun véhicule', 'Aucun véhicule rangé dans ce garage.'];

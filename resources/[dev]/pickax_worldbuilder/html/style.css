@@ -523,3 +523,24 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gbtn:disabled { opacity: .55; background: rgba(255, 255, 255, .8); color: #50545c; }
 .gdet .paygrid { margin-top: calc(12 * var(--u)); }
 .gfoot { margin-top: auto; font-size: calc(15 * var(--u)); padding-top: calc(18 * var(--u)); }
+
+/* ── Garage : finitions ── */
+@keyframes garin { from { opacity: 0; transform: translateY(8px); } }
+@keyframes garfade { from { opacity: 0; } }
+.gar { animation: garin .22s ease-out; }
+.gar .gtab svg.ic, .gar .gbtn svg.ic, .gar .gbrand svg.ic { fill: currentColor; stroke: none; }
+.gar .gtab svg.ic *, .gar .gbtn svg.ic *, .gar .gbrand svg.ic * { fill: currentColor; stroke: currentColor; stroke-width: 1.2; }
+.gar .gtab { transition: background .15s, border-color .15s; }
+.gar .gtab.on svg.ic { color: #fff; }
+.gar .gv { transition: background .12s, border-color .12s, box-shadow .12s; }
+.gar .gv.on { box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .45), 0 10px 30px rgba(var(--accent-rgb), .35); }
+.gar .gv:active { transform: scale(.985); }
+.gar .gphoto { opacity: 0; transition: opacity .25s; } .gar .gphoto.ok { opacity: 1; }
+.gar .gimg:has(.gphoto:not(.ok)) { background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .06) 50%, transparent 70%); background-size: 200% 100%; animation: garshim 1.2s linear infinite; }
+@keyframes garshim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.gar .gdet { animation: garfade .2s ease-out; }
+.gar .gbtn { transition: background .12s, transform .08s; } .gar .gbtn:not(:disabled):active { transform: scale(.98); }
+.gar .gbtn.gprim:not(:disabled):hover { filter: brightness(1.12); }
+.gar .ggrid::-webkit-scrollbar, .gar .gdet::-webkit-scrollbar { width: 0; }
+.gar .gtab svg.ic, .gar .gbtn svg.ic, .gar .gbrand svg.ic { fill: none; stroke: currentColor; stroke-width: 2.2; }
+.gar .gtab svg.ic *, .gar .gbtn svg.ic *, .gar .gbrand svg.ic * { fill: none; stroke: currentColor; stroke-width: inherit; }
