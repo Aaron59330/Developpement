@@ -2038,8 +2038,29 @@ const TUN_GROUP = { modFrontWheels: 'wheels', modBackWheels: 'wheels', wheels: '
 const TUN_LEVELS = { modEngine: 'engine', modBrakes: 'brakes', modTransmission: 'transmission', modSuspension: 'suspension', modArmor: 'armor' };
 const TUN_NAMES = { modEngine: 'Moteur', modBrakes: 'Freins', modTransmission: 'Transmission', modSuspension: 'Suspension', modArmor: 'Blindage', modTurbo: 'Turbo', modXenon: 'Phares xénon', xenonColor: 'Couleur des phares', color1: 'Peinture principale', color2: 'Peinture secondaire', pearlescentColor: 'Nacrage', wheelColor: 'Couleur des jantes', wheels: 'Type de jantes', neonEnabled: 'Néons', neonColor: 'Couleur des néons', windowTint: 'Vitres teintées', plateIndex: 'Style de plaque', modSmokeEnabled: 'Fumée de pneus', tyreSmokeColor: 'Couleur de la fumée', livery: 'Livrée', modLivery: 'Livrée' };
 const TUN_CATS = { engine: 'Moteur', brakes: 'Freins', transmission: 'Transmission', suspension: 'Suspension', armor: 'Blindage', turbo: 'Turbo', xenon: 'Xénon', cosmetic: 'Carrosserie', wheels: 'Roues', paint: 'Peinture', pearl: 'Nacré', wheelColor: 'Couleur de jantes', neon: 'Néons', tint: 'Vitres teintées', plate: 'Plaque', smoke: 'Fumée de pneus', livery: 'Livrée', horn: 'Klaxon' };
-const TUN_EMO = { modEngine: '⚙️', modBrakes: '🛑', modTransmission: '🔩', modSuspension: '🧰', modArmor: '🛡️', modTurbo: '🌀', wheels: '🛞', modFrontWheels: '🛞', modBackWheels: '🛞', wheelColor: '🎨', modSmokeEnabled: '💨', tyreSmokeColor: '💨', neonColor: '🌈', neonEnabled: '🌈', modXenon: '💡', xenonColor: '💡', windowTint: '🕶️', plateIndex: '🔢', color1: '🎨', color2: '🎨', pearlescentColor: '✨', modLivery: '🏷️', livery: '🏷️', modSpoilers: '🏎️', modFrontBumper: '🚘', modRearBumper: '🚘', modSideSkirt: '🚗', modExhaust: '💨', modHood: '🚗', modRoof: '🚙' };
-const tunIc = k => `<span class="tun-ic">${TUN_EMO[k] || '🔧'}</span>`;
+const TS = {
+  cog: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  brake: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  gear: '<circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 8v8M6 12h12"/>',
+  spring: '<path d="M8 3h8M8 21h8M12 3v3M12 18v3M9 6l6 2-6 2 6 2-6 2 6 2"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  turbo: '<circle cx="12" cy="12" r="2"/><path d="M12 10c0-4 2-6 5-6M14 12c4 0 6 2 6 5M12 14c0 4-2 6-5 6M10 12c-4 0-6-2-6-5"/>',
+  wheel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3.5v6M12 14.5v6M3.5 12h6M14.5 12h6"/>',
+  drop: '<path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  cloud: '<path d="M5 15a4 4 0 0 1 1-7.9A5 5 0 0 1 16 8a3.5 3.5 0 0 1 1 7z"/>',
+  zap: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  tint: '<rect x="4" y="5" width="16" height="14" rx="3"/><path d="M4 12h16"/>',
+  plate: '<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h6"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>',
+  car: '<path d="M5 17h14M3 13l2-6h14l2 6v4H3zM7 17v2M17 17v2"/>',
+  wrench: '<path d="M14 6a4 4 0 0 0 5 5l-9 9a2.1 2.1 0 0 1-3-3z"/>',
+  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
+};
+const tsv = n => `<svg viewBox="0 0 24 24">${TS[n] || TS.wrench}</svg>`;
+const TUN_ICON = { modEngine: 'cog', modBrakes: 'brake', modTransmission: 'gear', modSuspension: 'spring', modArmor: 'shield', modTurbo: 'turbo', wheels: 'wheel', modFrontWheels: 'wheel', modBackWheels: 'wheel', wheelColor: 'drop', modSmokeEnabled: 'cloud', tyreSmokeColor: 'cloud', neonColor: 'zap', neonEnabled: 'zap', modXenon: 'bulb', xenonColor: 'bulb', windowTint: 'tint', plateIndex: 'plate', color1: 'drop', color2: 'drop', pearlescentColor: 'spark', modLivery: 'tag', livery: 'tag', modSpoilers: 'car', modFrontBumper: 'car', modRearBumper: 'car', modSideSkirt: 'car', modExhaust: 'cloud', modHood: 'car', modRoof: 'car' };
+const tunIc = k => `<span class="tun-ic">${tsv(TUN_ICON[k] || 'wrench')}</span>`;
 const colName = id => (GTA_COLORS.find(c => c[0] === id) || [id, 'Couleur ' + id])[1];
 
 const Tuning = {
@@ -2139,7 +2160,7 @@ const Tuning = {
 
   render() {
     const d = this.d, q = this.quote(), n = this.changes().length;
-    const tabs = [['perf', '🔧', 'Perf.'], ['body', '🚗', 'Carrosserie'], ['wheels', '🛞', 'Roues'], ['paint', '🎨', 'Peinture'], ['lights', '💡', 'Éclairage'], ['sum', '🧾', 'Devis']];
+    const tabs = [['perf', tsv('cog'), 'Perf.'], ['body', tsv('car'), 'Carrosserie'], ['wheels', tsv('wheel'), 'Roues'], ['paint', tsv('drop'), 'Peinture'], ['lights', tsv('bulb'), 'Éclairage'], ['sum', tsv('receipt'), 'Devis']];
     $root.classList.remove('corner'); $root.classList.add('tuning');
     $root.innerHTML = `<div class="tun-view" id="tun-view"></div><div class="tun-panel">
       <div class="tun-head">${tile('wrench', 'lg')}<div class="ttl"><h1>${esc(d.vehicle.name || 'Véhicule')}</h1><p><span class="plate">${esc(d.vehicle.plate)}</span> ${esc(d.jobLabel)}</p></div><button class="icon" data-a="close" title="Fermer">${ic('x', 16)}</button></div>

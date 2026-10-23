@@ -433,3 +433,9 @@ body.neon .n-sp { flex: 1; }
 .tun-foot button.primary { height: 46px; border-radius: 14px; font-weight: 700; background: linear-gradient(100deg, var(--accent), rgba(var(--accent-rgb), .72)); border-color: rgba(255, 255, 255, .3); color: #fff; box-shadow: 0 8px 22px rgba(var(--accent-rgb), .45), inset 0 1px 0 rgba(255, 255, 255, .3); }
 .tun-foot button.primary:disabled { box-shadow: none; opacity: .4; }
 .tun-row.col { gap: 8px; } .tun-row.col .tun-lbl { margin: 0; } .tun-grid { margin-top: 0; grid-template-columns: repeat(auto-fill, 27px); gap: 7px; } .sw { width: 27px; height: 27px; }
+/* Menu tuning : pictogrammes fins (sobre) */
+.tun-ic svg, .tun-tabs em svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tun-ic { color: var(--accent-light, rgb(var(--accent-rgb))); background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .28); font-size: 0; }
+.tun-tabs button em { filter: none; display: grid; place-items: center; color: #8d92a0; }
+.tun-tabs button.active em { color: #fff; transform: none; }
+.tun-tabs button em svg { width: 21px; height: 21px; }
