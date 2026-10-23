@@ -55,7 +55,9 @@ Config.Hooks = {
 Config.UI = {
     side     = 'right',    -- 'right' | 'left'
     marginX  = 28,         -- distance au bord (px)
-    marginY  = -8,         -- distance au bas de l'écran (px, négatif = légèrement sous l'écran)
+    marginY  = 'auto',     -- 'auto' = téléphone centré verticalement ; ou un nombre = distance au bas de l'écran (px)
+    offsetY  = -10,        -- (mode auto) décalage vertical : négatif = plus bas, positif = plus haut
+    padY     = 56,         -- marge verticale totale réservée autour du téléphone (px) : plus grand = téléphone plus petit
     maxScale = 1.0,        -- taille maximale (1.0 = 100 %)
     minScale = 0.55,       -- taille minimale sur petits écrans
     showBootLogo = true,   -- animation de démarrage à la première ouverture

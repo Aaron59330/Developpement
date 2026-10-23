@@ -416,13 +416,15 @@ const OS = {
   },
   fit() {
     const u = (S.config && S.config.ui) || {};
-    const k = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - 24) / 864));
+    const k = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - (u.padY == null ? 56 : u.padY)) / 864));
     const st = $('#stage');
     st.style.setProperty('--scale', String(k));
     const left = u.side === 'left';
     st.style.right = left ? 'auto' : (u.marginX == null ? 28 : u.marginX) + 'px';
     st.style.left = left ? (u.marginX == null ? 28 : u.marginX) + 'px' : 'auto';
-    st.style.bottom = (u.marginY == null ? -8 : u.marginY) + 'px';
+    // 'auto' (défaut) : téléphone centré verticalement, décalé de offsetY (positif = plus haut, négatif = plus bas)
+    const auto = u.marginY == null || u.marginY === 'auto';
+    st.style.bottom = (auto ? Math.round((window.innerHeight - 864 * k) / 2 + (u.offsetY == null ? -10 : u.offsetY)) : u.marginY) + 'px';
     st.style.transformOrigin = left ? 'bottom left' : 'bottom right';
     const peek = $('#peek'); if (peek) { peek.style.right = left ? 'auto' : '38px'; peek.style.left = left ? '38px' : 'auto'; }
   },
