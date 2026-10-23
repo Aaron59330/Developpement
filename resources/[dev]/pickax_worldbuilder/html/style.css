@@ -585,3 +585,12 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gar .gsrv { align-items: center; justify-content: center; padding: 0 calc(10 * var(--u)); }
 .gar .glogo { max-width: 100%; max-height: calc(88 * var(--u)); object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5)); }
 .gar .glogo { width: calc(300 * var(--u)); max-height: calc(100 * var(--u)); }
+/* Logo : reste dans le coin haut droit, sans déborder sur les onglets */
+.gar .gsrv { min-width: 0; overflow: hidden; justify-content: flex-end; align-items: center; padding: 0 calc(10 * var(--u)) 0 0; }
+.gar .glogo { width: auto; height: calc(84 * var(--u)); max-width: 100%; max-height: none; }
+/* Bouton principal : reste coloré (et texte blanc) au survol / clic / focus */
+.gar .gbtn.gprim, .gar .gbtn.gprim:not(:disabled):hover, .gar .gbtn.gprim:not(:disabled):active, .gar .gbtn.gprim:focus { color: #fff; background: linear-gradient(100deg, var(--accent), rgba(var(--accent-rgb), .75)); border-color: rgba(255, 255, 255, .35); outline: none; }
+.gar .gbtn.gprim:not(:disabled):hover { filter: brightness(1.12); transform: translateX(3px); }
+.gar .gbtn:focus { outline: none; }
+.gar .gbtn:not(.gprim):not(:disabled):active { background: #e4e6ec; color: #2d3038; }
+.gar .glogo { height: calc(104 * var(--u)); } .gar .gsrv { padding-right: 0; }
