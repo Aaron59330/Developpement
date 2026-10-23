@@ -219,14 +219,31 @@ function Config.NeedsWeaponLicense(name)
     return name:find('^weapon_') ~= nil and not Config.MeleeWeapons[name]
 end
 
--- Vérifie une licence côté serveur (ex : 'weapon'). Par défaut : esx_license si démarré, sinon la condition est ignorée.
+-- Vérifie une licence côté serveur (ex : 'weapon'). Système de licences : esx_license OU pickax_core (qui expose les mêmes événements esx_license:*).
+-- Le joueur doit avoir la licence : événement esx_license:checkLicense, puis table user_licenses en secours. Sans licence → false (accès refusé).
 if IsDuplicityVersion() then
+    local cache = {}   -- [src:licence] = { v, at } : le système de licences peut ne jamais répondre pour un joueur sans licence
     Config.HasLicense = function(src, license)
-        if GetResourceState('esx_license') ~= 'started' then return true end
-        local p = promise.new()
-        TriggerEvent('esx_license:checkLicense', src, license, function(has) p:resolve(has == true) end)
-        SetTimeout(2500, function() p:resolve(false) end)
-        return Citizen.Await(p)
+        local k = src .. ':' .. tostring(license)
+        local c = cache[k]
+        if c and GetGameTimer() - c.at < 8000 then return c.v end
+        local has = false
+        if GetResourceState('esx_license') == 'started' or GetResourceState('pickax_core') == 'started' then
+            local p = promise.new()
+            local ok = pcall(TriggerEvent, 'esx_license:checkLicense', src, license, function(h) p:resolve(h == true) end)
+            if not ok then p:resolve(false) end
+            SetTimeout(400, function() p:resolve(false) end)
+            has = Citizen.Await(p)
+        end
+        if not has then
+            local x = ESX and ESX.GetPlayerFromId(src)
+            if x then
+                local ok, row = pcall(function() return MySQL.scalar.await('SELECT 1 FROM user_licenses WHERE type = ? AND owner = ? LIMIT 1', { license, x.identifier }) end)
+                has = ok and row ~= nil
+            end
+        end
+        cache[k] = { v = has, at = GetGameTimer() }
+        return has
     end
 end
 
