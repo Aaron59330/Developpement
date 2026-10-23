@@ -707,12 +707,20 @@ RegisterNetEvent("CorePickax:clearPlayerInventory", function(target)
     TriggerClientEvent('esx:showNotification', target, "~r~Votre inventaire a été vidé par un administrateur.")
 end)
 
+-- Liste des licences existantes (pour le menu « Give » : donner / retirer une licence)
+ESX.RegisterServerCallback('CorePickax:admin:licenseList', function(source, cb)
+    local out = {}
+    GetLicensesList(function(list) for _, l in ipairs(list or {}) do out[#out + 1] = { type = l.type, label = l.label } end end)
+    table.sort(out, function(a, b) return tostring(a.label) < tostring(b.label) end)
+    cb(out)
+end)
+
 RegisterNetEvent("CorePickax:ActionAdmin", function(what, action, player, args1, args2)
     if what == "ActionPlayer" then
         local actionPermission = {
             gotoPlayer = "func_1", bringPlayer = "func_2", RevivePlayer = (tonumber(player) == tonumber(source) and "func_20" or "func_3"),
             healPlayer = "func_21", IndentityPlayer = "func_9", ShieldPlayer = "func_10", kickPlayer = "func_16",
-            banPlayer = "func_17", RembourseItem = "func_7"
+            banPlayer = "func_17", RembourseItem = "func_7", GiveLicense = "func_7", RemoveLicense = "func_7"
         }
         local required = actionPermission[action]
         if required and not hasPermission(source, required) then return end
@@ -749,6 +757,25 @@ RegisterNetEvent("CorePickax:ActionAdmin", function(what, action, player, args1,
     				TriggerClientEvent(Config.Trigger.TriggerNotification, player, ConfigMenuAdmin.Notification["UHaveShield"])
 				elseif action == "kickPlayer" then
 					DropPlayer(player, (ConfigMenuAdmin.Notification["KickPlayer2"]):format(args1, GetPlayerName(source)))
+				elseif action == "GiveLicense" or action == "RemoveLicense" then
+                    -- Licences du serveur (pickax_core/esx/license) : args1 = type de licence (ex : weapon, drive)
+                    local lic = tostring(args1 or '')
+                    local label
+                    GetLicensesList(function(list) for _, l in ipairs(list or {}) do if l.type == lic then label = l.label end end end)
+                    if not label then
+                        TriggerClientEvent('esx:showNotification', source, "~r~Licence inconnue.")
+                        return
+                    end
+                    local tname = GetPlayerName(player) or ("ID " .. tostring(player))
+                    if action == "GiveLicense" then
+                        AddLicense(player, lic)
+                        TriggerClientEvent('esx:showNotification', source, ("~g~Licence « %s » donnée à ~s~%s"):format(label, tname))
+                        TriggerClientEvent('esx:showNotification', player, ("~g~Vous avez obtenu la licence : ~s~%s"):format(label))
+                    else
+                        local ok = pcall(RemoveLicense, player, lic)
+                        TriggerClientEvent('esx:showNotification', source, ok and ("~o~Licence « %s » retirée à ~s~%s"):format(label, tname) or "~r~Ce joueur n'a pas cette licence.")
+                        if ok then TriggerClientEvent('esx:showNotification', player, ("~r~Votre licence a été retirée : ~s~%s"):format(label)) end
+                    end
 				elseif action == "RembourseItem" then
                     if GetResourceState('ox_inventory') ~= 'started' then
                         TriggerClientEvent('esx:showNotification', source, "~r~ox_inventory n'est pas démarré.")

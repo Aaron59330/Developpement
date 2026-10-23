@@ -30,6 +30,7 @@ local selected = nil
 local isSubMenu = {[false] = { RightLabel = "~b~Éxecuter ~s~→→" },[true] = { RightLabel = "~s~→→" }}
 local stringText = {[true] = "~g~ON~s~",[false] = "~r~OFF~s~"}
 local possiblesQty = {}
+local licenseChoices, licenseIdx = nil, 1
 local gamerTags = {}
 local items = {}
 local qty = 1
@@ -659,6 +660,24 @@ function MenuStaffOpen5()
                     textxte = amount
                 end
             end)
+            RageUI.Separator("↓ ~g~Licences ~s~↓")
+            if licenseChoices == nil then
+                licenseChoices = {}
+                ESX.TriggerServerCallback('CorePickax:admin:licenseList', function(l) licenseChoices = l or {} end)
+            end
+            if #licenseChoices > 0 then
+                local names = {}
+                for i, l in ipairs(licenseChoices) do names[i] = l.label end
+                RageUI.List("Licence", names, licenseIdx, nil, {}, true, function(_,_,_,Index) licenseIdx = Index end)
+                RageUI.ButtonWithStyle("~g~Donner la licence", "Donne la licence choisie à "..tostring(selected.name or selected.s), { RightLabel = "~g~Give ~s~→→" }, true, function(_,_,s)
+                    if s then TriggerServerEvent("CorePickax:ActionAdmin", "ActionPlayer", "GiveLicense", selected.s, licenseChoices[licenseIdx].type) end
+                end)
+                RageUI.ButtonWithStyle("~r~Retirer la licence", "Retire la licence choisie à "..tostring(selected.name or selected.s), { RightLabel = "~r~Retirer ~s~→→" }, true, function(_,_,s)
+                    if s then TriggerServerEvent("CorePickax:ActionAdmin", "ActionPlayer", "RemoveLicense", selected.s, licenseChoices[licenseIdx].type) end
+                end)
+            else
+                RageUI.ButtonWithStyle("~c~Aucune licence disponible", nil, {}, false, function() end)
+            end
             RageUI.Separator("↓ ~o~Liste d'items ~s~↓")
             for k,v in pairs(items) do
                 if textxte == nil then
