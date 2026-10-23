@@ -562,3 +562,4 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gdet .paygrid { margin-top: calc(10 * var(--u)); }
 .gdet .paybtn { height: calc(46 * var(--u)); font-size: calc(15 * var(--u)); }
 .gdet .lbl { margin-top: calc(16 * var(--u)); }
+.gar .gmain { grid-template-columns: 1fr calc(500 * var(--u)); }
