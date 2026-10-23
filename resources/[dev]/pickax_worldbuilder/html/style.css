@@ -544,3 +544,21 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .gar .ggrid::-webkit-scrollbar, .gar .gdet::-webkit-scrollbar { width: 0; }
 .gar .gtab svg.ic, .gar .gbtn svg.ic, .gar .gbrand svg.ic { fill: none; stroke: currentColor; stroke-width: 2.2; }
 .gar .gtab svg.ic *, .gar .gbtn svg.ic *, .gar .gbrand svg.ic * { fill: none; stroke: currentColor; stroke-width: inherit; }
+
+/* ── Garage : fiche plus compacte, boutons repensés ── */
+.gmain { grid-template-columns: 1fr calc(620 * var(--u)); gap: calc(26 * var(--u)); }
+.gdet { padding: calc(10 * var(--u)) calc(14 * var(--u)) calc(16 * var(--u)); gap: calc(4 * var(--u)); }
+.gcar { height: calc(250 * var(--u)); }
+.gcar .gphoto { height: calc(250 * var(--u)); }
+.gdet h2 { font-size: calc(22 * var(--u)); } .gdet > small { font-size: calc(12 * var(--u)); }
+.gacts { gap: calc(12 * var(--u)); margin-top: calc(10 * var(--u)); align-items: stretch; }
+.gar .gbtn { height: calc(50 * var(--u)); width: 100%; padding: 0 calc(16 * var(--u)) 0 calc(8 * var(--u)); gap: calc(14 * var(--u)); justify-content: flex-start; font-size: calc(17 * var(--u)); font-weight: 600; border-radius: calc(10 * var(--u)); color: #2d3038; background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(228,230,236,.9)); border: 1px solid rgba(255,255,255,.7); box-shadow: 0 calc(4 * var(--u)) calc(12 * var(--u)) rgba(0,0,0,.25); }
+.gar .gbtn svg.ic { flex: none; box-sizing: content-box; width: calc(20 * var(--u)) !important; height: calc(20 * var(--u)) !important; padding: calc(7 * var(--u)); border-radius: calc(8 * var(--u)); background: rgba(var(--accent-rgb), .14); color: rgb(var(--accent-rgb)); }
+.gar .gbtn:not(:disabled):hover { background: #fff; transform: translateX(calc(3 * var(--u))); box-shadow: 0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(0,0,0,.3); }
+.gar .gbtn.gprim { height: calc(58 * var(--u)); font-size: calc(18 * var(--u)); font-weight: 700; color: #fff; background: linear-gradient(100deg, var(--accent), rgba(var(--accent-rgb), .75)); border-color: rgba(255,255,255,.35); box-shadow: 0 calc(8 * var(--u)) calc(22 * var(--u)) rgba(var(--accent-rgb), .5), inset 0 1px 0 rgba(255,255,255,.3); }
+.gar .gbtn.gprim svg.ic { background: rgba(255,255,255,.22); color: #fff; }
+.gar .gbtn:disabled { opacity: .45; background: rgba(255,255,255,.7); box-shadow: none; }
+.gfoot { font-size: calc(13 * var(--u)); }
+.gdet .paygrid { margin-top: calc(10 * var(--u)); }
+.gdet .paybtn { height: calc(46 * var(--u)); font-size: calc(15 * var(--u)); }
+.gdet .lbl { margin-top: calc(16 * var(--u)); }
