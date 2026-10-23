@@ -226,7 +226,7 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 
 .switcher { position: absolute; inset: 0; z-index: 135; background: rgba(0,0,0,.35); backdrop-filter: blur(24px); display: flex; align-items: center; padding-left: 70px; gap: 22px; overflow-x: auto; overflow-y: hidden; animation: fadein .25s; scroll-snap-type: x mandatory; }
 .switcher .card { flex: none; width: 220px; scroll-snap-align: center; cursor: pointer; text-align: center; color: #fff; font-size: 13px; position: relative; }
-.switcher .card .snap { width: 220px; height: 476px; border-radius: 26px; background: var(--c1); display: grid; place-items: center; box-shadow: 0 10px 40px rgba(0,0,0,.5); margin-bottom: 10px; transition: transform .25s, opacity .25s; } .switcher .card .snap svg.ic { width: 70px; height: 70px; stroke-width: 1.4; }
+.switcher .card .snap { width: 220px; height: 476px; border-radius: 26px; background: var(--c1); display: grid; place-items: center; box-shadow: 0 10px 40px rgba(0,0,0,.5); margin-bottom: 10px; transition: transform .25s, opacity .25s; } .switcher .card .snap:not(.live) svg.ic { width: 70px; height: 70px; stroke-width: 1.4; }
 .switcher .card.kill .snap { transform: translateY(-120%); opacity: 0; }
 
 /* ───────── démarrage ───────── */
@@ -248,3 +248,10 @@ input, textarea, select { font: inherit; color: inherit; user-select: text; outl
 #camhud .zoom { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.5); padding: 4px 12px; border-radius: 14px; font-size: 13px; }
 #camhud .flash { position: absolute; inset: 0; background: #fff; opacity: 0; } #camhud .flash.go { animation: flash .35s; } @keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
 #camhud .thumb { position: absolute; bottom: 36px; right: 40px; width: 64px; height: 64px; border-radius: 14px; background-size: cover; border: 2px solid #fff; display: none; } #camhud .err { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: var(--red); padding: 10px 18px; border-radius: 16px; font-size: 14px; }
+
+/* multitâche : aperçu réel de l'application */
+.switcher .card .snap.live { display: block; position: relative; overflow: hidden; background: #000; }
+.switcher .card .snap .thumb { position: absolute; left: 0; top: 0; width: 390px; height: 844px; transform: scale(.5641); transform-origin: top left; pointer-events: none; overflow: hidden; background: var(--bg, #000); }
+.switcher .card .snap .thumb > * { position: absolute; inset: 0; animation: none !important; transform: none !important; opacity: 1 !important; }
+.switcher .card > span { display: inline-flex; align-items: center; gap: 6px; }
+.switcher .card > span svg.ic { width: 15px; height: 15px; }

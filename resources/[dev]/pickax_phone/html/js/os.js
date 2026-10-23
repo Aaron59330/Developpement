@@ -277,7 +277,13 @@ const OS = {
     if (!ids.length) sw.appendChild(h('div', { style: 'color:#fff;margin:auto;opacity:.7' }, 'Aucune application récente'));
     ids.forEach(id => {
       const d = Apps.get(id);
-      const c = h('div.card', h('div.snap', { style: `--c1:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: icon(d.icon), onclick: () => { sw.remove(); OS.openApp(id); } }), h('span', d.name));
+      const snap = h('div.snap', { style: `--c1:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, onclick: () => { sw.remove(); OS.openApp(id); } });
+      // aperçu réel : copie de la dernière page de l'application (repli sur l'icône si la copie échoue)
+      try {
+        const th = h('div.thumb' + (this.running[id].dark ? '.dark' : '')), cl = this.running[id].el.cloneNode(true);
+        cl.classList.remove('closing'); cl.style.animation = 'none'; th.appendChild(cl); snap.appendChild(th); snap.classList.add('live');
+      } catch (e) { snap.innerHTML = icon(d.icon); }
+      const c = h('div.card', snap, h('span', { html: icon(d.icon, 15) }, ' ' + d.name));
       c.addEventListener('wheel', e => { if (e.deltaY < -20) { c.classList.add('kill'); setTimeout(() => { OS.quit(id); c.remove(); }, 250); } });
       c.addEventListener('contextmenu', e => { e.preventDefault(); c.classList.add('kill'); setTimeout(() => { OS.quit(id); c.remove(); }, 250); });
       sw.appendChild(c);
