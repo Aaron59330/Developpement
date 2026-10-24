@@ -317,6 +317,25 @@ local function initializeInvis()
     end)
 end
 
+-- Rang affiché dans la balise de nom : rang admin du joueur s'il en a un, sinon « Citoyen » (sans codes couleur GTA)
+local function tagRankOf(serverId)
+    local label
+    if serverId == GetPlayerServerId(PlayerId()) and currentAdminGroupLabel and currentAdminGroupLabel ~= '' then
+        label = currentAdminGroupLabel
+    else
+        local lp = localPlayers and localPlayers[serverId]
+        local g = lp and lp.group
+        if g and g ~= 'user' then
+            local r = ConfigMenuAdmin.GroupList[g] and ConfigMenuAdministrationAdmin.ranks[ConfigMenuAdmin.GroupList[g]]
+            label = r and r.label
+        end
+    end
+    if not label or label == '' then return 'Citoyen' end
+    label = tostring(label):gsub('~%a~', '')
+    return (label == '' or label:lower() == 'user') and 'Citoyen' or label
+end
+
+local gamerTagText = {}
 local function initializeNames()
     Citizen.CreateThread(function()
         while ShowName and staffService do
@@ -324,10 +343,14 @@ local function initializeNames()
             local pCoords = GetEntityCoords(pPed, false)
             for _, v in pairs(GetActivePlayers()) do
                 local otherPed = GetPlayerPed(v)
-                -- on s'affiche aussi soi-même (v == PlayerId()) ; la balise n'est créée qu'une fois et recréée si le ped a changé
+                -- on s'affiche aussi soi-même ; format « ID | Rang | Nom » ; la balise est recréée seulement si le texte ou le ped change
                 if v == PlayerId() or #(pCoords - GetEntityCoords(otherPed, false)) < 250.0 then
-                    if gamerTags[v] == nil or not IsMpGamerTagActive(gamerTags[v]) then
-                        gamerTags[v] = CreateFakeMpGamerTag(otherPed, ('[%s] %s'):format(GetPlayerServerId(v), GetPlayerName(v)), false, false, '', 0)
+                    local sid = GetPlayerServerId(v)
+                    local text = ('%s | %s | %s'):format(sid, tagRankOf(sid), GetPlayerName(v))
+                    if gamerTags[v] == nil or gamerTagText[v] ~= text or not IsMpGamerTagActive(gamerTags[v]) then
+                        if gamerTags[v] then RemoveMpGamerTag(gamerTags[v]) end
+                        gamerTags[v] = CreateFakeMpGamerTag(otherPed, text, false, false, '', 0)
+                        gamerTagText[v] = text
                     end
                     SetMpGamerTagVisibility(gamerTags[v], 4, 1)
                 elseif gamerTags[v] then
