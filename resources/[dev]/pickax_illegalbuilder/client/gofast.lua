@@ -87,24 +87,9 @@ local function clearRevBlips()
     revBlips = {}
 end
 
-local function rebuildRevBlips()
-    clearRevBlips()
-    for _, e in ipairs((State and State.entities) or {}) do
-        for _, p in ipairs(e.points) do
-            local label, sprite, colour
-            if e.type == 'gofast' and e.gofastItem and p.kind == 'gfstart' then label, sprite, colour = 'Contact Go Fast', 225, 1
-            elseif p.reveal and p.coords and not (e.blip and e.blip.enabled) then label, sprite, colour = (p.label and p.label ~= '') and p.label or 'Blanchiment', 108, 2 end   -- blip du module activé : il dessine déjà ce point
-            if label and p.coords then
-                local b = AddBlipForCoord(p.coords.x + 0.0, p.coords.y + 0.0, p.coords.z + 0.0)
-                SetBlipSprite(b, sprite) SetBlipColour(b, colour) SetBlipScale(b, 0.8) SetBlipAsShortRange(b, true)
-                BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(label) EndTextCommandSetBlipName(b)
-                revBlips[#revBlips + 1] = b
-            end
-        end
-    end
-end
+-- Les blips des points « à tablette » (contact Go Fast, blanchiment) sont dessinés par client/main.lua (rebuildBlips) : un seul blip par point,
+-- celui du module s'il est activé, sinon l'icône par défaut ci-dessous.
 
-RegisterNetEvent('illegalbuilder:client:sync', function() SetTimeout(300, rebuildRevBlips) end)
 
 -- Premier point révélé par `item` : position + texte du message
 local function revealedBy(item)

@@ -176,17 +176,26 @@ end)
 -- Un point qui exige une tablette n'est envoyé qu'aux joueurs qui la possèdent (serveur) : eux seuls voient donc son blip.
 -- Un point peut aussi forcer son blip (case du point) même si le blip du module est désactivé.
 local BLIP_KINDS = { harvest = true, sell = true, launder = true, door = true, start = true, clerk = true }
+-- Icône par défaut d'un point « à tablette » quand le blip du module n'est pas activé
+local DEFAULT_REVEAL = { gfstart = { label = 'Contact Go Fast', sprite = 225, color = 1 }, launder = { label = 'Blanchiment', sprite = 108, color = 2 } }
 
 local function rebuildBlips()
     for _, b in ipairs(blipHandles) do if DoesBlipExist(b) then RemoveBlip(b) end end
     blipHandles = {}
     for _, e in ipairs(State.entities) do
-        if e.type ~= 'gofast' then   -- Go Fast : le contact n'apparaît que via la tablette (client/gofast.lua)
-            local b = e.blip or {}
-            for _, p in ipairs(e.points) do
-                if p.coords and ((b.enabled and BLIP_KINDS[p.kind]) or p.blip == true) then
+        local b = e.blip or {}
+        for _, p in ipairs(e.points) do
+            if p.coords then
+                local gfContact = e.type == 'gofast' and e.gofastItem and p.kind == 'gfstart'
+                local onMap = (b.enabled and (BLIP_KINDS[p.kind] or gfContact)) or p.blip == true
+                if onMap then
+                    -- blip du module (ou forcé par le point) : c'est le SEUL blip de ce point
+                    pcall(function() blipHandles[#blipHandles + 1] = BB.Blip(p.coords, b, { label = e.label, category = e.type }) end)
+                elseif gfContact or (p.reveal and p.kind == 'launder') then
+                    -- module sans blip : icône par défaut des points à tablette (présents ici uniquement si le joueur possède la tablette)
+                    local d = DEFAULT_REVEAL[gfContact and 'gfstart' or 'launder']
                     pcall(function()
-                        blipHandles[#blipHandles + 1] = BB.Blip(p.coords, b, { label = e.label, category = e.type })
+                        blipHandles[#blipHandles + 1] = BB.Blip(p.coords, { sprite = d.sprite, color = d.color, shortRange = true, label = (p.kind == 'launder' and p.label and p.label ~= '') and p.label or d.label }, { label = d.label, category = e.type })
                     end)
                 end
             end
