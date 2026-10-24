@@ -134,8 +134,9 @@ label.chk { display: flex; align-items: center; gap: 10px; color: var(--text-2);
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 0 6px 8px; font-weight: 700; }
 td { padding: 3px 6px; }
-.coord { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 8px; align-items: end; }
-.coord.tp { grid-template-columns: repeat(4, 1fr) auto auto; }
+.coord { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; align-items: end; }   /* X Y Z Cap sur une ligne, boutons dessous : plus de champ écrasé */
+.coord.tp { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.coord > button { grid-column: span 2; white-space: nowrap; }
 .pts { display: grid; grid-template-columns: 250px 1fr; gap: 18px; }
 .pt { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; margin-bottom: 7px; }
 .pt:hover { border-color: var(--line-2); } .pt.active { border-color: rgba(255, 255, 255, .85); }
@@ -377,3 +378,10 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 .evrow input { height: 34px; }
 .sc { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .warnbox { border: 1px solid rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .06); color: var(--warn); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5; }
+
+/* Liste des points : colonne fixe, le contenu ne déborde plus sur l'éditeur */
+.pts { grid-template-columns: 270px minmax(0, 1fr); }
+.pts > div { min-width: 0; }
+.addgrid { grid-template-columns: 1fr; }
+.addgrid button { height: auto; min-height: 32px; padding: 6px 10px; justify-content: flex-start; white-space: normal; text-align: left; }
+.pt > div { min-width: 0; } .pt b, .pt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
