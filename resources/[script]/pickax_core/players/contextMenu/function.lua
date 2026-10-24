@@ -856,6 +856,24 @@ function _Moi()
             end
             table.insert(Action_Config.My, { Type = "nested-submenu", Label = "Gestion armes", Blocked = false, IsRestricted = false, CloseOnClick = true, Groups = groups })
         end
+
+        -- Style de visée (posture de l'arme en main) : une entrée par arme qui propose au moins un style
+        local okS, styled = pcall(function() return exports['pickax_weaponcarry']:GetStyleEntries() end)
+        if okS and type(styled) == 'table' and #styled > 0 then
+            local sgroups = {}
+            for _, w in ipairs(styled) do
+                local actions, cur = {}, 'Standard'
+                for _, st in ipairs(w.styles) do
+                    local name = w.name
+                    if st.id == w.current then cur = st.label end
+                    actions[#actions + 1] = { (st.id == w.current and "~b~✔ ~s~" or "") .. st.label, function()
+                        exports['pickax_weaponcarry']:SetAimStyle(name, st.id)
+                    end }
+                end
+                sgroups[#sgroups + 1] = { Label = ("%s ~b~· %s"):format(w.label, cur), Action = actions }
+            end
+            table.insert(Action_Config.My, { Type = "nested-submenu", Label = "Style de visée", Blocked = false, IsRestricted = false, CloseOnClick = true, Groups = sgroups })
+        end
     end
 end
 

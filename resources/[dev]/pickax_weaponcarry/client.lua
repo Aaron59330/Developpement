@@ -56,6 +56,7 @@ local function sync(ped, key, list)
 end
 
 local mine, mineJson = {}, ''
+local weaponByHash = {}   -- [hash arme] = nom, pour les armes de l'inventaire (style de visée)
 
 local function refresh()
     local ped = PlayerPedId()
@@ -65,10 +66,12 @@ local function refresh()
     local ok, items = pcall(function() return exports.ox_inventory:GetPlayerItems() end)
     if ok and type(items) == 'table' then
         local list, count, seen = {}, {}, {}
+        weaponByHash = {}
         for _, it in pairs(items) do
             local name = it.name and tostring(it.name):upper()
             if name and name:find('^WEAPON_') and not seen[name] then
                 seen[name] = true
+                weaponByHash[joaat(name)] = name
                 local place = placeOf(name)
                 if place ~= 'hidden' then
                     count[place] = (count[place] or 0) + 1
@@ -110,7 +113,7 @@ end)
 
 -- ───────── Menu contextuel (pickax_core → Moi → Armes) ─────────
 -- Liste des armes de l'inventaire avec leur placement actuel
-exports('GetEntries', function()
+local function entries()
     local out = {}
     local ok, items = pcall(function() return exports.ox_inventory:GetPlayerItems() end)
     if not ok or type(items) ~= 'table' then return out end
@@ -126,7 +129,8 @@ exports('GetEntries', function()
     end
     table.sort(out, function(a, b) return a.label < b.label end)
     return out
-end)
+end
+exports('GetEntries', entries)
 
 exports('SetPlacement', function(name, place)
     name = tostring(name or ''):upper()
@@ -142,6 +146,66 @@ end)
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then clearAll() end end)
 AddEventHandler('esx:onPlayerDeath', clearAll)
 
+-- ───────── Style de visée (par arme) ─────────
+local styleCache = {}
+local function styleOf(name)
+    local s = styleCache[name]
+    if s == nil then s = GetResourceKvpString('ws:' .. name) or 'default' styleCache[name] = s end
+    local def = Config.AimStyles[s]
+    local cls = classOf(name)
+    return (def and (not def.classes or def.classes[cls])) and s or 'default'
+end
+
+local appliedHash, appliedStyle = nil, 'default'
+CreateThread(function()
+    while true do
+        Wait(Config.AimCheck or 500)
+        local ped = PlayerPedId()
+        local sel = GetSelectedPedWeapon(ped)
+        local name = weaponByHash[sel]
+        local style = name and styleOf(name) or 'default'
+        if sel ~= appliedHash or style ~= appliedStyle then
+            if style == 'default' then
+                if appliedStyle ~= 'default' then SetWeaponAnimationOverride(ped, joaat('Default')) end
+            else
+                SetWeaponAnimationOverride(ped, joaat(Config.AimStyles[style].override))
+            end
+            appliedHash, appliedStyle = sel, style
+        elseif style ~= 'default' then
+            SetWeaponAnimationOverride(ped, joaat(Config.AimStyles[style].override))   -- certains scripts le remettent à zéro : on le réapplique
+        end
+    end
+end)
+
+-- Armes de l'inventaire qui ont au moins un style de visée disponible (menu contextuel → Moi → Style de visée)
+exports('GetStyleEntries', function()
+    local out = {}
+    for _, e in ipairs(entries()) do
+        local cls, styles = classOf(e.name), {}
+        for _, id in ipairs(Config.AimOrder) do
+            local d = Config.AimStyles[id]
+            if d and (not d.classes or d.classes[cls]) then styles[#styles + 1] = { id = id, label = d.label } end
+        end
+        if #styles > 1 then out[#out + 1] = { name = e.name, label = e.label, current = styleOf(e.name), styles = styles } end
+    end
+    return out
+end)
+
+exports('SetAimStyle', function(name, style)
+    name = tostring(name or ''):upper()
+    local d = Config.AimStyles[style]
+    if not name:find('^WEAPON_') or not d or (d.classes and not d.classes[classOf(name)]) then return false end
+    styleCache[name] = style
+    SetResourceKvp('ws:' .. name, style)
+    appliedHash = nil   -- force la réapplication immédiate
+    ESX.ShowNotification(('Style de visée : ~b~%s'):format(d.label))
+    return true
+end)
+
+AddEventHandler('onResourceStop', function(res)
+    if res == GetCurrentResourceName() then SetWeaponAnimationOverride(PlayerPedId(), joaat('Default')) end
+end)
+
 -- ───────── Réglage en jeu (réservé _dev) : /wctune <placement> <type> <x> <y> <z> <rotX> <rotY> <rotZ> ─────────
 if Config.TuneCommand then
     RegisterCommand(Config.TuneCommand, function(_, a)
@@ -149,7 +213,7 @@ if Config.TuneCommand then
             if not ok then return ESX.ShowNotification('~r~Réservé aux administrateurs') end
             local place, cls = a[1], a[2]
             if not (place and cls and Config.Attach[place] and Config.Attach[place][cls]) then
-                return ESX.ShowNotification('Usage : /' .. Config.TuneCommand .. ' back|front|pocket pistol|smg|long|melee x y z rx ry rz')
+                return ESX.ShowNotification('Usage : /' .. Config.TuneCommand .. ' <placement> pistol|smg|long|melee x y z rx ry rz  (placements : ' .. table.concat(Config.PlaceOrder, ', ') .. ')')
             end
             local d = Config.Attach[place][cls]
             for i = 1, 6 do d[i + 1] = tonumber(a[i + 2]) or d[i + 1] end
