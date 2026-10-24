@@ -392,500 +392,14 @@ const FuelPanel = new (class extends PanelBase {
   }
 })();
 
-/* ── Laboratoire ── */
-const LabPanel = new (class extends PanelBase {
-  init(d) { this.qty = {}; d.recipes.forEach(r => { this.qty[r.i] = 1; }); }
-  render() {
-    const d = this.d, img = window.__img;
-    const rows = d.recipes.map(r => {
-      const can = r.max >= 1, q = Math.min(this.qty[r.i] || 1, Math.max(1, r.max));
-      return `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} ${esc(r.label)}</div>${r.failChance ? chip(`${r.failChance}% de raté`, 'warn') : ''}${chip(`${r.time}s / lot`, 'mute nodot')}</div>
-        <div class="recipe"><div>${r.inputs.map(i => `<div class="rrow">${itemImg(img, i.item)}<b>${esc(i.item)}</b><span class="${i.have >= i.count * q ? 'ok-t' : 'bad'}">${i.have} / ${i.count * q}</span></div>`).join('')}</div>
-        <div class="arrow">${ic('chevron', 22)}</div>
-        <div>${r.outputs.map(o => `<div class="rrow">${itemImg(img, o.item)}<b>${esc(o.item)}</b><span>×${o.count * q}</span></div>`).join('')}</div></div>
-        ${r.tool ? `<div class="hint mt-s">Outil requis : <b>${esc(r.tool)}</b></div>` : ''}
-        <div class="row mt-s"><div class="stepper"><button class="icon" data-a="dec" data-v="${r.i}">${ic('minus', 13)}</button><span>${q}</span><button class="icon" data-a="inc" data-v="${r.i}">${ic('plus', 13)}</button></div><span class="spacer"></span>
-        <button class="primary" data-a="craft" data-v="${r.i}" ${can ? '' : 'disabled'}>${ic('check', 16)} Fabriquer${can ? '' : ' (ingrédients manquants)'}</button></div></div>`;
-    }).join('');
-    $root.innerHTML = panel({ icon: 'flask', title: this.d.label, sub: 'Choisis une recette', cls: 'md', body: rows || emptyState('flask', 'Aucune recette', 'Ce poste de travail n\'a pas de recette configurée.') });
-  }
-  async onA(el) {
-    const a = el.dataset.a, i = Number(el.dataset.v), r = this.d.recipes.find(x => x.i === i);
-    if (a === 'inc' && r) { this.qty[i] = Math.min(10, Math.max(1, r.max), (this.qty[i] || 1) + 1); return this.render(); }
-    if (a === 'dec' && r) { this.qty[i] = Math.max(1, (this.qty[i] || 1) - 1); return this.render(); }
-    if (a === 'craft' && r) { const res = await this.act('lab:craft', i, Math.min(this.qty[i] || 1, Math.max(1, r.max))); if (res && res.ok) $root.classList.add('hidden'); }
-  }
-})();
-
-/* ── Dealer ── */
-const DealerPanel = new (class extends PanelBase {
-  init(d) { this.qty = {}; }
-  render() {
-    const d = this.d, img = window.__img;
-    const rows = d.items.map(it => {
-      const q = Math.max(1, Math.min(this.qty[it.item] || 1, it.have || 1));
-      return `<div class="item">${itemImg(img, it.item)}<div class="grow"><b>${esc(it.item)}</b><small>${it.min === it.max ? money(it.min) : `${money(it.min)} – ${money(it.max)}`} l'unité · tu en as ${it.have}</small></div>
-        <input class="qty" type="number" min="1" max="${it.have}" value="${q}" data-q="${esc(it.item)}" ${it.have ? '' : 'disabled'}>
-        <button class="primary sm" data-a="sell" data-v="${esc(it.item)}" ${it.have ? '' : 'disabled'}>Vendre</button><button class="sm" data-a="sellall" data-v="${esc(it.item)}" ${it.have ? '' : 'disabled'}>Tout</button></div>`;
-    }).join('');
-    $root.innerHTML = panel({ icon: 'dollar', title: d.label, sub: `Paiement : ${d.account === 'black_money' ? 'argent sale' : d.account === 'bank' ? 'banque' : 'espèces'}`, cls: 'md',
-      body: `${d.left >= 0 ? `<div class="hint">Tu peux encore vendre <b>${d.left}</b> unité(s) cette heure.</div>` : ''}<div class="list">${rows || emptyState('dollar', 'Rien à vendre', 'Ce dealer n\'achète rien.')}</div>` });
-    $root.querySelectorAll('input[data-q]').forEach(i => i.addEventListener('input', () => { this.qty[i.dataset.q] = Number(i.value); }));
-  }
-  async sell(item, qty) {
-    const r = await this.act('drug:sell', this.d.eid, this.d.pi, item, qty);
-    if (!r || !r.ok) return;
-    toast(`Vendu ${r.qty} × ${item} pour ${money(r.total)}`, 'ok');
-    const it = this.d.items.find(x => x.item === item); if (it) it.have -= r.qty;
-    if (this.d.left >= 0) this.d.left = Math.max(0, this.d.left - r.qty);
-    this.render();
-  }
-  onA(el) {
-    const a = el.dataset.a, item = el.dataset.v, it = this.d.items.find(x => x.item === item);
-    if (a === 'sell' && it) return this.sell(item, Math.max(1, Math.min(this.qty[item] || 1, it.have)));
-    if (a === 'sellall' && it) return this.sell(item, it.have);
-  }
-})();
-
-/* ── Blanchiment ── */
-const LaunderPanel = new (class extends PanelBase {
-  init(d) { this.amount = Math.max(d.min || 1, Math.min(d.have, d.max || d.have)); }
-  recv() { return Math.floor(this.amount * this.d.rate / 100); }
-  render() {
-    const d = this.d;
-    $root.innerHTML = panel({ icon: 'card', title: d.label, sub: `Commission : ${100 - d.rate}%`, cls: '',
-      body: `<div class="card" style="text-align:center"><div class="eyebrow" style="justify-content:center">À blanchir (${esc(d.from)})</div><div class="big" style="margin:10px 0">${money(d.have)}</div><div class="hint">Min ${money(d.min)}${d.max ? ` · max ${money(d.max)}` : ''}${d.left >= 0 ? ` · reste ${money(d.left)} cette heure` : ''}</div></div>
-        <label class="f"><span>Montant</span><input type="number" min="${d.min}" max="${d.have}" data-path="amount" value="${this.amount}"></label>
-        <div class="kv"><span>Tu recevras (${esc(d.to === 'bank' ? 'banque' : d.to === 'money' ? 'espèces' : d.to)})</span><span id="lq-r" class="price">${money(this.recv())}</span></div>
-        <button class="primary" data-a="go" ${d.have >= Math.max(1, d.min) ? '' : 'disabled'}>${ic('check', 16)} Blanchir</button>` });
-  }
-  afterInput(p) { if (p === 'amount') document.getElementById('lq-r').textContent = money(this.recv()); }
-  async onA(el) {
-    if (el.dataset.a !== 'go') return;
-    const r = await this.act('drug:launder', this.d.eid, this.d.pi, this.amount);
-    if (r && r.ok) { toast(`Blanchi : ${money(r.received)} reçus`, 'ok'); this.d.have -= r.given; if (this.d.left >= 0) this.d.left = Math.max(0, this.d.left - r.given); this.amount = Math.max(this.d.min || 1, Math.min(this.d.have, this.d.max || this.d.have)); this.render(); }
-  }
-})();
-
-/* ── Zones PVP : HUD, kill-feed, réapparition ── */
-const PvpHud = {
-  stats: { kills: 0, deaths: 0, streak: 0 }, zone: '', color: '#ef4444',
-  draw() {
-    const s = this.stats, kd = s.deaths ? (s.kills / s.deaths).toFixed(2) : s.kills.toFixed(2);
-    const el = document.getElementById('pvphud');
-    el.style.setProperty('--pc', this.color);
-    el.innerHTML = `<b>${esc(this.zone)}</b><div class="pvp-stats"><span>Kills <b>${s.kills}</b></span><span>Morts <b>${s.deaths}</b></span><span>K/D <b>${kd}</b></span><span>Série <b>${s.streak}</b></span></div>`;
-  },
-  handle(d) {
-    const hud = document.getElementById('pvphud'), feed = document.getElementById('pvpfeed'), rs = document.getElementById('pvprespawn');
-    if (d.action === 'pvpHud') {
-      if (!d.show) { hud.classList.add('hidden'); return; }
-      this.zone = d.zone; this.color = d.color || '#ef4444'; if (d.stats) this.stats = d.stats;
-      this.draw(); hud.classList.remove('hidden'); return;
-    }
-    if (d.action === 'pvpStats') { this.stats = d.stats; if (!hud.classList.contains('hidden')) this.draw(); return; }
-    if (d.action === 'pvpRespawn') {
-      if (!d.show) { rs.classList.add('hidden'); return; }
-      rs.innerHTML = `<div class="rs"><small>Tu es mort</small><b>${d.seconds}</b><span>Réapparition…</span></div>`; rs.classList.remove('hidden'); return;
-    }
-    if (d.action === 'pvpFeed') {
-      const e = d.entry, row = document.createElement('div');
-      row.className = 'pvp-feed-row';
-      row.innerHTML = e.killer ? `<b>${esc(e.killer)}</b> <i>${ic('target', 13)}</i> ${esc(e.victim)}` : `${esc(e.victim)} est mort`;
-      feed.prepend(row);
-      while (feed.children.length > 5) feed.lastChild.remove();
-      setTimeout(() => row.remove(), 6000);
-    }
-  },
-};
-
-/* ── Zones PVP : menu (PNJ) ── */
-const PvpPanel = new (class extends PanelBase {
-  init() { this.tab = 'zones'; }
-  render() {
-    const d = this.d, s = d.stats;
-    const kd = s.deaths ? (s.kills / s.deaths).toFixed(2) : Number(s.kills).toFixed(2);
-    const tabs = [['zones', 'Zones', 'target'], ['board', 'Classement', 'chart'], ['me', 'Mes stats', 'user']];
-    let body;
-    if (this.tab === 'board') {
-      body = `<div class="card"><div class="card-h"><div class="t">${ic('chart', 17)} Classement (kills)</div></div>${d.leaderboard.map((r, i) => `<div class="kv"><span>${i + 1}. ${esc(r.name)}</span><span>${r.kills} kills <span class="muted">· ${r.deaths} morts · série max ${r.best_streak}</span></span></div>`).join('') || '<div class="hint">Aucun combat enregistré.</div>'}</div>`;
-    } else if (this.tab === 'me') {
-      const stat = (l, v) => `<div class="stat"><div class="eyebrow">${l}</div><div class="v">${v}</div></div>`;
-      body = `<div class="grid4">${stat('Kills', s.kills)}${stat('Morts', s.deaths)}${stat('K/D', kd)}${stat('Meilleure série', s.best)}</div>`;
-    } else {
-      body = d.zones.map(z => `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} ${esc(z.label)}</div>${chip(`${z.players} joueur${z.players > 1 ? 's' : ''}`, z.players ? 'ok' : 'mute')}</div>
-        <div class="hint">Rayon ${Math.round(z.radius)} m${z.giveWeapons ? ` · armes fournies : ${esc(z.weapons.join(', ') || 'aucune')}` : ''}${z.revive ? ' · revive automatique' : ''}${z.reward ? ` · ${money(z.reward)} par kill` : ''}</div>
-        <div class="row mt-s"><button class="sm" data-a="gps" data-v="${z.pi}">${ic('map', 14)} Placer le GPS</button></div></div>`).join('') || emptyState('target', 'Aucune zone', 'Aucune zone PVP n\'est configurée.');
-    }
-    $root.innerHTML = panel({ icon: 'target', title: d.label, sub: `${s.kills} kills · ${s.deaths} morts`, cls: 'md', body: `<div class="seg wrap">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[2], 15)} ${t[1]}</button>`).join('')}</div>${body}` });
-  }
-  onA(el) {
-    const a = el.dataset.a;
-    if (a === 'tab') { this.tab = el.dataset.v; return this.render(); }
-    if (a === 'gps') rpc('pvp:waypoint', Number(el.dataset.v));
-  }
-})();
-
-/* ── Course poursuite : HUD en partie ── */
-const ChaseHud = {
-  role: null, catchTime: 3000, headStart: 0, resultTimer: null,
-  fmt(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; },
-  handle(d) {
-    const hud = document.getElementById('chasehud'), cnt = document.getElementById('chasecount'), res = document.getElementById('chaseresult');
-    if (d.action === 'chaseHud') {
-      if (!d.show) { hud.classList.add('hidden'); cnt.classList.add('hidden'); return; }
-      this.role = d.role; this.catchTime = d.catchTime || 3000; this.headStart = d.headStart || 0;
-      hud.className = `chase-${d.role}`;
-      hud.innerHTML = `<div class="ch-head"><b>${d.role === 'runner' ? 'FUGITIF' : 'POURSUIVANT'}</b><span id="ch-time">--:--</span></div><div class="ch-msg" id="ch-msg"></div>
-        <div class="ch-row"><span>Distance</span><b id="ch-dist">—</b></div><div class="ch-bar"><i id="ch-bar"></i></div><div class="ch-row"><span>Contact</span><b id="ch-contact">0.0 s</b></div>`;
-      cnt.classList.add('hidden');
-      return;
-    }
-    if (d.action === 'chaseCount') {
-      cnt.innerHTML = `<div class="cc ${d.role || ''}"><small>${d.role === 'runner' ? 'Tu es le fugitif' : 'Tu es poursuivant'}</small><b>${esc(d.value)}</b></div>`;
-      cnt.classList.remove('hidden');
-      if (d.value === 'GO') setTimeout(() => cnt.classList.add('hidden'), 900);
-      return;
-    }
-    if (d.action === 'chaseTick') {
-      const t = d.tick, $ = id => document.getElementById(id);
-      if (!$('ch-time')) return;
-      $('ch-time').textContent = this.fmt(t.remaining);
-      $('ch-dist').textContent = t.dist > 9000 ? '—' : `${Math.round(t.dist)} m`;
-      const pc = Math.min(100, Math.round((t.contact / (t.catchTime || this.catchTime)) * 100));
-      $('ch-bar').style.width = pc + '%'; $('ch-bar').className = pc > 66 ? 'hot' : pc > 33 ? 'warm' : '';
-      $('ch-contact').textContent = `${(t.contact / 1000).toFixed(1)} s / ${(((t.catchTime || this.catchTime)) / 1000).toFixed(0)} s`;
-      $('ch-msg').textContent = t.releaseIn > 0 ? (this.role === 'runner' ? `Avance : poursuivants libérés dans ${Math.ceil(t.releaseIn / 1000)} s` : `Départ dans ${Math.ceil(t.releaseIn / 1000)} s…`) : (this.role === 'runner' ? 'Fuis ! Ne te laisse pas coller.' : 'Colle le fugitif !');
-      return;
-    }
-    if (d.action === 'chaseResult') {
-      clearTimeout(this.resultTimer);
-      if (!d.result) { res.classList.add('hidden'); return; }
-      const r = d.result;
-      res.innerHTML = `<div class="cr ${r.won ? 'won' : 'lost'}"><small>${r.winner === 'none' ? 'Course annulée' : r.winner === 'runner' ? 'Le fugitif gagne' : 'Les poursuivants gagnent'}</small><b>${r.winner === 'none' ? 'ANNULÉE' : r.won ? 'VICTOIRE' : 'DÉFAITE'}</b><p>${esc(r.reason || '')}</p>
-        <div class="row" style="justify-content:center;gap:18px"><span>Durée : <b>${this.fmt(r.elapsed || 0)}</b></span>${r.winner === 'none' ? (r.reward ? `<span>Remboursé : <b>${money(r.reward)}</b></span>` : '') : r.won ? (r.reward ? `<span>Gain : <b>+${money(r.reward)}</b></span>` : '') : (r.lost ? `<span>Perdu : <b>-${money(r.lost)}</b></span>` : '')}</div></div>`;
-      res.classList.remove('hidden');
-      this.resultTimer = setTimeout(() => res.classList.add('hidden'), ((r.delay || 8) + 1) * 1000);
-    }
-  },
-};
-
-/* ── Course poursuite : grand panel (lobbies) ── */
-const ChasePanel = new (class extends PanelBase {
-  init(d) { this.state = null; this.tab = 'lobbies'; this.board = null; this.pickEnd = 0; this.form = { name: '', map: d.maps[0] ? d.maps[0].id : null, duration: d.cfg.duration.default, maxChasers: Math.min(2, d.cfg.maxChasers), role: 'runner' }; this.vehCat = null; this.stopTimer(); }
-  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
-  setState(s) {
-    if (Mod !== this || $root.classList.contains('hidden')) return;
-    this.state = s;
-    // fenêtre de choix du véhicule (10 s après l'arrivée d'un joueur) : le serveur envoie le temps restant
-    this.pickEnd = (s.current && s.current.pickLeft > 0) ? Date.now() + s.current.pickLeft : 0;
-    if (s.current) this.tab = 'lobby'; else if (this.tab === 'lobby') this.tab = 'lobbies';
-    this.render();
-    this.stopTimer();
-    if (this.pickEnd) this.timer = setInterval(() => this.tick(), 200);
-  }
-  pickLeft() { return Math.max(0, this.pickEnd - Date.now()); }
-  tick() {
-    if (Mod !== this || $root.classList.contains('hidden')) return this.stopTimer();
-    const left = this.pickLeft();
-    if (left <= 0) { this.pickEnd = 0; this.stopTimer(); return this.render(); }
-    const t = document.getElementById('pickcd'), b = document.getElementById('pickbar');
-    if (t) t.textContent = Math.ceil(left / 1000);
-    if (b) b.style.width = Math.min(100, left / (this.d.cfg.pickTime * 10)) + '%';
-  }
-  stats(s) { return s ? `${s.matches} parties · ${s.wins_runner + s.wins_chaser} victoires` : ''; }
-  render() {
-    const d = this.d, s = this.state, cur = s && s.current;
-    const initials = ((s && s.name) || '?').split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase();
-    let body;
-    if (!s) body = '<div class="hint">Chargement…</div>';
-    else if (this.tab === 'board') body = this.viewBoard();
-    else if (this.tab === 'lobby' && cur) body = this.viewLobby(cur);
-    else body = this.viewLobbies(s);
-    const titles = { lobbies: ['Parties', 'Crée ou rejoins une course poursuite'], lobby: ['Mon lobby', cur ? cur.name : ''], board: ['Classement', 'Les meilleurs pilotes'] };
-    const t = titles[this.tab] || titles.lobbies;
-    $root.innerHTML = shellSide({
-      profile: { initials, title: s ? s.name : '…', sub: s ? this.stats(s.stats) : '' },
-      nav: [{ label: d.label, items: [
-        { id: 'lobbies', icon: 'grid', text: 'Parties', count: s ? s.lobbies.length : null },
-        ...(cur ? [{ id: 'lobby', icon: 'car', text: 'Mon lobby', count: `${cur.players.length}` }] : []),
-        { id: 'board', icon: 'chart', text: 'Classement' }] }],
-      active: this.tab,
-      foot: `<small>Les poursuivants gagnent s'ils restent collés (${d.cfg.catchDistance} m) au fugitif pendant ${d.cfg.catchTime} s ; sinon le fugitif gagne au bout du temps.</small>`,
-      head: { icon: 'flag', title: t[0], sub: t[1] }, body });
-  }
-  roleBtns(sel, act) { return `<div class="row">${[['runner', 'Fugitif'], ['chaser', 'Poursuivant']].map(r => `<button class="grow-i ${sel === r[0] ? 'primary' : ''}" data-a="${act}" data-v="${r[0]}">${r[1]}</button>`).join('')}</div>`; }
-  viewLobbies(s) {
-    const d = this.d, f = this.form;
-    const lobbies = s.lobbies.map(l => `<div class="item"><div class="tile">${ic('flag')}</div><div class="grow"><b>${esc(l.name)}</b><small>${esc(l.mapLabel)} · ${l.duration} min · ${l.runners}/1 fugitif · ${l.chasers}/${l.maxChasers} poursuivants${l.fee > 0 ? ` · mise ${money(l.fee)}` : ''}</small></div>
-      ${l.state === 'lobby' ? `<button class="sm" data-a="join" data-v="${l.id}:runner" ${l.runners >= 1 ? 'disabled' : ''}>Fugitif</button><button class="primary sm" data-a="join" data-v="${l.id}:chaser" ${l.chasers >= l.maxChasers ? 'disabled' : ''}>Poursuivant</button>` : chip('En cours', 'warn')}</div>`).join('');
-    return `<div class="chase-cols"><div><div class="card"><div class="card-h"><div class="t">${ic('plus', 17)} Créer une partie</div></div>
-        <div class="grid2"><label class="f"><span>Nom</span><input data-path="form.name" maxlength="28" placeholder="Course de ${esc(s.name)}" value="${esc(f.name)}"></label>
-        <label class="f"><span>Carte</span><select data-path="form.map" data-t="n">${d.maps.map(m => `<option value="${m.id}" ${m.id === f.map ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
-        <label class="f"><span>Durée : <b>${f.duration} min</b></span><input type="range" min="${d.cfg.duration.min}" max="${d.cfg.duration.max}" value="${f.duration}" data-path="form.duration"></label>
-        <label class="f"><span>Poursuivants max : <b>${f.maxChasers}</b></span><input type="range" min="1" max="${d.cfg.maxChasers}" value="${f.maxChasers}" data-path="form.maxChasers"></label></div>
-        <div class="lbl mt-s">Ton rôle</div>${this.roleBtns(f.role, 'formRole')}
-        <div class="hint mt-s">${d.cfg.reward.fee > 0 ? `Mise d'entrée : <b>${money(d.cfg.reward.fee)}</b> par joueur, débitée au lancement. Le gagnant empoche les mises, le perdant perd la sienne.` : 'Course gratuite.'}</div>
-        <button class="primary wide mt-s" data-a="create" ${d.maps.length ? '' : 'disabled'}>${ic('check', 16)} Créer la partie</button></div></div>
-      <div><div class="lbl">Parties ouvertes</div>${lobbies || emptyState('flag', 'Aucune partie', 'Crée la première partie à gauche.')}</div></div>`;
-  }
-  viewLobby(m) {
-    const d = this.d, me = m.players.find(p => p.src === this.state.you) || {}, host = me.host;
-    const cats = [...new Set(d.vehicles.map(v => v.category || 'Autre'))];
-    const cat = this.vehCat || (d.vehicles.find(v => v.model === me.vehicle) || {}).category || cats[0];
-    const bar = (l, v) => `<div class="mini"><span>${l}</span><div class="bar"><i style="width:${v}%"></i></div></div>`;
-    const left = this.pickLeft(), picking = left > 0;
-    const players = m.players.map(p => `<div class="item"><div class="tile">${ic(p.role === 'runner' ? 'target' : 'car')}</div><div class="grow"><b>${esc(p.name)}${p.host ? ' ★' : ''}</b><small>${esc((d.vehicles.find(v => v.model === p.vehicle) || {}).label || p.vehicle)}</small></div>${chip(p.role === 'runner' ? 'Fugitif' : 'Poursuivant', p.role === 'runner' ? 'warn' : 'info')}</div>`).join('');
-    const banner = picking ? `<div class="pickbanner"><div><b>Choisis ton véhicule !</b><small>La partie ne peut pas être lancée pendant ce temps.</small></div><span id="pickcd">${Math.ceil(left / 1000)}</span><div class="pickbar"><i id="pickbar" style="width:${Math.min(100, left / (d.cfg.pickTime * 10))}%"></i></div></div>` : '';
-    const canStart = m.runners === 1 && m.chasers >= 1 && !picking;
-    return `${banner}<div class="chase-lobby"><div>
-        <div class="card"><div class="card-h"><div class="t">${ic('flag', 17)} ${esc(m.name)}</div>${chip(m.state === 'lobby' ? 'En attente' : 'Lancement…', m.state === 'lobby' ? 'mute' : 'ok')}</div>
-          <div class="hint">${esc(m.mapLabel)} · ${m.duration} min · ${m.runners}/1 fugitif · ${m.chasers}/${m.maxChasers} poursuivants${m.fee > 0 ? ` · mise ${money(m.fee)} / joueur (cagnotte ${money(m.fee * m.players.length)})` : ''}</div></div>
-        <div class="lbl mt-s">Joueurs</div>${players}
-        <div class="lbl">Ton rôle</div>${this.roleBtns(me.role, 'setRole')}
-        <div class="row mt"><button class="danger" data-a="leave">Quitter</button><span class="spacer"></span>${host ? `<button class="primary" data-a="start" ${canStart ? '' : 'disabled'}>${ic('check', 16)} ${picking ? 'Choix du véhicule…' : 'Lancer la partie'}</button>` : '<span class="hint">En attente de l\'hôte…</span>'}</div>
-      </div><div>
-        <div class="lbl">Ton véhicule</div><div class="seg wrap" style="margin-bottom:10px">${cats.map(c => `<button class="${c === cat ? 'active' : ''}" data-a="vcat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-        <div class="veh-grid">${d.vehicles.filter(v => (v.category || 'Autre') === cat).map(v => `<div class="item click" data-a="setVehicle" data-v="${esc(v.model)}" style="${v.model === me.vehicle ? 'border-color:var(--accent-line);background:var(--accent-soft)' : ''}"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(v.label)}</b><div class="minis">${bar('Vitesse', v.speed)}${bar('Accél.', v.accel)}${bar('Tenue', v.handling)}</div></div>${v.model === me.vehicle ? chip('Choisi', 'ok') : ''}</div>`).join('')}</div>
-      </div></div>`;
-  }
-  viewBoard() {
-    const rows = (this.board || []).map((r, i) => `<div class="kv"><span>${i + 1}. ${esc(r.name)}</span><span>${r.wins} victoire${r.wins > 1 ? 's' : ''} <span class="muted">· ${r.matches} parties (F ${r.wins_runner} / P ${r.wins_chaser})</span></span></div>`).join('');
-    return `<div class="card"><div class="card-h"><div class="t">${ic('chart', 17)} Classement</div></div>${this.board ? (rows || '<div class="hint">Aucune partie jouée.</div>') : '<div class="hint">Chargement…</div>'}</div>`;
-  }
-  afterInput(p, el) {
-    if (!p || !p.startsWith('form.')) return;
-    const k = p.slice(5);
-    this.form[k] = (k === 'name') ? el.value : Number(el.value);
-    if (k === 'duration' || k === 'maxChasers') { const l = el.closest('label').querySelector('b'); if (l) l.textContent = k === 'duration' ? `${this.form.duration} min` : this.form.maxChasers; }
-  }
-  onInput(el) {
-    const p = el.dataset.path;
-    if (p && p.startsWith('form.')) return this.afterInput(p, el);
-  }
-  async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'nav' || a === 'tab') {
-      if (v === 'lobby' && !(this.state && this.state.current)) return;
-      this.tab = v;
-      if (v === 'board') { this.board = null; this.render(); const r = await rpc('chase:leaderboard'); this.board = (r && r.rows) || []; }
-      return this.render();
-    }
-    if (a === 'formRole') { this.form.role = v; return this.render(); }
-    if (a === 'create') { rpc('chase:create', { name: this.form.name, map: this.form.map, duration: this.form.duration, maxChasers: this.form.maxChasers, role: this.form.role }); return; }
-    if (a === 'join') { const [id, role] = v.split(':'); rpc('chase:join', { id: Number(id), role }); return; }
-    if (a === 'setRole') { rpc('chase:setRole', v); return; }
-    if (a === 'setVehicle') { rpc('chase:setVehicle', v); return; }
-    if (a === 'vcat') { this.vehCat = v; return this.render(); }
-    if (a === 'leave') { rpc('chase:leave'); this.tab = 'lobbies'; return; }
-    if (a === 'start') { rpc('chase:start'); return; }
-  }
-})();
-
-/* ── Occasion ── */
-const CarlotPanel = new (class extends PanelBase {
-  init(d) { this.tab = d.focus ? 'focus' : 'buy'; this.sel = null; this.price = 0; this.desc = ''; this.phone = ''; this.edit = {}; }
-  async call(name, ...a) {
-    const r = await this.act(name, ...a);
-    if (r && r.ok) { const keep = { eid: this.d.eid, pi: this.d.pi }; this.d = Object.assign(r, keep); if (this.tab === 'focus') this.tab = 'buy'; this.render(); }
-    return r;
-  }
-  card(l, actions) {
-    return `<div class="card"><div class="card-h"><div class="t">${ic('car', 17)} ${esc(l.name)}</div><span class="price">${money(l.price)}</span></div>
-      ${l.desc ? `<div style="margin-bottom:8px;line-height:1.5">${esc(l.desc)}</div>` : '<div class="hint">Pas de description.</div>'}
-      <div class="hint">Vendeur : <b>${esc(l.seller)}</b>${l.phone ? ` · Tel : <b>${esc(l.phone)}</b>` : ''}${l.plate ? ` · Plaque : <span class="mono">${esc(l.plate)}</span>` : ''}</div>${actions ? `<div class="row mt-s">${actions}</div>` : ''}</div>`;
-  }
-  render() {
-    const d = this.d, sell = d.kind === 'lot';
-    const tabs = [['buy', 'Annonces'], ...(sell ? [['sell', 'Vendre mon véhicule'], ['mine', 'Mes annonces']] : [])];
-    const head = `<div class="seg wrap">${tabs.map(t => `<button class="${t[0] === (this.tab === 'focus' ? 'buy' : this.tab) ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>`;
-    let body = '';
-    if (this.tab === 'focus') {
-      const l = d.listings.find(x => x.id === d.focus);
-      body = (l ? this.card(l, l.mine ? `<button class="danger" data-a="cancel" data-v="${l.id}">Retirer mon annonce</button>` : `<button class="primary" data-a="buy" data-v="${l.id}">Acheter · ${money(l.price)}</button>`) : emptyState('car', 'Annonce introuvable', 'Elle vient peut-être d\'être vendue.')) + payRow(d.payments, this.method)
-        + `<button class="wide" data-a="tab" data-v="buy">Voir toutes les annonces</button>`;
-    } else if (this.tab === 'buy') {
-      body = payRow(d.payments, this.method) + (d.listings.map(l => this.card(l, l.mine ? chip('Ton annonce', 'info') : `<button class="primary" data-a="buy" data-v="${l.id}">Acheter · ${money(l.price)}</button>`)).join('') || emptyState('car', 'Aucune annonce', 'Aucun véhicule en vente pour le moment.'));
-    } else if (this.tab === 'sell') {
-      const lim = [d.minPrice ? `min ${money(d.minPrice)}` : '', d.maxPrice ? `max ${money(d.maxPrice)}` : ''].filter(Boolean).join(' · ');
-      body = `<div class="hint">Frais d'annonce : <b>${money(d.fee)}</b> · commission à la vente : <b>${d.commission}%</b> · ${d.days ? `durée : <b>${d.days} jour(s)</b>` : 'sans limite de durée'} · annonces : <b>${d.mineCount}/${d.maxListings}</b> · places libres : <b>${d.freeSlots}</b></div>
-        <div class="lbl">1. Choisis un véhicule (rangé dans ton garage)</div>
-        <div class="list">${d.vehicles.map(v => `<div class="item click ${v.plate === this.sel ? 'sel' : ''}" data-a="pick" data-v="${esc(v.plate)}" style="${v.plate === this.sel ? 'border-color:var(--accent-line);background:var(--accent-soft)' : ''}"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(v.name)}</b><small class="mono">${esc(v.plate)}</small></div>${v.plate === this.sel ? chip('Sélectionné', 'ok') : ''}</div>`).join('') || '<div class="hint warn">Aucun véhicule rangé dans ton garage : range-le d\'abord dans un garage.</div>'}</div>
-        <div class="lbl">2. Prix et annonce</div>
-        <div class="grid2"><label class="f"><span>Prix (${esc(CUR)})${lim ? ' — ' + lim : ''}</span><input type="number" min="1" data-path="price" value="${this.price || ''}"></label><label class="f"><span>Téléphone (optionnel)</span><input data-path="phone" maxlength="20" value="${esc(this.phone)}" placeholder="555-0123"></label></div>
-        <label class="f"><span>Description (état, kilométrage, remarques…)</span><textarea data-path="desc" maxlength="140" placeholder="Ex : Très bon état, jamais accidentée, peinture refaite…">${esc(this.desc)}</textarea></label>
-        ${payRow(d.payments, this.method)}
-        <button class="primary wide" data-a="list" ${this.sel && this.price > 0 && d.freeSlots > 0 && d.mineCount < d.maxListings ? '' : 'disabled'}>${ic('check', 16)} Mettre en vente${d.fee ? ' · ' + money(d.fee) : ''}</button>
-        ${d.freeSlots < 1 ? '<div class="hint warn">Aucune place d\'exposition libre pour le moment.</div>' : ''}`;
-    } else {
-      const mine = d.listings.filter(l => l.mine);
-      body = mine.map(l => this.card(l, `<input class="qty" style="width:120px" type="number" min="1" data-edit="${l.id}" value="${this.edit[l.id] ?? l.price}"><button class="sm" data-a="reprice" data-v="${l.id}">Changer le prix</button><span class="spacer"></span><button class="danger sm" data-a="cancel" data-v="${l.id}">Retirer</button>`)).join('') || emptyState('car', 'Aucune annonce', 'Tu n\'as aucun véhicule en vente.');
-    }
-    $root.innerHTML = panel({ icon: 'car', title: d.label, sub: sell ? 'Annonces de véhicules' : 'Annonce', cls: 'md', body: head + body });
-    $root.querySelectorAll('input[data-edit]').forEach(i => i.addEventListener('input', () => { this.edit[i.dataset.edit] = Number(i.value); }));
-  }
-  afterInput(p) { if (p === 'price') { const b = $root.querySelector('[data-a="list"]'); if (b) b.disabled = !(this.sel && this.price > 0 && this.d.freeSlots > 0 && this.d.mineCount < this.d.maxListings); } }
-  async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'pay') { this.method = v; return this.render(); }
-    if (a === 'tab') { this.tab = v; return this.render(); }
-    if (a === 'pick') { this.sel = v; return this.render(); }
-    if (a === 'buy') { const r = await this.call('carlot:buy', Number(v), this.method); if (r && r.ok) toast('Véhicule acheté : il est dans ton garage', 'ok'); }
-    if (a === 'list') { const r = await this.call('carlot:list', this.sel, this.price, this.desc, this.phone, this.method); if (r && r.ok) { this.sel = null; this.price = 0; this.desc = ''; this.tab = 'mine'; this.render(); toast('Annonce publiée', 'ok'); } }
-    if (a === 'cancel') { const r = await this.call('carlot:cancel', Number(v)); if (r && r.ok) toast('Annonce retirée : véhicule rendu à ton garage', 'ok'); }
-    if (a === 'reprice') { const r = await this.call('carlot:price', Number(v), this.edit[v] ?? 0); if (r && r.ok) toast('Prix modifié', 'ok'); }
-  }
-})();
-
-/* ── Serrurier ── */
-const LocksmithPanel = new (class extends PanelBase {
-  render() {
-    const d = this.d;
-    const rows = d.vehicles.map(v => `<div class="item"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(v.name)}</b><small><span class="mono">${esc(v.plate)}</span> · ${v.nearby ? 'près de l\'atelier' : 'absent'}</small></div>${v.hasKey === true ? chip('Clé possédée', 'ok') : v.hasKey === false ? chip('Sans clé', 'warn') : ''}
-      <span class="price">${money(d.price)}</span><button class="primary sm" data-a="make" data-v="${esc(v.plate)}" ${v.canMake ? '' : 'disabled'}>Refaire la clé</button></div>`).join('');
-    $root.innerHTML = panel({ icon: 'key', title: d.label, sub: 'Duplicata de clés', cls: 'md',
-      body: `${payRow(d.payments, this.method)}${d.requireNearby ? '<div class="hint">Amène ton véhicule près de l\'atelier pour en refaire la clé.</div>' : ''}<div class="list">${rows || emptyState('key', 'Aucun véhicule', 'Tu ne possèdes aucun véhicule.')}</div>` });
-  }
-  async onA(el) {
-    const a = el.dataset.a;
-    if (a === 'pay') { this.method = el.dataset.v; return this.render(); }
-    if (a === 'make') { const r = await this.act('locksmith:make', this.d.eid, this.d.pi, el.dataset.v, this.method); if (r && r.ok) toast(`Clé refaite (${money(r.paid)})`, 'ok'); }
-  }
-})();
-
-/* ── Pôle emploi : jobs en libre accès + quêtes ── */
-const JobcenterPanel = new (class extends PanelBase {
-  init(d) { this.tab = d.mode === 'quests' ? 'quests' : 'jobs'; }
-  render() {
-    const d = this.d, st = d.stats;
-    const tabs = `<div class="seg">${d.mode !== 'quests' ? `<button class="${this.tab === 'jobs' ? 'active' : ''}" data-a="tab" data-v="jobs">${ic('users', 15)} Jobs disponibles</button>` : ''}
-      <button class="${this.tab === 'quests' ? 'active' : ''}" data-a="tab" data-v="quests" ${d.isSmall ? '' : 'disabled'}>${ic('list', 15)} Mes quêtes</button></div>`;
-    const cur = d.isSmall ? `<div class="card" style="display:flex;align-items:center;gap:12px"><div class="tile">${ic('check')}</div><div class="grow"><b style="display:block">Ton job : ${esc(d.currentLabel)}</b><small style="display:block">${esc(d.gradeLabel || '')}${st ? ` · ${st.done} quête${st.done > 1 ? 's' : ''} terminée${st.done > 1 ? 's' : ''}${st.next ? ` · prochain grade à ${st.next}` : ''}${st.bonus ? ` · bonus +${st.bonus}%` : ''}` : ''}</small></div>
-      <button class="sm" data-a="leave">${ic('logout', 15)} Quitter ce job</button></div>` : '';
-    let body;
-    if (this.tab === 'jobs') {
-      const rows = d.jobs.map(j => `<div class="item"><div class="tile">${ic(j.icon)}</div><div class="grow"><b>${esc(j.label)}</b><small>${esc(j.desc)}</small>
-        <small class="mono">${j.quests} quêtes · ${j.min}–${j.max} ${CUR} par quête</small></div>
-        ${j.current ? '<span class="price">Ton job</span>' : `<button class="primary sm" data-a="take" data-v="${esc(j.id)}">Prendre ce job</button>`}</div>`).join('');
-      body = `${cur}<div class="hint">Libre accès : un clic et tu es embauché. Tu peux quitter ton job à tout moment (ici ou dans le menu F6 → Quitter le métier).</div><div class="list">${rows}</div>`;
-    } else {
-      const rows = d.quests.map(q => `<div class="item"><div class="tile">${ic('flag')}</div><div class="grow"><b>${esc(q.label)}</b><small>${esc(q.desc)}</small><small class="mono">${q.steps} étapes · ${q.min}–${q.max} ${CUR}</small></div>
-        ${q.cooldownLeft > 0 ? `<span class="price">${q.cooldownLeft} s</span>` : `<button class="primary sm" data-a="quest" data-v="${esc(q.id)}" ${d.active ? 'disabled' : ''}>Lancer</button>`}</div>`).join('');
-      body = `${cur}${d.active ? `<div class="hint warn">Quête en cours : ${esc(d.active.label)} (étape ${d.active.idx}/${d.active.total}). <button class="sm" data-a="cancelq">Abandonner</button></div>` : ''}<div class="list">${rows || emptyState('flag', 'Aucune quête', 'Prends d\'abord un petit job.')}</div>`;
-    }
-    $root.innerHTML = panel({ icon: 'users', title: d.label, sub: d.mode !== 'quests' ? 'Pôle emploi — petits jobs en libre accès' : `Quêtes · ${d.currentLabel}`, cls: 'md', body: tabs + body });
-  }
-  async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'tab') { this.tab = v; return this.render(); }
-    if (a === 'take') {
-      const r = await this.act('jobcenter:take', this.d.eid || 0, this.d.pi || 0, v);
-      if (r && r.ok) { toast(`Embauché : ${(r.jobs.find(j => j.id === r.current) || {}).label || ''}`, 'ok'); r.eid = this.d.eid; r.pi = this.d.pi; r.mode = 'desk'; this.d = r; this.tab = 'quests'; this.render(); }
-    }
-    if (a === 'leave') {
-      const r = await this.act('jobcenter:leave');
-      if (r && r.ok) { toast('Tu as quitté ton job', 'ok'); const i = await this.act('jobcenter:info', this.d.eid || 0, this.d.pi || 0); if (i && i.ok) { i.eid = this.d.eid; i.pi = this.d.pi; i.mode = this.d.mode; this.d = i; this.tab = 'jobs'; if (this.d.mode === 'quests') return rpc('close'); this.render(); } }
-    }
-    if (a === 'quest') { const r = await this.act('jcStart', v); if (r && r.ok) $root.classList.add('hidden'); }
-    if (a === 'cancelq') { await this.act('jcCancel'); const i = await this.act('jobcenter:info', this.d.eid || 0, this.d.pi || 0); if (i && i.ok) { i.eid = this.d.eid; i.pi = this.d.pi; i.mode = this.d.mode; this.d = i; this.render(); } }
-  }
-})();
-
-/* ── Station de lavage ── */
-const CarwashPanel = new (class extends PanelBase {
-  render() {
-    const d = this.d;
-    const rows = d.programs.map(g => `<div class="item"><div class="tile">${ic('drop')}</div><div class="grow"><b>${esc(g.label)}</b><small>${g.seconds} secondes</small></div><span class="price">${money(g.price)}</span><button class="primary sm" data-a="wash" data-v="${g.i}">Laver</button></div>`).join('');
-    $root.innerHTML = panel({ icon: 'drop', title: d.label, sub: d.vehicle, cls: 'md',
-      body: `<div class="card"><div class="mini"><span>Saleté du véhicule</span><div class="bar"><i style="width:${d.dirt}%"></i></div><b>${d.dirt}%</b></div></div>${payRow(d.payments, this.method)}<div class="list">${rows || emptyState('drop', 'Aucun programme', 'Cette station ne propose aucun lavage.')}</div>` });
-  }
-  async onA(el) {
-    const a = el.dataset.a;
-    if (a === 'pay') { this.method = el.dataset.v; return this.render(); }
-    if (a === 'wash') { const r = await this.act('carwash:start', Number(el.dataset.v), this.method); if (r && r.ok) $root.classList.add('hidden'); }
-  }
-})();
-
-/* ── Auto-école ── */
-const DrivingPanel = new (class extends PanelBase {
-  init() { this.view = 'list'; this.quiz = null; this.result = null; }
-  render() {
-    if (this.view === 'quiz') return this.renderQuiz();
-    if (this.view === 'result') return this.renderResult();
-    const d = this.d;
-    const cards = d.licenses.map(l => `<div class="card"><div class="card-h"><div class="t">${ic('key', 17)} ${esc(l.label)}</div>${l.owned ? chip('Obtenu', 'ok') : l.lock ? chip('Verrouillé', 'warn') : l.theory && l.theory.done ? chip('Code réussi', 'info') : chip('Disponible', 'mute')}</div>
-        ${l.lock ? `<div class="hint warn">${esc(l.lock)}</div>` : ''}
-        <div class="row wrap">${l.theory ? `<button class="primary" data-a="theory" data-v="${esc(l.id)}" ${l.canTheory ? '' : 'disabled'}>Passer le code · ${money(l.theory.price)}</button>` : ''}
-        ${l.practical ? `<button class="primary" data-a="practical" data-v="${esc(l.id)}" ${l.canPractical ? '' : 'disabled'}>Passer la conduite · ${money(l.practical.price)}</button>` : ''}</div>
-        <div class="hint mt-s">${[l.theory ? `Code : ${l.theory.count} questions, ${l.theory.passPercent}% requis` : '', l.practical ? `Conduite : limite ${l.practical.speedLimit} km/h, ${l.practical.maxFaults} faute(s) max` : ''].filter(Boolean).join(' · ')}</div></div>`).join('');
-    $root.innerHTML = panel({ icon: 'book', title: d.label, sub: 'Passe tes permis', cls: 'md', body: `${payRow(d.payments, this.method)}${cards || emptyState('book', 'Aucun permis', 'Cette auto-école ne propose aucun permis.')}` });
-  }
-  renderQuiz() {
-    const q = this.quiz, cur = q.questions[q.i];
-    $root.innerHTML = panel({ icon: 'book', title: q.label, sub: `Question ${q.i + 1} / ${q.questions.length}`, cls: 'md',
-      body: `<div class="segs">${q.questions.map((_, k) => `<i class="${k <= q.i ? 'on' : ''}"></i>`).join('')}</div><div class="card"><b style="font-size:16px;line-height:1.4">${esc(cur.q)}</b></div>
-        ${cur.answers.map((a, k) => `<button class="wide" style="justify-content:flex-start;height:auto;min-height:42px;padding:10px 14px;white-space:normal;text-align:left" data-a="answer" data-v="${k + 1}">${k + 1}. ${esc(a)}</button>`).join('')}` });
-  }
-  renderResult() {
-    const r = this.result;
-    $root.innerHTML = panel({ icon: 'book', title: r.passed ? 'Code réussi !' : 'Code raté', sub: `${r.right} / ${r.total} bonnes réponses (${r.percent}%) — ${r.need}% requis`, cls: '',
-      body: `<div class="card" style="text-align:center"><div class="big">${r.percent}%</div>${r.passed ? chip(r.granted ? 'Permis délivré' : r.practical ? 'Tu peux passer la conduite' : 'Réussi', 'ok') : chip('Échec', 'bad')}</div><button class="primary" data-a="back">Retour</button>` });
-  }
-  async onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'pay') { this.method = v; return this.render(); }
-    if (a === 'back') { this.view = 'list'; const r = await rpc('driving:info'); if (r && r.ok) Object.assign(this.d, r); return this.render(); }
-    if (a === 'theory') {
-      const r = await this.act('driving:theoryStart', this.d.eid, this.d.pi, v, this.method);
-      if (r && r.ok) { this.quiz = { questions: r.questions, i: 0, answers: [], label: r.label }; this.view = 'quiz'; this.render(); }
-    }
-    if (a === 'answer') {
-      const q = this.quiz; q.answers.push(Number(v)); q.i++;
-      if (q.i < q.questions.length) return this.render();
-      const r = await this.act('driving:theorySubmit', q.answers);
-      if (r && r.ok) { this.result = r; this.view = 'result'; this.render(); }
-    }
-    if (a === 'practical') { const r = await this.act('driving:practicalStart', v, this.method); if (r && r.ok) $root.classList.add('hidden'); }
-  }
-})();
-
-/* ── Banque ── */
-const BankPanel = new (class extends PanelBase {
-  init() { this.amount = 100; this.target = ''; }
-  render() {
-    const d = this.d, f = d.fees, atm = d.kind === 'atm';
-    const note = (l, p) => p > 0 ? `${l} ${p}%` : '';
-    $root.innerHTML = panel({ icon: atm ? 'card' : 'dollar', title: d.label, sub: atm ? 'Distributeur' : 'Guichet', cls: 'md',
-      body: `<div class="grid2"><div class="card" style="text-align:center"><div class="eyebrow" style="justify-content:center">Espèces</div><div class="big" style="font-size:30px;margin:8px 0">${money(d.money)}</div></div>
-        <div class="card" style="text-align:center"><div class="eyebrow" style="justify-content:center">Compte bancaire</div><div class="big" style="font-size:30px;margin:8px 0">${money(d.bank)}</div></div></div>
-        <label class="f"><span>Montant</span><input type="number" min="1" data-path="amount" value="${this.amount}"></label>
-        <div class="row wrap">${[100, 500, 1000, 5000].map(n => `<button class="sm" data-a="amt" data-v="${n}">${money(n)}</button>`).join('')}<button class="sm" data-a="amt" data-v="bank">Tout le compte</button>${d.canDeposit ? '<button class="sm" data-a="amt" data-v="cash">Toutes les espèces</button>' : ''}</div>
-        <div class="row"><button class="primary grow-i" data-a="withdraw">Retirer</button>${d.canDeposit ? '<button class="primary grow-i" data-a="deposit">Déposer</button>' : ''}</div>
-        <div class="hint">${[note('Frais de retrait', f.withdraw), d.canDeposit ? note('Frais de dépôt', f.deposit) : '', note('Frais de virement', f.transfer), d.max ? `Max par opération : ${money(d.max)}` : '', d.left >= 0 ? `Retrait restant aujourd'hui : ${money(d.left)}` : ''].filter(Boolean).join(' · ') || 'Aucun frais.'}</div>
-        <div class="card"><div class="card-h"><div class="t">${ic('users', 17)} Virement</div></div><div class="row"><input type="number" min="1" placeholder="ID du joueur" data-path="target" value="${esc(this.target)}" style="width:150px"><button class="grow-i" data-a="transfer">Virer le montant ci-dessus</button></div></div>` });
-  }
-  async run(name, ...a) {
-    const r = await this.act(name, this.d.eid, this.d.pi, ...a);
-    if (r && r.ok) { Object.assign(this.d, r); toast('Opération effectuée', 'ok'); this.render(); }
-  }
-  onA(el) {
-    const a = el.dataset.a, v = el.dataset.v;
-    if (a === 'amt') { this.amount = v === 'bank' ? this.d.bank : v === 'cash' ? this.d.money : Number(v); return this.render(); }
-    if (a === 'withdraw') return this.run('bank:withdraw', this.amount);
-    if (a === 'deposit') return this.run('bank:deposit', this.amount);
-    if (a === 'transfer') return this.run('bank:transfer', this.amount, this.target);
-  }
-})();
-
-const Panels = { jobcenter: JobcenterPanel, pvp: PvpPanel, chase: ChasePanel, carlot: CarlotPanel, locksmith: LocksmithPanel, carwash: CarwashPanel, driving: DrivingPanel, bank: BankPanel, garage: GaragePanel, impound: ImpoundPanel, rental: RentalPanel, fuel: FuelPanel, lab: LabPanel, dealer: DealerPanel, launder: LaunderPanel };
+const Panels = { jobcenter: JobcenterPanel, pvp: PvpPanel, chase: ChasePanel, carlot: CarlotPanel, locksmith: LocksmithPanel, carwash: CarwashPanel, driving: DrivingPanel, bank: BankPanel, garage: GaragePanel, impound: ImpoundPanel, rental: RentalPanel, fuel: FuelPanel };
 Object.values(Panels).forEach(p => { const open = p.open.bind(p); p.open = d => { window.__img = d.imagePath === undefined ? window.__img : d.imagePath; window.__cur = d.currency || window.__cur; open(d); }; });
 
 /* ════════════════════════════ BUILDER (admin) ════════════════════════════ */
 const ACTION_LABEL = { create: 'Création', save: 'Modification', delete: 'Suppression', duplicate: 'Duplication', toggle: 'Statut', take: 'Sortie garage', store: 'Rangement', release: 'Fourrière', seize: 'Saisie',
-  rent: 'Location', return: 'Retour', fleet: 'Flotte', fuel: 'Plein', jerrycan: 'Jerricane', harvest: 'Récolte', process: 'Fabrication', sell: 'Vente', launder: 'Blanchiment',
-  rob_start: 'Braquage lancé', rob_loot: 'Butin', rob_end: 'Braquage terminé' };
+  rent: 'Location', return: 'Retour', fleet: 'Flotte', fuel: 'Plein', jerrycan: 'Jerricane', };
 const STAT_LABEL = { kills: 'Kills', matches: 'Parties jouées', listed: 'Annonces déposées', sold: 'Véhicules vendus', uses: 'Utilisations', keys: 'Clés faites', washes: 'Lavages effectués', exams: 'Examens passés', passed: 'Permis délivrés', deposits: 'Total déposé', withdrawn: 'Total retiré', transfers: 'Total viré', revenue: 'Revenus générés', rentals: 'Locations', liters: 'Litres vendus', tank: 'Cuve (L)', released: 'Véhicules rendus', seized: 'Véhicules saisis', harvested: 'Unités récoltées',
-  crafted: 'Lots fabriqués', sold: 'Unités vendues', laundered: 'Argent blanchi', attempts: 'Tentatives de braquage' };
+  };
 const SWATCHES = [[239, 68, 68], [249, 115, 22], [245, 158, 11], [34, 197, 94], [20, 184, 166], [59, 130, 246], [99, 102, 241], [168, 85, 247], [236, 72, 153], [244, 244, 245]];
 
 const KIND = {
@@ -897,25 +411,17 @@ const KIND = {
   wash: { label: 'Baie de lavage', icon: 'drop' },
   desk: { label: 'Accueil (inscriptions)', icon: 'user' }, spawn: { label: 'Départ du véhicule d\'examen', icon: 'car' }, checkpoint: { label: 'Point de passage (parcours)', icon: 'pin' },
   counter: { label: 'Guichet (agent)', icon: 'user' }, atm: { label: 'Distributeur (ATM)', icon: 'card' },
-  harvest: { label: 'Récolte', icon: 'leaf' }, process: { label: 'Laboratoire / traitement', icon: 'flask' }, sell: { label: 'Vente (dealer)', icon: 'dollar' },
-  launder: { label: 'Blanchiment', icon: 'card' }, door: { label: 'Porte (entrée / sortie)', icon: 'lock' },
-  clerk: { label: 'Vendeur (cible « en joue »)', icon: 'user' }, start: { label: 'Point de départ', icon: 'pin' }, register: { label: 'Caisse', icon: 'cart' },
-  safe: { label: 'Coffre', icon: 'lock' }, vault: { label: 'Coffre-fort', icon: 'shield' }, loot: { label: 'Butin (vitrines…)', icon: 'gift' }, guard: { label: 'Garde armé', icon: 'target' },
 };
-const KIND_ORDER = { drug: ['harvest', 'process', 'sell', 'launder', 'door'], robbery: ['clerk', 'start', 'register', 'safe', 'vault', 'loot', 'guard'], garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
-const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', drug: 'point', robbery: 'cible' };
-const PED_KINDS = new Set(['main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby', 'harvest', 'process', 'sell', 'launder', 'door', 'clerk']);
-const NO_BLIP = new Set(['map', 'slot', 'spawn', 'checkpoint', 'register', 'safe', 'vault', 'loot', 'guard']);
-const NO_MARKER = new Set(['zone', 'map', 'clerk', 'guard', 'spawn', 'checkpoint']);
-const TARGET_KINDS = new Set(['register', 'safe', 'vault', 'loot']);
+const KIND_ORDER = { garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
+const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone' };
+const PED_KINDS = new Set(['main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby']);
+const NO_BLIP = new Set(['map', 'slot', 'spawn', 'checkpoint']);
+const NO_MARKER = new Set(['zone', 'map', 'spawn', 'checkpoint']);
 
 const PED0 = () => ({ enabled: false, model: '', scenario: 'WORLD_HUMAN_STAND_IMPATIENT' });
 const ACC0 = () => ({ jobs: {}, item: '' });
 const TOOL0 = () => ({ item: '', consume: false });
 const NEWROW = {
-  stack: () => ({ item: '', count: 1 }),
-  sellitem: () => ({ item: '', min: 50, max: 100 }),
-  loot: () => ({ item: '', min: 1, max: 1, chance: 100 }),
   fleet: () => ({ model: '', label: '', minGrade: 0, price: 0, deposit: 0 }),
   pweapon: () => ({ name: '', ammo: 250 }),
   cvehicle: () => ({ model: '', label: '', category: 'Sportive', speed: 70, accel: 70, handling: 70 }),
@@ -925,7 +431,6 @@ const NEWROW = {
   jcloc: () => ({ label: 'Nouveau lieu', x: 0, y: 0, z: 0, h: 0 }),
   license: () => ({ id: '', label: 'Nouveau permis', requires: '', theoryPrice: 200, practicalPrice: 500, theory: { enabled: true, count: 10, passPercent: 80, questions: [] }, practical: { enabled: true, model: 'blista', speedLimit: 80, maxFaults: 5 } }),
   question: () => ({ q: '', answers: ['', '', '', ''], correct: 1 }),
-  recipe: () => ({ label: 'Nouvelle recette', inputs: [{ item: '', count: 1 }], outputs: [{ item: '', count: 1 }], time: 8, anim: 'repair', failChance: 0, tool: TOOL0() }),
 };
 const NEWP = {
   main: () => ({ kind: 'main', label: '', blip: true, ped: PED0(), spawns: [] }),
@@ -943,16 +448,7 @@ const NEWP = {
   counter: () => ({ kind: 'counter', label: 'Guichet', blip: true, ped: { enabled: true, model: 'ig_bankman', scenario: 'WORLD_HUMAN_CLIPBOARD' } }),
   atm: () => ({ kind: 'atm', label: 'Distributeur', blip: false, ped: PED0() }),
   pump: () => ({ kind: 'pump', label: 'Pompe', blip: false, ped: PED0() }),
-  harvest: () => ({ kind: 'harvest', label: 'Point de récolte', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, harvest: { item: '', min: 1, max: 3, time: 6, anim: 'harvest', tool: TOOL0(), cooldown: 10, maxUses: 0, regen: 300 } }),
-  process: () => ({ kind: 'process', label: 'Laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, recipes: [NEWROW.recipe()] }),
-  sell: () => ({ kind: 'sell', label: 'Dealer', blip: false, ped: { enabled: true, model: 'g_m_y_mexgoon_01', scenario: 'WORLD_HUMAN_DRUG_DEALER' }, access: ACC0(), copsRequired: 0, alertChance: 5, sell: { currency: 'black_money', maxPerHour: 0, items: [NEWROW.sellitem()] } }),
-  launder: () => ({ kind: 'launder', label: 'Blanchiment', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, launder: { rate: 70, min: 500, max: 50000, from: 'black_money', to: 'money', maxPerHour: 0 } }),
-  door: () => ({ kind: 'door', label: 'Entrée du laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0 }),
-  clerk: () => ({ kind: 'clerk', label: 'Vendeur', blip: false, ped: { enabled: true, model: 'mp_m_shopkeep_01', scenario: 'WORLD_HUMAN_STAND_IMPATIENT' } }),
-  start: () => ({ kind: 'start', label: 'Point de départ', blip: false }),
-  guard: () => ({ kind: 'guard', label: 'Garde', blip: false }),
 };
-['register', 'safe', 'vault', 'loot'].forEach(k => { NEWP[k] = () => ({ kind: k, label: KIND[k].label, blip: false, time: 12, anim: k === 'safe' ? 'safe' : k === 'register' ? 'till' : k === 'vault' ? 'drill' : 'pickup', minigame: false, tool: TOOL0(), cash: { min: 0, max: 0 }, items: [] }); });
 
 const Builder = {
   cat: null, list: [], cur: null, view: 'home', tab: 'general', dirty: false, sel: 0, newType: 'garage', newTpl: null, newLabel: '',
@@ -1070,7 +566,6 @@ const Builder = {
   /* ── Édition d'un module ── */
   tabs() {
     const t = this.cur.type, out = [['general', 'Général', 'sliders']];
-    if (t === 'robbery') out.push(['rules', 'Règles', 'target']);
     if (t === 'garage') out.push(['vehicles', 'Véhicules', 'car']);
     if (t === 'impound') out.push(['rules', 'Tarifs & droits', 'dollar']);
     if (t === 'rental') out.push(['fleet', 'Flotte', 'key']);
@@ -1083,7 +578,7 @@ const Builder = {
     if (t === 'carlot') out.push(['sale', 'Règles de vente', 'dollar']);
     if (t === 'chase') out.push(['rules', 'Règles & récompenses', 'target'], ['cars', 'Véhicules', 'car']);
     if (t === 'pvp') out.push(['rules', 'Réglages', 'dollar']);
-    out.push(['points', t === 'robbery' ? 'Cibles & points' : t === 'drug' ? 'Points' : 'Emplacements', 'pin']);
+    out.push(['points', 'Emplacements', 'pin']);
     if (t !== 'doorlock') out.push(['access', 'Accès', 'users']);   // portes : les accès se règlent sur chaque porte (Emplacements)
     out.push(['stats', 'Stats & journal', 'chart']);
     return out;
@@ -1236,18 +731,7 @@ const Builder = {
         <div class="mt">${this.payChecks('settings.payments')}</div><div class="mt">${this.fItem('Compte société crédité', 'settings.society')}</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('shield', 17)} Qui peut mettre un véhicule en fourrière ?</div></div>${this.jobsEditor('settings.impoundJobs', 'Métiers autorisés (police, dépanneur…)')}
         <div class="hint mt-s">Ces métiers voient un formulaire « Mise en fourrière » (raison + frais) au point de la fourrière. Les frais saisis remplacent le tarif de base.</div></div>`;
-    return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Déclenchement & conditions</div></div>
-        <div class="grid3">${this.fSel('Déclenchement', 'settings.trigger', [['aim', 'Viser le vendeur avec une arme'], ['interact', 'Touche E sur un point de départ']], { r: 1 })}${this.fN('Policiers requis', 'settings.copsRequired', { min: 0, max: 30 })}${this.fN('Cooldown (secondes)', 'settings.cooldown', { min: 0 })}
-        ${this.fN('Durée max (secondes)', 'settings.duration', { min: 30 })}${this.fN('Distance max (m) avant annulation', 'settings.leaveDistance', { min: 5 })}${this.fSel('Butin versé en', 'settings.currency', [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}</div>
-        <div class="row wrap mt" style="gap:22px">${this.fC('Arme obligatoire en main', 'settings.weapon')}${this.fC('Braquage à plusieurs (coopératif)', 'settings.coop')}</div></div>
-      <div class="card"><div class="card-h"><div class="t">${ic('lock', 17)} Matériel requis</div></div>
-        <div class="grid3">${this.fItem('Item requis (vide = aucun)', 'settings.requireItem.item')}${this.fN('Quantité', 'settings.requireItem.count', { min: 1 })}<div style="align-self:end">${this.fC('Consommé au lancement', 'settings.requireItem.consume')}</div></div></div>
-      <div class="card"><div class="card-h"><div class="t">${ic('shield', 17)} Alerte police</div></div>
-        <div class="grid2">${this.fN('Chance d\'alerte (%)', 'settings.alert.chance', { min: 0, max: 100 })}${this.fS('Message', 'settings.alert.label', { max: 80 })}</div>
-        <div class="hint mt-s">Utilise <code>Config.AlertHook</code> pour brancher ps-dispatch / cd_dispatch.</div></div>
-      <div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Gardes armés</div>${this.fC('Activer', 'settings.guards.enabled')}</div>
-        <div class="grid3">${this.fS('Modèle de PNJ', 'settings.guards.model', { max: 60 })}${this.fS('Arme', 'settings.guards.weapon', { max: 40 })}${this.fN('Nombre', 'settings.guards.count', { min: 0, max: 10 })}${this.fN('Précision (%)', 'settings.guards.accuracy', { min: 0, max: 100 })}${this.fN('Vie', 'settings.guards.health', { min: 100, max: 1000 })}</div>
-        <div class="hint mt-s">Les gardes apparaissent aux points « Garde armé » (onglet Cibles & points) quand le braquage démarre.</div></div>`;
+    return '';
   },
 
   tabCars() {
@@ -1401,16 +885,12 @@ const Builder = {
     if (c.type === 'garage') h += this.optCoord('Point de rangement séparé', `${base}.store`, 'Par défaut, on range au même endroit') + this.spawnsEditor(base);
     if (c.type === 'impound') h += this.spawnsEditor(base);
     if (c.type === 'rental') h += this.spawnsEditor(base) + this.optCoord('Point de retour séparé', `${base}.ret`, 'Par défaut, on rend au même endroit');
-    if (k === 'door') h += this.optCoord('Intérieur (téléportation)', `${base}.inside`, 'Position à l\'intérieur du laboratoire');
     h += '</div>';
     if (k === 'map') h += `<div class="card"><div class="card-h"><div class="t">${ic('map', 17)} Carte</div></div>${this.fS('Description (affichée dans le menu)', `${base}.desc`, { max: 160 })}<div class="hint mt-s">La position ci-dessus identifie la carte. Sans réglage ci-dessous, le fugitif part de cette position (le cap compte) et les poursuivants sont placés automatiquement derrière lui.</div>
       ${this.optCoord('Départ du fugitif (position de la voiture)', `${base}.runner`, 'Place-toi à l\'endroit voulu, orienté dans le sens du départ')}
       ${this.spawnsEditor(base, 'Départs des poursuivants (1 par poursuivant, dans l\'ordre)', 'Aucun point : les poursuivants sont placés automatiquement derrière le fugitif. Sinon, ajoute autant de points que de poursuivants max (ils réutilisent les points s\'il y en a moins).')}</div>`;
-    if (c.type === 'drug') h += this.drugAccess(base) + this.drugKind(base, p);
     if (c.type === 'doorlock') h += this.doorCard(base, p);
     if (c.type === 'pvp' && k === 'zone') h += this.zoneCard(base, p);
-    if (TARGET_KINDS.has(k)) h += this.targetEditor(base, p);
-    if (k === 'clerk' && !(p.ped && p.ped.enabled)) h += `<div class="hint warn" style="margin-bottom:12px">Le vendeur est la cible du braquage « en joue » : coche « Afficher un PNJ » ci-dessous.</div>`;
     if (!NO_MARKER.has(k)) h += this.markerCard(base, p);
     if (PED_KINDS.has(k)) h += this.pedCard(base);
     return h;
@@ -1422,7 +902,7 @@ const Builder = {
   },
 
   markerCard(base, p) {
-    const sec = p.store || p.ret || (p.kind === 'door' && p.inside);
+    const sec = p.store || p.ret;
     return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Couleur des markers</div></div><div class="grid2">${this.colorField('Marker principal', `${base}.color`, this.v('settings.color') || [64, 224, 208])}${sec ? this.colorField('Marker secondaire (rangement / retour / sortie)', `${base}.color2`, [255, 140, 60]) : ''}</div>
       <div class="hint mt-s">Par défaut, la couleur générale du module (onglet Général) est utilisée.</div></div>`;
   },
@@ -1459,49 +939,6 @@ const Builder = {
       <div class="card-h" style="margin-top:12px"><div class="t">${ic('chat', 17)} Dialogue du PNJ</div>${this.fC('Activer', `${base}.ped.dialog.enabled`, { r: 1 })}</div>
       ${this.v(`${base}.ped.dialog.enabled`) ? `${this.fS('Texte du PNJ (vide = texte par défaut du service)', `${base}.ped.dialog.text`, { max: 220, ph: 'Bonjour, que puis-je faire pour vous ?' })}<div class="hint">Le PNJ se tourne vers le joueur et écrit ce message avec deux boutons : Accepter ouvre le service, Refuser le ferme.</div>` : '<div class="hint">Désactivé : le service s\'ouvre directement.</div>'}
       ${this.optCoord('Position du PNJ séparée', `${base}.ped.pos`, 'Par défaut, à côté du marker')}` : '<div class="hint">Aucun PNJ affiché.</div>'}</div>`;
-  },
-
-  drugAccess(base) {
-    return `<div class="card"><div class="card-h"><div class="t">${ic('lock', 17)} Conditions</div></div>
-      <div class="grid2">${this.fN('Policiers requis (en plus du réglage global)', `${base}.copsRequired`, { min: 0, max: 30 })}${this.fN('Chance d\'alerter la police (%)', `${base}.alertChance`, { min: 0, max: 100 })}</div>
-      <div class="mt">${this.fItem('Item « clé » requis (non consommé)', `${base}.access.item`)}</div><div class="mt">${this.jobsEditor(`${base}.access.jobs`, 'Réservé à certains métiers / gangs (vide = tous)')}</div></div>`;
-  },
-
-  toolFields(base) { return `${this.fItem('Outil requis (vide = aucun)', `${base}.tool.item`)}<div style="align-self:end">${this.fC('Consommé', `${base}.tool.consume`)}</div>`; },
-
-  drugKind(base, p) {
-    const k = p.kind;
-    if (k === 'harvest') return `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
-      <div class="grid3">${this.fItem('Item récolté', `${base}.harvest.item`)}${this.fN('Quantité min', `${base}.harvest.min`, { min: 1 })}${this.fN('Quantité max', `${base}.harvest.max`, { min: 1 })}
-      ${this.fN('Durée (secondes)', `${base}.harvest.time`, { min: 1 })}${this.animSel('Animation', `${base}.harvest.anim`)}${this.fN('Délai entre deux récoltes (s)', `${base}.harvest.cooldown`, { min: 0 })}
-      ${this.fN('Récoltes avant épuisement (0 = ∞)', `${base}.harvest.maxUses`, { min: 0 })}${this.fN('Repousse (secondes)', `${base}.harvest.regen`, { min: 10 })}</div>
-      <div class="grid2 mt">${this.toolFields(`${base}.harvest`)}</div></div>`;
-    if (k === 'process') return `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
-      ${(p.recipes || []).map((r, j) => this.recipeEditor(`${base}.recipes.${j}`, r, j)).join('') || '<div class="hint">Aucune recette.</div>'}</div>`;
-    if (k === 'sell') return `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
-      <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
-      <div class="mt">${this.listEditor(`${base}.sell.items`, [{ key: 'item', label: 'Item acheté', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Prix min', kind: 'num', w: '110px' }, { key: 'max', label: 'Prix max', kind: 'num', w: '110px' }], 'sellitem', 'Ajouter un item')}</div>
-      <div class="hint mt-s">Le prix unitaire est tiré au hasard entre min et max à chaque vente.</div></div>`;
-    if (k === 'launder') return `<div class="card"><div class="card-h"><div class="t">${ic('card', 17)} Blanchiment</div></div>
-      <div class="grid3">${this.fN('Taux reversé (%)', `${base}.launder.rate`, { min: 1, max: 100 })}${this.fN('Montant min', `${base}.launder.min`, { min: 0 })}${this.fN('Montant max (0 = aucun)', `${base}.launder.max`, { min: 0 })}
-      ${this.fS('Source (black_money / money / bank / item)', `${base}.launder.from`, { max: 64 })}${this.fSel('Versé en', `${base}.launder.to`, [['money', 'Espèces'], ['bank', 'Banque'], ['black_money', 'Argent sale']])}${this.fN('Limite par heure (0 = aucune)', `${base}.launder.maxPerHour`, { min: 0 })}</div></div>`;
-    return '';
-  },
-
-  recipeEditor(path, r, j) {
-    const open = this.rows[path] !== false;
-    return `<div class="rcp"><div class="row"><b class="grow-i">${esc(r.label || 'Recette ' + (j + 1))}</b><button class="sm" data-a="toggleRow" data-v="${path}">${open ? 'Replier' : 'Déplier'}</button><button class="icon danger" data-a="rowDel" data-v="${path.replace(/\.\d+$/, '')}|${j}">${ic('trash', 14)}</button></div>
-      ${open ? `<div class="grid3 mt-s">${this.fS('Nom', `${path}.label`, { max: 60 })}${this.fN('Durée par lot (s)', `${path}.time`, { min: 1 })}${this.animSel('Animation', `${path}.anim`)}${this.fN('Chance de raté (%)', `${path}.failChance`, { min: 0, max: 100 })}${this.toolFields(path)}</div>
-      <div class="grid2 mt"><div><div class="lbl">Ingrédients</div>${this.listEditor(`${path}.inputs`, [{ key: 'item', label: 'Item', kind: 'item', w: '1.4fr' }, { key: 'count', label: 'Qté', kind: 'num', w: '70px', min: 1 }], 'stack', 'Ingrédient')}</div>
-      <div><div class="lbl">Produits</div>${this.listEditor(`${path}.outputs`, [{ key: 'item', label: 'Item', kind: 'item', w: '1.4fr' }, { key: 'count', label: 'Qté', kind: 'num', w: '70px', min: 1 }], 'stack', 'Produit')}</div></div>` : ''}</div>`;
-  },
-
-  targetEditor(base, p) {
-    return `<div class="card"><div class="card-h"><div class="t">${ic(KIND[p.kind].icon, 17)} Cible du braquage</div></div>
-      <div class="grid3">${this.fN('Durée (secondes)', `${base}.time`, { min: 1 })}${this.animSel('Animation', `${base}.anim`)}<div style="align-self:end">${this.fC('Mini-jeu (ox_lib)', `${base}.minigame`)}</div>
-      ${this.fN(`Butin min (${CUR})`, `${base}.cash.min`, { min: 0 })}${this.fN(`Butin max (${CUR})`, `${base}.cash.max`, { min: 0 })}</div>
-      <div class="grid2 mt">${this.toolFields(base)}</div>
-      <div class="lbl" style="margin-top:14px">Items en butin</div>${this.listEditor(`${base}.items`, [{ key: 'item', label: 'Item', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Min', kind: 'num', w: '70px', min: 1 }, { key: 'max', label: 'Max', kind: 'num', w: '70px', min: 1 }, { key: 'chance', label: 'Chance %', kind: 'num', w: '90px', min: 1, max: 100 }], 'loot', 'Ajouter un item')}</div>`;
   },
 
   /* ── Actions ── */

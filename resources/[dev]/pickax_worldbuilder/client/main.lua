@@ -1,8 +1,8 @@
 ESX = exports['es_extended']:getSharedObject()
 
 State = { entities = {}, config = {} }
-Handlers = {}          -- Handlers[type](node) : appelé quand le joueur interagit avec un point (modules garage.lua, drugs.lua...)
-NodeFilter = {}        -- NodeFilter[type](node) → bool : visibilité d'un point (braquages : seulement pendant l'action)
+Handlers = {}          -- Handlers[type](node) : appelé quand le joueur interagit avec un point (modules garage.lua, rental.lua...)
+NodeFilter = {}        -- NodeFilter[type](node) → bool : visibilité d'un point (ex : points visibles seulement dans certains états)
 NuiLocal, NuiRemote = {}, {}
 Busy = false           -- action chronométrée en cours
 
@@ -11,7 +11,7 @@ local blipHandles, peds, targetZones, Nodes = {}, {}, {}, {}
 Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 
 -- ─────────────────────────────── Utilitaires ───────────────────────────────
--- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
+-- Logo selon le module ouvert (garage, fourrière, banque…) ; sinon logo « monde »
 local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano', jobcenter = 'world',
     bank = 'bank', driving = 'school', doorlock = 'world', pvp = 'gang', chase = 'police' }
 local LastType = nil   -- dernier module utilisé (logo des notifications hors panneau)

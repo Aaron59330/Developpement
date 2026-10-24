@@ -5,7 +5,7 @@ WB = {
     ByName = {},     -- [name] = id
     Dirty = {},      -- [id] = true : stats à écrire en base
     State = {},      -- cooldowns persistants [clé] = timestamp de fin
-    Pending = {},    -- [src] = action en cours (récolte, fabrication, braquage...)
+    Pending = {},    -- [src] = action en cours (plein, parcours...)
     Counters = {},   -- compteurs horaires [clé] = { n, since }
     ready = false,
 }

@@ -8,7 +8,6 @@ Crée **en jeu** (sans toucher au code ni redémarrer) :
 | **Fourrières** | Récupération payante (frais de base + par jour + plafond), **mise en fourrière par un métier** (raison + frais), véhicules « perdus » récupérables, société créditée, export serveur `ImpoundVehicle` |
 | **Locations** | Flotte louable (prix, **caution**, durée max), caution rendue au retour (réduite selon les dégâts), point de retour séparé, expiration automatique |
 | **Stations essence** | Pompes illimitées, prix au litre, **cuve** avec stock et réapprovisionnement, plein avec animation, vente de **jerricanes**, société créditée |
-| **Drogues** | Filières complètes : **récolte** (épuisement/repousse, outil, cooldown), **laboratoires** (recettes multi-ingrédients, lots, chance de raté, outil), **portes/intérieurs** (téléportation), **vente dealer** (prix aléatoires, limite horaire), **blanchiment** (taux, limites) — alertes police, policiers requis, accès par métier/gang/item clé |
 | **Banques** | Agences (guichets avec agent) et distributeurs : dépôt, retrait, virement entre joueurs, frais en %, limites par opération et par jour, société créditée |
 | **Auto-écoles** | Permis configurables (code, moto, camion…) : **code de la route en QCM** (banque de questions, tirage au sort, % de réussite) puis **conduite sur parcours** (points de passage, limite de vitesse, fautes max, véhicule d'examen), prix, permis prérequis, délai avant de repasser ; compatible esx_license (sinon table interne) |
 | **Stations de lavage** | Baies de lavage avec programmes payants (nom, prix, durée), véhicule immobilisé pendant le lavage puis nettoyé, société créditée |
@@ -18,7 +17,6 @@ Crée **en jeu** (sans toucher au code ni redémarrer) :
 | **Courses poursuites** | Intégration de *pickax_chase* : lobbies multijoueurs fugitif / poursuivants, choix du véhicule (stats), partie isolée (routing bucket), compte à rebours, avance du fugitif, détection de contact **100 % serveur**, HUD, récompenses, classement ; PNJ d'accueil, cartes et véhicules gérés dans l'éditeur |
 | **Zones PVP** | Intégration de *pickax_pvp* : zones de combat (rayon, couleur, murs visibles), **armes données à l'entrée et retirées à la sortie** (natif ou ox_inventory), revive automatique avec réapparition sur spawns, invincibilité, munitions infinies, soin au kill, récompense par kill, kill-feed, HUD, classement |
 | **Pôles emploi** | Guichet avec PNJ : menu de **petits jobs en libre accès** (jardinier, bricoleur, électricien, plombier, déménageur, laveur de vitres, ouvrier de chantier, coursier). Un clic = `setJob` automatique ; les jobs, leurs 3 grades et leur fiche jobbuilder sont **créés tout seuls dans la base** dès qu'un module Pôle emploi est enregistré (`/wbjobs` pour forcer). Chaque job a 3 **quêtes** (aller sur place, travailler avec une animation, être payé), promotion automatique par grade, gains selon le grade ; lancement depuis le guichet ou depuis **F6 → Mes quêtes**, départ du job depuis F6 → Quitter le métier. **Tout est modifiable dans le builder** (module Pôle emploi → onglet *Jobs & quêtes* : « Personnaliser », puis chaque job, ses grades/salaires, ses quêtes — nom, description, animation, durée, gains, textes — et les lieux des quêtes). L'embauche se fait **uniquement au marker du guichet** ; F6 sert à quitter le job et à voir « Mes quêtes ». Réglages : `Config.JobCenter` |
-| **Braquages** | Supérettes, magasins d'alcool, stations, banques, bijouteries ou **tout ce que tu inventes** : déclenchement « en joue » sur le vendeur *ou* touche E, caisses / coffres / coffre-fort / butin, mini-jeux (ox_lib), outils requis, policiers requis, cooldown persistant, alerte police, gardes armés, mode coopératif, butin cash + items avec probabilités |
 
 Interface au même style que le Shop Builder, réservée aux groupes ESX (`_dev`, `admin`, `superadmin`), **droits vérifiés côté serveur à chaque action**.
 
@@ -37,7 +35,7 @@ Interface au même style que le Shop Builder, réservée aux groupes ESX (`_dev`
 5. En jeu : `/worldbuilder`.
 
 ## Créer un module en 1 minute
-1. `/worldbuilder` → **Nouveau module** → choisis le type (garage, fourrière, location, station, drogue, braquage) puis un **modèle** (ex : *Supérette 24/7*, *Cannabis*, *Banque*…).
+1. `/worldbuilder` → **Nouveau module** → choisis le type (garage, fourrière, location, station, banque…) puis un **modèle** (ex : *Supérette 24/7*, *Cannabis*, *Banque*…).
 2. Onglet **Points / Emplacements** → **Mode placement** : marche librement, `Entrée` enregistre ta position pour la cible suivante, `←/→` change de cible, `Retour` revient au menu. Pour un garage, ajoute aussi ses **places de sortie**.
 3. Ajuste les réglages (onglets Règles / Véhicules / Flotte / Station…). Les items inconnus de ton serveur sont signalés par un avertissement.
 4. Onglet **Général** → coche **Module actif** → **Enregistrer**. Visible immédiatement pour tous.
@@ -83,3 +81,5 @@ Arrête `pickax_pvp` avant de lancer `worldbuilder`. Le module **Zones PVP** (mo
 
 ## Pré-placement automatique
 Au premier démarrage, **27 stations essence** (une cuve par station) et **8 agences bancaires** sont créées et activées, une seule fois. `Config.Preset` pour modifier, `/wbseed` (admin) pour recréer ce qui manque.
+
+> Drogues, braquages et Go Fast sont maintenant dans **pickax_illegalbuilder** (`/illegalbuilder`).

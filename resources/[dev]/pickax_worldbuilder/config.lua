@@ -37,12 +37,12 @@ Config.Dialog = {
 Config.Inventory   = 'auto'      -- 'auto' | 'ox' | 'esx'
 Config.Target      = 'none'      -- 'none' (marker + touche E) | 'ox_target' (zone cliquable, en plus du marker)
 Config.InteractKey = 38          -- E
-Config.CancelKey   = 73          -- X : annule une action en cours (récolte, fabrication, braquage...)
+Config.CancelKey   = 73          -- X : annule une action en cours (plein, parcours...)
 Config.Currency    = '$'
 Config.Webhook     = ''          -- webhook Discord (logs) — vide pour désactiver
 Config.ImagePath   = 'nui://ox_inventory/web/images/%s.png'   -- images des items (vide pour désactiver)
 
--- Métiers considérés comme « police » (comptage pour les braquages / drogues + alertes)
+-- Métiers considérés comme « police » (comptage + alertes)
 Config.PoliceJobs = { 'police', 'sheriff' }
 
 -- Limites (sécurité)
@@ -148,7 +148,7 @@ Config.PedScenarios = {
     { id = '',                            label = 'Aucune animation' },
 }
 
--- ─────────────────────────────── Animations des actions (récolte, fabrication, braquage...) ───────────────────────────────
+-- ─────────────────────────────── Animations des actions (plein, parcours...) ───────────────────────────────
 -- scenario = animation « scénario » GTA ; dict/clip = animation classique (en boucle pendant l'action)
 Config.Animations = {
     { id = 'none',     label = 'Aucune' },
