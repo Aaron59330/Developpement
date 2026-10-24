@@ -100,7 +100,7 @@ function MGC.begin(d)
     for _, o in ipairs(MGC.spawnProps({ props = d.props }, 'match')) do s.props[#s.props + 1] = o end
     local E = MGC.engines[s.engine]
     if E and E.prepare then E.prepare(s) end
-    SendNUIMessage({ action = 'begin', name = s.name, engine = s.engine, type = s.type, team = s.team, countdown = d.countdown })
+    SendNUIMessage({ action = 'begin', name = s.name, engine = s.engine, type = s.type, team = s.team, countdown = d.countdown, theme = d.uiColor })
     Wait(250)
     fade(false, 400)
 

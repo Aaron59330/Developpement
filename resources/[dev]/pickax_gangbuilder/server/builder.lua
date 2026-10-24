@@ -262,6 +262,9 @@ local function cleanGang(payload)
             capture_grade = int(settings.capture_grade, 0, maxGrade, 0),               -- grade min. pour participer à la capture des territoires
             salary_source = (settings.salary_source == 'treasury' or settings.salary_source == 'system') and settings.salary_source or 'default',
             sell_cut = int(settings.sell_cut, -1, 100, -1),                             -- part des ventes reversée au gang (-1 = défaut)
+            marker = cleanStyle(settings.marker),                                       -- style de marker propre à ce gang (champs vides = marker du serveur)
+            ui_accent = (type(settings.ui_accent) == 'table' and #settings.ui_accent == 3)
+                and { int(settings.ui_accent[1], 0, 255, 239), int(settings.ui_accent[2], 0, 255, 68), int(settings.ui_accent[3], 0, 255, 68) } or nil,   -- couleur des menus du gang
         },
         start_money = int(g.start_money, 0, 1000000000, Config.Treasury.StartMoney),
     }, grades, points

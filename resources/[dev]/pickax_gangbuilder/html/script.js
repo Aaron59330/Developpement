@@ -430,7 +430,7 @@ const Builder = {
 
   renderGang() {
     const c = this.cur, g = c.gang;
-    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip'], ['logs', 'Logs Discord']];
+    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['custom', 'Personnaliser'], ['logs', 'Logs Discord']];
     const acts = (!c.isNew ? `<select id="test-grade" style="width:140px">${c.grades.map((x, i) => `<option value="${i}">${esc(x.label)}</option>`).join('')}</select><button data-a="testGang">Me mettre dans ce gang</button><button data-a="leaveGang">Me retirer</button><button class="danger" data-a="deleteGang">${ic('trash', 15)}</button>` : '')
       + `<button class="primary" data-a="save" style="height:38px">${c.isNew ? 'Créer le gang' : 'Enregistrer'}</button>`;
     return {
@@ -499,12 +499,20 @@ const Builder = {
     return c.isNew ? `<div class="card"><p class="hint">Enregistre d'abord ce gang : ses logs Discord se règlent ensuite ici.</p></div>` : `<div class="dl-host" data-ref="${esc(c.gang.name)}"></div>`;
   },
 
-  tab_blip() {
-    const b = this.cur.gang.blip;
+  /* Onglet Personnaliser (commun à tous les builders) : blip · marker · couleur des menus */
+  tab_custom() {
+    const g = this.cur.gang, b = g.blip, s = g.settings, acc = s.ui_accent, hexOf = c => '#' + c.map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
     const status = b.enabled && !(b.coords && b.coords.x != null) ? chip('⚠ position manquante : le blip ne s\'affichera pas', 'bad nodot') : (b.enabled ? chip('Blip actif', 'ok') : chip('Désactivé', 'mute'));
-    return BBMap.blipCard({ base: 'gang.blip', b, title: 'Blip du gang sur la carte (QG)', labelHint: 'Par défaut : nom du gang', hint: status, defSprite: 310,
-      extra: `<p class="hint mt">La couleur du blip est aussi celle de la zone sur la carte quand le gang détient un territoire.</p><div class="mt">${coordField('gang.blip.coords', b.coords, { tp: true })}</div>` });
+    const cm = this.catalog.coreMarker || {};
+    return BBMap.customizeTab({ noun: 'de ce gang',
+      blip: BBMap.blipCard({ base: 'gang.blip', b, title: 'Blip du gang sur la carte (QG)', labelHint: 'Par défaut : nom du gang', hint: status, defSprite: 310,
+        extra: `<p class="hint mt">La couleur du blip est aussi celle de la zone sur la carte quand le gang détient un territoire.</p><div class="mt">${coordField('gang.blip.coords', b.coords, { tp: true })}</div>` }),
+      marker: BBMap.markerCard({ base: 'gang.settings.marker', m: s.marker || {}, typeKey: 'marker', withEnabled: false, inherit: { marker: cm.type ?? 23, alpha: cm.alpha ?? 150, scale: cm.scale || { x: 1, y: 1, z: 0.5 }, offset: -0.95 },
+        title: 'Markers des points de ce gang', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="gang.settings.marker.color" data-t="c" value="${hexOf((s.marker && s.marker.color) || cm.color || [253, 194, 125])}" style="width:60px"><span class="muted sm-t">${s.marker && s.marker.color ? 'personnalisée' : 'couleur du serveur'}</span>${s.marker && s.marker.color ? '<button class="sm" data-a="gangMkReset">Réinitialiser</button>' : ''}</div>`) }),
+      menu: `<div class="row"><input type="color" data-path="gang.settings.ui_accent" data-t="c" value="${hexOf(acc || (this.catalog.accent || [253, 194, 125]))}" style="width:60px"><span class="muted sm-t">${acc ? 'personnalisée' : 'couleur du serveur'}</span></div>`,
+      menuSet: !!acc, menuReset: 'gangUiReset', menuHint: "Couleur des menus du gang (F7, trésorerie, tablette…) vue par ses membres. Par défaut : la couleur du serveur. Chaque point peut aussi avoir son propre marker (onglet Points)." });
   },
+
 
 
   tab_points() {
@@ -694,6 +702,9 @@ const Builder = {
       case 'addPoint': c.points.push(this.newPoint(v)); this.activePoint = c.points.length - 1; return this.render();
       case 'selPoint': this.activePoint = +v; return this.render();
       case 'styleOn': setPath(this.cur, v, {}); return this.render();
+      case 'bbPreview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
+      case 'gangMkReset': if (this.cur.gang.settings.marker) delete this.cur.gang.settings.marker.color; return this.render();
+      case 'gangUiReset': this.cur.gang.settings.ui_accent = null; return this.render();
       case 'preview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
       case 'styleOff': setPath(this.cur, v, null); return this.render();
       case 'delPoint': c.points.splice(+v, 1); this.activePoint = Math.max(0, this.activePoint - 1); return this.render();

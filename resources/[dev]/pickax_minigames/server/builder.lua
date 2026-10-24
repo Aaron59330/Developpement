@@ -111,6 +111,8 @@ function MG.sanitize(d, existingId)
         enabled = d.enabled == true,
         blip = MG.cleanBlip(d.blip),
         marker = MG.cleanMarker(d.marker),
+        uiColor = (type(d.uiColor) == 'table' and #d.uiColor == 3 and tonumber(d.uiColor[1]) and tonumber(d.uiColor[2]) and tonumber(d.uiColor[3]))
+            and { math.floor(num(d.uiColor[1], 0, 255, 0)), math.floor(num(d.uiColor[2], 0, 255, 0)), math.floor(num(d.uiColor[3], 0, 255, 0)) } or nil,   -- couleur des menus de ce mini-jeu
         props = MG.cleanProps(d.props),
         settings = {},
         points = {},

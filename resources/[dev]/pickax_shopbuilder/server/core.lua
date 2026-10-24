@@ -132,7 +132,7 @@ function SB.publicShop(shop)
     for i, l in ipairs(shop.locations) do locs[i] = { label = l.label, coords = l.coords, ped = l.ped } end   -- sans les repères de gestion
     return {
         id = shop.id, label = shop.label, type = shop.type, mode = s.mode or 'items',
-        locations = locs, blip = s.blip, ped = s.ped, color = s.color, marker = s.marker,
+        locations = locs, blip = s.blip, ped = s.ped, color = s.color, uiColor = s.uiColor, marker = s.marker,
     }
 end
 
@@ -179,10 +179,24 @@ local function migrateCoreStyle(settingsTable, entityTable)
     if n > 0 then print(('^2[%s] %d module(s) : marker de base remis sur celui de pickax_core.^0'):format(GetCurrentResourceName(), n)) end
 end
 
+-- La couleur d'une boutique servait aux menus ET au marker : on la recopie en couleur de menus (une seule fois) pour que rien ne change à l'écran
+local function migrateUiColor()
+    if MySQL.scalar.await("SELECT 1 FROM shopbuilder_settings WHERE k = '_ui_split_v1'") then return end
+    for _, r in ipairs(MySQL.query.await('SELECT id, settings FROM shopbuilder_shops') or {}) do
+        local s = json.decode(r.settings or '{}')
+        if type(s) == 'table' and type(s.color) == 'table' and not s.uiColor then
+            s.uiColor = s.color
+            MySQL.update.await('UPDATE shopbuilder_shops SET settings = ? WHERE id = ?', { json.encode(s), r.id })
+        end
+    end
+    MySQL.update.await("INSERT INTO shopbuilder_settings (k, v) VALUES ('_ui_split_v1', '1') ON DUPLICATE KEY UPDATE v = VALUES(v)")
+end
+
 AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
     installTables()
     migrateCoreStyle('shopbuilder_settings', 'shopbuilder_shops')
+    migrateUiColor()
     SB.loadAll()
     SB.loadSettings()
     SB.ready = true

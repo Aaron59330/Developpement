@@ -989,6 +989,7 @@ const Builder = {
     if (t === 'chase') out.push(['rules', 'Règles & récompenses', 'target'], ['cars', 'Véhicules', 'car']);
     if (t === 'pvp') out.push(['rules', 'Réglages', 'dollar']);
     out.push(['points', 'Emplacements', 'pin']);
+    out.push(['custom', 'Personnaliser', 'sliders']);
     if (t !== 'doorlock') out.push(['access', 'Accès', 'users']);   // portes : les accès se règlent sur chaque porte (Emplacements)
     out.push(['stats', 'Stats & journal', 'chart']);
     return out;
@@ -1005,7 +1006,7 @@ const Builder = {
     const tabs = this.tabs();
     if (!tabs.find(x => x[0] === this.tab)) this.tab = 'general';
     const warn = this.missing.length ? `<div class="hint warn" style="margin-bottom:14px">Items introuvables sur ton serveur : <b>${this.missing.map(esc).join(', ')}</b>. Corrige leur nom (ou crée-les dans ton inventaire) pour que ce module fonctionne.</div>` : '';
-    const fn = { general: 'tabGeneral', rules: 'tabRules', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', jobs: 'tabJobs', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', access: 'tabAccess', stats: 'tabStats' }[this.tab];
+    const fn = { general: 'tabGeneral', rules: 'tabRules', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', jobs: 'tabJobs', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', custom: 'tabCustom', access: 'tabAccess', stats: 'tabStats' }[this.tab];
     return `${warn}<div class="seg wrap">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[2], 15)} ${t[1]}</button>`).join('')}</div>${this[fn]()}`;
   },
 
@@ -1070,10 +1071,16 @@ const Builder = {
     const c = this.cur, col = c.settings.color, hex = col ? '#' + col.map(n => Math.round(n).toString(16).padStart(2, '0')).join('') : '#fdc27d';
     return `<div class="card"><div class="card-h"><div class="t">${ic('edit', 17)} Informations</div>${this.fC('Module actif', 'enabled')}</div>
         <div class="grid2">${this.fS('Nom', 'label', { max: 100 })}${this.fS('Note (interne)', 'settings.note', { max: 200 })}</div>
-        <div class="hint mt-s">Type : <b>${esc(this.type(c.type).one)}</b>. Un module désactivé est invisible pour les joueurs.</div></div>
-      ${this.blipCard()}
-      ${this.uiColorCard()}
-      ${BBMap.markerCard({ base: 'settings.marker', m: this.v('settings.marker') || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${hex}" style="width:60px"><span class="muted sm-t">${col ? 'personnalisée' : 'couleur par défaut'}</span>${col ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) })}`;
+        <div class="hint mt-s">Type : <b>${esc(this.type(c.type).one)}</b>. Un module désactivé est invisible pour les joueurs.</div></div>`;
+  },
+
+  /* ── Onglet Personnaliser (commun à tous les builders) : blip · marker · couleur des menus ── */
+  tabCustom() {
+    const c = this.cur, col = c.settings.color, hex = col ? '#' + col.map(n => Math.round(n).toString(16).padStart(2, '0')).join('') : '#fdc27d';
+    return BBMap.customizeTab({ noun: 'de ce module', blip: this.blipCard(),
+      marker: BBMap.markerCard({ base: 'settings.marker', m: this.v('settings.marker') || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${hex}" style="width:60px"><span class="muted sm-t">${col ? 'personnalisée' : 'couleur du serveur'}</span>${col ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) }),
+      menu: this.colorField('Couleur des menus de ce module (joueurs)', 'settings.uiColor', this.cat.accent || [253, 194, 125]),
+      menuSet: !!c.settings.uiColor, menuReset: 'coordDel', menuResetV: 'settings.uiColor', menuHint: "Les menus de ce module (garage, banque, annonces…) s'affichent avec cette couleur. Par défaut : la couleur du serveur." });
   },
 
   /* ── Couleur des menus (par module) ── */

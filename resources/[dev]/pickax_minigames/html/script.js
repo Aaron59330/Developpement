@@ -171,7 +171,7 @@ function homeBody() {
 }
 
 /* ── Éditeur d'un mini-jeu ── */
-const TABS = [['general', 'Général', 'grid'], ['rules', 'Règles', 'list'], ['rewards', 'Récompenses', 'trophy'], ['settings', 'Réglages', 'bolt'], ['props', 'Props', 'box'], ['points', 'Emplacements', 'pin'], ['map', 'Carte & marker', 'target'], ['top', 'Classement', 'chart']];
+const TABS = [['general', 'Général', 'grid'], ['rules', 'Règles', 'list'], ['rewards', 'Récompenses', 'trophy'], ['settings', 'Réglages', 'bolt'], ['props', 'Props', 'box'], ['points', 'Emplacements', 'pin'], ['map', 'Personnaliser', 'sliders'], ['top', 'Classement', 'chart']];
 function gameBody() {
   const d = S.cur, T = typeOf(d.type), probs = localProblems(d);
   const tabs = `<div class="seg">${TABS.map(([k, l]) => `<button class="${S.tab === k ? 'active' : ''}" data-a="tab" data-v="${k}">${l}</button>`).join('')}</div>`;
@@ -260,10 +260,14 @@ function tabPoints(d, T) {
 
 /* ── Carte, blip & marker (même éditeur que les autres builders) ── */
 function tabMap(d) {
-  const mk = d.marker || {};
-  const col = Array.isArray(mk.color) ? '#' + mk.color.map(n => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, '0')).join('') : '#fdc27d';
-  return BBMap.blipCard({ base: 'blip', b: d.blip || {}, hint: 'Blip placé à l\'entrée du lobby. Champs vides = style commun du serveur.' }) +
-    BBMap.markerCard({ base: 'marker', m: d.marker || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${col}" style="width:60px"><span class="muted sm-t">${mk.color ? 'personnalisée' : 'couleur par défaut'}</span>${mk.color ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) });
+  const mk = d.marker || {}, ui = d.uiColor;
+  const hexOf = c => '#' + c.map(n => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, '0')).join('');
+  const col = Array.isArray(mk.color) ? hexOf(mk.color) : '#fdc27d';
+  return BBMap.customizeTab({ noun: 'de ce mini-jeu',
+    blip: BBMap.blipCard({ base: 'blip', b: d.blip || {}, hint: 'Blip placé à l\'entrée du lobby. Champs vides = style commun du serveur.' }),
+    marker: BBMap.markerCard({ base: 'marker', m: d.marker || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${col}" style="width:60px"><span class="muted sm-t">${mk.color ? 'personnalisée' : 'couleur du serveur'}</span>${mk.color ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) }),
+    menu: `<div class="row"><input type="color" data-path="__ui" value="${ui ? hexOf(ui) : '#fdc27d'}" style="width:60px"><span class="muted sm-t">${ui ? 'personnalisée' : 'couleur du serveur'}</span></div>`,
+    menuSet: !!ui, menuReset: 'uiReset', menuHint: "Couleur de l'interface en partie (compte à rebours, score, résultats). Par défaut : la couleur du serveur." });
 }
 
 function tabTop() {
@@ -404,6 +408,7 @@ const ACTIONS = {
     toast(r && r.ok ? `« ${model} » apparaît devant toi pendant 8 secondes` : `Modèle introuvable : ${model}`, r && r.ok ? 'ok' : 'err');
   },
   async bbPreview(path) { await rpc('bbPreview', getPath(S.cur, path) || {}); toast('Aperçu du marker devant toi', 'ok'); },
+  uiReset() { delete S.cur.uiColor; mark(); render(); },
   colorReset() { if (S.cur.marker) delete S.cur.marker.color; mark(); render(); },
 };
 async function addProp(mode) {
@@ -430,6 +435,7 @@ function onInput(el, change) {
   if (!p) return;
   const root = rootObj(el);
   if (!root) return;
+  if (p === '__ui') { const h = el.value; setPath(root, 'uiColor', [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))); mark(); if (change) render(); return; }
   if (p === '__color') {
     const h = el.value, rgb = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
     setPath(root, 'marker.color', rgb); mark(); if (change) render(); return;
@@ -700,7 +706,7 @@ window.addEventListener('message', e => {
       break;
     }
     case 'kicked': GS.wait = null; GS.playing = false; GS.res = null; GS.down = null; L.joined = false; hideProgress(); drawGame(); if (m.text) toast(m.text, 'err'); break;
-    case 'begin': GS.playing = true; GS.engine = m.engine; GS.name = m.name; GS.hud = null; GS.hint = ''; GS.wait = null; GS.res = null; GS.down = null; hideProgress(); hideUIs(); drawGame(); break;
+    case 'begin': if (Array.isArray(m.theme) && m.theme.length === 3) { const st = document.documentElement.style; st.setProperty('--accent', `rgb(${m.theme.join(',')})`); st.setProperty('--accent-rgb', m.theme.join(',')); st.setProperty('--pk-accent', `rgb(${m.theme.join(',')})`); st.setProperty('--pk-accent-rgb', m.theme.join(',')); } GS.playing = true; GS.engine = m.engine; GS.name = m.name; GS.hud = null; GS.hint = ''; GS.wait = null; GS.res = null; GS.down = null; hideProgress(); hideUIs(); drawGame(); break;
     case 'count': overlay(`<div class="cd"><span>${m.n}</span></div>`, 950); snd('tick'); break;
     case 'go': overlay(`<div class="cd"><span style="color:var(--ok);font-size:140px">GO !</span></div>`, 950); snd('confirm'); break;
     case 'hud': GS.hud = m.data; drawGame(); break;

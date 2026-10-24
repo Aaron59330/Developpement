@@ -38,7 +38,9 @@ function OpenUI(payload)
     if IsEntityDead(PlayerPedId()) or LocalPlayer.state.isDead == true then return end   -- mort : aucun menu
     if payload.action == 'open' and payload.kind ~= 'menu' and menuOrigin and GetGameTimer() - menuOrigin < 4000 then payload.back = true end
     menuOrigin = nil
-    payload.theme = Config.UI and Config.UI.Accent   -- couleur d'accentuation courante
+    -- couleur des menus : celle du gang si elle est définie (menus du gang), sinon la couleur du serveur (builder : toujours la globale)
+    local own = payload.kind ~= 'builder' and State.gangConfig and State.gangConfig.accent
+    payload.theme = own or (Config.UI and Config.UI.Accent)
     uiOpen = true
     SetNuiFocus(true, true)
     setWalkMenu(payload.action == 'open' and payload.kind == 'menu')

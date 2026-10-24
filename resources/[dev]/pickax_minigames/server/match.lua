@@ -136,7 +136,7 @@ local function startCountdown(g)
         acMark(src, true, 12)
         TriggerClientEvent('minigames:begin', src, {
             id = g.id, type = def.type, engine = T.engine, name = def.name, team = p.team, spawn = sp,
-            countdown = def.settings.countdown, settings = def.settings, points = def.points, slot = i, props = def.props,
+            countdown = def.settings.countdown, uiColor = def.uiColor, settings = def.settings, points = def.points, slot = i, props = def.props,
         })
     end
     g.teamScore = { 0, 0 }

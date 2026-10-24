@@ -177,6 +177,8 @@ local function cleanSettings(s, old)
     -- couleur générale de la boutique (interface + marker) ; absente = couleur globale
     local col = s.color
     if type(col) == 'table' and #col == 3 then out.color = { int(col[1], 0, 255, 239), int(col[2], 0, 255, 68), int(col[3], 0, 255, 68) } end
+    local ucol = s.uiColor   -- couleur des menus (distincte de celle du marker)
+    if type(ucol) == 'table' and #ucol == 3 then out.uiColor = { int(ucol[1], 0, 255, 239), int(ucol[2], 0, 255, 68), int(ucol[3], 0, 255, 68) } end
     local mk = type(s.marker) == 'table' and s.marker or {}
     -- la forme n'est enregistrée que si elle diffère du marker de base (pickax_core) : un changement du core s'applique alors partout
     out.marker = { enabled = mk.enabled ~= false }

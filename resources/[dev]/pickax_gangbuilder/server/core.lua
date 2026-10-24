@@ -310,6 +310,13 @@ function GB.publicBlips()
     return list
 end
 
+local function mergeStyle(a, b)
+    local o = {}
+    for k, v in pairs(a or {}) do o[k] = v end
+    for k, v in pairs(b or {}) do o[k] = v end
+    return next(o) and o or nil
+end
+
 function GB.pointsForGang(name)
     local list, gang = {}, GB.Gangs[name]
     if not gang then return list end
@@ -319,7 +326,7 @@ function GB.pointsForGang(name)
             list[#list + 1] = {
                 id = id, type = p.type, label = p.label, coords = p.coords, min_grade = p.min_grade, color = color,
                 kind = p.type == 'garage' and (p.data.kind or 'car') or nil,
-                spawn = p.type == 'garage' and p.data.spawn or nil, style = p.data.style,
+                spawn = p.type == 'garage' and p.data.spawn or nil, style = mergeStyle(gang.settings and gang.settings.marker, p.data.style),
             }
         end
     end
@@ -369,7 +376,7 @@ function GB.syncPlayer(src)
         blips = GB.publicBlips(),
         territories = GB.territoryList and GB.territoryList() or {},
         gangConfig = gang and {
-            name = name, label = gang.label, color = gang.color, grade = grade, gradeLabel = (gang.grades[grade + 1] or {}).label or '',
+            name = name, label = gang.label, color = gang.color, accent = gang.settings and gang.settings.ui_accent, grade = grade, gradeLabel = (gang.grades[grade + 1] or {}).label or '',
             actions = GB.menuActions(gang), boss_grade = gang.boss_grade,
         } or nil,
     })

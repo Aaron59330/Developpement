@@ -249,7 +249,7 @@ const Shop = {
   open(data) {
     this.d = data; this.cat = '__all'; this.q = ''; this.cart = {}; this.busy = false; this.sel = null; this.inCabin = false;
     CUR = data.currency || '$';
-    if (data.shop.color) applyTheme(data.shop.color);   // couleur générale de la boutique
+    if (data.shop.uiColor) applyTheme(data.shop.uiColor);   // couleur des menus de la boutique
     this.method = (data.payments[0] || {}).id;
     this.render();
   },
@@ -655,7 +655,7 @@ const Builder = {
 
   shopBody() {
     const c = this.cur;
-    const tabs = [['general', 'Général'], ...(this.isItems() ? [['products', `Produits (${c.items.length})`]] : []), ['locations', `Emplacements (${c.locations.length})`], ['access', 'Accès & paiement'], ['logs', 'Logs Discord'], ['stats', 'Statistiques']];
+    const tabs = [['general', 'Général'], ...(this.isItems() ? [['products', `Produits (${c.items.length})`]] : []), ['locations', `Emplacements (${c.locations.length})`], ['custom', 'Personnaliser'], ['access', 'Accès & paiement'], ['logs', 'Logs Discord'], ['stats', 'Statistiques']];
     if (!tabs.some(t => t[0] === this.tab)) this.tab = 'general';
     const warn = !c.locations.length ? `<div class="card" style="border-color:rgba(251,191,36,.35)"><div class="row">${ic('pin', 18)}<div class="hint"><b>Aucun emplacement</b> — la boutique n'apparaîtra nulle part. Ajoute-en un dans l'onglet « Emplacements ».</div><span class="spacer"></span><button class="sm" data-a="tab" data-v="locations">Ajouter</button></div></div>` : '';
     return `<div class="seg">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>${warn}${this['tab_' + this.tab]()}`;
@@ -680,13 +680,6 @@ const Builder = {
       <div class="card" style="border-color:rgba(var(--pk-accent-rgb,253,194,125),.35)"><div class="card-h"><div class="t">${ic('lock', 17)} Repères de gestion</div>${chip('Invisible aux joueurs', 'info nodot')}</div>
         <div class="grid2">${fld('Nom interne / repère', this.inp('settings.tag', s.tag, { ph: 'Ex : Centre-ville, Sandy Shores…', extra: 'maxlength="40"' }))}${fld('Note privée', this.inp('settings.memo', s.memo, { ph: 'Ex : celle près du commissariat', extra: 'maxlength="500"' }))}</div>
         <div class="hint mt-s">Sert à reconnaître tes boutiques quand plusieurs ont le même nom : affiché dans la liste de gestion, jamais côté joueurs.</div></div>
-      <div class="card"><div class="card-h"><div class="t">${ic('sliders', 17)} Apparence de la boutique</div>${s.color ? `<button class="sm" data-a="shopColorReset">Couleur par défaut</button>` : ''}</div>
-        <div class="lbl" style="margin-bottom:10px">Couleur générale (interface d'achat + marker au sol)</div>
-        <div class="row wrap">${SWATCHES.map(sw => `<button class="swatch-pick ${s.color && sw.join() === s.color.join() ? 'on' : ''}" style="background:rgb(${sw.join(',')})" data-a="shopSwatch" data-v="${sw.join(',')}"></button>`).join('')}
-          <input type="color" data-path="__shopcolor" value="${'#' + (s.color || this.cat.accent || [239, 68, 68]).map(n => Math.round(n).toString(16).padStart(2, '0')).join('')}" style="width:60px">${s.color ? '' : '<span class="hint">Couleur globale du serveur utilisée</span>'}</div>
-        </div>
-      ${BBMap.markerCard({ base: 'settings.marker', m: s.marker || {}, typeKey: 'type' })}
-      ${BBMap.blipCard({ base: 'settings.blip', b, labelHint: 'Par défaut : nom de la boutique', hint: 'Le blip est affiché à chaque emplacement de la boutique.', defSprite: 52 })}
       <div class="card"><div class="card-h"><div class="t">${ic('user', 17)} Vendeur (PNJ)</div>${this.chk('settings.ped.enabled', 'Afficher un vendeur', p.enabled, true)}</div>
         ${p.enabled ? `<div class="grid2">${fld('Modèle du PNJ', `<div class="row">${this.inp('settings.ped.model', p.model, { ph: 'ex : mp_m_shopkeep_01' })}<button data-a="checkPed">Vérifier</button></div>`)}${fld('Animation', this.sel('settings.ped.scenario', this.cat.scenarios.map(x => [x.id, x.label]), p.scenario || ''))}</div>
         <div class="mt">${this.chk('settings.ped.dialog.enabled', 'Dialogue du PNJ (message + boutons Accepter / Refuser avant d\'ouvrir)', p.dialog && p.dialog.enabled !== false, true)}</div>
@@ -702,6 +695,17 @@ const Builder = {
         ${fld('Prix de la tenue', this.inp('settings.clothing.price', (s.clothing || {}).price, { t: 'n', type: 'number', extra: 'min="0"' }))}
         <div class="lbl mt">Parties modifiables</div><div class="partgrid">${this.cat.parts.map(pt => `<label class="chk"><input type="checkbox" data-path="__part:${pt.id}" ${((s.clothing || {}).parts || []).includes(pt.id) ? 'checked' : ''}> ${esc(pt.label)}</label>`).join('')}</div>
         <div class="hint mt-s">Le joueur ne peut changer que ces éléments. Le paiement n'est prélevé que lorsqu'il valide sa tenue.</div></div>`}`;
+  },
+
+  /* Onglet : Personnaliser (commun à tous les builders) : blip · marker · couleur des menus */
+  tab_custom() {
+    const s = this.cur.settings, b = s.blip || {}, hexOf = c => '#' + c.map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
+    const mkHex = hexOf(s.color || this.cat.accent || [253, 194, 125]), uiHex = hexOf(s.uiColor || this.cat.accent || [253, 194, 125]);
+    return BBMap.customizeTab({ noun: 'de cette boutique',
+      blip: BBMap.blipCard({ base: 'settings.blip', b, labelHint: 'Par défaut : nom de la boutique', hint: 'Le blip est affiché à chaque emplacement de la boutique.', defSprite: 52 }),
+      marker: BBMap.markerCard({ base: 'settings.marker', m: s.marker || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__shopcolor" value="${mkHex}" style="width:60px"><span class="muted sm-t">${s.color ? 'personnalisée' : 'couleur du serveur'}</span>${s.color ? '<button class="sm" data-a="shopColorReset">Réinitialiser</button>' : ''}</div>`) }),
+      menu: `<div class="row wrap">${SWATCHES.map(sw => `<button class="swatch-pick ${s.uiColor && sw.join() === s.uiColor.join() ? 'on' : ''}" style="background:rgb(${sw.join(',')})" data-a="shopSwatch" data-v="${sw.join(',')}"></button>`).join('')}<input type="color" data-path="__shopui" value="${uiHex}" style="width:60px"><span class="muted sm-t">${s.uiColor ? 'personnalisée' : 'couleur du serveur'}</span></div>`,
+      menuSet: !!s.uiColor, menuReset: 'shopUiReset', menuHint: "Couleur de l'interface d'achat de cette boutique. Par défaut : la couleur du serveur." });
   },
 
   /* Onglet : Produits */
@@ -890,7 +894,8 @@ const Builder = {
     if (p === '__pickcat' && this.pick) { this.pick.cat = v; return; }
     if (p === '__accent') { this.accentDraft = [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)); applyTheme(this.accentDraft); if (final) this.render(); return; }
     if (!this.cur) return;
-    if (p === '__shopcolor') { this.cur.settings.color = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); applyTheme(this.cur.settings.color); this.markDirty(); if (final) this.render(); return; }
+    if (p === '__shopcolor') { this.cur.settings.color = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); this.markDirty(); if (final) this.render(); return; }
+    if (p === '__shopui') { this.cur.settings.uiColor = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); applyTheme(this.cur.settings.uiColor); this.markDirty(); if (final) this.render(); return; }
     if (p.startsWith('__pedsep:')) {
       const l = this.cur.locations[Number(p.slice(9))];
       if (l) { if (el.checked) l.ped = Object.assign({}, l.coords || {}); else delete l.ped; this.markDirty(); this.render(); }
@@ -954,7 +959,8 @@ const Builder = {
         toast('Boutique dupliquée (désactivée, sans emplacement)', 'ok'); await this.refreshList();
         this.cur = clone(r.shop); this.tab = 'locations'; this.logs = null; this.render(true); return;
       }
-      case 'shopSwatch': c.settings.color = v.split(',').map(Number); this.markDirty(); this.render(); return;
+      case 'shopSwatch': c.settings.uiColor = v.split(',').map(Number); applyTheme(c.settings.uiColor); this.markDirty(); this.render(); return;
+      case 'shopUiReset': delete c.settings.uiColor; this.markDirty(); this.render(); return;
       case 'shopColorReset': delete c.settings.color; this.markDirty(); this.render(); return;
       case 'checkPed': {
         const r = await rpc('checkPed', c.settings.ped.model);

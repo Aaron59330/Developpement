@@ -450,7 +450,7 @@ const Builder = {
 
   renderJob() {
     const c = this.cur, j = c.job;
-    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['blip', 'Blip'], ['logs', 'Logs Discord']];
+    const tabs = [['general', 'Général'], ['grades', `Grades · ${c.grades.length}`], ['points', `Points · ${c.points.length}`], ['custom', 'Personnaliser'], ['logs', 'Logs Discord']];
     const acts = (!c.isNew ? `<select id="test-grade" style="width:140px">${c.grades.map((g, i) => `<option value="${i}">${esc(g.label)}</option>`).join('')}</select><button data-a="testJob">Me mettre dans ce job</button><button class="danger" data-a="deleteJob">${ic('trash', 15)}</button>` : '')
       + `<button class="primary" data-a="save" style="height:38px">${c.isNew ? 'Créer le job' : 'Enregistrer'}</button>`;
     return {
@@ -506,8 +506,6 @@ const Builder = {
       ${j.type === 'police' || s.actions.includes('tablet') ? this.tabletCard(s) : ''}
       ${j.type === 'ems' || s.actions.includes('emstablet') ? this.emsCard(s) : ''}
       ${j.type === 'bank' ? this.bankCard(s) : ''}
-      ${this.appearanceCard(s)}
-      <div style="grid-column:1/-1;margin:14px 0">${this.jobMarkerCard(s)}</div>
       ${j.type === 'mecano' || c.points.some(p => p.type === 'tuning') ? this.tuningCard(s) : ''}
       ${this.phoneCard(s)}
       ${this.announceCard(s)}
@@ -599,14 +597,12 @@ const Builder = {
         ${m && Object.keys(m).length ? `<div class="row mt"><button class="sm danger" data-a="styleOff" data-v="job.settings.marker">Tout remettre au style global</button></div>` : ''}</details></div>`;
   },
 
-  appearanceCard(s) {
-    const acc = s.ui_accent, presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
-    return `<div class="card"><div class="card-h"><div class="t">${ic('sliders', 16)} Apparence du job</div>${chip(acc ? 'Couleur propre au job' : 'Couleur globale', acc ? 'ok' : 'mute')}</div>
-      <p class="hint" style="margin-bottom:12px">Couleur des <b>menus de ce job</b> (F6, boss, tablette, atelier…) vue par ses employés, indépendante des autres jobs et de la couleur globale (Paramètres → Apparence). Les markers du job se règlent juste en dessous ; le style d'un point précis, en bas de son éditeur (onglet Points).</p>
-      <div class="lbl" style="margin-bottom:8px">Couleur des menus</div>
-      ${acc ? `<div class="row wrap" style="gap:10px"><input type="color" data-path="job.settings.ui_accent" data-t="c" value="${rgbHex(acc)}" style="width:64px;height:38px;padding:0;border-radius:8px">${presets.map(([n, c]) => `<button class="swatch-pick ${c.join() === acc.join() ? 'on' : ''}" title="${n}" data-a="accentPick" data-v="${c.join(',')}" style="background:rgb(${c.join(',')})"></button>`).join('')}<button class="sm" data-a="accentOff">Utiliser la couleur globale</button></div>`
+  // Couleur des menus du job (champs de la carte « Couleur des menus » de l'onglet Personnaliser)
+  menuColorFields(s) {
+    const acc = s.ui_accent, presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Sable', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
+    return `${acc ? `<div class="row wrap" style="gap:10px"><input type="color" data-path="job.settings.ui_accent" data-t="c" value="${rgbHex(acc)}" style="width:64px;height:38px;padding:0;border-radius:8px">${presets.map(([n, c]) => `<button class="swatch-pick ${c.join() === acc.join() ? 'on' : ''}" title="${n}" data-a="accentPick" data-v="${c.join(',')}" style="background:rgb(${c.join(',')})"></button>`).join('')}</div>`
         : `<button class="sm" data-a="accentOn">${ic('edit', 14)} Choisir une couleur pour ce job</button>`}
-</div>`;
+`;
   },
 
   tuningCard(s) {
@@ -670,12 +666,18 @@ const Builder = {
     return c.isNew ? `<div class="card"><p class="hint">Enregistre d'abord ce job : ses logs Discord se règlent ensuite ici.</p></div>` : `<div class="dl-host" data-ref="${esc(c.job.name)}"></div>`;
   },
 
-  tab_blip() {
-    const b = this.cur.job.blip;
+  /* Onglet Personnaliser (commun à tous les builders) : blip · marker · couleur des menus */
+  tab_custom() {
+    const b = this.cur.job.blip, s = this.cur.job.settings;
     const status = b.enabled && !(b.coords && b.coords.x != null) ? chip('⚠ position manquante : le blip ne s\'affichera pas', 'bad nodot') : (b.enabled ? chip('Blip actif', 'ok') : chip('Désactivé', 'mute'));
-    return BBMap.blipCard({ base: 'job.blip', b, title: 'Blip du job sur la carte', labelHint: 'Par défaut : nom du job', hint: status, defSprite: 478,
-      extra: `<div class="mt">${coordField('job.blip.coords', b.coords, { tp: true })}</div>` });
+    return BBMap.customizeTab({ noun: 'de ce job',
+      blip: BBMap.blipCard({ base: 'job.blip', b, title: 'Blip du job sur la carte', labelHint: 'Par défaut : nom du job', hint: status, defSprite: 478,
+        extra: `<div class="mt">${coordField('job.blip.coords', b.coords, { tp: true })}</div>` }),
+      marker: this.jobMarkerCard(s),
+      menu: this.menuColorFields(s), menuSet: !!s.ui_accent, menuReset: 'accentOff',
+      menuHint: "Couleur des menus de ce job (F6, boss, tablette, atelier…) vue par ses employés, indépendante des autres jobs. Par défaut : la couleur du serveur. Le style d'un point précis se règle en bas de son éditeur (onglet Points)." });
   },
+
 
 
   tab_points() {

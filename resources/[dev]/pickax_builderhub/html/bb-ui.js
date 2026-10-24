@@ -245,8 +245,21 @@
       fld('Taille Y', num(p + '.scale.y', sc.y, 'step="0.05" min="0.05"', d(isc.y, 1.0))) +
       fld('Hauteur (Z)', num(p + '.scale.z', sc.z, 'step="0.05" min="0.05"', d(isc.z, 0.5))) +
       '<div class="row" style="align-items:flex-end;gap:22px;flex-wrap:wrap">' + chk(p + '.bob', 'Rebond', m.bob === true) + chk(p + '.rotate', 'Rotation', m.rotate === true) + chk(p + '.help', 'Aide « E »', m.help !== false) + '</div></div>' +
-      '<div class="hint mt-s">Les champs vides reprennent le style commun (Paramètres → Marker). Même éditeur dans tous les builders.</div></div>';
+      '<div class="hint mt-s">Les champs vides reprennent le marker du serveur (pickax_core). Même éditeur dans tous les builders ; une modification ne concerne que cet élément.</div></div>';
   }
 
-  window.BBMap = { markerTypes: TYPES, blipCard: blipCard, markerCard: markerCard };
+
+  /* Onglet « Personnaliser » commun à tous les builders (Job, Gang, Shop, World, Illegal, Minigames) : MÊME ordre, MÊMES cartes
+     Blip · Marker · Couleur des menus. o = { noun, blip (html), marker (html), menu (html des champs), menuSet (bool), menuReset (data-a), menuHint }.
+     Ce qui n'est pas modifié suit le marker / la couleur du serveur (pickax_core) ; une modification ne concerne que l'élément édité. */
+  function customizeTab(o) {
+    var head = '<div class="card"><div class="card-h"><div class="t">' + ic('sliders', 17) + ' Personnaliser</div></div>' +
+      '<p class="hint">Blip, marker et couleur des menus ' + (o.noun || 'de cet élément') + '. Ce que tu ne modifies pas suit les réglages du serveur (pickax_core) ; une modification ne change <b>que cet élément</b>, jamais les autres.</p></div>';
+    var menu = '<div class="card"><div class="card-h"><div class="t">' + ic('sliders', 17) + ' Couleur des menus</div>' +
+      (o.menuSet && o.menuReset ? '<button class="sm" data-a="' + o.menuReset + '"' + (o.menuResetV ? ' data-v="' + o.menuResetV + '"' : '') + '>Revenir à la couleur du serveur</button>' : '<span class="chip mute">Couleur du serveur</span>') + '</div>' +
+      (o.menu || '') + '<p class="hint mt-s">' + (o.menuHint || 'Couleur des menus ouverts par les joueurs pour cet élément. Par défaut : la couleur du serveur.') + '</p></div>';
+    return head + (o.blip || '') + (o.marker || '') + menu;
+  }
+
+  window.BBMap = { markerTypes: TYPES, blipCard: blipCard, markerCard: markerCard, customizeTab: customizeTab };
 })();
