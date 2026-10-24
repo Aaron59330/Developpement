@@ -17,11 +17,11 @@
 }
 
 .color-4 {
-	color: #00a4ff;
+	color: rgb(var(--pk-rgb, 0, 164, 255));
 }
 
 .color-5 {
-	color: #00a4ff;
+	color: rgb(var(--pk-rgb, 0, 164, 255));
 }
 
 .color-6 {
@@ -101,7 +101,7 @@ textarea {
 	padding: 1%;
 	padding-left: 3.5%;
 	color: white;
-	background-color: rgba(0, 164, 255, 0.5);
+	background-color: rgba(var(--pk-rgb, 0, 164, 255), 0.5);
 	width: 100%;
 	border-width: 0;
 	height: 3.15%;
@@ -139,7 +139,7 @@ input:focus {
 	font-size: 1.65vh;
 	box-sizing: border-box;
 	color: white;
-	background-color: rgba(0, 164, 255, 0.5);
+	background-color: rgba(var(--pk-rgb, 0, 164, 255), 0.5);
 	width: 100%;
 }
 

@@ -101,9 +101,26 @@ AddEventHandler('onClientResourceStop', function(resName)
 	refreshThemes()
 end)
 
+-- Couleur du serveur (Config.AccentColor de pickax_core, via son export) envoyée au chat ; réessayée car pickax_core peut démarrer après
+local function sendAccent()
+	local ok, st = pcall(function() return exports['pickax_core']:GetGlobalStyle() end)
+	local hex = ok and type(st) == 'table' and st.hex or nil
+	local r, g, b = tostring(hex or ''):match('^#?(%x%x)(%x%x)(%x%x)$')
+	if not r then return false end
+	SendNUIMessage({ type = 'ON_ACCENT', rgb = ('%d,%d,%d'):format(tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)) })
+	return true
+end
+CreateThread(function()
+	for _ = 1, 10 do
+		Wait(1500)
+		if chatLoaded and sendAccent() then return end
+	end
+end)
+
 RegisterNUICallback('loaded', function(data, cb)
 	refreshCommands()
 	refreshThemes()
+	sendAccent()
 
 	chatLoaded = true
 	cb('ok')

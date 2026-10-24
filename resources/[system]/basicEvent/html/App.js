@@ -51,6 +51,12 @@ window.APP = {
 		},
 	},
 	methods: {
+		// couleur principale du serveur (Config.AccentColor de pickax_core) : barre de saisie, suggestions, couleurs ^4 / ^5
+		ON_ACCENT({
+			rgb
+		}) {
+			if (/^\d{1,3},\d{1,3},\d{1,3}$/.test(String(rgb))) document.documentElement.style.setProperty('--pk-rgb', rgb);
+		},
 		ON_SCREEN_STATE_CHANGE({
 			shouldHide
 		}) {
