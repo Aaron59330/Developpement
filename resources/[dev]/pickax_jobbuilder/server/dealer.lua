@@ -128,6 +128,13 @@ function JB.dealerCatalog(job)
             list[#list + 1] = { model = o.model, label = o.label, category = (o.category and o.category ~= '') and o.category or 'imports', vtype = o.vtype, price = o.price, stock = o.stock, min_grade = o.min_grade, enabled = o.enabled, src = 'custom' }
         end
     end
+    -- type de concession : voitures / motos / bateaux / avions — un véhicule d'un autre type n'est ni listé ni vendable
+    local kind = s.dealer_kind
+    if kind and kind ~= 'all' then
+        local kept = {}
+        for _, v in ipairs(list) do if (v.vtype or 'car') == kind then kept[#kept + 1] = v end end
+        list = kept
+    end
     table.sort(list, function(a, b)
         if a.category ~= b.category then return a.category < b.category end
         return a.label:lower() < b.label:lower()

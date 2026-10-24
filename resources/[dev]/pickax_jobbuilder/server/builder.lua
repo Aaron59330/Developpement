@@ -290,6 +290,7 @@ local function cleanJob(payload)
             dealer_admin_grade = math.floor(num(settings.dealer_admin_grade, 0, maxGrade, maxGrade)),
             dealer_self_service = settings.dealer_self_service == true,
             dealer_auto = settings.dealer_auto ~= false,
+            dealer_kind = (Config.GarageKinds[settings.dealer_kind] and settings.dealer_kind) or 'all',
             dealer_markup = math.floor(num(settings.dealer_markup, 10, 500, 100)),
             dealer_categories = (function()
                 local out = {}
