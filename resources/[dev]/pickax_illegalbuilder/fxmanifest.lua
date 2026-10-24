@@ -20,6 +20,7 @@ server_scripts {
     'server/plants.lua',
     'server/toxic.lua',
     'server/gofast.lua',
+    'server/seed.lua',
 }
 
 client_scripts {
