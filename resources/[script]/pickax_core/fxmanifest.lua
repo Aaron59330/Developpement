@@ -192,6 +192,11 @@ ui_page 'players/jsfour-idcard/html/index.html'
 loadscreen 'loading/index.html'
 loadscreen_cursor 'yes'
 
+-- Thème du chat (couleur du serveur) : fichier généré depuis Config.AccentColor par utils/chattheme/server.lua
+chat_theme 'pickax' {
+    styleSheet = 'chat/theme.css',
+}
+
 files {
     'config.lua',   -- lu par pickax_theme (Config.AccentColor)
     'loading/index.html',
@@ -200,6 +205,7 @@ files {
     'loading/index.js',
     'loading/ui.js',
     'loading/background.png',
+    'chat/theme.css',
     'loading/music/music.mp3',
 
     'utils/gifMenu/banner.html',
