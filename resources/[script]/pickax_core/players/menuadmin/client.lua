@@ -196,14 +196,8 @@ local function toggleLegacyMenu()
     end
 end
 
--- Deux menus complets : le panel moderne (pickax_staff) et l'ancien menu RageUI.
--- ConfigMenuAdmin.DefaultMenu choisit celui de la touche F11 / de /menuadmin ; /staff ouvre le panel, /menuadmin_old l'ancien.
+-- Un seul menu : le menu RageUI (le panel moderne pickax_staff est retiré).
 RegisterCommand(ConfigMenuAdmin.Commande.CommandeName, function()
-    local panelUp = GetResourceState('pickax_staff') == 'started'
-    if panelUp and not MenuStaffOpenState and ConfigMenuAdmin.DefaultMenu ~= 'legacy' then
-        exports['pickax_staff']:Toggle()
-        return
-    end
     toggleLegacyMenu()
 end)
 RegisterCommand('menuadmin_old', function() toggleLegacyMenu() end)

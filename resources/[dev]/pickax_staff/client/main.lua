@@ -17,6 +17,7 @@ local function stateOf()
 end
 
 local function openUI()
+    do return end   -- panel UI retiré : plus d'ouverture de l'interface (le serveur garde les actions utilisées par le menu RageUI)
     if open then return end
     if IsEntityDead(PlayerPedId()) then return end
     ESX.TriggerServerCallback('pickax_staff:open', function(res)
@@ -32,7 +33,6 @@ local function toggleUI() if open then closeUI() else openUI() end end
 exports('Toggle', toggleUI)
 exports('Open', openUI)
 exports('Close', closeUI)
-RegisterCommand(Config.Command, toggleUI, false)
 
 CreateThread(function()
     while true do
