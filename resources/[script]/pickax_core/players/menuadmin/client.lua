@@ -319,22 +319,24 @@ end
 
 local function initializeNames()
     Citizen.CreateThread(function()
-        local pPed = PlayerPedId()
         while ShowName and staffService do
-            local pCoords = GetEntityCoords(GetPlayerPed(-1), false)
+            local pPed = PlayerPedId()
+            local pCoords = GetEntityCoords(pPed, false)
             for _, v in pairs(GetActivePlayers()) do
                 local otherPed = GetPlayerPed(v)
-                if otherPed ~= pPed then
-                    if #(pCoords - GetEntityCoords(otherPed, false)) < 250.0 then
+                -- on s'affiche aussi soi-même (v == PlayerId()) ; la balise n'est créée qu'une fois et recréée si le ped a changé
+                if v == PlayerId() or #(pCoords - GetEntityCoords(otherPed, false)) < 250.0 then
+                    if gamerTags[v] == nil or not IsMpGamerTagActive(gamerTags[v]) then
                         gamerTags[v] = CreateFakeMpGamerTag(otherPed, ('[%s] %s'):format(GetPlayerServerId(v), GetPlayerName(v)), false, false, '', 0)
-                        SetMpGamerTagVisibility(gamerTags[v], 4, 1)
-                    else
-                        RemoveMpGamerTag(gamerTags[v])
-                        gamerTags[v] = nil
                     end
+                    SetMpGamerTagVisibility(gamerTags[v], 4, 1)
+                elseif gamerTags[v] then
+                    RemoveMpGamerTag(gamerTags[v])
+                    gamerTags[v] = nil
                 end
                 Citizen.Wait(1)
             end
+            Citizen.Wait(0)
         end
     end)
 end
