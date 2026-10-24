@@ -245,7 +245,7 @@ function JB.openShowroom(src, x, point, job, cb)
     cb({
         ok = true, kind = 'showroom', label = point.label, jobLabel = job.label, vehicles = list, categories = categoryList(),
         canSell = staff and x.job.grade >= (s.dealer_sell_grade or 0), grade = staff and x.job.grade or -1,
-        selfService = s.dealer_self_service == true, hasTest = hasTest, focus = point.type == 'display' and point.data.model or nil,
+        commission = s.dealer_commission or D.DefaultCommission, selfService = s.dealer_self_service == true, hasTest = hasTest, focus = point.type == 'display' and point.data.model or nil,
     })
 end
 

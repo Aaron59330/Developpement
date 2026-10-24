@@ -2670,7 +2670,9 @@ const Runtime = {
       case 'missionStatus': $root.classList.add('corner'); return this.renderMissionStatus();
       case 'showroom': return this.renderShowroom();
       case 'dealerOffer': return $root.innerHTML = panel({ icon: 'car', title: 'Offre d\'achat', sub: d.jobLabel,
-        body: `<div class="card"><b style="font-size:16px">${esc(d.label)}</b><p class="hint mt-s">${esc(d.category || '')}</p><div class="eyebrow mt">Prix</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div><p class="hint">Le véhicule est ajouté à ton garage / livré devant toi après le paiement.</p></div><div class="row"><button class="danger" style="flex:1" data-a="carNo">Refuser</button><button class="primary" style="flex:2" data-a="carYes">${ic('check', 16)} Acheter · ${money(d.price)}</button></div>` });
+        body: `<div class="sr-side" style="border:0;padding:0;background:none"><div class="sr-img"><img src="https://docs.fivem.net/vehicles/${esc(d.model || '')}.webp" onerror="this.style.display='none'"></div><div><h3>${esc(d.label)}</h3><small class="hint">${esc(d.category || 'Véhicule')}</small></div>
+          <div class="card"><div class="eyebrow">Prix</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div><p class="hint mt-s">Payé depuis ton compte bancaire. Le véhicule est ajouté à ton garage / livré devant toi.</p></div></div>
+          <div class="row"><button class="danger" style="flex:1" data-a="carNo">Refuser</button><button class="primary" style="flex:2" data-a="carYes">${ic('check', 16)} Acheter · ${money(d.price)}</button></div>` });
       case 'door': return this.renderDoor();
       case 'wardrobe': return this.renderWardrobe();
       case 'ring': return $root.innerHTML = panel({ icon: 'bell', title: 'Quelqu\'un sonne', sub: 'À la porte',
@@ -2767,21 +2769,37 @@ const Runtime = {
 
   q: '',
   renderShowroom() {
-    const d = this.data, q = (this.q || '').toLowerCase(), cat = this.cat || '';
+    const d = this.data, q = (this.q || '').toLowerCase(), cat = this.cat || '', sort = this.sort || 'name';
     let list = d.vehicles.filter(v => (!cat || v.category === cat) && (!q || (v.label + ' ' + v.category + ' ' + v.model).toLowerCase().includes(q)));
+    list.sort(sort === 'asc' ? (x, y) => x.price - y.price : sort === 'desc' ? (x, y) => y.price - x.price : (x, y) => String(x.label).localeCompare(String(y.label)));
     if (d.focus) list = [...list.filter(v => v.model === d.focus), ...list.filter(v => v.model !== d.focus)];
     const total = list.length;
-    list = list.slice(0, 80);
-    const row = v => `<div class="item">${tile('car')}<div class="grow"><b>${esc(v.label)}${d.focus === v.model ? ' ' + chip('Exposé', 'info nodot') : ''}</b><small>${esc(v.category || 'Véhicule')}${v.stock > 0 ? ' · ' + v.stock + ' en stock' : ''}</small></div><span class="price">${money(v.price)}</span>
-      ${d.hasTest ? `<button class="sm" data-a="testCar" data-id="${esc(v.model)}">Essai</button>` : ''}
-      ${d.canSell && d.grade >= v.min_grade ? `<button class="sm primary" data-a="sellCar" data-id="${esc(v.model)}">Vendre</button><button class="sm" data-a="sellCarSelf" data-id="${esc(v.model)}" title="Te vendre ce véhicule à toi-même">Pour moi</button>` : ''}
-      ${d.selfService ? `<button class="sm primary" data-a="buyCar" data-id="${esc(v.model)}">Acheter</button>` : ''}</div>`;
-    $root.innerHTML = panel({ icon: 'car', title: d.label, sub: `${d.jobLabel} — catalogue (${d.vehicles.length})`, cls: 'md',
-      body: `<div class="row"><div style="position:relative;flex:1"><input data-path="q" id="sr-q" placeholder="Rechercher un véhicule…" value="${esc(this.q || '')}" style="padding-left:38px"><span style="position:absolute;left:12px;top:10px;color:var(--muted)">${ic('search', 16)}</span></div>
-        <select data-path="cat" style="width:190px"><option value="">Toutes catégories</option>${(d.categories || []).filter(c => d.vehicles.some(v => v.category === c.name)).map(c => `<option value="${esc(c.name)}" ${cat === c.name ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select></div>
-        ${d.canSell ? '<p class="hint">Vendre : le client le plus proche reçoit l\'offre à l\'écran.</p>' : (d.selfService ? '' : '<p class="hint">Demande à un vendeur pour acheter un véhicule.</p>')}
-        ${list.map(row).join('') || '<p class="hint">Aucun véhicule disponible.</p>'}
-        ${total > list.length ? `<p class="hint">${total - list.length} autres véhicules : affine ta recherche ou choisis une catégorie.</p>` : ''}` });
+    list = list.slice(0, 120);
+    const sel = list.find(v => v.model === this.sel) || list[0];
+    const ph = big => ic('car', big ? 56 : 40).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    const img = (v, big) => `<div class="sr-img"><img src="https://docs.fivem.net/vehicles/${esc(v.model)}.webp" loading="lazy" onerror="this.outerHTML='<span class=&quot;ph&quot;>${ph(big)}</span>'">${d.focus === v.model ? '<span class="sr-tag">Exposé</span>' : ''}</div>`;
+    const card = v => `<div class="sr-card ${sel && sel.model === v.model ? 'sel' : ''}" data-a="srSel" data-id="${esc(v.model)}">${img(v)}<div class="sr-info"><b>${esc(v.label)}</b><small>${esc(v.category || 'Véhicule')}${v.stock > 0 ? ' · ' + v.stock + ' en stock' : ''}</small><span class="price">${money(v.price)}</span></div></div>`;
+    const cats = (d.categories || []).filter(c => d.vehicles.some(v => v.category === c.name));
+    const canSellThis = sel && d.canSell && d.grade >= sel.min_grade;
+    const side = sel ? `<div class="sr-side">${img(sel, true)}<div><h3>${esc(sel.label)}</h3><small class="hint">${esc(sel.category || 'Véhicule')}</small></div>
+        <div><div class="eyebrow">Prix</div><div class="big">${Number(sel.price).toLocaleString('fr-FR')}<small>$</small></div></div>
+        <div><div class="kv"><span>Stock</span><b>${sel.stock > 0 ? sel.stock : 'Sur commande'}</b></div>
+        ${d.canSell ? `<div class="kv"><span>Ta commission</span><b>${Number(d.commission || 0)}% · ${money(Math.floor(sel.price * Number(d.commission || 0) / 100))}</b></div>` : ''}
+        ${sel.min_grade > 0 ? `<div class="kv"><span>Grade requis</span><b>${sel.min_grade}</b></div>` : ''}</div>
+        <div class="sr-actions">
+          ${canSellThis ? `<button class="primary" data-a="sellCar" data-id="${esc(sel.model)}">${ic('check', 16)} Vendre au client le plus proche</button><button data-a="sellCarSelf" data-id="${esc(sel.model)}">Me le vendre à moi-même</button>` : ''}
+          ${d.selfService ? `<button class="primary" data-a="buyCar" data-id="${esc(sel.model)}">Acheter · ${money(sel.price)}</button>` : ''}
+          ${d.hasTest ? `<button data-a="testCar" data-id="${esc(sel.model)}">Essayer le véhicule</button>` : ''}
+          ${!canSellThis && !d.selfService ? '<p class="hint">Demande à un vendeur pour acheter ce véhicule.</p>' : ''}
+        </div></div>` : '';
+    $root.innerHTML = panel({ icon: 'car', title: d.label, sub: `${d.jobLabel} — ${d.vehicles.length} véhicules`, cls: 'xl',
+      body: `<div class="sr"><div class="sr-main">
+        <div class="row"><div style="position:relative;flex:1"><input data-path="q" id="sr-q" placeholder="Rechercher un véhicule…" value="${esc(this.q || '')}" style="padding-left:38px"><span style="position:absolute;left:12px;top:10px;color:var(--muted)">${ic('search', 16)}</span></div>
+          <select data-path="sort" style="width:170px"><option value="name" ${sort === 'name' ? 'selected' : ''}>Nom A→Z</option><option value="asc" ${sort === 'asc' ? 'selected' : ''}>Prix croissant</option><option value="desc" ${sort === 'desc' ? 'selected' : ''}>Prix décroissant</option></select></div>
+        <div class="sr-chips"><span class="sr-chip ${cat ? '' : 'on'}" data-a="srCat" data-id="">Tous</span>${cats.map(c => `<span class="sr-chip ${cat === c.name ? 'on' : ''}" data-a="srCat" data-id="${esc(c.name)}">${esc(c.label)}</span>`).join('')}</div>
+        <div class="sr-grid">${list.map(card).join('') || '<p class="hint">Aucun véhicule disponible.</p>'}</div>
+        ${total > list.length ? `<p class="hint">${total - list.length} autres véhicules : affine ta recherche.</p>` : ''}
+      </div>${side}</div>` });
   },
 
   renderDoor() {
@@ -2943,6 +2961,8 @@ const Runtime = {
       case 'actStop': return rpc('activity:stop', pid);
       case 'missionStart': { const r = await rpc('missions:start', pid, el.dataset.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'missionCancel': { await rpc('missions:cancel'); toast('Mission annulée', 'ok'); return; }
+      case 'srSel': this.sel = String(el.dataset.id); return this.render();
+      case 'srCat': this.cat = String(el.dataset.id || ''); return this.render();
       case 'sellCarSelf': { const r = await rpc('dealer:offerSelf', String(el.dataset.id)); if (ok(r, 'Offre à toi-même : confirme à l\'écran')) close(); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }
       case 'buyCar': { const v = d.vehicles.find(x => x.model === el.dataset.id); if (!await confirmBox('Acheter ce véhicule ?', `${v.label} — ${money(v.price)}`, 'Acheter', false)) return; const r = await rpc('dealer:buy', pid, v.model); if (ok(r, 'Achat effectué')) close(); return; }
@@ -2969,6 +2989,7 @@ const Runtime = {
 
   async onInput(el, isChange) {
     if (el.dataset.path === 'cat') { this.cat = el.value; return this.render(); }
+    if (el.dataset.path === 'sort') { this.sort = el.value; return this.render(); }
     if (el.dataset.path === 'q' && !isChange) {
       const pos = el.selectionStart; this.q = el.value; this.render();
       const inp = document.getElementById('sr-q'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); }
