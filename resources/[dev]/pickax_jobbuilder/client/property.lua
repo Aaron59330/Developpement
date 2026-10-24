@@ -5,6 +5,8 @@ local Props = {}        -- biens (entrées publiques) envoyés par le serveur
 local propBlips = {}
 local Inside = nil      -- { id, label, role, exit, entrance, points }
 
+function JBInside() return Inside end   -- utilisé par client/furniture.lua
+
 -- Handlers NUI -> client / serveur ajoutés par ce fichier
 for _, n in ipairs({
     'prop:manage', 'prop:save', 'prop:delete', 'prop:reset', 'prop:offer', 'prop:giveKey', 'prop:removeKey',
@@ -68,7 +70,11 @@ local function enterProperty(id, cb)
             for _, name in ipairs(res.ipl or {}) do RequestIpl(name) end
             Inside = res
             CloseUI()
-            CreateThread(function() teleportTo(res.exit) end)
+            CreateThread(function()
+                teleportTo(res.exit)
+                FurnSpawn(res.furniture)
+                if res.role == 'owner' then JBNotify('Tu peux décorer ta propriété : touche ~g~F7~s~ (ou /meubles).') end
+            end)
         end
         if cb then cb(res or { ok = false, error = 'Erreur' }) end
     end, id)
@@ -78,6 +84,7 @@ local function leaveProperty()
     ESX.TriggerServerCallback('jobbuilder:prop:leave', function(res)
         if res and res.ok then
             Inside = nil
+            FurnClear()
             CreateThread(function() teleportTo(res.entrance) end)
         else
             JBNotify('~r~' .. ((res and res.error) or 'Erreur'))
@@ -87,6 +94,7 @@ end
 
 RegisterNetEvent('jobbuilder:client:propKick', function(entrance)
     Inside = nil
+    FurnClear()
     CloseUI()
     CreateThread(function() teleportTo(entrance) end)
     JBNotify('Tu as été invité à quitter la propriété.')
@@ -228,6 +236,7 @@ end)
 AddEventHandler('esx:onPlayerSpawn', function()
     if Inside then
         Inside = nil
+        FurnClear()
         TriggerServerEvent('jobbuilder:server:forceLeave')
     end
 end)

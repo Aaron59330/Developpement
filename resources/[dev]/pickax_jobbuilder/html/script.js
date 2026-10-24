@@ -2596,6 +2596,10 @@ const Bank = {
 };
 
 /* ════════════════════════════ RUNTIME (panneaux en jeu) ════════════════════════════ */
+document.addEventListener('input', e => {
+  if (e.target.id === 'fq' && Runtime.kind === 'furniture') { Runtime.furnQ = e.target.value; const l = document.getElementById('furn-list'); if (l) l.innerHTML = Runtime.furnList(); }
+});
+
 const Runtime = {
   kind: null, data: null, pointId: null, bossTab: 'money',
 
@@ -2619,6 +2623,7 @@ const Runtime = {
       case 'boss': return this.renderBoss();
       case 'menu': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: TYPE_ICON[d.type] || 'briefcase', title: d.jobLabel, sub: `Grade : ${d.grade}`, cls: 'corner',
         body: list(d.actions, a => `<div class="item click" data-a="act" data-id="${a.id}">${tile(ACTION_ICON[a.id] || 'grid')}<div class="grow"><b>${esc(a.label)}</b></div><span class="chev">${ic('chevron', 16)}</span></div>`, 'Aucune action.') });
+      case 'furniture': return this.renderFurniture();
       case 'props': {
         $root.classList.add('corner');
         const pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit;
@@ -2674,6 +2679,33 @@ const Runtime = {
       case 'propOffer': return $root.innerHTML = panel({ icon: 'home', title: d.deal === 'rent' ? 'Offre de location' : 'Offre d\'achat', sub: d.jobLabel,
         body: `<div class="card"><b style="font-size:16px">${esc(d.label)}</b><p class="hint mt-s">${esc(d.address || '')}</p><div class="eyebrow mt">${d.deal === 'rent' ? `Loyer · par semaine (${d.days} jours)` : 'Prix'}</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div>${d.deal === 'rent' ? '<p class="hint">Le premier loyer est payé maintenant. Les suivants se règlent à la porte.</p>' : ''}</div><div class="row"><button class="danger" style="flex:1" data-a="offerNo">Refuser</button><button class="primary" style="flex:2" data-a="offerYes">${ic('check', 16)} ${d.deal === 'rent' ? 'Louer' : 'Acheter'} · ${money(d.price)}</button></div>` });
     }
+  },
+
+  // ── Meubles de la propriété ──
+  furnTab: 'catalog', furnCat: 'all', furnQ: '',
+  renderFurniture() {
+    const d = this.data, pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit, vl = d.vipLimits || {};
+    const cats = [...new Set((d.catalog || []).map(c => c.cat))];
+    const tiers = [['Sans VIP', d.base, 0], ['Bronze', vl[1] || d.base, 1], ['Argent', vl[2] || d.base, 2], ['Or', vl[3] || d.base, 3]];
+    const tab = (id, label) => `<button class="vchip ${this.furnTab === id ? 'on' : ''}" data-a="furnTab" data-v="${id}">${label}</button>`;
+    $root.innerHTML = panel({ icon: 'home', title: 'Décoration', sub: d.label, cls: 'md', body: `
+      <div class="card"><div class="card-h"><div class="t">${ic('box', 16)} ${d.count} / ${d.limit} meubles</div>${full ? chip('Limite atteinte', 'warn') : chip((d.limit - d.count) + ' restants', 'ok')}</div>
+        <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--accent)"></i></div>
+        <div class="vchips" style="margin-top:12px">${tiers.map(([n, v, lv]) => `<span class="vchip ${(d.vip || 0) === lv ? 'on' : ''}" style="cursor:default">${n} · ${v}</span>`).join('')}</div>
+        <p class="hint mt-s">Plus ton niveau VIP est élevé, plus tu peux poser de meubles dans cette propriété.</p></div>
+      <div class="vchips" style="margin:2px 0 4px">${tab('catalog', `${ic('grid', 14)} Catalogue`)}${tab('mine', `${ic('list', 14)} Mes meubles (${(d.mine || []).length})`)}</div>
+      ${this.furnTab === 'catalog' ? `
+        <div class="vchips"><button class="vchip ${this.furnCat === 'all' ? 'on' : ''}" data-a="furnCat" data-v="all">Tout</button>${cats.map(c => `<button class="vchip ${this.furnCat === c ? 'on' : ''}" data-a="furnCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+        <input id="fq" placeholder="Rechercher un meuble…" value="${esc(this.furnQ)}" style="margin-top:4px">
+        <div id="furn-list">${this.furnList()}</div>
+        <p class="hint">Mode placement : <b>flèches ← →</b> ou molette pour tourner, <b>↑ ↓</b> pour la hauteur, <b>Entrée</b> pour poser, <b>Retour</b> pour annuler.</p>`
+      : `${(d.mine || []).map(m => `<div class="item">${tile('box')}<div class="grow"><b>${esc(m.label)}</b><small>${esc(m.cat)}</small></div><button class="sm" data-a="furnMove" data-v="${m.id}" data-m="${esc(m.model)}">Déplacer</button><button class="sm danger" data-a="furnDel" data-v="${m.id}">Retirer</button></div>`).join('') || '<p class="hint">Aucun meuble posé pour le moment. Choisis-en un dans le catalogue.</p>'}
+        ${(d.mine || []).length ? `<button class="danger vall" data-a="furnDelAll">Tout retirer</button>` : ''}`}` });
+  },
+  furnList() {
+    const d = this.data, q = this.furnQ.trim().toLowerCase(), full = d.count >= d.limit;
+    const list = (d.catalog || []).filter(c => (this.furnCat === 'all' || c.cat === this.furnCat) && (!q || c.label.toLowerCase().includes(q)));
+    return list.map(c => `<div class="item">${tile('box')}<div class="grow"><b>${esc(c.label)}</b><small>${esc(c.cat)}</small></div><button class="sm primary" data-a="furnPlace" data-v="${esc(c.id)}" ${full ? 'disabled' : ''}>Poser</button></div>`).join('') || '<p class="hint">Aucun meuble ne correspond.</p>';
   },
 
   renderActivity() {
@@ -2818,6 +2850,16 @@ const Runtime = {
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile', 'ok');
       case 'take': return ok(await rpc('armory:take', pid, i), 'Objet récupéré');
       case 'buy': return ok(await rpc('shop:buy', pid, i, Number(document.getElementById('q' + i).value)), 'Achat effectué');
+      case 'furnTab': this.furnTab = el.dataset.v; return this.render();
+      case 'furnCat': this.furnCat = el.dataset.v; return this.render();
+      case 'furnPlace': return rpc('furn:place', el.dataset.v);
+      case 'furnMove': return rpc('furn:move', Number(el.dataset.v), el.dataset.m);
+      case 'furnDel': case 'furnDelAll': {
+        const r = a === 'furnDel' ? await rpc('furn:remove', Number(el.dataset.v)) : await rpc('furn:removeAll');
+        if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');
+        const n = await rpc('furn:list'); if (n && n.ok) { this.data = n; this.render(); }
+        return toast(a === 'furnDel' ? 'Meuble retiré' : 'Meubles retirés', 'ok');
+      }
       case 'propPick': return rpc('props:place', el.dataset.v);
       case 'propDel': case 'propDelAll': {
         const r = a === 'propDel' ? await rpc('props:remove', Number(el.dataset.v)) : await rpc('props:removeAll');

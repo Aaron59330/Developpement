@@ -536,6 +536,54 @@ Config.Real = {
     BucketBase        = 20000,  -- routing bucket = BucketBase + id propriété (instances séparées)
     ShowBlips         = true,   -- blips des biens disponibles
     RentCheckMinutes  = 5,      -- fréquence de vérification des loyers impayés
+    -- Meubles : le propriétaire décore son intérieur (touche F7 ou /meubles dans la propriété). Limite PAR PROPRIÉTÉ, plus haute avec le VIP du propriétaire.
+    Furniture = {
+        Enabled       = true,
+        BaseLimit     = 10,
+        VipLimits     = { [1] = 15, [2] = 20, [3] = 30 },   -- Bronze / Argent / Or (pickax_core)
+        PlaceDistance = 8.0,                                -- distance max entre le joueur et le meuble posé
+        Cooldown      = 700,                                -- ms entre deux poses
+        Key           = 'F7',                               -- touche par défaut (modifiable par le joueur dans les paramètres FiveM)
+        Catalog = {
+            { id = 'sofa1',   label = 'Canapé moderne',        model = 'prop_t_sofa',            cat = 'Canapés & fauteuils' },
+            { id = 'sofa2',   label = 'Canapé 2 places',       model = 'prop_t_sofa_02',         cat = 'Canapés & fauteuils' },
+            { id = 'sofa3',   label = 'Canapé de salon',       model = 'v_res_tre_sofa',         cat = 'Canapés & fauteuils' },
+            { id = 'arm1',    label = 'Fauteuil',              model = 'prop_armchair_01',       cat = 'Canapés & fauteuils' },
+            { id = 'chair1',  label = 'Chaise en bois',        model = 'prop_chair_01a',         cat = 'Chaises & tabourets' },
+            { id = 'chair2',  label = 'Chaise de salle à manger', model = 'prop_chair_02',       cat = 'Chaises & tabourets' },
+            { id = 'chair3',  label = 'Chaise design',         model = 'prop_chair_04a',         cat = 'Chaises & tabourets' },
+            { id = 'chair4',  label = 'Chaise de bureau',      model = 'prop_off_chair_01',      cat = 'Chaises & tabourets' },
+            { id = 'stool1',  label = 'Tabouret de bar',       model = 'prop_bar_stool_01',      cat = 'Chaises & tabourets' },
+            { id = 'table1',  label = 'Table à manger',        model = 'prop_table_03',          cat = 'Tables' },
+            { id = 'table2',  label = 'Table carrée',          model = 'prop_table_04',          cat = 'Tables' },
+            { id = 'table3',  label = 'Table ronde',           model = 'prop_table_06',          cat = 'Tables' },
+            { id = 'table4',  label = 'Table basse',           model = 'prop_t_coffe_table',     cat = 'Tables' },
+            { id = 'table5',  label = 'Table basse design',    model = 'prop_t_coffe_table_02',  cat = 'Tables' },
+            { id = 'bed1',    label = 'Lit double',            model = 'v_res_mbbed',            cat = 'Chambre' },
+            { id = 'bed2',    label = 'Lit simple',            model = 'p_mbbed_s',              cat = 'Chambre' },
+            { id = 'cab1',    label = 'Armoire',               model = 'prop_cabinet_01',        cat = 'Rangements' },
+            { id = 'cab2',    label = 'Meuble de rangement',   model = 'prop_cabinet_02b',       cat = 'Rangements' },
+            { id = 'chest1',  label = 'Coffre à outils',       model = 'prop_toolchest_01',      cat = 'Rangements' },
+            { id = 'tv1',     label = 'Télévision écran plat', model = 'prop_tv_flat_01',        cat = 'Multimédia' },
+            { id = 'tv2',     label = 'Télévision 2',          model = 'prop_tv_flat_02',        cat = 'Multimédia' },
+            { id = 'tv3',     label = 'Télévision ancienne',   model = 'prop_tv_03',             cat = 'Multimédia' },
+            { id = 'pc1',     label = 'Ordinateur de bureau',  model = 'prop_pc_01a',            cat = 'Multimédia' },
+            { id = 'laptop1', label = 'Ordinateur portable',   model = 'prop_laptop_01a',        cat = 'Multimédia' },
+            { id = 'box1',    label = 'Enceinte portable',     model = 'prop_boombox_01',        cat = 'Multimédia' },
+            { id = 'lamp1',   label = 'Lampe de bureau',       model = 'v_res_desklamp',         cat = 'Éclairage' },
+            { id = 'lamp2',   label = 'Projecteur',            model = 'prop_worklight_03a',     cat = 'Éclairage' },
+            { id = 'plant1',  label = 'Plante d\'intérieur',   model = 'prop_plant_int_01a',     cat = 'Plantes & déco' },
+            { id = 'plant2',  label = 'Grande plante',         model = 'prop_plant_int_03a',     cat = 'Plantes & déco' },
+            { id = 'plant3',  label = 'Plante en pot',         model = 'prop_pot_plant_01a',     cat = 'Plantes & déco' },
+            { id = 'plant4',  label = 'Ficus',                 model = 'prop_fib_plant_01',      cat = 'Plantes & déco' },
+            { id = 'neon1',   label = 'Néon bière',            model = 'prop_beer_neon_01',      cat = 'Plantes & déco' },
+            { id = 'fridge1', label = 'Réfrigérateur',         model = 'prop_fridge_01',         cat = 'Cuisine & bain' },
+            { id = 'fridge2', label = 'Réfrigérateur américain', model = 'prop_fridge_03',       cat = 'Cuisine & bain' },
+            { id = 'micro1',  label = 'Micro-ondes',           model = 'prop_micro_01',          cat = 'Cuisine & bain' },
+            { id = 'toil1',   label = 'Toilettes',             model = 'prop_toilet_01',         cat = 'Cuisine & bain' },
+            { id = 'sink1',   label = 'Lavabo',                model = 'prop_sink_02',           cat = 'Cuisine & bain' },
+        },
+    },
     Blips = {
         sale = { sprite = 374, color = 2, scale = PK_BSF(0.65) },
         rent = { sprite = 374, color = 3, scale = PK_BSF(0.65) },
