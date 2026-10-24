@@ -29,7 +29,7 @@ local function snapshot()
         ok = true, inVehicle = true,
         name = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(veh))),
         plate = GetVehicleNumberPlateText(veh),
-        siren = IsVehicleSirenOn(veh) == true,
+        siren = (s.sirenT and GetGameTimer() - s.sirenT < 1500) and s.siren == true or IsVehicleSirenOn(veh) == true,
         muted = s.muted == true,
         lights = s.lights, headlights = lightsOn == 1, high = highOn == 1,
         indL = s.indL, indR = s.indR, hazard = s.indL and s.indR,
@@ -43,7 +43,13 @@ local function applyIndicators(veh, s)
 end
 
 local handlers = {
-    siren = function(veh, s) SetVehicleSiren(veh, not IsVehicleSirenOn(veh)) end,
+    siren = function(veh, s)
+        local recent = s.sirenT and GetGameTimer() - s.sirenT < 1500   -- le jeu met un instant à refléter l'état demandé : on part de ce qui a été demandé
+        local on = not (recent and s.siren or (not recent and IsVehicleSirenOn(veh) == true))
+        s.siren, s.sirenT = on, GetGameTimer()
+        SetVehicleSiren(veh, on)
+        SetVehicleHasMutedSirens(veh, s.muted == true)
+    end,
     mute = function(veh, s) s.muted = not s.muted SetVehicleHasMutedSirens(veh, s.muted) end,
     blip = function(veh) BlipSiren(veh) end,
     horn = function(veh) StartVehicleHorn(veh, 900, `HELDDOWN`, false) end,
@@ -58,7 +64,7 @@ local handlers = {
         if v and DoesExtraExist(veh, v) then SetVehicleExtra(veh, v, IsVehicleExtraTurnedOn(veh, v)) end   -- 2e paramètre = « désactiver »
     end,
     off = function(veh, s)
-        SetVehicleSiren(veh, false) s.muted = false SetVehicleHasMutedSirens(veh, false)
+        SetVehicleSiren(veh, false) s.siren, s.sirenT = false, GetGameTimer() s.muted = false SetVehicleHasMutedSirens(veh, false)
         s.indL, s.indR, s.interior, s.lights = false, false, false, 0
         applyIndicators(veh, s) SetVehicleInteriorlight(veh, false) SetVehicleFullbeam(veh, false) SetVehicleLights(veh, 0)
     end,
