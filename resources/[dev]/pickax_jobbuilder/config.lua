@@ -84,6 +84,32 @@ Config.GarageKinds = {
     boat     = { label = 'Bateaux',                clear = 8.0 },
 }
 
+-- ─────────────────────────────── Props du métier ───────────────────────────────
+-- Menu F6 (en service) → « Props du métier » : le joueur pose des barrières, plots, tables… Limite PAR JOUEUR : BaseLimit, ou la valeur de son
+-- niveau VIP (pickax_core) si elle est plus haute ; la limite est commune avec les props de gang (pickax_gangbuilder).
+Config.Props = {
+    Enabled            = true,
+    BaseLimit          = 10,
+    VipLimits          = { [1] = 15, [2] = 20, [3] = 30 },
+    PlaceDistance      = 10.0,
+    Lifetime           = 0,                                 -- durée de vie en minutes (0 = jusqu'au retrait / redémarrage)
+    RemoveOnDisconnect = true,
+    RemoveOffDuty      = false,                             -- true : les props disparaissent quand le joueur quitte son service
+    Cooldown           = 1500,
+    Catalog = {
+        { id = 'barrier1',  label = 'Barrière de chantier',      model = 'prop_barrier_work05',   cat = 'Barrières' },
+        { id = 'barrier2',  label = 'Barrière rayée',            model = 'prop_barrier_work06a',  cat = 'Barrières' },
+        { id = 'barrier3',  label = 'Barrière basse',            model = 'prop_barrier_work01a',  cat = 'Barrières' },
+        { id = 'barrier4',  label = 'Barrière béton',            model = 'prop_mp_barrier_02b',   cat = 'Barrières' },
+        { id = 'cone',      label = 'Plot orange',               model = 'prop_roadcone02a',      cat = 'Signalisation' },
+        { id = 'light',     label = 'Projecteur de chantier',    model = 'prop_worklight_03a',    cat = 'Éclairage' },
+        { id = 'box1',      label = 'Caisse en bois',            model = 'prop_box_wood02a',      cat = 'Matériel' },
+        { id = 'barrel',    label = 'Fût métallique',            model = 'prop_barrel_02a',       cat = 'Matériel' },
+        { id = 'table',     label = 'Table',                     model = 'prop_table_03',         cat = 'Mobilier' },
+        { id = 'chair',     label = 'Chaise',                    model = 'prop_chair_01a',        cat = 'Mobilier' },
+    },
+}
+
 -- ─────────────────────────────── Actions métier (menu F6) ───────────────────────────────
 Config.Actions = {
     handcuff = { label = 'Menotter / Démenotter', icon = 'fa-handcuffs',    target = true, types = { 'police' } },
@@ -93,6 +119,7 @@ Config.Actions = {
     heal     = { label = 'Soigner',               icon = 'fa-kit-medical',  target = true, types = { 'ems' } },
     repair   = { label = 'Réparer le véhicule',   icon = 'fa-wrench',       target = false, types = { 'mecano' } },
     clean    = { label = 'Nettoyer le véhicule',  icon = 'fa-soap',         target = false, types = { 'mecano' } },
+    props    = { label = 'Props du métier',       icon = 'fa-road-barrier', target = false },   -- barrières, plots, tables… (limite par joueur, plus haute avec le VIP)
     invoice  = { label = 'Facturer',              icon = 'fa-file-invoice-dollar', target = true },
     properties = { label = 'Gestion immobilière', icon = 'fa-house',        target = false, auto = true }, -- auto pour les jobs de type realestate
     dealership = { label = 'Gestion concession',  icon = 'fa-car',          target = false, auto = true }, -- auto pour les jobs de type dealer
@@ -551,7 +578,7 @@ Config.Real = {
 Config.JobTypes = {
     police = {
         label = 'Police', blip = { sprite = 60, color = 29, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search', 'invoice' },
+        actions = { 'handcuff', 'escort', 'search', 'props', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'recruit',    label = 'Recrue',     salary = 100 },
@@ -563,7 +590,7 @@ Config.JobTypes = {
     },
     ems = {
         label = 'EMS / Ambulance', blip = { sprite = 61, color = 1, scale = PK_BSF(0.9) },
-        actions = { 'revive', 'heal', 'invoice' },
+        actions = { 'revive', 'heal', 'props', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'shop', 'boss' },
         grades = {
             { name = 'ambulance',    label = 'Ambulancier',  salary = 350 },
@@ -585,7 +612,7 @@ Config.JobTypes = {
     },
     mecano = {
         label = 'Mécano', blip = { sprite = 446, color = 5, scale = PK_BSF(0.9) },
-        actions = { 'repair', 'clean', 'invoice' },
+        actions = { 'repair', 'clean', 'props', 'invoice' },
         points = { 'garage', 'garage_return', 'cloakroom', 'stash', 'tuning', 'shop', 'boss' },
         grades = {
             { name = 'recrue',   label = 'Apprenti',    salary = 150 },

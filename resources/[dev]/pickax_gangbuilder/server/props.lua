@@ -31,6 +31,13 @@ local function countOf(identifier)
     return n
 end
 
+-- Props posés par le même joueur via son métier (pickax_jobbuilder) : la limite est commune (gang + métier)
+local function otherCount(identifier)
+    local ok, n = pcall(function() return exports.pickax_jobbuilder:CountProps(identifier) end)
+    return ok and tonumber(n) or 0
+end
+local function totalCount(identifier) return countOf(identifier) + otherCount(identifier) end
+
 local function removeProp(id)
     local p = Props[id]
     if not p then return end
@@ -65,7 +72,7 @@ ESX.RegisterServerCallback('gangbuilder:props:list', function(src, cb)
     local limit, vip = limitFor(src)
     local cat = {}
     for _, c in ipairs(P.Catalog) do cat[#cat + 1] = { id = c.id, label = c.label, cat = c.cat } end
-    cb({ ok = true, limit = limit, vip = vip, base = P.BaseLimit, vipLimits = P.VipLimits, count = countOf(xPlayer.identifier), catalog = cat, mine = mine(xPlayer.identifier),
+    cb({ ok = true, limit = limit, vip = vip, base = P.BaseLimit, vipLimits = P.VipLimits, count = totalCount(xPlayer.identifier), catalog = cat, mine = mine(xPlayer.identifier),
         gangLabel = gang.label })
 end)
 
@@ -78,7 +85,7 @@ ESX.RegisterServerCallback('gangbuilder:props:place', function(src, cb, id, c)
     local now = GetGameTimer()
     if lastPlace[src] and now - lastPlace[src] < (P.Cooldown or 1500) then return cb(fail('Doucement…')) end
     local limit = limitFor(src)
-    if countOf(xPlayer.identifier) >= limit then return cb(fail(('Limite atteinte : %d props maximum'):format(limit))) end
+    if totalCount(xPlayer.identifier) >= limit then return cb(fail(('Limite atteinte : %d props maximum'):format(limit))) end
     local ped = GetPlayerPed(src)
     if not ped or ped == 0 then return cb(fail('Erreur')) end
     local pc = GetEntityCoords(ped)
@@ -95,7 +102,7 @@ ESX.RegisterServerCallback('gangbuilder:props:place', function(src, cb, id, c)
     local pid = nextId nextId = nextId + 1
     Props[pid] = { id = pid, ent = ent, owner = xPlayer.identifier, src = src, gang = gang.name, model = entry.model, label = entry.label, at = os.time() }
     GB.log(gang.name, xPlayer, 'prop_placed', entry.label)
-    cb({ ok = true, count = countOf(xPlayer.identifier), limit = limit })
+    cb({ ok = true, count = totalCount(xPlayer.identifier), limit = limit })
 end)
 
 ESX.RegisterServerCallback('gangbuilder:props:remove', function(src, cb, pid)
@@ -140,4 +147,5 @@ AddEventHandler('onResourceStop', function(res)
     for id in pairs(Props) do removeProp(id) end
 end)
 
+exports('CountProps', function(identifier) return countOf(identifier) end)
 exports('GetPropLimit', function(src) return (limitFor(tonumber(src))) end)

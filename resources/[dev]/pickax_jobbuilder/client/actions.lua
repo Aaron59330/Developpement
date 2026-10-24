@@ -52,6 +52,11 @@ function RunAction(id, label, amount)
     if not hasAction(id) then return JBNotify('~r~Action non autorisée.') end
     local cfg = Config.Actions[id]
 
+    if id == 'props' then
+        CloseUI()
+        return SetTimeout(150, function() OpenPropsMenu() end)
+    end
+
     if id == 'smallquests' then
         if GetResourceState('pickax_worldbuilder') ~= 'started' then return JBNotify('~r~pickax_worldbuilder n\'est pas démarré.') end
         return exports['pickax_worldbuilder']:OpenQuests()

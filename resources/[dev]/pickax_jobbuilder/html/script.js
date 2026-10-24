@@ -128,7 +128,7 @@ const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout', vehctl: 'siren' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout', vehctl: 'siren', props: 'box' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
 function applyTheme(rgb) {
@@ -2597,7 +2597,7 @@ const Runtime = {
 
   render() {
     const d = this.data, k = this.kind;
-    window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
+    window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl', 'props'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
     const list = (arr, fn, empty) => arr.length ? arr.map(fn).join('') : `<p class="hint">${empty}</p>`;
     const row = (icon, title, sub, right) => `<div class="item">${tile(icon)}<div class="grow"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>${right}</div>`;
     switch (k) {
@@ -2612,6 +2612,20 @@ const Runtime = {
       case 'boss': return this.renderBoss();
       case 'menu': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: TYPE_ICON[d.type] || 'briefcase', title: d.jobLabel, sub: `Grade : ${d.grade}`, cls: 'corner',
         body: list(d.actions, a => `<div class="item click" data-a="act" data-id="${a.id}">${tile(ACTION_ICON[a.id] || 'grid')}<div class="grow"><b>${esc(a.label)}</b></div><span class="chev">${ic('chevron', 16)}</span></div>`, 'Aucune action.') });
+      case 'props': {
+        $root.classList.add('corner');
+        const pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit;
+        const vipName = ['', 'VIP Bronze', 'VIP Argent', 'VIP Or'][d.vip || 0], vl = d.vipLimits || {};
+        const cats = [...new Set((d.catalog || []).map(c => c.cat))];
+        return $root.innerHTML = panel({ icon: 'box', title: 'Props du métier', sub: d.gangLabel, cls: 'corner', body: `
+          <div class="vgroup">Mes props</div>
+          <div class="item"><div class="grow"><b>${d.count} / ${d.limit} posés</b><small>${d.vip ? vipName + ' · ' : ''}Sans VIP : ${d.base} · Bronze ${vl[1] || d.base} · Argent ${vl[2] || d.base} · Or ${vl[3] || d.base}</small>
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.1);margin-top:8px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--accent)"></i></div></div></div>
+          ${cats.map(cat => `<div class="vgroup">${esc(cat)}</div><div class="vchips">${(d.catalog || []).filter(c => c.cat === cat).map(c => `<button class="vchip" data-a="propPick" data-v="${esc(c.id)}" ${full ? 'disabled' : ''}>${esc(c.label)}</button>`).join('')}</div>`).join('')}
+          <div class="vgroup">Props posés (${(d.mine || []).length})</div>
+          ${(d.mine || []).map(p => `<div class="item"><div class="grow"><b>${esc(p.label)}</b><small>#${p.id}</small></div><button class="sm" data-a="propDel" data-v="${p.id}">Retirer</button></div>`).join('') || '<p class="hint">Aucun prop posé.</p>'}
+          ${(d.mine || []).length ? `<button class="danger vall" data-a="propDelAll">Tout retirer</button>` : ''}` });
+      }
       case 'vehctl': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'siren', title: 'Véhicule d\'urgence', sub: d.inVehicle ? `${d.name} · ${d.plate}` : 'Gyrophares & sirènes', cls: 'corner', body: this.renderVehctl(d) });
       case 'leaveJob': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'logout', title: 'Quitter le métier', sub: d.jobLabel, cls: 'corner',
         body: `<p class="hint">Tu es sûr de vouloir quitter <b>${esc(d.jobLabel)}</b> ? Tu perds ton grade et l'accès aux points, coffres et véhicules du métier.</p>
@@ -2784,6 +2798,13 @@ const Runtime = {
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile', 'ok');
       case 'take': return ok(await rpc('armory:take', pid, i), 'Objet récupéré');
       case 'buy': return ok(await rpc('shop:buy', pid, i, Number(document.getElementById('q' + i).value)), 'Achat effectué');
+      case 'propPick': return rpc('props:place', el.dataset.v);
+      case 'propDel': case 'propDelAll': {
+        const r = a === 'propDel' ? await rpc('props:remove', Number(el.dataset.v)) : await rpc('props:removeAll');
+        if (!ok(r)) return;
+        const n = await rpc('props:list'); if (n && n.ok) { this.data = n; this.render(); }
+        return toast(a === 'propDel' ? 'Prop retiré' : 'Props retirés', 'ok');
+      }
       case 'vc': { const r = await rpc('vehctl:set', el.dataset.k, el.dataset.v); if (!ok(r)) return; this.data = r; return this.render(); }
       case 'leaveJobCancel': return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }

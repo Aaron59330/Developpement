@@ -19,6 +19,7 @@ server_scripts {
     'server/dlogs.lua',
     'server/duty.lua',
     'server/runtime.lua',
+    'server/props.lua',
     'server/property.lua',
     'server/settings.lua',
     'server/dealer.lua',
@@ -52,6 +53,7 @@ client_scripts {
     'client/emstablet.lua',
     'client/bank.lua',
     'client/vehctl.lua',
+    'client/props.lua',
 }
 
 ui_page 'html/index.html'

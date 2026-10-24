@@ -359,6 +359,7 @@ NuiRemote = {
     ['cloak:wear'] = true, ['armory:take'] = true, ['shop:buy'] = true,
     ['boss:money'] = true, ['boss:recruit'] = true, ['boss:setGrade'] = true, ['boss:fire'] = true, ['boss:salary'] = true,
     openPoint = true, ['duty:toggle'] = true,
+    ['props:list'] = true, ['props:remove'] = true, ['props:removeAll'] = true,
     ['boss:poll'] = true, ['gov:balance'] = true,
     ['settings:get'] = true, ['settings:save'] = true, ['settings:reset'] = true,
 }
