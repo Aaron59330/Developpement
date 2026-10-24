@@ -251,7 +251,7 @@ local EXIT_COLOR = { 255, 140, 60 }
 local function addNode(e, p, kind, c, color)
     local text = KIND_TEXT[e.type] and KIND_TEXT[e.type][kind]
     if not text then return end
-    Nodes[#Nodes + 1] = { eid = e.id, type = e.type, pi = p.i, kind = kind, c = vector3(c.x, c.y, c.z), text = text, label = p.label, entity = e, color = color }
+    Nodes[#Nodes + 1] = { eid = e.id, type = e.type, pi = p.i, kind = kind, c = vector3(c.x, c.y, c.z), text = text, label = p.label, entity = e, color = color, plant = p.plant, outfit = p.outfit }
 end
 
 local function buildNodes()

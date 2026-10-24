@@ -403,8 +403,8 @@ Object.values(Panels).forEach(p => { const open = p.open.bind(p); p.open = d => 
 /* ════════════════════════════ BUILDER (admin) ════════════════════════════ */
 const ACTION_LABEL = { create: 'Création', save: 'Modification', delete: 'Suppression', duplicate: 'Duplication', toggle: 'Statut', take: 'Sortie garage', store: 'Rangement', release: 'Fourrière', seize: 'Saisie',
   rent: 'Location', return: 'Retour', fleet: 'Flotte', fuel: 'Plein', jerrycan: 'Jerricane', harvest: 'Récolte', process: 'Fabrication', sell: 'Vente', launder: 'Blanchiment',
-  rob_start: 'Braquage lancé', rob_loot: 'Butin', rob_end: 'Braquage terminé', gf_start: 'Go Fast lancé', gf_deliver: 'Go Fast livré' };
-const STAT_LABEL = { kills: 'Kills', matches: 'Parties jouées', listed: 'Annonces déposées', sold: 'Véhicules vendus', uses: 'Utilisations', keys: 'Clés faites', washes: 'Lavages effectués', exams: 'Examens passés', passed: 'Permis délivrés', deposits: 'Total déposé', withdrawn: 'Total retiré', transfers: 'Total viré', revenue: 'Revenus générés', rentals: 'Locations', liters: 'Litres vendus', tank: 'Cuve (L)', released: 'Véhicules rendus', seized: 'Véhicules saisis', harvested: 'Unités récoltées',
+  rob_start: 'Braquage lancé', rob_loot: 'Butin', rob_end: 'Braquage terminé', plant: 'Plantation', gf_start: 'Go Fast lancé', gf_deliver: 'Go Fast livré' };
+const STAT_LABEL = { planted: 'Graines plantées', kills: 'Kills', matches: 'Parties jouées', listed: 'Annonces déposées', sold: 'Véhicules vendus', uses: 'Utilisations', keys: 'Clés faites', washes: 'Lavages effectués', exams: 'Examens passés', passed: 'Permis délivrés', deposits: 'Total déposé', withdrawn: 'Total retiré', transfers: 'Total viré', revenue: 'Revenus générés', rentals: 'Locations', liters: 'Litres vendus', tank: 'Cuve (L)', released: 'Véhicules rendus', seized: 'Véhicules saisis', harvested: 'Unités récoltées',
   crafted: 'Lots fabriqués', sold: 'Unités vendues', laundered: 'Argent blanchi', attempts: 'Tentatives de braquage', started: 'Go Fast lancés', delivered: 'Go Fast livrés', earned: 'Gains versés' };
 const SWATCHES = [[239, 68, 68], [249, 115, 22], [245, 158, 11], [34, 197, 94], [20, 184, 166], [59, 130, 246], [99, 102, 241], [168, 85, 247], [236, 72, 153], [244, 244, 245]];
 
@@ -1005,14 +1005,33 @@ const Builder = {
 
   toolFields(base) { return `${this.fItem('Outil requis (vide = aucun)', `${base}.tool.item`)}<div style="align-self:end">${this.fC('Consommé', `${base}.tool.consume`)}</div>`; },
 
+  outfitCard(base) {
+    const o = getPath(this.cur, `${base}.outfit`) || {};
+    const lab = r => (r.k === 'p' ? ({ 0: 'Chapeau', 1: 'Lunettes' })[r.id] : ({ 1: 'Masque', 3: 'Torse', 4: 'Pantalon', 6: 'Chaussures', 7: 'Accessoire', 8: 'Haut', 9: 'Gilet', 11: 'Veste' })[r.id]) || (r.k === 'p' ? 'Accessoire ' : 'Pièce ') + r.id;
+    const row = (sex, title) => { const arr = o[sex] || []; return `<div class="lbl mt">${title} (${arr.length} pièce${arr.length > 1 ? 's' : ''})</div><div class="row wrap" style="gap:6px">${arr.map((r, i) => `<span class="chip">${esc(lab(r))} · ${r.d}<button class="icon sm" style="margin-left:6px;width:20px;height:20px" data-a="outfitDel" data-v="${base}.outfit.${sex}|${i}">${ic('x', 11)}</button></span>`).join('') || '<span class="muted sm-t">Aucune pièce : pas de tenue exigée pour ce sexe</span>'}</div>`; };
+    return `<div class="card"><div class="card-h"><div class="t">${ic('shirt', 17)} Tenue obligatoire</div>${this.fC('Exiger une tenue', `${base}.outfit.enabled`, { r: 1 })}</div>
+      ${this.v(`${base}.outfit.enabled`) ? `${row('male', 'Tenue homme')}${row('female', 'Tenue femme')}
+        <div class="row mt"><button class="primary" data-a="outfitCapture" data-v="${base}">${ic('shirt', 15)} Capturer ma tenue actuelle</button></div>
+        <div class="hint mt-s">Habille ton personnage avec la tenue exigée (combinaison, masque, gilet…) puis clique : elle remplace la tenue du <b>sexe de ton personnage</b>. Retire avec ✕ les pièces qui ne comptent pas. Le joueur doit porter exactement ces pièces pour utiliser ce point.</div>` : '<div class="hint">Aucune tenue exigée.</div>'}</div>`;
+  },
+
+  plantCard(base) {
+    const on = this.v(`${base}.harvest.plant.enabled`);
+    return `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Plantation</div>${this.fC('Les plantes poussent', `${base}.harvest.plant.enabled`, { r: 1 })}</div>
+      ${on ? `<div class="grid3">${this.fItem('Item graine', `${base}.harvest.plant.seed`)}${this.fN('Graines par plantation', `${base}.harvest.plant.seedCount`, { min: 1, max: 100 })}${this.fN('Temps de pousse (minutes)', `${base}.harvest.plant.growMinutes`, { min: 1, max: 10080 })}
+        ${this.fN('Durée de la plantation (s)', `${base}.harvest.plant.plantSeconds`, { min: 1, max: 600 })}</div>
+        <div class="grid3 mt">${this.fS('Prop : petite plante', `${base}.harvest.plant.small`, { max: 60, ph: 'bkr_prop_weed_01_small_01a' })}${this.fS('Prop : plante moyenne', `${base}.harvest.plant.medium`, { max: 60, ph: 'bkr_prop_weed_med_01a' })}${this.fS('Prop : plante prête', `${base}.harvest.plant.large`, { max: 60, ph: 'bkr_prop_weed_lrg_01a' })}</div>
+        <div class="hint mt-s">Cette parcelle démarre <b>vide</b> : le joueur plante des graines, la plante pousse de 0 à 100 % avec le temps (même hors ligne), puis il la récolte. Après la récolte, il faut <b>replanter</b>. Un point = une parcelle : place un point par plante. Laisse les props vides pour utiliser ceux par défaut.</div>` : '<div class="hint">Désactivé : récolte directe, comme avant.</div>'}</div>`;
+  },
+
   drugKind(base, p) {
     const k = p.kind;
-    if (k === 'harvest') return `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
+    if (k === 'harvest') return this.outfitCard(base) + this.plantCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
       <div class="grid3">${this.fItem('Item récolté', `${base}.harvest.item`)}${this.fN('Quantité min', `${base}.harvest.min`, { min: 1 })}${this.fN('Quantité max', `${base}.harvest.max`, { min: 1 })}
       ${this.fN('Durée (secondes)', `${base}.harvest.time`, { min: 1 })}${this.animSel('Animation', `${base}.harvest.anim`)}${this.fN('Délai entre deux récoltes (s)', `${base}.harvest.cooldown`, { min: 0 })}
       ${this.fN('Récoltes avant épuisement (0 = ∞)', `${base}.harvest.maxUses`, { min: 0 })}${this.fN('Repousse (secondes)', `${base}.harvest.regen`, { min: 10 })}</div>
       <div class="grid2 mt">${this.toolFields(`${base}.harvest`)}</div></div>`;
-    if (k === 'process') return `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
+    if (k === 'process') return this.outfitCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
       ${(p.recipes || []).map((r, j) => this.recipeEditor(`${base}.recipes.${j}`, r, j)).join('') || '<div class="hint">Aucune recette.</div>'}</div>`;
     if (k === 'sell') return `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
       <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
@@ -1114,6 +1133,14 @@ const Builder = {
         if (arr.length >= 60) return toast('Limite atteinte', 'err');
         arr.push(NEWROW[key]()); this.markDirty(); return this.render();
       }
+      case 'outfitCapture': {
+        const r = await rpc('captureOutfit');
+        if (!r || !r.ok) return toast((r && r.error) || 'Capture impossible', 'err');
+        setPath(c, `${v}.outfit.${r.sex}`, r.list);
+        if (!getPath(c, `${v}.outfit.enabled`)) setPath(c, `${v}.outfit.enabled`, true);
+        this.markDirty(); toast(`Tenue ${r.sex === 'male' ? 'homme' : 'femme'} enregistrée (${r.list.length} pièce${r.list.length > 1 ? 's' : ''})`, 'ok'); return this.render();
+      }
+      case 'outfitDel': { const [path, i] = v.split('|'); const arr = getPath(c, path); if (arr) arr.splice(Number(i), 1); this.markDirty(); return this.render(); }
       case 'rowDel': { const [path, i] = v.split('|'); getPath(c, path).splice(Number(i), 1); this.markDirty(); return this.render(); }
       case 'jcInit': {
         const d = this.cat.jobcenter || {};

@@ -17,6 +17,7 @@ server_scripts {
     'server/builder.lua',
     'server/drugs.lua',
     'server/robbery.lua',
+    'server/plants.lua',
     'server/gofast.lua',
 }
 
@@ -26,6 +27,7 @@ client_scripts {
     'client/main.lua',
     'client/drugs.lua',
     'client/robbery.lua',
+    'client/plants.lua',
     'client/gofast.lua',
 }
 

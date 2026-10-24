@@ -37,9 +37,25 @@ end
 -- ═══════════════ Début d'une action chronométrée (récolte / fabrication) ═══════════════
 ESX.RegisterServerCallback('illegalbuilder:drug:begin', function(src, cb, eid, pi, kind, recipeIdx, batches)
     if IB.Pending[src] then return cb({ ok = false, error = 'Action déjà en cours' }) end
-    if kind ~= 'harvest' and kind ~= 'process' then return cb({ ok = false, error = 'Action invalide' }) end
-    local e, p, xPlayer, idx = resolve(src, eid, pi, kind)
+    if kind ~= 'harvest' and kind ~= 'process' and kind ~= 'plant' then return cb({ ok = false, error = 'Action invalide' }) end
+    local e, p, xPlayer, idx = resolve(src, eid, pi, kind == 'plant' and 'harvest' or kind)
     if not e then return cb({ ok = false, error = p }) end
+
+    -- plantation : on plante des graines (parcelle vide), puis on récolte quand la plante est à 100 %
+    local pl = kind ~= 'process' and IB.plantDef(e, idx) or nil
+    if kind == 'plant' then
+        if not pl then return cb({ ok = false, error = 'Pas de plantation ici' }) end
+        local state = IB.plantStatus(e, idx)
+        if state ~= 'empty' then return cb({ ok = false, error = 'Il y a déjà une plante ici' }) end
+        if IB.itemCount(src, pl.seed) < pl.seedCount then return cb({ ok = false, error = ('Il te faut : %s ×%d'):format(pl.seed, pl.seedCount) }) end
+        IB.beginAct(src, { kind = 'drug', sub = 'plant', eid = e.id, pi = idx }, pl.plantSeconds)
+        return cb({ ok = true, seconds = pl.plantSeconds, anim = 'harvest', label = 'Plantation' })
+    end
+    if pl then
+        local state, pct = IB.plantStatus(e, idx)
+        if state == 'empty' then return cb({ ok = false, error = 'Plante d\'abord des graines' }) end
+        if state ~= 'ready' then return cb({ ok = false, error = ('La plante n\'est pas encore prête (%d %%)'):format(pct) }) end
+    end
 
     if kind == 'harvest' then
         local h = p.harvest
@@ -47,7 +63,7 @@ ESX.RegisterServerCallback('illegalbuilder:drug:begin', function(src, cb, eid, p
         if h.tool and h.tool.item ~= '' and IB.itemCount(src, h.tool.item) < 1 then return cb({ ok = false, error = 'Il te faut : ' .. h.tool.item }) end
         local now = os.time()
         local key = ('%d:%d'):format(e.id, idx)
-        if (h.maxUses or 0) > 0 then
+        if not pl and (h.maxUses or 0) > 0 then
             local u = Uses[key]
             if u and u.uses >= h.maxUses then
                 if now >= u.resetAt then Uses[key] = nil else return cb({ ok = false, error = 'Il n\'y a plus rien à récolter ici pour le moment' }) end
@@ -84,16 +100,30 @@ RegisterNetEvent('illegalbuilder:server:drugFinish', function(done)
     local p = e.points[a.pi]
     if not p or not p.coords or not IB.near(src, p.coords, 6.0) then return end
 
+    if a.sub == 'plant' then
+        local pl = IB.plantDef(e, a.pi)
+        if not pl or IB.plantStatus(e, a.pi) ~= 'empty' then return IB.notify(src, 'Impossible de planter ici.', 'error') end
+        if IB.itemCount(src, pl.seed) < pl.seedCount or not IB.removeItem(src, pl.seed, pl.seedCount) then return IB.notify(src, 'Il te faut : ' .. pl.seed, 'error') end
+        IB.plantSet(e, a.pi, xPlayer.identifier)
+        maybeAlert(p, e)
+        IB.stat(e, 'planted', 1)
+        IB.log(e, xPlayer, 'plant', ('%s ×%d'):format(pl.seed, pl.seedCount), pl.seedCount)
+        return IB.notify(src, ('Graines plantées : prête dans %d min.'):format(pl.growMinutes), 'success')
+    end
+
     if a.sub == 'harvest' then
         local h = p.harvest
+        local pl = IB.plantDef(e, a.pi)
+        if pl and IB.plantStatus(e, a.pi) ~= 'ready' then return IB.notify(src, 'La plante n\'est pas prête.', 'error') end
         local n = roll(h.min, h.max)
         if h.tool and h.tool.item ~= '' then
             if IB.itemCount(src, h.tool.item) < 1 then return IB.notify(src, 'Il te faut : ' .. h.tool.item, 'error') end
             if h.tool.consume then IB.removeItem(src, h.tool.item, 1) end
         end
         if not IB.addItem(src, h.item, n) then return IB.notify(src, 'Tu ne peux pas porter plus.', 'error') end
+        if pl then IB.plantClear(e, a.pi) end   -- la parcelle est vide : il faut replanter des graines
         local key = ('%d:%d'):format(e.id, a.pi)
-        if (h.maxUses or 0) > 0 then
+        if not pl and (h.maxUses or 0) > 0 then
             local u = Uses[key] or { uses = 0, resetAt = 0 }
             u.uses = u.uses + 1
             if u.uses >= h.maxUses then u.resetAt = os.time() + (h.regen or 300) end

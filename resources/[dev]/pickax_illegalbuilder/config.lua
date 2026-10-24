@@ -169,7 +169,7 @@ Config.Templates.drug = {
         label = 'Cannabis', icon = 'leaf',
         settings = { note = 'Champ → séchage → vente' },
         points = {
-            harvest('Champ de cannabis', 'weed', 6, 'harvest'),
+            harvest('Champ de cannabis', 'weed', 6, 'harvest', { plant = { enabled = true, seed = 'weed_seed', seedCount = 1, growMinutes = 30, plantSeconds = 6, small = '', medium = '', large = '' } }),
             process('Séchage & conditionnement', { { label = 'Pochon de cannabis', inputs = { { item = 'weed', count = 3 } }, outputs = { { item = 'weed_pooch', count = 1 } }, time = 8 } }, 'inspect'),
             sell('Dealer — cannabis', { { item = 'weed_pooch', min = 90, max = 140 } }),
         },
@@ -178,7 +178,7 @@ Config.Templates.drug = {
         label = 'Cocaïne', icon = 'flask',
         settings = { note = 'Feuilles de coca → laboratoire → vente' },
         points = {
-            harvest('Plantation de coca', 'coke', 8, 'harvest', { max = 4 }),
+            harvest('Plantation de coca', 'coke', 8, 'harvest', { max = 4, plant = { enabled = true, seed = 'coke_seed', seedCount = 1, growMinutes = 45, plantSeconds = 8, small = '', medium = '', large = '' } }),
             process('Laboratoire de cocaïne', { { label = 'Sachet de cocaïne', inputs = { { item = 'coke', count = 3 } }, outputs = { { item = 'coke_pooch', count = 1 } }, time = 12, failChance = 5 } }, 'clipboard'),
             sell('Dealer — cocaïne', { { item = 'coke_pooch', min = 220, max = 320 } }),
         },

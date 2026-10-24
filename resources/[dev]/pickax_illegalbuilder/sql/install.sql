@@ -41,3 +41,11 @@ CREATE TABLE IF NOT EXISTS `illegalbuilder_state` (
   `v` bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY (`k`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `illegalbuilder_plants` (
+  `entity_id` int(11) NOT NULL,
+  `point_idx` int(11) NOT NULL,
+  `planted_at` int(11) NOT NULL,
+  `planted_by` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`entity_id`,`point_idx`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

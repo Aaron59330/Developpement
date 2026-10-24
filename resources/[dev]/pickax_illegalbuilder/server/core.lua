@@ -389,7 +389,8 @@ function IB.publicEntity(e)
     local s, pts = e.settings, {}
     for i, p in ipairs(e.points) do
         if p.coords and p.coords.x then
-            pts[#pts + 1] = { i = i, kind = p.kind or 'main', label = p.label, coords = p.coords, store = p.store, ret = p.ret, inside = p.inside,
+            pts[#pts + 1] = { i = i, kind = p.kind or 'main', outfit = (p.outfit and p.outfit.enabled) and p.outfit or nil,
+                plant = (p.harvest and p.harvest.plant and p.harvest.plant.enabled) and p.harvest.plant or nil, label = p.label, coords = p.coords, store = p.store, ret = p.ret, inside = p.inside,
                 spawns = p.spawns, ped = p.ped, blip = p.blip, color = p.color, color2 = p.color2, doors = p.doors, useKey = p.useKey, showMarker = p.showMarker, showText = p.showText, desc = p.desc, zone = (p.kind == 'zone') and { radius = p.radius, reviveEnabled = p.reviveEnabled, reviveDelay = p.reviveDelay, giveWeapons = p.giveWeapons, removeOnExit = p.removeOnExit,
                 infiniteAmmo = p.infiniteAmmo, armorOnRespawn = p.armorOnRespawn, spawnProtection = p.spawnProtection, weapons = p.weapons, spawns = p.spawns } or nil }
         end
@@ -409,6 +410,7 @@ function IB.syncPlayer(src)
         marker = Config.Marker, drawDistance = Config.DrawDistance, interactDistance = Config.InteractDistance, pedDistance = Config.PedDistance,
     } })
     if IB.syncRobberies then IB.syncRobberies(src) end
+    if IB.syncPlants then IB.syncPlants(src) end
     if IB.syncDoors then IB.syncDoors(src) end
     if IB.syncListings then IB.syncListings(src) end
 end
