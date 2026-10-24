@@ -1,0 +1,6 @@
+/* GÉNÉRÉ au démarrage de pickax_core depuis Config.AccentColor (#00a4ff) — ne pas modifier à la main. Après un changement de couleur : restart pickax_core puis reconnexion. */
+.chat-input > div { background-color: rgba(0,164,255,.55) !important; }
+.chat-input textarea { color: #fff !important; caret-color: rgb(0,164,255) !important; }
+.chat-input .prefix { color: rgb(0,164,255) !important; }
+.suggestions { border-left: 3px solid rgb(0,164,255) !important; }
+.msg b, .msg > strong { color: rgb(0,164,255); }
