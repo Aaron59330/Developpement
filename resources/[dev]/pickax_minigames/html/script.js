@@ -261,7 +261,7 @@ function tabPoints(d, T) {
 /* ── Carte, blip & marker (même éditeur que les autres builders) ── */
 function tabMap(d) {
   const mk = d.marker || {};
-  const col = Array.isArray(mk.color) ? '#' + mk.color.map(n => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, '0')).join('') : '#40e0d0';
+  const col = Array.isArray(mk.color) ? '#' + mk.color.map(n => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, '0')).join('') : '#fdc27d';
   return BBMap.blipCard({ base: 'blip', b: d.blip || {}, hint: 'Blip placé à l\'entrée du lobby. Champs vides = style commun du serveur.' }) +
     BBMap.markerCard({ base: 'marker', m: d.marker || {}, typeKey: 'type', colorHtml: fld('Couleur du marker', `<div class="row"><input type="color" data-path="__color" value="${col}" style="width:60px"><span class="muted sm-t">${mk.color ? 'personnalisée' : 'couleur par défaut'}</span>${mk.color ? '<button class="sm" data-a="colorReset">Réinitialiser</button>' : ''}</div>`) });
 }

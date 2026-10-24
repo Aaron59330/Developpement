@@ -65,7 +65,8 @@ Config.GlobalMarker = {
     Enabled = true,
     Type = 23,
     Size = { x = 1.0, y = 1.0, z = 0.5 },
-    Color = { r = 253, g = 194, b = 125, a = 150 },
+    -- Couleur : celle du serveur (AccentColor) tant que r / g / b ne sont pas renseignés. Ajoute r = 0, g = 0, b = 0 pour imposer une autre couleur à tous les markers.
+    Color = { a = 150 },
     BobUpAndDown = false,
     FaceCamera = false,
     Rotate = false,

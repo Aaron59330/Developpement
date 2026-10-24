@@ -34,7 +34,7 @@ Config.MaxItemsPerPoint = 100
 
 Config.Inventory         = 'auto'  -- 'auto' | 'ox' | 'esx'
 Config.PlatePrefixLength = 3       -- plaque véhicule gang : 3 lettres du gang + 5 chiffres
-Config.UseGangColor      = true    -- les markers des points prennent la couleur du gang (sinon : couleur du type de point)
+Config.UseGangColor      = false   -- true : les markers des points prennent la couleur du gang (sinon : couleur de base du serveur / du type de point)
 
 -- Ressources redémarrées automatiquement après la création / modification / suppression d'un gang.
 -- Utile si ta ressource job2 charge la liste des jobs2 au DÉMARRAGE (voir Config.Job2.Refresh* plus bas). Ex : { 'pickax_core' }

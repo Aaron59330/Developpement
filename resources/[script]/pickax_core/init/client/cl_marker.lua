@@ -93,6 +93,14 @@ function ClearGlobalMarkerGroundCache()
     lockedGround = {}
 end
 
+-- Couleur du serveur (AccentColor) : utilisée quand GlobalMarker.Color n'impose pas de r / g / b
+local function accentRGB()
+    local h = Config and Config.AccentColor
+    if type(h) == 'string' and h:match('^#%x%x%x%x%x%x$') then
+        return tonumber(h:sub(2, 3), 16), tonumber(h:sub(4, 5), 16), tonumber(h:sub(6, 7), 16)
+    end
+end
+
 function DrawGlobalMarker(...)
     local args = { ... }
     local marker = Config and Config.GlobalMarker
@@ -144,6 +152,7 @@ function DrawGlobalMarker(...)
 
     local size = marker.Size or {}
     local color = marker.Color or {}
+    local ar, ag, ab = accentRGB()
 
     -- Position finale au sol : GroundZ réel + éventuel réglage général, puis
     -- compensation propre au type 23 pour que le cercle soit visuellement
@@ -162,9 +171,9 @@ function DrawGlobalMarker(...)
         size.x or oldScaleX,
         size.y or oldScaleY,
         size.z or oldScaleZ,
-        color.r or oldRed,
-        color.g or oldGreen,
-        color.b or oldBlue,
+        color.r or ar or oldRed,
+        color.g or ag or oldGreen,
+        color.b or ab or oldBlue,
         color.a or oldAlpha,
         false, -- fixed: no vertical bobbing
         false, -- fixed: no camera-facing movement

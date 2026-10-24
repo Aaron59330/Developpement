@@ -95,7 +95,7 @@ CreateThread(function()
             local dd = #(p - vector3(depot.x, depot.y, depot.z))
             if dd < G.DrawDistance then
                 wait = 0
-                BB.DrawMarker(nil, depot, { G.Marker.r, G.Marker.g, G.Marker.b })
+                BB.DrawMarker(nil, depot)
                 if dd < 3.0 then
                     if not mission then
                         BB.ShowHelp('Appuie sur ~INPUT_CONTEXT~ pour charger une citerne de carburant')
@@ -128,7 +128,7 @@ CreateThread(function()
                 local dc = #(p - vector3(c.x, c.y, c.z))
                 if dc < 40.0 then
                     wait = 0
-                    BB.DrawMarker(nil, c, { G.Marker.r, G.Marker.g, G.Marker.b })
+                    BB.DrawMarker(nil, c)
                     if dc < 3.0 and not IsPedInAnyVehicle(ped, false) then
                         if vehNear(c, 30.0) then
                             BB.ShowHelp(('Appuie sur ~INPUT_CONTEXT~ pour décharger %d L'):format(mission.liters))

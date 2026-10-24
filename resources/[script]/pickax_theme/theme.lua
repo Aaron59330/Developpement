@@ -41,7 +41,7 @@ do
         PickaxTheme.marker = {
             type = t or 23,
             scale = { x = n(sz, 'x', 1.0), y = n(sz, 'y', 1.0), z = n(sz, 'z', 0.5) },
-            color = { n(co, 'r', 64), n(co, 'g', 224), n(co, 'b', 208) },
+            color = (co and co:match('r%s*=%s*%d') and co:match('g%s*=%s*%d') and co:match('b%s*=%s*%d')) and { n(co, 'r', PickaxTheme.r), n(co, 'g', PickaxTheme.g), n(co, 'b', PickaxTheme.b) } or { PickaxTheme.r, PickaxTheme.g, PickaxTheme.b },
             alpha = math.floor(n(co, 'a', 150)),
         }
     end

@@ -235,6 +235,11 @@ CreateThread(function()
         if type(a) == 'table' and ((a[1] == 0 and a[2] == 164 and a[3] == 255) or (a[1] == 64 and a[2] == 224 and a[3] == 208)) then
             MySQL.update.await("DELETE FROM gangbuilder_settings WHERE name = 'ui'")
         end
+        local gen = GB.decode(MySQL.scalar.await("SELECT value FROM gangbuilder_settings WHERE name = 'general'"), nil)
+        if type(gen) == 'table' and gen.UseGangColor == true then
+            gen.UseGangColor = false
+            MySQL.update.await("UPDATE gangbuilder_settings SET value = ? WHERE name = 'general'", { json.encode(gen) })
+        end
         MySQL.update.await("INSERT INTO gangbuilder_settings (name, value) VALUES ('_core_style_v2', '1') ON DUPLICATE KEY UPDATE value = '1'")
     end
     local rows = MySQL.query.await('SELECT name, value FROM gangbuilder_settings') or {}

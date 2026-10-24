@@ -612,7 +612,6 @@ Config.Gazoline = {
     -- Garantie : au moins une station garde de l'essence
     ReservePercent = 15,                               -- niveau mini (%) maintenu sur la station de réserve
     CheckSeconds   = 30,
-    Marker         = { r = 255, g = 180, b = 0 },
     DrawDistance   = 25.0,
     Blip           = { sprite = 361, color = 5, scale = 0.9, label = 'Dépôt Gazoline' },
 }

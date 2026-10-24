@@ -74,12 +74,10 @@ function AJ.Cleanup()
 end
 
 -- Marqueur + distance (retourne la distance)
-function AJ.Marker(c, kind, r, g, b)
+function AJ.Marker(c)
     local pos = GetEntityCoords(PlayerPedId())
     local d = #(pos - vector3(c.x, c.y, c.z))
-    if d < Config.Act.DrawDistance then
-        DrawMarker(kind or 1, c.x, c.y, c.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.6, 1.6, 0.7, r or 0, g or 164, b or 255, 110, false, false, 2, false, nil, nil, false)
-    end
+    if d < Config.Act.DrawDistance then BB.DrawMarker(nil, c) end   -- marker de base du serveur (pickax_core), comme tous les points
     return d
 end
 

@@ -1067,7 +1067,7 @@ const Builder = {
 
   /* ── Onglet Général ── */
   tabGeneral() {
-    const c = this.cur, col = c.settings.color, hex = col ? '#' + col.map(n => Math.round(n).toString(16).padStart(2, '0')).join('') : '#40e0d0';
+    const c = this.cur, col = c.settings.color, hex = col ? '#' + col.map(n => Math.round(n).toString(16).padStart(2, '0')).join('') : '#fdc27d';
     return `<div class="card"><div class="card-h"><div class="t">${ic('edit', 17)} Informations</div>${this.fC('Module actif', 'enabled')}</div>
         <div class="grid2">${this.fS('Nom', 'label', { max: 100 })}${this.fS('Note (interne)', 'settings.note', { max: 200 })}</div>
         <div class="hint mt-s">Type : <b>${esc(this.type(c.type).one)}</b>. Un module désactivé est invisible pour les joueurs.</div></div>
