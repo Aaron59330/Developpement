@@ -81,6 +81,9 @@ function GB.onIllegalActivity(src, kind, point)
     startConflict(src, t, g.name)
 end
 
+-- Utilisable par d'autres ressources (Builder Illégal : récolte / traitement / vente de drogue)
+exports('ReportIllegalActivity', function(src, kind) if GB.onIllegalActivity then GB.onIllegalActivity(tonumber(src), tostring(kind), nil) end end)
+
 local function removeRep(name, amount)
     amount = math.floor(tonumber(amount) or 0)
     if amount > 0 and Config.Rep.Enabled then

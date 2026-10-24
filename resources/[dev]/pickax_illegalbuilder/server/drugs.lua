@@ -32,6 +32,12 @@ local function roll(a, b)
     return math.random(a, b)
 end
 
+-- Un gang qui opère (récolte / traitement / vente) sur le territoire d'un autre gang déclenche un affrontement (pickax_gangbuilder)
+local function reportGang(src, kind)
+    if GetResourceState('pickax_gangbuilder') ~= 'started' then return end
+    pcall(function() exports.pickax_gangbuilder:ReportIllegalActivity(src, kind) end)
+end
+
 local function maybeAlert(p, e)
     if (p.alertChance or 0) > 0 and math.random(100) <= p.alertChance then
         IB.alertPolice(p.coords, 'Activité suspecte', ('Activité de drogue suspectée (%s)'):format(p.label ~= '' and p.label or e.label))
@@ -140,6 +146,7 @@ RegisterNetEvent('illegalbuilder:server:drugFinish', function(done)
         end
         IB.counter(('cd:%s:%s'):format(xPlayer.identifier, key), math.max(1, h.cooldown or 0)).n = 1
         maybeAlert(p, e)
+        reportGang(src, 'harvest')
         IB.stat(e, 'harvested', n)
         IB.log(e, xPlayer, 'harvest', ('%s ×%d'):format(h.item, n), n)
         IB.notify(src, ('Tu as récolté %d × %s'):format(n, h.item), 'success')
@@ -165,6 +172,7 @@ RegisterNetEvent('illegalbuilder:server:drugFinish', function(done)
         end
     end
     maybeAlert(p, e)
+    if made > 0 then reportGang(src, 'process') end
     IB.stat(e, 'crafted', made)
     IB.log(e, xPlayer, 'process', ('%s ×%d (%d raté)'):format(r.label ~= '' and r.label or 'recette', made, failed), made)
     if failed > 0 then IB.notify(src, ('%d lot(s) raté(s) : ingrédients perdus.'):format(failed), 'error') end
@@ -228,6 +236,7 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
     c.n = c.n + qty
     IB.pay(xPlayer, ACCOUNT[s.currency] or 'black_money', total, 'Vente : ' .. item)
     maybeAlert(p, e)
+    reportGang(src, 'sell')
     IB.stat(e, 'revenue', total) IB.stat(e, 'sold', qty)
     IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total)
     cb({ ok = true, qty = qty, unit = unit, total = total })

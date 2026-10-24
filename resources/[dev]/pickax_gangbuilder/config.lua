@@ -116,7 +116,7 @@ Config.Salary = {
 }
 
 -- ─────────────────────────────── Affrontements de territoire ───────────────────────────────
--- Quand un gang fait une activité illégale (récolte, traitement, vente) sur le territoire d'un AUTRE gang, le propriétaire est
+-- Quand un gang fait une activité illégale (récolte, traitement, vente de drogue du Builder Illégal) sur le territoire d'un AUTRE gang, le propriétaire est
 -- prévenu (notification + alerte sur la carte) et un affrontement commence : chaque kill dans la zone rapporte un point.
 -- À la fin, le gang qui a le plus de points gagne ; s'il s'agit de l'intrus, il capture le territoire (WinnerCaptures).
 Config.Conflicts = {
@@ -236,10 +236,10 @@ Config.PointTypes = {
     armory    = { label = 'Armurerie',       color = PK_MKC(), marker = PK_MKT },
     stash     = { label = 'Coffre',          color = PK_MKC(), marker = PK_MKT },
     boss      = { label = 'Gestion du gang', color = PK_MKC(), marker = PK_MKT },
-    shop      = { label = 'Marché noir',     color = PK_MKC(), marker = PK_MKT },
-    harvest   = { label = 'Récolte',         color = PK_MKC(), marker = PK_MKT },
-    process   = { label = 'Traitement',      color = PK_MKC(), marker = PK_MKT },
-    sell      = { label = 'Point de vente',  color = PK_MKC(), marker = PK_MKT },
+    shop      = { label = 'Marché noir',     color = PK_MKC(), marker = PK_MKT, hidden = true },
+    harvest   = { label = 'Récolte',         color = PK_MKC(), marker = PK_MKT, hidden = true },
+    process   = { label = 'Traitement',      color = PK_MKC(), marker = PK_MKT, hidden = true },
+    sell      = { label = 'Point de vente',  color = PK_MKC(), marker = PK_MKT, hidden = true },
     laundry   = { label = 'Blanchiment',     color = PK_MKC(), marker = PK_MKT, hidden = true },   -- retiré : le blanchiment se fait avec la tablette (Builder Illégal) ; les anciens points sont supprimés au prochain enregistrement du gang
     -- Variantes de garage (hidden = non ajoutables directement : on choisit le « type » dans l'éditeur du garage)
     garage_bike     = { label = 'Garage motos',    color = PK_MKC(), marker = PK_MKT, hidden = true },
@@ -310,7 +310,7 @@ Config.GangTypes = {
     street = {
         label = 'Gang de rue', color = '#22c55e', blip = { sprite = 310, color = 2, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'recrue',   label = 'Petit',       salary = 50 },
             { name = 'soldat',   label = 'Soldat',      salary = 100 },
@@ -321,7 +321,7 @@ Config.GangTypes = {
     mafia = {
         label = 'Mafia', color = '#a855f7', blip = { sprite = 310, color = 27, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'shop', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'associe',  label = 'Associé',     salary = 100 },
             { name = 'soldat',   label = 'Soldat',      salary = 200 },
@@ -333,7 +333,7 @@ Config.GangTypes = {
     biker = {
         label = 'Club de motards', color = '#f97316', blip = { sprite = 226, color = 17, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'prospect', label = 'Prospect',    salary = 50 },
             { name = 'member',   label = 'Membre',      salary = 120 },
@@ -345,7 +345,7 @@ Config.GangTypes = {
     cartel = {
         label = 'Cartel', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'halcon',   label = 'Halcón',      salary = 80 },
             { name = 'sicario',  label = 'Sicario',     salary = 180 },
@@ -471,9 +471,6 @@ Config.Schema = {
         { key = 'Rep.Enabled', label = 'Réputation activée', t = 'bool', server = true },
         { key = 'Rep.PerCapture', label = 'Territoire capturé', t = 'int', min = 0, max = 100000, server = true },
         { key = 'Rep.PerIncome', label = 'Revenu de territoire', t = 'int', min = 0, max = 100000, server = true },
-        { key = 'Rep.PerSaleThousand', label = 'Par 1 000 $ vendus', t = 'int', min = 0, max = 100000, server = true },
-        { key = 'Rep.PerProcess', label = 'Par fabrication', t = 'int', min = 0, max = 100000, server = true },
-        { key = 'Rep.PerHarvest', label = 'Par récolte', t = 'int', min = 0, max = 100000, server = true },
     } },
     { id = 'territories', label = 'Territoires', fields = {
         { key = 'Territories.Enabled', label = 'Territoires activés', t = 'bool' },
@@ -521,22 +518,6 @@ Config.Schema = {
         { key = 'Objectives.RewardAccount', label = 'Compte crédité', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale du gang' }, { 'money', 'Argent propre du gang' }) },
         { key = 'Objectives.Reward', label = 'Récompense ($)', t = 'int', min = 0, max = 100000000, server = true },
         { key = 'Objectives.RewardRep', label = 'Réputation gagnée', t = 'int', min = 0, max = 100000, server = true },
-    } },
-    { id = 'activities', label = 'Activités', fields = {
-        { key = 'Activities.Grace', label = 'Part de la durée à respecter (anti-triche, 0-1)', t = 'num', min = 0.3, max = 1, server = true },
-        { key = 'Activities.MaxHarvest', label = 'Quantité max par récolte', t = 'int', min = 1, max = 500, server = true },
-        { key = 'Activities.MaxBatch', label = 'Fabrications max d\'un coup', t = 'int', min = 1, max = 100, server = true },
-        { key = 'Activities.MaxRecipes', label = 'Recettes max par point', t = 'int', min = 1, max = 100, server = true },
-        { key = 'Activities.MaxInputs', label = 'Ingrédients max par recette', t = 'int', min = 1, max = 10, server = true },
-        { key = 'Activities.MaxSell', label = 'Quantité max par vente', t = 'int', min = 1, max = 1000, server = true },
-        { key = 'Activities.HarvestScenario', label = 'Animation de récolte', t = 'str', max = 60 },
-        { key = 'Activities.ProcessScenario', label = 'Animation de traitement', t = 'str', max = 60 },
-        { key = 'Activities.SellAccount', label = 'Vente : compte crédité par défaut', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale' }, { 'money', 'Liquide' }, { 'bank', 'Banque' }) },
-        { key = 'Activities.SellPriceVariance', label = 'Vente : variation du prix (± %)', t = 'int', min = 0, max = 90, server = true },
-        { key = 'Activities.SellGangCut', label = 'Vente : part reversée au gang (%)', t = 'int', min = 0, max = 100, server = true },
-        { key = 'Activities.SellCooldown', label = 'Vente : délai entre deux ventes (s)', t = 'int', min = 0, max = 3600, server = true },
-        { key = 'Activities.PoliceAlert', label = 'Vente : alerte police', t = 'bool' },
-        { key = 'Activities.PoliceAlertChance', label = 'Vente : chance d\'alerte (%)', t = 'int', min = 0, max = 100 },
     } },
     { id = 'ui', label = 'Apparence', fields = {
         { key = 'UI.Accent', label = 'Couleur d\'accentuation', t = 'color' },
@@ -628,16 +609,12 @@ Config.Tablet = {
     Quests = {
         DailyCount = 3, WeeklyCount = 2, RewardAccount = 'dirty',
         Daily = {
-            { id = 'd_harvest', label = 'Approvisionnement',   desc = 'Récolter 60 produits.',          metric = 'harvested', target = 60,    reward = 400,  rep = 4 },
-            { id = 'd_process', label = 'Production',          desc = 'Fabriquer 30 produits.',         metric = 'processed', target = 30,    reward = 500,  rep = 5 },
-            { id = 'd_sell',    label = 'Écouler la marchandise', desc = 'Vendre pour 3 000 $.',        metric = 'sold',      target = 3000,  reward = 600,  rep = 6 },
             { id = 'd_capture', label = 'Prise de territoire', desc = 'Capturer 1 territoire.',         metric = 'capture',   target = 1,     reward = 900,  rep = 12 },
             { id = 'd_win',     label = 'Garder la rue',       desc = 'Gagner 1 affrontement de zone.', metric = 'conflict_win', target = 1,  reward = 800,  rep = 10 },
         },
         Weekly = {
             { id = 'w_capture', label = 'Expansion',           desc = 'Capturer 3 territoires.',        metric = 'capture',   target = 3,     reward = 4000, rep = 40 },
             { id = 'w_object',  label = 'Colis livrés',        desc = 'Livrer 2 colis à votre coffre.', metric = 'objective', target = 2,     reward = 5000, rep = 45 },
-            { id = 'w_sell',    label = 'Gros trafic',         desc = 'Vendre pour 25 000 $.',          metric = 'sold',      target = 25000, reward = 5500, rep = 40 },
             { id = 'w_war',     label = 'Guerre gagnée',       desc = 'Gagner 1 guerre contre un gang.', metric = 'war_win',  target = 1,     reward = 6000, rep = 60 },
             { id = 'w_win',     label = 'Maîtres du quartier', desc = 'Gagner 3 affrontements de zone.', metric = 'conflict_win', target = 3, reward = 4500, rep = 40 },
         },
