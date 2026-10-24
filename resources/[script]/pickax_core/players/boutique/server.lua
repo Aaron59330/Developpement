@@ -109,6 +109,11 @@ Citizen.CreateThread(function()--Ajout des informations au cache Price
         end
     end
 
+    PriceConfigBoutique.vip = {}
+    for k, v in pairs(ConfigBoutique.vip or {}) do
+        PriceConfigBoutique.vip[k] = { id = k, price = v.price, name = v.name }
+    end
+
     PriceConfigBoutique.Entreprise = {}
     for k, v in pairs(ConfigBoutique.Entreprise) do
         if PriceConfigBoutique.Entreprise[k] == nil then
@@ -343,11 +348,19 @@ AddEventHandler("CorePickax:Boutique:Add", function(table)
                 elseif table.Interaction == "BuyPack" then
                     if tonumber(PriceConfigBoutique.pack[table.id].price) == tonumber(table.price) then
                         BoutiqueFunction.removePointsToPlayer(_src, table.price)
-                        for _, win in ipairs((ConfigBoutique.pack[table.id] or {}).Win or {}) do
-                            if win.vip and VipGrantByIdentifier then VipGrantByIdentifier(xPlayer.identifier, win.vip, win.days or 31) end
-                        end
 
                         TriggerEvent('esx:customDiscordLog', 'Logs boutique', 'Nouvelle achat', nil, ConfigSV.Logs["LogsBoutique"], 'ID : '.._src..'\nUtilisateur : '..GetPlayerName(_src)..'\nLicense : '..ESX.GetPlayerFromId(_src).identifier.."\nAchat : "..PriceConfigBoutique.pack[table.id].name.."\nPrix : "..table.price.." coins\nCoins Actuelle : "..PlayerCacheBoutique[ESX.GetPlayerFromId(_src).identifier].points)
+                    else
+                        DropPlayer(_src, ConfigBoutique.Notification["KickPlayer"])
+                    end
+                elseif table.Interaction == "BuyVip" then
+                    local item = ConfigBoutique.vip and ConfigBoutique.vip[table.id]
+                    if item and tonumber(PriceConfigBoutique.vip[table.id].price) == tonumber(table.price) then
+                        BoutiqueFunction.removePointsToPlayer(_src, table.price)
+                        for _, win in ipairs(item.Win or {}) do
+                            if win.vip and VipGrantByIdentifier then VipGrantByIdentifier(xPlayer.identifier, win.vip, win.days or 31) end
+                        end
+                        TriggerEvent('esx:customDiscordLog', 'Logs boutique', 'Achat VIP', nil, ConfigSV.Logs["LogsBoutique"], 'ID : '.._src..'\nUtilisateur : '..GetPlayerName(_src)..'\nVIP : '..tostring(item.name))
                     else
                         DropPlayer(_src, ConfigBoutique.Notification["KickPlayer"])
                     end
@@ -834,7 +847,7 @@ end)
 -- ═══════════════════════════ Exports pour pickax_boutique (panier, codes, historique) ═══════════════════════════
 local BoutiqueLists = function()
     return { vehicle = ConfigBoutique.vehicle, moto = ConfigBoutique.Motos, other = ConfigBoutique.Autres, weapon = ConfigBoutique.weapon,
-        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, business = ConfigBoutique.Entreprise }
+        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, vip = ConfigBoutique.vip or {}, business = ConfigBoutique.Entreprise }
 end
 
 -- Prix / nom d'un article du catalogue (jamais fourni par le client)

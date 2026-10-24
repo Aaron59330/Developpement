@@ -300,8 +300,11 @@ ConfigBoutique = {
                     weapon = "weapon_cal50"
                 }
             }
-        },
-        -- Packs VIP (niveaux et avantages : pickax_core/players/vip/config.lua). `vip` = niveau 1-3, `days` = durée ; un achat du même niveau prolonge le VIP.
+        }
+    },
+    
+    -- Catégorie « Vip » de la boutique. `vip` = niveau 1-3, `days` = durée ; un achat du même niveau prolonge le VIP (avantages : players/vip/config.lua)
+    vip = {
         {
             name = "VIP Bronze (31 jours)",
             desc = "Salaire majoré, inventaire plus grand, coins offerts chaque heure, récompense quotidienne et coffre VIP personnel.\nDétails dans le menu F5 > Espace VIP.",
@@ -321,7 +324,7 @@ ConfigBoutique = {
             Win = { { vip = 3, days = 31 } }
         }
     },
-    
+
     Entreprise = {
         {name = "Pack Gangs", price = "4000", desc = "-Ce pack contient une créations de gangs.\n\n~p~Ouvrez un ticket discord apres l'achat avec votre prenom / nom rp."},
         {name = "Entreprise Farming", price = "7500", desc = "-Ce pack contient une créations de entreprise de farm.\n\n~p~Ouvrez un ticket discord apres l'achat avec votre prenom / nom rp."},

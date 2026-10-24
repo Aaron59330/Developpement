@@ -33,7 +33,7 @@ local function Open()
         cat.dev = res.dev == true
         cat.dailyInfo = res.daily
         if res.boutiqueId then cat.boutiqueId = res.boutiqueId end
-        for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, business = 1 }) do
+        for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, vip = 1, business = 1 }) do
             for _, it in ipairs(cat[c] or {}) do
                 local txt = res.map[c .. '|' .. tostring(it.model or it.name)]
                 if txt then it.desc = txt end

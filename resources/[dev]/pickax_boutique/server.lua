@@ -197,7 +197,7 @@ ESX.RegisterServerCallback('pickax_boutique:prepare', function(src, cb, cart, co
     for _, line in ipairs(cart) do
         local cat, idx = tostring(line.cat), tonumber(line.idx)
         local qty = math.max(1, math.min(10, math.floor(tonumber(line.qty) or 1)))
-        if cat == 'weapon' or cat == 'business' then qty = 1 end
+        if cat == 'weapon' or cat == 'business' or cat == 'vip' then qty = 1 end
         local ok, item = pcall(function() return core():BoutiqueItem(cat, idx) end)
         if not ok or not item then return cb(fail('Article introuvable dans le panier')) end
         for _ = 1, qty do
@@ -380,7 +380,7 @@ end, true)
 
 
 -- ─────────────────────────────── Code boutique & descriptifs des articles ───────────────────────────────
-local DESC_CATS = { vehicle = true, moto = true, other = true, weapon = true, crate = true, pack = true, business = true }
+local DESC_CATS = { vehicle = true, moto = true, other = true, weapon = true, crate = true, pack = true, vip = true, business = true }
 CreateThread(function()
     MySQL.query.await([[CREATE TABLE IF NOT EXISTS boutique_descriptions (
         cat VARCHAR(16) NOT NULL, item_key VARCHAR(100) NOT NULL, description TEXT NOT NULL, updated_by VARCHAR(80) NULL,

@@ -12,6 +12,7 @@ const IC = {
   gun: '<path d="M3 8.5h13.5l1.5 2H21v3.5h-5.2l-.9 5H9.5l1-5H5a2 2 0 0 1-2-2z"/><path d="M7 11.5h4"/>',
   box: '<path d="M3 7.5l9-4.5 9 4.5v9l-9 4.5-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9M7.5 5.2l9 4.5"/>',
   gift: '<rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13.5h17"/><path d="M12 9C9.5 9 7.2 8 7.2 6A2.2 2.2 0 0 1 11 4.6L12 9zM12 9c2.5 0 4.8-1 4.8-3A2.2 2.2 0 0 0 13 4.6L12 9z"/>',
+  crown: '<path d="M3 18 2 7l5.5 4.5L12 4l4.5 7.5L22 7l-1 11z"/><path d="M4 21h16"/>',
   brief: '<rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8.5 7.5V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8v1.7"/><path d="M3 13h18M11 13h2v2h-2z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   bag: '<path d="M6 8h12l1 12H5z"/><path d="M9 8a3 3 0 0 1 6 0"/>', link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
@@ -38,6 +39,7 @@ const CATS = [
   { id: 'weapon', label: 'Armes', sub: 'Armes permanentes avec munitions', icon: 'gun', kind: 'Arme', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'crate', label: 'Caisses', sub: 'Caisses surprise : véhicules, armes et argent', icon: 'box', kind: 'Caisse', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'pack', label: 'Packs', sub: 'Packs de départ et bonus', icon: 'gift', kind: 'Pack', color: 'var(--pk-accent,#00a4ff)' },
+  { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#00a4ff)' },
   { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#00a4ff)' },
 ];
 const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null };
@@ -65,6 +67,7 @@ function art(cat, it) {
   const f = `fill="url(#g${it.idx}${cat})"`;
   let body;
   if (cat === 'crate') body = `<path d="M10 34 60 10l50 24v52L60 112 10 86z" ${f}/><path d="M10 34l50 26 50-26M60 60v52" stroke="rgba(0,0,0,.28)" stroke-width="3" fill="none"/><rect x="52" y="52" width="16" height="12" rx="3" fill="rgba(0,0,0,.35)"/>`;
+  else if (cat === 'vip') body = `<path d="M16 88 10 38l30 24 20-34 20 34 30-24-6 50z" ${f}/><rect x="16" y="92" width="88" height="12" rx="5" fill="rgba(0,0,0,.25)"/><circle cx="60" cy="28" r="6" fill="rgba(255,255,255,.85)"/><circle cx="10" cy="38" r="5" fill="rgba(255,255,255,.85)"/><circle cx="110" cy="38" r="5" fill="rgba(255,255,255,.85)"/>`;
   else if (cat === 'pack') body = `<rect x="14" y="40" width="92" height="66" rx="10" ${f}/><rect x="14" y="40" width="92" height="22" rx="8" fill="rgba(255,255,255,.22)"/><rect x="54" y="40" width="12" height="66" fill="rgba(0,0,0,.25)"/><path d="M60 40c-14 0-26-6-26-16a10 10 0 0 1 18-6l8 22zM60 40c14 0 26-6 26-16a10 10 0 0 0-18-6l-8 22z" ${f}/>`;
   else body = `<rect x="14" y="36" width="92" height="64" rx="12" ${f}/><path d="M42 36v-8a8 8 0 0 1 8-8h20a8 8 0 0 1 8 8v8" stroke="${b}" stroke-width="6" fill="none"/><rect x="14" y="62" width="92" height="8" fill="rgba(0,0,0,.25)"/><rect x="52" y="56" width="16" height="20" rx="4" fill="rgba(255,255,255,.85)"/>`;
   return `<svg class="art" viewBox="0 0 120 120">${g}${body}</svg>`;
@@ -88,7 +91,6 @@ const filtered = () => {
   const q = S.q.trim().toLowerCase();
   const l = list().filter(it => !q || String(it.name).toLowerCase().includes(q) || String(it.model || '').toLowerCase().includes(q));
   if (S.sort === 'priceDesc') l.sort((a, b) => b.price - a.price); else if (S.sort === 'name') l.sort((a, b) => String(a.name).localeCompare(String(b.name), 'fr')); else if (S.sort === 'price') l.sort((a, b) => a.price - b.price);
-  if (S.cat === 'pack') { const vip = it => (/^VIP\b/i.test(String(it.name)) ? 1 : 0); l.sort((a, b) => vip(a) - vip(b)); } // packs classiques d'abord, puis les VIP (Bronze, Argent, Or) dans l'ordre du tri
   return l;
 };
 const cat = () => CATS.find(c => c.id === S.cat) || CATS[0];
@@ -107,12 +109,13 @@ function metaOf(it, c) {
   c = c || S.cat;
   if (c === 'weapon') return it.balle ? `${it.balle} munitions` : 'Arme';
   if (c === 'vehicle' || c === 'moto' || c === 'other') return it.model;
+  if (c === 'vip') return (it.contents || [])[0] || 'Statut VIP';
   if (c === 'pack') return `${(it.contents || []).length} éléments`;
   return (it.desc || '').split('\n')[0].slice(0, 60);
 }
 
 /* ───── panier ───── */
-const maxQty = c => (c === 'weapon' || c === 'business') ? 1 : 10;
+const maxQty = c => (c === 'weapon' || c === 'business' || c === 'vip') ? 1 : 10;
 const cartCount = () => S.cart.reduce((n, l) => n + l.qty, 0);
 const cartLines = () => S.cart.map(l => ({ l, it: itemIn(l.cat, l.idx) })).filter(x => x.it);
 const subtotal = () => cartLines().reduce((n, x) => n + effPrice(x.l.cat, x.it) * x.l.qty, 0);

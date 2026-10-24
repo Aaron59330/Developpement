@@ -1565,7 +1565,7 @@ exports('BoutiqueCatalog', function()
     return {
         points = tonumber(PlayerData.points) or 0, staff = PlayerData.Staff == true, link = ConfigBoutique.LinkShop, boutiqueId = PlayerData.boutique_id,
         vehicle = conv(ConfigBoutique.vehicle), moto = conv(ConfigBoutique.Motos), other = conv(ConfigBoutique.Autres), weapon = conv(ConfigBoutique.weapon),
-        crate = conv(ConfigBoutique.caisse), pack = conv(ConfigBoutique.pack, 'pack'), business = conv(ConfigBoutique.Entreprise),
+        crate = conv(ConfigBoutique.caisse), pack = conv(ConfigBoutique.pack, 'pack'), vip = conv(ConfigBoutique.vip, 'pack'), business = conv(ConfigBoutique.Entreprise),
     }
 end)
 
@@ -1577,7 +1577,7 @@ end)
 
 exports('BoutiqueBuy', function(cat, idx, skipCheck)
     local lists = { vehicle = ConfigBoutique.vehicle, moto = ConfigBoutique.Motos, other = ConfigBoutique.Autres, weapon = ConfigBoutique.weapon,
-        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, business = ConfigBoutique.Entreprise }
+        crate = ConfigBoutique.caisse, pack = ConfigBoutique.pack, vip = ConfigBoutique.vip or {}, business = ConfigBoutique.Entreprise }
     local k = tonumber(idx)
     local v = lists[cat] and k and lists[cat][k]
     if not v or v.Separator then return { ok = false, error = 'Article introuvable' } end
@@ -1606,6 +1606,9 @@ exports('BoutiqueBuy', function(cat, idx, skipCheck)
                 end
             end
             ESX.ShowNotification("Vous avez reçu votre pack")
+        elseif cat == 'vip' then
+            TriggerServerEvent("CorePickax:Boutique:Add", { id = k, price = price, name = v.name, Interaction = "BuyVip" })
+            ESX.ShowNotification("Votre VIP est en cours d'activation")
         elseif cat == 'business' then
             TriggerServerEvent("CorePickax:Boutique:Add", { id = k, price = price, name = v.name, Interaction = "entrepriseachat" })
         end
