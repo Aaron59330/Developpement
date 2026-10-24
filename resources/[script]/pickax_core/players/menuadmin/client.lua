@@ -1574,7 +1574,7 @@ function MenuStaffOpen()
             RageUI.ButtonWithStyle("Job Builder", "Jobs, grades, points, agence immobilière, concession…", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("jobbuilder") end
             end)
-            RageUI.ButtonWithStyle("Gang Builder", "Gangs, grades, points, trésorerie, activités", {RightLabel = "→→"}, true, function(_,a,s)
+            RageUI.ButtonWithStyle("Gang Builder", "Gangs, territoires, points, trésorerie, activités", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("gangbuilder") end
             end)
             RageUI.ButtonWithStyle("Shop Builder", "Boutiques, catalogues, vêtements", {RightLabel = "→→"}, true, function(_,a,s)

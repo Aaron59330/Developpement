@@ -47,7 +47,7 @@ Config.Builders = {
     {
         id = 'illegalbuilder', resource = 'pickax_illegalbuilder', command = 'illegalbuilder', icon = 'gang',
         label = 'Builder Illégal',
-        desc = 'Drogues & labos, braquages et Go Fast : crée les activités illégales du serveur (territoires : bientôt).',
+        desc = 'Drogues & labos, braquages et Go Fast : crée les activités illégales du serveur.',
         stats = { { 'Modules', 'illegalbuilder_entities' }, { 'Logs', 'illegalbuilder_logs' } },
     },
 }
