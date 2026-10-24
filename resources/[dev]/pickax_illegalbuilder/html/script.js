@@ -1024,16 +1024,27 @@ const Builder = {
         <div class="hint mt-s">Cette parcelle démarre <b>vide</b> : le joueur plante des graines, la plante pousse de 0 à 100 % avec le temps (même hors ligne), puis il la récolte. Après la récolte, il faut <b>replanter</b>. Un point = une parcelle : place un point par plante. Laisse les props vides pour utiliser ceux par défaut.</div>` : '<div class="hint">Désactivé : récolte directe, comme avant.</div>'}</div>`;
   },
 
+  // Choix d'une drogue en un clic : remplit tous les items liés (produit brut, pochon, graines) selon le type de point
+  drugPicker(base, p) {
+    const drugs = this.cat.drugs || {}, order = this.cat.drugOrder || Object.keys(drugs);
+    const k = p.kind;
+    const cur = k === 'harvest' ? (p.harvest || {}).item : null;
+    const info = { harvest: 'Remplit l\'item récolté et les graines', process: 'Ajoute la recette brut → pochon', sell: 'Ajoute le pochon et le produit brut aux achats du dealer' }[k] || '';
+    return `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Choisir la drogue</div></div>
+      <div class="row wrap" style="gap:8px">${order.filter(id => drugs[id]).map(id => `<button class="${cur && cur === drugs[id].raw ? 'primary' : ''}" data-a="drugPick" data-v="${base}|${id}">${esc(drugs[id].label)}</button>`).join('')}</div>
+      <div class="hint mt-s">${esc(info)} : inutile de taper les noms d'items. Tu peux ensuite tout modifier à la main.</div></div>`;
+  },
+
   drugKind(base, p) {
     const k = p.kind;
-    if (k === 'harvest') return this.outfitCard(base) + this.plantCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
+    if (k === 'harvest') return this.drugPicker(base, p) + this.outfitCard(base) + this.plantCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
       <div class="grid3">${this.fItem('Item récolté', `${base}.harvest.item`)}${this.fN('Quantité min', `${base}.harvest.min`, { min: 1 })}${this.fN('Quantité max', `${base}.harvest.max`, { min: 1 })}
       ${this.fN('Durée (secondes)', `${base}.harvest.time`, { min: 1 })}${this.animSel('Animation', `${base}.harvest.anim`)}${this.fN('Délai entre deux récoltes (s)', `${base}.harvest.cooldown`, { min: 0 })}
       ${this.fN('Récoltes avant épuisement (0 = ∞)', `${base}.harvest.maxUses`, { min: 0 })}${this.fN('Repousse (secondes)', `${base}.harvest.regen`, { min: 10 })}</div>
       <div class="grid2 mt">${this.toolFields(`${base}.harvest`)}</div></div>`;
-    if (k === 'process') return this.outfitCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
+    if (k === 'process') return this.drugPicker(base, p) + this.outfitCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
       ${(p.recipes || []).map((r, j) => this.recipeEditor(`${base}.recipes.${j}`, r, j)).join('') || '<div class="hint">Aucune recette.</div>'}</div>`;
-    if (k === 'sell') return `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
+    if (k === 'sell') return this.drugPicker(base, p) + `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
       <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
       <div class="mt">${this.listEditor(`${base}.sell.items`, [{ key: 'item', label: 'Item acheté', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Prix min', kind: 'num', w: '110px' }, { key: 'max', label: 'Prix max', kind: 'num', w: '110px' }], 'sellitem', 'Ajouter un item')}</div>
       <div class="hint mt-s">Le prix unitaire est tiré au hasard entre min et max à chaque vente.</div></div>`;
@@ -1132,6 +1143,34 @@ const Builder = {
         let arr = getPath(c, path); if (!Array.isArray(arr)) { arr = []; setPath(c, path, arr); }
         if (arr.length >= 60) return toast('Limite atteinte', 'err');
         arr.push(NEWROW[key]()); this.markDirty(); return this.render();
+      }
+      case 'drugPick': {
+        const [base, id] = v.split('|'), d = (this.cat.drugs || {})[id], p = getPath(c, base);
+        if (!d || !p) return;
+        const items = [];
+        if (p.kind === 'harvest') {
+          p.harvest = p.harvest || {};
+          p.harvest.item = d.raw; items.push(d.raw);
+          const pl = Object.assign({ enabled: false, seed: '', seedCount: 1, growMinutes: 30, plantSeconds: 6, small: '', medium: '', large: '' }, p.harvest.plant || {});
+          if (d.seed) { pl.enabled = true; pl.seed = d.seed; pl.growMinutes = d.grow || pl.growMinutes; pl.plantSeconds = d.plantSeconds || pl.plantSeconds; items.push(d.seed); }
+          else { pl.enabled = false; pl.seed = ''; }
+          p.harvest.plant = pl;
+          if (!d.seed) toast(`${d.label} : pas de graines, récolte directe`, 'ok');
+        } else if (p.kind === 'process') {
+          p.recipes = p.recipes || [];
+          if (!p.recipes.some(r => (r.outputs || []).some(o => o.item === d.pooch))) {
+            p.recipes.push({ label: d.recipe.label, inputs: [{ item: d.raw, count: d.recipe.count }], outputs: [{ item: d.pooch, count: 1 }], time: d.recipe.time, anim: d.recipe.anim, failChance: d.recipe.fail, tool: { item: '', consume: false } });
+          }
+          items.push(d.raw, d.pooch);
+        } else if (p.kind === 'sell') {
+          p.sell = p.sell || { currency: 'black_money', maxPerHour: 60, items: [] };
+          p.sell.items = p.sell.items || [];
+          for (const [it, pr] of [[d.pooch, d.price.pooch], [d.raw, d.price.raw]]) {
+            if (!p.sell.items.some(x => x.item === it)) p.sell.items.push({ item: it, min: pr[0], max: pr[1] });
+            items.push(it);
+          }
+        }
+        this.markDirty(); toast(`${d.label} : ${items.join(' · ')}`, 'ok'); return this.render();
       }
       case 'outfitCapture': {
         const r = await rpc('captureOutfit');

@@ -164,6 +164,16 @@ end
 local launder = { kind = 'launder', label = 'Blanchiment', blip = false, ped = ped('a_m_m_business_01'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0,
     launder = { rate = 70, min = 500, max = 50000, from = 'black_money', to = 'money', maxPerHour = 50000 } }
 
+-- Catalogue des drogues : choisies d'un clic dans l'éditeur (plus besoin de taper les noms d'items).
+-- raw = produit brut (récolte), pooch = produit fini (pochon), seed = graines (nil = pas de plantation), recipe = recette de base, price = prix du dealer.
+Config.Drugs = {
+    weed  = { label = 'Cannabis',          raw = 'weed',  pooch = 'weed_pooch',  seed = 'weed_seed',  grow = 30, plantSeconds = 6, recipe = { count = 3, time = 8,  fail = 0,  anim = 'inspect',  label = 'Pochon de cannabis' }, price = { raw = { 25, 45 },  pooch = { 90, 140 } } },
+    coke  = { label = 'Cocaïne',           raw = 'coke',  pooch = 'coke_pooch',  seed = 'coke_seed',  grow = 45, plantSeconds = 8, recipe = { count = 3, time = 12, fail = 5,  anim = 'clipboard', label = 'Sachet de cocaïne' }, price = { raw = { 70, 110 }, pooch = { 220, 320 } } },
+    meth  = { label = 'Méthamphétamine',   raw = 'meth',  pooch = 'meth_pooch',  seed = nil,          grow = 30, plantSeconds = 6, recipe = { count = 4, time = 15, fail = 10, anim = 'cook',      label = 'Sachet de meth' },      price = { raw = { 90, 140 }, pooch = { 320, 450 } } },
+    opium = { label = 'Opium / Héroïne',   raw = 'opium', pooch = 'opium_pooch', seed = 'opium_seed', grow = 40, plantSeconds = 7, recipe = { count = 3, time = 12, fail = 0,  anim = 'repair',    label = 'Dose d\'héroïne' },     price = { raw = { 80, 120 }, pooch = { 280, 380 } } },
+}
+Config.DrugOrder = { 'weed', 'coke', 'meth', 'opium' }
+
 Config.Templates.drug = {
     weed = {
         label = 'Cannabis', icon = 'leaf',

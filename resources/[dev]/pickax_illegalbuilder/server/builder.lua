@@ -313,7 +313,7 @@ ESX.RegisterServerCallback('illegalbuilder:catalog', function(src, cb)
     table.sort(pay, function(a, b) return a.id < b.id end)
     local anims = {}
     for _, a in ipairs(Config.Animations) do anims[#anims + 1] = { id = a.id, label = a.label } end
-    cb({ ok = true, types = types, items = IB.itemCatalog(), jobs = jobList(), jobs2 = jobs2List(), weapons = {}, payments = pay, scenarios = Config.PedScenarios, animations = anims, jobcenter = {},
+    cb({ ok = true, types = types, drugs = Config.Drugs, drugOrder = Config.DrugOrder, items = IB.itemCatalog(), jobs = jobList(), jobs2 = jobs2List(), weapons = {}, payments = pay, scenarios = Config.PedScenarios, animations = anims, jobcenter = {},
         vehicleTypes = Config.VehicleTypes, inventory = IB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent,
         policeJobs = Config.PoliceJobs, limits = { points = Config.Max.Points, fleet = Config.Max.Fleet, recipes = Config.Max.Recipes } })
 end)
