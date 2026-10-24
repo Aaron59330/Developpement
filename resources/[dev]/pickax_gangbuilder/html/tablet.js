@@ -40,6 +40,7 @@ const Tablet = {
     this.d = d; this.at = Date.now();
     if (!this.page) this.page = 'home';
     $root.classList.add('tb');
+    $root.innerHTML = '';   // nouvelle ouverture : l'animation d'entrée joue une fois
     this.render();
     clearInterval(this.timer); clearInterval(this.tickTimer);
     // plus de rafraîchissement automatique (l'écran se relançait toutes les 5 s) : les données se mettent à jour à l'ouverture, après une action et quand on change de page
@@ -75,13 +76,17 @@ const Tablet = {
     const g = me.color || (window.PICKAX_ACCENT || '#fdc27d');
     const nav = [['home', 'home', 'Accueil'], ['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['rank', 'trophy', 'Classement'], ['news', 'news', 'Actus'], ['log', 'log', 'Journal']];
     const badge = { quest: this.claimable(), war: d.wars.incoming ? 1 : 0 };
-    $root.innerHTML = `<div class="tb-device" style="--g:${esc(g)};--g-rgb:${hexToRgbStr(g)}"><div class="tb-cam"></div><div class="tb-screen">
+    const inner = `
       <div class="tb-top"><div class="brand"><span class="dot"></span>${esc(me.label)}</div><span class="tb-chip inf">${esc(me.gradeLabel)}</span><div class="sp"></div>
         ${me.money != null ? `<div class="tb-pill ok">${ti('coins', 14)} <b>${money(me.money)}</b></div><div class="tb-pill dirty">${ti('skull', 14)} <b>${money(me.dirty)}</b></div>` : ''}
         <div class="tb-pill">${ti('crown', 14)} <b>${me.rep}</b> rép.</div><div class="tb-clock" id="tb-clock">${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
         <button class="tb-x" data-a="close" title="Fermer">${ti('x', 16)}</button></div>
       <div class="tb-rail">${nav.map(([id, icon, l]) => `<button class="tb-nav ${this.page === id ? 'active' : ''}" data-a="tbnav" data-v="${id}">${ti(icon)}<span>${l}</span>${badge[id] ? `<i class="bdg">${badge[id]}</i>` : ''}</button>`).join('')}</div>
-      <div class="tb-main">${this['p_' + this.page]()}</div></div></div>`;
+      <div class="tb-main">${this['p_' + this.page]()}</div>`;
+    // l'appareil n'est créé qu'une fois : le redessiner entièrement rejouait son animation d'ouverture (clignotement à chaque clic)
+    const dev = $root.querySelector('.tb-device');
+    if (dev) { dev.style.setProperty('--g', g); dev.style.setProperty('--g-rgb', hexToRgbStr(g)); dev.querySelector('.tb-screen').innerHTML = inner; }
+    else $root.innerHTML = `<div class="tb-device" style="--g:${esc(g)};--g-rgb:${hexToRgbStr(g)}"><div class="tb-cam"></div><div class="tb-screen">${inner}</div></div>`;
     if (scroll) { const m = document.querySelector('.tb-main'); if (m) m.scrollTop = scroll; }
   },
 
