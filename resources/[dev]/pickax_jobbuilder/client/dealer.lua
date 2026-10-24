@@ -52,6 +52,30 @@ end)
 -- ─────────────────────────────── Essai routier ───────────────────────────────
 local testing = false
 
+-- HUD de l'essai : en bas à droite de l'écran (accent du serveur), barre de temps restant
+local function hudText(txt, x, y, scale, r, g, b, a, right)
+    SetTextFont(4) SetTextScale(0.0, scale) SetTextColour(r, g, b, a) SetTextOutline()
+    if right then SetTextRightJustify(true) SetTextWrap(0.0, x) end
+    BeginTextCommandDisplayText('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayText(right and x or x, y)
+end
+
+local function drawTestHud(label, left, total)
+    local W, H, cx, cy = 0.17, 0.105, 0.895, 0.865
+    local x0, y0 = cx - W / 2, cy - H / 2
+    local f = math.max(0.0, math.min(1.0, left / math.max(1, total)))
+    local ar, ag, ab = 253, 194, 125
+    DrawRect(cx, cy, W, H, 14, 16, 22, 215)
+    DrawRect(cx, y0 + 0.002, W, 0.004, ar, ag, ab, 255)
+    hudText('ESSAI ROUTIER', x0 + 0.008, y0 + 0.010, 0.30, ar, ag, ab, 255)
+    hudText(label, x0 + 0.008, y0 + 0.032, 0.40, 255, 255, 255, 240)
+    local m, sec = left // 60, left % 60
+    hudText(('%d:%02d'):format(m, sec), x0 + W - 0.008, y0 + 0.012, 0.62, 255, 255, 255, 245, true)
+    DrawRect(cx, y0 + H - 0.014, W - 0.016, 0.008, 255, 255, 255, 35)
+    DrawRect(x0 + 0.008 + (W - 0.016) * f / 2, y0 + H - 0.014, (W - 0.016) * f, 0.008, left <= 10 and 255 or ar, left <= 10 and 90 or ag, left <= 10 and 90 or ab, 255)
+    hudText('Reste dans le véhicule', x0 + 0.008, y0 + H - 0.036, 0.28, 255, 255, 255, 150)
+end
+
+
 NuiLocal['dealer:test'] = function(args, cb)
     if testing then return cb({ ok = false, error = 'Tu as déjà un essai en cours' }) end
     ESX.TriggerServerCallback('jobbuilder:dealer:test', function(res)
@@ -80,9 +104,7 @@ NuiLocal['dealer:test'] = function(args, cb)
             while testing do
                 local left = math.ceil((untilT - GetGameTimer()) / 1000)
                 if left <= 0 or not DoesEntityExist(veh) or IsEntityDead(ped) or GetVehiclePedIsIn(ped, false) ~= veh and left < res.seconds - 3 then break end
-                SetTextFont(4) SetTextScale(0.0, 0.5) SetTextColour(255, 255, 255, 230) SetTextOutline()
-                SetTextEntry('STRING') AddTextComponentString(('Essai : %s — %d s restantes'):format(res.label or '', left))
-                DrawText(0.5 - 0.1, 0.04)
+                drawTestHud(res.label or 'Véhicule', left, res.seconds)
                 Wait(0)
             end
             if DoesEntityExist(veh) then

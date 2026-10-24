@@ -206,7 +206,7 @@ end
 function JB.pointsForJob(jobName)
     local list = {}
     for id, p in pairs(JB.Points) do
-        if p.job_name == jobName then
+        if p.job_name == jobName and p.type ~= 'testdrive' then   -- l'essai routier n'a ni marker ni blip : seul son point de départ sert
             if p.type == 'garage' and p.data.store then      -- point de rangement du garage : envoyé comme un point à part (id décalé)
                 list[#list + 1] = { id = id + 100000000, type = 'garage_return', label = p.label .. ' (rangement)', coords = p.data.store.coords, min_grade = p.min_grade,
                     kind = p.data.kind or 'car', radius = p.data.store.radius or 5.0, style = JB.pointStyle(p) }

@@ -798,8 +798,8 @@ const Builder = {
     }
     return `<div class="card"><div class="card-h"><div class="t">${ic(POINT_ICON[p.type], 16)} ${esc(T.label)}</div><button class="sm danger" data-a="delPoint" data-v="${i}">${ic('trash', 14)} Supprimer</button></div>
       <div class="grid2">${fld('Nom du point', `<input data-path="${base}.label" value="${esc(p.label)}" maxlength="60">`)}${fld('Grade minimum', this.gradeSelect(base + '.min_grade', p.min_grade))}</div>
-      <div class="mt"><div class="lbl" style="margin-bottom:6px">Position du marker</div>${coordField(base + '.coords', p.coords, { tp: true })}</div></div>${body}
-      ${this.styleCard(base + '.data.style', 'Marker de ce point', { hint: 'Hérite du style du job, sinon du type de point. Personnalise pour ce point uniquement (couleur, forme, taille…).' })}`;
+      ${p.type === 'testdrive' ? '' : `<div class="mt"><div class="lbl" style="margin-bottom:6px">Position du marker</div>${coordField(base + '.coords', p.coords, { tp: true })}</div>`}</div>${body}
+      ${p.type === 'testdrive' ? '' : this.styleCard(base + '.data.style', 'Marker de ce point', { hint: 'Hérite du style du job, sinon du type de point. Personnalise pour ce point uniquement (couleur, forme, taille…).' })}`;
   },
 
   newRow(tpl) {

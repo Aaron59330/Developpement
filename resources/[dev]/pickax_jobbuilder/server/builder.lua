@@ -63,7 +63,7 @@ end
 -- ─────────────────────────────── Validation d'un point ───────────────────────────────
 local function cleanPoint(p, maxGrade, jobType)
     if type(p) ~= 'table' or not Config.PointTypes[p.type] or (Config.PointTypes[p.type].hidden and p.type ~= 'garage_return') then return nil, 'Type de point invalide' end
-    local coords = cleanCoords(p.coords)
+    local coords = cleanCoords(p.coords) or (p.type == 'testdrive' and type(p.data) == 'table' and cleanCoords(p.data.spawn)) or nil   -- essai routier : seul le point de départ compte, pas de marker
     if not coords then return nil, ('Coordonnées manquantes (%s)'):format(Config.PointTypes[p.type].label) end
     if jobType and not JBPointAllowed(p.type, jobType) then
         return nil, ('Le point « %s » n\'est pas disponible pour un job de type « %s » : supprime-le de la liste'):format(Config.PointTypes[p.type].label, (Config.JobTypes[jobType] or {}).label or jobType)
