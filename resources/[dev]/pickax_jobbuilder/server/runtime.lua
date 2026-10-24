@@ -179,8 +179,15 @@ RegisterCommand('jobmoney', function(src, args)
     if src ~= 0 then JBNotifyClient( src, 'Diagnostic des trésoreries dans la console serveur.') end
 end, false)
 
-local function pay(xPlayer, amount)
+-- method : 'cash' | 'bank' (le joueur choisit) ; absent : cash d'abord, banque ensuite
+local function pay(xPlayer, amount, method)
     if amount <= 0 then return true end
+    local acc = method == 'cash' and 'money' or method == 'bank' and 'bank' or nil
+    if acc then
+        if xPlayer.getAccount(acc).money < amount then return false end
+        xPlayer.removeAccountMoney(acc, amount)
+        return true
+    end
     if xPlayer.getAccount('money').money >= amount then
         xPlayer.removeAccountMoney('money', amount)
         return true

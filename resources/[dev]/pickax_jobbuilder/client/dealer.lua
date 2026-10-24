@@ -14,7 +14,7 @@ RegisterNetEvent('jobbuilder:client:dealerOffer', function(id, data)
 end)
 
 NuiLocal.dealerAnswer = function(args, cb)
-    TriggerServerEvent('jobbuilder:server:dealerAnswer', args[1], args[2] == true)
+    TriggerServerEvent('jobbuilder:server:dealerAnswer', args[1], args[2] == true, args[3])
     CloseUI()
     cb({ ok = true })
 end

@@ -522,3 +522,10 @@ body.neon .n-sp { flex: 1; }
 .sr-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .sr-actions button { width: 100%; }
 @media (max-width: 860px) { .sr { grid-template-columns: 1fr; } }
+
+.pay-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.pay-opt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: #fff; text-align: left; cursor: pointer; }
+.pay-opt span { display: flex; flex-direction: column; line-height: 1.25; }
+.pay-opt small { color: var(--muted); font-size: 11px; }
+.pay-opt.on { border-color: rgb(var(--accent-rgb)); background: rgba(var(--accent-rgb), .14); }
+.pay-opt[data-low] small { color: #f87171; }

@@ -179,7 +179,7 @@ local function panelData(x, job)
     local sales = MySQL.query.await('SELECT model, label, plate, buyer_name, seller_name, price, commission, tax, UNIX_TIMESTAMP(created_at) AS t FROM jobbuilder_dealer_sales WHERE job_name = ? ORDER BY id DESC LIMIT 40', { job.name }) or {}
     return {
         ok = true, job = job.name, jobLabel = job.label, agent = JB.playerName(x), gradeLabel = x.job.grade_label, admin = admin,
-        commission = s.dealer_commission or D.DefaultCommission, selfService = s.dealer_self_service == true, maxGrade = #job.grades - 1, grades = job.grades,
+        cash = x.getAccount('money').money, bank = x.getAccount('bank').money, commission = s.dealer_commission or D.DefaultCommission, selfService = s.dealer_self_service == true, maxGrade = #job.grades - 1, grades = job.grades,
         auto = s.dealer_auto ~= false, markup = tonumber(s.dealer_markup) or 100, restricted = s.dealer_categories or {},
         catalog = cat, categories = categoryList(), sales = sales,
         stats = { vehicles = #cat, enabled = enabled, adjusted = adjusted, sales = st.c or 0, revenue = st.revenue or 0, commission = st.commission or 0, tax = st.tax or 0 },
@@ -265,7 +265,9 @@ local function showroomPoint(src, pointId)
 end
 
 -- ─────────────────────────────── Vente ───────────────────────────────
-local function completeSale(job, v, buyer, seller)
+local function payMethod(m) return (m == 'cash' or m == 'bank') and m or nil end
+
+local function completeSale(job, v, buyer, seller, method)
     local s = job.settings or {}
     if not v.enabled or v.stock == 0 then return false, 'Ce véhicule n\'est plus disponible' end
     if D.MaxVehiclesPerPlayer > 0 and ownedCount(buyer.identifier) >= D.MaxVehiclesPerPlayer then
@@ -287,10 +289,10 @@ local function completeSale(job, v, buyer, seller)
     if not insertOwned(buyer.identifier, plate, vehJson, v.vtype, delivered and D.StateOut or D.StateStored, v.label) then
         return false, 'Erreur base de données (table owned_vehicles / colonnes ?) : vente annulée'
     end
-    if not JB.pay(buyer, v.price) then
+    if not JB.pay(buyer, v.price, method) then
         local t, cp, co = ident(D.Table), ident(D.Cols.plate), ident(D.Cols.owner)
         MySQL.update.await(('DELETE FROM `%s` WHERE `%s` = ? AND `%s` = ?'):format(t, cp, co), { plate, buyer.identifier })
-        return false, 'Pas assez d\'argent'
+        return false, method == 'cash' and 'Pas assez de liquide' or method == 'bank' and 'Pas assez d\'argent en banque' or 'Pas assez d\'argent'
     end
 
     local tax = JB.applyTax and JB.applyTax('dealer', v.price, job.name) or 0
@@ -339,14 +341,15 @@ local function dealerOffer(src, cb, vehId, targetId, self)
     if not self and not playersClose(src, t.source) then return cb(fail('Le client est trop loin')) end
     offerId = offerId + 1
     Offers[offerId] = { from = src, to = t.source, veh = v.model, job = job.name, exp = now() + 90 }
-    TriggerClientEvent('jobbuilder:client:dealerOffer', t.source, offerId, { label = v.label, model = v.model, category = v.category, price = v.price, jobLabel = job.label })
+    TriggerClientEvent('jobbuilder:client:dealerOffer', t.source, offerId, { label = v.label, model = v.model, category = v.category, price = v.price, jobLabel = job.label,
+        cash = t.getAccount('money').money, bank = t.getAccount('bank').money })
     cb({ ok = true })
 end
 
 ESX.RegisterServerCallback('jobbuilder:dealer:offer', function(src, cb, vehId, targetId) dealerOffer(src, cb, vehId, targetId, false) end)
 ESX.RegisterServerCallback('jobbuilder:dealer:offerSelf', function(src, cb, vehId) dealerOffer(src, cb, vehId, nil, true) end)
 
-RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes)
+RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes, method)
     local src = source
     local o = Offers[id]
     if not o or o.to ~= src then return end
@@ -360,21 +363,21 @@ RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes)
     local buyer, job = ESX.GetPlayerFromId(src), dealerJob(o.job)
     local v = job and vehRow(o.veh, o.job)
     if not buyer or not v then return end
-    local ok, e = completeSale(job, v, buyer, seller)
+    local ok, e = completeSale(job, v, buyer, seller, payMethod(method))
     if not ok then
         JBNotifyClient( src, '~r~' .. e)
         if seller then JBNotifyClient( o.from, '~r~' .. e) end
     end
 end)
 
-ESX.RegisterServerCallback('jobbuilder:dealer:buy', function(src, cb, pointId, vehId)
+ESX.RegisterServerCallback('jobbuilder:dealer:buy', function(src, cb, pointId, vehId, method)
     local p, job = showroomPoint(src, pointId)
     if not p then return cb(fail(job)) end
     if not job or job.settings.dealer_self_service ~= true then return cb(fail('Cette concession ne propose pas le libre-service : demande à un vendeur')) end
     local buyer = ESX.GetPlayerFromId(src)
     local v = vehRow(vehId, job.name)
     if not buyer or not v then return cb(fail('Véhicule introuvable')) end
-    local ok, e = completeSale(job, v, buyer, nil)
+    local ok, e = completeSale(job, v, buyer, nil, payMethod(method))
     if not ok then return cb(fail(e)) end
     cb({ ok = true })
 end)

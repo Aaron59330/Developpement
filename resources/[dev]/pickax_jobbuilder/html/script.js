@@ -2671,8 +2671,8 @@ const Runtime = {
       case 'missionStatus': $root.classList.add('corner'); return this.renderMissionStatus();
       case 'showroom': return this.renderShowroom();
       case 'dealerOffer': return $root.innerHTML = panel({ icon: 'car', title: 'Offre d\'achat', sub: d.jobLabel,
-        body: `<div class="sr-side" style="border:0;padding:0;background:none"><div class="sr-img"><img src="https://docs.fivem.net/vehicles/${esc(d.model || '')}.webp" onerror="this.style.display='none'"></div><div><h3>${esc(d.label)}</h3><small class="hint">${esc(d.category || 'Véhicule')}</small></div>
-          <div class="card"><div class="eyebrow">Prix</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div><p class="hint mt-s">Payé depuis ton compte bancaire. Le véhicule est ajouté à ton garage / livré devant toi.</p></div></div>
+        body: `<div class="sr-side" style="border:0;padding:0;background:none;align-self:stretch"><div class="sr-img"><img src="https://docs.fivem.net/vehicles/${esc(d.model || '')}.webp" onerror="this.style.display='none'"></div><div><h3>${esc(d.label)}</h3><small class="hint">${esc(d.category || 'Véhicule')}</small></div>
+          <div class="card"><div class="eyebrow">Prix</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div><p class="hint mt-s">Le véhicule est ajouté à ton garage / livré devant toi après le paiement.</p></div>${this.payPick(d, d.price)}</div>
           <div class="row"><button class="danger" style="flex:1" data-a="carNo">Refuser</button><button class="primary" style="flex:2" data-a="carYes">${ic('check', 16)} Acheter · ${money(d.price)}</button></div>` });
       case 'door': return this.renderDoor();
       case 'wardrobe': return this.renderWardrobe();
@@ -2769,6 +2769,12 @@ const Runtime = {
   },
 
   q: '',
+  payPick(d, price) {   // choix du moyen de paiement : liquide ou banque (le solde insuffisant grise l'option)
+    const cur = this.payM || 'bank';
+    const opt = (id, label, icon, bal) => `<button class="pay-opt ${cur === id ? 'on' : ''}" data-a="payM" data-id="${id}" ${bal < price ? 'data-low="1"' : ''}>${ic(icon, 18)}<span><b>${label}</b><small>${money(bal)}${bal < price ? ' · insuffisant' : ''}</small></span></button>`;
+    return `<div class="eyebrow">Moyen de paiement</div><div class="pay-pick">${opt('cash', 'Liquide', 'dollar', Number(d.cash || 0))}${opt('bank', 'Banque', 'landmark', Number(d.bank || 0))}</div>`;
+  },
+
   renderShowroom() {
     const d = this.data, q = (this.q || '').toLowerCase(), cat = this.cat || '', sort = this.sort || 'name';
     let list = d.vehicles.filter(v => (!cat || v.category === cat) && (!q || (v.label + ' ' + v.category + ' ' + v.model).toLowerCase().includes(q)));
@@ -2784,6 +2790,7 @@ const Runtime = {
     const canSellThis = sel && d.canSell && d.grade >= sel.min_grade;
     const side = sel ? `<div class="sr-side">${img(sel, true)}<div><h3>${esc(sel.label)}</h3><small class="hint">${esc(sel.category || 'Véhicule')}</small></div>
         <div><div class="eyebrow">Prix</div><div class="big">${Number(sel.price).toLocaleString('fr-FR')}<small>$</small></div></div>
+        ${d.selfService ? this.payPick(d, sel.price) : ''}
         <div><div class="kv"><span>Stock</span><b>${sel.stock > 0 ? sel.stock : 'Sur commande'}</b></div>
         ${d.canSell ? `<div class="kv"><span>Ta commission</span><b>${Number(d.commission || 0)}% · ${money(Math.floor(sel.price * Number(d.commission || 0) / 100))}</b></div>` : ''}
         ${sel.min_grade > 0 ? `<div class="kv"><span>Grade requis</span><b>${sel.min_grade}</b></div>` : ''}</div>
@@ -2966,9 +2973,10 @@ const Runtime = {
       case 'srCat': this.cat = String(el.dataset.id || ''); return this.render();
       case 'sellCarSelf': { const r = await rpc('dealer:offerSelf', String(el.dataset.id)); ok(r, 'Offre à toi-même : confirme à l\'écran'); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }
-      case 'buyCar': { const v = d.vehicles.find(x => x.model === el.dataset.id); if (!await confirmBox('Acheter ce véhicule ?', `${v.label} — ${money(v.price)}`, 'Acheter', false)) return; const r = await rpc('dealer:buy', pid, v.model); if (ok(r, 'Achat effectué')) close(); return; }
+      case 'buyCar': { const v = d.vehicles.find(x => x.model === el.dataset.id); if (!await confirmBox('Acheter ce véhicule ?', `${v.label} — ${money(v.price)} (${(this.payM || 'bank') === 'cash' ? 'en liquide' : 'par banque'})`, 'Acheter', false)) return; const r = await rpc('dealer:buy', pid, v.model, this.payM || 'bank'); if (ok(r, 'Achat effectué')) close(); return; }
       case 'testCar': { const r = await rpc('dealer:test', pid, String(el.dataset.id)); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
-      case 'carYes': return rpc('dealerAnswer', d.id, true);
+      case 'carYes': return rpc('dealerAnswer', d.id, true, this.payM || 'bank');
+      case 'payM': this.payM = el.dataset.id; return this.render();
       case 'carNo': return rpc('dealerAnswer', d.id, false);
       case 'enter': { const r = await rpc('prop:enter', d.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'ring': { const r = await rpc('prop:ring', d.id); if (ok(r, 'Tu as sonné, patiente…')) close(); return; }
