@@ -91,17 +91,17 @@ AJ.Mod[KEY] = {
                             if dist < 1.5 and not IsPedInAnyVehicle(ped, false) then
                                 if not p then
                                     AJ.Help(('~INPUT_PICKUP~ Semer du %s'):format(crop().label:lower()))
-                                    if IsControlJustPressed(0, Config.Interact) then
+                                    if IsControlJustPressed(0, Config.Act.Interact) then
                                         if AJ.Progress('Semis', 3, { scenario = 'WORLD_HUMAN_GARDENER_PLANT', radius = 3.0 }) then TriggerServerEvent('aj:farm:sow', i, order[sel]) end
                                     end
                                 elseif p.ready then
                                     AJ.Help('~INPUT_PICKUP~ Récolter')
-                                    if IsControlJustPressed(0, Config.Interact) then
+                                    if IsControlJustPressed(0, Config.Act.Interact) then
                                         if AJ.Progress('Récolte', 3.5, { scenario = 'WORLD_HUMAN_GARDENER_PLANT', radius = 3.0 }) then TriggerServerEvent('aj:farm:harvest', i) end
                                     end
                                 elseif not p.watered then
                                     AJ.Help(('~INPUT_PICKUP~ Arroser (pousse plus vite) — prêt dans %d min'):format(math.ceil(p.left / 60)))
-                                    if IsControlJustPressed(0, Config.Interact) then
+                                    if IsControlJustPressed(0, Config.Act.Interact) then
                                         if AJ.Progress('Arrosage', 3, { scenario = 'WORLD_HUMAN_BUM_WASH', radius = 3.0 }) then TriggerServerEvent('aj:farm:water', i) end
                                     end
                                 else
@@ -113,13 +113,13 @@ AJ.Mod[KEY] = {
                 end
                 -- marché : vente et achat de graines
                 local md = #(pos - vector3(d.market.x, d.market.y, d.market.z))
-                if md < Config.DrawDistance then
+                if md < Config.Act.DrawDistance then
                     sleep = 0
                     AJ.Marker(d.market, 1, 255, 190, 0)
                     if md < 3.0 then
                         local c = crop()
                         AJ.Help(('~INPUT_PICKUP~ Vendre la récolte    ~INPUT_VEH_HEADLIGHT~ Acheter 10 graines de %s (%d $)'):format(c.label:lower(), c.seedPrice * 10))
-                        if IsControlJustPressed(0, Config.Interact) then TriggerServerEvent('aj:farm:sell') end
+                        if IsControlJustPressed(0, Config.Act.Interact) then TriggerServerEvent('aj:farm:sell') end
                         if IsControlJustPressed(0, 74) then TriggerServerEvent('aj:farm:buy', order[sel], 10) end
                     end
                 end

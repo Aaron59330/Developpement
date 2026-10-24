@@ -69,7 +69,7 @@ AJ.Mod[KEY] = {
                         if dist < 25.0 then sleep = 0 end
                         if not carrying and dist < 1.8 and not IsPedInAnyVehicle(ped, false) then
                             AJ.Help('~INPUT_PICKUP~ Ramasser le sac poubelle')
-                            if IsControlJustPressed(0, Config.Interact) then
+                            if IsControlJustPressed(0, Config.Act.Interact) then
                                 if AJ.Progress('Ramassage', 1.2, { dict = 'anim@heists@narcotics@trash', clip = 'pickup' }) then
                                     b.taken = true
                                     if b.obj then DeleteEntity(b.obj) b.obj = nil end
@@ -94,7 +94,7 @@ AJ.Mod[KEY] = {
                     local rear = GetOffsetFromEntityInWorldCoords(truck, 0.0, -4.4, 0.0)
                     if #(pos - rear) < 2.4 then
                         AJ.Help('~INPUT_PICKUP~ Jeter le sac dans le camion')
-                        if IsControlJustPressed(0, Config.Interact) then
+                        if IsControlJustPressed(0, Config.Act.Interact) then
                             RequestAnimDict('anim@heists@narcotics@trash')
                             TaskPlayAnim(ped, 'anim@heists@narcotics@trash', 'throw_b', 4.0, 4.0, 1200, 48, 0.0, false, false, false)
                             Wait(900)
@@ -114,7 +114,7 @@ AJ.Mod[KEY] = {
                     local dd = AJ.Marker(depot, 1, 255, 190, 0)
                     if dd < 6.0 and IsPedInVehicle(ped, truck, false) then
                         AJ.Help('~INPUT_PICKUP~ Terminer la tournée')
-                        if IsControlJustPressed(0, Config.Interact) then TriggerServerEvent('aj:garbage:finish') Wait(1500) end
+                        if IsControlJustPressed(0, Config.Act.Interact) then TriggerServerEvent('aj:garbage:finish') Wait(1500) end
                     end
                 end
                 Wait(sleep)
@@ -128,7 +128,7 @@ AJ.Mod[KEY] = {
                     local ped2 = PlayerPedId()
                     if #(GetEntityCoords(ped2) - vector3(depot.x, depot.y, depot.z)) < 6.0 and IsPedInVehicle(ped2, truck, false) then
                         AJ.Help('~INPUT_PICKUP~ Rendre le camion (tournée incomplète, pas de prime)')
-                        if IsControlJustPressed(0, Config.Interact) then TriggerServerEvent('aj:garbage:finish') Wait(1500) end
+                        if IsControlJustPressed(0, Config.Act.Interact) then TriggerServerEvent('aj:garbage:finish') Wait(1500) end
                     end
                     Wait(0)
                 else Wait(700) end

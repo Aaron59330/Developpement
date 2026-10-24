@@ -45,7 +45,10 @@ Crée des jobs **police, EMS, mécano, taxi, agence immobilière, bar, personnal
 - Le brouillon reste en mémoire quand tu fermes avec Échap (pour aller relever des coordonnées / une tenue).
 
 ## 🚜 Métiers actifs (types Éboueur, Dépanneur, Laveur auto, Camionneur, Fermier, Pompier, Conducteur de train)
-Créés comme les autres jobs. Points dédiés : **Poste d'activité** (démarrage de l'activité en service) et **Points d'activité** (rôle : zone, fourrière, baie, destination, champ, marché, incendie, station). Le gameplay, l'XP et la paie sont dans la ressource `pickax_activejobs` (voir son README).
+Tout est dans le Job Builder (aucune autre ressource). Crée le job avec son modèle, puis dans l'onglet **Points** : un **Poste d'activité** (l'employé *en service* y démarre son activité) et des **Points d'activité** avec un rôle (zone de ramassage, lieu de panne, fourrière, baie, destination, champ, marché, incendie, station — pour le train, l'ordre de création = l'ordre de la ligne). Un rôle sans point utilise des positions par défaut approximatives.
+- Éboueur : camion-benne, sacs à ramasser à pied puis à jeter à l'arrière, prime de tournée. Dépanneur : charger la voiture en panne sur la dépanneuse et la déposer à la fourrière (paie à la distance). Laveur : clients dans les baies, 4 côtés à laver, pourboire. Camionneur : semi + remorque, destination lointaine, temps limité, état de la cargaison, prime de retour.
+- Fermier : parcelles persistantes (semer, arroser, récolter, vendre ; graines au marché). Pompier : incendies automatiques (toutes les 7 min, ou 20 s après la prise de service), plusieurs foyers, canon du camion / extincteur, prime finale. Conducteur : métro à conduire, arrêts précis en station.
+- XP / niveaux (+3 % de paie par niveau, bonus VIP 5/10/15 %), promotion automatique aux niveaux 5 et 12 (jamais jusqu'au grade boss). Réglages et lieux par défaut : `config_active.lua`. `/finservice` termine l'activité, `/ajfire` (admin) déclenche un incendie. Tables `activejobs_stats` et `activejobs_farm` créées automatiquement ; items ox_inventory `wheat_seed`, `corn_seed`, `wheat`, `corn`.
 
 ## 🏠 Agence immobilière (jobs de type `realestate`)
 Les agents ouvrent **F6 → Gestion immobilière** (aucune case à cocher : automatique pour ce type de job).

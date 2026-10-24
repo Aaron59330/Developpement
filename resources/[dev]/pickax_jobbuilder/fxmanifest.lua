@@ -9,6 +9,7 @@ version '1.0.0'
 shared_scripts {
     'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
+    'config_active.lua',
 }
 
 server_scripts {
@@ -33,7 +34,14 @@ server_scripts {
     'server/bank.lua',
     'server/announce.lua',
     'server/phone.lua',
-    'server/activity.lua',
+    'server/act_core.lua',
+    'server/act_garbage.lua',
+    'server/act_towing.lua',
+    'server/act_carwash.lua',
+    'server/act_trucker.lua',
+    'server/act_farmer.lua',
+    'server/act_firefighter.lua',
+    'server/act_train.lua',
     'server/compat.lua',
 }
 
@@ -55,6 +63,14 @@ client_scripts {
     'client/bank.lua',
     'client/vehctl.lua',
     'client/props.lua',
+    'client/act_core.lua',
+    'client/act_garbage.lua',
+    'client/act_towing.lua',
+    'client/act_carwash.lua',
+    'client/act_trucker.lua',
+    'client/act_farmer.lua',
+    'client/act_firefighter.lua',
+    'client/act_train.lua',
 }
 
 ui_page 'html/index.html'

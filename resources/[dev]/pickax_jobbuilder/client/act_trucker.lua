@@ -39,7 +39,7 @@ AJ.Mod[KEY] = {
                     local dd = AJ.Marker(d.dest, 1, 255, 190, 0)
                     if dd < 12.0 and IsPedInVehicle(ped, truck, false) then
                         AJ.Help('~INPUT_PICKUP~ Livrer la cargaison')
-                        if IsControlJustPressed(0, Config.Interact) then
+                        if IsControlJustPressed(0, Config.Act.Interact) then
                             if IsVehicleAttachedToTrailer(truck) then
                                 if AJ.Progress('Déchargement de la cargaison', 6, { radius = 15.0 }) then
                                     TriggerServerEvent('aj:trucker:deliver', GetEntityHealth(trailer) / math.max(1, GetEntityMaxHealth(trailer)))
@@ -54,7 +54,7 @@ AJ.Mod[KEY] = {
                         local dd = AJ.Marker(depot, 1, 0, 200, 90)
                         if dd < 12.0 and IsPedInVehicle(ped, truck, false) then
                             AJ.Help('~INPUT_PICKUP~ Rendre le camion')
-                            if IsControlJustPressed(0, Config.Interact) then TriggerServerEvent('aj:trucker:return') Wait(1500) end
+                            if IsControlJustPressed(0, Config.Act.Interact) then TriggerServerEvent('aj:trucker:return') Wait(1500) end
                         end
                     end
                 end

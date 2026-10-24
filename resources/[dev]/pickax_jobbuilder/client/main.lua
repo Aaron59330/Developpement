@@ -154,7 +154,6 @@ local function openPoint(point)
             return
         end
         if res.kind == 'tuning' then return OpenTuning(point, res) end
-        if res.kind == 'activity' then TriggerEvent('aj:client:openPanel', point.id) return end   -- panneau de pickax_activejobs
         OpenUI({ action = 'open', kind = res.kind, pointId = point.id, data = res })
     end, point.id)
 end

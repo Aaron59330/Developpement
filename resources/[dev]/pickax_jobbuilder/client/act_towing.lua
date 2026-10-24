@@ -64,7 +64,7 @@ AJ.Mod[KEY] = {
                         if #(tp - back) < 8.0 or #(tp - GetEntityCoords(flat)) < 9.0 then
                             sleep = 0
                             AJ.Help('~INPUT_PICKUP~ Charger le véhicule sur la dépanneuse')
-                            if IsControlJustPressed(0, Config.Interact) then
+                            if IsControlJustPressed(0, Config.Act.Interact) then
                                 if GetEntitySpeed(flat) > 1.0 then AJ.Notify('Arrête la dépanneuse avant de charger.')
                                 else
                                     SetVehicleDoorsLocked(target, 1) SetVehicleUndriveable(target, false)
@@ -83,7 +83,7 @@ AJ.Mod[KEY] = {
                     local dd = AJ.Marker(scrap, 1, 255, 190, 0)
                     if dd < 6.0 and IsPedInVehicle(ped, flat, false) then
                         AJ.Help('~INPUT_PICKUP~ Décharger le véhicule à la fourrière')
-                        if IsControlJustPressed(0, Config.Interact) then
+                        if IsControlJustPressed(0, Config.Act.Interact) then
                             DetachEntity(target, true, true)
                             Wait(300)
                             SetEntityAsMissionEntity(target, true, true) DeleteEntity(target) target = nil

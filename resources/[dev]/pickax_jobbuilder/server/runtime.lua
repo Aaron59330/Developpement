@@ -269,7 +269,8 @@ ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
         JB.openMissions(src, xPlayer, point, job, cb)
 
     elseif point.type == 'activity' then
-        cb({ ok = true, kind = 'activity', label = point.label })
+        if not JB.openActivity then return cb(fail('Module activités non chargé (server/act_core.lua)')) end
+        JB.openActivity(src, xPlayer, point, job, cb)
 
     elseif point.type == 'actpoint' then
         cb(fail('Ce point sert de repère à ton activité'))

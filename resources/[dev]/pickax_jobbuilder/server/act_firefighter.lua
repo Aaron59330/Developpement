@@ -11,7 +11,7 @@ end
 local function publicIncident()
     local f = {}
     for i, p in ipairs(Incident.foyers) do f[i] = { x = p.x, y = p.y, z = p.z, out = p.out } end
-    return { id = Incident.id, label = Incident.site.label, site = Incident.site, foyers = f, left = math.max(0, Incident.t0 + Config.Jobs[KEY].timeLimit - os.time()) }
+    return { id = Incident.id, label = Incident.site.label, site = Incident.site, foyers = f, left = math.max(0, Incident.t0 + Config.Act.Jobs[KEY].timeLimit - os.time()) }
 end
 
 local function clear(reason)
@@ -23,7 +23,7 @@ end
 
 local function createIncident()
     if Incident then return false end
-    local j = Config.Jobs[KEY]
+    local j = Config.Act.Jobs[KEY]
     -- le lieu est tiré parmi les points d'incendie d'un pompier en service (Job Builder), sinon les lieux par défaut
     local w = workers()
     if #w == 0 then return false end
@@ -47,7 +47,7 @@ end
 
 AJ.Modules[KEY] = {
     start = function(src, st)
-        local j = Config.Jobs[KEY]
+        local j = Config.Act.Jobs[KEY]
         local spawn = AJ.spawnPoint(st)
         if not spawn then return nil, 'Caserne non configurée' end
         st.score = 0
@@ -64,7 +64,7 @@ AJ.Modules[KEY] = {
 
 -- Incidents automatiques
 CreateThread(function()
-    local j = Config.Jobs[KEY]
+    local j = Config.Act.Jobs[KEY]
     while true do
         Wait(j.interval * 1000)
         if not Incident and #workers() >= j.minWorkers then createIncident() end
@@ -75,7 +75,7 @@ end)
 CreateThread(function()
     while true do
         Wait(5000)
-        if Incident and os.time() - Incident.t0 > Config.Jobs[KEY].timeLimit then
+        if Incident and os.time() - Incident.t0 > Config.Act.Jobs[KEY].timeLimit then
             for _, src in ipairs(workers()) do AJ.notify(src, 'L\'incendie à ' .. Incident.site.label .. ' est hors de contrôle...', 'error') end
             clear('expired')
         end
@@ -90,7 +90,7 @@ RegisterNetEvent('aj:fire:foyerOut', function(id, idx)
     Incident.credited[src] = Incident.credited[src] or {}
     if Incident.credited[src][idx] then return end
     Incident.credited[src][idx] = true
-    local j = Config.Jobs[KEY]
+    local j = Config.Act.Jobs[KEY]
     local paid = AJ.pay(src, KEY, j.payPerFire, 14, 'Foyer éteint', 0)
     AJ.notify(src, ('Foyer éteint : %d $'):format(paid), 'success')
     if not f.out then

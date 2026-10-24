@@ -44,7 +44,7 @@ AJ.Mod[KEY] = {
         CreateThread(function()
             while run == my and AJ.Active == KEY do
                 TriggerServerEvent('aj:carwash:request')
-                Wait(Config.Jobs[KEY].interval * 1000 * 0.8)
+                Wait(Config.Act.Jobs[KEY].interval * 1000 * 0.8)
             end
         end)
 
@@ -69,8 +69,8 @@ AJ.Mod[KEY] = {
                                     DrawMarker(1, p.x, p.y, p.z - 0.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 0, 164, 255, 110, false, false, 2, false, nil, nil, false)
                                     if dist < 1.4 then
                                         AJ.Help(('~INPUT_PICKUP~ Laver ' .. labels[i]))
-                                        if IsControlJustPressed(0, Config.Interact) then
-                                            local secs = Config.Jobs[KEY].washSeconds / 4
+                                        if IsControlJustPressed(0, Config.Act.Interact) then
+                                            local secs = Config.Act.Jobs[KEY].washSeconds / 4
                                             if AJ.Progress('Lavage — ' .. labels[i], secs, { dict = 'timetable@floyd@clean_kitchen@base', clip = 'base', radius = 3.0 }) then
                                                 c.parts[i] = true
                                                 SetVehicleDirtLevel(c.veh, math.max(0.0, GetVehicleDirtLevel(c.veh) - 3.6))

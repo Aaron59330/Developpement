@@ -2,7 +2,7 @@ local KEY = 'trucker'
 
 AJ.Modules[KEY] = {
     start = function(src, st)
-        local j = Config.Jobs[KEY]
+        local j = Config.Act.Jobs[KEY]
         local spawn, dep = AJ.spawnPoint(st), AJ.pts(st, 'depot')[1]
         local dests = AJ.pts(st, 'dest')
         if not spawn or #dests == 0 then return nil, 'Destinations non configurées (point d\'activité « Destination » dans le Job Builder)' end
@@ -21,7 +21,7 @@ RegisterNetEvent('aj:trucker:deliver', function(health)
     local src = source
     local st = AJ.session(src, KEY)
     if not st or st.delivered or not AJ.near(src, st.dest, 45.0) then return end
-    local j = Config.Jobs[KEY]
+    local j = Config.Act.Jobs[KEY]
     local cond = math.max(0.4, math.min(1.0, tonumber(health) or 1.0))
     local elapsed = os.time() - st.t0
     local base = (j.payBase + st.km * j.payPerKm) * cond
@@ -38,7 +38,7 @@ RegisterNetEvent('aj:trucker:return', function()
     local st = AJ.session(src, KEY)
     local dep = st and AJ.pts(st, 'depot')[1]
     if not st or not st.delivered or not dep or not AJ.near(src, dep, 40.0) then return end
-    local paid = AJ.pay(src, KEY, Config.Jobs[KEY].returnBonus, 10, 'Retour au dépôt', 0)
+    local paid = AJ.pay(src, KEY, Config.Act.Jobs[KEY].returnBonus, 10, 'Retour au dépôt', 0)
     AJ.notify(src, ('Camion rendu : prime de retour %d $'):format(paid), 'success')
     AJ.stopShift(src, nil)
 end)

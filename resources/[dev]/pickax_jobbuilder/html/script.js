@@ -2662,6 +2662,7 @@ const Runtime = {
         body: list(d.items, it => `<div class="item">${tile('box')}<div class="grow"><b>${esc(it.label)}</b><small>${money(it.price)} · tu en as ${it.have}</small></div>
           <input class="qty" type="number" min="1" max="${d.maxServe}" value="1" id="sq${it.idx}"><button class="primary" style="height:38px" data-a="sell" data-i="${it.idx}" ${it.have > 0 ? '' : 'disabled'}>Proposer</button></div>`, 'La carte est vide : le patron ajoute des produits dans le builder (onglet Général).') });
       case 'missions': return this.renderMissions();
+      case 'activity': return this.renderActivity();
       case 'missionStatus': $root.classList.add('corner'); return this.renderMissionStatus();
       case 'showroom': return this.renderShowroom();
       case 'dealerOffer': return $root.innerHTML = panel({ icon: 'car', title: 'Offre d\'achat', sub: d.jobLabel,
@@ -2673,6 +2674,18 @@ const Runtime = {
       case 'propOffer': return $root.innerHTML = panel({ icon: 'home', title: d.deal === 'rent' ? 'Offre de location' : 'Offre d\'achat', sub: d.jobLabel,
         body: `<div class="card"><b style="font-size:16px">${esc(d.label)}</b><p class="hint mt-s">${esc(d.address || '')}</p><div class="eyebrow mt">${d.deal === 'rent' ? `Loyer · par semaine (${d.days} jours)` : 'Prix'}</div><div class="big">${Number(d.price).toLocaleString('fr-FR')}<small>$</small></div>${d.deal === 'rent' ? '<p class="hint">Le premier loyer est payé maintenant. Les suivants se règlent à la porte.</p>' : ''}</div><div class="row"><button class="danger" style="flex:1" data-a="offerNo">Refuser</button><button class="primary" style="flex:2" data-a="offerYes">${ic('check', 16)} ${d.deal === 'rent' ? 'Louer' : 'Acheter'} · ${money(d.price)}</button></div>` });
     }
+  },
+
+  renderActivity() {
+    const d = this.data, pct = Math.min(100, Math.round(d.xpInLevel / d.xpPerLevel * 100));
+    const grades = d.grades.map(g => `<div><b>${esc(g.label)}</b> — ${money(g.salary)} / paie</div>`).join('');
+    $root.innerHTML = panel({ icon: d.icon === 'flame' ? 'siren' : ({ trash: 'trash', wrench: 'wrench', drop: 'droplet', truck: 'car', sprout: 'sprout', train: 'route' }[d.icon] || 'route'), title: d.label, sub: `Grade : ${esc(d.gradeLabel || 'employé')}`, cls: 'md',
+      body: `<p class="hint" style="font-size:13px">${esc(d.desc)}</p>
+        <div class="card"><div class="card-h"><div class="t">Niveau ${d.level}${d.level >= d.maxLevel ? ' (max)' : ''}</div>${chip('+' + d.payBonus + '% de paie', 'info')}</div>
+          <div class="bar" style="height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><i style="display:block;height:100%;width:${d.level >= d.maxLevel ? 100 : pct}%;background:var(--accent)"></i></div>
+          <div class="grid3 mt"><div class="stat"><div class="eyebrow">Missions</div><div class="v">${d.done}</div></div><div class="stat"><div class="eyebrow">Gagné</div><div class="v">${money(d.earned)}</div></div><div class="stat"><div class="eyebrow">XP</div><div class="v">${d.xp}</div></div></div></div>
+        <div class="card hint" style="line-height:1.7">${grades}</div>
+        ${d.active ? `<div class="row">${chip('Activité en cours', 'ok')}</div><button class="danger" data-a="actStop">Terminer l'activité</button>` : `<button class="primary" data-a="actStart">${ic('route', 15)} Commencer l'activité</button>`}` });
   },
 
   renderMissions() {
@@ -2849,6 +2862,8 @@ const Runtime = {
       case 'ringYes': return rpc('ringAnswer', d.ringer, d.propId, true);
       case 'ringNo': return rpc('ringAnswer', d.ringer, d.propId, false);
       /* immobilier : porte */
+      case 'actStart': { const r = await rpc('activity:start', pid); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
+      case 'actStop': return rpc('activity:stop', pid);
       case 'missionStart': { const r = await rpc('missions:start', pid, el.dataset.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'missionCancel': { await rpc('missions:cancel'); toast('Mission annulée', 'ok'); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }

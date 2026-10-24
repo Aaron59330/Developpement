@@ -1,5 +1,3 @@
-ESX = exports['es_extended']:getSharedObject()
-
 AJ = {
     Modules = {},     -- Modules[clé] = { start = function(src, ctx) -> payload | nil, err ; stop = function(src, state) }
     Active = {},      -- Active[src] = { job = clé, state = {}, started = os.time() }
@@ -13,7 +11,7 @@ function AJ.isAdmin(src)
     local x = ESX.GetPlayerFromId(src)
     if not x then return false end
     local g = x.getGroup()
-    for _, a in ipairs(Config.AdminGroups) do if g == a then return true end end
+    for _, a in ipairs(Config.Act.AdminGroups) do if g == a then return true end end
     return false
 end
 
@@ -31,27 +29,38 @@ local function installTables()
         PRIMARY KEY (identifier, job)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
 end
 
--- ─────────────────────────────── Lien avec le Job Builder ───────────────────────────────
--- Les métiers se créent dans le Job Builder (types : garbage, towing, carwash, trucker, farmer, firefighter, train). Ici : seulement le gameplay.
-local function jbReady() return GetResourceState('pickax_jobbuilder') == 'started' end
-
+-- ─────────────────────────────── Lien avec le Job Builder (même ressource) ───────────────────────────────
+-- Types de job : garbage, towing, carwash, trucker, farmer, firefighter, train (Config.JobTypes). Ici : le gameplay de l'activité.
 function AJ.meta(jobName)
-    if not jbReady() then return nil end
-    local ok, m = pcall(function() return exports.pickax_jobbuilder:GetJobMeta(jobName) end)
-    return ok and m or nil
+    local job = JB.Jobs[jobName]
+    if not job then return nil end
+    return { name = job.name, type = job.type, label = job.label, grades = job.grades, boss_grade = job.boss_grade }
 end
 
--- Clé du module d'activité d'un joueur (selon le type de son job dans le Job Builder)
+-- Clé du module d'activité d'un joueur (selon le type de son job)
 function AJ.keyOf(xPlayer)
     local m = xPlayer and AJ.meta(xPlayer.job.name)
-    return m and Config.Jobs[m.type] and m.type or nil, m
+    return m and Config.Act.Jobs[m.type] and m.type or nil, m
+end
+
+local function xyz(c, label) return { x = c.x + 0.0, y = c.y + 0.0, z = c.z + 0.0, h = (c.h or 0.0) + 0.0, label = label or '' } end
+
+-- Points d'activité du job : { rôle = { {x,y,z,h,label}, ... } } dans l'ordre de création
+local function activityRoles(jobName)
+    local list, out = {}, {}
+    for _, p in pairs(JB.Points) do if p.job_name == jobName and p.type == 'actpoint' and p.data.role then list[#list + 1] = p end end
+    table.sort(list, function(a, b) return a.id < b.id end)
+    for _, p in ipairs(list) do
+        out[p.data.role] = out[p.data.role] or {}
+        table.insert(out[p.data.role], xyz(p.coords, p.label))
+    end
+    return out
 end
 
 -- Points du terrain pour une session : poste d'activité (dépôt), sortie du véhicule, points d'activité du Job Builder, sinon valeurs par défaut
 local function buildPts(key, jobName, point)
     local pts = {}
-    local ok, roles = pcall(function() return exports.pickax_jobbuilder:GetActivityRoles(jobName) end)
-    for role, list in pairs(ok and roles or {}) do pts[role] = list end
+    for role, list in pairs(activityRoles(jobName)) do pts[role] = list end
     pts.depot = { { x = point.coords.x, y = point.coords.y, z = point.coords.z, h = point.coords.h or 0.0, label = point.label } }
     if point.spawn then
         pts.spawn = { point.spawn }
@@ -59,8 +68,8 @@ local function buildPts(key, jobName, point)
         local d, rad = pts.depot[1], math.rad(point.coords.h or 0.0)
         pts.spawn = { { x = d.x - math.sin(rad) * 7.0, y = d.y + math.cos(rad) * 7.0, z = d.z, h = d.h } }
     end
-    local j = Config.Jobs[key]
-    for role, list in pairs(Config.DefaultPoints[key] or {}) do
+    local j = Config.Act.Jobs[key]
+    for role, list in pairs(Config.Act.DefaultPoints[key] or {}) do
         if role ~= 'depot' and not pts[role] then
             pts[role] = {}
             for _, p in ipairs(list) do pts[role][#pts[role] + 1] = { x = p.x, y = p.y, z = p.z, h = p.h or 0.0, label = p.label or '' } end
@@ -76,7 +85,7 @@ local function buildPts(key, jobName, point)
     end
     if not pts.station and key == 'train' then
         pts.station = {}
-        for _, z in ipairs(Config.TrainStations) do pts.station[#pts.station + 1] = { x = z.x, y = z.y, z = z.z, h = 0.0, label = z.label } end
+        for _, z in ipairs(Config.Act.TrainStations) do pts.station[#pts.station + 1] = { x = z.x, y = z.y, z = z.z, h = 0.0, label = z.label } end
     end
     return pts
 end
@@ -86,7 +95,7 @@ function AJ.pts(st, kind) return (st and st.pts and st.pts[kind]) or {} end
 function AJ.spawnPoint(st) return AJ.pts(st, 'spawn')[1] end
 
 -- ─────────────────────────────── Stats / niveau / paie ───────────────────────────────
-local function levelOf(xp) return math.min(Config.XP.MaxLevel, 1 + math.floor((xp or 0) / Config.XP.PerLevel)) end
+local function levelOf(xp) return math.min(Config.Act.XP.MaxLevel, 1 + math.floor((xp or 0) / Config.Act.XP.PerLevel)) end
 function AJ.level(xp) return levelOf(xp) end
 
 function AJ.stat(xPlayer, key)
@@ -112,7 +121,7 @@ end
 local function vipBonus(src)
     local ok, l = pcall(function() return exports.pickax_core:GetVIPLevel(src) end)
     l = ok and tonumber(l) or 0
-    return Config.XP.VipPayBonus[l] or 0
+    return Config.Act.XP.VipPayBonus[l] or 0
 end
 
 -- Paie une mission : base × (niveau + VIP) ; ajoute de l'XP (et fait monter de niveau / de grade). Retourne le montant versé.
@@ -121,11 +130,11 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
     if not xPlayer then return 0 end
     local s = AJ.stat(xPlayer, key)
     local before = levelOf(s.xp)
-    local mult = 1 + (before - 1) * Config.XP.PayPerLevel / 100 + vipBonus(src) / 100
+    local mult = 1 + (before - 1) * Config.Act.XP.PayPerLevel / 100 + vipBonus(src) / 100
     local amount = math.floor(math.max(0, base) * mult)
     local meta = AJ.meta(xPlayer.job.name)
-    local label = meta and meta.label or Config.Jobs[key].label
-    if amount > 0 then xPlayer.addAccountMoney(Config.Account, amount, reason or label) end
+    local label = meta and meta.label or Config.Act.Jobs[key].label
+    if amount > 0 then xPlayer.addAccountMoney(Config.Act.Account, amount, reason or label) end
     s.xp = s.xp + math.max(0, math.floor(xpGain or 0))
     s.done = s.done + (doneCount or 0)
     s.earned = s.earned + amount
@@ -134,7 +143,7 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
         AJ.notify(src, ('Niveau %d atteint : %s !'):format(after, label), 'success')
         -- promotion automatique : jamais jusqu'au grade boss ni au-delà du nombre de grades du job
         local grade = 0
-        for lvl, g in pairs(Config.XP.Promotions) do if after >= lvl and g > grade then grade = g end end
+        for lvl, g in pairs(Config.Act.XP.Promotions) do if after >= lvl and g > grade then grade = g end end
         if meta and grade > 0 then
             local cap = math.max(0, (meta.boss_grade or #meta.grades) - 1)
             grade = math.min(grade, cap, #meta.grades - 1)
@@ -169,42 +178,42 @@ function AJ.stopShift(src, reason)
     TriggerClientEvent('aj:client:stop', src, a.job, reason or '')
 end
 
-local function onDuty(src)
-    if not jbReady() then return false end
-    local ok, d = pcall(function() return exports.pickax_jobbuilder:IsOnDuty(src) end)
-    return ok and d == true
-end
+local function onDuty(src) return JB.isOnDuty(src) end
 
 -- Vérifie le poste d'activité : point existant, bon job, grade, proximité et service pris dans le Job Builder
 local function context(src, pointId)
     local x = ESX.GetPlayerFromId(src)
     if not x then return nil, 'Erreur' end
-    if not jbReady() then return nil, 'Job Builder indisponible' end
-    local ok, point = pcall(function() return exports.pickax_jobbuilder:GetActivityPoint(tonumber(pointId)) end)
-    if not ok or not point then return nil, 'Poste introuvable' end
+    local p = JB.Points[tonumber(pointId)]
+    local job = p and JB.Jobs[p.job_name]
+    if not p or p.type ~= 'activity' or not job then return nil, 'Poste introuvable' end
+    local point = { id = p.id, job = p.job_name, type = job.type, min_grade = p.min_grade, label = p.label, coords = xyz(p.coords, p.label), spawn = p.data.spawn and xyz(p.data.spawn, 'Sortie véhicule') or nil }
     if x.job.name ~= point.job then return nil, 'Ce poste n\'appartient pas à ton métier' end
     if x.job.grade < (point.min_grade or 0) then return nil, 'Ton grade est insuffisant' end
     if not AJ.near(src, point.coords, 10.0) then return nil, 'Tu es trop loin du poste' end
     if not onDuty(src) then return nil, 'Prends ton service (F6) pour utiliser ce poste' end
     local key = point.type
-    if not Config.Jobs[key] then return nil, 'Ce type de job n\'a pas d\'activité' end
+    if not Config.Act.Jobs[key] then return nil, 'Ce type de job n\'a pas d\'activité' end
     return { x = x, key = key, point = point }
 end
 
 local function fail(msg) return { ok = false, error = msg } end
 
-ESX.RegisterServerCallback('aj:panel', function(src, cb, pointId)
+-- Données du panneau (ouvert par le point « Poste d'activité » via JB.openActivity)
+local function panelData(src, pointId, cb)
     local c, err = context(src, pointId)
     if not c then return cb(fail(err)) end
-    local j, x, key = Config.Jobs[c.key], c.x, c.key
+    local j, x, key = Config.Act.Jobs[c.key], c.x, c.key
     local meta = AJ.meta(x.job.name) or { grades = {}, label = j.label }
     local s = AJ.stat(x, key)
     local lvl = levelOf(s.xp)
-    cb({ ok = true, pointId = pointId, key = key, label = meta.label or j.label, icon = j.icon, desc = j.desc, worker = true, gradeLabel = (meta.grades[x.job.grade + 1] or {}).label,
-        level = lvl, maxLevel = Config.XP.MaxLevel, xp = s.xp, xpInLevel = s.xp - (lvl - 1) * Config.XP.PerLevel, xpPerLevel = Config.XP.PerLevel,
+    cb({ ok = true, kind = 'activity', pointId = pointId, key = key, label = meta.label or j.label, icon = j.icon, desc = j.desc, worker = true, gradeLabel = (meta.grades[x.job.grade + 1] or {}).label,
+        level = lvl, maxLevel = Config.Act.XP.MaxLevel, xp = s.xp, xpInLevel = s.xp - (lvl - 1) * Config.Act.XP.PerLevel, xpPerLevel = Config.Act.XP.PerLevel,
         done = s.done, earned = s.earned, active = AJ.Active[src] ~= nil and AJ.Active[src].job == key,
-        payBonus = (lvl - 1) * Config.XP.PayPerLevel + vipBonus(src), grades = meta.grades })
-end)
+        payBonus = (lvl - 1) * Config.Act.XP.PayPerLevel + vipBonus(src), grades = meta.grades })
+end
+
+function JB.openActivity(src, xPlayer, point, job, cb) panelData(src, point.id, cb) end
 
 ESX.RegisterServerCallback('aj:start', function(src, cb, pointId)
     local c, err = context(src, pointId)
@@ -244,7 +253,6 @@ end)
 AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
     installTables()
-    print('^2[activejobs] Moteur des métiers actifs chargé (jobs à créer dans le Job Builder).^0')
 end)
 
 AddEventHandler('onResourceStop', function(res)
@@ -252,4 +260,4 @@ AddEventHandler('onResourceStop', function(res)
     for src in pairs(AJ.Active) do AJ.stopShift(src, nil) end
 end)
 
-exports('GetActiveJob', function(src) local a = AJ.Active[tonumber(src)] return a and a.job or nil end)
+exports('GetActiveActivity', function(src) local a = AJ.Active[tonumber(src)] return a and a.job or nil end)

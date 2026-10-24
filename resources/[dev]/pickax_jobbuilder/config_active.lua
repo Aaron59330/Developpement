@@ -1,14 +1,14 @@
-Config = {}
+Config.Act = {}
 
 -- ─────────────────────────────── Général ───────────────────────────────
-Config.Account       = 'money'        -- compte crédité pour les missions : 'money' | 'bank'
-Config.Interact      = 38             -- E
-Config.AdminGroups   = { '_dev', 'admin', 'superadmin' }   -- qui peut déclencher /ajfire (test des incendies)
-Config.DrawDistance  = 25.0
-Config.InteractDistance = 2.0
+Config.Act.Account       = 'money'        -- compte crédité pour les missions : 'money' | 'bank'
+Config.Act.Interact      = 38             -- E
+Config.Act.AdminGroups   = { '_dev', 'admin', 'superadmin' }   -- qui peut déclencher /ajfire (test des incendies)
+Config.Act.DrawDistance  = 25.0
+Config.Act.InteractDistance = 2.0
 
 -- Progression : chaque mission rapporte de l'XP ; le niveau augmente la paie et peut promouvoir au grade supérieur.
-Config.XP = {
+Config.Act.XP = {
     PerLevel      = 150,              -- XP par niveau
     MaxLevel      = 20,
     PayPerLevel   = 3,                -- % de paie en plus par niveau
@@ -20,7 +20,7 @@ Config.XP = {
 -- Les métiers se CRÉENT DANS LE JOB BUILDER (/jobbuilder → nouveau job → type Éboueur, Dépanneur, Laveur auto, Camionneur, Fermier, Pompier ou
 -- Conducteur de train) : grades, salaires, société, vestiaire, coffre, boss, service (F6). Ici : seulement le gameplay de chaque activité.
 -- Dans le Job Builder, place un « Poste d'activité » (là où l'on démarre) puis des « Points d'activité » (zones, destinations, baies, champ, marché…).
-Config.Jobs = {
+Config.Act.Jobs = {
     garbage = {
         label = 'Éboueur', icon = 'trash',
         desc = 'Ramasse les poubelles de la ville et ramène-les au centre de tri. Chaque sac rapporte, la tournée complète donne une prime.',
@@ -74,12 +74,12 @@ Config.Jobs = {
         variation = 24, maxSpeed = 22.0, stopRadius = 28.0, stopSpeed = 1.5, dwell = 9, payPerStop = 80, bonusLine = 200,
     },
 }
-Config.JobOrder = { 'garbage', 'towing', 'carwash', 'trucker', 'farmer', 'firefighter', 'train' }
+Config.Act.JobOrder = { 'garbage', 'towing', 'carwash', 'trucker', 'farmer', 'firefighter', 'train' }
 
 -- ─────────────────────────────── Points par défaut ───────────────────────────────
 -- Utilisés seulement si le job n'a AUCUN point d'activité de ce rôle dans le Job Builder (valeurs de départ approximatives : pose les tiens).
 -- Rôles : scrap (fourrière), bay (baie), dest (destination), field (champ), market (marché), zone (zone de ramassage / de panne), fire (incendie), station (train).
-Config.DefaultPoints = {
+Config.Act.DefaultPoints = {
     garbage     = {},
     towing      = {
                     scrap = { { x = 401.0, y = -1631.0, z = 29.3, h = 320.0, label = 'Fourrière' } } },
@@ -95,7 +95,7 @@ Config.DefaultPoints = {
     train       = {},
 }
 -- Arrêts du métro (ordre de la ligne) : positions à vérifier / remplacer avec des points d'activité « Station » du Job Builder (sur le quai, dans l'ordre de la ligne).
-Config.TrainStations = {
+Config.Act.TrainStations = {
     { label = 'LSIA Terminal', x = -1095.0, y = -2714.0, z = -7.4 }, { label = 'LSIA Parking', x = -890.0, y = -2326.0, z = -11.7 },
     { label = 'Puerto del Sol', x = -537.0, y = -1286.0, z = 26.9 }, { label = 'Pillbox Hill', x = -214.0, y = -1031.0, z = 30.1 },
     { label = 'Strawberry', x = 270.0, y = -1209.0, z = 38.9 }, { label = 'Davis', x = 112.0, y = -1730.0, z = 30.1 },

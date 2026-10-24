@@ -1,15 +1,7 @@
-ESX = exports['es_extended']:getSharedObject()
-
 AJ = { Pts = {}, Active = nil, Mod = {}, Hud = {}, Blips = {}, Ents = {} }
 
 -- ─────────────────────────────── Outils communs ───────────────────────────────
-function AJ.Notify(msg, kind)
-    if GetResourceState('pickax_notify') == 'started' then
-        local ok = pcall(function() exports['pickax_notify']:ShowNotification(msg, kind or 'info') end)
-        if ok then return end
-    end
-    ESX.ShowNotification(msg)
-end
+function AJ.Notify(msg, kind) JBNotify(msg, kind) end
 RegisterNetEvent('aj:client:notify', function(msg, kind) AJ.Notify(msg, kind) end)
 
 function AJ.Help(text)
@@ -85,7 +77,7 @@ end
 function AJ.Marker(c, kind, r, g, b)
     local pos = GetEntityCoords(PlayerPedId())
     local d = #(pos - vector3(c.x, c.y, c.z))
-    if d < Config.DrawDistance then
+    if d < Config.Act.DrawDistance then
         DrawMarker(kind or 1, c.x, c.y, c.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.6, 1.6, 0.7, r or 0, g or 164, b or 255, 110, false, false, 2, false, nil, nil, false)
     end
     return d
@@ -137,34 +129,21 @@ CreateThread(function()
     end
 end)
 
--- ─────────────────────────────── Panneau du poste d'activité (ouvert par le Job Builder) ───────────────────────────────
-local uiOpen = false
-local function closePanel() uiOpen = false SetNuiFocus(false, false) SendNUIMessage({ action = 'close' }) end
-
-local function openPanel(pointId)
-    ESX.TriggerServerCallback('aj:panel', function(res)
-        if not res or not res.ok then return AJ.Notify('~r~' .. ((res and res.error) or 'Indisponible')) end
-        uiOpen = true
-        SetNuiFocus(true, true)
-        SendNUIMessage({ action = 'open', data = res, accent = PickaxTheme and PickaxTheme.rgb or nil })
-    end, pointId)
-end
-RegisterNetEvent('aj:client:openPanel', function(pointId) openPanel(pointId) end)
-
--- ─────────────────────────────── NUI ───────────────────────────────
-RegisterNUICallback('close', function(_, cb) closePanel() cb({}) end)
-RegisterNUICallback('act', function(body, cb)
-    local pid, what = body.pointId, body.what
-    if what == 'stop' then
-        ESX.TriggerServerCallback('aj:stop', function() openPanel(pid) cb({ ok = true }) end)
-        return
-    end
-    if what ~= 'start' then return cb({ ok = false }) end
+-- ─────────────────────────────── Panneau du poste d'activité (interface du Job Builder) ───────────────────────────────
+NuiLocal['activity:start'] = function(args, cb)
     ESX.TriggerServerCallback('aj:start', function(res)
-        if res and res.ok then closePanel() else AJ.Notify('~r~' .. ((res and res.error) or 'Erreur')) end
+        if res and res.ok then CloseUI() else AJ.Notify('~r~' .. ((res and res.error) or 'Erreur')) end
         cb(res or { ok = false })
-    end, pid)
-end)
+    end, args[1])
+end
+
+NuiLocal['activity:stop'] = function(args, cb)
+    ESX.TriggerServerCallback('aj:stop', function()
+        CloseUI()
+        SetTimeout(250, function() ReopenPoint(tonumber(args[1])) end)
+        cb({ ok = true })
+    end)
+end
 
 -- ─────────────────────────────── Début / fin de service ───────────────────────────────
 RegisterNetEvent('aj:client:start', function(key, data)
@@ -193,5 +172,4 @@ end, false)
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     AJ.Cleanup()
-    if uiOpen then SetNuiFocus(false, false) end
 end)
