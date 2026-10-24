@@ -2827,3 +2827,15 @@ end)
 RegisterNetEvent("Admin:UpdateData", function(info)
     reportlist = info
 end)
+-- ═══════════════ Chat staff (remplace celui du panel pickax_staff retiré) ═══════════════
+RegisterNetEvent('CorePickax:StaffChat:msg', function(m)
+    if type(m) ~= 'table' then return end
+    TriggerEvent('chat:addMessage', { color = { 150, 110, 230 }, multiline = false, args = { ('[STAFF] [%s] %s | %s'):format(tostring(m.id), tostring(m.rank), tostring(m.name)), tostring(m.text) } })
+    ESX.ShowNotification(('~p~[Staff] ~s~%s : %s'):format(tostring(m.name), tostring(m.text)))
+end)
+
+-- /sc <message> : écrire rapidement au chat staff sans passer par le menu
+RegisterCommand('sc', function(_, args)
+    local t = table.concat(args, ' ')
+    if t ~= '' then TriggerServerEvent('CorePickax:StaffChat:send', t) end
+end, false)

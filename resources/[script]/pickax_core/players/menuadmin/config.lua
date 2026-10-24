@@ -1429,9 +1429,8 @@ ConfigMenuAdministrationAdmin = {
             toSub = false,
             label = "Écrire au chat staff",
             press = function()
-                if GetResourceState("pickax_staff") ~= "started" then ESX.ShowNotification("~r~pickax_staff n'est pas démarré") return end
                 local t = ConfigMenuAdministrationAdmin.utils.keyboard("Chat staff", "Message pour l'équipe", 200)
-                if t and t ~= "" then exports["pickax_staff"]:World("chatSend", t) end
+                if t and t ~= "" then TriggerServerEvent("CorePickax:StaffChat:send", t) end
             end
         },
 

@@ -1695,3 +1695,30 @@ exports('StaffPermMatrix', function(src)
     for i, f in ipairs(ConfigMenuAdministrationAdmin.functions) do funcs[#funcs + 1] = { id = i, label = tostring(f.label or ('func_' .. i)):gsub('~%a~', ''), cat = f.cat } end
     return { matrix = adminPermissionMatrix, funcs = funcs, grades = buildAdminGradeList() }
 end)
+
+-- ═══════════════ Chat staff (remplace celui du panel pickax_staff retiré) ═══════════════
+-- Réservé aux membres de l'équipe (groupe ESX différent de « user ») : le message part à tous les staffs en ligne, avec ID, rang et nom de l'auteur.
+local StaffChatLast = {}
+local function isStaffSrc(src)
+    local x = ESX.GetPlayerFromId(src)
+    return x ~= nil and x.getGroup() ~= 'user'
+end
+
+RegisterNetEvent('CorePickax:StaffChat:send', function(text)
+    local src = source
+    if not isStaffSrc(src) then return end
+    text = tostring(text or ''):gsub('[%c]', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    if text == '' then return end
+    if #text > 200 then text = text:sub(1, 200) end
+    local now = GetGameTimer()
+    if StaffChatLast[src] and now - StaffChatLast[src] < 800 then return end   -- anti-spam
+    StaffChatLast[src] = now
+    local x = ESX.GetPlayerFromId(src)
+    local msg = { id = src, name = GetPlayerName(src) or ('ID ' .. src), rank = tostring(x.getGroup()):upper(), text = text }
+    for _, id in ipairs(GetPlayers()) do
+        id = tonumber(id)
+        if isStaffSrc(id) then TriggerClientEvent('CorePickax:StaffChat:msg', id, msg) end
+    end
+    print(('[STAFFCHAT] [%d] %s : %s'):format(src, msg.name, text))
+end)
+AddEventHandler('playerDropped', function() StaffChatLast[source] = nil end)
