@@ -680,7 +680,7 @@ const Builder = {
   },
 
   blipCard() {
-    return BBMap.blipCard({ base: 'settings.blip', b: this.v('settings.blip') || {}, hint: "Chaque point choisit lui-même s'il affiche un blip (onglet Points)." });
+    return BBMap.blipCard({ base: 'settings.blip', b: this.v('settings.blip') || {}, hint: "Blip affiché sur tous les points repérables du module (récolte, dealer, blanchiment, porte, braquage). Un point à tablette n'est visible que par les joueurs qui la possèdent." });
   },
 
   /* ── Onglet Général ── */

@@ -172,14 +172,19 @@ RegisterNetEvent('illegalbuilder:client:alert', function(coords, title, message)
 end)
 
 -- ─────────────────────────────── Blips ───────────────────────────────
+-- Blips : le réglage « Personnaliser → Blip » du module s'applique à tous ses points repérables (récolte, dealer, blanchiment, porte, braquage).
+-- Un point qui exige une tablette n'est envoyé qu'aux joueurs qui la possèdent (serveur) : eux seuls voient donc son blip.
+-- Un point peut aussi forcer son blip (case du point) même si le blip du module est désactivé.
+local BLIP_KINDS = { harvest = true, sell = true, launder = true, door = true, start = true, clerk = true }
+
 local function rebuildBlips()
     for _, b in ipairs(blipHandles) do if DoesBlipExist(b) then RemoveBlip(b) end end
     blipHandles = {}
     for _, e in ipairs(State.entities) do
-        local b = e.blip
-        if b and b.enabled then
+        if e.type ~= 'gofast' then   -- Go Fast : le contact n'apparaît que via la tablette (client/gofast.lua)
+            local b = e.blip or {}
             for _, p in ipairs(e.points) do
-                if p.blip then
+                if p.coords and ((b.enabled and BLIP_KINDS[p.kind]) or p.blip == true) then
                     pcall(function()
                         blipHandles[#blipHandles + 1] = BB.Blip(p.coords, b, { label = e.label, category = e.type })
                     end)
