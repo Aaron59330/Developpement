@@ -233,7 +233,21 @@ local function openGangMenu()
     OpenUI({ action = 'open', kind = 'menu', data = { gangLabel = gc.label, color = gc.color, grade = gc.gradeLabel or '', actions = actions } })
 end
 
-RegisterCommand(Config.GangMenuCommand, function() if not uiOpen then openGangMenu() elseif walkMenu then CloseUI() end end, false)
+local lastGangToggle = 0
+local function toggleGangMenu()
+    if GetGameTimer() - lastGangToggle < 400 then return end   -- la touche peut arriver par la commande ET par le contrôle : une seule ouverture
+    lastGangToggle = GetGameTimer()
+    if not uiOpen then CreateThread(openGangMenu) elseif walkMenu then CloseUI() end
+end
+
+RegisterCommand(Config.GangMenuCommand, toggleGangMenu, false)
+-- Filet de sécurité : si le raccourci enregistré (RegisterKeyMapping) a été perdu / réattribué dans les paramètres FiveM, F7 (contrôle 168) ouvre quand même le menu
+CreateThread(function()
+    while true do
+        Wait(0)
+        if Config.GangMenuKey == 'F7' and IsControlJustPressed(0, 168) and not IsNuiFocused() then toggleGangMenu() end
+    end
+end)
 RegisterKeyMapping(Config.GangMenuCommand, 'Menu du gang', 'keyboard', Config.GangMenuKey)
 
 RegisterNetEvent('gangbuilder:client:openBuilder', function()
