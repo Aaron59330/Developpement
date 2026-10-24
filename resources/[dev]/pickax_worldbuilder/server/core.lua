@@ -106,7 +106,7 @@ end
 
 function WB.loadAll()
     WB.Entities, WB.ByName = {}, {}
-    for _, r in ipairs(MySQL.query.await('SELECT * FROM worldbuilder_entities ORDER BY id') or {}) do
+    for _, r in ipairs(MySQL.query.await("SELECT * FROM worldbuilder_entities WHERE type NOT IN ('drug', 'robbery') ORDER BY id") or {}) do
         r.enabled = WB.flag(r.enabled)
         r.settings = WB.decode(r.settings, {})
         r.points = WB.decode(r.points, {})
@@ -387,7 +387,6 @@ function WB.syncPlayer(src)
     TriggerClientEvent('worldbuilder:client:sync', src, { entities = list, accent = Config.UI.Accent, config = {
         marker = Config.Marker, drawDistance = Config.DrawDistance, interactDistance = Config.InteractDistance, pedDistance = Config.PedDistance,
     } })
-    if WB.syncRobberies then WB.syncRobberies(src) end
     if WB.syncDoors then WB.syncDoors(src) end
     if WB.syncListings then WB.syncListings(src) end
 end

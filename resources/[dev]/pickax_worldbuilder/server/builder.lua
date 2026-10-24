@@ -208,23 +208,9 @@ local SETTINGS = {
             practical = obj({ enabled = { 'b', false }, model = MODEL, speedLimit = { 'n', 20, 300, 80 }, maxFaults = { 'n', 0, 50, 5 } }),
         }), 12, function(x) return x.id ~= '' end },
     }),
-    drug = merge(COMMON, { copsRequired = { 'n', 0, 30, 0 } }),
-    robbery = merge(COMMON, {
-        trigger = { 'e', { 'aim', 'interact' }, 'aim' }, weapon = { 'b', true }, copsRequired = { 'n', 0, 30, 0 }, cooldown = { 'n', 0, 604800, 1800 },
-        duration = { 'n', 30, 3600, 240 }, leaveDistance = { 'n', 5, 300, 30 }, coop = { 'b', true }, currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' },
-        requireItem = obj({ item = ITEM, count = { 'n', 1, 100, 1 }, consume = { 'b', false } }),
-        alert = obj({ chance = { 'n', 0, 100, 100 }, label = { 's', 80, 'Braquage en cours' } }),
-        guards = obj({ enabled = { 'b', false }, model = MODEL, weapon = { 's', 40, 'WEAPON_PISTOL' }, count = { 'n', 0, 10, 0 }, accuracy = { 'n', 0, 100, 30 }, health = { 'n', 100, 1000, 200 } }),
-    }),
 }
 
 local PBASE = { label = { 's', 60, '' }, coords = { 'c' }, blip = { 'b', false }, ped = PED, color = { 'rgb' }, color2 = { 'rgb' } }
-local ACCESS = obj({ jobs = { 'j' }, item = ITEM })
-local DRUGBASE = merge(PBASE, { access = ACCESS, copsRequired = { 'n', 0, 30, 0 }, alertChance = { 'n', 0, 100, 0 } })
-local TARGET = merge(PBASE, {
-    time = { 'n', 1, 600, 10 }, anim = ANIM, minigame = { 'b', false }, tool = TOOL, cash = obj({ min = { 'n', 0, 100000000, 0 }, max = { 'n', 0, 100000000, 0 } }),
-    items = { 'a', obj({ item = ITEM, min = { 'n', 1, 1000, 1 }, max = { 'n', 1, 1000, 1 }, chance = { 'n', 1, 100, 100 } }), Config.Max.Items, function(x) return x.item ~= '' end },
-})
 
 local POINTS = {
     garage  = { main = merge(PBASE, { store = { 'c' }, spawns = { 'a', { 'c' }, 12 } }) },
@@ -246,21 +232,6 @@ local POINTS = {
         doors = { 'a', obj({ model = { 'n', -2147483648, 4294967295, 0 }, x = { 'n', -20000, 20000, 0 }, y = { 'n', -20000, 20000, 0 }, z = { 'n', -2000, 4000, 0 }, h = { 'n', -360, 360, 0 } }), 8,
             function(d) return d.model ~= 0 end } }) },
     driving = { desk = PBASE, spawn = PBASE, checkpoint = PBASE },
-    drug = {
-        harvest = merge(DRUGBASE, { harvest = obj({ item = ITEM, min = { 'n', 1, 1000, 1 }, max = { 'n', 1, 1000, 3 }, time = { 'n', 1, 600, 6 }, anim = ANIM, tool = TOOL,
-            cooldown = { 'n', 0, 3600, 10 }, maxUses = { 'n', 0, 10000, 0 }, regen = { 'n', 10, 86400, 300 } }) }),
-        process = merge(DRUGBASE, { recipes = { 'a', obj({ label = { 's', 60, '' }, inputs = STACK, outputs = STACK, time = { 'n', 1, 600, 8 }, anim = ANIM,
-            failChance = { 'n', 0, 100, 0 }, tool = TOOL }), Config.Max.Recipes } }),
-        sell = merge(DRUGBASE, { sell = obj({ currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' }, maxPerHour = { 'n', 0, 100000, 0 },
-            items = { 'a', obj({ item = ITEM, min = { 'n', 0, 100000000, 1 }, max = { 'n', 0, 100000000, 1 } }), Config.Max.Items, function(x) return x.item ~= '' end } }) }),
-        launder = merge(DRUGBASE, { launder = obj({ rate = { 'n', 1, 100, 70 }, min = { 'n', 0, 100000000, 0 }, max = { 'n', 0, 100000000, 100000 }, from = ITEM,
-            to = { 'e', { 'money', 'bank', 'black_money' }, 'money' }, maxPerHour = { 'n', 0, 1000000000, 0 } }) }),
-        door = merge(DRUGBASE, { inside = { 'c' } }),
-    },
-    robbery = {
-        clerk = PBASE, start = PBASE, guard = PBASE,
-        register = TARGET, safe = TARGET, vault = TARGET, loot = TARGET,
-    },
 }
 
 local KINDS = {}

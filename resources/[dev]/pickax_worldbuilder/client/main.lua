@@ -13,7 +13,7 @@ Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 -- ─────────────────────────────── Utilitaires ───────────────────────────────
 -- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
 local WB_ICON = { garage = 'garage', impound = 'impound', rental = 'dealer', carlot = 'dealer', fuel = 'fuel', carwash = 'carwash', locksmith = 'mecano', jobcenter = 'world',
-    bank = 'bank', driving = 'school', drug = 'drug', robbery = 'robbery', doorlock = 'world', pvp = 'gang', chase = 'police' }
+    bank = 'bank', driving = 'school', doorlock = 'world', pvp = 'gang', chase = 'police' }
 local LastType = nil   -- dernier module utilisé (logo des notifications hors panneau)
 function Notify(msg, kind)
     local t = (Ctx and Ctx.type) or LastType
@@ -256,8 +256,6 @@ local KIND_TEXT = {
     carwash = { wash = 'Laver le véhicule' },
     driving = { desk = 'Ouvrir l\'auto-école' },
     bank = { counter = 'Accéder au guichet', atm = 'Utiliser le distributeur' },
-    drug = { harvest = 'Récolter', process = 'Utiliser le poste de travail', sell = 'Parler au dealer', launder = 'Blanchir de l\'argent', door = 'Entrer', exit = 'Sortir' },
-    robbery = { start = 'Commencer le braquage', register = 'Vider la caisse', safe = 'Forcer le coffre', vault = 'Percer le coffre-fort', loot = 'Ramasser le butin' },
 }
 local EXIT_COLOR = { 255, 140, 60 }
 
@@ -277,7 +275,6 @@ local function buildNodes()
             addNode(e, p, kind, p.coords, p.color)
             if e.type == 'garage' and p.store then addNode(e, p, 'store', p.store, c2) end
             if e.type == 'rental' and p.ret then addNode(e, p, 'return', p.ret, c2) end
-            if e.type == 'drug' and kind == 'door' and p.inside then addNode(e, p, 'exit', p.inside, c2) end
         end
     end
 end
@@ -436,7 +433,7 @@ end)
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'worldbuilder:<nom>')
 for _, n in ipairs({ 'catalog', 'list', 'get', 'create', 'save', 'delete', 'duplicate', 'toggle', 'resetStats', 'logs', 'settings:save',
-    'drug:processInfo', 'drug:sellInfo', 'drug:sell', 'drug:launderInfo', 'drug:launder', 'fuel:info', 'fuel:jerrycan', 'locksmith:make', 'jobcenter:info', 'jobcenter:take', 'jobcenter:leave', 'driving:theoryStart', 'driving:theorySubmit', 'bank:deposit', 'bank:withdraw', 'bank:transfer' }) do NuiRemote[n] = true end
+    'fuel:info', 'fuel:jerrycan', 'locksmith:make', 'jobcenter:info', 'jobcenter:take', 'jobcenter:leave', 'driving:theoryStart', 'driving:theorySubmit', 'bank:deposit', 'bank:withdraw', 'bank:transfer' }) do NuiRemote[n] = true end
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end
 

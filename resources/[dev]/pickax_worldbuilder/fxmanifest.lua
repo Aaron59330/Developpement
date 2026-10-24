@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_worldbuilder'
-description 'World Builder ESX : crée en jeu des garages, fourrières, locations de véhicules, stations essence, drogues (récolte / laboratoires / traitement / vente / blanchiment) et braquages (supérettes, banques, bijouteries...) — UI + oxmysql'
+description 'World Builder ESX : crée en jeu des garages, fourrières, locations de véhicules, stations essence, etc. (drogues et braquages : voir pickax_illegalbuilder) — UI + oxmysql'
 version '1.0.0'
 
 shared_scripts {
@@ -25,8 +25,6 @@ server_scripts {
     'server/carwash.lua',
     'server/locksmith.lua',
     'server/jobcenter.lua',
-    'server/drugs.lua',
-    'server/robbery.lua',
     'server/doorlock.lua',
     'server/carlot.lua',
     'server/chase.lua',
@@ -46,8 +44,6 @@ client_scripts {
     'client/carwash.lua',
     'client/locksmith.lua',
     'client/jobcenter.lua',
-    'client/drugs.lua',
-    'client/robbery.lua',
     'client/doorlock.lua',
     'client/carlot.lua',
     'client/chase.lua',

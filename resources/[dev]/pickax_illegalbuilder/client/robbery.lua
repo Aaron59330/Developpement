@@ -36,8 +36,8 @@ local function setState(eid, st)
     end
 end
 
-RegisterNetEvent('worldbuilder:client:robState', setState)
-RegisterNetEvent('worldbuilder:client:robStates', function(list)
+RegisterNetEvent('illegalbuilder:client:robState', setState)
+RegisterNetEvent('illegalbuilder:client:robStates', function(list)
     States = {}
     for _, r in ipairs(list or {}) do setState(r.eid, r.state) end
 end)
@@ -75,7 +75,7 @@ end
 local function robStart(eid, pi)
     if starting or Busy then return end
     starting = true
-    ESX.TriggerServerCallback('worldbuilder:rob:start', function(res)
+    ESX.TriggerServerCallback('illegalbuilder:rob:start', function(res)
         starting = false
         if not res or not res.ok then return Notify((res and res.error) or 'Impossible', 'error') end
         Notify('Braquage en cours ! Vide les cibles avant la fin du temps.', 'info')
@@ -86,11 +86,11 @@ local function robStart(eid, pi)
 end
 
 local function robTarget(node)
-    ESX.TriggerServerCallback('worldbuilder:rob:begin', function(res)
+    ESX.TriggerServerCallback('illegalbuilder:rob:begin', function(res)
         if not res or not res.ok then return Notify((res and res.error) or 'Impossible', 'error') end
         CreateThread(function()
             local done = RunAction({ seconds = res.seconds, label = res.label, anim = res.anim, minigame = res.minigame })
-            TriggerServerEvent('worldbuilder:server:robFinish', done)
+            TriggerServerEvent('illegalbuilder:server:robFinish', done)
             if not done then Notify('Action interrompue.', 'error') end
         end)
     end, node.eid, node.pi)

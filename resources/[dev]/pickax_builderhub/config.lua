@@ -41,7 +41,13 @@ Config.Builders = {
     {
         id = 'worldbuilder', resource = 'pickax_worldbuilder', command = 'worldbuilder', icon = 'world',
         label = 'World Builder',
-        desc = 'Garages, fourrières, locations, stations, drogues, braquages, portes et zones PVP.',
+        desc = 'Garages, fourrières, locations, stations, banques, portes, zones PVP et courses poursuites.',
         stats = { { 'Éléments', 'worldbuilder_entities' }, { 'Fourrière', 'worldbuilder_impound' }, { 'Logs', 'worldbuilder_logs' } },
+    },
+    {
+        id = 'illegalbuilder', resource = 'pickax_illegalbuilder', command = 'illegalbuilder', icon = 'gang',
+        label = 'Builder Illégal',
+        desc = 'Drogues & labos, braquages et Go Fast : crée les activités illégales du serveur (territoires : bientôt).',
+        stats = { { 'Modules', 'illegalbuilder_entities' }, { 'Logs', 'illegalbuilder_logs' } },
     },
 }

@@ -30,8 +30,6 @@ Config.Dialog = {
         ['pvp.lobby']      = 'Prêt pour le combat ? Souhaitez-vous rejoindre une zone PVP ?',
         ['chase.lobby']    = 'Envie d\'adrénaline ? Voulez-vous lancer une course poursuite ?',
         ['jobcenter.desk'] = 'Bonjour ! Vous cherchez du travail ? J\'ai plusieurs petits jobs à vous proposer.',
-        ['drug.sell']      = 'Psst… tu as de la marchandise à me vendre ?',
-        ['drug.launder']   = 'Tu veux blanchir de l\'argent ? Je prends ma commission.',
         default            = 'Bonjour, que puis-je faire pour vous ?',
     },
 }
@@ -134,11 +132,9 @@ Config.Types = {
     driving = { label = 'Auto-écoles',         one = 'Auto-école',        icon = 'book',   sub = 'Permis : code de la route (QCM) et conduite (parcours)' },
     bank    = { label = 'Banques',             one = 'Banque',            icon = 'dollar', sub = 'Guichets et distributeurs : dépôt, retrait, virement' },
     fuel    = { label = 'Stations essence',    one = 'Station essence',   icon = 'fuel',   sub = 'Pompes, carburant, jerricans' },
-    drug    = { label = 'Drogues & labos',     one = 'Filière de drogue', icon = 'flask',  sub = 'Récolte, laboratoires, vente, blanchiment' },
-    robbery = { label = 'Braquages',           one = 'Braquage',          icon = 'mask',   sub = 'Supérettes, banques, bijouteries...' },
     jobcenter = { label = 'Pôles emploi',      one = 'Pôle emploi',       icon = 'users',  sub = 'Petits jobs en libre accès : un clic = embauché, puis des petites quêtes' },
 }
-Config.TypeOrder = { 'garage', 'impound', 'rental', 'pvp', 'chase', 'carlot', 'doorlock', 'fuel', 'carwash', 'locksmith', 'bank', 'driving', 'drug', 'robbery', 'jobcenter' }
+Config.TypeOrder = { 'garage', 'impound', 'rental', 'pvp', 'chase', 'carlot', 'doorlock', 'fuel', 'carwash', 'locksmith', 'bank', 'driving', 'jobcenter' }
 
 -- ─────────────────────────────── PNJ ───────────────────────────────
 Config.PedScenarios = {
@@ -468,133 +464,6 @@ Config.Templates.driving = {
     },
 }
 
--- ─────────────────────────────── Drogues ───────────────────────────────
-local function harvest(label, item, time, anim, extra)
-    local p = { kind = 'harvest', label = label, blip = false, ped = noPed, access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0,
-        harvest = { item = item, min = 2, max = 5, time = time, anim = anim or 'harvest', tool = { item = '', consume = false }, cooldown = 10, maxUses = 0, regen = 300 } }
-    for k, v in pairs(extra or {}) do p.harvest[k] = v end
-    return p
-end
-local function process(label, recipes, anim)
-    for _, r in ipairs(recipes) do r.anim = r.anim or anim or 'repair' r.failChance = r.failChance or 0 r.tool = r.tool or { item = '', consume = false } end
-    return { kind = 'process', label = label, blip = false, ped = noPed, access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0, recipes = recipes }
-end
-local function sell(label, items, currency)
-    return { kind = 'sell', label = label, blip = false, ped = ped('g_m_y_mexgoon_01', 'WORLD_HUMAN_DRUG_DEALER'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 5,
-        sell = { currency = currency or 'black_money', maxPerHour = 60, items = items } }
-end
-local launder = { kind = 'launder', label = 'Blanchiment', blip = false, ped = ped('a_m_m_business_01'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0,
-    launder = { rate = 70, min = 500, max = 50000, from = 'black_money', to = 'money', maxPerHour = 50000 } }
-
-Config.Templates.drug = {
-    weed = {
-        label = 'Cannabis', icon = 'leaf',
-        settings = { note = 'Champ → séchage → vente' },
-        points = {
-            harvest('Champ de cannabis', 'weed', 6, 'harvest'),
-            process('Séchage & conditionnement', { { label = 'Pochon de cannabis', inputs = { { item = 'weed', count = 3 } }, outputs = { { item = 'weed_pooch', count = 1 } }, time = 8 } }, 'inspect'),
-            sell('Dealer — cannabis', { { item = 'weed_pooch', min = 90, max = 140 } }),
-        },
-    },
-    coke = {
-        label = 'Cocaïne', icon = 'flask',
-        settings = { note = 'Feuilles de coca → laboratoire → vente' },
-        points = {
-            harvest('Plantation de coca', 'coke', 8, 'harvest', { max = 4 }),
-            process('Laboratoire de cocaïne', { { label = 'Sachet de cocaïne', inputs = { { item = 'coke', count = 3 } }, outputs = { { item = 'coke_pooch', count = 1 } }, time = 12, failChance = 5 } }, 'clipboard'),
-            sell('Dealer — cocaïne', { { item = 'coke_pooch', min = 220, max = 320 } }),
-        },
-    },
-    meth = {
-        label = 'Méthamphétamine', icon = 'flask',
-        settings = { note = 'Produits chimiques → laboratoire → vente' },
-        points = {
-            harvest('Entrepôt de produits chimiques', 'meth', 10, 'pickup', { max = 3 }),
-            process('Laboratoire de meth', { { label = 'Sachet de meth', inputs = { { item = 'meth', count = 4 } }, outputs = { { item = 'meth_pooch', count = 1 } }, time = 15, failChance = 10, anim = 'cook' } }, 'cook'),
-            sell('Dealer — meth', { { item = 'meth_pooch', min = 320, max = 450 } }),
-        },
-    },
-    opium = {
-        label = 'Opium / Héroïne', icon = 'flask',
-        settings = { note = 'Pavot → raffinage → vente' },
-        points = {
-            harvest('Champ de pavot', 'opium', 7, 'harvest'),
-            process('Raffinerie', { { label = 'Dose d\'héroïne', inputs = { { item = 'opium', count = 3 } }, outputs = { { item = 'opium_pooch', count = 1 } }, time = 12 } }, 'repair'),
-            sell('Dealer — héroïne', { { item = 'opium_pooch', min = 280, max = 380 } }),
-        },
-    },
-    launder = {
-        label = 'Blanchiment d\'argent', icon = 'dollar',
-        settings = { note = 'Argent sale → argent propre (commission)' },
-        points = { launder },
-    },
-    custom = {
-        label = 'Filière personnalisée', icon = 'flask',
-        settings = { note = '' },
-        points = {},
-    },
-}
-
--- ─────────────────────────────── Braquages ───────────────────────────────
-local function target(kind, label, time, anim, cash, items, extra)
-    local p = { kind = kind, label = label, blip = false, time = time, anim = anim, minigame = false, tool = { item = '', consume = false }, cash = cash or { min = 0, max = 0 }, items = items or {} }
-    for k, v in pairs(extra or {}) do p[k] = v end
-    return p
-end
-local function clerk(model) return { kind = 'clerk', label = 'Vendeur', blip = false, ped = ped(model or 'mp_m_shopkeep_01', 'WORLD_HUMAN_STAND_IMPATIENT') } end
-local function baseRob(extra)
-    local s = { trigger = 'aim', weapon = true, copsRequired = 0, cooldown = 1800, duration = 240, leaveDistance = 30, coop = true, currency = 'black_money',
-        requireItem = { item = '', count = 1, consume = false }, alert = { chance = 100, label = 'Braquage en cours' },
-        guards = { enabled = false, model = 's_m_m_security_01', weapon = 'WEAPON_PISTOL', count = 0, accuracy = 30, health = 200 },
-        blip = { enabled = false, sprite = 52, color = 1, scale = PK_BSF(0.8), label = '', shortRange = true } }
-    for k, v in pairs(extra or {}) do s[k] = v end
-    return s
-end
-
-Config.Templates.robbery = {
-    store = {
-        label = 'Supérette (24/7)', icon = 'cart',
-        settings = baseRob({ copsRequired = 1, cooldown = 1200, duration = 180, note = 'Braque le vendeur en le menaçant avec une arme' }),
-        points = { clerk(), target('register', 'Caisse 1', 12, 'till', { min = 300, max = 900 }), target('register', 'Caisse 2', 12, 'till', { min = 300, max = 900 }),
-            target('safe', 'Coffre de l\'arrière-boutique', 45, 'safe', { min = 1500, max = 3500 }, {}, { minigame = true }) },
-    },
-    liquor = {
-        label = 'Magasin d\'alcool', icon = 'utensils',
-        settings = baseRob({ copsRequired = 1, cooldown = 1500, duration = 180 }),
-        points = { clerk('s_m_m_linecook'), target('register', 'Caisse', 12, 'till', { min = 400, max = 1100 }), target('loot', 'Étagère de spiritueux', 8, 'pickup', { min = 0, max = 0 }, { { item = 'whisky', min = 1, max = 3, chance = 80 }, { item = 'vodka', min = 1, max = 3, chance = 80 } }) },
-    },
-    gas = {
-        label = 'Station-service', icon = 'fuel',
-        settings = baseRob({ copsRequired = 1, cooldown = 1500, duration = 180 }),
-        points = { clerk('a_m_m_hillbilly_01'), target('register', 'Caisse', 12, 'till', { min = 250, max = 800 }), target('safe', 'Petit coffre', 40, 'safe', { min = 900, max = 2200 }, {}, { minigame = true }) },
-    },
-    bank = {
-        label = 'Banque (coffre)', icon = 'lock',
-        settings = baseRob({ trigger = 'interact', weapon = false, copsRequired = 4, cooldown = 5400, duration = 600, leaveDistance = 45,
-            requireItem = { item = 'thermite', count = 1, consume = true }, alert = { chance = 100, label = 'Braquage de banque' },
-            guards = { enabled = true, model = 's_m_m_security_01', weapon = 'WEAPON_PISTOL', count = 2, accuracy = 35, health = 250 },
-            blip = { enabled = false, sprite = 108, color = 1, scale = PK_BSF(0.9), label = 'Banque', shortRange = true } }),
-        points = { { kind = 'start', label = 'Porte du coffre', blip = false },
-            target('vault', 'Coffre principal', 90, 'drill', { min = 8000, max = 15000 }, {}, { minigame = true, tool = { item = 'drill', consume = false } }),
-            target('safe', 'Casiers', 40, 'lockpick', { min = 2000, max = 4500 }, {}, { minigame = true, tool = { item = 'lockpick', consume = true } }),
-            target('loot', 'Liasses de billets', 15, 'pickup', { min = 0, max = 0 }, { { item = 'markedbills', min = 3, max = 8, chance = 100 } }),
-            { kind = 'guard', label = 'Garde 1', blip = false }, { kind = 'guard', label = 'Garde 2', blip = false } },
-    },
-    jewelry = {
-        label = 'Bijouterie', icon = 'diamond',
-        settings = baseRob({ trigger = 'interact', weapon = false, copsRequired = 3, cooldown = 3600, duration = 360, leaveDistance = 40, alert = { chance = 100, label = 'Cambriolage de bijouterie' },
-            requireItem = { item = 'WEAPON_CROWBAR', count = 1, consume = false } }),
-        points = { { kind = 'start', label = 'Entrée de service', blip = false },
-            target('loot', 'Vitrine 1', 10, 'pickup', { min = 0, max = 0 }, { { item = 'diamond', min = 1, max = 2, chance = 60 }, { item = 'goldbar', min = 1, max = 1, chance = 40 } }),
-            target('loot', 'Vitrine 2', 10, 'pickup', { min = 0, max = 0 }, { { item = 'diamond', min = 1, max = 2, chance = 60 }, { item = 'goldbar', min = 1, max = 1, chance = 40 } }),
-            target('safe', 'Coffre', 50, 'safe', { min = 3500, max = 7000 }, {}, { minigame = true }) },
-    },
-    custom = {
-        label = 'Braquage personnalisé', icon = 'mask',
-        settings = baseRob({}),
-        points = {},
-    },
-}
 
 -- ─────────────────────────────── Pôle emploi : petits jobs en libre accès ───────────────────────────────
 -- Un module « Pôle emploi » (/worldbuilder → Nouveau module) place un guichet : le joueur clique sur un job et il est embauché (setJob).

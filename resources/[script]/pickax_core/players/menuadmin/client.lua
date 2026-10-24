@@ -1574,7 +1574,7 @@ function MenuStaffOpen()
             RageUI.ButtonWithStyle("Job Builder", "Jobs, grades, points, agence immobilière, concession…", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("jobbuilder") end
             end)
-            RageUI.ButtonWithStyle("Gang Builder", "Gangs, territoires, activités illégales", {RightLabel = "→→"}, true, function(_,a,s)
+            RageUI.ButtonWithStyle("Gang Builder", "Gangs, grades, points, trésorerie, activités", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("gangbuilder") end
             end)
             RageUI.ButtonWithStyle("Shop Builder", "Boutiques, catalogues, vêtements", {RightLabel = "→→"}, true, function(_,a,s)
@@ -1582,6 +1582,9 @@ function MenuStaffOpen()
             end)
             RageUI.ButtonWithStyle("World Builder", "Garages, locations, stations, banques, portes…", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("worldbuilder") end
+            end)
+            RageUI.ButtonWithStyle("Builder Illégal", "Drogues, braquages, Go Fast, territoires", {RightLabel = "→→"}, true, function(_,a,s)
+                if s then ExecuteCommand("illegalbuilder") end
             end)
             RageUI.ButtonWithStyle("Event Builder", "Événements : braquage de fourgon, largage, livraison… (toutes les 30 min, réglable)", {RightLabel = "→→"}, true, function(_,a,s)
                 if s then ExecuteCommand("eventbuilder") end

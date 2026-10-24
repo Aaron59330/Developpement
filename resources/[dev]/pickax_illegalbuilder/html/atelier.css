@@ -1,0 +1,48 @@
+/* ═══════════ Style « Atelier » (commun aux builders) — actif avec body.atl ; sans lui : style d'origine inchangé ═══════════
+   Toute la palette dérive de la couleur principale du serveur (Config.AccentColor de pickax_core → --pk-accent). */
+body.atl {
+  --bg: var(--atl-bg); --surface: var(--atl-p2); --surface-2: var(--atl-p3); --line: rgba(255,255,255,.07); --line-2: rgba(var(--atl-rgb), .22);
+  --text: #eceff4; --text-2: #aab2c0; --muted: #6f7787; --ok: #6fbf9b; --warn: var(--atl-hex); --danger: #d9686b;
+  --panel: var(--atl-p1); --panel2: var(--atl-p2);
+}
+body.atl .shell, body.atl .panel { position: relative; background: var(--atl-bg); border: 1px solid var(--atl-ln); border-radius: 14px; box-shadow: 0 40px 100px rgba(0,0,0,.65); }
+body.atl .shell::before, body.atl .panel::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 5; background: var(--atl-hex); }
+body.atl .side { background: var(--atl-p1); border-right: 1px solid var(--atl-ln); }
+body.atl .head { background: var(--atl-p1); border-bottom: 1px solid var(--atl-ln); }
+body.atl .nav-label { color: var(--muted); letter-spacing: .14em; }
+body.atl .nav-item { position: relative; border-radius: 10px; border: 1px solid transparent; color: var(--text-2); }
+body.atl .nav-item:hover { background: var(--atl-p2); }
+body.atl .nav-item.active { background: rgba(var(--atl-rgb), .1); border-color: rgba(var(--atl-rgb), .28); color: var(--text); }
+body.atl .nav-item.active::before { content: ""; position: absolute; left: -1px; top: 9px; bottom: 9px; width: 2px; border-radius: 2px; background: var(--atl-hex); }
+body.atl .nav-item.active svg { color: var(--atl-hex); }
+body.atl .nav-item .count { color: var(--atl-hex); }
+body.atl .card, body.atl .stat, body.atl .item, body.atl .pt, body.atl .toprow { background: var(--atl-p1); border: 1px solid var(--atl-ln); border-radius: 12px; }
+body.atl .card { position: relative; }
+body.atl .card-h .t::before, body.atl .card > h3::before { content: ""; display: inline-block; width: 2px; height: 12px; margin-right: 8px; border-radius: 2px; background: var(--atl-hex); vertical-align: -1px; }
+body.atl .item.click:hover, body.atl .pt:hover { border-color: rgba(var(--atl-rgb), .4); background: var(--atl-p2); }
+body.atl .pt.active, body.atl .item.sel { border-color: rgba(var(--atl-rgb), .5); background: rgba(var(--atl-rgb), .08); }
+body.atl button { border-color: var(--atl-ln2); }
+body.atl button:hover { border-color: rgba(var(--atl-rgb), .55); background: rgba(var(--atl-rgb), .08); }
+body.atl button.primary, body.atl button.pri { background: var(--atl-hex); border-color: var(--atl-hex); color: var(--atl-on); box-shadow: none; }
+body.atl button.primary:hover, body.atl button.pri:hover { filter: brightness(1.08); background: var(--atl-hex); }
+body.atl input:focus, body.atl select:focus, body.atl textarea:focus { border-color: var(--atl-hex); box-shadow: 0 0 0 3px rgba(var(--atl-rgb), .16); }
+body.atl .tab.active, body.atl .tab.on { color: var(--text); border-bottom-color: var(--atl-hex); }
+body.atl .seg button.active { background: rgba(var(--atl-rgb), .16); color: var(--text); }
+body.atl input[type=checkbox]:checked { background: var(--atl-hex); border-color: var(--atl-hex); }
+body.atl ::-webkit-scrollbar-thumb { background: rgba(var(--atl-rgb), .28); border-radius: 6px; }
+/* tuiles d'icônes : verre teinté, pictogramme fin de la couleur du type (métier, événement, jeu…) — sobre et lisible */
+body.atl .tile { background: rgba(var(--tc-rgb, var(--atl-rgb)), .13); border: 1px solid rgba(var(--tc-rgb, var(--atl-rgb)), .32); box-shadow: none; color: var(--tc-a, var(--atl-hex)); border-radius: 11px; }
+body.atl .tile svg { color: var(--tc-a, var(--atl-hex)); stroke: var(--tc-a, var(--atl-hex)); stroke-width: 1.7; filter: none; }
+.atl-sw { font-size: 11.5px !important; height: 30px !important; padding: 0 11px !important; border-radius: 8px !important; }
+/* Event Builder (autres noms de classes) */
+body.atl .box { position: relative; background: var(--atl-bg); border: 1px solid var(--atl-ln); border-radius: 14px; }
+body.atl .top { background: var(--atl-p1); border-bottom: 1px solid var(--atl-ln); position: relative; }
+body.atl .top::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--atl-hex); }
+body.atl .ev { background: var(--atl-p1); border: 1px solid var(--atl-ln); border-radius: 12px; }
+body.atl .ev:hover { border-color: rgba(var(--atl-rgb), .4); }
+body.atl .card h3::before { content: ""; width: 2px; height: 12px; border-radius: 2px; background: var(--atl-hex); }
+body.atl .card h3 .ic { color: var(--text-2); }
+body.atl .tab.on { background: none; }
+body.atl .tpl:hover { border-color: rgba(var(--atl-rgb), .5); }
+body.atl .acc, body.atl { --acc: var(--atl-hex); --acc-rgb: var(--atl-rgb); }
+body.atl .tile svg.ic { width: 54%; height: 54%; }
