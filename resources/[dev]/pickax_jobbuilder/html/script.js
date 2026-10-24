@@ -878,17 +878,12 @@ const Builder = {
       case 'gradeDown': if (+v < c.grades.length - 1) [c.grades[+v + 1], c.grades[v]] = [c.grades[v], c.grades[+v + 1]]; return this.render();
       case 'addPoint': c.points.push(this.newPoint(v)); this.activePoint = c.points.length - 1; return this.render();
       case 'selPoint': this.activePoint = +v; return this.render();
-      case 'styleOn': {      // initialise le style avec les valeurs actuelles du type de point (ou d'un marker standard pour un job)
-        const ty = path => path.startsWith('points.') ? this.cur.points[+path.split('.')[1]].type : null, t = ty(v);
-        const baseSt = (t && (this.catalog.pointTypes || {})[t]) || Object.values(this.catalog.pointTypes || {})[0] || {};
-        setPath(this.cur, v, { marker: baseSt.marker ?? 23, color: [...(baseSt.color || [253, 194, 125])], alpha: baseSt.alpha ?? 140, scale: { ...(baseSt.scale || { x: 0.9, y: 0.9, z: 0.6 }) }, offset: baseSt.offset ?? -0.95, bob: !!baseSt.bob, rotate: !!baseSt.rotate, help: baseSt.help !== false });
-        return this.render();
-      }
+      case 'styleOn': setPath(this.cur, v, {}); return this.render();   // style « creux » : seuls les champs que tu modifies sont enregistrés, le reste suit le marker du serveur
       case 'storeOn': { const p = c.points[+v]; p.data.store = { coords: null, radius: 5, any: false }; return this.render(); }
       case 'storeOff': { delete c.points[+v].data.store; return this.render(); }
       case 'styleOff': setPath(this.cur, v, null); return this.render();
       case 'preview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
-      case 'mkOn': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = [253, 194, 125]; return this.render();
+      case 'mkOn': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = [...((Object.values(this.catalog.pointTypes || {})[0] || {}).color || [253, 194, 125])]; return this.render();
       case 'mkPick': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = v.split(',').map(Number); return this.render();
       case 'mkOff': { const m = c.job.settings.marker; if (m) { delete m.color; if (!Object.keys(m).length) c.job.settings.marker = null; } return this.render(); }
       case 'bankDefaults': c.job.settings.bank_fees = clone((this.catalog.bank || {}).DefaultFees || []); return this.render();
@@ -957,7 +952,7 @@ const MARKER_TYPES = [[0, 'Cône inversé'], [1, 'Cylindre'], [2, 'Chevron épai
 const clone = o => (o === undefined ? undefined : JSON.parse(JSON.stringify(o)));
 const rgbHex = c => '#' + (c || [255, 255, 255]).map(n => Math.max(0, Math.min(255, Number(n) || 0)).toString(16).padStart(2, '0')).join('');
 const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-const SET_TABS = [['general', 'Général'], ['pointTypes', 'Markers des points'], ['real', 'Immobilier'], ['interiors', 'Intérieurs'], ['dealer', 'Concession'], ['gov', 'Gouvernement'], ['missions', 'Missions PNJ'], ['police', 'Police'], ['announce', 'Annonces'], ['tuning', 'Tuning'], ['death', 'Mort & EMS'], ['jobTypes', 'Modèles de jobs'], ['ui', 'Apparence']];
+const SET_TABS = [['general', 'Général'], ['real', 'Immobilier'], ['interiors', 'Intérieurs'], ['dealer', 'Concession'], ['gov', 'Gouvernement'], ['missions', 'Missions PNJ'], ['police', 'Police'], ['announce', 'Annonces'], ['tuning', 'Tuning'], ['death', 'Mort & EMS'], ['jobTypes', 'Modèles de jobs'], ['ui', 'Apparence']];
 const num = (path, label, v, extra = '') => fld(label, `<input type="number" step="any" data-path="${path}" data-t="n" value="${v ?? ''}" ${extra}>`);
 
 Object.assign(Builder, {

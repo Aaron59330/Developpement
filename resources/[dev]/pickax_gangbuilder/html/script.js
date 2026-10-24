@@ -610,7 +610,7 @@ const Builder = {
     }
     return `<div class="card"><div class="card-h"><div class="t">${ic(POINT_ICON[p.type], 16)} ${esc(T.label)}</div><button class="sm danger" data-a="delPoint" data-v="${i}">${ic('trash', 14)} Supprimer</button></div>
       <div class="grid2">${fld('Nom du point', `<input data-path="${base}.label" value="${esc(p.label)}" maxlength="60">`)}${fld('Grade minimum', this.gradeSelect(base + '.min_grade', p.min_grade))}</div>
-      <div class="mt"><div class="lbl" style="margin-bottom:6px">Position du marker</div>${coordField(base + '.coords', p.coords, { tp: true })}</div></div>${body}`;
+      <div class="mt"><div class="lbl" style="margin-bottom:6px">Position du marker</div>${coordField(base + '.coords', p.coords, { tp: true })}</div></div>${body}${this.pointStyleCard(base, p)}`;
   },
 
   newRow(tpl) {
@@ -693,6 +693,9 @@ const Builder = {
       case 'gradeDown': if (+v < c.grades.length - 1) [c.grades[+v + 1], c.grades[v]] = [c.grades[v], c.grades[+v + 1]]; return this.render();
       case 'addPoint': c.points.push(this.newPoint(v)); this.activePoint = c.points.length - 1; return this.render();
       case 'selPoint': this.activePoint = +v; return this.render();
+      case 'styleOn': setPath(this.cur, v, {}); return this.render();
+      case 'preview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
+      case 'styleOff': setPath(this.cur, v, null); return this.render();
       case 'delPoint': c.points.splice(+v, 1); this.activePoint = Math.max(0, this.activePoint - 1); return this.render();
       case 'addRow': { const arr = getPath(c, v) || []; arr.push(this.newRow(el.dataset.tpl)); setPath(c, v, arr); return this.render(); }
       case 'delRow': getPath(c, v).splice(+el.dataset.k, 1); return this.render();
@@ -773,7 +776,7 @@ Object.assign(Builder, {
   },
 
   setTabs() {
-    return [...this.S.schema.map(s => [s.id, s.label]), ['pointTypes', 'Markers des points'], ['gangTypes', 'Modèles de gangs']];
+    return [...this.S.schema.map(s => [s.id, s.label]), ['gangTypes', 'Modèles de gangs']];
   },
 
   renderSettings() {
@@ -825,6 +828,16 @@ Object.assign(Builder, {
       ${flat.length ? `<div class="grid3" style="gap:14px 14px">${flat.map(f => this.schemaField(sec, f)).join('')}</div>` : ''}
       ${bools.length ? `<div style="display:flex;flex-direction:column;gap:13px;margin-top:${flat.length ? 18 : 0}px">${bools.map(f => this.schemaField(sec, f)).join('')}</div>` : ''}
       ${hints[sec] ? `<p class="hint mt">${hints[sec]}</p>` : ''}</div>`;
+  },
+
+  // Apparence propre à CE point : sans personnalisation, il garde le marker de base du serveur (pickax_core)
+  pointStyleCard(base, p) {
+    const path = `${base}.data.style`, d = p.data.style;
+    if (!d) return `<div class="card"><div class="card-h"><div class="t">${ic('target', 16)} Marker de ce point</div>${chip('Marker du serveur', 'mute')}</div>
+      <p class="hint" style="margin-bottom:12px">Ce point utilise le marker de base du serveur (forme, couleur, taille de pickax_core). Personnalise-le pour ce point uniquement.</p>
+      <button class="sm" data-a="styleOn" data-v="${path}">${ic('edit', 14)} Personnaliser ce point</button></div>`;
+    const core = { marker: (this.catalog.coreMarker || {}).type ?? 23, color: (this.catalog.coreMarker || {}).color || [253, 194, 125], alpha: (this.catalog.coreMarker || {}).alpha ?? 150, scale: (this.catalog.coreMarker || {}).scale || { x: 1, y: 1, z: 0.5 }, offset: -0.95 };
+    return this.markerEditor(path, Object.assign({}, core, d, { scale: Object.assign({}, core.scale, d.scale || {}) }), 'Marker de ce point', false).replace('<button class="sm" data-a="preview"', `<button class="sm danger" data-a="styleOff" data-v="${path}" style="margin-right:8px">Revenir au marker du serveur</button><button class="sm" data-a="preview"`);
   },
 
   markerEditor(path, d, title, withLabel) {

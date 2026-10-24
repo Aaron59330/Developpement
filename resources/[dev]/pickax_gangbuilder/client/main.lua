@@ -170,7 +170,7 @@ CreateThread(function()
                 local dist = #(pos - vector3(c.x, c.y, c.z))
                 if dist < Config.DrawDistance then
                     sleep = 0
-                    DrawGBMarker(pointType(p), c, Config.UseGangColor and p.color or nil)
+                    DrawGBMarker(BB.Style(pointType(p), p.style), c, Config.UseGangColor and p.color or nil)
                     if dist < Config.InteractDistance then nearest = p end
                 end
             end

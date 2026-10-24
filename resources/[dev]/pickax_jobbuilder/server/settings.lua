@@ -419,12 +419,17 @@ CreateThread(function()
         if type(a) == 'table' and ((a[1] == 0 and a[2] == 164 and a[3] == 255) or (a[1] == 64 and a[2] == 224 and a[3] == 208)) then
             MySQL.update.await("DELETE FROM jobbuilder_settings WHERE name = 'ui'")
         end
+        local real = JB.decode(MySQL.scalar.await("SELECT value FROM jobbuilder_settings WHERE name = 'real'"), nil)
+        if type(real) == 'table' and (real.Markers or real.PointTypes) then
+            real.Markers, real.PointTypes = nil, nil   -- les markers des propriétés reprennent le marker de base du core
+            MySQL.update.await("UPDATE jobbuilder_settings SET value = ? WHERE name = 'real'", { json.encode(real) })
+        end
         MySQL.update.await("INSERT INTO jobbuilder_settings (name, value) VALUES ('_core_style_v2', '1') ON DUPLICATE KEY UPDATE value = '1'")
     end
     for _, row in ipairs(MySQL.query.await('SELECT name, value FROM jobbuilder_settings') or {}) do
         local v = JB.decode(row.value, nil)
         local sanitize = S[row.name]
-        if v and sanitize then
+        if v and sanitize and row.name ~= 'pointTypes' then   -- plus de style de marker commun à tout le builder : base = pickax_core, personnalisation par job / par point
             local ok, clean = pcall(sanitize, v, 0)
             if ok and clean then JBSet(row.name, clean) end
         end

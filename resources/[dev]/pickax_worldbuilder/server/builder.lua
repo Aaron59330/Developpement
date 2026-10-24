@@ -245,6 +245,8 @@ local function cleanSettings(tp, s)
         out.durationDefault = math.max(out.durationMin, math.min(out.durationMax, out.durationDefault))
     end
     if out.marker == nil then out.marker = { enabled = true } end
+    -- une forme identique au marker de base n'est pas figée : elle suivra le core
+    if out.marker.type == Config.Marker.type then out.marker.type = nil end
     -- les cibles d'un braquage et les valeurs min/max restent cohérentes
     return out
 end

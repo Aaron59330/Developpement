@@ -245,7 +245,7 @@ CreateThread(function()
     local rows = MySQL.query.await('SELECT name, value FROM gangbuilder_settings') or {}
     local n = 0
     for _, r in ipairs(rows) do
-        if isSection(r.name) then
+        if isSection(r.name) and r.name ~= 'pointTypes' then   -- plus de marker commun à tout le builder : base = pickax_core, personnalisation par point
             local v = GB.decode(r.value, nil)
             local out = v and clean(r.name, v, nil)
             if out then GBSet(r.name, out) n = n + 1

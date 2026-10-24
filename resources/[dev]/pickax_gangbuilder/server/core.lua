@@ -319,7 +319,7 @@ function GB.pointsForGang(name)
             list[#list + 1] = {
                 id = id, type = p.type, label = p.label, coords = p.coords, min_grade = p.min_grade, color = color,
                 kind = p.type == 'garage' and (p.data.kind or 'car') or nil,
-                spawn = p.type == 'garage' and p.data.spawn or nil,
+                spawn = p.type == 'garage' and p.data.spawn or nil, style = p.data.style,
             }
         end
     end

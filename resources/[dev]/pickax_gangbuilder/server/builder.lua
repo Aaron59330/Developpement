@@ -50,6 +50,30 @@ end
 local ACCOUNTS = { money = true, bank = true, dirty = true }
 
 -- ─────────────────────────────── Validation d'un point ───────────────────────────────
+-- Style de marker « creux » : seuls les champs renseignés sont gardés (le reste est hérité du marker de base du serveur)
+local function cleanStyle(s)
+    if type(s) ~= 'table' then return nil end
+    local out, n = {}, 0
+    if tonumber(s.marker) then out.marker = math.floor(math.max(0, math.min(50, tonumber(s.marker)))) n = n + 1 end
+    if type(s.color) == 'table' and tonumber(s.color[1]) and tonumber(s.color[2]) and tonumber(s.color[3]) then
+        out.color = { math.floor(math.max(0, math.min(255, tonumber(s.color[1])))), math.floor(math.max(0, math.min(255, tonumber(s.color[2])))), math.floor(math.max(0, math.min(255, tonumber(s.color[3])))) } n = n + 1
+    end
+    if tonumber(s.alpha) then out.alpha = math.floor(math.max(0, math.min(255, tonumber(s.alpha)))) n = n + 1 end
+    if type(s.scale) == 'table' then
+        local sc, any = {}, false
+        for k, def in pairs({ x = 1.0, y = 1.0, z = 0.5 }) do
+            if tonumber(s.scale[k]) then any = true end
+            sc[k] = math.max(0.05, math.min(20, tonumber(s.scale[k]) or def))
+        end
+        if any then out.scale = sc n = n + 1 end
+    end
+    if tonumber(s.offset) then out.offset = math.max(-10, math.min(10, tonumber(s.offset))) n = n + 1 end
+    if s.bob ~= nil then out.bob = s.bob == true n = n + 1 end
+    if s.rotate ~= nil then out.rotate = s.rotate == true n = n + 1 end
+    if s.help ~= nil then out.help = s.help ~= false n = n + 1 end
+    return n > 0 and out or nil
+end
+
 local function cleanPoint(p, maxGrade)
     if type(p) ~= 'table' or not Config.PointTypes[p.type] or Config.PointTypes[p.type].hidden then return nil, 'Type de point invalide' end
     local coords = cleanCoords(p.coords)
@@ -64,6 +88,7 @@ local function cleanPoint(p, maxGrade)
         data = {},
     }
     if out.label == '' then out.label = Config.PointTypes[p.type].label end
+    out.data.style = cleanStyle(d.style)   -- apparence propre à ce point (sinon : marker de base du serveur)
     local A = Config.Activities
 
     if p.type == 'garage' then
@@ -292,7 +317,7 @@ ESX.RegisterServerCallback('gangbuilder:catalog', function(src, cb)
     table.sort(items, function(a, b) return a.name < b.name end)
     local okV, vehicles = pcall(MySQL.query.await, 'SELECT name, model, category FROM vehicles ORDER BY name')
     cb({
-        items = items, vehicles = okV and vehicles or {}, blipScale = PickaxTheme and PickaxTheme.blipScale or nil, gangTypes = Config.GangTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds,
+        items = items, vehicles = okV and vehicles or {}, blipScale = PickaxTheme and PickaxTheme.blipScale or nil, gangTypes = Config.GangTypes, pointTypes = Config.PointTypes, coreMarker = PickaxTheme and PickaxTheme.marker or nil, garageKinds = Config.GarageKinds,
         maxItems = Config.MaxItemsPerPoint, maxGrades = Config.MaxGrades, categoryTypes = Config.CategoryTypes, territories = Config.Territories, actions = Config.Actions, clothesKeys = Config.ClothesKeys, activities = Config.Activities,
         nameMax = J.NameMaxLength, dirty = Config.Dirty, defaults = { sellCut = Config.Activities.SellGangCut, launderFee = Config.Activities.LaunderFee, launderGangCut = Config.Activities.LaunderGangCut,
             launderMin = Config.Activities.LaunderMin, launderMax = Config.Activities.LaunderMax, launderSeconds = Config.Activities.LaunderSeconds, maxMembers = Config.Gang.MaxMembers },
