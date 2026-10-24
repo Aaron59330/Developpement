@@ -1464,7 +1464,7 @@ const Agency = {
         if (!f.id) toast('Astuce : clique « Visiter » pour placer coffres et penderies à l\'intérieur', '');
         return;
       }
-      case 'offerSelf': { const r = await rpc('prop:offerSelf', Number(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
+      case 'offerSelf': { const r = await rpc('prop:offerSelf', Number(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'offer': { const r = await rpc('prop:offer', Number(v)); if (r && r.ok) { toast('Offre envoyée au client, en attente de sa réponse', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'visit': { const r = await rpc('prop:enter', Number(v)); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'gps': { const p = this.prop(Number(v)); rpc('waypoint', p.entrance); return toast('Point GPS défini', 'ok'); }
@@ -1579,7 +1579,7 @@ const Dealer = {
         if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');
         this.d = r; this.draft = this.prep(r.catalog); this.resets = []; this.dirty = false; toast('Ajustements enregistrés', 'ok'); return this.render();
       }
-      case 'sellSelf': { const r = await rpc('dealer:offerSelf', String(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
+      case 'sellSelf': { const r = await rpc('dealer:offerSelf', String(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'sell': { const r = await rpc('dealer:offer', String(v)); if (r && r.ok) { toast('Offre envoyée au client, en attente de sa réponse', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
     }
   },
@@ -2941,7 +2941,7 @@ const Runtime = {
       case 'work': { const q = document.getElementById('kq' + i); return ok(await rpc('kitchen:work', pid, i, q ? Number(q.value) : 1)); }
       case 'sellSelfServe': {
         const q = Number(document.getElementById('sq' + i).value) || 1, r = await rpc('serve:offerSelf', i, q);
-        if (ok(r, 'Facture à toi-même : confirme à l\'écran')) close();
+        ok(r, 'Facture à toi-même : confirme à l\'écran');
         return;
       }
       case 'sell': {
@@ -2963,7 +2963,7 @@ const Runtime = {
       case 'missionCancel': { await rpc('missions:cancel'); toast('Mission annulée', 'ok'); return; }
       case 'srSel': this.sel = String(el.dataset.id); return this.render();
       case 'srCat': this.cat = String(el.dataset.id || ''); return this.render();
-      case 'sellCarSelf': { const r = await rpc('dealer:offerSelf', String(el.dataset.id)); if (ok(r, 'Offre à toi-même : confirme à l\'écran')) close(); return; }
+      case 'sellCarSelf': { const r = await rpc('dealer:offerSelf', String(el.dataset.id)); ok(r, 'Offre à toi-même : confirme à l\'écran'); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }
       case 'buyCar': { const v = d.vehicles.find(x => x.model === el.dataset.id); if (!await confirmBox('Acheter ce véhicule ?', `${v.label} — ${money(v.price)}`, 'Acheter', false)) return; const r = await rpc('dealer:buy', pid, v.model); if (ok(r, 'Achat effectué')) close(); return; }
       case 'testCar': { const r = await rpc('dealer:test', pid, String(el.dataset.id)); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
