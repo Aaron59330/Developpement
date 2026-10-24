@@ -88,6 +88,7 @@ const filtered = () => {
   const q = S.q.trim().toLowerCase();
   const l = list().filter(it => !q || String(it.name).toLowerCase().includes(q) || String(it.model || '').toLowerCase().includes(q));
   if (S.sort === 'priceDesc') l.sort((a, b) => b.price - a.price); else if (S.sort === 'name') l.sort((a, b) => String(a.name).localeCompare(String(b.name), 'fr')); else if (S.sort === 'price') l.sort((a, b) => a.price - b.price);
+  if (S.cat === 'pack') { const vip = it => (/^VIP\b/i.test(String(it.name)) ? 1 : 0); l.sort((a, b) => vip(a) - vip(b)); } // packs classiques d'abord, puis les VIP (Bronze, Argent, Or) dans l'ordre du tri
   return l;
 };
 const cat = () => CATS.find(c => c.id === S.cat) || CATS[0];
