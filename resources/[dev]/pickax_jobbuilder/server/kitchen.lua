@@ -148,8 +148,8 @@ ESX.RegisterServerCallback('jobbuilder:serve:menu', function(src, cb)
     cb({ ok = true, jobLabel = job.label, items = items, maxServe = K.MaxServe })
 end)
 
--- (idx, cible, quantité) : la cible est injectée côté client (joueur le plus proche)
-ESX.RegisterServerCallback('jobbuilder:serve:offer', function(src, cb, idx, targetId, qty)
+-- (idx, cible, quantité) : la cible est injectée côté client (joueur le plus proche) ; `self` : l'employé se sert lui-même (même facture à payer)
+local function serveOffer(src, cb, idx, targetId, qty, self)
     local xPlayer = ESX.GetPlayerFromId(src)
     if not xPlayer or not JB.jobHasAction(xPlayer, 'serve') then return cb(fail('Action non autorisée')) end
     local job = JB.Jobs[xPlayer.job.name]
@@ -157,10 +157,14 @@ ESX.RegisterServerCallback('jobbuilder:serve:offer', function(src, cb, idx, targ
     qty = math.floor(tonumber(qty) or 1)
     if not it then return cb(fail('Produit inconnu')) end
     if qty < 1 or qty > K.MaxServe then return cb(fail('Quantité invalide')) end
-    local target = ESX.GetPlayerFromId(tonumber(targetId))
-    if not target or target.source == src then return cb(fail('Aucun client à proximité')) end
-    if not JB.playersClose(src, target.source) then return cb(fail('Le client est trop loin')) end
+    local target = self and xPlayer or ESX.GetPlayerFromId(tonumber(targetId))
+    if not target or (not self and target.source == src) then return cb(fail('Aucun client à proximité')) end
+    if not self and not JB.playersClose(src, target.source) then return cb(fail('Le client est trop loin')) end
     if JB.itemCount(src, xPlayer, it.name) < qty then return cb(fail(('Tu n\'as pas %d× %s sur toi'):format(qty, it.label))) end
     JB.sendInvoice(xPlayer, target, ('%d× %s'):format(qty, it.label), it.price * qty, { name = it.name, label = it.label, count = qty })
     cb({ ok = true })
-end)
+end
+
+ESX.RegisterServerCallback('jobbuilder:serve:offer', function(src, cb, idx, targetId, qty) serveOffer(src, cb, idx, targetId, qty, false) end)
+ESX.RegisterServerCallback('jobbuilder:serve:offerSelf', function(src, cb, idx, qty) serveOffer(src, cb, idx, nil, qty, true) end)
+

@@ -641,18 +641,19 @@ ESX.RegisterServerCallback('jobbuilder:prop:reset', function(src, cb, id)
 end)
 
 -- ─────────────────────────────── Vente / location à un joueur ───────────────────────────────
-ESX.RegisterServerCallback('jobbuilder:prop:offer', function(src, cb, id, targetId)
+-- Offre de vente / location au client le plus proche, ou à soi-même (`self` : l'agent est aussi l'acheteur)
+local function propOffer(src, cb, id, targetId, self)
     local x, job, err = agentCtx(src)
     if not x then return cb(fail(err)) end
     local p = Props[tonumber(id)]
     if not p or p.job_name ~= job.name then return cb(fail('Propriété introuvable')) end
     if p.status ~= 'available' then return cb(fail('Cette propriété n\'est pas disponible')) end
-    local t = ESX.GetPlayerFromId(tonumber(targetId))
-    if not t or t.source == src then return cb(fail('Aucun client à proximité')) end
-    if not playersClose(src, t.source) then return cb(fail('Le client est trop loin')) end
+    local t = self and x or ESX.GetPlayerFromId(tonumber(targetId))
+    if not t or (not self and t.source == src) then return cb(fail('Aucun client à proximité')) end
+    if not self and not playersClose(src, t.source) then return cb(fail('Le client est trop loin')) end
     local owned = 0
     for _, q in pairs(Props) do if q.owner == t.identifier then owned = owned + 1 end end
-    if owned >= R.MaxPerPlayer then return cb(fail(('Ce client possède déjà %d propriétés (maximum)'):format(R.MaxPerPlayer))) end
+    if owned >= R.MaxPerPlayer then return cb(fail(self and ('Tu possèdes déjà %d propriétés (maximum)'):format(R.MaxPerPlayer) or ('Ce client possède déjà %d propriétés (maximum)'):format(R.MaxPerPlayer))) end
 
     offerId = offerId + 1
     Offers[offerId] = { from = src, to = t.source, prop = p.id, exp = now() + 90 }
@@ -660,7 +661,10 @@ ESX.RegisterServerCallback('jobbuilder:prop:offer', function(src, cb, id, target
         label = p.label, address = p.address, deal = p.deal, price = p.price, jobLabel = job.label, days = R.RentDays,
     })
     cb({ ok = true })
-end)
+end
+
+ESX.RegisterServerCallback('jobbuilder:prop:offer', function(src, cb, id, targetId) propOffer(src, cb, id, targetId, false) end)
+ESX.RegisterServerCallback('jobbuilder:prop:offerSelf', function(src, cb, id) propOffer(src, cb, id, nil, true) end)
 
 RegisterNetEvent('jobbuilder:server:offerAnswer', function(id, yes)
     local src = source

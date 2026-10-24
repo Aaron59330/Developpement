@@ -1,5 +1,5 @@
 -- ─────────────────────────────── Restaurant / bar : récolte, cuisine, vente (côté client) ───────────────────────────────
-for _, n in ipairs({ 'serve:menu', 'serve:offer' }) do NuiRemote[n] = true end
+for _, n in ipairs({ 'serve:menu', 'serve:offer', 'serve:offerSelf' }) do NuiRemote[n] = true end
 
 local working = false
 

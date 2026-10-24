@@ -1387,7 +1387,7 @@ const Agency = {
     if (!p) { this.view = 'list'; return this.view_list(); }
     const avail = p.status === 'available';
     const actions = avail
-      ? `<button class="primary" data-a="offer" data-v="${p.id}">${ic('tag', 16)} ${p.deal === 'rent' ? 'Louer' : 'Vendre'} au client le plus proche</button><button data-a="visit" data-v="${p.id}">${ic('login', 16)} Visiter</button>`
+      ? `<button class="primary" data-a="offer" data-v="${p.id}">${ic('tag', 16)} ${p.deal === 'rent' ? 'Louer' : 'Vendre'} au client le plus proche</button><button data-a="offerSelf" data-v="${p.id}">${ic('user', 16)} ${p.deal === 'rent' ? 'Me le louer' : 'Me l\'acheter'} (moi-même)</button><button data-a="visit" data-v="${p.id}">${ic('login', 16)} Visiter</button>`
       : `<button data-a="gps" data-v="${p.id}">${ic('pin', 16)} GPS</button>`;
     return {
       head: { icon: avail ? 'home' : 'key', title: p.label, sub: p.address || 'Sans adresse', acts: `<button data-a="nav" data-v="list"><span style="display:inline-flex;transform:rotate(180deg)">${ic('chevron', 14)}</span> Retour</button>` },
@@ -1464,6 +1464,7 @@ const Agency = {
         if (!f.id) toast('Astuce : clique « Visiter » pour placer coffres et penderies à l\'intérieur', '');
         return;
       }
+      case 'offerSelf': { const r = await rpc('prop:offerSelf', Number(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'offer': { const r = await rpc('prop:offer', Number(v)); if (r && r.ok) { toast('Offre envoyée au client, en attente de sa réponse', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'visit': { const r = await rpc('prop:enter', Number(v)); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'gps': { const p = this.prop(Number(v)); rpc('waypoint', p.entrance); return toast('Point GPS défini', 'ok'); }
@@ -1543,7 +1544,7 @@ const Dealer = {
         <input type="number" min="0" placeholder="Prix" data-path="draft.${i}.price" data-t="n" value="${v.price}"><input type="number" min="-1" title="-1 = illimité" data-path="draft.${i}.stock" data-t="n" value="${v.stock}">
         ${gsel(i, v.min_grade)}<select data-path="draft.${i}.vtype">${['car', 'bike', 'boat', 'aircraft'].map(t => `<option value="${t}" ${v.vtype === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
         <input type="checkbox" data-path="draft.${i}.enabled" data-t="b" ${v.enabled ? 'checked' : ''} title="En vente">
-        <div class="row" style="gap:6px"><button class="sm" data-a="sell" data-v="${esc(v.model)}">Vendre</button>${v.src === 'table' && !v._o ? '' : `<button class="icon" title="${v.src === 'custom' ? 'Supprimer' : 'Revenir au prix de la table'}" data-a="${v.src === 'custom' ? 'delVeh' : 'resetVeh'}" data-v="${i}">${ic(v.src === 'custom' ? 'trash' : 'x', 14)}</button>`}</div></div>`; };
+        <div class="row" style="gap:6px"><button class="sm" data-a="sell" data-v="${esc(v.model)}">Vendre</button><button class="sm" data-a="sellSelf" data-v="${esc(v.model)}" title="Te vendre ce véhicule à toi-même">Pour moi</button>${v.src === 'table' && !v._o ? '' : `<button class="icon" title="${v.src === 'custom' ? 'Supprimer' : 'Revenir au prix de la table'}" data-a="${v.src === 'custom' ? 'delVeh' : 'resetVeh'}" data-v="${i}">${ic(v.src === 'custom' ? 'trash' : 'x', 14)}</button>`}</div></div>`; };
     const rowRead = i => { const v = this.draft[i]; return `<div class="item">${tile('car')}<div class="grow"><b>${esc(v.label)}</b><small>${esc(v.category || 'Véhicule')} · ${v.stock < 0 ? 'stock illimité' : v.stock + ' en stock'}${v.enabled ? '' : ' · hors vente'}</small></div><span class="price">${money(v.price)}</span>${v.enabled && v.stock !== 0 ? `<button class="sm primary" data-a="sell" data-v="${esc(v.model)}">Vendre</button>` : ''}</div>`; };
     const filters = `<div class="row" style="margin-bottom:14px;flex-wrap:wrap"><div style="flex:1;min-width:220px;position:relative"><input data-path="q" id="dl-q" placeholder="Rechercher un véhicule…" value="${esc(this.q)}" style="padding-left:38px"><span style="position:absolute;left:12px;top:10px;color:var(--muted)">${ic('search', 16)}</span></div>
       <select data-path="cat" style="width:220px"><option value="">Toutes les catégories</option>${d.categories.map(c => `<option value="${esc(c.name)}" ${this.cat === c.name ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>
@@ -1578,6 +1579,7 @@ const Dealer = {
         if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');
         this.d = r; this.draft = this.prep(r.catalog); this.resets = []; this.dirty = false; toast('Ajustements enregistrés', 'ok'); return this.render();
       }
+      case 'sellSelf': { const r = await rpc('dealer:offerSelf', String(v)); if (r && r.ok) { toast('Offre à toi-même : confirme à l\'écran', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'sell': { const r = await rpc('dealer:offer', String(v)); if (r && r.ok) { toast('Offre envoyée au client, en attente de sa réponse', 'ok'); close(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
     }
   },
@@ -2662,7 +2664,7 @@ const Runtime = {
           ${d.history.length ? `<div class="lbl" style="margin:14px 0 6px">Dernières annonces</div>${d.history.map(h => `<div class="logline"><b>${esc(h.title)}</b> — ${esc(h.text)}<br>${esc(h.author || '')} · ${fmtDate(h.t)}</div>`).join('')}` : ''}` });
       case 'serve': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'utensils', title: 'Vendre un produit', sub: 'Le client le plus proche reçoit l\'offre et paie directement', cls: 'corner',
         body: list(d.items, it => `<div class="item">${tile('box')}<div class="grow"><b>${esc(it.label)}</b><small>${money(it.price)} · tu en as ${it.have}</small></div>
-          <input class="qty" type="number" min="1" max="${d.maxServe}" value="1" id="sq${it.idx}"><button class="primary" style="height:38px" data-a="sell" data-i="${it.idx}" ${it.have > 0 ? '' : 'disabled'}>Proposer</button></div>`, 'La carte est vide : le patron ajoute des produits dans le builder (onglet Général).') });
+          <input class="qty" type="number" min="1" max="${d.maxServe}" value="1" id="sq${it.idx}"><button class="primary" style="height:38px" data-a="sell" data-i="${it.idx}" ${it.have > 0 ? '' : 'disabled'}>Proposer</button><button class="sm" style="height:38px" data-a="sellSelfServe" data-i="${it.idx}" ${it.have > 0 ? '' : 'disabled'} title="Te servir toi-même (tu paies la société)">Pour moi</button></div>`, 'La carte est vide : le patron ajoute des produits dans le builder (onglet Général).') });
       case 'missions': return this.renderMissions();
       case 'activity': return this.renderActivity();
       case 'missionStatus': $root.classList.add('corner'); return this.renderMissionStatus();
@@ -2772,7 +2774,7 @@ const Runtime = {
     list = list.slice(0, 80);
     const row = v => `<div class="item">${tile('car')}<div class="grow"><b>${esc(v.label)}${d.focus === v.model ? ' ' + chip('Exposé', 'info nodot') : ''}</b><small>${esc(v.category || 'Véhicule')}${v.stock > 0 ? ' · ' + v.stock + ' en stock' : ''}</small></div><span class="price">${money(v.price)}</span>
       ${d.hasTest ? `<button class="sm" data-a="testCar" data-id="${esc(v.model)}">Essai</button>` : ''}
-      ${d.canSell && d.grade >= v.min_grade ? `<button class="sm primary" data-a="sellCar" data-id="${esc(v.model)}">Vendre</button>` : ''}
+      ${d.canSell && d.grade >= v.min_grade ? `<button class="sm primary" data-a="sellCar" data-id="${esc(v.model)}">Vendre</button><button class="sm" data-a="sellCarSelf" data-id="${esc(v.model)}" title="Te vendre ce véhicule à toi-même">Pour moi</button>` : ''}
       ${d.selfService ? `<button class="sm primary" data-a="buyCar" data-id="${esc(v.model)}">Acheter</button>` : ''}</div>`;
     $root.innerHTML = panel({ icon: 'car', title: d.label, sub: `${d.jobLabel} — catalogue (${d.vehicles.length})`, cls: 'md',
       body: `<div class="row"><div style="position:relative;flex:1"><input data-path="q" id="sr-q" placeholder="Rechercher un véhicule…" value="${esc(this.q || '')}" style="padding-left:38px"><span style="position:absolute;left:12px;top:10px;color:var(--muted)">${ic('search', 16)}</span></div>
@@ -2919,6 +2921,11 @@ const Runtime = {
         const n = await rpc('announce:open'); if (n && n.ok) { this.data = n; this.render(); } return;
       }
       case 'work': { const q = document.getElementById('kq' + i); return ok(await rpc('kitchen:work', pid, i, q ? Number(q.value) : 1)); }
+      case 'sellSelfServe': {
+        const q = Number(document.getElementById('sq' + i).value) || 1, r = await rpc('serve:offerSelf', i, q);
+        if (ok(r, 'Facture à toi-même : confirme à l\'écran')) close();
+        return;
+      }
       case 'sell': {
         const q = Number(document.getElementById('sq' + i).value) || 1, r = await rpc('serve:offer', i, 0, q);
         if (ok(r, 'Offre envoyée au client, en attente de sa réponse')) close();
@@ -2936,6 +2943,7 @@ const Runtime = {
       case 'actStop': return rpc('activity:stop', pid);
       case 'missionStart': { const r = await rpc('missions:start', pid, el.dataset.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'missionCancel': { await rpc('missions:cancel'); toast('Mission annulée', 'ok'); return; }
+      case 'sellCarSelf': { const r = await rpc('dealer:offerSelf', String(el.dataset.id)); if (ok(r, 'Offre à toi-même : confirme à l\'écran')) close(); return; }
       case 'sellCar': { const r = await rpc('dealer:offer', String(el.dataset.id)); if (ok(r, 'Offre envoyée au client')) close(); return; }
       case 'buyCar': { const v = d.vehicles.find(x => x.model === el.dataset.id); if (!await confirmBox('Acheter ce véhicule ?', `${v.label} — ${money(v.price)}`, 'Acheter', false)) return; const r = await rpc('dealer:buy', pid, v.model); if (ok(r, 'Achat effectué')) close(); return; }
       case 'testCar': { const r = await rpc('dealer:test', pid, String(el.dataset.id)); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }

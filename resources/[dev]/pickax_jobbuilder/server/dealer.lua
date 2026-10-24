@@ -319,20 +319,24 @@ local function vehRow(model, jobName)
     return job and JB.dealerFind(job, model) or nil
 end
 
-ESX.RegisterServerCallback('jobbuilder:dealer:offer', function(src, cb, vehId, targetId)
+-- Offre de vente d'un véhicule à un client (le plus proche) ou à soi-même (`self` : le vendeur est aussi l'acheteur, même confirmation et même paiement)
+local function dealerOffer(src, cb, vehId, targetId, self)
     local x, job, err = ctx(src)
     if not x then return cb(fail(err)) end
     local v = vehRow(vehId, job.name)
     if not v or not v.enabled or v.stock == 0 then return cb(fail('Véhicule indisponible')) end
     if x.job.grade < v.min_grade then return cb(fail('Ton grade ne permet pas de vendre ce véhicule')) end
-    local t = ESX.GetPlayerFromId(tonumber(targetId))
-    if not t or t.source == src then return cb(fail('Aucun client à proximité')) end
-    if not playersClose(src, t.source) then return cb(fail('Le client est trop loin')) end
+    local t = self and x or ESX.GetPlayerFromId(tonumber(targetId))
+    if not t or (not self and t.source == src) then return cb(fail('Aucun client à proximité')) end
+    if not self and not playersClose(src, t.source) then return cb(fail('Le client est trop loin')) end
     offerId = offerId + 1
     Offers[offerId] = { from = src, to = t.source, veh = v.model, job = job.name, exp = now() + 90 }
     TriggerClientEvent('jobbuilder:client:dealerOffer', t.source, offerId, { label = v.label, model = v.model, category = v.category, price = v.price, jobLabel = job.label })
     cb({ ok = true })
-end)
+end
+
+ESX.RegisterServerCallback('jobbuilder:dealer:offer', function(src, cb, vehId, targetId) dealerOffer(src, cb, vehId, targetId, false) end)
+ESX.RegisterServerCallback('jobbuilder:dealer:offerSelf', function(src, cb, vehId) dealerOffer(src, cb, vehId, nil, true) end)
 
 RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes)
     local src = source

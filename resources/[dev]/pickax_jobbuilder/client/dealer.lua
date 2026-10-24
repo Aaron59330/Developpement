@@ -1,5 +1,5 @@
 -- ─────────────────────────────── Concession (client) ───────────────────────────────
-for _, n in ipairs({ 'dealer:manage', 'dealer:saveCatalog', 'dealer:offer', 'dealer:buy' }) do NuiRemote[n] = true end
+for _, n in ipairs({ 'dealer:manage', 'dealer:saveCatalog', 'dealer:offer', 'dealer:offerSelf', 'dealer:buy' }) do NuiRemote[n] = true end
 
 function OpenDealerPanel()
     ESX.TriggerServerCallback('jobbuilder:dealer:manage', function(res)

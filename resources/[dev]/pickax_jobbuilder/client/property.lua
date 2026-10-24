@@ -9,7 +9,7 @@ function JBInside() return Inside end   -- utilisé par client/furniture.lua
 
 -- Handlers NUI -> client / serveur ajoutés par ce fichier
 for _, n in ipairs({
-    'prop:manage', 'prop:save', 'prop:delete', 'prop:reset', 'prop:offer', 'prop:giveKey', 'prop:removeKey',
+    'prop:manage', 'prop:save', 'prop:delete', 'prop:reset', 'prop:offer', 'prop:offerSelf', 'prop:giveKey', 'prop:removeKey',
     'prop:payRent', 'prop:terminate', 'prop:ring', 'prop:wardrobe:delete', 'prop:wardrobe:wear',
 }) do NuiRemote[n] = true end
 
