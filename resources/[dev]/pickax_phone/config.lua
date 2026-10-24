@@ -188,7 +188,7 @@ Config.Crypto = {
         { id = 'ETH', name = 'Ethereum', price = 2400,  color = '#627eea' },
         { id = 'SOL', name = 'Solana',   price = 95,    color = '#14f195' },
         { id = 'DOGE', name = 'Dogecoin', price = 0.12, color = '#c2a633' },
-        { id = 'AER', name = 'Aero Coin', price = 12,   color = '#00a4ff' },
+        { id = 'AER', name = 'Aero Coin', price = 12,   color = '#fdc27d' },
     },
 }
 

@@ -16,8 +16,8 @@
   --act-text: #fff;
   --box-on: #fff;
   --box-tick: #16171c;
-  --accent: var(--pk-accent,#00a4ff);
-  --accent-rgb: var(--pk-accent-rgb,0,164,255);
+  --accent: var(--pk-accent,#fdc27d);
+  --accent-rgb: var(--pk-accent-rgb,253,194,125);
   --zoom: 1;
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }

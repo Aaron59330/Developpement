@@ -227,6 +227,16 @@ end)
 -- Chargement des réglages enregistrés au démarrage
 CreateThread(function()
     while not GB.ready do Wait(100) end
+    -- Marker / couleur de base = pickax_core : on retire (une seule fois) les anciens réglages enregistrés qui les remplaçaient
+    if not MySQL.scalar.await("SELECT 1 FROM gangbuilder_settings WHERE name = '_core_style_v2'") then
+        MySQL.update.await("DELETE FROM gangbuilder_settings WHERE name = 'pointTypes'")
+        local ui = GB.decode(MySQL.scalar.await("SELECT value FROM gangbuilder_settings WHERE name = 'ui'"), nil)
+        local a = type(ui) == 'table' and ui.Accent
+        if type(a) == 'table' and ((a[1] == 0 and a[2] == 164 and a[3] == 255) or (a[1] == 64 and a[2] == 224 and a[3] == 208)) then
+            MySQL.update.await("DELETE FROM gangbuilder_settings WHERE name = 'ui'")
+        end
+        MySQL.update.await("INSERT INTO gangbuilder_settings (name, value) VALUES ('_core_style_v2', '1') ON DUPLICATE KEY UPDATE value = '1'")
+    end
     local rows = MySQL.query.await('SELECT name, value FROM gangbuilder_settings') or {}
     local n = 0
     for _, r in ipairs(rows) do

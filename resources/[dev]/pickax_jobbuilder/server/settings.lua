@@ -301,7 +301,7 @@ S.announce = function(v)
         local id = str(t.id, 20):lower():gsub('[^%w_]', '')
         if id ~= '' and not used[id] and #out.Types < 20 then
             used[id] = true
-            out.Types[#out.Types + 1] = { id = id, label = str(t.label, 30) ~= '' and str(t.label, 30) or id, color = color(t.color, { 64, 224, 208 }) }
+            out.Types[#out.Types + 1] = { id = id, label = str(t.label, 30) ~= '' and str(t.label, 30) or id, color = color(t.color, { 253, 194, 125 }) }
         end
     end
     if #out.Types == 0 then out.Types = (function() local c = {} for i, t in ipairs(A.Types) do c[i] = t end return c end)() end
@@ -408,6 +408,19 @@ CreateThread(function()
     while not JB.ready do Wait(100) end
     -- Nouveau modèle livré avec le script (banque) : les réglages déjà enregistrés en base remplacent les modèles par défaut, on l'ajoute donc une seule fois
     local newType, newTpl = clone(Config.JobTypes.bank), clone(Config.Missions.Templates.bank)
+    -- Modèles des métiers actifs : les modèles enregistrés en base remplacent ceux du script, on les remet s'ils manquent
+    local actTypes = {}
+    for _, k in ipairs({ 'garbage', 'towing', 'carwash', 'trucker', 'farmer', 'firefighter', 'train' }) do actTypes[k] = clone(Config.JobTypes[k]) end
+    -- Marker / couleur de base = pickax_core : on retire (une seule fois) les anciens réglages enregistrés qui les remplaçaient
+    if not MySQL.scalar.await("SELECT 1 FROM jobbuilder_settings WHERE name = '_core_style_v2'") then
+        MySQL.update.await("DELETE FROM jobbuilder_settings WHERE name = 'pointTypes'")
+        local ui = JB.decode(MySQL.scalar.await("SELECT value FROM jobbuilder_settings WHERE name = 'ui'"), nil)
+        local a = type(ui) == 'table' and ui.Accent
+        if type(a) == 'table' and ((a[1] == 0 and a[2] == 164 and a[3] == 255) or (a[1] == 64 and a[2] == 224 and a[3] == 208)) then
+            MySQL.update.await("DELETE FROM jobbuilder_settings WHERE name = 'ui'")
+        end
+        MySQL.update.await("INSERT INTO jobbuilder_settings (name, value) VALUES ('_core_style_v2', '1') ON DUPLICATE KEY UPDATE value = '1'")
+    end
     for _, row in ipairs(MySQL.query.await('SELECT name, value FROM jobbuilder_settings') or {}) do
         local v = JB.decode(row.value, nil)
         local sanitize = S[row.name]
@@ -416,6 +429,7 @@ CreateThread(function()
             if ok and clean then JBSet(row.name, clean) end
         end
     end
+    for k, t in pairs(actTypes) do if t and not Config.JobTypes[k] then Config.JobTypes[k] = t end end
     local seen = MySQL.scalar.await("SELECT 1 FROM jobbuilder_settings WHERE name = '_seen_bank'")
     if not seen then
         local touched = false

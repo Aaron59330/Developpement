@@ -178,7 +178,9 @@ local function cleanSettings(s, old)
     local col = s.color
     if type(col) == 'table' and #col == 3 then out.color = { int(col[1], 0, 255, 239), int(col[2], 0, 255, 68), int(col[3], 0, 255, 68) } end
     local mk = type(s.marker) == 'table' and s.marker or {}
-    out.marker = { enabled = mk.enabled ~= false, type = int(mk.type, 0, 43, Config.Marker.type) }
+    -- la forme n'est enregistrée que si elle diffère du marker de base (pickax_core) : un changement du core s'applique alors partout
+    out.marker = { enabled = mk.enabled ~= false }
+    if tonumber(mk.type) and int(mk.type, 0, 43, Config.Marker.type) ~= Config.Marker.type then out.marker.type = int(mk.type, 0, 43, Config.Marker.type) end
     -- style complet commun aux builders (champs optionnels : absent = hérite du marker commun)
     if tonumber(mk.alpha) then out.marker.alpha = int(mk.alpha, 0, 255, 140) end
     if tonumber(mk.offset) then out.marker.offset = math.max(-10.0, math.min(10.0, tonumber(mk.offset))) end

@@ -103,7 +103,7 @@ function AJ.Progress(label, seconds, opts)
         DisableControlAction(0, 24, true) DisableControlAction(0, 25, true) DisableControlAction(0, 140, true) DisableControlAction(0, 141, true) DisableControlAction(0, 142, true)
         local f = (GetGameTimer() - start) / total
         DrawRect(0.5, 0.88, 0.2, 0.026, 0, 0, 0, 170)
-        DrawRect(0.5 - 0.1 * (1 - f), 0.88, 0.2 * f, 0.02, 0, 164, 255, 230)
+        DrawRect(0.5 - 0.1 * (1 - f), 0.88, 0.2 * f, 0.02, 253, 194, 125, 230)
         SetTextScale(0.0, 0.34) SetTextFont(4) SetTextCentre(true) SetTextOutline()
         BeginTextCommandDisplayText('STRING') AddTextComponentSubstringPlayerName(label .. '  ·  X pour annuler') EndTextCommandDisplayText(0.5, 0.845)
         if IsControlJustPressed(0, 73) or IsEntityDead(ped) or IsPedRagdoll(ped) or #(GetEntityCoords(ped) - origin) > radius then ok = false break end

@@ -27,7 +27,7 @@
     '.dl-chk{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;border:1px solid var(--line,rgba(255,255,255,.08));cursor:pointer;font-size:13px;color:var(--text-2,#c9c9ce)}',
     '.dl-chk:hover{background:rgba(255,255,255,.04)}',
     '.dl-chk input{appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid rgba(255,255,255,.3);display:grid;place-content:center;flex:none;cursor:pointer;margin:0}',
-    '.dl-chk input:checked{background:var(--accent,var(--acc,#00a4ff));border-color:var(--accent,var(--acc,#00a4ff))}',
+    '.dl-chk input:checked{background:var(--accent,var(--acc,#fdc27d));border-color:var(--accent,var(--acc,#fdc27d))}',
     '.dl-chk input:checked::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}',
     '.dl-chk.on{border-color:rgba(255,255,255,.28);color:var(--text,#f4f4f5)}',
     '.dl-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}',
@@ -74,7 +74,7 @@
   }
 
   function mkDraft(cfg) {
-    return { enabled: !!cfg.enabled, webhookNew: '', clearWebhook: false, name: cfg.name || '', color: cfg.color || (window.PICKAX_ACCENT || '#00a4ff'), mention: cfg.mention || '', events: Object.assign({}, cfg.events || {}), fields: Object.assign({}, cfg.fields || {}) };
+    return { enabled: !!cfg.enabled, webhookNew: '', clearWebhook: false, name: cfg.name || '', color: cfg.color || (window.PICKAX_ACCENT || '#fdc27d'), mention: cfg.mention || '', events: Object.assign({}, cfg.events || {}), fields: Object.assign({}, cfg.fields || {}) };
   }
 
   function mount(host) {

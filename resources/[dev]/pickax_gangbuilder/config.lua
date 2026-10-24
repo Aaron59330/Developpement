@@ -2,6 +2,10 @@ Config = {}
 -- Taille des blips par défaut : celle de tout le serveur (pickax_core/config.lua → Config.GlobalBlip.Scale), sinon la valeur donnée.
 -- Un blip réglé en jeu dans un builder garde sa taille.
 local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or default end
+-- Marker de base : celui de tout le serveur (pickax_core/config.lua → Config.GlobalMarker : forme + couleur)
+local PK_MK = PickaxTheme and PickaxTheme.marker
+local PK_MKT = PK_MK and PK_MK.type or 23
+local function PK_MKC() return PK_MK and { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] } or { 253, 194, 125 } end
 
 -- ═══════════════════════════════════════════════════════════════════════════════════════════════
 --  GANG BUILDER — config.lua
@@ -226,20 +230,20 @@ Config.Activities = {
 -- ─────────────────────────────── Points ───────────────────────────────
 -- Apparence de base des markers (modifiable en jeu : Paramètres → Markers des points)
 Config.PointTypes = {
-    garage    = { label = 'Garage',          color = { 239, 68, 68 }, marker = 25 },
-    cloakroom = { label = 'Vestiaire',       color = { 239, 68, 68 }, marker = 25 },
-    armory    = { label = 'Armurerie',       color = { 239, 68, 68 }, marker = 25 },
-    stash     = { label = 'Coffre',          color = { 239, 68, 68 }, marker = 25 },
-    boss      = { label = 'Gestion du gang', color = { 239, 68, 68 }, marker = 25 },
-    shop      = { label = 'Marché noir',     color = { 239, 68, 68 }, marker = 25 },
-    harvest   = { label = 'Récolte',         color = { 239, 68, 68 }, marker = 25 },
-    process   = { label = 'Traitement',      color = { 239, 68, 68 }, marker = 25 },
-    sell      = { label = 'Point de vente',  color = { 239, 68, 68 }, marker = 25 },
-    laundry   = { label = 'Blanchiment',     color = { 239, 68, 68 }, marker = 25 },
+    garage    = { label = 'Garage',          color = PK_MKC(), marker = PK_MKT },
+    cloakroom = { label = 'Vestiaire',       color = PK_MKC(), marker = PK_MKT },
+    armory    = { label = 'Armurerie',       color = PK_MKC(), marker = PK_MKT },
+    stash     = { label = 'Coffre',          color = PK_MKC(), marker = PK_MKT },
+    boss      = { label = 'Gestion du gang', color = PK_MKC(), marker = PK_MKT },
+    shop      = { label = 'Marché noir',     color = PK_MKC(), marker = PK_MKT },
+    harvest   = { label = 'Récolte',         color = PK_MKC(), marker = PK_MKT },
+    process   = { label = 'Traitement',      color = PK_MKC(), marker = PK_MKT },
+    sell      = { label = 'Point de vente',  color = PK_MKC(), marker = PK_MKT },
+    laundry   = { label = 'Blanchiment',     color = PK_MKC(), marker = PK_MKT },
     -- Variantes de garage (hidden = non ajoutables directement : on choisit le « type » dans l'éditeur du garage)
-    garage_bike     = { label = 'Garage motos',    color = { 239, 68, 68 }, marker = 25, hidden = true },
-    garage_aircraft = { label = 'Garage aéronefs', color = { 239, 68, 68 }, marker = 25, hidden = true },
-    garage_boat     = { label = 'Garage bateaux',  color = { 239, 68, 68 }, marker = 25, hidden = true },
+    garage_bike     = { label = 'Garage motos',    color = PK_MKC(), marker = PK_MKT, hidden = true },
+    garage_aircraft = { label = 'Garage aéronefs', color = PK_MKC(), marker = PK_MKT, hidden = true },
+    garage_boat     = { label = 'Garage bateaux',  color = PK_MKC(), marker = PK_MKT, hidden = true },
 }
 
 Config.GarageKinds = {
@@ -297,7 +301,7 @@ Config.ActionRules = {
 }
 
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
-Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
+Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation de toute l'interface (modifiable en jeu)
 
 -- ─────────────────────────────── Modèles de gangs ───────────────────────────────
 -- Chaque modèle pré-remplit le builder (grades, blip, actions, points suggérés). Tout reste modifiable dans l'UI et ici.

@@ -8,7 +8,7 @@ Config = {}
 -- ============================================================
 
 -- COULEURS ---------------------------------------------------
-Config.MainColor = (PickaxTheme and PickaxTheme.hex) or '#00a4ff'   -- Couleur principale (ligne, titre, icône, compteur) : suit pickax_theme/theme.js
+Config.MainColor = (PickaxTheme and PickaxTheme.hex) or '#fdc27d'   -- Couleur principale (ligne, titre, icône, compteur) : suit pickax_theme/theme.js
 Config.BackgroundColor = '#16171c'        -- Couleur du fond de la notification
 Config.BackgroundTransparency = 0.82      -- 0.0 = invisible / 1.0 = opaque
 
@@ -17,7 +17,7 @@ Config.SmallTextColor = '#b7b6c1'         -- Petit texte / subject
 Config.SuccessColor = '#5be39a'           -- ~g~
 Config.ErrorColor = '#ff7373'             -- ~r~
 Config.WarningColor = '#ffd86a'           -- ~y~
-Config.BlueTextColor = (PickaxTheme and PickaxTheme.hex) or '#00a4ff'   -- ~b~ (suit pickax_theme/theme.js)
+Config.BlueTextColor = (PickaxTheme and PickaxTheme.hex) or '#fdc27d'   -- ~b~ (suit pickax_theme/theme.js)
 
 -- FORME / TAILLE ---------------------------------------------
 Config.Width = 'clamp(270px, 14.2vw, 315px)' -- Largeur comme avant (accepte aussi 300 ou '300px')

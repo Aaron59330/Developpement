@@ -7,8 +7,8 @@
   const hex = (h, s, l) => { s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); }; return '#' + f(0) + f(8) + f(4); };
   function palette() {
     const cs = getComputedStyle(root);
-    let raw = (cs.getPropertyValue('--accent-rgb') || cs.getPropertyValue('--acc-rgb') || cs.getPropertyValue('--pk-accent-rgb') || '0,164,255').split(',').map(x => parseInt(x, 10));
-    if (raw.length < 3 || raw.some(isNaN)) raw = [0, 164, 255];
+    let raw = (cs.getPropertyValue('--accent-rgb') || cs.getPropertyValue('--acc-rgb') || cs.getPropertyValue('--pk-accent-rgb') || '253,194,125').split(',').map(x => parseInt(x, 10));
+    if (raw.length < 3 || raw.some(isNaN)) raw = [253, 194, 125];
     const [r, g, b] = raw, h = hsl(r, g, b), st = root.style, key = raw.join(',');
     if (palette.last === key) return; palette.last = key;
     st.setProperty('--atl-rgb', `${r}, ${g}, ${b}`);

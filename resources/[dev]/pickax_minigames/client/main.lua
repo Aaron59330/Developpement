@@ -4,7 +4,7 @@ MGC = { defs = {}, session = nil, joined = nil }
 local uiMode = nil            -- nil | 'builder' | 'lobby'
 local blips = {}
 
-local ACC = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 }
+local ACC = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 }
 
 -- ─── Interface (builder + lobby) ──────────────────────────────────────────────
 local function openUI(mode, data)

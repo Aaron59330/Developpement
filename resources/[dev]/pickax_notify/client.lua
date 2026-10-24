@@ -31,7 +31,7 @@ local playerRadius = tonumber(GetResourceKvpString(KVP_RADIUS) or '')
 
 local function getUiConfig()
     local cfg = {
-        mainColor = Config.MainColor or (PickaxTheme and PickaxTheme.hex) or '#00a4ff',
+        mainColor = Config.MainColor or (PickaxTheme and PickaxTheme.hex) or '#fdc27d',
         backgroundColor = Config.BackgroundColor or '#070c12',
         backgroundTransparency = getNumber(Config.BackgroundTransparency, 0.68),
 

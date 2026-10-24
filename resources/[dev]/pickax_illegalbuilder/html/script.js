@@ -962,7 +962,7 @@ const Builder = {
 
   markerCard(base, p) {
     const sec = p.store || p.ret || (p.kind === 'door' && p.inside);
-    return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Couleur des markers</div></div><div class="grid2">${this.colorField('Marker principal', `${base}.color`, this.v('settings.color') || [64, 224, 208])}${sec ? this.colorField('Marker secondaire (rangement / retour / sortie)', `${base}.color2`, [255, 140, 60]) : ''}</div>
+    return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Couleur des markers</div></div><div class="grid2">${this.colorField('Marker principal', `${base}.color`, this.v('settings.color') || [253, 194, 125])}${sec ? this.colorField('Marker secondaire (rangement / retour / sortie)', `${base}.color2`, [255, 140, 60]) : ''}</div>
       <div class="hint mt-s">Par défaut, la couleur générale du module (onglet Général) est utilisée.</div></div>`;
   },
 

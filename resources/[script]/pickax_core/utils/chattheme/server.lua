@@ -1,7 +1,7 @@
 -- Thème du chat aux couleurs du serveur : écrit chat/theme.css depuis Config.AccentColor (lu par le chat via chat_theme dans le manifest).
 -- Le fichier est envoyé aux joueurs au démarrage de la ressource : si la couleur change, le fichier est réécrit ici et pris en compte au redémarrage suivant.
 CreateThread(function()
-    local h = tostring(Config.AccentColor or '#00a4ff')
+    local h = tostring(Config.AccentColor or '#fdc27d')
     local r, g, b = h:match('^#?(%x%x)(%x%x)(%x%x)$')
     if not r then return end
     r, g, b = tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)

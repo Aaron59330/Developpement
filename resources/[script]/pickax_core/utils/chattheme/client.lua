@@ -2,9 +2,9 @@
 -- Le chat natif refuse de redéfinir son modèle de message par défaut (« duplicate template 'default' ») : on ne le touche donc plus ;
 -- seuls nos propres messages utilisent le modèle « pickax » aux couleurs du serveur.
 local function accentRgb()
-    local h = tostring(Config.AccentColor or '#00a4ff')
+    local h = tostring(Config.AccentColor or '#fdc27d')
     local r, g, b = h:match('^#?(%x%x)(%x%x)(%x%x)$')
-    if not r then return 0, 164, 255 end
+    if not r then return 253, 194, 125 end
     return tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)
 end
 PickaxChatAccent = function() return accentRgb() end

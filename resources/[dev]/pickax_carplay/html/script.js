@@ -138,7 +138,7 @@ function pLib(kind) {
 function pRadios() {
   const dis = lock();
   return `<div class="pg-h"><h2>Radios & ambiances</h2><small>Un clic pour lancer</small></div>
-    <div class="cards">${S.presets.map((p, i) => `<button class="card" data-a="preset" data-i="${i}" ${dis} style="--c:${esc(p.color || (window.PICKAX_ACCENT || '#00a4ff'))}"><span class="cic">${ic('radio', 26)}</span><b>${esc(p.label)}</b><small>${esc(p.sub || '')}</small></button>`).join('') || '<p class="empty">Aucune radio configurée.</p>'}</div>`;
+    <div class="cards">${S.presets.map((p, i) => `<button class="card" data-a="preset" data-i="${i}" ${dis} style="--c:${esc(p.color || (window.PICKAX_ACCENT || '#fdc27d'))}"><span class="cic">${ic('radio', 26)}</span><b>${esc(p.label)}</b><small>${esc(p.sub || '')}</small></button>`).join('') || '<p class="empty">Aucune radio configurée.</p>'}</div>`;
 }
 
 function pSearch() {

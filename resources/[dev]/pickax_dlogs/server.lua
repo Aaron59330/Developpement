@@ -2,7 +2,7 @@
 local function themeHex()
     local ok, st = pcall(function() return exports['pickax_core']:GetGlobalStyle() end)
     if ok and type(st) == 'table' and type(st.hex) == 'string' and st.hex:match('^#%x%x%x%x%x%x$') then return st.hex end
-    return '#00a4ff'
+    return '#fdc27d'
 end
 
 -- ─────────────────────────────── Logs Discord par élément ───────────────────────────────

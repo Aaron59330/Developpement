@@ -587,7 +587,7 @@ const Builder = {
   // Une seule carte pour les markers du job : couleur en un clic + options avancées (forme, taille, animation) repliées
   jobMarkerCard(s) {
     const mk = s.marker && s.marker.color, m = s.marker, types = this.catalog.pointTypes || {};
-    const presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [64, 224, 208]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
+    const presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
     const base = Object.values(types)[0] || {};
     const adv = this.markerEditor('job.settings.marker', m || {}, 'Markers du job', false, base, { bare: true, noColor: true });
     return `<div class="card"><div class="card-h"><div class="t">${ic('target', 16)} Markers du job</div>${chip(m && Object.keys(m).length ? 'Personnalisés' : 'Style global', m && Object.keys(m).length ? 'ok' : 'mute')}</div>
@@ -600,7 +600,7 @@ const Builder = {
   },
 
   appearanceCard(s) {
-    const acc = s.ui_accent, presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [64, 224, 208]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
+    const acc = s.ui_accent, presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]]];
     return `<div class="card"><div class="card-h"><div class="t">${ic('sliders', 16)} Apparence du job</div>${chip(acc ? 'Couleur propre au job' : 'Couleur globale', acc ? 'ok' : 'mute')}</div>
       <p class="hint" style="margin-bottom:12px">Couleur des <b>menus de ce job</b> (F6, boss, tablette, atelier…) vue par ses employés, indépendante des autres jobs et de la couleur globale (Paramètres → Apparence). Les markers du job se règlent juste en dessous ; le style d'un point précis, en bas de son éditeur (onglet Points).</p>
       <div class="lbl" style="margin-bottom:8px">Couleur des menus</div>
@@ -881,19 +881,19 @@ const Builder = {
       case 'styleOn': {      // initialise le style avec les valeurs actuelles du type de point (ou d'un marker standard pour un job)
         const ty = path => path.startsWith('points.') ? this.cur.points[+path.split('.')[1]].type : null, t = ty(v);
         const baseSt = (t && (this.catalog.pointTypes || {})[t]) || Object.values(this.catalog.pointTypes || {})[0] || {};
-        setPath(this.cur, v, { marker: baseSt.marker ?? 25, color: [...(baseSt.color || [64, 224, 208])], alpha: baseSt.alpha ?? 140, scale: { ...(baseSt.scale || { x: 0.9, y: 0.9, z: 0.6 }) }, offset: baseSt.offset ?? -0.95, bob: !!baseSt.bob, rotate: !!baseSt.rotate, help: baseSt.help !== false });
+        setPath(this.cur, v, { marker: baseSt.marker ?? 23, color: [...(baseSt.color || [253, 194, 125])], alpha: baseSt.alpha ?? 140, scale: { ...(baseSt.scale || { x: 0.9, y: 0.9, z: 0.6 }) }, offset: baseSt.offset ?? -0.95, bob: !!baseSt.bob, rotate: !!baseSt.rotate, help: baseSt.help !== false });
         return this.render();
       }
       case 'storeOn': { const p = c.points[+v]; p.data.store = { coords: null, radius: 5, any: false }; return this.render(); }
       case 'storeOff': { delete c.points[+v].data.store; return this.render(); }
       case 'styleOff': setPath(this.cur, v, null); return this.render();
       case 'preview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
-      case 'mkOn': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = [64, 224, 208]; return this.render();
+      case 'mkOn': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = [253, 194, 125]; return this.render();
       case 'mkPick': c.job.settings.marker = c.job.settings.marker || {}; c.job.settings.marker.color = v.split(',').map(Number); return this.render();
       case 'mkOff': { const m = c.job.settings.marker; if (m) { delete m.color; if (!Object.keys(m).length) c.job.settings.marker = null; } return this.render(); }
       case 'bankDefaults': c.job.settings.bank_fees = clone((this.catalog.bank || {}).DefaultFees || []); return this.render();
       case 'careDefaults': c.job.settings.care_prices = clone((this.catalog.ems || {}).DefaultCare || []); return this.render();
-      case 'accentOn': c.job.settings.ui_accent = c.job.settings.ui_accent || [64, 224, 208]; return this.render();
+      case 'accentOn': c.job.settings.ui_accent = c.job.settings.ui_accent || [253, 194, 125]; return this.render();
       case 'accentOff': c.job.settings.ui_accent = null; return this.render();
       case 'accentPick': c.job.settings.ui_accent = v.split(',').map(Number); return this.render();
       case 'delPoint': c.points.splice(+v, 1); this.activePoint = Math.max(0, this.activePoint - 1); return this.render();
@@ -1100,7 +1100,7 @@ Object.assign(Builder, {
 
   set_ui() {
     const u = this.S.draft.ui, hex = rgbHex(u.Accent), b = 'S.draft.ui';
-    const presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [64, 224, 208]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]], ['Blanc', [244, 244, 245]]];
+    const presets = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]], ['Blanc', [244, 244, 245]]];
     return `<div class="grid2"><div class="card"><div class="card-h"><div class="t">${ic('sliders', 16)} Couleur d'accentuation</div></div>
         ${fld('Couleur personnalisée', `<input type="color" data-path="${b}.Accent" data-t="c" value="${hex}" style="max-width:200px">`)}
         <div class="lbl" style="margin:16px 0 8px">Couleurs prédéfinies</div>
@@ -1230,7 +1230,7 @@ Object.assign(Builder, {
       case 'fnDel': if (!need()) return false; S.draft.police.DefaultFines.splice(Number(v), 1); this.render(); return true;
       case 'lmAdd': { if (!need()) return false; const r = await rpc('getCoords'); const c = r && r.coords ? r.coords : (r || {}); S.draft.police.Landmarks.push(['Nouveau lieu', Math.round(c.x || 0), Math.round(c.y || 0)]); this.render(); return true; }
       case 'lmDel': if (!need()) return false; S.draft.police.Landmarks.splice(Number(v), 1); this.render(); return true;
-      case 'atAdd': if (!need()) return false; S.draft.announce.Types.push({ id: 'type' + (S.draft.announce.Types.length + 1), label: 'Nouveau type', color: [64, 224, 208] }); this.render(); return true;
+      case 'atAdd': if (!need()) return false; S.draft.announce.Types.push({ id: 'type' + (S.draft.announce.Types.length + 1), label: 'Nouveau type', color: [253, 194, 125] }); this.render(); return true;
       case 'atDel': if (!need()) return false; S.draft.announce.Types.splice(Number(v), 1); this.render(); return true;
       case 'setTab': if (!need()) return false; S.sec = v; this.render(); return true;
       case 'preview': { if (!need()) return false; await rpc('previewMarker', getPath(this, v)); toast('Aperçu affiché devant toi (8 s)'); return true; }
@@ -1921,7 +1921,7 @@ const Tablet = {
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     const g = cv.getContext('2d'), M = this.M, mp = this.d.map, L = this.live || { units: [], calls: [] };
     const sx = x => W / 2 + (x - M.cx) * M.scale, sy = y => H / 2 - (y - M.cy) * M.scale;
-    const acc = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '64,224,208';
+    const acc = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '253,194,125';
     g.fillStyle = '#0b0d10'; g.fillRect(0, 0, W, H);
     const tilesOn = this.drawTiles(g, W, H, sx, sy);
     if (!tilesOn) {
@@ -1946,7 +1946,7 @@ const Tablet = {
     // appels
     if (M.layers.calls) (L.calls || []).filter(c => c.status !== 'closed').forEach(c => {
       const px = sx(c.x), py = sy(c.y), pulse = c.kind === 'panic' ? 8 + 5 * Math.abs(Math.sin(Date.now() / 250)) : 8;
-      g.fillStyle = c.kind === 'panic' ? '#ef4444' : c.kind === 'pursuit' ? '#f59e0b' : (window.PICKAX_ACCENT || '#00a4ff'); g.globalAlpha = .9; g.beginPath(); g.arc(px, py, pulse, 0, 7); g.fill(); g.globalAlpha = 1;
+      g.fillStyle = c.kind === 'panic' ? '#ef4444' : c.kind === 'pursuit' ? '#f59e0b' : (window.PICKAX_ACCENT || '#fdc27d'); g.globalAlpha = .9; g.beginPath(); g.arc(px, py, pulse, 0, 7); g.fill(); g.globalAlpha = 1;
       g.fillStyle = '#000'; g.font = 'bold 10px sans-serif'; g.textAlign = 'center'; g.fillText('#' + c.id, px, py + 3.5);
     });
     // traînée + fugitif

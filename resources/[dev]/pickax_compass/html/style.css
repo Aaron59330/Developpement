@@ -1,4 +1,4 @@
-:root { --acc: var(--pk-accent, #00a4ff); --acc-rgb: var(--pk-accent-rgb, 0,164,255); }
+:root { --acc: var(--pk-accent, #fdc27d); --acc-rgb: var(--pk-accent-rgb, 253,194,125); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: transparent; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; color: #f5f6f8; -webkit-font-smoothing: antialiased; user-select: none; }
 .hidden { display: none !important; }

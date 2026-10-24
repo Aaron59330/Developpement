@@ -32,15 +32,15 @@ IC.check = '<path d="M5 12.5l4.5 4.5L19 7"/>';
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${IC[n] || IC.box}</svg>`;
 
 const CATS = [
-  { id: 'daily', label: 'Boutique du jour', sub: 'Une sélection qui change chaque jour, avec une remise', icon: 'flame', kind: 'Offre du jour', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'vehicle', label: 'Véhicules', sub: 'Voitures et SUV, livrés dans ton garage', icon: 'car', kind: 'Véhicule', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'moto', label: 'Motos', sub: 'Deux-roues, sportives et tout-terrain', icon: 'moto', kind: 'Moto', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'other', label: 'Air & mer', sub: 'Avions, hélicoptères et bateaux', icon: 'plane', kind: 'Véhicule', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'weapon', label: 'Armes', sub: 'Armes permanentes avec munitions', icon: 'gun', kind: 'Arme', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'crate', label: 'Caisses', sub: 'Caisses surprise : véhicules, armes et argent', icon: 'box', kind: 'Caisse', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'pack', label: 'Packs', sub: 'Packs de départ et bonus', icon: 'gift', kind: 'Pack', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#00a4ff)' },
-  { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#00a4ff)' },
+  { id: 'daily', label: 'Boutique du jour', sub: 'Une sélection qui change chaque jour, avec une remise', icon: 'flame', kind: 'Offre du jour', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'vehicle', label: 'Véhicules', sub: 'Voitures et SUV, livrés dans ton garage', icon: 'car', kind: 'Véhicule', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'moto', label: 'Motos', sub: 'Deux-roues, sportives et tout-terrain', icon: 'moto', kind: 'Moto', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'other', label: 'Air & mer', sub: 'Avions, hélicoptères et bateaux', icon: 'plane', kind: 'Véhicule', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'weapon', label: 'Armes', sub: 'Armes permanentes avec munitions', icon: 'gun', kind: 'Arme', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'crate', label: 'Caisses', sub: 'Caisses surprise : véhicules, armes et argent', icon: 'box', kind: 'Caisse', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'pack', label: 'Packs', sub: 'Packs de départ et bonus', icon: 'gift', kind: 'Pack', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#fdc27d)' },
+  { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#fdc27d)' },
 ];
 const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null };
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
@@ -59,7 +59,7 @@ function srcsFor(cat, it) {
   return [];
 }
 function tierColor(name) {
-  return ['var(--pk-accent,#00a4ff)', 'var(--pk-accent-dark,#0076b8)'];
+  return ['var(--pk-accent,#fdc27d)', 'var(--pk-accent-dark,#0076b8)'];
 }
 function art(cat, it) {
   const [a, b] = tierColor(it.name);
@@ -137,15 +137,15 @@ function brand() {
   return `<div class="brand"><div class="mark">${mark}</div><div class="bt"><b>${esc(sv.name || 'Boutique')}</b><span>Boutique officielle</span></div></div>`;
 }
 function sidebar(cats) {
-  const nav = (id, icon, label, extra, color) => `<button class="${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}" style="--cc:${color || 'var(--pk-accent,#00a4ff)'}"><span class="ico">${ic(icon, 19)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
+  const nav = (id, icon, label, extra, color) => `<button class="${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}" style="--cc:${color || 'var(--pk-accent,#fdc27d)'}"><span class="ico">${ic(icon, 19)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
   return `<aside class="side">${brand()}
     <div class="cap">Catégories</div>
     <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb">${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
       <div class="cap" style="margin-top:14px">Mon compte</div>
-      ${nav('cart', 'cart', 'Panier', `<span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`, 'var(--pk-accent,#00a4ff)')}
-      ${nav('history', 'hist', 'Historique', '', 'var(--pk-accent,#00a4ff)')}
-      ${nav('codes', 'tag', 'Codes & parrainage', '', 'var(--pk-accent,#00a4ff)')}
-      ${S.data.staff ? nav('admin', 'shield', 'Gestion', '', 'var(--pk-accent,#00a4ff)') : ''}</nav>
+      ${nav('cart', 'cart', 'Panier', `<span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`, 'var(--pk-accent,#fdc27d)')}
+      ${nav('history', 'hist', 'Historique', '', 'var(--pk-accent,#fdc27d)')}
+      ${nav('codes', 'tag', 'Codes & parrainage', '', 'var(--pk-accent,#fdc27d)')}
+      ${S.data.staff ? nav('admin', 'shield', 'Gestion', '', 'var(--pk-accent,#fdc27d)') : ''}</nav>
     <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
@@ -191,7 +191,7 @@ setInterval(() => { const e = document.getElementById('dcd'); if (e && S.dayEnds
 
 function viewCart() {
   const lines = cartLines(), sub = subtotal(), fin = finalTotal(), lack = fin - S.points;
-  return heroBar('cart', 'Mon panier', `${cartCount()} article${cartCount() > 1 ? 's' : ''}`, 'var(--pk-accent,#00a4ff)') +
+  return heroBar('cart', 'Mon panier', `${cartCount()} article${cartCount() > 1 ? 's' : ''}`, 'var(--pk-accent,#fdc27d)') +
     `<div class="scroll"><div class="cartwrap"><div class="cartlist">${lines.length ? lines.map(({ l, it }) => `<div class="row">
         <div class="thumb">${picHtml(l.cat, it, '')}</div><div class="rn"><b>${esc(it.name)}</b><span>${esc(metaOf(it, l.cat))}</span></div>
         <div class="qty">${maxQty(l.cat) > 1 ? `<button data-a="qminus" data-c="${l.cat}" data-i="${it.idx}">${ic('minus', 14)}</button><b>${l.qty}</b><button data-a="qplus" data-c="${l.cat}" data-i="${it.idx}">${ic('plus', 14)}</button>` : '<b>×1</b>'}</div>
@@ -216,14 +216,14 @@ const catLabel = c => (CATS.find(x => x.id === c) || {}).label || '';
 
 function viewHistory() {
   const h = S.history;
-  return heroBar('hist', 'Historique', 'Tes derniers achats en boutique', 'var(--pk-accent,#00a4ff)') +
+  return heroBar('hist', 'Historique', 'Tes derniers achats en boutique', 'var(--pk-accent,#fdc27d)') +
     `<div class="scroll">${h == null ? '<div class="empty">Chargement…</div>' : h.length ? `<table class="tbl"><tr><th>Date</th><th>Article</th><th>Catégorie</th><th>Payé</th><th>Code</th></tr>${h.map(r => `<tr><td>${when(r.ts)}</td><td><b>${esc(r.item_name)}</b></td><td>${esc(catLabel(r.category))}</td>
       <td><span class="pill"><i></i>${fmt(r.price)}</span>${r.full_price > r.price ? ` <s class="old">${fmt(r.full_price)}</s>` : ''}</td><td>${r.code ? `<span class="chip">${esc(r.code)}</span>` : ''}</td></tr>`).join('')}</table>` : '<div class="empty">Aucun achat pour le moment.</div>'}</div>`;
 }
 
 function viewCodes() {
   const o = S.overview, r = o && o.referral;
-  return heroBar('tag', 'Codes & parrainage', 'Utilise un code ou invite tes amis', 'var(--pk-accent,#00a4ff)') +
+  return heroBar('tag', 'Codes & parrainage', 'Utilise un code ou invite tes amis', 'var(--pk-accent,#fdc27d)') +
     `<div class="scroll"><div class="two">
       <div class="panel"><h3>${ic('tag', 18)} Utiliser un code</h3><p class="sub">Code cadeau (coins offerts) ou code de parrainage d'un ami. Les codes de réduction se saisissent dans le panier.</p>
         <div class="promo big"><input id="redeem" placeholder="Ex : CADEAU2025 ou REF-1234" maxlength="32"><button class="pri" data-a="redeem">Valider</button></div></div>
@@ -236,9 +236,9 @@ function viewCodes() {
 
 function viewAdmin() {
   const a = S.admin;
-  if (!a) return heroBar('shield', 'Gestion', 'Codes promo, parrainage et ventes', 'var(--pk-accent,#00a4ff)') + '<div class="scroll"><div class="empty">Chargement…</div></div>';
+  if (!a) return heroBar('shield', 'Gestion', 'Codes promo, parrainage et ventes', 'var(--pk-accent,#fdc27d)') + '<div class="scroll"><div class="empty">Chargement…</div></div>';
   const ref = a.referral;
-  return heroBar('shield', 'Gestion', 'Codes promo, parrainage et ventes', 'var(--pk-accent,#00a4ff)') +
+  return heroBar('shield', 'Gestion', 'Codes promo, parrainage et ventes', 'var(--pk-accent,#fdc27d)') +
     `<div class="scroll"><div class="two">
       <div class="panel"><h3>${ic('plus', 18)} Créer un code</h3><div class="form">
         <label>Code (vide = aléatoire)<input id="nc" maxlength="32" placeholder="PROMO10"></label>

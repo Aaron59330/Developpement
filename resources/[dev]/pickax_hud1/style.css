@@ -55,7 +55,7 @@ body {
     bottom: 0.55vh;
     width: 24.8vh;
     --hh-h: 13px;
-    --hh-color: var(--pk-accent, #00a4ff);       /* couleur du serveur (pickax_core/config.lua → AccentColor) */
+    --hh-color: var(--pk-accent, #fdc27d);       /* couleur du serveur (pickax_core/config.lua → AccentColor) */
 }
 .health-hud.off { display: none; }
 .hh-bar {
@@ -116,7 +116,7 @@ body {
 /* armure : fine ligne bleue en haut de la barre */
 .hh-armor { position: absolute; left: 0; right: 0; top: 0; height: 3px; display: none; background: rgba(255, 255, 255, 0.15); }
 .hh-armor.on { display: block; }
-.hh-armor-fill { height: 100%; width: 100%; background: var(--pk-accent,#00a4ff); box-shadow: 0 0 6px var(--pk-accent,#00a4ff); transition: width 0.25s ease; }
+.hh-armor-fill { height: 100%; width: 100%; background: var(--pk-accent,#fdc27d); box-shadow: 0 0 6px var(--pk-accent,#fdc27d); transition: width 0.25s ease; }
 
 /* ===== Bandeau HUD staff (haut centre) ===== */
 .staff-bar {
@@ -143,9 +143,9 @@ body {
     position: absolute;
     left: 0; right: 0; top: 0;
     height: 2px;
-    background: var(--pk-accent,#00a4ff);
+    background: var(--pk-accent,#fdc27d);
 }
-.staff-bar .sb-tag { color: var(--pk-accent,#00a4ff); font-weight: 700; font-size: 13.5px; letter-spacing: 0.03em; }
+.staff-bar .sb-tag { color: var(--pk-accent,#fdc27d); font-weight: 700; font-size: 13.5px; letter-spacing: 0.03em; }
 .staff-bar b { color: #fff; font-weight: 700; font-size: 16.5px; margin-right: 5px; }
 .staff-bar .sb-sep { width: 1px; height: 18px; margin: 0 17px; background: rgba(255, 255, 255, 0.2); }
 .staff-bar .sb-flag { font-weight: 600; }

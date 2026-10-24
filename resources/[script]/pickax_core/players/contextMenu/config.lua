@@ -108,11 +108,11 @@ ButtonContextMenu = {
 ConfigContextMenu = {
     Color = {
         ColorMenu = {22, 23, 28},            -- gris de base (#16171c)
-        ColorMenuHovered = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},     -- survol : bleu principal #00a4ff
+        ColorMenuHovered = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},     -- survol : bleu principal #fdc27d
         ColorText = {255, 255, 255},
         ColorTextDisable = {107, 110, 120},
-        ColorBorder = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},         -- liseré bleu #00a4ff
-        ColorSeparator = (PickaxTheme and PickaxTheme.rgb) or {0, 164, 255},
+        ColorBorder = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},         -- liseré bleu #fdc27d
+        ColorSeparator = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},
         BorderAlpha = 190,-- opacité du liseré (0-255)
         SeparatorAlpha = 90 -- opacité des séparateurs (0-255)
     },

@@ -1,5 +1,5 @@
 @font-face { font-family: Teko; src: url(./fonts/Teko-54d71c9d.woff); }
-:root { --main: var(--pk-accent,#00a4ff); --bg: rgba(22, 23, 28, .82); --text: #f7f7fb; --muted: #b7b6c1; --ok: #5be39a; --bad: #ff7373; }
+:root { --main: var(--pk-accent,#fdc27d); --bg: rgba(22, 23, 28, .82); --text: #f7f7fb; --muted: #b7b6c1; --ok: #5be39a; --bad: #ff7373; }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: Teko, sans-serif; }
 html, body { background: transparent; overflow: hidden; }
 
@@ -19,7 +19,7 @@ html, body { background: transparent; overflow: hidden; }
 .chip svg { width: 15px; height: 15px; fill: none; stroke: var(--main); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Métier */
-.jobicon { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: calc(var(--r, 6px) * .8); background: rgba(var(--pk-accent-rgb,0,164,255),.14); border: 1px solid rgba(var(--pk-accent-rgb,0,164,255),.45); }
+.jobicon { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: calc(var(--r, 6px) * .8); background: rgba(var(--pk-accent-rgb,253,194,125),.14); border: 1px solid rgba(var(--pk-accent-rgb,253,194,125),.45); }
 .jobicon svg { width: 22px; height: 22px; fill: none; stroke: var(--main); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .jobtxt { display: flex; flex-direction: column; line-height: 1; min-width: 0; flex: 1; }
 .jobname { font-size: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

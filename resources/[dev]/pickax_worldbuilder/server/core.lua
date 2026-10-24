@@ -399,9 +399,33 @@ AddEventHandler('esx:playerLoaded', function(src) SetTimeout(1500, function() WB
 AddEventHandler('esx:setJob', function(src) SetTimeout(300, function() WB.syncPlayer(src) end) end)
 RegisterNetEvent('worldbuilder:server:requestSync', function() WB.syncPlayer(source) end)
 
+-- Marker / couleur de base = ceux de pickax_core : on retire une seule fois les anciennes valeurs « par défaut » figées en base
+-- (forme 25 ou forme actuelle du core enregistrée sur chaque module, couleur d'interface restée sur l'ancien bleu / turquoise).
+local function migrateCoreStyle(settingsTable, entityTable)
+    local flag = '_core_style_v2'
+    if MySQL.scalar.await(('SELECT 1 FROM %s WHERE k = ?'):format(settingsTable), { flag }) then return end
+    local acc = json.decode(MySQL.scalar.await(('SELECT v FROM %s WHERE k = ?'):format(settingsTable), { 'accent' }) or 'null')
+    if type(acc) == 'table' and ((acc[1] == 0 and acc[2] == 164 and acc[3] == 255) or (acc[1] == 64 and acc[2] == 224 and acc[3] == 208)) then
+        MySQL.update.await(('DELETE FROM %s WHERE k = ?'):format(settingsTable), { 'accent' })
+    end
+    local n = 0
+    for _, r in ipairs(MySQL.query.await(('SELECT id, settings FROM %s'):format(entityTable)) or {}) do
+        local s = json.decode(r.settings or '{}')
+        local t = type(s) == 'table' and type(s.marker) == 'table' and tonumber(s.marker.type)
+        if t and (t == 25 or t == (Config.Marker and Config.Marker.type)) then
+            s.marker.type = nil
+            MySQL.update.await(('UPDATE %s SET settings = ? WHERE id = ?'):format(entityTable), { json.encode(s), r.id })
+            n = n + 1
+        end
+    end
+    MySQL.update.await(('INSERT INTO %s (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)'):format(settingsTable), { flag, '1' })
+    if n > 0 then print(('^2[%s] %d module(s) : marker de base remis sur celui de pickax_core.^0'):format(GetCurrentResourceName(), n)) end
+end
+
 AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
     installTables()
+    migrateCoreStyle('worldbuilder_settings', 'worldbuilder_entities')
     WB.loadAll()
     WB.loadSettings()
     WB.ready = true

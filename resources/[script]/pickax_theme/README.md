@@ -3,7 +3,7 @@
 Tout se règle en haut de `pickax_core/config.lua` :
 
 ```lua
-AccentColor = '#00a4ff',            -- couleur principale
+AccentColor = '#fdc27d',            -- couleur principale
 ServerName = 'Bluebay Roleplay',    -- nom complet
 ServerShortName = 'BLUEBAY',        -- nom court (HUD, connexion, Discord…)
 ServerTagline = 'RP sérieux · Free-Access',

@@ -143,7 +143,7 @@ local COMMON = {
     access = obj({ jobs = { 'j' }, item = ITEM }),
     color = { 'rgb' },
     uiColor = { 'rgb' },
-    marker = obj({ enabled = { 'b', true }, type = { 'n', 0, 43, 25 }, alpha = { 'on', 0, 255 }, offset = { 'on', -10, 10 }, bob = { 'ob' }, rotate = { 'ob' }, help = { 'ob' },
+    marker = obj({ enabled = { 'b', true }, type = { 'on', 0, 43 }, alpha = { 'on', 0, 255 }, offset = { 'on', -10, 10 }, bob = { 'ob' }, rotate = { 'ob' }, help = { 'ob' },
         scale = obj({ x = { 'on', 0.05, 20 }, y = { 'on', 0.05, 20 }, z = { 'on', 0.05, 20 } }) }),
     note = { 's', 200, '' },
 }
@@ -207,7 +207,7 @@ for tp, kinds in pairs(POINTS) do KINDS[tp] = {} for k in pairs(kinds) do KINDS[
 local function cleanSettings(tp, s)
     s = type(s) == 'table' and s or {}
     local out = clean(obj(SETTINGS[tp]), s)
-    if out.marker == nil then out.marker = { enabled = true, type = Config.Marker.type } end
+    if out.marker == nil then out.marker = { enabled = true } end
     -- les cibles d'un braquage et les valeurs min/max restent cohérentes
     return out
 end

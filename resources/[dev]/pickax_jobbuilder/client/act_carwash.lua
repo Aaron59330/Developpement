@@ -66,7 +66,7 @@ AJ.Mod[KEY] = {
                                 local dist = #(pos - p)
                                 if dist < 12.0 then
                                     sleep = 0
-                                    DrawMarker(1, p.x, p.y, p.z - 0.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 0, 164, 255, 110, false, false, 2, false, nil, nil, false)
+                                    DrawMarker(1, p.x, p.y, p.z - 0.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 253, 194, 125, 110, false, false, 2, false, nil, nil, false)
                                     if dist < 1.4 then
                                         AJ.Help(('~INPUT_PICKUP~ Laver ' .. labels[i]))
                                         if IsControlJustPressed(0, Config.Act.Interact) then

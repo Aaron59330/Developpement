@@ -33,7 +33,7 @@ local Prefs = {
 	-- Couleurs : liste de préréglages + "Personnalisé" (Entrée = saisir un code #RRGGBB au clavier)
 	Colors = {
 		{ key = 'accent', label = 'Couleur principale', desc = 'Barre, détails et accents des menus', noDefault = true, presets = {
-			{ (PickaxTheme and PickaxTheme.hex) or '#00a4ff', 'Couleur du serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
+			{ (PickaxTheme and PickaxTheme.hex) or '#fdc27d', 'Couleur du serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
 			{ '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
 		{ key = 'bg', label = 'Fond du menu', desc = 'Couleur de fond des menus', presets = {
 			{ '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' },
@@ -41,15 +41,15 @@ local Prefs = {
 		{ key = 'text', label = 'Texte', desc = 'Couleur du texte des menus', presets = {
 			{ '#f4f4f5', 'Blanc' }, { '#c9c9ce', 'Gris clair' }, { '#111114', 'Noir' }, { '#cfe6ff', 'Bleu clair' }, { '#fde68a', 'Doré' } } },
 		{ key = 'selbg', label = 'Bouton sélectionné (fond)', desc = 'Fond du bouton survolé', presets = {
-			{ '#00a4ff', 'Bleu' }, { '#ffffff', 'Blanc' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
+			{ '#fdc27d', 'Bleu' }, { '#ffffff', 'Blanc' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
 		{ key = 'selborder', label = 'Bouton sélectionné (bordure)', desc = 'Bordure du bouton survolé', presets = {
-			{ '#ffffff', 'Blanc' }, { '#00a4ff', 'Bleu' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
+			{ '#ffffff', 'Blanc' }, { '#fdc27d', 'Bleu' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
 	},
 	BtnRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } },
 	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
 
-local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
+local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end
@@ -143,9 +143,9 @@ local function PrefsAskHex(key)
 		local cur = PrefsCfg[key] or ''
 		local typed
 		if GetResourceState('pickax_ui') == 'started' then
-			typed = exports['pickax_ui']:Input({ title = 'Couleur personnalisée', hint = 'Format #RRGGBB', placeholder = '#00a4ff', default = cur ~= '' and cur or '#', max = 7 })
+			typed = exports['pickax_ui']:Input({ title = 'Couleur personnalisée', hint = 'Format #RRGGBB', placeholder = '#fdc27d', default = cur ~= '' and cur or '#', max = 7 })
 		else
-			AddTextEntry('PICKAX_HEX', 'Couleur au format #RRGGBB (ex : #00a4ff)')
+			AddTextEntry('PICKAX_HEX', 'Couleur au format #RRGGBB (ex : #fdc27d)')
 			DisplayOnscreenKeyboard(1, 'PICKAX_HEX', '', cur ~= '' and cur or '#', '', '', '', 7)
 			while UpdateOnscreenKeyboard() == 0 do
 				DisableAllControlActions(0)

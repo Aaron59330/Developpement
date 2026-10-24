@@ -46,8 +46,8 @@ BB.Alias = { driving = 'school', carlot = 'dealer', general = 'shop', custom = '
 -- Défaut = marker de tout le serveur (pickax_core/config.lua → Config.GlobalMarker, lu via PickaxTheme) ; sinon valeurs ci-dessous.
 -- Ce que l'admin règle EN JEU dans un builder (module / point) reste prioritaire : voir BB.Style.
 local GM = PickaxTheme and PickaxTheme.marker
-BB.Marker = { marker = GM and GM.type or 25, color = GM and { GM.color[1], GM.color[2], GM.color[3] } or { 64, 224, 208 }, alpha = GM and GM.alpha or 140,
-    scale = GM and { x = GM.scale.x, y = GM.scale.y, z = GM.scale.z } or { x = 0.9, y = 0.9, z = 0.6 }, offset = -0.95, bob = false, rotate = false, help = true }
+BB.Marker = { marker = GM and GM.type or 23, color = GM and { GM.color[1], GM.color[2], GM.color[3] } or { 253, 194, 125 }, alpha = GM and GM.alpha or 150,
+    scale = GM and { x = GM.scale.x, y = GM.scale.y, z = GM.scale.z } or { x = 1.0, y = 1.0, z = 0.5 }, offset = -0.95, bob = false, rotate = false, help = true }
 
 local function cleanColor(c)
     if type(c) == 'table' and tonumber(c[1]) and tonumber(c[2]) and tonumber(c[3]) then return c end

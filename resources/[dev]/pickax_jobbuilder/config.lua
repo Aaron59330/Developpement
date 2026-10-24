@@ -5,8 +5,8 @@ local function PK_BSF(default) return (PickaxTheme and PickaxTheme.blipScale) or
 -- Marker par défaut des points : celui de tout le serveur (pickax_core/config.lua → Config.GlobalMarker).
 -- Un réglage fait en jeu dans le builder (Paramètres / éditeur) est enregistré et reste prioritaire.
 local PK_MK = PickaxTheme and PickaxTheme.marker
-local PK_MKT = PK_MK and PK_MK.type or 25
-local function PK_MKC() return PK_MK and { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] } or { 64, 224, 208 } end
+local PK_MKT = PK_MK and PK_MK.type or 23
+local function PK_MKC() return PK_MK and { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] } or { 253, 194, 125 } end
 
 -- ─────────────────────────────── Général ───────────────────────────────
 Config.AllowedGroups   = { '_dev' }      -- groupes ESX autorisés à ouvrir le builder
@@ -522,7 +522,7 @@ Config.Gov = {
 -- ─────────────────────────────── Apparence des menus ───────────────────────────────
 -- Couleur d'accentuation de toute l'interface (boutons, onglet actif, pastilles, icônes, bordures teintées).
 -- Modifiable en direct par les _dev : /jobbuilder → Paramètres → Apparence (appliquée à tous les joueurs).
-Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   -- bleu #00a4ff (modifiable en jeu)
+Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- bleu #fdc27d (modifiable en jeu)
 
 -- ─────────────────────────────── Immobilier ───────────────────────────────
 Config.Real = {

@@ -759,7 +759,7 @@ const MARKER_TYPES = [[0, 'Cône inversé'], [1, 'Cylindre'], [2, 'Chevron épai
   [20, 'Chevron ×1'], [21, 'Chevron ×2'], [22, 'Chevron ×3'], [23, 'Cercle épais'], [24, 'Icône replay'], [25, 'Cercle fin'], [26, 'Cercle fin + flèche'], [27, 'Cercle + flèches'], [28, 'Sphère'],
   [29, 'Symbole dollar'], [30, 'Barres horizontales'], [31, 'Tête de loup'], [32, 'Point d\'interrogation'], [33, 'Symbole avion'], [34, 'Symbole hélico'], [35, 'Symbole bateau'], [36, 'Symbole voiture'],
   [37, 'Symbole moto'], [38, 'Symbole vélo'], [39, 'Symbole camion'], [40, 'Symbole parachute'], [41, 'Lame de scie']];
-const ACCENT_PRESETS = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [64, 224, 208]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]], ['Blanc', [244, 244, 245]]];
+const ACCENT_PRESETS = [['Rouge', [239, 68, 68]], ['Orange', [249, 115, 22]], ['Jaune', [250, 204, 21]], ['Vert', [34, 197, 94]], ['Turquoise', [253, 194, 125]], ['Bleu', [59, 130, 246]], ['Violet', [168, 85, 247]], ['Rose', [236, 72, 153]], ['Blanc', [244, 244, 245]]];
 
 Object.assign(Builder, {
   async openSettings() {

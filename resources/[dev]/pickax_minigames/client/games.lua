@@ -623,7 +623,7 @@ function race.tick(s, ped)
     local c = cps[idx]
     local nxt = cps[(idx % N) + 1]
     local rad = (c.r or s.settings.cpRadius) + 0.0
-    DrawMarker(1, c.x, c.y, c.z - 1.0, 0, 0, 0, 0, 0, 0, rad * 2, rad * 2, 4.0, 0, 164, 255, 110, false, false, 2, false, nil, nil, false)
+    DrawMarker(1, c.x, c.y, c.z - 1.0, 0, 0, 0, 0, 0, 0, rad * 2, rad * 2, 4.0, 253, 194, 125, 110, false, false, 2, false, nil, nil, false)
     if nxt and (idx % N) + 1 ~= idx then
         DrawMarker(1, nxt.x, nxt.y, nxt.z - 1.0, 0, 0, 0, 0, 0, 0, (nxt.r or rad) * 2, (nxt.r or rad) * 2, 4.0, 255, 255, 255, 40, false, false, 2, false, nil, nil, false)
     end

@@ -1,6 +1,6 @@
 -- Identité du serveur (couleur, nom, slogan, Discord, logo) lue dans pickax_core/config.lua, sinon valeurs par défaut.
 -- Utilisation : dans le fxmanifest d'une ressource → shared_script '@pickax_theme/theme.lua'
---   PickaxTheme.hex ('#00a4ff'), PickaxTheme.rgb ({0,164,255}), PickaxTheme.r / .g / .b
+--   PickaxTheme.hex ('#fdc27d'), PickaxTheme.rgb ({253,194,125}), PickaxTheme.r / .g / .b
 --   PickaxTheme.name, .short, .tagline, .discord ('discord.gg/xxx'), .logo (nom de fichier ou lien)
 PickaxTheme = PickaxTheme or {}
 
@@ -12,8 +12,8 @@ do
         if v and v ~= '' then return v end
         return default
     end
-    local hex = str('AccentColor', '#00a4ff')
-    if not hex:match('^#%x%x%x%x%x%x$') then hex = '#00a4ff' end
+    local hex = str('AccentColor', '#fdc27d')
+    if not hex:match('^#%x%x%x%x%x%x$') then hex = '#fdc27d' end
     PickaxTheme.hex = hex:lower()
     PickaxTheme.r = tonumber(hex:sub(2, 3), 16)
     PickaxTheme.g = tonumber(hex:sub(4, 5), 16)
@@ -39,10 +39,10 @@ do
         local co = gm:match('[%s,{]Color%s*=%s*{([^}]*)}')
         local function n(src, k, d) return tonumber(src and src:match(k .. '%s*=%s*(-?[%d%.]+)')) or d end
         PickaxTheme.marker = {
-            type = t or 25,
-            scale = { x = n(sz, 'x', 0.9), y = n(sz, 'y', 0.9), z = n(sz, 'z', 0.6) },
+            type = t or 23,
+            scale = { x = n(sz, 'x', 1.0), y = n(sz, 'y', 1.0), z = n(sz, 'z', 0.5) },
             color = { n(co, 'r', 64), n(co, 'g', 224), n(co, 'b', 208) },
-            alpha = math.floor(n(co, 'a', 140)),
+            alpha = math.floor(n(co, 'a', 150)),
         }
     end
     local gb = block('GlobalBlip')

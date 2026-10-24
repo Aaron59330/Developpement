@@ -2,7 +2,7 @@
 local KVP = 'pickax_ui:settings2'
 local DEFAULTS = {
     banner = true, style = 'noir', size = 'md',
-    accent = (PickaxTheme and PickaxTheme.hex) or '#00a4ff', bg = '', text = '', selbg = '', selborder = '',
+    accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '',
     btnRadius = 12, cardRadius = 18,
     sound = true, volume = 60,
 }
@@ -37,7 +37,7 @@ if saved and saved ~= '' then
     if ok and type(t) == 'table' then
         for k in pairs(DEFAULTS) do
             local good, v = validate(k, t[k])
-            if k == 'accent' and v == '#00a4ff' then v = DEFAULTS.accent end   -- ancien défaut mémorisé : on suit la couleur du thème
+            if k == 'accent' and v == '#fdc27d' then v = DEFAULTS.accent end   -- ancien défaut mémorisé : on suit la couleur du thème
             if good then settings[k] = v end
         end
     end

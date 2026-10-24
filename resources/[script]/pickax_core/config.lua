@@ -1,7 +1,7 @@
 Config = {
 	-- ══════════ IDENTITÉ DU SERVEUR (appliquée à toutes les interfaces) ══════════
 	-- Après modification : restart pickax_theme puis relance des ressources (ou reconnexion).
-	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
+	AccentColor = '#fdc27d',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
 	InventoryColor = '',--Couleur de l'inventaire (#RRGGBB) ; laisser vide = même couleur que AccentColor. Ex : '#dc2626' pour un inventaire rouge
 	ServerName = 'Bluebay Roleplay',--Nom complet du serveur (menu pause, identité, textes…)
 	ServerShortName = 'BLUEBAY',--Nom court (HUD, écran de connexion, Discord, menus RageUI…)
@@ -65,7 +65,7 @@ Config.GlobalMarker = {
     Enabled = true,
     Type = 23,
     Size = { x = 1.0, y = 1.0, z = 0.5 },
-    Color = { r = 0, g = 164, b = 255, a = 150 },
+    Color = { r = 253, g = 194, b = 125, a = 150 },
     BobUpAndDown = false,
     FaceCamera = false,
     Rotate = false,

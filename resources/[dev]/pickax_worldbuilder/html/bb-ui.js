@@ -229,7 +229,7 @@
   function markerCard(o) {
     var m = o.m || {}, p = o.base, tk = o.typeKey || 'type', inh = o.inherit || {}, isc = inh.scale || {}, sc = m.scale || {};
     var t = Number(m[tk] != null ? m[tk] : inh[tk]);
-    if (isNaN(t)) t = o.defType != null ? o.defType : 25;
+    if (isNaN(t)) t = o.defType != null ? o.defType : 23;
     var known = TYPES.some(function (x) { return x[0] === t; });
     var sel = '<select data-path="' + p + '.' + tk + '" data-t="n">' + TYPES.map(function (x) { return '<option value="' + x[0] + '"' + (t === x[0] ? ' selected' : '') + '>' + x[0] + ' · ' + x[1] + '</option>'; }).join('') +
       (known || isNaN(t) ? '' : '<option value="' + t + '" selected>' + t + ' · (personnalisé)</option>') + '</select>';
@@ -238,12 +238,12 @@
       '<button class="sm" data-a="bbPreview" data-v="' + p + '">' + ic('target', 14) + ' Aperçu en jeu</button>' +
       (o.withEnabled === false ? '' : '<span style="margin-left:12px">' + chk(p + '.enabled', 'Afficher', m.enabled !== false, true) + '</span>') + '</div>' +
       '<div class="grid4">' + fld('Forme du marker', sel) + (o.colorHtml ? o.colorHtml : '<div></div>') +
-      fld('Opacité (0-255)', num(p + '.alpha', m.alpha, 'min="0" max="255"', d(inh.alpha, 140))) +
+      fld('Opacité (0-255)', num(p + '.alpha', m.alpha, 'min="0" max="255"', d(inh.alpha, 150))) +
       fld('Décalage vertical', num(p + '.offset', m.offset, 'step="0.05"', d(inh.offset, -0.95))) + '</div>' +
       '<div class="grid4 mt">' +
-      fld('Taille X', num(p + '.scale.x', sc.x, 'step="0.05" min="0.05"', d(isc.x, 0.9))) +
-      fld('Taille Y', num(p + '.scale.y', sc.y, 'step="0.05" min="0.05"', d(isc.y, 0.9))) +
-      fld('Hauteur (Z)', num(p + '.scale.z', sc.z, 'step="0.05" min="0.05"', d(isc.z, 0.6))) +
+      fld('Taille X', num(p + '.scale.x', sc.x, 'step="0.05" min="0.05"', d(isc.x, 1.0))) +
+      fld('Taille Y', num(p + '.scale.y', sc.y, 'step="0.05" min="0.05"', d(isc.y, 1.0))) +
+      fld('Hauteur (Z)', num(p + '.scale.z', sc.z, 'step="0.05" min="0.05"', d(isc.z, 0.5))) +
       '<div class="row" style="align-items:flex-end;gap:22px;flex-wrap:wrap">' + chk(p + '.bob', 'Rebond', m.bob === true) + chk(p + '.rotate', 'Rotation', m.rotate === true) + chk(p + '.help', 'Aide « E »', m.help !== false) + '</div></div>' +
       '<div class="hint mt-s">Les champs vides reprennent le style commun (Paramètres → Marker). Même éditeur dans tous les builders.</div></div>';
   }

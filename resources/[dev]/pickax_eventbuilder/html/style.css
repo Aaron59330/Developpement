@@ -1,4 +1,4 @@
-:root { --acc: var(--pk-accent, #00a4ff); --acc-rgb: var(--pk-accent-rgb, 0,164,255); --bg: #16171c; --panel: #1d1f26; --panel2: #23262e; --line: rgba(255,255,255,.08); --text: #f4f4f5; --muted: #8f93a0; --ok: #4ade80; --bad: #ef4444; --warn: #fbbf24; }
+:root { --acc: var(--pk-accent, #fdc27d); --acc-rgb: var(--pk-accent-rgb, 253,194,125); --bg: #16171c; --panel: #1d1f26; --panel2: #23262e; --line: rgba(255,255,255,.08); --text: #f4f4f5; --muted: #8f93a0; --ok: #4ade80; --bad: #ef4444; --warn: #fbbf24; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: transparent; color: var(--text); font-family: 'Segoe UI', Inter, system-ui, sans-serif; overflow: hidden; font-size: 14px; }
 .hidden { display: none !important; }

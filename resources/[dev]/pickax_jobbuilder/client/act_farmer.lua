@@ -86,7 +86,7 @@ AJ.Mod[KEY] = {
                         if dist < 14.0 then
                             local p = plots[i]
                             local r, g, b = 120, 90, 50
-                            if p then if p.ready then r, g, b = 80, 220, 90 else r, g, b = 0, 164, 255 end end
+                            if p then if p.ready then r, g, b = 80, 220, 90 else r, g, b = 253, 194, 125 end end
                             DrawMarker(1, x, y, z - 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 1.5, 0.15, r, g, b, 120, false, false, 2, false, nil, nil, false)
                             if dist < 1.5 and not IsPedInAnyVehicle(ped, false) then
                                 if not p then

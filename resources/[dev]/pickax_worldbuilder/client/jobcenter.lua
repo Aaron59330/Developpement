@@ -97,7 +97,7 @@ local function begin(m)
                 local z = Q.gz or st.loc.z
                 text(0.5, 0.045, ('~b~%s~s~ · étape %d/%d'):format(Q.label, Q.idx, #Q.steps), 0.45)
                 text(0.5, 0.075, st.label, 0.4, 230, 230, 230)
-                if d < 60.0 then DrawMarker(1, st.loc.x + 0.0, st.loc.y + 0.0, z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0, 1.2, 0, 164, 255, 120, false, false, 2, false, nil, nil, false) end
+                if d < 60.0 then DrawMarker(1, st.loc.x + 0.0, st.loc.y + 0.0, z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0, 1.2, 253, 194, 125, 120, false, false, 2, false, nil, nil, false) end
                 if st.t == 'goto' then
                     if d < 3.5 and not IsPedInAnyVehicle(ped, false) then stepDone() end
                 elseif d < 3.0 and not Busy then

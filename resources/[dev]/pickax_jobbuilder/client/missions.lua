@@ -40,7 +40,7 @@ end
 -- Marker des étapes de mission : même apparence de base que les points « Missions PNJ » (type et couleur réglables dans Paramètres)
 local function stepMarker(c, size, height)
     local t = Config.PointTypes.missions or {}
-    DrawJBMarker({ marker = t.marker or 25, color = t.color or { 64, 224, 208 }, alpha = 150, scale = { x = size, y = size, z = height }, offset = -1.0 }, c)
+    DrawJBMarker({ marker = t.marker or 23, color = t.color or { 253, 194, 125 }, alpha = 150, scale = { x = size, y = size, z = height }, offset = -1.0 }, c)
 end
 
 local function dist(loc) return #(GetEntityCoords(PlayerPedId()) - vector3(loc.x, loc.y, loc.z)) end
