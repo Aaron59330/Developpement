@@ -488,13 +488,20 @@ body.neon .n-sp { flex: 1; }
 .pt > div { min-width: 0; } .pt b, .pt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* concessionnaire : catalogue */
-.panel.xl { width: min(1080px, 96vw); }
+.panel.xl { width: min(1440px, 96vw); height: min(780px, 92vh); max-height: none; }
+.panel.xl .pb { flex: 1; min-height: 0; }
+.panel.xl .sr { height: 100%; grid-template-columns: minmax(0, 1fr) 380px; }
+.panel.xl .sr-main { min-height: 0; }
+.panel.xl .sr-grid { flex: 1; max-height: none; min-height: 0; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.panel.xl .sr-img { height: 130px; }
+.panel.xl .sr-side { overflow-y: auto; max-height: 100%; }
+.panel.xl .sr-side .sr-img { height: 210px; }
 .sr { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; min-height: 0; }
 .sr-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .sr-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .sr-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--muted); font-size: 12px; cursor: pointer; }
 .sr-chip.on { background: rgba(var(--accent-rgb), .16); border-color: rgba(var(--accent-rgb), .55); color: rgb(var(--accent-rgb)); }
-.sr-grid { align-content: start; grid-auto-rows: max-content; flex-shrink: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; max-height: 52vh; overflow-y: auto; padding-right: 4px; }
+.sr-grid { align-content: start; grid-auto-rows: max-content; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; max-height: 52vh; overflow-y: auto; padding-right: 4px; }
 .sr-card { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.03); overflow: hidden; cursor: pointer; transition: .15s; position: relative; }
 .sr-card:hover { transform: translateY(-2px); border-color: rgba(var(--accent-rgb), .45); }
 .sr-card.sel { border-color: rgb(var(--accent-rgb)); box-shadow: 0 0 0 1px rgb(var(--accent-rgb)) inset; }
