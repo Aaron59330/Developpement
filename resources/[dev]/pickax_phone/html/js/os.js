@@ -176,24 +176,30 @@ const OS = {
     if (pages.length > 1) el.appendChild(h('div.dots', pages.map((_, i) => h('i' + (i === this.homePage ? '.on' : '')))));
     el.appendChild(h('div.search-pill', { style: 'display:block;', onclick: () => this.spotlight() }, '🔍 Rechercher'));
     el.appendChild(h('div.dock', dock.map(id => this.appIcon(Apps.get(id), true))));
-    let sx = null;
-    el.addEventListener('pointerdown', e => { sx = e.clientX; });
-    // un seul changement de page par geste : la molette envoie plusieurs événements d'affilée (page 1 → 3 d'un coup)
-    const go = (dir) => {
-      const now = Date.now();
-      if (now - (this._pgAt || 0) < 450) return;
-      const np = Math.max(0, Math.min(pages.length - 1, this.homePage + dir));
-      if (np === this.homePage) return;
-      this._pgAt = now; this.homePage = np;
-      wrap.style.transform = `translateX(${-this.homePage * 390}px)`;
-      $$('.dots i', el).forEach((d, i) => d.classList.toggle('on', i === this.homePage));
-    };
-    el.addEventListener('pointerup', e => {
-      if (sx == null) return; const dx = e.clientX - sx; sx = null;
-      if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
-    });
-    el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) < 20 || pages.length < 2) return; go(e.deltaY > 0 ? 1 : -1); });
-    el.addEventListener('click', e => { if (this.editing && !e.target.closest('.appicon')) { this.editing = false; this.drawHome(); } });
+    this._pageCount = pages.length;
+    // les écouteurs ne sont attachés qu'UNE fois (drawHome réutilise le même élément : sinon ils s'empilent et font sauter plusieurs pages)
+    if (!el._pgBound) {
+      el._pgBound = true;
+      let sx = null;
+      el.addEventListener('pointerdown', e => { sx = e.clientX; });
+      el.addEventListener('pointerup', e => {
+        if (sx == null) return; const dx = e.clientX - sx; sx = null;
+        if (Math.abs(dx) > 60) this.goPage(dx < 0 ? 1 : -1);
+      });
+      el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) < 20) return; this.goPage(e.deltaY > 0 ? 1 : -1); });
+      el.addEventListener('click', e => { if (this.editing && !e.target.closest('.appicon')) { this.editing = false; this.drawHome(); } });
+    }
+  },
+  // un seul changement de page par geste (la molette envoie plusieurs événements d'affilée)
+  goPage(dir) {
+    const n = this._pageCount || 1, now = Date.now();
+    if (n < 2 || now - (this._pgAt || 0) < 450) return;
+    const np = Math.max(0, Math.min(n - 1, this.homePage + dir));
+    if (np === this.homePage) return;
+    this._pgAt = now; this.homePage = np;
+    const el = $('#home'), wrap = el && el.querySelector('.pages');
+    if (wrap) wrap.style.transform = `translateX(${-this.homePage * 390}px)`;
+    if (el) $$('.dots i', el).forEach((d, i) => d.classList.toggle('on', i === this.homePage));
   },
   appIcon(d, dock) {
     const badge = S.badges[d.id] || 0;
