@@ -279,7 +279,7 @@ ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
         cb(fail('Ce point sert de repère à ton activité'))
 
     elseif point.type == 'testdrive' then
-        cb(fail('Utilise le showroom pour demander un essai'))
+        cb(fail('Utilise le catalogue pour demander un essai'))
 
     elseif point.type == 'tuning' then
         if not JB.openTuning then return cb(fail('Module tuning non chargé (server/tuning.lua)')) end

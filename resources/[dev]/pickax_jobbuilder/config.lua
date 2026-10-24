@@ -55,7 +55,7 @@ Config.PointTypes = {
     garage_aircraft = { label = 'Garage aéronefs',  color = PK_MKC(), marker = PK_MKT, hidden = true },
     garage_boat     = { label = 'Garage bateaux',   color = PK_MKC(),   marker = PK_MKT, hidden = true },
     missions  = { label = 'Missions PNJ',    color = PK_MKC(),  marker = PK_MKT },
-    showroom  = { label = 'Showroom',        color = PK_MKC(),  marker = PK_MKT },
+    showroom  = { label = 'Catalogue',        color = PK_MKC(),  marker = PK_MKT },
     display   = { label = 'Véhicule expo',   color = PK_MKC(), marker = PK_MKT },
     testdrive = { label = 'Essai routier',   color = PK_MKC(),  marker = PK_MKT },
     harvest   = { label = 'Récolte',         color = PK_MKC(),  marker = PK_MKT },

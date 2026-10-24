@@ -153,7 +153,7 @@ local function cleanPoint(p, maxGrade, jobType)
 
     elseif p.type == 'showroom' then
         local spawn = cleanCoords(d.spawn)
-        if not spawn then return nil, ('Showroom "%s" : position de livraison des véhicules manquante'):format(out.label) end
+        if not spawn then return nil, ('Catalogue "%s" : position de livraison des véhicules manquante'):format(out.label) end
         out.data.spawn = spawn
 
     elseif p.type == 'display' then
@@ -738,7 +738,7 @@ local function runCheck()
             if cat == 0 then warn(prefix .. 'catalogue de véhicules vide') end
             local hasShow = false
             for _, p in pairs(JB.Points) do if p.job_name == name and p.type == 'showroom' then hasShow = true end end
-            if not hasShow then warn(prefix .. 'pas de point Showroom (catalogue public + livraison)') end
+            if not hasShow then warn(prefix .. 'pas de point Catalogue (catalogue public + livraison)') end
         end
         if job.type == 'realestate' or job.type == 'government' then
             if job.type == 'government' and job.settings.treasury ~= false and JB.treasuryJob and JB.treasuryJob() ~= name then ok(prefix .. 'gouvernement secondaire (le trésor est ' .. tostring(JB.treasuryJob()) .. ')') end
