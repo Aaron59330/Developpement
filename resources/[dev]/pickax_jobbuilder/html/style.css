@@ -439,3 +439,10 @@ body.neon .n-sp { flex: 1; }
 .tun-tabs button em { filter: none; display: grid; place-items: center; color: #8d92a0; }
 .tun-tabs button.active em { color: #fff; transform: none; }
 .tun-tabs button em svg { width: 21px; height: 21px; }
+
+/* Annonces d'entreprise : plus compactes, un peu plus bas, centrées */
+#announce { top: 14vh; left: 50%; width: min(460px, 90vw); gap: 12px; padding: 12px 16px 15px; border-radius: 14px; }
+#announce .an-ico { width: 40px; height: 40px; border-radius: 12px; } #announce .an-ico svg { width: 20px; height: 20px; }
+#announce .an-top { gap: 8px; margin-bottom: 4px; } #announce .an-org { font-size: 10px; } #announce .an-kind { font-size: 10px; padding: 2px 8px; }
+#announce h3 { font-size: 15px; margin-bottom: 2px; } #announce p { font-size: 13px; line-height: 1.45; }
+#announce .an-foot { margin-top: 8px; font-size: 11px; gap: 7px; } #announce .an-av { width: 18px; height: 18px; font-size: 10px; }
