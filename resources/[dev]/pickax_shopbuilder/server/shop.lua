@@ -115,7 +115,7 @@ ESX.RegisterServerCallback('shopbuilder:open', function(src, cb, shopId, locIdx)
     local disc = discountFor(shop, xPlayer)
     local payments = paymentList(shop, xPlayer)
     if #payments == 0 then return cb(fail('Aucun moyen de paiement n\'est accepté ici')) end
-    local head = { id = shop.id, label = shop.label, type = shop.type, mode = s.mode or 'items', note = s.note or '', locIdx = tonumber(locIdx), discount = disc, color = s.color }
+    local head = { id = shop.id, label = shop.label, type = shop.type, mode = s.mode or 'items', note = s.note or '', locIdx = tonumber(locIdx), discount = disc, color = s.color, uiColor = s.uiColor }
 
     if s.mode == 'clothing' then
         local restrict = {}
