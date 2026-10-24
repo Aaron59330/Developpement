@@ -231,7 +231,7 @@ Config.Activities = {
 -- Apparence de base des markers (modifiable en jeu : Paramètres → Markers des points)
 Config.PointTypes = {
     garage    = { label = 'Garage',          color = PK_MKC(), marker = PK_MKT },
-    garage_return = { label = 'Rangement véhicule', color = PK_MKC(), marker = PK_MKT },   -- point À PART : on arrive au volant, E = le véhicule du gang est rangé
+    garage_return = { label = 'Rangement véhicule', color = PK_MKC(), marker = PK_MKT, hidden = true },   -- le rangement est INTÉGRÉ au garage (carte « Rangement » de l'éditeur) ; ce type reste géré pour le point généré
     cloakroom = { label = 'Vestiaire',       color = PK_MKC(), marker = PK_MKT },
     armory    = { label = 'Armurerie',       color = PK_MKC(), marker = PK_MKT },
     stash     = { label = 'Coffre',          color = PK_MKC(), marker = PK_MKT },

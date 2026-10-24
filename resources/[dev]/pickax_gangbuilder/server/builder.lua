@@ -110,6 +110,12 @@ local function cleanPoint(p, maxGrade)
             end
         end
         if #out.data.vehicles == 0 then return nil, ('Garage "%s" : ajoute au moins un véhicule'):format(out.label) end
+        -- rangement intégré au garage : un point où l'on arrive au volant (E = véhicule du gang rangé)
+        if type(d.store) == 'table' then
+            local sc = cleanCoords(d.store.coords)
+            if not sc then return nil, ('Garage "%s" : position du point de rangement manquante (ou retire le rangement)'):format(out.label) end
+            out.data.store = { coords = sc, radius = math.max(2.0, math.min(20.0, tonumber(d.store.radius) or 5.0)), any = d.store.any == true }
+        end
 
     elseif p.type == 'cloakroom' then
         out.data.outfits = {}

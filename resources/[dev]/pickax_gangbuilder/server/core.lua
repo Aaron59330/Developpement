@@ -323,6 +323,10 @@ function GB.pointsForGang(name)
     local color = GB.hexToRgb(gang.color)
     for id, p in pairs(GB.Points) do
         if p.gang_name == name then
+            if p.type == 'garage' and p.data.store then      -- point de rangement du garage : envoyé comme un point à part (id décalé)
+                list[#list + 1] = { id = id + 100000000, type = 'garage_return', label = p.label .. ' (rangement)', coords = p.data.store.coords, min_grade = p.min_grade, color = color,
+                    kind = p.data.kind or 'car', radius = p.data.store.radius or 5.0, style = mergeStyle(gang.settings and gang.settings.marker, p.data.style) }
+            end
             list[#list + 1] = {
                 id = id, type = p.type, label = p.label, coords = p.coords, min_grade = p.min_grade, color = color,
                 kind = (p.type == 'garage' or p.type == 'garage_return') and (p.data.kind or 'car') or nil,

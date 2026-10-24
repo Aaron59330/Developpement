@@ -451,6 +451,7 @@ const Builder = {
       const name = p.label || this.catalog.pointTypes[p.type].label;
       out.push({ root: this.cur, path: `points.${i}.coords`, label: `${name} — marker` });
       if (p.type === 'garage') out.push({ root: this.cur, path: `points.${i}.data.spawn`, label: `${name} — sortie véhicules` });
+      if (p.type === 'garage' && p.data.store) out.push({ root: this.cur, path: `points.${i}.data.store.coords`, label: `${name} — rangement` });
     });
     return out;
   },
@@ -540,6 +541,12 @@ const Builder = {
         <div class="grid2">${fld('Type', `<select data-path="${base}.data.kind" data-t="s" data-kindsel="${i}">${Object.entries(kinds).map(([k, v]) => `<option value="${k}" ${kind === k ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>`)}
         <p class="hint" style="align-self:end">Les véhicules proposés et le rangement dépendent du type : un garage de bateaux n'accepte que des bateaux.</p></div></div>
         <div class="card"><div class="card-h"><div class="t">Sortie des véhicules</div></div>${coordField(base + '.data.spawn', d.spawn, { tp: true })}</div>
+        <div class="card"><div class="card-h"><div class="t">${ic('login', 16)} Rangement des véhicules</div>${d.store ? (d.store.coords && d.store.coords.x != null ? chip('Point de rangement placé', 'ok') : chip('⚠ position à placer', 'bad nodot')) : chip('Menu du garage', 'mute')}${d.store ? `<button class="sm danger" data-a="storeOff" data-v="${i}" style="margin-left:auto">Retirer</button>` : ''}</div>
+          ${d.store ? `<p class="hint" style="margin-bottom:12px">Le membre arrive <b>au volant</b> sur ce marker et appuie sur <b>E</b> : le véhicule est rangé (type : ${esc((kinds[kind] || {}).label || '')}, comme le garage). Seuls les véhicules du gang sont acceptés (plaque du gang), sauf option contraire. Le bouton « Ranger mon véhicule » du menu du garage disparaît.</p>
+            <div class="mb">${coordField(base + '.data.store.coords', d.store.coords, { tp: true })}</div>
+            <div class="grid3 mt">${fld('Rayon du marker (m)', `<input type="number" min="2" max="20" step="0.5" data-path="${base}.data.store.radius" data-t="n" value="${d.store.radius ?? 5}">`)}
+              <label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="${base}.data.store.any" data-t="b" ${d.store.any ? 'checked' : ''}> Accepter tous les véhicules</label></div>`
+            : `<p class="hint" style="margin-bottom:12px">Ajoute un <b>point de rangement</b> (cour, parking, quai, piste…) : il fait partie de ce garage. Sans lui, le membre range son véhicule depuis le menu du garage.</p><button class="sm" data-a="storeOn" data-v="${i}">${ic('plus', 14)} Ajouter un point de rangement</button>`}</div>
         <div class="card"><div class="card-h"><div class="t">Véhicules (${(d.vehicles || []).length})</div></div>
           ${cats.length ? `<div class="row" style="margin-bottom:14px"><select id="gk-cat-${i}" style="max-width:260px">${cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select><button class="sm" data-a="addCat" data-v="${i}">${ic('plus', 14)} Ajouter toute la catégorie</button></div>` : ''}
           ${(d.vehicles || []).map((v, k) => `<div class="form-row" style="grid-template-columns:1.2fr 1.2fr 1fr 80px auto">
@@ -708,6 +715,8 @@ const Builder = {
       case 'gradeDown': if (+v < c.grades.length - 1) [c.grades[+v + 1], c.grades[v]] = [c.grades[v], c.grades[+v + 1]]; return this.render();
       case 'addPoint': c.points.push(this.newPoint(v)); this.activePoint = c.points.length - 1; return this.render();
       case 'selPoint': this.activePoint = +v; return this.render();
+      case 'storeOn': { const p = this.cur.points[+v]; p.data.store = { coords: null, radius: 5, any: false }; return this.render(); }
+      case 'storeOff': { delete this.cur.points[+v].data.store; return this.render(); }
       case 'styleOn': setPath(this.cur, v, {}); return this.render();
       case 'bbPreview': await rpc('previewMarker', getPath(this.cur, v)); return toast('Aperçu affiché devant toi (8 s)');
       case 'gangMkReset': if (this.cur.gang.settings.marker) delete this.cur.gang.settings.marker.color; return this.render();
@@ -1046,7 +1055,7 @@ const Runtime = {
   view_garage(d) {
     const kind = d.garageKind || 'car';
     return panel({ icon: KIND_ICON[kind], title: d.label, sub: `${d.vehicles.length} véhicule(s) disponible(s)`, cls: 'md', body:
-      `<button data-a="store">${ic('down', 15)} Ranger mon véhicule</button>` + (d.vehicles.map(v => `<div class="item">${tile(KIND_ICON[kind])}<div class="grow"><b>${esc(v.label)}</b><small>${esc(v.model)}</small></div><button class="primary sm" data-a="spawn" data-v="${v.idx}">Sortir</button></div>`).join('') || emptyState('car', 'Aucun véhicule', 'Ton grade ne donne accès à aucun véhicule ici.')) });
+      (d.hasStore ? '' : `<button data-a="store">${ic('down', 15)} Ranger mon véhicule</button>`) + (d.vehicles.map(v => `<div class="item">${tile(KIND_ICON[kind])}<div class="grow"><b>${esc(v.label)}</b><small>${esc(v.model)}</small></div><button class="primary sm" data-a="spawn" data-v="${v.idx}">Sortir</button></div>`).join('') || emptyState('car', 'Aucun véhicule', 'Ton grade ne donne accès à aucun véhicule ici.')) });
   },
 
   view_cloakroom(d) {

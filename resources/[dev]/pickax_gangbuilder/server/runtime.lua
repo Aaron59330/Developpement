@@ -55,7 +55,7 @@ ESX.RegisterServerCallback('gangbuilder:openPoint', function(src, cb, pointId)
         for i, v in ipairs(d.vehicles) do
             if grade >= v.min_grade then list[#list + 1] = { idx = i, model = v.model, label = v.label } end
         end
-        cb({ ok = true, kind = 'garage', garageKind = d.kind or 'car', label = point.label, vehicles = list })
+        cb({ ok = true, kind = 'garage', garageKind = d.kind or 'car', label = point.label, vehicles = list, hasStore = d.store ~= nil })
 
     elseif point.type == 'cloakroom' then
         local list = {}
@@ -124,8 +124,18 @@ end)
 -- Point « Rangement véhicule » (à part du garage) : seuls les véhicules du gang (plaque avec son préfixe) sont acceptés, sauf option « tous les véhicules »
 ESX.RegisterServerCallback('gangbuilder:garage:return', function(src, cb, pointId, plate)
     local xPlayer = ESX.GetPlayerFromId(src)
-    local point = GB.Points[tonumber(pointId)]
-    if not xPlayer or not point or point.type ~= 'garage_return' then return cb(fail('Point introuvable')) end
+    pointId = tonumber(pointId) or 0
+    local point
+    if pointId >= 100000000 then            -- point de rangement intégré à un garage
+        local g = GB.Points[pointId - 100000000]
+        if g and g.type == 'garage' and g.data.store then
+            point = { gang_name = g.gang_name, min_grade = g.min_grade, coords = g.data.store.coords, data = { radius = g.data.store.radius, any = g.data.store.any } }
+        end
+    else
+        local p = GB.Points[pointId]
+        if p and p.type == 'garage_return' then point = p end
+    end
+    if not xPlayer or not point then return cb(fail('Point introuvable')) end
     if GB.distanceTo(src, point.coords) > Config.ServerDistance + (point.data.radius or 5.0) then return cb(fail('Tu es trop loin')) end
     local name, grade = GB.job2Of(xPlayer)
     if name ~= point.gang_name then return cb(fail('Ce point n\'appartient pas à ton gang')) end
