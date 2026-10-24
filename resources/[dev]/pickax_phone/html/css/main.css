@@ -222,7 +222,7 @@ html.crisp #stage.peekmode { transform: translateY(100%); }
 .cc .tog { aspect-ratio: 1; display: grid; place-items: center; padding: 0; cursor: pointer; } .cc .tog.on { background: #fff; color: #000; }
 .cc .sliders { display: grid; gap: 12px; margin-top: 12px; }
 .cc .slider { position: relative; height: 58px; border-radius: 22px; background: rgba(80,80,84,.5); overflow: hidden; touch-action: none; cursor: pointer; }
-.cc .slider i { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+.cc .slider i { pointer-events: none; position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
 .cc .slider span { position: absolute; left: 18px; top: 0; bottom: 0; display: flex; align-items: center; z-index: 1; color: #8e8e93; pointer-events: none; }
 .cc .slider span svg.ic { width: 24px; height: 24px; }
 .cc .wide { padding: 14px; display: flex; align-items: center; gap: 12px; margin-top: 12px; cursor: pointer; } .cc .wide span { font-size: 15px; font-weight: 600; }

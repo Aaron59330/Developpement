@@ -42,7 +42,7 @@ const OS = {
     const ac = this.accentColor();
     document.documentElement.style.setProperty('--accent', ac);
     document.documentElement.style.setProperty('--accent-rgb', [1, 3, 5].map(i => parseInt(ac.slice(i, i + 2), 16)).join(','));
-    const dim = $('#dim'); if (dim) { const o = Math.max(0, (100 - (S.settings.brightness == null ? 100 : S.settings.brightness)) / 100 * .75); dim.style.opacity = String(o); dim.style.display = o > 0 ? 'block' : 'none'; }
+    const dim = $('#dim'); if (dim) { const o = Math.max(0, (100 - Math.max(20, S.settings.brightness == null ? 100 : S.settings.brightness)) / 100 * .75); dim.style.opacity = String(o); dim.style.display = o > 0 ? 'block' : 'none'; }
     document.documentElement.style.fontSize = ((S.settings.textSize || 100) / 100 * 16) + 'px';
     this.updateBars();
   },
@@ -382,13 +382,13 @@ const OS = {
       rb('plane', st.airplane, 'orange', () => save({ airplane: !st.airplane })), rb('signal', !st.airplane, 'green', () => save({ airplane: !st.airplane })),
       rb('wifi', st.wifi && !st.airplane, '', () => save({ wifi: !st.wifi })), rb('bluetooth', st.bluetooth, '', () => save({ bluetooth: !st.bluetooth })));
     const music = h('div.tile', { style: 'padding:14px;display:flex;flex-direction:column;justify-content:center;cursor:pointer', onclick: () => this.openApp('music') }, h('small', { style: 'opacity:.7' }, 'Lecture en cours'), h('b', { style: 'font-size:15px;margin:6px 0' }, (window.MusicState && MusicState.title) || 'Aucun titre'), h('div', { style: 'display:flex;gap:14px;font-size:22px;opacity:.9' }, h('span', { html: icon((window.MusicState && MusicState.playing) ? 'pause' : 'play', 24) })));
-    const slider = (ic, val, on) => {
+    const slider = (ic, val, on, min) => {
       const el = h('div.slider', h('i', { style: `width:${val}%` }), h('span', { html: icon(ic, 24) }));
-      const setFrom = (e) => { const r = el.getBoundingClientRect(); let v = Math.round(((e.clientX - r.left) / (r.width || 1)) * 100); v = Math.max(5, Math.min(100, v)); $('i', el).style.width = v + '%'; on(v); };
+      const setFrom = (e) => { let v = Math.round((e.offsetX / (el.offsetWidth || 1)) * 100); v = Math.max(min, Math.min(100, v)); $('i', el).style.width = v + '%'; on(v); };
       let drag = false; el.addEventListener('pointerdown', e => { drag = true; el.setPointerCapture(e.pointerId); setFrom(e); }); el.addEventListener('pointermove', e => drag && setFrom(e)); el.addEventListener('pointerup', () => { drag = false; });
       return el;
     };
-    const sl = h('div.sliders', slider('sun', st.brightness == null ? 100 : st.brightness, v => { S.settings.brightness = v; this.applyTheme(); clearTimeout(this.bt); this.bt = setTimeout(() => rpc('settingsSet', { brightness: v }), 400); }), slider('volume', st.volume == null ? 70 : st.volume, v => { S.settings.volume = v; clearTimeout(this.vt); this.vt = setTimeout(() => rpc('settingsSet', { volume: v }), 400); }));
+    const sl = h('div.sliders', slider('sun', st.brightness == null ? 100 : st.brightness, v => { S.settings.brightness = v; this.applyTheme(); clearTimeout(this.bt); this.bt = setTimeout(() => rpc('settingsSet', { brightness: v }), 400); }, 20), slider('volume', st.volume == null ? 70 : st.volume, v => { S.settings.volume = v; clearTimeout(this.vt); this.vt = setTimeout(() => rpc('settingsSet', { volume: v }), 400); }, 0));
     const cts = (ic, label, on, fn) => h('div.tile.wide', { onclick: () => { fn(); this.drawCC(); } }, h('div', { style: 'width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:' + (on ? 'var(--accent)' : 'rgba(120,120,128,.5)'), html: icon(ic, 20) }), h('span', label));
     const small = h('div.small-row',
       ...[['torch', 'Lampe', this.torch, () => { this.torch = !this.torch; post('flashlight', { state: this.torch }); }],
