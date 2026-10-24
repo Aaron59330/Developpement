@@ -340,7 +340,11 @@ local function initializeNames()
                 -- on s'affiche aussi soi-même ; format « ID | Rang | Nom » ; la balise est recréée seulement si le texte ou le ped change
                 if v == PlayerId() or #(pCoords - GetEntityCoords(otherPed, false)) < 250.0 then
                     local sid = GetPlayerServerId(v)
-                    local text = ('%s | %s | %s'):format(sid, tagRankOf(sid), GetPlayerName(v))
+                    local lp = localPlayers and localPlayers[sid]
+                    local parts = { tostring(sid), tagRankOf(sid), (lp and lp.rpname and lp.rpname ~= '') and lp.rpname or GetPlayerName(v) }
+                    if lp and lp.job then parts[#parts + 1] = tostring(lp.job):gsub('~%a~', '') end
+                    if lp and lp.gang then parts[#parts + 1] = 'Gang : ' .. tostring(lp.gang):gsub('~%a~', '') end
+                    local text = table.concat(parts, ' | ')
                     if gamerTags[v] == nil or gamerTagText[v] ~= text or not IsMpGamerTagActive(gamerTags[v]) then
                         if gamerTags[v] then RemoveMpGamerTag(gamerTags[v]) end
                         gamerTags[v] = CreateFakeMpGamerTag(otherPed, text, false, false, '', 0)

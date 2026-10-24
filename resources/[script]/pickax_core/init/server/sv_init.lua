@@ -143,6 +143,19 @@ Citizen.CreateThread(function()
                     TablePlayerAllowFDP[player].group = ESX.GetPlayerFromId(player).getGroup()
                 end
 
+                -- infos RP pour la balise de nom du staff : nom/prénom RP, métier et gang/orga
+                local xp = ESX.GetPlayerFromId(player)
+                local info = TablePlayerAllowFDP[player]
+                info.rpname = xp.getName and xp.getName() or nil
+                local function lbl(j, bad)
+                    if not j or not j.name or j.name == '' or j.name:find(bad) then return nil end
+                    local l = tostring(j.label or j.name)
+                    if j.grade_label and j.grade_label ~= '' and j.grade_label ~= l then l = l .. ' - ' .. j.grade_label end
+                    return l
+                end
+                info.job = lbl(xp.job, '^unemployed')
+                info.gang = lbl(xp.job2, '^unemployed')
+
                 local KK = ESX.GetPlayerFromId(player).getGroup()
                 if KK ~= "user" then
                     TriggerClientEvent("CorePickax:updatePlayers", player, TablePlayerAllowFDP)
