@@ -6,6 +6,7 @@ local function fail(msg) return { ok = false, error = msg } end
 
 local state = {}      -- [territoire] = { progress, attacker }
 local inZone = {}     -- [src] = id du territoire dont le HUD est affiché
+local alerted = {}    -- ['<territoire>:<attaquant>'] = fin du délai d'alerte
 
 local function str(v, max, default)
     if type(v) ~= 'string' then return default or '' end
@@ -125,6 +126,13 @@ local function tick()
         elseif others == 1 and #attackers == 1 and not (T.OwnerBlocks and ownerPresent) then
             local a = attackers[1]
             if st.attacker ~= a then st.attacker, st.progress = a, 0 end
+            if T.AlertOwner and t.owner and GB.Gangs[t.owner] then
+                local key = id .. ':' .. a
+                if (alerted[key] or 0) <= now then
+                    alerted[key] = now + math.max(10, T.AlertCooldown or 120)
+                    notifyGang(t.owner, ('~r~%s~s~ attaque votre territoire ~y~%s~s~ !'):format(GB.Gangs[a].label, t.label))
+                end
+            end
             st.progress = st.progress + step
             status = 'capturing'
             if st.progress >= 100 then
@@ -139,13 +147,15 @@ local function tick()
             status = 'decaying'
         end
 
+        if status == 'idle' and others >= 1 and #attackers == 0 then status = 'short' end   -- des rivaux sont là mais pas assez nombreux
+
         -- HUD des joueurs présents
         for _, p in ipairs(here) do
             seen[p.src] = id
             local o = t.owner and GB.Gangs[t.owner]
             local a = st.attacker and GB.Gangs[st.attacker]
             TriggerClientEvent('gangbuilder:client:zone', p.src, {
-                id = id, label = t.label, progress = math.floor(st.progress * 10) / 10, status = status,
+                id = id, label = t.label, progress = math.floor(st.progress * 10) / 10, status = status, need = minM,
                 owner = o and o.label or nil, attacker = a and a.label or nil, color = a and a.color or (o and o.color or nil),
                 protectedLeft = protected and (t.protected_until - now) or 0,
                 conflict = GB.conflictInfo and GB.conflictInfo(id) or nil,

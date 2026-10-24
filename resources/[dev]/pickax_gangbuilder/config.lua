@@ -185,6 +185,8 @@ Config.Territories = {
     DefaultRadius     = 40.0,
     MaxRadius         = 300.0,
     AnnounceCapture   = true,    -- prévient les membres des gangs concernés
+    AlertOwner        = true,    -- prévient le propriétaire dès qu'un gang commence à capturer son territoire
+    AlertCooldown     = 120,     -- secondes entre deux alertes pour un même territoire et un même attaquant
     ShowBlips         = true,
     BlipSprite        = 310,     -- icône au centre de la zone
     BlipScale         = 0.8,
@@ -455,6 +457,8 @@ Config.Schema = {
         { key = 'Territories.DefaultRadius', label = 'Rayon par défaut (m)', t = 'num', min = 5, max = 1000, server = true },
         { key = 'Territories.MaxRadius', label = 'Rayon max (m)', t = 'num', min = 10, max = 1000, server = true },
         { key = 'Territories.AnnounceCapture', label = 'Prévenir les gangs lors d\'une capture', t = 'bool', server = true },
+        { key = 'Territories.AlertOwner', label = 'Prévenir le propriétaire quand on attaque son territoire', t = 'bool', server = true },
+        { key = 'Territories.AlertCooldown', label = 'Délai entre deux alertes (s)', t = 'int', min = 10, max = 3600, server = true },
         { key = 'Territories.ShowBlips', label = 'Afficher les blips', t = 'bool' },
         { key = 'Territories.BlipSprite', label = 'Sprite de l\'icône', t = 'int', min = 0, max = 900 },
         { key = 'Territories.BlipScale', label = 'Taille de l\'icône', t = 'num', min = 0.1, max = 3 },
