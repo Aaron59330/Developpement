@@ -51,6 +51,7 @@ client_scripts {
     'client/death.lua',
     'client/emstablet.lua',
     'client/bank.lua',
+    'client/vehctl.lua',
 }
 
 ui_page 'html/index.html'

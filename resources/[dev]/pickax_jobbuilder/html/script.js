@@ -111,6 +111,12 @@ const P = {
   left: '<path d="m15 18-6-6 6-6"/>',
   map: '<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/>',
   folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>',
+  bulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V18h6v-1.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>',
+  hazard: '<path d="M12 3 2 20h20z"/><path d="M12 9.5 7.6 17h8.8z"/>',
+  arrowl: '<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>',
+  arrowr: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+  horn: '<path d="M3 10v4a1 1 0 0 0 1 1h3l5 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
   siren: '<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.929 4.929.707.707"/><path d="M12 12v6"/>',
   tablet: '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M12 18h.01"/>',
   cross: '<path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2z"/>',
@@ -122,7 +128,7 @@ const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout', vehctl: 'siren' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
 function applyTheme(rgb) {
@@ -2591,7 +2597,7 @@ const Runtime = {
 
   render() {
     const d = this.data, k = this.kind;
-    window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
+    window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
     const list = (arr, fn, empty) => arr.length ? arr.map(fn).join('') : `<p class="hint">${empty}</p>`;
     const row = (icon, title, sub, right) => `<div class="item">${tile(icon)}<div class="grow"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>${right}</div>`;
     switch (k) {
@@ -2606,6 +2612,7 @@ const Runtime = {
       case 'boss': return this.renderBoss();
       case 'menu': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: TYPE_ICON[d.type] || 'briefcase', title: d.jobLabel, sub: `Grade : ${d.grade}`, cls: 'corner',
         body: list(d.actions, a => `<div class="item click" data-a="act" data-id="${a.id}">${tile(ACTION_ICON[a.id] || 'grid')}<div class="grow"><b>${esc(a.label)}</b></div><span class="chev">${ic('chevron', 16)}</span></div>`, 'Aucune action.') });
+      case 'vehctl': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'siren', title: 'Véhicule d\'urgence', sub: d.inVehicle ? `${d.name} · ${d.plate}` : 'Gyrophares & sirènes', cls: 'corner', body: this.renderVehctl(d) });
       case 'leaveJob': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: 'logout', title: 'Quitter le métier', sub: d.jobLabel, cls: 'corner',
         body: `<p class="hint">Tu es sûr de vouloir quitter <b>${esc(d.jobLabel)}</b> ? Tu perds ton grade et l'accès aux points, coffres et véhicules du métier.</p>
         <div class="row"><span class="spacer"></span><button data-a="leaveJobCancel">Annuler</button><button class="danger" data-a="leaveJobConfirm">Quitter le métier</button></div>` });
@@ -2742,6 +2749,31 @@ const Runtime = {
       foot: '', head: { icon: cur.icon, title: cur.text, sub: d.jobLabel }, body });
   },
 
+  vcPoll() {   // le véhicule peut changer d'état hors du menu (touche sirène du jeu) : on relit l'état tant que le menu est ouvert
+    clearInterval(this._vcT);
+    this._vcT = setInterval(async () => {
+      if (this.kind !== 'vehctl' || $root.classList.contains('hidden')) return clearInterval(this._vcT);
+      const r = await rpc('vehctl:state'); if (r && r.ok && this.kind === 'vehctl') { this.data = r; this.render(); }
+    }, 1500);
+  },
+  renderVehctl(d) {
+    if (!d.inVehicle) return `<p class="hint">Monte <b>au volant</b> d'un véhicule pour piloter ses gyrophares, sa sirène et ses phares.</p>`;
+    const sw = (k, icon, title, sub, on) => `<div class="item click vc ${on ? 'on' : ''}" data-a="vc" data-k="${k}">${tile(icon)}<div class="grow"><b>${esc(title)}</b><small>${esc(sub)}</small></div><span class="sw ${on ? 'on' : ''}"><i></i></span></div>`;
+    const seg = (k, opts, cur) => `<div class="seg">${opts.map(o => `<button class="${o[0] === cur ? 'on' : ''}" data-a="vc" data-k="${k}" data-v="${o[0]}">${esc(o[1])}</button>`).join('')}</div>`;
+    const tog = (k, icon, label, on) => `<button class="vtog ${on ? 'on' : ''}" data-a="vc" data-k="${k}">${ic(icon, 20)}<span>${esc(label)}</span></button>`;
+    return `<div class="vgroup">Gyrophares & sirène</div>
+      ${sw('siren', 'siren', 'Gyrophares et sirène', d.siren ? 'Activés' : 'Éteints', d.siren)}
+      ${sw('mute', 'horn', 'Sirène silencieuse', d.muted ? 'Lumières seules, sans le son' : 'Son de la sirène actif', d.muted)}
+      <div class="vrow"><button class="vbtn" data-a="vc" data-k="blip">${ic('siren', 18)} Appel de sirène</button><button class="vbtn" data-a="vc" data-k="horn">${ic('horn', 18)} Klaxon</button></div>
+      <div class="vgroup">Éclairage</div>
+      <div class="vlabel">Phares</div>${seg('lights', [[0, 'Auto'], [1, 'Éteints'], [2, 'Allumés']], d.lights)}
+      ${sw('high', 'bulb', 'Pleins phares', d.high ? 'Activés' : 'Désactivés', d.high)}
+      ${sw('interior', 'bulb', 'Lumière intérieure', d.interior ? 'Allumée' : 'Éteinte', d.interior)}
+      <div class="vgroup">Signalisation</div>
+      <div class="vrow3">${tog('left', 'arrowl', 'Gauche', d.indL && !d.hazard)}${tog('hazard', 'hazard', 'Détresse', d.hazard)}${tog('right', 'arrowr', 'Droite', d.indR && !d.hazard)}</div>
+      ${d.extras && d.extras.length ? `<div class="vgroup">Extras du véhicule</div><div class="vchips">${d.extras.map(x => `<button class="vchip ${x.on ? 'on' : ''}" data-a="vc" data-k="extra" data-v="${x.id}">Extra ${x.id}</button>`).join('')}</div>` : ''}
+      <button class="danger vall" data-a="vc" data-k="off">${ic('power', 16)} Tout éteindre</button>`;
+  },
   async onA(el) {
     const a = el.dataset.a, i = Number(el.dataset.i), pid = this.pointId, d = this.data;
     const ok = (r, msg) => { if (!r || !r.ok) { toast((r && r.error) || 'Erreur', 'err'); return false; } if (msg) toast(msg, 'ok'); return true; };
@@ -2752,11 +2784,13 @@ const Runtime = {
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile', 'ok');
       case 'take': return ok(await rpc('armory:take', pid, i), 'Objet récupéré');
       case 'buy': return ok(await rpc('shop:buy', pid, i, Number(document.getElementById('q' + i).value)), 'Achat effectué');
+      case 'vc': { const r = await rpc('vehctl:set', el.dataset.k, el.dataset.v); if (!ok(r)) return; this.data = r; return this.render(); }
       case 'leaveJobCancel': return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':
         if (el.dataset.id === 'dutyon' || el.dataset.id === 'dutyoff') { const want = el.dataset.id === 'dutyon'; const r = await rpc('duty:toggle', want); if (!ok(r, want ? 'Service pris : tout ton menu et tes points sont disponibles' : 'Service quitté')) return; return close(); }
         if (el.dataset.id === 'leavejob') { this.kind = 'leaveJob'; this.data = { jobLabel: (this.menuData || {}).jobLabel || '' }; return this.render(); }
+        if (el.dataset.id === 'vehctl') { const r = await rpc('vehctl:state'); if (!ok(r)) return; this.data = r; this.kind = 'vehctl'; this.vcPoll(); return this.render(); }
         if (el.dataset.id === 'invoice') { this.kind = 'invoiceForm'; return this.render(); }
         if (el.dataset.id === 'tablet') { const r = await rpc('tablet:open'); if (!ok(r)) return; window.JBBackFromMenu = true; window.JBBack = true; Mod = Tablet; return Tablet.open(r); }
         if (el.dataset.id === 'emstablet') { const r = await rpc('emstab:open'); if (!ok(r)) return; window.JBBackFromMenu = true; window.JBBack = true; Mod = Ems; return Ems.open(r); }

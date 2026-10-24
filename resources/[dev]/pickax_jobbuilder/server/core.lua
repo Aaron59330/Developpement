@@ -237,6 +237,7 @@ function JB.menuActions(job)
     if job.type == 'dealer' then list[#list + 1] = 'dealership' end
     if job.type == 'government' then list[#list + 1] = 'government' end
     if Config.Missions.Enabled and job.settings.missions_enabled ~= false then list[#list + 1] = 'missions' end
+    if (job.type == 'police' or job.type == 'ems' or job.settings.vehctl == true) and job.settings.vehctl ~= false then list[#list + 1] = 'vehctl' end
     if job.type == 'police' and job.settings.tablet_enabled ~= false then list[#list + 1] = 'tablet' end
     if job.type == 'ems' and job.settings.ems_receive ~= false then list[#list + 1] = 'emscalls' end
     if job.type == 'ems' and job.settings.ems_tablet_enabled ~= false then list[#list + 1] = 'emstablet' end

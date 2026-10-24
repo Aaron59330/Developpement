@@ -446,3 +446,35 @@ body.neon .n-sp { flex: 1; }
 #announce .an-top { gap: 8px; margin-bottom: 4px; } #announce .an-org { font-size: 10px; } #announce .an-kind { font-size: 10px; padding: 2px 8px; }
 #announce h3 { font-size: 15px; margin-bottom: 2px; } #announce p { font-size: 13px; line-height: 1.45; }
 #announce .an-foot { margin-top: 8px; font-size: 11px; gap: 7px; } #announce .an-av { width: 18px; height: 18px; font-size: 10px; }
+
+/* ── Menu véhicule d'urgence (F6 → Gyrophares & sirènes) ── */
+.vgroup { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 16px 2px 8px; }
+.vgroup:first-child { margin-top: 0; }
+.vlabel { font-size: 12px; color: var(--text-2); margin: 2px 2px 6px; }
+.item.vc { cursor: pointer; }
+.item.vc.on { border-color: rgba(var(--accent-rgb), .55); background: rgba(var(--accent-rgb), .08); }
+.item.vc.on .tile { background: var(--accent); color: #fff; }
+.sw { position: relative; width: 42px; height: 24px; border-radius: 12px; background: rgba(255,255,255,.14); flex-shrink: 0; transition: background .18s; }
+.sw i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.sw.on { background: var(--accent); }
+.sw.on i { transform: translateX(18px); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; }
+.seg button { height: 34px; border: 0; border-radius: 9px; font-size: 13px; color: var(--text-2); justify-content: center; }
+.seg button.on { background: var(--accent); color: #fff; font-weight: 600; }
+.vrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 2px 0 0; }
+.vbtn { height: 42px; justify-content: center; gap: 8px; background: var(--surface); }
+.vrow3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.vtog { height: 64px; flex-direction: column; gap: 4px; justify-content: center; background: var(--surface); font-size: 12px; border-radius: 14px; }
+.vtog.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.vchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.vchip { height: 30px; padding: 0 12px; font-size: 12px; border-radius: 999px; background: var(--surface); }
+.vchip.on { background: rgba(var(--accent-rgb), .18); border-color: rgba(var(--accent-rgb), .6); color: #fff; }
+.vall { width: 100%; justify-content: center; margin-top: 16px; }
+
+.panel.corner .item.vc { padding: 8px 12px; margin-bottom: 6px; gap: 11px; }
+.panel.corner .item.vc .tile { width: 34px; height: 34px; }
+.panel.corner .vgroup { margin: 12px 2px 6px; }
+.panel.corner .vbtn { height: 38px; font-size: 13px; }
+.panel.corner .vtog { height: 54px; }
+.panel.corner .seg button { height: 30px; }
+.panel.corner .vall { margin-top: 12px; height: 38px; }
