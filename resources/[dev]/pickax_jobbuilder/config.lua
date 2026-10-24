@@ -543,7 +543,7 @@ Config.Real = {
         VipLimits     = { [1] = 15, [2] = 20, [3] = 30 },   -- Bronze / Argent / Or (pickax_core)
         PlaceDistance = 8.0,                                -- distance max entre le joueur et le meuble posé
         Cooldown      = 700,                                -- ms entre deux poses
-        Key           = 'F7',                               -- touche par défaut (modifiable par le joueur dans les paramètres FiveM)
+        Key           = 'F10',                              -- touche par défaut (F6 métier, F7 gang : modifiable par le joueur dans les paramètres FiveM)
         Catalog = {
             { id = 'sofa1',   label = 'Canapé moderne',        model = 'prop_t_sofa',            cat = 'Canapés & fauteuils' },
             { id = 'sofa2',   label = 'Canapé 2 places',       model = 'prop_t_sofa_02',         cat = 'Canapés & fauteuils' },

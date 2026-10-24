@@ -64,7 +64,7 @@ function OpenFurnitureMenu()
 end
 
 RegisterCommand('meubles', function() if not IsUIOpen() and not placing then OpenFurnitureMenu() end end, false)
-RegisterKeyMapping('meubles', 'Décorer ma propriété (meubles)', 'keyboard', F.Key or 'F7')
+RegisterKeyMapping('meubles', 'Décorer ma propriété (meubles)', 'keyboard', F.Key or 'F10')
 
 -- ─────────────────────────────── Mode placement ───────────────────────────────
 local function hint(text)

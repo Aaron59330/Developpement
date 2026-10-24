@@ -63,7 +63,7 @@ Les agents ouvrent **F6 → Gestion immobilière** (aucune case à cocher : auto
 - Pour placer un coffre / une penderie : enregistre le bien → **Visiter** → F6 → **Modifier** → « Ma position » depuis l'intérieur.
 
 ## 🛋️ Meubles (propriétaires)
-Dans sa propriété, le **propriétaire** appuie sur **F7** (ou `/meubles`) : menu de décoration (catalogue par catégories, recherche, « Mes meubles » avec déplacer / retirer). Mode placement avec fantôme : flèches ← → ou molette pour tourner, ↑ ↓ pour la hauteur, Entrée pour poser. **Limite par propriété : 10 meubles**, **15 / 20 / 30** avec le VIP Bronze / Argent / Or du propriétaire (`Config.Real.Furniture`, catalogue modifiable). Les meubles sont enregistrés en base (`jobbuilder_furniture`), visibles par tous les occupants, et supprimés si la propriété est reprise ou remise en vente.
+Dans sa propriété, le **propriétaire** appuie sur **F10** (ou `/meubles`) : menu de décoration (catalogue par catégories, recherche, « Mes meubles » avec déplacer / retirer). Mode placement avec fantôme : flèches ← → ou molette pour tourner, ↑ ↓ pour la hauteur, Entrée pour poser. **Limite par propriété : 10 meubles**, **15 / 20 / 30** avec le VIP Bronze / Argent / Or du propriétaire (`Config.Real.Furniture`, catalogue modifiable). Les meubles sont enregistrés en base (`jobbuilder_furniture`), visibles par tous les occupants, et supprimés si la propriété est reprise ou remise en vente.
 
 ## 🚗 Concessionnaire (jobs de type `dealer`)
 **F6 → Gestion concession** (automatique) :

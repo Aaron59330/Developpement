@@ -73,7 +73,7 @@ local function enterProperty(id, cb)
             CreateThread(function()
                 teleportTo(res.exit)
                 FurnSpawn(res.furniture)
-                if res.role == 'owner' then JBNotify('Tu peux décorer ta propriété : touche ~g~F7~s~ (ou /meubles).') end
+                if res.role == 'owner' then JBNotify('Tu peux décorer ta propriété : touche ~g~F10~s~ (ou /meubles).') end
             end)
         end
         if cb then cb(res or { ok = false, error = 'Erreur' }) end

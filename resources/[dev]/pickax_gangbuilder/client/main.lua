@@ -205,9 +205,18 @@ CreateThread(function()
     end
 end)
 
+-- Le job2 a pu changer (commande admin, autre script) sans que le gang soit déjà synchronisé : on le redemande au serveur avant de conclure « aucun gang »
+local function ensureGang()
+    if State.gangConfig then return State.gangConfig end
+    TriggerServerEvent('gangbuilder:server:requestSync')
+    local t = GetGameTimer()
+    while not State.gangConfig and GetGameTimer() - t < 1500 do Wait(50) end
+    return State.gangConfig
+end
+
 -- ─────────────────────────────── Menu gang ───────────────────────────────
 local function openGangMenu()
-    local gc = State.gangConfig
+    local gc = ensureGang()
     if not gc then return notify('~r~Tu n\'es dans aucun gang.') end
     local actions = {}
     for _, id in ipairs(gc.actions or {}) do
@@ -310,7 +319,7 @@ end
 
 -- Tablette de gang (F7, commande, menu contextuel → Organisation)
 function OpenGangTablet()
-    if not State.gangConfig then return notify('~r~Tu n\'es dans aucun gang.') end
+    if not ensureGang() then return notify('~r~Tu n\'es dans aucun gang.') end
     ESX.TriggerServerCallback('gangbuilder:tablet:open', function(res)
         if not res or not res.ok then return notify('~r~' .. ((res and res.error) or 'Tablette indisponible')) end
         OpenUI({ action = 'open', kind = 'tablet', data = res })
