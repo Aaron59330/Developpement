@@ -1776,16 +1776,18 @@ function MenuStaffOpen()
             RageUI.Separator("↓ ~b~Actions détaillées ~s~↓")
             for i = 1, #ConfigMenuAdministrationAdmin.functions do
                 local f = ConfigMenuAdministrationAdmin.functions[i]
-                local key = "func_"..i
-                local checked = perms[key] == true
-                local prefix = f.cat == "player" and "[Joueur] " or (f.cat == "self" and "[Perso] " or "[Véhicule] ")
-                RageUI.Checkbox(prefix..f.label, "Permission #"..i, checked, {Style = RageUI.CheckboxStyle.Tick}, function(_,_,_,newChecked)
-                    checked = newChecked
-                end, function()
-                    TriggerServerEvent("CorePickax:setPermission", selectedPermissionRank, key, true)
-                end, function()
-                    TriggerServerEvent("CorePickax:setPermission", selectedPermissionRank, key, false)
-                end)
+                if f.cat ~= "hidden" then   -- les entrées masquées (doublons retirés) n'apparaissent plus dans l'éditeur de permissions
+                    local key = "func_"..i
+                    local checked = perms[key] == true
+                    local prefix = f.cat == "player" and "[Joueur] " or (f.cat == "self" and "[Perso] " or "[Véhicule] ")
+                    RageUI.Checkbox(prefix..f.label, "Permission #"..i, checked, {Style = RageUI.CheckboxStyle.Tick}, function(_,_,_,newChecked)
+                        checked = newChecked
+                    end, function()
+                        TriggerServerEvent("CorePickax:setPermission", selectedPermissionRank, key, true)
+                    end, function()
+                        TriggerServerEvent("CorePickax:setPermission", selectedPermissionRank, key, false)
+                    end)
+                end
             end
         end, function() end, 1)
 

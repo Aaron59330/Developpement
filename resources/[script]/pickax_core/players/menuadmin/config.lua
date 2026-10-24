@@ -1290,7 +1290,7 @@ ConfigMenuAdministrationAdmin = {
         },
 
         [47] = {
-            cat = "player",
+            cat = "hidden", -- doublon de « Rembourser le joueur (items) » (n° 7) : masqué, numéro conservé pour les permissions
             sep = nil,
             toSub = false,
             label = "Donner un objet",
@@ -1316,7 +1316,7 @@ ConfigMenuAdministrationAdmin = {
         },
 
         [49] = {
-            cat = "player",
+            cat = "hidden", -- doublon de « Rembourser le joueur (armes) » (n° 8) : masqué, numéro conservé pour les permissions
             sep = nil,
             toSub = false,
             label = "Donner une arme (ox_inventory)",
