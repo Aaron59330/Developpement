@@ -42,16 +42,17 @@ const Tablet = {
     $root.classList.add('tb');
     this.render();
     clearInterval(this.timer); clearInterval(this.tickTimer);
-    this.timer = setInterval(() => this.refresh(), 5000);
+    // plus de rafraîchissement automatique (l'écran se relançait toutes les 5 s) : les données se mettent à jour à l'ouverture, après une action et quand on change de page
     this.tickTimer = setInterval(() => this.tick(), 1000);
   },
 
   stop() { clearInterval(this.timer); clearInterval(this.tickTimer); $root.classList.remove('tb'); },
 
-  async refresh() {
+  async refresh(quiet) {
     if ($root.classList.contains('hidden') || Mod !== this) return this.stop();
     const r = await rpc('tablet:open');
     if (!r || !r.ok || !r.me) return;
+    if (quiet && JSON.stringify(r) === JSON.stringify(this.d)) return;   // rien de nouveau : l'écran n'est pas redessiné
     const main = document.querySelector('.tb-main'), st = main ? main.scrollTop : 0;
     this.d = r; this.at = Date.now();
     this.render(st);
@@ -201,7 +202,7 @@ const Tablet = {
   async onA(el) {
     const a = el.dataset.a, done = (r, msg) => { if (!r || !r.ok) { toast((r && r.error) || 'Erreur', 'err'); return false; } if (msg) toast(msg, 'ok'); return true; };
     switch (a) {
-      case 'tbnav': this.page = el.dataset.v; return this.render();
+      case 'tbnav': this.page = el.dataset.v; this.render(); return this.refresh(true);
       case 'tsel': this.sel = Number(el.dataset.v); return this.render();
       case 'gps': return rpc('waypoint', { x: Number(el.dataset.x), y: Number(el.dataset.y) });
       case 'claim': { const r = await rpc('tablet:claim', el.dataset.q, el.dataset.id); if (done(r, r && r.ok ? `+${money(r.reward)} dans la trésorerie` : '')) await this.refresh(); return; }
