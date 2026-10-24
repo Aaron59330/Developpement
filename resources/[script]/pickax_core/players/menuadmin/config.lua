@@ -1421,8 +1421,7 @@ ConfigMenuAdministrationAdmin = {
             toSub = false,
             label = "Ouvrir le panel moderne",
             press = function()
-                exports["pickax_core"]:StaffCloseLegacy()
-                exports["pickax_staff"]:Open()
+                -- entrée masquée (panel retiré) : rien à ouvrir
             end
         },
 
