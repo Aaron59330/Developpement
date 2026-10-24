@@ -374,6 +374,11 @@ function GB.syncPlayer(src)
     local name, grade = GB.job2Of(xPlayer)
     local gang = name and GB.Gangs[name]
     GB.PlayerGang[src] = gang and { name = name, grade = grade } or nil
+    if not gang then   -- aide au diagnostic : ce que le serveur voit comme job2 et les gangs qu'il connaît
+        local known = {}
+        for n in pairs(GB.Gangs) do if #known < 8 then known[#known + 1] = n end end
+        TriggerClientEvent('gangbuilder:client:diag', src, { job2 = name or '', known = known })
+    end
     TriggerClientEvent('gangbuilder:client:config', src, GB.configSnapshot())
     TriggerClientEvent('gangbuilder:client:sync', src, {
         points = gang and GB.pointsForGang(name) or {},

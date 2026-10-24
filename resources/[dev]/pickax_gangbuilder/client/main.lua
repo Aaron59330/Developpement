@@ -206,18 +206,25 @@ CreateThread(function()
 end)
 
 -- Le job2 a pu changer (commande admin, autre script) sans que le gang soit déjà synchronisé : on le redemande au serveur avant de conclure « aucun gang »
+local noGang = nil
+RegisterNetEvent('gangbuilder:client:diag', function(d) noGang = d end)
+
 local function ensureGang()
     if State.gangConfig then return State.gangConfig end
+    noGang = nil
     TriggerServerEvent('gangbuilder:server:requestSync')
     local t = GetGameTimer()
     while not State.gangConfig and GetGameTimer() - t < 1500 do Wait(50) end
+    if not State.gangConfig and noGang then
+        notify(('~r~Aucun gang : ton job2 est « %s », il doit être EXACTEMENT le nom d\'un gang du builder (%s).'):format(noGang.job2 ~= '' and noGang.job2 or 'vide', #noGang.known > 0 and table.concat(noGang.known, ', ') or 'aucun gang créé'))
+    end
     return State.gangConfig
 end
 
 -- ─────────────────────────────── Menu gang ───────────────────────────────
 local function openGangMenu()
     local gc = ensureGang()
-    if not gc then return notify('~r~Tu n\'es dans aucun gang.') end
+    if not gc then return end
     local actions = {}
     for _, id in ipairs(gc.actions or {}) do
         local a = Config.Actions[id]
@@ -319,7 +326,7 @@ end
 
 -- Tablette de gang (F7, commande, menu contextuel → Organisation)
 function OpenGangTablet()
-    if not ensureGang() then return notify('~r~Tu n\'es dans aucun gang.') end
+    if not ensureGang() then return end
     ESX.TriggerServerCallback('gangbuilder:tablet:open', function(res)
         if not res or not res.ok then return notify('~r~' .. ((res and res.error) or 'Tablette indisponible')) end
         OpenUI({ action = 'open', kind = 'tablet', data = res })

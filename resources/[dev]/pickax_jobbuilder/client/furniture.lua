@@ -1,5 +1,5 @@
 -- ─────────────────────────────── Meubles (client) ───────────────────────────────
--- F7 / /meubles dans sa propriété : menu de décoration. Les meubles sont des objets LOCAUX créés chez chaque occupant (positions en base).
+-- F10 / /decorer dans sa propriété : menu de décoration. Les meubles sont des objets LOCAUX créés chez chaque occupant (positions en base).
 local F = Config.Real.Furniture
 local objs = {}        -- [id] = { ent, model }
 local placing = false
@@ -63,8 +63,9 @@ function OpenFurnitureMenu()
     end)
 end
 
-RegisterCommand('meubles', function() if not IsUIOpen() and not placing then OpenFurnitureMenu() end end, false)
-RegisterKeyMapping('meubles', 'Décorer ma propriété (meubles)', 'keyboard', F.Key or 'F10')
+RegisterCommand('decorer', function() if not IsUIOpen() and not placing then OpenFurnitureMenu() end end, false)
+-- Commande « decorer » (et non « meubles ») : une touche déjà enregistrée dans les paramètres FiveM d'un joueur n'est pas modifiée par un nouveau défaut
+RegisterKeyMapping('decorer', 'Décorer ma propriété (meubles)', 'keyboard', F.Key or 'F10')
 
 -- ─────────────────────────────── Mode placement ───────────────────────────────
 local function hint(text)

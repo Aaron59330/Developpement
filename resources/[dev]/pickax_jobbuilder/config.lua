@@ -536,7 +536,7 @@ Config.Real = {
     BucketBase        = 20000,  -- routing bucket = BucketBase + id propriété (instances séparées)
     ShowBlips         = true,   -- blips des biens disponibles
     RentCheckMinutes  = 5,      -- fréquence de vérification des loyers impayés
-    -- Meubles : le propriétaire décore son intérieur (touche F7 ou /meubles dans la propriété). Limite PAR PROPRIÉTÉ, plus haute avec le VIP du propriétaire.
+    -- Meubles : le propriétaire décore son intérieur (touche F10 ou /decorer dans la propriété). Limite PAR PROPRIÉTÉ, plus haute avec le VIP du propriétaire.
     Furniture = {
         Enabled       = true,
         BaseLimit     = 10,
