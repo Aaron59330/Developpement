@@ -22,7 +22,7 @@ var UPDATES = [
 ];
 
 // ===== Fond : '' = fond dégradé aux couleurs du serveur ; sinon nom d'une image du dossier loading (ex : 'background.png') =====
-var BACKGROUND = '';
+var BACKGROUND = 'background.png';
 
 (function () {
 	var bars = ['INIT_BEFORE_MAP_LOADED', 'MAP', 'INIT_AFTER_MAP_LOADED', 'INIT_SESSION'];
@@ -56,7 +56,7 @@ var BACKGROUND = '';
 	if (!LINKS.discord && SV.discord) LINKS.discord = 'https://' + String(SV.discord).replace(/^https?:\/\//, '');   // Discord du config du core
 
 	// Fond
-	if (BACKGROUND) document.getElementById('background').style.background = 'url(' + BACKGROUND + ') center / cover no-repeat';
+	if (BACKGROUND) document.getElementById('background').style.background = 'linear-gradient(rgba(8,10,16,.35), rgba(8,10,16,.5)), url(' + BACKGROUND + ') center / cover no-repeat';
 
 	// Menu équipe / mises à jour
 	var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
