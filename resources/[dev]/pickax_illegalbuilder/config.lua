@@ -292,7 +292,7 @@ Config.Templates.gofast = {
         label = 'Go Fast classique', icon = 'car',
         settings = { note = '', copsRequired = 0, cooldown = 1800, stock = 3, regenMinutes = 30, model = 'sultan', plate = 'GOFAST', account = 'black_money',
             rewardMin = 2500, rewardMax = 4000, damageBonus = true, bonusMax = 1500, timeLimit = 30, deliverRadius = 8.0,
-            alert = { chance = 60, delay = 20, label = 'Go Fast suspecté' } },
+            alert = { chance = 60, delay = 20, label = 'Go Fast suspecté' }, tablet = { enabled = true, item = 'gofast_tablet' } },
         points = {
             { kind = 'gfstart', label = 'Contact Go Fast', blip = false, ped = ped('g_m_y_mexgoon_01', 'WORLD_HUMAN_SMOKING') },
             { kind = 'gfspawn', label = 'Sortie du véhicule' },

@@ -76,3 +76,73 @@ CreateThread(function()
         Wait(sleep)
     end
 end)
+
+-- ───────── Tablette Go Fast : sans l'item, le contact n'existe pas pour le joueur ─────────
+-- Le serveur n'envoie les points d'un Go Fast « à tablette » qu'aux joueurs qui possèdent l'item. Ici : on surveille l'inventaire pour
+-- redemander la synchronisation quand la tablette est achetée / perdue, on affiche le contact sur la carte et on pose le GPS à l'achat.
+local gfBlips, gfCount, gfLastKey = {}, {}, ''
+
+local function clearGfBlips()
+    for _, b in ipairs(gfBlips) do if DoesBlipExist(b) then RemoveBlip(b) end end
+    gfBlips = {}
+end
+
+local function rebuildGfBlips()
+    clearGfBlips()
+    for _, e in ipairs((State and State.entities) or {}) do
+        if e.type == 'gofast' and e.gofastItem then
+            for _, p in ipairs(e.points) do
+                if p.kind == 'gfstart' and p.coords then
+                    local b = AddBlipForCoord(p.coords.x + 0.0, p.coords.y + 0.0, p.coords.z + 0.0)
+                    SetBlipSprite(b, 225) SetBlipColour(b, 1) SetBlipScale(b, 0.8) SetBlipAsShortRange(b, true)
+                    BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName('Contact Go Fast') EndTextCommandSetBlipName(b)
+                    gfBlips[#gfBlips + 1] = b
+                end
+            end
+        end
+    end
+end
+
+RegisterNetEvent('illegalbuilder:client:sync', function() SetTimeout(300, rebuildGfBlips) end)
+
+CreateThread(function()
+    while true do
+        Wait(3000)
+        local changed, gained = false, nil
+        for _, e in ipairs((State and State.entities) or {}) do
+            local item = e.gofastItem
+            if item then
+                local ok, n = pcall(function() return exports.ox_inventory:Search('count', item) end)
+                n = ok and tonumber(n) or 0
+                if gfCount[item] == nil then gfCount[item] = n end
+                if (gfCount[item] > 0) ~= (n > 0) then
+                    changed = true
+                    if n > 0 then gained = e end
+                end
+                gfCount[item] = n
+            end
+        end
+        if changed then
+            TriggerServerEvent('illegalbuilder:server:requestSync')
+            if gained then
+                SetTimeout(2500, function()
+                    for _, e in ipairs((State and State.entities) or {}) do
+                        if e.id == gained.id then
+                            for _, p in ipairs(e.points) do
+                                if p.kind == 'gfstart' and p.coords then
+                                    SetNewWaypoint(p.coords.x + 0.0, p.coords.y + 0.0)
+                                    Notify('Tablette Go Fast : le contact est indiqué sur ta carte (GPS posé).', 'success')
+                                    return
+                                end
+                            end
+                        end
+                    end
+                end)
+            else
+                Notify('Tu n\'as plus la tablette Go Fast : le contact n\'est plus accessible.', 'error')
+            end
+        end
+    end
+end)
+
+AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then clearGfBlips() end end)

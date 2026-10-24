@@ -35,6 +35,7 @@ BB.Categories = {
     pvp         = { sprite = 311, color = 1,  scale = 0.5 },
     chase       = { sprite = 315, color = 3,  scale = 0.5 },
     gang        = { sprite = 310, color = 1,  scale = 0.5 },
+    gofast      = { sprite = 225, color = 1,  scale = 0.7 },
     default     = { sprite = 1,   color = 0,  scale = 0.5 },
 }
 

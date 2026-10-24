@@ -158,6 +158,7 @@ local SETTINGS = {
         rewardMin = { 'n', 0, 100000000, 2500 }, rewardMax = { 'n', 0, 100000000, 4000 }, damageBonus = { 'b', true }, bonusMax = { 'n', 0, 100000000, 1500 },
         timeLimit = { 'n', 1, 240, 30 }, deliverRadius = { 'n', 3, 50, 8 },
         alert = obj({ chance = { 'n', 0, 100, 60 }, delay = { 'n', 0, 600, 20 }, label = { 's', 80, 'Go Fast suspecté' } }),
+        tablet = obj({ enabled = { 'b', false }, item = ITEM }),
     }),
     drug = merge(COMMON, { copsRequired = { 'n', 0, 30, 0 } }),
     robbery = merge(COMMON, {

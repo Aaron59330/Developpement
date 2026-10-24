@@ -94,6 +94,7 @@ return {
     ['vodkaredbull'] = { label = 'Vodka-Redbull', weight = 300, stack = true, close = true },
     ['water'] = { label = 'Bouteille d\'eau', weight = 100, stack = true, close = true },
     ['weed'] = { label = 'Weed', weight = 1000, stack = true, close = true },
+    ['gofast_tablet'] = { label = 'Tablette Go Fast', weight = 600, stack = false, close = true, description = 'Indique où trouver le contact Go Fast et donne accès à ses livraisons.' },
     ['antidote'] = { label = 'Antidote', weight = 100, stack = true, close = true, description = 'Le seul remède contre l\'intoxication des laboratoires.' },
     ['weed_seed'] = { label = 'Graines de cannabis', weight = 10, stack = true, close = true, description = 'À planter dans une serre ou un champ.' },
     ['coke_seed'] = { label = 'Graines de coca', weight = 10, stack = true, close = true, description = 'À planter dans une plantation de coca.' },

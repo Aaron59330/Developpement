@@ -395,7 +395,8 @@ function IB.publicEntity(e)
                 infiniteAmmo = p.infiniteAmmo, armorOnRespawn = p.armorOnRespawn, spawnProtection = p.spawnProtection, weapons = p.weapons, spawns = p.spawns } or nil }
         end
     end
-    return { id = e.id, type = e.type, label = e.label, points = pts, blip = s.blip, color = s.color, uiColor = s.uiColor, marker = s.marker,
+    local gfItem = IB.gofastTabletItem and IB.gofastTabletItem(e) or nil
+    return { gofastItem = gfItem, id = e.id, type = e.type, label = e.label, points = pts, blip = s.blip, color = s.color, uiColor = s.uiColor, marker = s.marker,
         mode = s.mode, trigger = s.trigger, weapon = s.weapon, duration = s.duration }
 end
 
@@ -404,7 +405,12 @@ function IB.syncPlayer(src)
     if not xPlayer then return end
     local list = {}
     for _, e in pairs(IB.Entities) do
-        if IB.canSee(e, xPlayer) then list[#list + 1] = IB.publicEntity(e) end
+        if IB.canSee(e, xPlayer) then
+            local pub = IB.publicEntity(e)
+            -- Go Fast avec tablette : sans la tablette, ni le contact ni les points ne sont envoyés au joueur (il ne sait pas où est le Go Fast)
+            if pub.gofastItem and IB.itemCount(src, pub.gofastItem) < 1 then pub.points = {} end
+            list[#list + 1] = pub
+        end
     end
     TriggerClientEvent('illegalbuilder:client:sync', src, { entities = list, accent = Config.UI.Accent, config = {
         marker = Config.Marker, drawDistance = Config.DrawDistance, interactDistance = Config.InteractDistance, pedDistance = Config.PedDistance,

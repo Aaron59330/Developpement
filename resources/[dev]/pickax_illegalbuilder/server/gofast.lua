@@ -3,6 +3,13 @@
 local Runs = {}      -- [src] = { eid, drop (index du point), veh, plate, startAt, deadline }
 local Stock = {}     -- [eid] = { n, at } : stock disponible, reconstitué avec le temps
 
+-- Nom de l'item « tablette » exigé par ce module (nil si la tablette n'est pas activée)
+function IB.gofastTabletItem(e)
+    local t = e.type == 'gofast' and e.settings and e.settings.tablet
+    if t and t.enabled then return (t.item and t.item ~= '') and t.item or 'gofast_tablet' end
+    return nil
+end
+
 local function clamp(v, a, b) return math.max(a, math.min(b, v)) end
 
 local function stockOf(e)
@@ -36,6 +43,8 @@ local function resolve(src, eid, pi)
     if not p or p.kind ~= 'gfstart' or not p.coords or not IB.near(src, p.coords, 4.0) then return nil, 'Trop loin' end
     local ok, err = IB.hasAccess(xPlayer, p.access)
     if not ok then return nil, err end
+    local tab = IB.gofastTabletItem(e)
+    if tab and IB.itemCount(src, tab) < 1 then return nil, 'Il te faut la tablette Go Fast' end
     return e, p, xPlayer
 end
 

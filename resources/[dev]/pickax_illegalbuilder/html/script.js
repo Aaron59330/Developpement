@@ -745,6 +745,9 @@ const Builder = {
         <div class="grid3">${this.fSel('Compte crédité', 'settings.account', [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN(`Minimum (${CUR})`, 'settings.rewardMin', { min: 0 })}${this.fN(`Maximum (${CUR})`, 'settings.rewardMax', { min: 0 })}</div>
         <div class="row wrap mt" style="gap:22px">${this.fC('Bonus selon l\'état du véhicule', 'settings.damageBonus')}</div>
         ${this.v('settings.damageBonus') ? `<div class="grid3 mt">${this.fN(`Bonus maximum (${CUR})`, 'settings.bonusMax', { min: 0 })}</div>` : ''}</div>
+      <div class="card"><div class="card-h"><div class="t">${ic('tablet', 17)} Tablette d'accès</div>${this.fC('Tablette obligatoire', 'settings.tablet.enabled', { r: 1 })}</div>
+        ${this.v('settings.tablet.enabled') ? `<div class="grid2">${this.fItem('Item de la tablette', 'settings.tablet.item')}</div>
+        <div class="hint mt-s">Sans cet item dans son inventaire, le joueur ne voit <b>ni le contact, ni les points</b> du Go Fast et ne peut pas le lancer. Avec la tablette, le contact apparaît sur sa carte (et le GPS est posé la première fois). Mets-la en vente à un prix élevé (Shop Builder, marché noir). Par défaut : <code>gofast_tablet</code>.</div>` : '<div class="hint">Désactivée : le contact est visible et utilisable par tous.</div>'}</div>
       <div class="card"><div class="card-h"><div class="t">${ic('bell', 17)} Alerte police</div></div>
         <div class="grid3">${this.fN('Chance d\'alerter la police (%)', 'settings.alert.chance', { min: 0, max: 100 })}${this.fN('Délai après le départ (s)', 'settings.alert.delay', { min: 0, max: 600 })}${this.fS('Message', 'settings.alert.label', { max: 80 })}</div>
         <div class="hint mt-s">La police reçoit la position du véhicule au moment de l'alerte. Utilise <code>Config.AlertHook</code> pour brancher ps-dispatch / cd_dispatch.</div></div>`;
