@@ -260,8 +260,37 @@ Config.Actions = {
     search   = { label = 'Fouiller',              icon = 'fa-magnifying-glass', target = true },
     info     = { label = 'Fiche du gang',         icon = 'fa-skull',           target = false },
     tablet   = { label = 'Tablette de gang',      icon = 'fa-tablet',          target = false },
+    props    = { label = 'Props du gang',         icon = 'fa-road-barrier',    target = false },   -- poser des barrières, plots, sacs de sable… (limite par joueur, plus haute avec le VIP)
     leave    = { label = 'Quitter le gang',       icon = 'fa-door-open',       target = false },
 }
+-- ─────────────────────────────── Props du gang ───────────────────────────────
+-- Menu gang (F7) → « Props du gang » : chaque membre pose des props cohérents avec un gang (barrières, plots, sacs de sable, tables…).
+-- Limite PAR JOUEUR : BaseLimit, ou la valeur du niveau VIP (pickax_core, players/vip/config.lua) si elle est plus haute.
+Config.Props = {
+    Enabled            = true,
+    BaseLimit          = 10,                                -- props par joueur sans VIP
+    VipLimits          = { [1] = 15, [2] = 20, [3] = 30 },  -- props par joueur selon le niveau VIP (1 Bronze, 2 Argent, 3 Or)
+    PlaceDistance      = 10.0,                              -- distance max entre le joueur et le prop posé (m)
+    Lifetime           = 0,                                 -- durée de vie d'un prop en minutes (0 = jusqu'au retrait / redémarrage)
+    RemoveOnDisconnect = true,                              -- les props d'un joueur disparaissent quand il se déconnecte
+    Cooldown           = 1500,                              -- ms minimum entre deux poses
+    Catalog = {
+        { id = 'barrier1',  label = 'Barrière de chantier',      model = 'prop_barrier_work05',   cat = 'Barrières' },
+        { id = 'barrier2',  label = 'Barrière rayée',            model = 'prop_barrier_work06a',  cat = 'Barrières' },
+        { id = 'barrier3',  label = 'Barrière basse',            model = 'prop_barrier_work01a',  cat = 'Barrières' },
+        { id = 'barrier4',  label = 'Barrière béton',            model = 'prop_mp_barrier_02b',   cat = 'Barrières' },
+        { id = 'cone',      label = 'Plot orange',               model = 'prop_roadcone02a',      cat = 'Barrières' },
+        { id = 'sandbag',   label = 'Sacs de sable',             model = 'prop_sandbag_01',       cat = 'Défense' },
+        { id = 'light',     label = 'Projecteur de chantier',    model = 'prop_worklight_03a',    cat = 'Éclairage' },
+        { id = 'box1',      label = 'Caisse en bois',            model = 'prop_box_wood02a',      cat = 'Caisses' },
+        { id = 'box2',      label = 'Pile de caisses',           model = 'prop_boxpile_07d',      cat = 'Caisses' },
+        { id = 'barrel',    label = 'Fût métallique',            model = 'prop_barrel_02a',       cat = 'Caisses' },
+        { id = 'table',     label = 'Table',                     model = 'prop_table_03',         cat = 'Mobilier' },
+        { id = 'chair',     label = 'Chaise',                    model = 'prop_chair_01a',        cat = 'Mobilier' },
+        { id = 'bbq',       label = 'Barbecue',                  model = 'prop_bbq_3',            cat = 'Mobilier' },
+    },
+}
+
 Config.ActionRules = {
     SearchRequiresCuffed = true,   -- on ne fouille qu'un joueur menotté
     EscortRequiresCuffed = true,   -- on n'escorte qu'un joueur menotté
@@ -275,7 +304,7 @@ Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 0, 164, 255 } }   
 Config.GangTypes = {
     street = {
         label = 'Gang de rue', color = '#22c55e', blip = { sprite = 310, color = 2, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search' },
+        actions = { 'handcuff', 'escort', 'search', 'props' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'boss' },
         grades = {
             { name = 'recrue',   label = 'Petit',       salary = 50 },
@@ -286,7 +315,7 @@ Config.GangTypes = {
     },
     mafia = {
         label = 'Mafia', color = '#a855f7', blip = { sprite = 310, color = 27, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search' },
+        actions = { 'handcuff', 'escort', 'search', 'props' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'laundry', 'shop', 'boss' },
         grades = {
             { name = 'associe',  label = 'Associé',     salary = 100 },
@@ -298,7 +327,7 @@ Config.GangTypes = {
     },
     biker = {
         label = 'Club de motards', color = '#f97316', blip = { sprite = 226, color = 17, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search' },
+        actions = { 'handcuff', 'escort', 'search', 'props' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'boss' },
         grades = {
             { name = 'prospect', label = 'Prospect',    salary = 50 },
@@ -310,7 +339,7 @@ Config.GangTypes = {
     },
     cartel = {
         label = 'Cartel', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search' },
+        actions = { 'handcuff', 'escort', 'search', 'props' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'laundry', 'boss' },
         grades = {
             { name = 'halcon',   label = 'Halcón',      salary = 80 },
@@ -322,7 +351,7 @@ Config.GangTypes = {
     },
     custom = {
         label = 'Personnalisé', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
-        actions = { 'handcuff', 'escort', 'search' },
+        actions = { 'handcuff', 'escort', 'search', 'props' },
         points = { 'garage', 'cloakroom', 'armory', 'stash', 'boss' },
         grades = {
             { name = 'recrue', label = 'Recrue', salary = 50 },

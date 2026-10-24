@@ -20,6 +20,7 @@ server_scripts {
     'server/runtime.lua',
     'server/activities.lua',
     'server/territories.lua',
+    'server/props.lua',
     'server/conflicts.lua',
     'server/objectives.lua',
     'server/tablet.lua',
@@ -33,6 +34,7 @@ client_scripts {
     'client/actions.lua',
     'client/activities.lua',
     'client/territories.lua',
+    'client/props.lua',
     'client/conflicts.lua',
     'client/objectives.lua',
 }

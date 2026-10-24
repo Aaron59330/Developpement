@@ -123,7 +123,7 @@ const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${
 const TYPE_ICON = { street: 'users', mafia: 'crown', biker: 'bike', cartel: 'skull', custom: 'flag' };
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'crown', shop: 'cart', harvest: 'leaf', process: 'flask', sell: 'coins', laundry: 'wash' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', info: 'skull', leave: 'door' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', info: 'skull', leave: 'door', props: 'box', tablet: 'tablet' };
 const ACCOUNT_LABEL = { '': 'Valeur par défaut (config)', dirty: 'Argent sale', money: 'Liquide', bank: 'Banque' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
@@ -1076,6 +1076,21 @@ const Runtime = {
       <div class="row"><span class="spacer"></span><button data-a="close">Annuler</button><button class="danger" data-a="leaveConfirm">Quitter le gang</button></div>` });
   },
 
+  view_props(d) {
+    const pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit;
+    const vipName = ['', 'VIP Bronze', 'VIP Argent', 'VIP Or'][d.vip || 0];
+    const cats = [...new Set(d.catalog.map(c => c.cat))];
+    const vl = d.vipLimits || {};
+    return panel({ icon: 'box', title: 'Props du gang', sub: d.gangLabel, cls: 'md', body: `
+      <div class="card"><div class="card-h"><div class="t">${ic('box', 16)} Mes props</div>${d.vip ? chip(vipName + ' · ' + d.limit + ' max', 'ok') : chip(d.limit + ' max', 'mute')}</div>
+        <div class="kv"><span style="color:var(--text)">${d.count} / ${d.limit} posés</span><span>${full ? chip('Limite atteinte', 'bad') : chip((d.limit - d.count) + ' restants', 'info')}</span></div>
+        <div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div>
+        <p class="hint mt-s">Sans VIP : <b>${d.base}</b> props. Avec le VIP : Bronze <b>${vl[1] || d.base}</b> · Argent <b>${vl[2] || d.base}</b> · Or <b>${vl[3] || d.base}</b>.</p></div>
+      ${cats.map(cat => `<div class="card"><div class="card-h"><div class="t">${esc(cat)}</div></div><div class="row wrap" style="gap:8px">${d.catalog.filter(c => c.cat === cat).map(c => `<button data-a="propPick" data-v="${esc(c.id)}" ${full ? 'disabled' : ''}>${esc(c.label)}</button>`).join('')}</div></div>`).join('')}
+      <div class="card"><div class="card-h"><div class="t">${ic('list', 16)} Props posés (${d.mine.length})</div>${d.mine.length ? `<button class="sm danger" data-a="propDelAll">Tout retirer</button>` : ''}</div>
+        ${d.mine.map(p => `<div class="kv"><span style="color:var(--text)">${esc(p.label)} <small class="muted">#${p.id}</small></span><button class="sm" data-a="propDel" data-v="${p.id}">Retirer</button></div>`).join('') || '<p class="hint">Aucun prop posé.</p>'}</div>` });
+  },
+
   view_info(d) {
     const terr = d.territories || [];
     const mine = terr.filter(t => t.mine).length;
@@ -1138,6 +1153,13 @@ const Runtime = {
     const done = r => { if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return r && r.ok; };
     switch (a) {
       case 'act': return rpc('doAction', v);
+      case 'propPick': return rpc('props:place', v);
+      case 'propDel': case 'propDelAll': {
+        const r = a === 'propDel' ? await rpc('props:remove', Number(v)) : await rpc('props:removeAll');
+        if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');
+        const n = await rpc('props:list'); if (n && n.ok) { this.data = n; this.render(); }
+        return toast(a === 'propDel' ? 'Prop retiré' : 'Props retirés', 'ok');
+      }
       case 'spawn': return done(await rpc('garage:spawn', pid, +v));
       case 'store': return done(await rpc('garage:store', pid));
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile remise', 'ok');

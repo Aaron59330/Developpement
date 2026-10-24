@@ -261,6 +261,7 @@ NuiRemote = {
     openPoint = true,
     ['settings:get'] = true, ['settings:save'] = true, ['settings:reset'] = true,
     ['tablet:open'] = true, ['tablet:claim'] = true, ['tablet:warPropose'] = true, ['tablet:warRespond'] = true,
+    ['props:list'] = true, ['props:remove'] = true, ['props:removeAll'] = true,
     ['terr:list'] = true, ['terr:save'] = true, ['terr:delete'] = true, ['terr:setOwner'] = true,
 }
 

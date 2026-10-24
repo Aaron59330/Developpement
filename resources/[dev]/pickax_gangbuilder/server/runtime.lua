@@ -301,7 +301,7 @@ end)
 ESX.RegisterServerCallback('gangbuilder:action', function(src, cb, action, targetId)
     local gang, _, xPlayer = GB.gangOf(src)
     local cfg = Config.Actions[action]
-    if not gang or not cfg or action == 'info' or action == 'leave' or action == 'tablet' then return cb(fail('Action non autorisée')) end
+    if not gang or not cfg or action == 'info' or action == 'leave' or action == 'tablet' or action == 'props' then return cb(fail('Action non autorisée')) end
     local allowed = false
     for _, a in ipairs(gang.settings.actions or {}) do if a == action then allowed = true end end
     if not allowed then return cb(fail('Action non autorisée pour ton gang')) end

@@ -27,6 +27,10 @@ function RunAction(id)
             OpenUI({ action = 'open', kind = 'info', data = res })
         end)
     end
+    if id == 'props' then
+        CloseUI()
+        return SetTimeout(150, function() OpenPropsMenu() end)
+    end
     if id == 'tablet' then
         CloseUI()
         return SetTimeout(150, function() OpenGangTablet() end)
