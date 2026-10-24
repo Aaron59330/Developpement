@@ -63,9 +63,7 @@ CreateThread(function()
                 sleep = 0
                 DrawMarker(1, Run.drop.x, Run.drop.y, Run.drop.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Run.radius * 2.0, Run.radius * 2.0, 1.2, 255, 80, 80, 120, false, false, 2, false, nil, nil, false)
                 if d <= Run.radius and IsPedInAnyVehicle(ped, false) then
-                    BeginTextCommandDisplayHelp('STRING')
-                    AddTextComponentSubstringPlayerName('Appuie sur ~INPUT_PICKUP~ pour livrer le véhicule')
-                    EndTextCommandDisplayHelp(0, false, false, -1)
+                    BB.ShowHelp('Appuie sur ~INPUT_CONTEXT~ : livrer le véhicule')   -- même aide que tous les builders
                     if IsControlJustPressed(0, 38) then
                         TriggerServerEvent('illegalbuilder:server:gofastDeliver')
                         Wait(1500)
