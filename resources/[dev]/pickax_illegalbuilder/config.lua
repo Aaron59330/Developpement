@@ -308,3 +308,19 @@ Config.VehicleTypes = {
     { id = 'boat',     label = 'Bateaux' },
     { id = 'aircraft', label = 'Aéronefs' },
 }
+
+-- ─────────────────────────────── Intoxication des laboratoires ───────────────────────────────
+-- Dans le rayon d'un laboratoire (poste de travail avec « tenue obligatoire »), un joueur sans la bonne tenue s'intoxique.
+-- Le niveau d'intoxication (0-100) monte tant qu'il est exposé, puis continue de monter lentement tant qu'il n'est pas soigné.
+-- À 100 : mort. UN SEUL item guérit : Config.Toxic.CureItem (rien d'autre : ni kit de soin, ni réanimation).
+Config.Toxic = {
+    Enabled       = true,
+    CureItem      = 'antidote',   -- le seul item qui guérit l'intoxication (ajouté dans ox_inventory/data/items.lua)
+    Tick          = 5,            -- secondes entre deux calculs
+    ExposureGain  = 6,            -- niveau gagné à chaque tick passé dans le laboratoire sans la tenue
+    SickGain      = 1,            -- niveau gagné à chaque tick quand on est malade (même hors du laboratoire)
+    DamageFrom    = 60,           -- à partir de ce niveau : perte de vie à chaque tick
+    DamageHealth  = 4,            -- points de vie perdus par tick au-dessus de DamageFrom
+    KillAt        = 100,          -- niveau de mort
+    WarnAt        = { 20, 50, 80 },   -- seuils des messages d'alerte
+}

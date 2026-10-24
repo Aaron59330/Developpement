@@ -1009,10 +1009,10 @@ const Builder = {
     const o = getPath(this.cur, `${base}.outfit`) || {};
     const lab = r => (r.k === 'p' ? ({ 0: 'Chapeau', 1: 'Lunettes' })[r.id] : ({ 1: 'Masque', 3: 'Torse', 4: 'Pantalon', 6: 'Chaussures', 7: 'Accessoire', 8: 'Haut', 9: 'Gilet', 11: 'Veste' })[r.id]) || (r.k === 'p' ? 'Accessoire ' : 'Pièce ') + r.id;
     const row = (sex, title) => { const arr = o[sex] || []; return `<div class="lbl mt">${title} (${arr.length} pièce${arr.length > 1 ? 's' : ''})</div><div class="row wrap" style="gap:6px">${arr.map((r, i) => `<span class="chip">${esc(lab(r))} · ${r.d}<button class="icon sm" style="margin-left:6px;width:20px;height:20px" data-a="outfitDel" data-v="${base}.outfit.${sex}|${i}">${ic('x', 11)}</button></span>`).join('') || '<span class="muted sm-t">Aucune pièce : pas de tenue exigée pour ce sexe</span>'}</div>`; };
-    return `<div class="card"><div class="card-h"><div class="t">${ic('shirt', 17)} Tenue obligatoire</div>${this.fC('Exiger une tenue', `${base}.outfit.enabled`, { r: 1 })}</div>
-      ${this.v(`${base}.outfit.enabled`) ? `${row('male', 'Tenue homme')}${row('female', 'Tenue femme')}
+    return `<div class="card"><div class="card-h"><div class="t">${ic('shirt', 17)} Tenue obligatoire (laboratoire)</div>${this.fC('Laboratoire : tenue exigée', `${base}.outfit.enabled`, { r: 1 })}</div>
+      ${this.v(`${base}.outfit.enabled`) ? `<div class="grid3">${this.fN('Rayon du laboratoire autour du point (m)', `${base}.outfit.radius`, { min: 3, max: 100 })}</div>${row('male', 'Tenue homme')}${row('female', 'Tenue femme')}
         <div class="row mt"><button class="primary" data-a="outfitCapture" data-v="${base}">${ic('shirt', 15)} Capturer ma tenue actuelle</button></div>
-        <div class="hint mt-s">Habille ton personnage avec la tenue exigée (combinaison, masque, gilet…) puis clique : elle remplace la tenue du <b>sexe de ton personnage</b>. Retire avec ✕ les pièces qui ne comptent pas. Le joueur doit porter exactement ces pièces pour utiliser ce point.</div>` : '<div class="hint">Aucune tenue exigée.</div>'}</div>`;
+        <div class="hint mt-s">Habille ton personnage avec la tenue exigée (combinaison, masque, gilet…) puis clique : elle remplace la tenue du <b>sexe de ton personnage</b>. Retire avec ✕ les pièces qui ne comptent pas. Sans cette tenue, le joueur ne peut pas utiliser le poste de travail et <b>s'intoxique</b> dans le rayon du laboratoire : s'il n'est pas soigné avec l'antidote, il finit par mourir.</div>` : '<div class="hint">Aucune tenue exigée.</div>'}</div>`;
   },
 
   plantCard(base) {
@@ -1037,7 +1037,7 @@ const Builder = {
 
   drugKind(base, p) {
     const k = p.kind;
-    if (k === 'harvest') return this.drugPicker(base, p) + this.outfitCard(base) + this.plantCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
+    if (k === 'harvest') return this.drugPicker(base, p) + this.plantCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('leaf', 17)} Récolte</div></div>
       <div class="grid3">${this.fItem('Item récolté', `${base}.harvest.item`)}${this.fN('Quantité min', `${base}.harvest.min`, { min: 1 })}${this.fN('Quantité max', `${base}.harvest.max`, { min: 1 })}
       ${this.fN('Durée (secondes)', `${base}.harvest.time`, { min: 1 })}${this.animSel('Animation', `${base}.harvest.anim`)}${this.fN('Délai entre deux récoltes (s)', `${base}.harvest.cooldown`, { min: 0 })}
       ${this.fN('Récoltes avant épuisement (0 = ∞)', `${base}.harvest.maxUses`, { min: 0 })}${this.fN('Repousse (secondes)', `${base}.harvest.regen`, { min: 10 })}</div>

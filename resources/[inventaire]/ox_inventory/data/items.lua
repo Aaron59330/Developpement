@@ -94,6 +94,7 @@ return {
     ['vodkaredbull'] = { label = 'Vodka-Redbull', weight = 300, stack = true, close = true },
     ['water'] = { label = 'Bouteille d\'eau', weight = 100, stack = true, close = true },
     ['weed'] = { label = 'Weed', weight = 1000, stack = true, close = true },
+    ['antidote'] = { label = 'Antidote', weight = 100, stack = true, close = true, description = 'Le seul remède contre l\'intoxication des laboratoires.' },
     ['weed_seed'] = { label = 'Graines de cannabis', weight = 10, stack = true, close = true, description = 'À planter dans une serre ou un champ.' },
     ['coke_seed'] = { label = 'Graines de coca', weight = 10, stack = true, close = true, description = 'À planter dans une plantation de coca.' },
     ['opium_seed'] = { label = 'Graines de pavot', weight = 10, stack = true, close = true, description = 'À planter dans un champ de pavot.' },

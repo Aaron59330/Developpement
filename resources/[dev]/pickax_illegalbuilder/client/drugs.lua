@@ -28,6 +28,8 @@ local function outfitOK(def)
     return #missing == 0, missing
 end
 
+LabOutfitOK = outfitOK   -- utilisé par client/toxic.lua (intoxication dans les laboratoires)
+
 local function checkOutfit(def)
     local ok, missing = outfitOK(def)
     if not ok then Notify('Tenue obligatoire : mets la bonne tenue (' .. table.concat(missing, ', ') .. ').', 'error') end
@@ -93,7 +95,6 @@ end
 Handlers.drug = function(node)
     local k = node.kind
     if k == 'harvest' then
-        if node.outfit and not checkOutfit(node.outfit) then return end
         if node.plant then return plantFlow(node) end
         return timedAction(node, 'harvest')
     end

@@ -49,3 +49,9 @@ CREATE TABLE IF NOT EXISTS `illegalbuilder_plants` (
   `planted_by` varchar(80) DEFAULT NULL,
   PRIMARY KEY (`entity_id`,`point_idx`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `illegalbuilder_toxic` (
+  `identifier` varchar(80) NOT NULL,
+  `level` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
