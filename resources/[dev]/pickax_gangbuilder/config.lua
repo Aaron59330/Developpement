@@ -240,7 +240,7 @@ Config.PointTypes = {
     harvest   = { label = 'Récolte',         color = PK_MKC(), marker = PK_MKT },
     process   = { label = 'Traitement',      color = PK_MKC(), marker = PK_MKT },
     sell      = { label = 'Point de vente',  color = PK_MKC(), marker = PK_MKT },
-    laundry   = { label = 'Blanchiment',     color = PK_MKC(), marker = PK_MKT },
+    laundry   = { label = 'Blanchiment',     color = PK_MKC(), marker = PK_MKT, hidden = true },   -- retiré : le blanchiment se fait avec la tablette (Builder Illégal) ; les anciens points sont supprimés au prochain enregistrement du gang
     -- Variantes de garage (hidden = non ajoutables directement : on choisit le « type » dans l'éditeur du garage)
     garage_bike     = { label = 'Garage motos',    color = PK_MKC(), marker = PK_MKT, hidden = true },
     garage_aircraft = { label = 'Garage aéronefs', color = PK_MKC(), marker = PK_MKT, hidden = true },
@@ -321,7 +321,7 @@ Config.GangTypes = {
     mafia = {
         label = 'Mafia', color = '#a855f7', blip = { sprite = 310, color = 27, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'laundry', 'shop', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'shop', 'boss' },
         grades = {
             { name = 'associe',  label = 'Associé',     salary = 100 },
             { name = 'soldat',   label = 'Soldat',      salary = 200 },
@@ -345,7 +345,7 @@ Config.GangTypes = {
     cartel = {
         label = 'Cartel', color = '#ef4444', blip = { sprite = 310, color = 1, scale = PK_BSF(0.9) },
         actions = { 'handcuff', 'escort', 'search', 'props' },
-        points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'laundry', 'boss' },
+        points = { 'garage', 'cloakroom', 'armory', 'stash', 'harvest', 'process', 'sell', 'boss' },
         grades = {
             { name = 'halcon',   label = 'Halcón',      salary = 80 },
             { name = 'sicario',  label = 'Sicario',     salary = 180 },

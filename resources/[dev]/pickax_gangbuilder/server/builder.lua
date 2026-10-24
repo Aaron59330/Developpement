@@ -249,9 +249,11 @@ local function cleanGang(payload)
     if type(payload.points) == 'table' then
         if #payload.points > Config.MaxPoints then return nil, ('Maximum %d points par gang'):format(Config.MaxPoints) end
         for _, p in ipairs(payload.points) do
-            local cp, err = cleanPoint(p, maxGrade)
-            if not cp then return nil, err end
-            points[#points + 1] = cp
+            if not (type(p) == 'table' and p.type == 'laundry') then   -- points de blanchiment supprimés (remplacés par la tablette du Builder Illégal)
+                local cp, err = cleanPoint(p, maxGrade)
+                if not cp then return nil, err end
+                points[#points + 1] = cp
+            end
         end
     end
 
