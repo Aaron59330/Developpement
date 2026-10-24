@@ -85,8 +85,12 @@ ConfigBasicNeeds.Consumables = {
     orange      = { kind = 'eat', hunger = 100000, anim = EAT, prop = hand('ng_proc_food_ornge1a'), msg = 'Vous avez mangé une orange' },
     tarte_pomme = { kind = 'eat', hunger = 220000, anim = EAT, prop = hand('prop_donut_02'),      msg = 'Vous avez mangé une tarte aux pommes' },
     mixapero    = { kind = 'eat', hunger = 150000, anim = EAT, prop = hand('prop_food_bs_chips'), msg = 'Vous avez grignoté un mix apéritif' },
+    sandwich    = { kind = 'eat', hunger = 220000, anim = EAT, prop = hand('prop_sandwich_01'),   msg = 'Vous avez mangé un sandwich' },
+    chips       = { kind = 'eat', hunger = 120000, anim = EAT, prop = hand('prop_food_bs_chips'), msg = 'Vous avez mangé des chips' },
+    pizza       = { kind = 'eat', hunger = 400000, anim = EAT, prop = hand('prop_pizza_box_01'),  msg = 'Vous avez mangé une pizza' },
     raisin      = { kind = 'eat', hunger = 80000,  anim = EAT, prop = hand('ng_proc_food_aple1a'), msg = 'Vous avez mangé du raisin' },
     -- boissons sans alcool
+    coffee      = { kind = 'drink', thirst = 60000, anim = DRINK, prop = { model = 'p_amb_coffeecup_01', bone = 28422, x = 0.0, y = 0.0, z = 0.0, rx = 0.0, ry = 0.0, rz = 0.0 }, msg = 'Vous avez bu un café' },
     water       = { kind = 'drink', thirst = 250000, anim = DRINK, prop = hand('prop_ld_flow_bottle'), msg = "Vous avez bu de l'eau" },
     cola        = { kind = 'drink', thirst = 200000, anim = DRINK, prop = hand('prop_ecola_can'),      msg = 'Vous avez bu un cola' },
     redbull     = { kind = 'drink', thirst = 180000, anim = DRINK, prop = hand('prop_ld_can_01'),      msg = 'Vous avez bu un Redbull' },
@@ -122,6 +126,7 @@ ConfigBasicNeeds.Consumables = {
     gitanes     = { kind = 'smoke', scenario = 'WORLD_HUMAN_SMOKING', ms = 9000, msg = 'Vous avez fumé une Gitane' },
     -- soins
     bandage     = { kind = 'heal', health = 25, anim = TEND, msg = 'Vous avez appliqué un bandage' },
+    painkillers = { kind = 'heal', health = 20, anim = { dict = 'mp_suicide', clip = 'pill', flag = 49, ms = 2500 }, msg = 'Vous avez pris un antidouleur' },
     medikit     = { kind = 'heal', health = 60, anim = TEND, msg = 'Vous avez utilisé un medikit' },
     firstaidkit = { kind = 'heal', health = 40, anim = TEND, msg = 'Vous avez utilisé une trousse de premier secours' },
     armor       = { kind = 'armor', armor = 100, anim = { dict = 'clothingshirt', clip = 'try_shirt_positive_d', flag = 49, ms = 3000 }, msg = 'Vous avez enfilé un gilet pare-balles' },
