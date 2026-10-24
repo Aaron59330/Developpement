@@ -2,7 +2,8 @@ local KEY = 'towing'
 
 local function newMission(st)
     local j = Config.Jobs[KEY]
-    local z = j.zones[math.random(#j.zones)]
+    local zones = AJ.pts(st, 'zone')
+    local z = zones[math.random(#zones)]
     st.zone = { x = z.x, y = z.y }
     st.model = j.models[math.random(#j.models)]
     st.loaded = false
@@ -13,8 +14,9 @@ end
 AJ.Modules[KEY] = {
     start = function(src, st)
         local j = Config.Jobs[KEY]
-        local spawn, scrap = AJ.spawnPoint(KEY), AJ.points(KEY, 'scrap')[1]
-        if not spawn or not scrap then return nil, 'Fourrière non configurée (/ajpoint towing scrap)' end
+        local spawn, scrap = AJ.spawnPoint(st), AJ.pts(st, 'scrap')[1]
+        if not spawn or not scrap then return nil, 'Fourrière non configurée (point d\'activité « Fourrière » dans le Job Builder)' end
+        if #AJ.pts(st, 'zone') == 0 then return nil, 'Aucun lieu de panne' end
         local m = newMission(st)
         m.vehicle, m.spawn, m.scrap = j.vehicle, spawn, scrap
         m.plate = 'DEPAN' .. math.random(100, 999)
@@ -39,7 +41,7 @@ end)
 RegisterNetEvent('aj:towing:done', function()
     local src = source
     local st = AJ.session(src, KEY)
-    local scrap = AJ.points(KEY, 'scrap')[1]
+    local scrap = st and AJ.pts(st, 'scrap')[1]
     if not st or not st.loaded or not scrap or not AJ.near(src, scrap, 35.0) then return end
     local j = Config.Jobs[KEY]
     local km = #(vector2(st.zone.x, st.zone.y) - vector2(scrap.x, scrap.y)) / 1000.0

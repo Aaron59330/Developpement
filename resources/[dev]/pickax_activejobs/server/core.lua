@@ -3,11 +3,8 @@ ESX = exports['es_extended']:getSharedObject()
 AJ = {
     Modules = {},     -- Modules[clé] = { start = function(src, ctx) -> payload | nil, err ; stop = function(src, state) }
     Active = {},      -- Active[src] = { job = clé, state = {}, started = os.time() }
-    Points = {},      -- Points[clé][type] = liste de points (base de données, sinon valeurs par défaut)
     Stats = {},       -- Stats[identifier][clé] = { xp, done }
 }
-
-local function fail(msg) return { ok = false, error = msg } end
 
 function AJ.notify(src, msg, kind) TriggerClientEvent('aj:client:notify', src, msg, kind or 'info') end
 
@@ -29,82 +26,64 @@ end
 
 -- ─────────────────────────────── Base de données ───────────────────────────────
 local function installTables()
-    MySQL.query.await([[CREATE TABLE IF NOT EXISTS activejobs_points (
-        id INT AUTO_INCREMENT PRIMARY KEY, job VARCHAR(30) NOT NULL, kind VARCHAR(20) NOT NULL, label VARCHAR(80) NULL,
-        x FLOAT NOT NULL, y FLOAT NOT NULL, z FLOAT NOT NULL, h FLOAT NOT NULL DEFAULT 0, INDEX idx_job (job, kind)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
     MySQL.query.await([[CREATE TABLE IF NOT EXISTS activejobs_stats (
         identifier VARCHAR(80) NOT NULL, job VARCHAR(30) NOT NULL, xp INT NOT NULL DEFAULT 0, done INT NOT NULL DEFAULT 0, earned INT NOT NULL DEFAULT 0,
         PRIMARY KEY (identifier, job)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
 end
 
--- Crée les jobs ESX manquants (jamais d'écrasement d'un job existant)
-local function ensureJobs()
-    local created = 0
-    for _, key in ipairs(Config.JobOrder) do
-        local j = Config.Jobs[key]
-        local exists = MySQL.scalar.await('SELECT 1 FROM jobs WHERE name = ?', { j.job })
-        if not exists then
-            MySQL.insert.await('INSERT INTO jobs (name, label, whitelisted) VALUES (?, ?, 0)', { j.job, j.label })
-            created = created + 1
-        end
-        for i, g in ipairs(j.grades) do
-            local has = MySQL.scalar.await('SELECT 1 FROM job_grades WHERE job_name = ? AND grade = ?', { j.job, i - 1 })
-            if not has then
-                MySQL.insert.await("INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, '{}', '{}')",
-                    { j.job, i - 1, g.name, g.label, g.salary })
-            end
-        end
-    end
-    if created > 0 then
-        if ESX.RefreshJobs then pcall(ESX.RefreshJobs) else print('^3[activejobs] Redémarre es_extended pour prendre en compte les nouveaux jobs.^0') end
-        print(('^2[activejobs] %d job(s) créé(s) dans la table jobs.^0'):format(created))
-    end
+-- ─────────────────────────────── Lien avec le Job Builder ───────────────────────────────
+-- Les métiers se créent dans le Job Builder (types : garbage, towing, carwash, trucker, farmer, firefighter, train). Ici : seulement le gameplay.
+local function jbReady() return GetResourceState('pickax_jobbuilder') == 'started' end
+
+function AJ.meta(jobName)
+    if not jbReady() then return nil end
+    local ok, m = pcall(function() return exports.pickax_jobbuilder:GetJobMeta(jobName) end)
+    return ok and m or nil
 end
 
--- ─────────────────────────────── Points ───────────────────────────────
-function AJ.loadPoints()
-    AJ.Points = {}
-    local rows = MySQL.query.await('SELECT * FROM activejobs_points ORDER BY id') or {}
-    for _, r in ipairs(rows) do
-        AJ.Points[r.job] = AJ.Points[r.job] or {}
-        local l = AJ.Points[r.job][r.kind] or {}
-        l[#l + 1] = { id = r.id, x = r.x, y = r.y, z = r.z, h = r.h, label = r.label or '' }
-        AJ.Points[r.job][r.kind] = l
+-- Clé du module d'activité d'un joueur (selon le type de son job dans le Job Builder)
+function AJ.keyOf(xPlayer)
+    local m = xPlayer and AJ.meta(xPlayer.job.name)
+    return m and Config.Jobs[m.type] and m.type or nil, m
+end
+
+-- Points du terrain pour une session : poste d'activité (dépôt), sortie du véhicule, points d'activité du Job Builder, sinon valeurs par défaut
+local function buildPts(key, jobName, point)
+    local pts = {}
+    local ok, roles = pcall(function() return exports.pickax_jobbuilder:GetActivityRoles(jobName) end)
+    for role, list in pairs(ok and roles or {}) do pts[role] = list end
+    pts.depot = { { x = point.coords.x, y = point.coords.y, z = point.coords.z, h = point.coords.h or 0.0, label = point.label } }
+    if point.spawn then
+        pts.spawn = { point.spawn }
+    else
+        local d, rad = pts.depot[1], math.rad(point.coords.h or 0.0)
+        pts.spawn = { { x = d.x - math.sin(rad) * 7.0, y = d.y + math.cos(rad) * 7.0, z = d.z, h = d.h } }
     end
-    -- valeurs par défaut pour les types sans point en base
-    for key, kinds in pairs(Config.DefaultPoints) do
-        AJ.Points[key] = AJ.Points[key] or {}
-        for kind, list in pairs(kinds) do
-            if not AJ.Points[key][kind] then
-                local copy = {}
-                for _, p in ipairs(list) do copy[#copy + 1] = { id = 0, x = p.x, y = p.y, z = p.z, h = p.h or 0.0, label = p.label or '' } end
-                AJ.Points[key][kind] = copy
-            end
+    local j = Config.Jobs[key]
+    for role, list in pairs(Config.DefaultPoints[key] or {}) do
+        if role ~= 'depot' and not pts[role] then
+            pts[role] = {}
+            for _, p in ipairs(list) do pts[role][#pts[role] + 1] = { x = p.x, y = p.y, z = p.z, h = p.h or 0.0, label = p.label or '' } end
         end
     end
-    AJ.Points.train = AJ.Points.train or {}
-    if not AJ.Points.train.station then
-        local copy = {}
-        for _, p in ipairs(Config.TrainStations) do copy[#copy + 1] = { id = 0, x = p.x, y = p.y, z = p.z, h = 0.0, label = p.label } end
-        AJ.Points.train.station = copy
+    if not pts.zone and j.zones then
+        pts.zone = {}
+        for _, z in ipairs(j.zones) do pts.zone[#pts.zone + 1] = { x = z.x, y = z.y, z = z.z or 0.0, h = 0.0, label = z.label or '' } end
     end
+    if not pts.fire and j.sites then
+        pts.fire = {}
+        for _, z in ipairs(j.sites) do pts.fire[#pts.fire + 1] = { x = z.x, y = z.y, z = z.z, h = 0.0, label = z.label or '' } end
+    end
+    if not pts.station and key == 'train' then
+        pts.station = {}
+        for _, z in ipairs(Config.TrainStations) do pts.station[#pts.station + 1] = { x = z.x, y = z.y, z = z.z, h = 0.0, label = z.label } end
+    end
+    return pts
 end
 
-function AJ.points(key, kind) return (AJ.Points[key] and AJ.Points[key][kind]) or {} end
-
--- Position de sortie du véhicule : point « spawn » sinon 7 m devant le dépôt
-function AJ.spawnPoint(key)
-    local s = AJ.points(key, 'spawn')[1]
-    if s then return s end
-    local d = AJ.points(key, 'depot')[1]
-    if not d then return nil end
-    local rad = math.rad(d.h)
-    return { x = d.x - math.sin(rad) * 7.0, y = d.y + math.cos(rad) * 7.0, z = d.z, h = d.h }
-end
-
-function AJ.syncPoints(src)
-    TriggerClientEvent('aj:client:points', src or -1, AJ.Points)
-end
+-- Liste des points d'une session (les modules lisent state.pts)
+function AJ.pts(st, kind) return (st and st.pts and st.pts[kind]) or {} end
+function AJ.spawnPoint(st) return AJ.pts(st, 'spawn')[1] end
 
 -- ─────────────────────────────── Stats / niveau / paie ───────────────────────────────
 local function levelOf(xp) return math.min(Config.XP.MaxLevel, 1 + math.floor((xp or 0) / Config.XP.PerLevel)) end
@@ -144,18 +123,25 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
     local before = levelOf(s.xp)
     local mult = 1 + (before - 1) * Config.XP.PayPerLevel / 100 + vipBonus(src) / 100
     local amount = math.floor(math.max(0, base) * mult)
-    if amount > 0 then xPlayer.addAccountMoney(Config.Account, amount, reason or Config.Jobs[key].label) end
+    local meta = AJ.meta(xPlayer.job.name)
+    local label = meta and meta.label or Config.Jobs[key].label
+    if amount > 0 then xPlayer.addAccountMoney(Config.Account, amount, reason or label) end
     s.xp = s.xp + math.max(0, math.floor(xpGain or 0))
     s.done = s.done + (doneCount or 0)
     s.earned = s.earned + amount
     local after = levelOf(s.xp)
     if after > before then
-        AJ.notify(src, ('Niveau %d atteint : %s !'):format(after, Config.Jobs[key].label), 'success')
+        AJ.notify(src, ('Niveau %d atteint : %s !'):format(after, label), 'success')
+        -- promotion automatique : jamais jusqu'au grade boss ni au-delà du nombre de grades du job
         local grade = 0
         for lvl, g in pairs(Config.XP.Promotions) do if after >= lvl and g > grade then grade = g end end
-        if grade > 0 and xPlayer.job.name == Config.Jobs[key].job and xPlayer.job.grade < grade and Config.Jobs[key].grades[grade + 1] then
-            xPlayer.setJob(Config.Jobs[key].job, grade)
-            AJ.notify(src, ('Promotion : %s !'):format(Config.Jobs[key].grades[grade + 1].label), 'success')
+        if meta and grade > 0 then
+            local cap = math.max(0, (meta.boss_grade or #meta.grades) - 1)
+            grade = math.min(grade, cap, #meta.grades - 1)
+            if xPlayer.job.grade < grade then
+                xPlayer.setJob(xPlayer.job.name, grade)
+                AJ.notify(src, ('Promotion : %s !'):format((meta.grades[grade + 1] or {}).label or ('grade ' .. grade)), 'success')
+            end
         end
     end
     saveStat(xPlayer, key)
@@ -163,11 +149,6 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
 end
 
 -- ─────────────────────────────── Service (début / fin) ───────────────────────────────
-function AJ.isWorker(src, key)
-    local x = ESX.GetPlayerFromId(src)
-    return x ~= nil and x.job.name == Config.Jobs[key].job
-end
-
 -- État de service du joueur s'il est bien en service sur ce métier
 function AJ.session(src, key)
     local a = AJ.Active[src]
@@ -188,118 +169,82 @@ function AJ.stopShift(src, reason)
     TriggerClientEvent('aj:client:stop', src, a.job, reason or '')
 end
 
-ESX.RegisterServerCallback('aj:panel', function(src, cb, key)
-    local j = Config.Jobs[key]
+local function onDuty(src)
+    if not jbReady() then return false end
+    local ok, d = pcall(function() return exports.pickax_jobbuilder:IsOnDuty(src) end)
+    return ok and d == true
+end
+
+-- Vérifie le poste d'activité : point existant, bon job, grade, proximité et service pris dans le Job Builder
+local function context(src, pointId)
     local x = ESX.GetPlayerFromId(src)
-    if not j or not x then return cb(fail('Métier inconnu')) end
-    local dep = AJ.points(key, 'depot')[1]
-    if not dep or not AJ.near(src, dep, 8.0) then return cb(fail('Trop loin du PNJ')) end
+    if not x then return nil, 'Erreur' end
+    if not jbReady() then return nil, 'Job Builder indisponible' end
+    local ok, point = pcall(function() return exports.pickax_jobbuilder:GetActivityPoint(tonumber(pointId)) end)
+    if not ok or not point then return nil, 'Poste introuvable' end
+    if x.job.name ~= point.job then return nil, 'Ce poste n\'appartient pas à ton métier' end
+    if x.job.grade < (point.min_grade or 0) then return nil, 'Ton grade est insuffisant' end
+    if not AJ.near(src, point.coords, 10.0) then return nil, 'Tu es trop loin du poste' end
+    if not onDuty(src) then return nil, 'Prends ton service (F6) pour utiliser ce poste' end
+    local key = point.type
+    if not Config.Jobs[key] then return nil, 'Ce type de job n\'a pas d\'activité' end
+    return { x = x, key = key, point = point }
+end
+
+local function fail(msg) return { ok = false, error = msg } end
+
+ESX.RegisterServerCallback('aj:panel', function(src, cb, pointId)
+    local c, err = context(src, pointId)
+    if not c then return cb(fail(err)) end
+    local j, x, key = Config.Jobs[c.key], c.x, c.key
+    local meta = AJ.meta(x.job.name) or { grades = {}, label = j.label }
     local s = AJ.stat(x, key)
     local lvl = levelOf(s.xp)
-    local gradeLabel = nil
-    if x.job.name == j.job then gradeLabel = (j.grades[x.job.grade + 1] or {}).label end
-    cb({ ok = true, key = key, label = j.label, icon = j.icon, desc = j.desc, worker = x.job.name == j.job, gradeLabel = gradeLabel, level = lvl, maxLevel = Config.XP.MaxLevel,
-        xp = s.xp, xpInLevel = s.xp - (lvl - 1) * Config.XP.PerLevel, xpPerLevel = Config.XP.PerLevel, done = s.done, earned = s.earned, active = AJ.Active[src] ~= nil and AJ.Active[src].job == key,
-        payBonus = (lvl - 1) * Config.XP.PayPerLevel + vipBonus(src), grades = j.grades })
+    cb({ ok = true, pointId = pointId, key = key, label = meta.label or j.label, icon = j.icon, desc = j.desc, worker = true, gradeLabel = (meta.grades[x.job.grade + 1] or {}).label,
+        level = lvl, maxLevel = Config.XP.MaxLevel, xp = s.xp, xpInLevel = s.xp - (lvl - 1) * Config.XP.PerLevel, xpPerLevel = Config.XP.PerLevel,
+        done = s.done, earned = s.earned, active = AJ.Active[src] ~= nil and AJ.Active[src].job == key,
+        payBonus = (lvl - 1) * Config.XP.PayPerLevel + vipBonus(src), grades = meta.grades })
 end)
 
-ESX.RegisterServerCallback('aj:join', function(src, cb, key)
-    local j, x = Config.Jobs[key], ESX.GetPlayerFromId(src)
-    if not j or not x then return cb(fail('Erreur')) end
-    local dep = AJ.points(key, 'depot')[1]
-    if not dep or not AJ.near(src, dep, 8.0) then return cb(fail('Trop loin du PNJ')) end
-    if x.job.name == j.job then return cb(fail('Tu fais déjà ce métier')) end
-    -- on ne prend pas un job géré par un autre builder (police, ems…) : seulement le chômage ou un autre métier actif de ce script
-    local keepOut = false
-    for _, k in ipairs(Config.JobOrder) do if Config.Jobs[k].job == x.job.name then keepOut = true end end
-    if x.job.name ~= 'unemployed' and not keepOut then return cb(fail('Quitte d\'abord ton métier actuel')) end
-    AJ.stopShift(src, 'Changement de métier')
-    x.setJob(j.job, 0)
-    cb({ ok = true })
-end)
-
-ESX.RegisterServerCallback('aj:leave', function(src, cb, key)
-    local j, x = Config.Jobs[key], ESX.GetPlayerFromId(src)
-    if not j or not x or x.job.name ~= j.job then return cb(fail('Tu ne fais pas ce métier')) end
-    AJ.stopShift(src, 'Tu as quitté le métier')
-    x.setJob('unemployed', 0)
-    cb({ ok = true })
-end)
-
-ESX.RegisterServerCallback('aj:start', function(src, cb, key)
-    local j, x, m = Config.Jobs[key], ESX.GetPlayerFromId(src), AJ.Modules[key]
-    if not j or not x or not m then return cb(fail('Métier indisponible')) end
-    if x.job.name ~= j.job then return cb(fail('Rejoins d\'abord ce métier')) end
+ESX.RegisterServerCallback('aj:start', function(src, cb, pointId)
+    local c, err = context(src, pointId)
+    if not c then return cb(fail(err)) end
+    local m = AJ.Modules[c.key]
+    if not m then return cb(fail('Activité indisponible')) end
     if AJ.Active[src] then return cb(fail('Tu as déjà un service en cours')) end
-    local dep = AJ.points(key, 'depot')[1]
-    if not dep or not AJ.near(src, dep, 8.0) then return cb(fail('Trop loin du PNJ')) end
-    local state = {}
-    local payload, err = m.start(src, state)
-    if not payload then return cb(fail(err or 'Impossible de commencer')) end
-    AJ.Active[src] = { job = key, state = state, started = os.time() }
-    TriggerClientEvent('aj:client:start', src, key, payload)
+    local state = { pts = buildPts(c.key, c.x.job.name, c.point), jobName = c.x.job.name }
+    local payload, e = m.start(src, state)
+    if not payload then return cb(fail(e or 'Impossible de commencer')) end
+    payload.pts = state.pts
+    AJ.Active[src] = { job = c.key, jobName = c.x.job.name, state = state, started = os.time() }
+    TriggerClientEvent('aj:client:start', src, c.key, payload)
     cb({ ok = true })
 end)
 
 ESX.RegisterServerCallback('aj:stop', function(src, cb)
-    AJ.stopShift(src, 'Service terminé')
+    AJ.stopShift(src, 'Activité terminée')
     cb({ ok = true })
 end)
 
 AddEventHandler('playerDropped', function() AJ.stopShift(source, nil) end)
--- si le joueur change de métier hors du script, son service est arrêté
+-- changement de métier hors du script : l'activité s'arrête
 AddEventHandler('esx:setJob', function(src, job)
     local a = AJ.Active[src]
-    if a and job and job.name ~= Config.Jobs[a.job].job then AJ.stopShift(src, 'Tu n\'as plus ce métier') end
+    if a and job and job.name ~= a.jobName then AJ.stopShift(src, 'Tu n\'as plus ce métier') end
+end)
+-- fin de service dans le Job Builder : l'activité s'arrête aussi
+CreateThread(function()
+    while true do
+        Wait(4000)
+        for src, a in pairs(AJ.Active) do if not onDuty(src) then AJ.stopShift(src, 'Service terminé') end end
+    end
 end)
 
-AddEventHandler('esx:playerLoaded', function(src) SetTimeout(1500, function() AJ.syncPoints(src) end) end)
-RegisterNetEvent('aj:server:requestPoints', function() AJ.syncPoints(source) end)
-
--- ─────────────────────────────── Administration : points ───────────────────────────────
-RegisterCommand('ajpoint', function(src, args)
-    if not AJ.isAdmin(src) or src == 0 then return end
-    local key, kind = args[1], args[2]
-    if not Config.Jobs[key] or not kind or not kind:match('^[%a_]+$') then
-        return AJ.notify(src, 'Usage : /ajpoint <métier> <type> [nom]  — métiers : ' .. table.concat(Config.JobOrder, ', '), 'error')
-    end
-    local ped = GetPlayerPed(src)
-    local c, h = GetEntityCoords(ped), GetEntityHeading(ped)
-    table.remove(args, 1) table.remove(args, 1)
-    local label = table.concat(args, ' '):sub(1, 80)
-    local id = MySQL.insert.await('INSERT INTO activejobs_points (job, kind, label, x, y, z, h) VALUES (?, ?, ?, ?, ?, ?, ?)', { key, kind, label, c.x, c.y, c.z, h })
-    AJ.loadPoints() AJ.syncPoints()
-    AJ.notify(src, ('Point #%d ajouté : %s / %s'):format(id, key, kind), 'success')
-end, false)
-
-RegisterCommand('ajpoints', function(src, args)
-    if not AJ.isAdmin(src) then return end
-    local key = args[1]
-    local out = {}
-    for kind, list in pairs(AJ.Points[key] or {}) do
-        for _, p in ipairs(list) do out[#out + 1] = ('[%s] #%s %s (%.1f, %.1f, %.1f)%s'):format(kind, p.id == 0 and 'défaut' or p.id, p.label, p.x, p.y, p.z, '') end
-    end
-    table.sort(out)
-    local text = #out > 0 and table.concat(out, '\n') or 'Aucun point.'
-    if src == 0 then print(text) else TriggerClientEvent('aj:client:printPoints', src, key, out) end
-end, false)
-
-RegisterCommand('ajdelpoint', function(src, args)
-    if not AJ.isAdmin(src) then return end
-    local id = tonumber(args[1])
-    if not id then return AJ.notify(src, 'Usage : /ajdelpoint <id>', 'error') end
-    MySQL.update.await('DELETE FROM activejobs_points WHERE id = ?', { id })
-    AJ.loadPoints() AJ.syncPoints()
-    AJ.notify(src, 'Point supprimé.', 'success')
-end, false)
-
+-- ─────────────────────────────── Administration ───────────────────────────────
 AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
     installTables()
-    ensureJobs()
-    AJ.loadPoints()
-    SetTimeout(1000, function() AJ.syncPoints() end)
-    print('^2[activejobs] Métiers actifs chargés.^0')
+    print('^2[activejobs] Moteur des métiers actifs chargé (jobs à créer dans le Job Builder).^0')
 end)
 
 AddEventHandler('onResourceStop', function(res)

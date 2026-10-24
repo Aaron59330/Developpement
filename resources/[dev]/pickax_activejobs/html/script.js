@@ -20,15 +20,15 @@ function render(d) {
   const pct = Math.min(100, Math.round(d.xpInLevel / d.xpPerLevel * 100));
   const grades = d.grades.map((g, i) => `<div>${i === 0 ? '' : ''}<b>${esc(g.label)}</b> — ${money(g.salary)} / paie</div>`).join('');
   $root.innerHTML = `<div class="panel"><div class="head"><div class="ic"><svg viewBox="0 0 24 24">${ICONS[d.icon] || ICONS.wrench}</svg></div>
-    <div><h1>${esc(d.label)}</h1><div class="sub">${d.worker ? `Tu es <b>${esc(d.gradeLabel || 'employé')}</b>` : 'Recrutement'}</div></div><button class="x" data-a="close">✕</button></div>
+    <div><h1>${esc(d.label)}</h1><div class="sub">Grade : <b>${esc(d.gradeLabel || 'employé')}</b></div></div><button class="x" data-a="close">✕</button></div>
     <div class="body"><p class="desc">${esc(d.desc)}</p>
       <div class="card"><div class="row"><span class="lvl">Niveau ${d.level}${d.level >= d.maxLevel ? ' (max)' : ''}</span><span class="chip">+${d.payBonus}% de paie</span></div>
         <div class="bar"><i style="width:${d.level >= d.maxLevel ? 100 : pct}%"></i></div>
         <div class="grid3" style="margin-top:14px"><div><b>${d.done}</b><small>missions</small></div><div><b>${money(d.earned)}</b><small>gagnés</small></div><div><b>${d.xp}</b><small>XP</small></div></div></div>
       <div class="card grades">${grades}</div>
-      ${!d.worker ? `<button class="btn pri" data-a="join">Rejoindre ce métier</button>` : d.active ? `<div class="row"><span class="chip ok">Service en cours</span></div><button class="btn danger" data-a="stop">Terminer le service</button>` : `<button class="btn pri" data-a="start">Commencer le service</button><button class="btn danger" data-a="leave">Quitter le métier</button>`}
+      ${d.active ? `<div class="row"><span class="chip ok">Activité en cours</span></div><button class="btn danger" data-a="stop">Terminer l'activité</button>` : `<button class="btn pri" data-a="start">Commencer l'activité</button>`}
     </div></div>`;
-  $root.dataset.key = d.key;
+  $root.dataset.pid = d.pointId;
 }
 
 window.addEventListener('message', e => {
@@ -38,9 +38,9 @@ window.addEventListener('message', e => {
 });
 $root.addEventListener('click', async e => {
   const b = e.target.closest('[data-a]'); if (!b) return;
-  const a = b.dataset.a, key = $root.dataset.key;
+  const a = b.dataset.a, pointId = Number($root.dataset.pid);
   if (a === 'close') return post('close');
   b.disabled = true;
-  await post('act', { key, what: a });
+  await post('act', { pointId, what: a });
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$root.classList.contains('hidden')) post('close'); });

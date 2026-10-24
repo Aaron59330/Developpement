@@ -3,9 +3,11 @@ local KEY = 'garbage'
 AJ.Modules[KEY] = {
     start = function(src, state)
         local j = Config.Jobs[KEY]
-        local spawn = AJ.spawnPoint(KEY)
+        local spawn = AJ.spawnPoint(state)
         if not spawn then return nil, 'Dépôt non configuré' end
-        local zone = j.zones[math.random(#j.zones)]
+        local zones = AJ.pts(state, 'zone')
+        if #zones == 0 then return nil, 'Aucune zone de ramassage' end
+        local zone = zones[math.random(#zones)]
         state.total = math.random(j.bags[1], j.bags[2])
         state.collected = 0
         state.last = 0
@@ -27,7 +29,7 @@ end)
 RegisterNetEvent('aj:garbage:finish', function()
     local src = source
     local st = AJ.session(src, KEY)
-    local dep = AJ.points(KEY, 'depot')[1]
+    local dep = AJ.pts(st, 'depot')[1]
     if not st or not dep or not AJ.near(src, dep, 40.0) then return end
     if st.collected <= 0 then return AJ.notify(src, 'Tu n\'as ramassé aucun sac.', 'error') end
     local j = Config.Jobs[KEY]

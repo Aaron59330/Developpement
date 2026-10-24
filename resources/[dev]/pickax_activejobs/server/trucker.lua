@@ -3,9 +3,9 @@ local KEY = 'trucker'
 AJ.Modules[KEY] = {
     start = function(src, st)
         local j = Config.Jobs[KEY]
-        local spawn, dep = AJ.spawnPoint(KEY), AJ.points(KEY, 'depot')[1]
-        local dests = AJ.points(KEY, 'dest')
-        if not spawn or #dests == 0 then return nil, 'Destinations non configurées (/ajpoint trucker dest)' end
+        local spawn, dep = AJ.spawnPoint(st), AJ.pts(st, 'depot')[1]
+        local dests = AJ.pts(st, 'dest')
+        if not spawn or #dests == 0 then return nil, 'Destinations non configurées (point d\'activité « Destination » dans le Job Builder)' end
         local best = {}
         for _, d in ipairs(dests) do if AJ.dist(d, dep) > 1500.0 then best[#best + 1] = d end end
         if #best == 0 then best = dests end
@@ -36,7 +36,7 @@ end)
 RegisterNetEvent('aj:trucker:return', function()
     local src = source
     local st = AJ.session(src, KEY)
-    local dep = AJ.points(KEY, 'depot')[1]
+    local dep = st and AJ.pts(st, 'depot')[1]
     if not st or not st.delivered or not dep or not AJ.near(src, dep, 40.0) then return end
     local paid = AJ.pay(src, KEY, Config.Jobs[KEY].returnBonus, 10, 'Retour au dépôt', 0)
     AJ.notify(src, ('Camion rendu : prime de retour %d $'):format(paid), 'success')

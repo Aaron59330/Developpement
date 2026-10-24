@@ -44,9 +44,9 @@ local function push(src)
     if x then TriggerClientEvent('aj:farm:plots', src, snapshot(x)) end
 end
 
-local function fieldOk(src, plot)
+local function fieldOk(src, st, plot)
     local j = Config.Jobs[KEY]
-    local f = AJ.points(KEY, 'field')[1]
+    local f = AJ.pts(st, 'field')[1]
     return f and plot and plot >= 1 and plot <= j.fieldRows * j.fieldCols and AJ.near(src, f, (j.fieldRows + j.fieldCols) * j.spacing + 12.0)
 end
 
@@ -54,8 +54,8 @@ AJ.Modules[KEY] = {
     start = function(src, st)
         local j = Config.Jobs[KEY]
         local x = ESX.GetPlayerFromId(src)
-        local field, market, spawn = AJ.points(KEY, 'field')[1], AJ.points(KEY, 'market')[1], AJ.spawnPoint(KEY)
-        if not field or not market then return nil, 'Champ ou marché non configuré (/ajpoint farmer field | market)' end
+        local field, market, spawn = AJ.pts(st, 'field')[1], AJ.pts(st, 'market')[1], AJ.spawnPoint(st)
+        if not field or not market then return nil, 'Champ ou marché non configuré (points d\'activité « Champ » et « Marché » dans le Job Builder)' end
         local crops = {}
         for k, c in pairs(j.crops) do crops[k] = { label = c.label, seed = c.seed, item = c.item, models = c.models, price = c.price, seedPrice = c.seedPrice } end
         return { field = field, market = market, spawn = spawn, tractor = j.tractor, rows = j.fieldRows, cols = j.fieldCols, spacing = j.spacing, crops = crops, plots = snapshot(x) }
@@ -65,10 +65,11 @@ AJ.Modules[KEY] = {
 
 RegisterNetEvent('aj:farm:sow', function(plot, crop)
     local src = source
-    if not AJ.session(src, KEY) then return end
+    local st = AJ.session(src, KEY)
+    if not st then return end
     local x, c = ESX.GetPlayerFromId(src), Config.Jobs[KEY].crops[crop]
     plot = tonumber(plot)
-    if not x or not c or not fieldOk(src, plot) then return end
+    if not x or not c or not fieldOk(src, st, plot) then return end
     local f = farmOf(x)
     if f[plot] then return AJ.notify(src, 'Cette parcelle est déjà semée.', 'error') end
     if not ox():RemoveItem(src, c.seed, 1) then return AJ.notify(src, ('Tu n\'as pas de graines de %s (achète-en au marché).'):format(c.label:lower()), 'error') end
@@ -80,10 +81,11 @@ end)
 
 RegisterNetEvent('aj:farm:water', function(plot)
     local src = source
-    if not AJ.session(src, KEY) then return end
+    local st = AJ.session(src, KEY)
+    if not st then return end
     local x = ESX.GetPlayerFromId(src)
     plot = tonumber(plot)
-    if not x or not fieldOk(src, plot) then return end
+    if not x or not fieldOk(src, st, plot) then return end
     local p = farmOf(x)[plot]
     if not p or p.watered or progress(p) >= 1.0 then return end
     -- on garde la progression déjà accomplie : on décale la date de plantation pour conserver le ratio
@@ -99,10 +101,11 @@ end)
 
 RegisterNetEvent('aj:farm:harvest', function(plot)
     local src = source
-    if not AJ.session(src, KEY) then return end
+    local st = AJ.session(src, KEY)
+    if not st then return end
     local x = ESX.GetPlayerFromId(src)
     plot = tonumber(plot)
-    if not x or not fieldOk(src, plot) then return end
+    if not x or not fieldOk(src, st, plot) then return end
     local f = farmOf(x)
     local p = f[plot]
     if not p or progress(p) < 1.0 then return end
@@ -119,8 +122,9 @@ end)
 
 RegisterNetEvent('aj:farm:buy', function(crop, qty)
     local src = source
-    if not AJ.session(src, KEY) then return end
-    local c, x, m = Config.Jobs[KEY].crops[crop], ESX.GetPlayerFromId(src), AJ.points(KEY, 'market')[1]
+    local st = AJ.session(src, KEY)
+    if not st then return end
+    local c, x, m = Config.Jobs[KEY].crops[crop], ESX.GetPlayerFromId(src), AJ.pts(st, 'market')[1]
     qty = math.floor(tonumber(qty) or 0)
     if not c or not x or not m or qty < 1 or qty > 50 or not AJ.near(src, m, 10.0) then return end
     local cost = qty * c.seedPrice
@@ -133,8 +137,9 @@ end)
 
 RegisterNetEvent('aj:farm:sell', function()
     local src = source
-    if not AJ.session(src, KEY) then return end
-    local m = AJ.points(KEY, 'market')[1]
+    local st = AJ.session(src, KEY)
+    if not st then return end
+    local m = AJ.pts(st, 'market')[1]
     if not m or not AJ.near(src, m, 10.0) then return end
     local base, count = 0, 0
     for _, c in pairs(Config.Jobs[KEY].crops) do

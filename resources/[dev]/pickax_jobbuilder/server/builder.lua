@@ -142,6 +142,15 @@ local function cleanPoint(p, maxGrade, jobType)
     elseif p.type == 'missions' then
         out.data.spawn = cleanCoords(d.spawn)   -- position d'apparition du véhicule de mission (optionnelle : sinon le point lui-même)
 
+    elseif p.type == 'activity' then
+        out.data.spawn = cleanCoords(d.spawn)   -- sortie du véhicule de travail (optionnelle : sinon devant le poste)
+
+    elseif p.type == 'actpoint' then
+        local roles = Config.ActivityRoles[jobType or ''] or {}
+        local role = str(d.role, 20)
+        if not roles[role] then return nil, ('Point d\'activité "%s" : choisis un rôle valide pour ce métier'):format(out.label) end
+        out.data.role = role
+
     elseif p.type == 'showroom' then
         local spawn = cleanCoords(d.spawn)
         if not spawn then return nil, ('Showroom "%s" : position de livraison des véhicules manquante'):format(out.label) end
@@ -446,7 +455,7 @@ ESX.RegisterServerCallback('jobbuilder:catalog', function(src, cb)
     end
     table.sort(items, function(a, b) return a.name < b.name end)
     local vehicles = MySQL.query.await('SELECT name, model, category FROM vehicles ORDER BY name') or {}
-    cb({ items = items, vehicles = vehicles, vehicleCategories = (JB.vehicleCategories and JB.vehicleCategories() or {}), blipScale = PickaxTheme and PickaxTheme.blipScale or nil, jobTypes = Config.JobTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds, categoryTypes = Config.Dealer.CategoryTypes, maxItems = Config.MaxItemsPerPoint, actions = Config.Actions, clothesKeys = Config.ClothesKeys, kitchen = Config.Kitchen, announceTypes = Config.Announce.Types, announce = Config.Announce, police = Config.Police, tuning = Config.Tuning, ems = Config.Ems, bank = Config.Bank, pointRules = JB_POINT_RULES })
+    cb({ items = items, vehicles = vehicles, vehicleCategories = (JB.vehicleCategories and JB.vehicleCategories() or {}), blipScale = PickaxTheme and PickaxTheme.blipScale or nil, activityRoles = Config.ActivityRoles, jobTypes = Config.JobTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds, categoryTypes = Config.Dealer.CategoryTypes, maxItems = Config.MaxItemsPerPoint, actions = Config.Actions, clothesKeys = Config.ClothesKeys, kitchen = Config.Kitchen, announceTypes = Config.Announce.Types, announce = Config.Announce, police = Config.Police, tuning = Config.Tuning, ems = Config.Ems, bank = Config.Bank, pointRules = JB_POINT_RULES })
 end)
 
 ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)

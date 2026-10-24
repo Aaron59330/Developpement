@@ -154,6 +154,7 @@ local function openPoint(point)
             return
         end
         if res.kind == 'tuning' then return OpenTuning(point, res) end
+        if res.kind == 'activity' then TriggerEvent('aj:client:openPanel', point.id) return end   -- panneau de pickax_activejobs
         OpenUI({ action = 'open', kind = res.kind, pointId = point.id, data = res })
     end, point.id)
 end
@@ -176,7 +177,7 @@ CreateThread(function()
             for _, p in ipairs(State.points) do
                 local c = p.coords
                 local dist = #(pos - vector3(c.x, c.y, c.z))
-                if dist < Config.DrawDistance and p.type ~= 'testdrive' then
+                if dist < Config.DrawDistance and p.type ~= 'testdrive' and p.type ~= 'actpoint' then
                     sleep = 0
                     local t = Config.PointTypes[(p.type == 'garage' and p.kind and p.kind ~= 'car') and ('garage_' .. p.kind) or p.type] or Config.PointTypes[p.type]
                     if p.style then                      -- style propre au point / au job : seuls les champs renseignés remplacent ceux du type

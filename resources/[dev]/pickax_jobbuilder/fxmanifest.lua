@@ -33,6 +33,7 @@ server_scripts {
     'server/bank.lua',
     'server/announce.lua',
     'server/phone.lua',
+    'server/activity.lua',
     'server/compat.lua',
 }
 

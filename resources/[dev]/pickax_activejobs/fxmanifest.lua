@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_activejobs'
-description 'Métiers actifs : éboueur, dépanneur, pompier, fermier, laveur auto, camionneur, conducteur de train — vraies missions et interactions (ESX + oxmysql)'
+description 'Moteur des métiers actifs (éboueur, dépanneur, laveur auto, camionneur, fermier, pompier, conducteur de train) : missions, XP, niveaux — les jobs se créent dans le Job Builder'
 version '1.0.0'
 
 shared_scripts {
@@ -45,4 +45,5 @@ files {
 dependencies {
     'es_extended',
     'oxmysql',
+    'pickax_jobbuilder',
 }

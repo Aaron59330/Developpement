@@ -3,8 +3,8 @@ local KEY = 'train'
 AJ.Modules[KEY] = {
     start = function(src, st)
         local j = Config.Jobs[KEY]
-        local stations = AJ.points(KEY, 'station')
-        if #stations < 2 then return nil, 'Il faut au moins 2 stations (/ajpoint train station <nom>)' end
+        local stations = AJ.pts(st, 'station')
+        if #stations < 2 then return nil, 'Il faut au moins 2 stations (points d\'activité « Station » dans le Job Builder)' end
         st.idx, st.last = 2, 0       -- on part de la station 1 : prochain arrêt = station 2
         return { stations = stations, variation = j.variation, maxSpeed = j.maxSpeed, stopRadius = j.stopRadius, stopSpeed = j.stopSpeed, dwell = j.dwell }
     end,
@@ -14,7 +14,7 @@ AJ.Modules[KEY] = {
 RegisterNetEvent('aj:train:stop', function(idx)
     local src = source
     local st = AJ.session(src, KEY)
-    local stations = AJ.points(KEY, 'station')
+    local stations = st and AJ.pts(st, 'station') or {}
     if not st or idx ~= st.idx or not stations[idx] then return end
     local j = Config.Jobs[KEY]
     if not AJ.near(src, stations[idx], j.stopRadius + 40.0) then return end

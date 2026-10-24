@@ -44,6 +44,9 @@ Crée des jobs **police, EMS, mécano, taxi, agence immobilière, bar, personnal
 - **Blip** du job sur la carte, **logs** en base (+ webhook Discord optionnel).
 - Le brouillon reste en mémoire quand tu fermes avec Échap (pour aller relever des coordonnées / une tenue).
 
+## 🚜 Métiers actifs (types Éboueur, Dépanneur, Laveur auto, Camionneur, Fermier, Pompier, Conducteur de train)
+Créés comme les autres jobs. Points dédiés : **Poste d'activité** (démarrage de l'activité en service) et **Points d'activité** (rôle : zone, fourrière, baie, destination, champ, marché, incendie, station). Le gameplay, l'XP et la paie sont dans la ressource `pickax_activejobs` (voir son README).
+
 ## 🏠 Agence immobilière (jobs de type `realestate`)
 Les agents ouvrent **F6 → Gestion immobilière** (aucune case à cocher : automatique pour ce type de job).
 - **Tableau de bord** : revenus 30 jours, taux d'occupation, biens disponibles / vendus / loués, activité récente.

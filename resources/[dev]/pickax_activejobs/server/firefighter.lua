@@ -21,10 +21,16 @@ local function clear(reason)
     for _, src in ipairs(workers()) do TriggerClientEvent('aj:fire:clear', src, id, reason) end
 end
 
-local function createIncident(siteIdx)
+local function createIncident()
     if Incident then return false end
     local j = Config.Jobs[KEY]
-    local site = j.sites[siteIdx or math.random(#j.sites)]
+    -- le lieu est tiré parmi les points d'incendie d'un pompier en service (Job Builder), sinon les lieux par défaut
+    local w = workers()
+    if #w == 0 then return false end
+    local sites = AJ.pts(AJ.Active[w[math.random(#w)]].state, 'fire')
+    if #sites == 0 then return false end
+    local site = sites[math.random(#sites)]
+    site = { label = (site.label ~= '' and site.label) or 'Incendie', x = site.x, y = site.y, z = site.z }
     local n = math.random(j.foyers[1], j.foyers[2])
     local foyers = {}
     for i = 1, n do
@@ -42,7 +48,7 @@ end
 AJ.Modules[KEY] = {
     start = function(src, st)
         local j = Config.Jobs[KEY]
-        local spawn = AJ.spawnPoint(KEY)
+        local spawn = AJ.spawnPoint(st)
         if not spawn then return nil, 'Caserne non configurée' end
         st.score = 0
         -- premier incident quelques secondes après la prise de service s'il n'y en a pas déjà

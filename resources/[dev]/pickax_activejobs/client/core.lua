@@ -1,6 +1,6 @@
 ESX = exports['es_extended']:getSharedObject()
 
-AJ = { Points = {}, Active = nil, Mod = {}, Hud = {}, Blips = {}, Ents = {} }
+AJ = { Pts = {}, Active = nil, Mod = {}, Hud = {}, Blips = {}, Ents = {} }
 
 -- ─────────────────────────────── Outils communs ───────────────────────────────
 function AJ.Notify(msg, kind)
@@ -28,7 +28,8 @@ function AJ.Text3D(x, y, z, text, scale)
     ClearDrawOrigin()
 end
 
-function AJ.Points_(key, kind) return (AJ.Points[key] and AJ.Points[key][kind]) or {} end
+-- Points du terrain de la session en cours (poste, sortie, points d'activité du Job Builder)
+function AJ.Points_(_, kind) return AJ.Pts[kind] or {} end
 
 function AJ.LoadModel(name)
     local hash = type(name) == 'number' and name or joaat(name)
@@ -136,100 +137,40 @@ CreateThread(function()
     end
 end)
 
--- ─────────────────────────────── Points & dépôts (PNJ + menu) ───────────────────────────────
-RegisterNetEvent('aj:client:points', function(p) AJ.Points = p or {} end)
-CreateThread(function() Wait(2000) TriggerServerEvent('aj:server:requestPoints') end)
-
-local peds, depotBlips = {}, {}
+-- ─────────────────────────────── Panneau du poste d'activité (ouvert par le Job Builder) ───────────────────────────────
 local uiOpen = false
-
 local function closePanel() uiOpen = false SetNuiFocus(false, false) SendNUIMessage({ action = 'close' }) end
 
-local function openPanel(key)
+local function openPanel(pointId)
     ESX.TriggerServerCallback('aj:panel', function(res)
         if not res or not res.ok then return AJ.Notify('~r~' .. ((res and res.error) or 'Indisponible')) end
         uiOpen = true
         SetNuiFocus(true, true)
         SendNUIMessage({ action = 'open', data = res, accent = PickaxTheme and PickaxTheme.rgb or nil })
-    end, key)
+    end, pointId)
 end
-
-CreateThread(function()
-    while true do
-        local sleep = 1000
-        local pos = GetEntityCoords(PlayerPedId())
-        for key, j in pairs(Config.Jobs) do
-            local d = AJ.Points_(key, 'depot')[1]
-            if d then
-                local dist = #(pos - vector3(d.x, d.y, d.z))
-                -- PNJ
-                if dist < 70.0 then
-                    if not peds[key] or not DoesEntityExist(peds[key]) then
-                        local hash = AJ.LoadModel(j.ped)
-                        if hash then
-                            local ped = CreatePed(4, hash, d.x, d.y, d.z - 1.0, d.h + 0.0, false, false)
-                            SetEntityInvincible(ped, true) SetBlockingOfNonTemporaryEvents(ped, true) FreezeEntityPosition(ped, true)
-                            TaskStartScenarioInPlace(ped, 'WORLD_HUMAN_CLIPBOARD', 0, true)
-                            SetModelAsNoLongerNeeded(hash)
-                            peds[key] = ped
-                        end
-                    end
-                elseif peds[key] and DoesEntityExist(peds[key]) then DeleteEntity(peds[key]) peds[key] = nil end
-                if dist < Config.DrawDistance then
-                    sleep = 0
-                    DrawMarker(1, d.x, d.y, d.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 0.6, 0, 164, 255, 120, false, false, 2, false, nil, nil, false)
-                    if dist < 2.2 and not uiOpen then
-                        AJ.Text3D(d.x, d.y, d.z + 1.1, j.label, 0.34)
-                        AJ.Help('Appuie sur ~INPUT_PICKUP~ pour parler au recruteur — ' .. j.label)
-                        if IsControlJustPressed(0, Config.Interact) then openPanel(key) end
-                    end
-                end
-            end
-        end
-        Wait(sleep)
-    end
-end)
-
--- blips des dépôts
-local function rebuildDepotBlips()
-    for _, b in ipairs(depotBlips) do AJ.RemoveBlip(b) end
-    depotBlips = {}
-    for key, j in pairs(Config.Jobs) do
-        local d = AJ.Points_(key, 'depot')[1]
-        if d then
-            local b = AddBlipForCoord(d.x + 0.0, d.y + 0.0, d.z + 0.0)
-            SetBlipSprite(b, j.blip.sprite) SetBlipColour(b, j.blip.color) SetBlipScale(b, 0.75) SetBlipAsShortRange(b, true)
-            BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(j.label) EndTextCommandSetBlipName(b)
-            depotBlips[#depotBlips + 1] = b
-        end
-    end
-end
-RegisterNetEvent('aj:client:points', function() SetTimeout(200, rebuildDepotBlips) end)
+RegisterNetEvent('aj:client:openPanel', function(pointId) openPanel(pointId) end)
 
 -- ─────────────────────────────── NUI ───────────────────────────────
 RegisterNUICallback('close', function(_, cb) closePanel() cb({}) end)
 RegisterNUICallback('act', function(body, cb)
-    local key, what = body.key, body.what
-    local map = { join = 'aj:join', leave = 'aj:leave', start = 'aj:start' }
+    local pid, what = body.pointId, body.what
     if what == 'stop' then
-        ESX.TriggerServerCallback('aj:stop', function() openPanel(key) cb({ ok = true }) end)
+        ESX.TriggerServerCallback('aj:stop', function() openPanel(pid) cb({ ok = true }) end)
         return
     end
-    if not map[what] then return cb({ ok = false }) end
-    ESX.TriggerServerCallback(map[what], function(res)
-        if res and res.ok then
-            if what == 'start' then closePanel() else openPanel(key) end
-        else
-            AJ.Notify('~r~' .. ((res and res.error) or 'Erreur'))
-        end
+    if what ~= 'start' then return cb({ ok = false }) end
+    ESX.TriggerServerCallback('aj:start', function(res)
+        if res and res.ok then closePanel() else AJ.Notify('~r~' .. ((res and res.error) or 'Erreur')) end
         cb(res or { ok = false })
-    end, key)
+    end, pid)
 end)
 
 -- ─────────────────────────────── Début / fin de service ───────────────────────────────
 RegisterNetEvent('aj:client:start', function(key, data)
     AJ.Cleanup()
     AJ.Active = key
+    AJ.Pts = (data and data.pts) or {}
     local m = AJ.Mod[key]
     if m and m.start then
         local ok, err = pcall(m.start, data or {})
@@ -249,15 +190,8 @@ RegisterCommand('finservice', function()
     if AJ.Active then ESX.TriggerServerCallback('aj:stop', function() end) else AJ.Notify('Tu n\'es pas en service.') end
 end, false)
 
-RegisterNetEvent('aj:client:printPoints', function(key, list)
-    for _, l in ipairs(list or {}) do print('[activejobs] ' .. key .. ' ' .. l) end
-    AJ.Notify(('%d point(s) pour %s : liste dans la console F8.'):format(#(list or {}), key))
-end)
-
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
-    for _, p in pairs(peds) do if DoesEntityExist(p) then DeleteEntity(p) end end
-    for _, b in ipairs(depotBlips) do AJ.RemoveBlip(b) end
     AJ.Cleanup()
     if uiOpen then SetNuiFocus(false, false) end
 end)

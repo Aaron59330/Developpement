@@ -124,10 +124,10 @@ const P = {
 };
 const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${P[n] || P.grid}</svg>`;
 
-const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car', realestate: 'home', dealer: 'car', government: 'landmark', bank: 'landmark', bar: 'utensils', custom: 'briefcase' };
+const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car', realestate: 'home', dealer: 'car', government: 'landmark', bank: 'landmark', bar: 'utensils', custom: 'briefcase', garbage: 'trash', towing: 'wrench', carwash: 'droplet', trucker: 'car', farmer: 'sprout', firefighter: 'siren', train: 'route' };
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
-const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
+const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login', activity: 'route', actpoint: 'pin' };
 const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout', vehctl: 'siren', props: 'box' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
@@ -478,6 +478,7 @@ const Builder = {
       if (p.type === 'garage' && p.data.store) out.push({ root: this.cur, path: `points.${i}.data.store.coords`, label: `${name} — rangement` });
       if (p.type === 'showroom') out.push({ root: this.cur, path: `points.${i}.data.spawn`, label: `${name} — livraison` });
       if (p.type === 'missions') out.push({ root: this.cur, path: `points.${i}.data.spawn`, label: `${name} — départ des véhicules` });
+      if (p.type === 'activity') out.push({ root: this.cur, path: `points.${i}.data.spawn`, label: `${name} — sortie du véhicule` });
       if (p.type === 'testdrive') out.push({ root: this.cur, path: `points.${i}.data.spawn`, label: `${name} — départ de l'essai` });
     });
     return out;
@@ -510,6 +511,7 @@ const Builder = {
       ${j.type === 'mecano' || c.points.some(p => p.type === 'tuning') ? this.tuningCard(s) : ''}
       ${this.phoneCard(s)}
       ${this.announceCard(s)}
+      ${(this.catalog.jobTypes[j.type] || {}).activity ? `<div class="card"><div class="card-h"><div class="t">${ic('route', 16)} Activité du métier</div>${chip(c.points.some(p => p.type === 'activity') ? 'Poste placé' : 'Ajoute un « Poste d\'activité »', c.points.some(p => p.type === 'activity') ? 'ok' : 'warn')}</div><p class="hint">Métier de terrain avec de vraies missions, de l'XP, des niveaux (+3 % de paie par niveau, bonus VIP) et des promotions automatiques. Dans l'onglet <b>Points</b> : place un <b>Poste d'activité</b> (là où les employés en service démarrent) puis des <b>Points d'activité</b> (zones, destinations, baies, champ, marché, incendies, stations selon le métier).</p></div>` : ''}
       <div class="card"><div class="card-h"><div class="t">${ic('route', 16)} Missions PNJ</div>${chip(s.missions_enabled === false ? 'Désactivées' : 'Activées', s.missions_enabled === false ? 'mute' : 'ok')}</div>
         <div class="grid3"><label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="job.settings.missions_enabled" data-t="b" ${s.missions_enabled === false ? '' : 'checked'}> Activer les missions pour ce job</label>
         ${fld('Paiement des missions', `<select data-path="job.settings.missions_source"><option value="system" ${s.missions_source !== 'society' ? 'selected' : ''}>Créé par le serveur (gratuit pour la société)</option><option value="society" ${s.missions_source === 'society' ? 'selected' : ''}>Payé par le compte société</option></select>`)}
@@ -777,6 +779,11 @@ const Builder = {
         ${addBtn(base + '.data.recipes', 'recipe', 'Recette')}</div>`;
     } else if (p.type === 'missions') {
       body = `<div class="card"><div class="card-h"><div class="t">Missions PNJ</div></div><p class="hint" style="margin-bottom:12px">Les employés viennent ici choisir une mission. <b>Départ des véhicules</b> (optionnel) : où apparaissent les véhicules de mission (livraison…), sinon à côté du marker.</p>${coordField(base + '.data.spawn', d.spawn, { tp: true })}</div>`;
+    } else if (p.type === 'activity') {
+      body = `<div class="card"><div class="card-h"><div class="t">Poste d'activité</div></div><p class="hint" style="margin-bottom:12px">Les employés <b>en service</b> viennent ici démarrer leur activité (missions, XP, niveaux, paie). <b>Sortie du véhicule</b> (optionnelle) : où apparaît le véhicule de travail, sinon devant le poste. Les repères du terrain (zone, fourrière, baie, destination, champ, marché, incendie, station) se placent avec des <b>Points d'activité</b>.</p>${coordField(base + '.data.spawn', d.spawn, { tp: true })}</div>`;
+    } else if (p.type === 'actpoint') {
+      const roles = (this.catalog.activityRoles || {})[this.cur.job.type] || {};
+      body = `<div class="card"><div class="card-h"><div class="t">Point d'activité</div></div><div style="max-width:380px">${fld('Rôle de ce point', `<select data-path="${base}.data.role">${Object.entries(roles).map(([k, l]) => `<option value="${k}" ${d.role === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`)}</div><p class="hint mt">Pose-en autant que nécessaire (plusieurs zones, destinations, baies…). Pour le train, l'<b>ordre de création</b> des stations est l'ordre de la ligne. Si un rôle n'a aucun point, des valeurs par défaut approximatives sont utilisées.</p></div>`;
     } else if (p.type === 'showroom') {
       body = `<div class="card"><div class="card-h"><div class="t">Livraison des véhicules</div></div><p class="hint" style="margin-bottom:12px">Position où le véhicule apparaît après un achat. Le showroom est <b>public</b> : tout le monde voit le catalogue, les vendeurs vendent depuis ici.</p>${coordField(base + '.data.spawn', d.spawn, { tp: true })}</div>`;
     } else if (p.type === 'display') {
@@ -802,7 +809,7 @@ const Builder = {
   },
 
   newPoint(type) {
-    const data = { missions: { spawn: null }, showroom: { spawn: null }, display: { model: '', color: null }, testdrive: { spawn: null, seconds: 120 }, garage: { kind: 'car', spawn: null, vehicles: [], store: { coords: null, radius: 5, any: false } }, cloakroom: { outfits: [] }, armory: { items: [] }, stash: { slots: 50, weight: 100 }, boss: {}, shop: { public: false, items: [] }, harvest: { name: '', label: '', count: 1, seconds: 8 }, kitchen: { recipes: [] }, tuning: { radius: 6 }, garage_return: { kind: 'car', radius: 5, any: false } }[type];
+    const data = { activity: { spawn: null }, actpoint: { role: Object.keys((this.catalog.activityRoles || {})[this.cur.job.type] || {})[0] || '' }, missions: { spawn: null }, showroom: { spawn: null }, display: { model: '', color: null }, testdrive: { spawn: null, seconds: 120 }, garage: { kind: 'car', spawn: null, vehicles: [], store: { coords: null, radius: 5, any: false } }, cloakroom: { outfits: [] }, armory: { items: [] }, stash: { slots: 50, weight: 100 }, boss: {}, shop: { public: false, items: [] }, harvest: { name: '', label: '', count: 1, seconds: 8 }, kitchen: { recipes: [] }, tuning: { radius: 6 }, garage_return: { kind: 'car', radius: 5, any: false } }[type];
     return { type, label: this.catalog.pointTypes[type].label, coords: null, min_grade: type === 'boss' ? this.cur.job.boss_grade : 0, data };
   },
 

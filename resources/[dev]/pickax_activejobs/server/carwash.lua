@@ -1,10 +1,10 @@
 local KEY = 'carwash'
 
 -- Baies : points « bay » configurés, sinon alignées devant le dépôt
-local function bays()
-    local list = AJ.points(KEY, 'bay')
+local function bays(st)
+    local list = AJ.pts(st, 'bay')
     if #list > 0 then return list end
-    local d = AJ.points(KEY, 'depot')[1]
+    local d = AJ.pts(st, 'depot')[1]
     if not d then return {} end
     local rad = math.rad(d.h)
     local fx, fy, rx, ry = -math.sin(rad), math.cos(rad), math.cos(rad), math.sin(rad)
@@ -18,7 +18,7 @@ end
 
 AJ.Modules[KEY] = {
     start = function(src, st)
-        local list = bays()
+        local list = bays(st)
         if #list == 0 then return nil, 'Dépôt non configuré' end
         st.bays, st.pending, st.last, st.nextId = list, {}, 0, 1
         return { bays = list, wash = Config.Jobs[KEY].washSeconds }

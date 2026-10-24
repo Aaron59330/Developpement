@@ -61,6 +61,20 @@ Config.PointTypes = {
     harvest   = { label = 'Récolte',         color = PK_MKC(),  marker = PK_MKT },
     kitchen   = { label = 'Cuisine / Bar',   color = PK_MKC(),  marker = PK_MKT },
     tuning    = { label = 'Atelier tuning',  color = PK_MKC(),  marker = PK_MKT },
+    -- Métiers actifs (pickax_activejobs) : le poste d'activité démarre la mission ; les points d'activité (rôle au choix) décrivent le terrain
+    activity  = { label = 'Poste d\'activité', color = PK_MKC(), marker = PK_MKT },
+    actpoint  = { label = 'Point d\'activité', color = PK_MKC(), marker = PK_MKT },
+}
+
+-- Rôles des « Points d\'activité » selon le type de job (le poste d\'activité sert de dépôt ; sa sortie de véhicule = rôle « spawn »)
+Config.ActivityRoles = {
+    garbage     = { zone = 'Zone de ramassage (centre)' },
+    towing      = { zone = 'Lieu de panne (centre de zone)', scrap = 'Fourrière (dépose)' },
+    carwash     = { bay = 'Baie de lavage' },
+    trucker     = { dest = 'Destination de livraison' },
+    farmer      = { field = 'Centre du champ', market = 'Marché (vente / graines)' },
+    firefighter = { fire = 'Lieu d\'incendie' },
+    train       = { station = 'Station (dans l\'ordre de la ligne)' },
 }
 
 -- Types de points réservés à certains métiers (absent = tous les jobs ; le type « Personnalisé » peut tout placer).
@@ -68,10 +82,12 @@ Config.PointTypes = {
 JB_POINT_RULES = {
     armory = { 'police', 'ems' }, tuning = { 'mecano' }, harvest = { 'bar' }, kitchen = { 'bar' },
     showroom = { 'dealer' }, display = { 'dealer' }, testdrive = { 'dealer' },
+    activity = { 'garbage', 'towing', 'carwash', 'trucker', 'farmer', 'firefighter', 'train' },
+    actpoint = { 'garbage', 'towing', 'carwash', 'trucker', 'farmer', 'firefighter', 'train' },
 }
 function JBPointAllowed(pointType, jobType)
     local rule = JB_POINT_RULES[pointType]
-    if not rule or jobType == 'custom' then return true end
+    if not rule or (jobType == 'custom' and pointType ~= 'activity' and pointType ~= 'actpoint') then return true end
     for _, t in ipairs(rule) do if t == jobType then return true end end
     return false
 end
@@ -672,6 +688,49 @@ Config.JobTypes = {
             { name = 'barman',  label = 'Barman',  salary = 200 },
             { name = 'boss',    label = 'Gérant',  salary = 450 },
         },
+    },
+    -- ── Métiers actifs (moteur : pickax_activejobs) : une activité de terrain avec XP, niveaux et vraies missions ──
+    garbage = {
+        label = 'Éboueur', activity = true, blip = { sprite = 318, color = 25, scale = PK_BSF(0.9) },
+        actions = { 'props' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Éboueur', salary = 90 }, { name = 'confirme', label = 'Éboueur confirmé', salary = 130 }, { name = 'chef', label = 'Chef d\'équipe', salary = 180 }, { name = 'boss', label = 'Patron', salary = 350 } },
+    },
+    towing = {
+        label = 'Dépanneur', activity = true, blip = { sprite = 477, color = 47, scale = PK_BSF(0.9) },
+        actions = { 'props', 'invoice' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Dépanneur', salary = 110 }, { name = 'confirme', label = 'Dépanneur confirmé', salary = 150 }, { name = 'chef', label = 'Chef d\'atelier', salary = 200 }, { name = 'boss', label = 'Patron', salary = 400 } },
+    },
+    carwash = {
+        label = 'Laveur auto', activity = true, blip = { sprite = 100, color = 3, scale = PK_BSF(0.9) },
+        actions = { 'props', 'invoice' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Laveur', salary = 80 }, { name = 'confirme', label = 'Laveur confirmé', salary = 115 }, { name = 'chef', label = 'Responsable', salary = 160 }, { name = 'boss', label = 'Patron', salary = 320 } },
+    },
+    trucker = {
+        label = 'Camionneur (poids lourd)', activity = true, blip = { sprite = 477, color = 5, scale = PK_BSF(0.9) },
+        actions = { 'props' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Chauffeur', salary = 130 }, { name = 'confirme', label = 'Chauffeur confirmé', salary = 175 }, { name = 'chef', label = 'Chef de convoi', salary = 230 }, { name = 'boss', label = 'Patron', salary = 450 } },
+    },
+    farmer = {
+        label = 'Fermier', activity = true, blip = { sprite = 479, color = 2, scale = PK_BSF(0.9) },
+        actions = { 'props' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Ouvrier agricole', salary = 85 }, { name = 'confirme', label = 'Fermier', salary = 125 }, { name = 'chef', label = 'Exploitant', salary = 175 }, { name = 'boss', label = 'Patron', salary = 350 } },
+    },
+    firefighter = {
+        label = 'Pompier', activity = true, blip = { sprite = 436, color = 1, scale = PK_BSF(0.9) },
+        actions = { 'props' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Sapeur', salary = 140 }, { name = 'confirme', label = 'Caporal', salary = 190 }, { name = 'chef', label = 'Capitaine', salary = 260 }, { name = 'boss', label = 'Colonel', salary = 500 } },
+    },
+    train = {
+        label = 'Conducteur de train', activity = true, blip = { sprite = 795, color = 38, scale = PK_BSF(0.9) },
+        actions = { 'props' },
+        points = { 'activity', 'actpoint', 'cloakroom', 'stash', 'boss' },
+        grades = { { name = 'recrue', label = 'Conducteur', salary = 150 }, { name = 'confirme', label = 'Conducteur confirmé', salary = 200 }, { name = 'chef', label = 'Chef de ligne', salary = 270 }, { name = 'boss', label = 'Directeur', salary = 550 } },
     },
     custom = {
         label = 'Personnalisé', blip = { sprite = 478, color = 0, scale = PK_BSF(0.9) },

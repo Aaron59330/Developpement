@@ -268,6 +268,12 @@ ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
         if not JB.openMissions then return cb(fail('Module missions non chargé (server/missions.lua)')) end
         JB.openMissions(src, xPlayer, point, job, cb)
 
+    elseif point.type == 'activity' then
+        cb({ ok = true, kind = 'activity', label = point.label })
+
+    elseif point.type == 'actpoint' then
+        cb(fail('Ce point sert de repère à ton activité'))
+
     elseif point.type == 'testdrive' then
         cb(fail('Utilise le showroom pour demander un essai'))
 
