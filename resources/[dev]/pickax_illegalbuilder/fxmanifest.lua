@@ -18,7 +18,6 @@ server_scripts {
     'server/drugs.lua',
     'server/robbery.lua',
     'server/plants.lua',
-    'server/toxic.lua',
     'server/gofast.lua',
     'server/seed.lua',
 }
@@ -30,7 +29,6 @@ client_scripts {
     'client/drugs.lua',
     'client/robbery.lua',
     'client/plants.lua',
-    'client/toxic.lua',
     'client/gofast.lua',
 }
 

@@ -2681,7 +2681,11 @@ const Runtime = {
   // ── Meubles de la propriété ──
   furnTab: 'catalog', furnCat: 'all', furnQ: '',
   renderFurniture() {
-    const d = this.data, pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit, vl = d.vipLimits || {};
+    const d = this.data;
+    // réouverture du menu sur l'onglet Laboratoire (après une pose) : on recharge l'équipement une fois pour ces données
+    if (this.furnTab === 'lab' && d.lab && this.labFor !== d) { this.labFor = d; rpc('lab:list').then(r => { if (r && r.ok && this.data === d) { this.labData = r; this.render(); } }); }
+    if (!d.lab && this.furnTab === 'lab') this.furnTab = 'catalog';
+    const pct = Math.min(100, Math.round(d.count / Math.max(1, d.limit) * 100)), full = d.count >= d.limit, vl = d.vipLimits || {};
     const cats = [...new Set((d.catalog || []).map(c => c.cat))];
     const tiers = [['Sans VIP', d.base, 0], ['Bronze', vl[1] || d.base, 1], ['Argent', vl[2] || d.base, 2], ['Or', vl[3] || d.base, 3]];
     const tab = (id, label) => `<button class="vchip ${this.furnTab === id ? 'on' : ''}" data-a="furnTab" data-v="${id}">${label}</button>`;
@@ -2690,8 +2694,8 @@ const Runtime = {
         <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--accent)"></i></div>
         <div class="vchips" style="margin-top:12px">${tiers.map(([n, v, lv]) => `<span class="vchip ${(d.vip || 0) === lv ? 'on' : ''}" style="cursor:default">${n} · ${v}</span>`).join('')}</div>
         <p class="hint mt-s">Plus ton niveau VIP est élevé, plus tu peux poser de meubles dans cette propriété.</p></div>
-      <div class="vchips" style="margin:2px 0 4px">${tab('catalog', `${ic('grid', 14)} Catalogue`)}${tab('mine', `${ic('list', 14)} Mes meubles (${(d.mine || []).length})`)}</div>
-      ${this.furnTab === 'catalog' ? `
+      <div class="vchips" style="margin:2px 0 4px">${tab('catalog', `${ic('grid', 14)} Catalogue`)}${tab('mine', `${ic('list', 14)} Mes meubles (${(d.mine || []).length})`)}${d.lab ? tab('lab', `${ic('droplet', 14)} Laboratoire`) : ''}</div>
+      ${this.furnTab === 'lab' ? this.renderLab() : this.furnTab === 'catalog' ? `
         <div class="vchips"><button class="vchip ${this.furnCat === 'all' ? 'on' : ''}" data-a="furnCat" data-v="all">Tout</button>${cats.map(c => `<button class="vchip ${this.furnCat === c ? 'on' : ''}" data-a="furnCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
         <input id="fq" placeholder="Rechercher un meuble…" value="${esc(this.furnQ)}" style="margin-top:4px">
         <div id="furn-list">${this.furnList()}</div>
@@ -2699,6 +2703,26 @@ const Runtime = {
       : `${(d.mine || []).map(m => `<div class="item">${tile('box')}<div class="grow"><b>${esc(m.label)}</b><small>${esc(m.cat)}</small></div><button class="sm" data-a="furnMove" data-v="${m.id}" data-m="${esc(m.model)}">Déplacer</button><button class="sm danger" data-a="furnDel" data-v="${m.id}">Retirer</button></div>`).join('') || '<p class="hint">Aucun meuble posé pour le moment. Choisis-en un dans le catalogue.</p>'}
         ${(d.mine || []).length ? `<button class="danger vall" data-a="furnDelAll">Tout retirer</button>` : ''}`}` });
   },
+  // ── Équipement du laboratoire (propriété de catégorie « Laboratoire ») ──
+  renderLab() {
+    const l = this.labData;
+    if (!l) return '<p class="hint">Chargement…</p>';
+    const c = l.counts, m = l.max, R = l.radius || {};
+    const btn = (kind, drug, label, full) => `<button class="sm primary" data-a="labPlace" data-k="${kind}" data-d="${drug || ''}" ${full ? 'disabled' : ''}>${label}</button>`;
+    const eqName = q => q.kind === 'greenhouse' ? `Serre — ${esc(q.drugLabel || '')}` : q.kind === 'table' ? `Table de traitement — ${esc(q.drugLabel || '')}` : 'Zone de tenue obligatoire';
+    const eqSub = q => q.kind === 'greenhouse' ? (q.state === 'growing' ? `Pousse : ${q.pct} %` : q.state === 'ready' ? 'Prête à récolter' : 'Vide') : q.kind === 'outfit' ? `Rayon ${Math.round(q.radius)} m · ${q.outfit ? ((q.outfit.male ? 'tenue homme ' : '') + (q.outfit.female ? 'tenue femme' : '')).trim() : 'aucune tenue enregistrée'}` : 'Produit brut → produit fini';
+    return `<div class="card"><div class="card-h"><div class="t">${ic('droplet', 16)} Équipement installé</div>${chip(`Serres ${c.greenhouse}/${m.greenhouse} · Tables ${c.table}/${m.table} · Zones ${c.outfit}/${m.outfit}`, 'info')}</div>
+        <p class="hint" style="margin-bottom:10px">Place ton équipement dans le laboratoire : fantôme de placement (flèches ← → pour tourner, ↑ ↓ pour la hauteur, Entrée pour valider). Tes clés peuvent l'utiliser, toi seul l'installe.</p>
+        ${(l.equipment || []).map(q => `<div class="item">${tile(q.kind === 'outfit' ? 'shield' : q.kind === 'table' ? 'tools' : 'sprout')}<div class="grow"><b>${eqName(q)}</b><small>${eqSub(q)}</small></div>${q.kind === 'outfit' ? `<button class="sm" data-a="labOutfit" data-v="${q.id}">Capturer ma tenue</button>` : ''}<button class="sm danger" data-a="labDel" data-v="${q.id}">Retirer</button></div>`).join('') || '<p class="hint">Rien d\'installé pour le moment.</p>'}</div>
+      <div class="vgroup">Serres (plantation)</div>
+      <div class="vchips">${(l.drugs || []).filter(x => x.greenhouse).map(x => btn('greenhouse', x.id, `+ ${esc(x.label)}`, c.greenhouse >= m.greenhouse)).join('')}</div>
+      <div class="vgroup">Tables de traitement</div>
+      <div class="vchips">${(l.drugs || []).map(x => btn('table', x.id, `+ ${esc(x.label)}`, c.table >= m.table)).join('')}</div>
+      <div class="vgroup">Zone de tenue obligatoire</div>
+      <div class="row" style="gap:10px;align-items:flex-end"><label class="f" style="max-width:160px"><span>Rayon (m)</span><input id="lab-r" type="number" min="${R.min || 3}" max="${R.max || 40}" value="${R.default || 10}"></label>${btn('outfit', '', '+ Placer une zone (avec ma tenue actuelle)', c.outfit >= m.outfit)}</div>
+      <p class="hint mt-s">Porte la tenue de protection <b>avant</b> de placer la zone : elle est enregistrée automatiquement. Sans cette tenue, dans la zone : intoxication progressive (seul l'<b>antidote</b> guérit). Dans une zone, la tenue est aussi obligatoire pour planter, récolter et traiter.</p>`;
+  },
+
   furnList() {
     const d = this.data, q = this.furnQ.trim().toLowerCase(), full = d.count >= d.limit;
     const list = (d.catalog || []).filter(c => (this.furnCat === 'all' || c.cat === this.furnCat) && (!q || c.label.toLowerCase().includes(q)));
@@ -2847,7 +2871,14 @@ const Runtime = {
       case 'civil': await rpc('cloakCivil'); return toast('Tenue civile', 'ok');
       case 'take': return ok(await rpc('armory:take', pid, i), 'Objet récupéré');
       case 'buy': return ok(await rpc('shop:buy', pid, i, Number(document.getElementById('q' + i).value)), 'Achat effectué');
-      case 'furnTab': this.furnTab = el.dataset.v; return this.render();
+      case 'furnTab': {
+        this.furnTab = el.dataset.v;
+        if (this.furnTab === 'lab') { this.labData = null; this.render(); const r = await rpc('lab:list'); if (r && r.ok) { this.labData = r; this.render(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
+        return this.render();
+      }
+      case 'labPlace': { const r = document.getElementById('lab-r'); return rpc('lab:place', el.dataset.k, el.dataset.d, r ? Number(r.value) : 0); }
+      case 'labDel': { const r = await rpc('lab:remove', Number(el.dataset.v)); if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err'); const n = await rpc('lab:list'); if (n && n.ok) { this.labData = n; this.render(); } return toast('Équipement retiré', 'ok'); }
+      case 'labOutfit': { const r = await rpc('lab:outfit', Number(el.dataset.v)); if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err'); const n = await rpc('lab:list'); if (n && n.ok) { this.labData = n; this.render(); } return toast('Tenue de la zone mise à jour', 'ok'); }
       case 'furnCat': this.furnCat = el.dataset.v; return this.render();
       case 'furnPlace': return rpc('furn:place', el.dataset.v);
       case 'furnMove': return rpc('furn:move', Number(el.dataset.v), el.dataset.m);

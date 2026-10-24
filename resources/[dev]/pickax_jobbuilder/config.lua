@@ -536,6 +536,28 @@ Config.Real = {
     BucketBase        = 20000,  -- routing bucket = BucketBase + id propriété (instances séparées)
     ShowBlips         = true,   -- blips des biens disponibles
     RentCheckMinutes  = 5,      -- fréquence de vérification des loyers impayés
+    -- Laboratoires : propriété de catégorie « lab » installée par un agent immobilier ; le propriétaire y place serres, tables de traitement et zones de tenue
+    -- (F10 → onglet « Laboratoire »). Plantation → récolte → traitement en pochons ; intoxication dans une zone de tenue sans la tenue.
+    Lab = {
+        Enabled   = true,
+        Category  = 'lab',                                   -- catégorie de propriété concernée
+        Max       = { greenhouse = 8, table = 4, outfit = 2 },   -- équipements maximum par laboratoire
+        Grace     = 0.85,                                    -- part minimale de la durée à respecter côté serveur (anti-triche)
+        BatchMax  = 5,                                       -- lots traités d'un coup sur une table
+        OutfitRadius = { min = 3.0, max = 40.0, default = 10.0 },
+        Models = { greenhouse = 'prop_pot_plant_04a', table = 'prop_table_03', stages = { 'bkr_prop_weed_01_small_01a', 'bkr_prop_weed_med_01a', 'bkr_prop_weed_lrg_01a' },
+                   stageFallback = { 'prop_weed_02', 'prop_weed_02', 'prop_weed_01' } },
+        Drugs = {   -- seed = graines (nil : pas de serre) · grow = minutes de pousse · yield = récolte · recipe = lot de traitement (count bruts → 1 produit fini)
+            weed  = { label = 'Cannabis',        seed = 'weed_seed',  raw = 'weed',  pooch = 'weed_pooch',  grow = 30, plantSeconds = 6, yield = { 4, 8 }, recipe = { count = 3, time = 8,  fail = 0,  label = 'Pochon de cannabis' } },
+            coke  = { label = 'Cocaïne',         seed = 'coke_seed',  raw = 'coke',  pooch = 'coke_pooch',  grow = 45, plantSeconds = 8, yield = { 3, 6 }, recipe = { count = 3, time = 12, fail = 5,  label = 'Sachet de cocaïne' } },
+            opium = { label = 'Opium / Héroïne', seed = 'opium_seed', raw = 'opium', pooch = 'opium_pooch', grow = 40, plantSeconds = 7, yield = { 3, 6 }, recipe = { count = 3, time = 12, fail = 0,  label = 'Dose d\'héroïne' } },
+            meth  = { label = 'Méthamphétamine', seed = nil,          raw = 'meth',  pooch = 'meth_pooch',  grow = 0,  plantSeconds = 0, yield = { 0, 0 }, recipe = { count = 4, time = 15, fail = 10, label = 'Sachet de meth' } },
+        },
+        DrugOrder = { 'weed', 'coke', 'opium', 'meth' },
+        Toxic = {   -- sans la tenue dans une zone : intoxication progressive (un seul remède : l'antidote)
+            Enabled = true, CureItem = 'antidote', Tick = 5, ExposureGain = 6, SickGain = 1, DamageFrom = 60, DamageHealth = 4, KillAt = 100, WarnAt = { 20, 50, 80 },
+        },
+    },
     -- Meubles : le propriétaire décore son intérieur (touche F10 ou /decorer dans la propriété). Limite PAR PROPRIÉTÉ, plus haute avec le VIP du propriétaire.
     Furniture = {
         Enabled       = true,

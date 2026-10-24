@@ -65,6 +65,13 @@ Les agents ouvrent **F6 → Gestion immobilière** (aucune case à cocher : auto
 ## 🛋️ Meubles (propriétaires)
 Dans sa propriété, le **propriétaire** appuie sur **F10** (ou `/decorer`) : menu de décoration (catalogue par catégories, recherche, « Mes meubles » avec déplacer / retirer). Mode placement avec fantôme : flèches ← → ou molette pour tourner, ↑ ↓ pour la hauteur, Entrée pour poser. **Limite par propriété : 10 meubles**, **15 / 20 / 30** avec le VIP Bronze / Argent / Or du propriétaire (`Config.Real.Furniture`, catalogue modifiable). Les meubles sont enregistrés en base (`jobbuilder_furniture`), visibles par tous les occupants, et supprimés si la propriété est reprise ou remise en vente.
 
+## 🧪 Laboratoires
+Un laboratoire est une **propriété de catégorie « Laboratoire »** (intérieurs : labo de meth, ferme de cannabis, labo de coke, atelier de faux billets / faux papiers) **installée par un agent immobilier**, vendue ou louée comme n'importe quel bien. Le propriétaire (et ses clés) y entre, puis le **propriétaire** ouvre **F10 → onglet « Laboratoire »** et place :
+- des **serres** (cannabis, cocaïne, opium) : on plante une graine, la plante pousse en temps réel, on récolte le produit brut ;
+- des **tables de traitement** (cannabis, cocaïne, opium, meth) : produit brut → pochon / sachet (par lots, avec risque de ratage) ;
+- des **zones de tenue obligatoire** (rayon réglable) : la tenue portée au moment de la pose est enregistrée (bouton « Capturer ma tenue » pour la changer, homme et femme séparément). Sans elle dans la zone : intoxication progressive (vision trouble, toux, chutes, dégâts, mort) ; **seul l'antidote** guérit. Dans une zone, la tenue est aussi exigée pour planter, récolter et traiter.
+Limites par laboratoire, plantes, recettes et réglages d'intoxication : `Config.Real.Lab`. Le Builder Illégal ne gère plus les laboratoires : il garde récoltes, plantations en extérieur, dealers et blanchiment.
+
 ## 🚗 Concessionnaire (jobs de type `dealer`)
 **F6 → Gestion concession** (automatique) :
 - **Catalogue automatique** : une concession vend **directement tous les véhicules de ta table `vehicles`** (prix de la table × marge réglable). Filtre par **catégories** (ex : une concession de motos = `motorcycles` + `velo`) et marge dans le builder (carte Concession). Option désactivable pour un catalogue 100 % manuel.

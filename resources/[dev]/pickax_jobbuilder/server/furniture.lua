@@ -79,7 +79,7 @@ ESX.RegisterServerCallback('jobbuilder:furn:list', function(src, cb)
     local list = load(p.id)
     local cat = {}
     for _, c in ipairs(F.Catalog) do cat[#cat + 1] = { id = c.id, label = c.label, cat = c.cat } end
-    cb({ ok = true, label = p.label, limit = limit, vip = vip, base = F.BaseLimit, vipLimits = F.VipLimits, count = #list, catalog = cat, mine = pubList(list) })
+    cb({ ok = true, lab = Config.Real.Lab.Enabled and p.category == Config.Real.Lab.Category or false, label = p.label, limit = limit, vip = vip, base = F.BaseLimit, vipLimits = F.VipLimits, count = #list, catalog = cat, mine = pubList(list) })
 end)
 
 local function validPos(src, c)

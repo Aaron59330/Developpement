@@ -52,7 +52,8 @@ end
 -- ═══════════════ Début d'une action chronométrée (récolte / fabrication) ═══════════════
 ESX.RegisterServerCallback('illegalbuilder:drug:begin', function(src, cb, eid, pi, kind, recipeIdx, batches)
     if IB.Pending[src] then return cb({ ok = false, error = 'Action déjà en cours' }) end
-    if kind ~= 'harvest' and kind ~= 'process' and kind ~= 'plant' then return cb({ ok = false, error = 'Action invalide' }) end
+    if kind == 'process' then return cb({ ok = false, error = 'Le traitement se fait dans un laboratoire (propriété installée par un agent immobilier)' }) end
+    if kind ~= 'harvest' and kind ~= 'plant' then return cb({ ok = false, error = 'Action invalide' }) end
     local e, p, xPlayer, idx = resolve(src, eid, pi, kind == 'plant' and 'harvest' or kind)
     if not e then return cb({ ok = false, error = p }) end
 

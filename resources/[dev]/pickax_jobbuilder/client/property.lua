@@ -73,6 +73,7 @@ local function enterProperty(id, cb)
             CreateThread(function()
                 teleportTo(res.exit)
                 FurnSpawn(res.furniture)
+                if LabSet then LabSet(res.lab) end
                 if res.role == 'owner' then JBNotify('Tu peux décorer ta propriété : touche ~g~F10~s~ (ou /decorer).') end
             end)
         end
@@ -85,6 +86,7 @@ local function leaveProperty()
         if res and res.ok then
             Inside = nil
             FurnClear()
+            if LabClear then LabClear() end
             CreateThread(function() teleportTo(res.entrance) end)
         else
             JBNotify('~r~' .. ((res and res.error) or 'Erreur'))
@@ -95,6 +97,7 @@ end
 RegisterNetEvent('jobbuilder:client:propKick', function(entrance)
     Inside = nil
     FurnClear()
+    if LabClear then LabClear() end
     CloseUI()
     CreateThread(function() teleportTo(entrance) end)
     JBNotify('Tu as été invité à quitter la propriété.')
@@ -237,6 +240,7 @@ AddEventHandler('esx:onPlayerSpawn', function()
     if Inside then
         Inside = nil
         FurnClear()
+        if LabClear then LabClear() end
         TriggerServerEvent('jobbuilder:server:forceLeave')
     end
 end)

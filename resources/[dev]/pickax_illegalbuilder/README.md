@@ -4,7 +4,7 @@ Un seul builder pour toutes les activités illégales du serveur (`/illegalbuild
 
 | Module | Contenu |
 |---|---|
-| **Drogues & labos** | récolte, laboratoires (recettes), dealer, blanchiment, portes de labo |
+| **Drogues** | récolte / plantations, dealer, blanchiment (tablette). Le traitement et l'intoxication se font dans les **laboratoires** (propriétés, Job Builder) |
 | **Braquages** | supérettes, banques, bijouteries : cibles, gardes, alertes police |
 | **Go Fast** | contact, sortie du véhicule, points de livraison tirés au sort, stock, délais, bonus selon l'état du véhicule, alerte police |
 

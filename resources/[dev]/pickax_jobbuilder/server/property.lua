@@ -216,6 +216,7 @@ end
 local function resetProp(p, reason, actor)
     kickAll(p)
     if JB.furnClear then JB.furnClear(p.id) end
+    if JB.labClear then JB.labClear(p.id) end
     for _, pt in ipairs(p.points) do
         if (pt.type == 'stash' or pt.type == 'safe') and JB.inventory() == 'ox' then
             pcall(function() exports.ox_inventory:ClearInventory(stashId(p, pt)) end)
@@ -282,7 +283,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:enter', function(src, cb, id)
     SetPlayerRoutingBucket(src, R.BucketBase + p.id)
     local pts = {}
     for _, pt in ipairs(p.points) do pts[#pts + 1] = { id = pt.id, type = pt.type, label = pt.label, coords = pt.coords } end
-    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts, ipl = interiorIpl(p), furniture = JB.furnList and JB.furnList(p.id) or {} })
+    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts, ipl = interiorIpl(p), furniture = JB.furnList and JB.furnList(p.id) or {}, lab = JB.labList and JB.labList(p.id) or nil })
 end)
 
 ESX.RegisterServerCallback('jobbuilder:prop:leave', function(src, cb)
@@ -621,6 +622,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:delete', function(src, cb, id)
     if p.status ~= 'available' then return cb(fail('Cette propriété est occupée : remets-la d\'abord en vente')) end
     kickAll(p)
     if JB.furnClear then JB.furnClear(p.id) end
+    if JB.labClear then JB.labClear(p.id) end
     MySQL.update.await('DELETE FROM jobbuilder_properties WHERE id = ? AND job_name = ?', { p.id, job.name })
     history(nil, job.name, 'deleted', JB.playerName(x), p.label, 0)
     JB.loadProps()

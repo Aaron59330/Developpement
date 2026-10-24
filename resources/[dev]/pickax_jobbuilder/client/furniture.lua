@@ -17,6 +17,8 @@ local function loadModel(name)
     return HasModelLoaded(hash) and hash or nil
 end
 
+LoadModelJB = loadModel   -- utilisé par client/lab.lua
+
 function FurnClear()
     for id, o in pairs(objs) do if DoesEntityExist(o.ent) then DeleteEntity(o.ent) end objs[id] = nil end
 end
@@ -86,11 +88,12 @@ local function aimPoint(dist)
     if hit == 1 then return coords end
 end
 
--- Pose (ou déplace si `moveId`) : flèches ←/→ ou molette = tourner, ↑/↓ = hauteur, ENTRÉE = valider, RETOUR = annuler
-local function placeFurniture(e, moveId, startAt)
-    if placing then return end
-    local hash = loadModel(e.model)
-    if not hash then JBNotify('~r~Modèle introuvable sur ce serveur : ' .. e.model) return OpenFurnitureMenu() end
+-- Fantôme de placement (aussi utilisé par l'équipement des laboratoires) : flèches ←/→ ou molette = tourner, ↑/↓ = hauteur, ENTRÉE = valider, RETOUR = annuler.
+-- Retourne { x, y, z, h } ou nil si annulé. `radius` : affiche un cercle (zones).
+function GhostPlace(model, label, startAt, radius)
+    if placing then return nil end
+    local hash = loadModel(model)
+    if not hash then JBNotify('~r~Modèle introuvable sur ce serveur : ' .. model) return nil end
     placing = true
     local maxDist = F.PlaceDistance or 8.0
     local ped = PlayerPedId()
@@ -99,6 +102,7 @@ local function placeFurniture(e, moveId, startAt)
     SetEntityAlpha(ghost, 150, false)
     SetEntityCollision(ghost, false, false)
     FreezeEntityPosition(ghost, true)
+    if radius then SetEntityVisible(ghost, false, false) end
     local heading, lift, result = (startAt and startAt.h) or GetEntityHeading(ped), 0.0, nil
     while placing do
         Wait(0)
@@ -125,7 +129,8 @@ local function placeFurniture(e, moveId, startAt)
         local gc = GetEntityCoords(ghost)
         local tooFar = #(pc - gc) > maxDist + 1.0
         SetEntityAlpha(ghost, tooFar and 60 or 150, false)
-        hint(('%s\n~INPUT_CELLPHONE_LEFT~ ~INPUT_CELLPHONE_RIGHT~ / molette : tourner · ~INPUT_CELLPHONE_UP~ ~INPUT_CELLPHONE_DOWN~ : hauteur (%.2f)\n~INPUT_FRONTEND_ACCEPT~ valider   ~INPUT_FRONTEND_RRIGHT~ annuler'):format(e.label, lift))
+        if radius then DrawMarker(1, gc.x, gc.y, gc.z - 0.95, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, radius * 2.0, radius * 2.0, 1.2, 255, 140, 60, 70, false, false, 2, false, nil, nil, false) end
+        hint(('%s\n~INPUT_CELLPHONE_LEFT~ ~INPUT_CELLPHONE_RIGHT~ / molette : tourner · ~INPUT_CELLPHONE_UP~ ~INPUT_CELLPHONE_DOWN~ : hauteur (%.2f)\n~INPUT_FRONTEND_ACCEPT~ valider   ~INPUT_FRONTEND_RRIGHT~ annuler'):format(label, lift))
         if IsControlJustPressed(0, 201) or IsControlJustPressed(0, 191) then
             if tooFar then JBNotify('~r~Trop loin : rapproche-toi.')
             else result = { x = gc.x, y = gc.y, z = gc.z, h = GetEntityHeading(ghost) } placing = false end
@@ -135,6 +140,12 @@ local function placeFurniture(e, moveId, startAt)
     end
     DeleteEntity(ghost)
     SetModelAsNoLongerNeeded(hash)
+    return result
+end
+
+-- Pose (ou déplace si `moveId`) un meuble
+local function placeFurniture(e, moveId, startAt)
+    local result = GhostPlace(e.model, e.label, startAt)
     if not result then return OpenFurnitureMenu() end
     local function done(res)
         if res and res.ok then JBNotify(moveId and 'Meuble déplacé.' or ('Meuble posé (%d / %d)'):format(res.count, res.limit))
@@ -144,6 +155,8 @@ local function placeFurniture(e, moveId, startAt)
     if moveId then ESX.TriggerServerCallback('jobbuilder:furn:move', done, moveId, result)
     else ESX.TriggerServerCallback('jobbuilder:furn:place', done, e.id, result) end
 end
+
+function IsPlacing() return placing end
 
 NuiLocal['furn:place'] = function(args, cb)
     cb({ ok = true })

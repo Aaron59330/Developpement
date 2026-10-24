@@ -60,7 +60,7 @@ Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } } 
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────
 Config.Types = {
-    drug    = { label = 'Drogues & labos',     one = 'Filière de drogue', icon = 'flask',  sub = 'Récolte, laboratoires, vente, blanchiment' },
+    drug    = { label = 'Drogues',     one = 'Filière de drogue', icon = 'flask',  sub = 'Récolte, laboratoires, vente, blanchiment' },
     robbery = { label = 'Braquages',           one = 'Braquage',          icon = 'mask',   sub = 'Supérettes, banques, bijouteries...' },
     gofast  = { label = 'Go Fast',             one = 'Go Fast',           icon = 'car',    sub = 'Livraison illégale en véhicule : départ, sortie du véhicule, points de livraison' },
 }
@@ -180,16 +180,14 @@ Config.Templates.drug = {
         settings = { note = 'Champ → séchage → vente' },
         points = {
             harvest('Champ de cannabis', 'weed', 6, 'harvest', { plant = { enabled = true, seed = 'weed_seed', seedCount = 1, growMinutes = 30, plantSeconds = 6, small = '', medium = '', large = '' } }),
-            process('Séchage & conditionnement', { { label = 'Pochon de cannabis', inputs = { { item = 'weed', count = 3 } }, outputs = { { item = 'weed_pooch', count = 1 } }, time = 8 } }, 'inspect'),
             sell('Dealer — cannabis', { { item = 'weed_pooch', min = 90, max = 140 } }),
         },
     },
     coke = {
         label = 'Cocaïne', icon = 'flask',
-        settings = { note = 'Feuilles de coca → laboratoire → vente' },
+        settings = { note = 'Plantation → laboratoire (propriété) → vente' },
         points = {
             harvest('Plantation de coca', 'coke', 8, 'harvest', { max = 4, plant = { enabled = true, seed = 'coke_seed', seedCount = 1, growMinutes = 45, plantSeconds = 8, small = '', medium = '', large = '' } }),
-            process('Laboratoire de cocaïne', { { label = 'Sachet de cocaïne', inputs = { { item = 'coke', count = 3 } }, outputs = { { item = 'coke_pooch', count = 1 } }, time = 12, failChance = 5 } }, 'clipboard'),
             sell('Dealer — cocaïne', { { item = 'coke_pooch', min = 220, max = 320 } }),
         },
     },
@@ -198,7 +196,6 @@ Config.Templates.drug = {
         settings = { note = 'Produits chimiques → laboratoire → vente' },
         points = {
             harvest('Entrepôt de produits chimiques', 'meth', 10, 'pickup', { max = 3 }),
-            process('Laboratoire de meth', { { label = 'Sachet de meth', inputs = { { item = 'meth', count = 4 } }, outputs = { { item = 'meth_pooch', count = 1 } }, time = 15, failChance = 10, anim = 'cook' } }, 'cook'),
             sell('Dealer — meth', { { item = 'meth_pooch', min = 320, max = 450 } }),
         },
     },
@@ -207,7 +204,6 @@ Config.Templates.drug = {
         settings = { note = 'Pavot → raffinage → vente' },
         points = {
             harvest('Champ de pavot', 'opium', 7, 'harvest'),
-            process('Raffinerie', { { label = 'Dose d\'héroïne', inputs = { { item = 'opium', count = 3 } }, outputs = { { item = 'opium_pooch', count = 1 } }, time = 12 } }, 'repair'),
             sell('Dealer — héroïne', { { item = 'opium_pooch', min = 280, max = 380 } }),
         },
     },
@@ -307,20 +303,4 @@ Config.VehicleTypes = {
     { id = 'bike',     label = 'Motos / vélos' },
     { id = 'boat',     label = 'Bateaux' },
     { id = 'aircraft', label = 'Aéronefs' },
-}
-
--- ─────────────────────────────── Intoxication des laboratoires ───────────────────────────────
--- Dans le rayon d'un laboratoire (poste de travail avec « tenue obligatoire »), un joueur sans la bonne tenue s'intoxique.
--- Le niveau d'intoxication (0-100) monte tant qu'il est exposé, puis continue de monter lentement tant qu'il n'est pas soigné.
--- À 100 : mort. UN SEUL item guérit : Config.Toxic.CureItem (rien d'autre : ni kit de soin, ni réanimation).
-Config.Toxic = {
-    Enabled       = true,
-    CureItem      = 'antidote',   -- le seul item qui guérit l'intoxication (ajouté dans ox_inventory/data/items.lua)
-    Tick          = 5,            -- secondes entre deux calculs
-    ExposureGain  = 6,            -- niveau gagné à chaque tick passé dans le laboratoire sans la tenue
-    SickGain      = 1,            -- niveau gagné à chaque tick quand on est malade (même hors du laboratoire)
-    DamageFrom    = 60,           -- à partir de ce niveau : perte de vie à chaque tick
-    DamageHealth  = 4,            -- points de vie perdus par tick au-dessus de DamageFrom
-    KillAt        = 100,          -- niveau de mort
-    WarnAt        = { 20, 50, 80 },   -- seuils des messages d'alerte
 }
