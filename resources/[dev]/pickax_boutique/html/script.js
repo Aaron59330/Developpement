@@ -253,8 +253,9 @@ function viewAdmin() {
         <p class="sub" style="margin-top:14px">Chaque joueur a un code unique « REF-<i>numéro boutique</i> » visible dans l'onglet Codes & parrainage.</p></div></div>
       <div class="panel wide"><h3>${ic('users', 18)} Coins par joueur</h3>
         <div class="promo big"><input id="plq" placeholder="Nom, ID serveur, code boutique…" maxlength="40" value="${esc((S.pl && S.pl.q) || '')}"><button data-a="plSearch">Chercher</button><button data-a="plOnline">En ligne</button><button data-a="plRecent">Récents</button></div>
+        <div class="promo big" style="margin-top:8px"><span class="sub" style="align-self:center">VIP :</span><select id="vl"><option value="1">Bronze</option><option value="2">Argent</option><option value="3">Or</option></select><input id="vd" type="number" min="1" max="3650" value="31" style="width:90px" title="Durée en jours"><span class="sub" style="align-self:center">jours — bouton « VIP » sur la ligne du joueur</span></div>
         ${S.pl && S.pl.list ? (S.pl.list.length ? `<table class="tbl"><tr><th>Joueur</th><th>ID</th><th>Code</th><th>Coins</th><th>Montant</th><th></th></tr>${S.pl.list.map((p, n) => `<tr><td><b>${esc(p.name)}</b><br><small>${p.online ? 'En ligne' : 'Hors ligne'}</small></td><td>${p.id != null ? p.id : '—'}</td><td>#${esc(p.boutique_id)}</td><td>${fmt(p.points)}</td>
-          <td><input class="amt" id="pa${n}" type="number" min="1" value="100" style="width:90px"></td><td style="text-align:right"><button class="mini2" data-a="plGive" data-n="${n}">Donner</button> <button class="mini2 bad" data-a="plTake" data-n="${n}">Retirer</button></td></tr>`).join('')}</table>` : '<p class="sub">Aucun joueur trouvé.</p>') : '<p class="sub">Cherche un joueur (en ligne ou hors ligne) pour lui donner ou lui retirer des coins, comme dans le menu de base.</p>'}</div>
+          <td><input class="amt" id="pa${n}" type="number" min="1" value="100" style="width:90px"></td><td style="text-align:right"><button class="mini2" data-a="plGive" data-n="${n}">Donner</button> <button class="mini2 bad" data-a="plTake" data-n="${n}">Retirer</button> <button class="mini2" data-a="plVip" data-n="${n}">VIP</button> <button class="mini2 bad" data-a="plUnvip" data-n="${n}">&times;VIP</button></td></tr>`).join('')}</table>` : '<p class="sub">Aucun joueur trouvé.</p>') : '<p class="sub">Cherche un joueur (en ligne ou hors ligne) pour lui donner ou lui retirer des coins, comme dans le menu de base.</p>'}</div>
       <div class="panel wide"><h3>${ic('users', 18)} Give à tous les joueurs en ligne</h3><div class="form">
         <label>Coins par joueur<input id="ga" type="number" min="1" max="1000000" value="100"></label>
         <label>Motif (affiché au joueur)<input id="gr" maxlength="60" placeholder="Événement, compensation…"></label></div>
@@ -405,6 +406,14 @@ document.addEventListener('click', async e => {
       if (!await askConfirm(`${a === 'plTake' ? 'Retirer' : 'Donner'} ${fmt(n)} coins à ${p.name} ?`)) return;
       const r = await coreAdmin('coins', p.online && p.id != null ? Number(p.id) : p.identifier, amount);
       if (r && r.ok) { p.points = r.points; toast(`${a === 'plTake' ? 'Retiré' : 'Donné'} : ${fmt(n)} coins (solde ${fmt(r.points)})`, 'ok'); return render(); }
+      return toast((r && r.error) || 'Erreur', 'bad');
+    }
+    case 'plVip': case 'plUnvip': {
+      const p = S.pl && S.pl.list[Number(el.dataset.n)]; if (!p) return;
+      const lvl = a === 'plUnvip' ? 0 : Number(val('vl')) || 1, days = Math.floor(Number(val('vd')) || 31), nm = ['', 'Bronze', 'Argent', 'Or'][lvl];
+      if (!await askConfirm(lvl ? `Donner le VIP ${nm} (${days} j) à ${p.name} ?` : `Retirer le VIP de ${p.name} ?`)) return;
+      const r = await coreAdmin('vip', p.online && p.id != null ? Number(p.id) : p.identifier, lvl, days);
+      if (r && r.ok) return toast(lvl ? `VIP ${nm} donné à ${p.name} (${days} j)` : `VIP retiré à ${p.name}`, 'ok');
       return toast((r && r.error) || 'Erreur', 'bad');
     }
     case 'giveAll': {

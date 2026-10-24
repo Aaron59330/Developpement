@@ -266,6 +266,13 @@ local function OpenMenu()
 	local KeysMenu = RageUI.CreateSubMenu(mainmenu, "Touches du serveur", "Raccourcis clavier :")
 	local CmdsMenu = RageUI.CreateSubMenu(mainmenu, "Commandes du serveur", "Commandes utiles :")
 	local StatusMenu = RageUI.CreateSubMenu(mainmenu, "Statut des entreprises", "En ligne = au moins un employé en service :")
+	local VipMenu = RageUI.CreateSubMenu(mainmenu, "Espace VIP", "Vos avantages et récompenses :")
+	local VipInfo, VipAt, VipLoading = nil, 0, false
+	local function RefreshVip(force)
+		if VipLoading or (not force and GetGameTimer() - VipAt < 5000) then return end
+		VipLoading = true
+		ESX.TriggerServerCallback('CorePickax:Vip:info', function(info) VipInfo = info or false VipAt = GetGameTimer() VipLoading = false end)
+	end
 	local JobStatus, JobStatusAt, JobStatusLoading = nil, 0, false
 	local function RefreshJobStatus(force)
 		if JobStatusLoading or (not force and GetGameTimer() - JobStatusAt < 4000) then return end
@@ -298,6 +305,7 @@ local function OpenMenu()
 			local inVeh = IsPedInAnyVehicle(PlayerPedId(), false)
 			RageUI.ButtonWithStyle("Véhicule", inVeh and "Portes, fenêtres et limiteur de vitesse" or "Vous devez être dans un véhicule", {RightLabel = "→→→"}, inVeh, function() end, MenuVehicle)
 			RageUI.ButtonWithStyle("Préférences", "Réglages du jeu, apparence des menus et performances", {RightLabel = "→→→"}, true, function() end, Parametres)
+			RageUI.ButtonWithStyle("Espace VIP", "Avantages, récompense quotidienne et coffre VIP", {RightLabel = "→→→"}, true, function(_, _, sel) if sel then RefreshVip(true) end end, VipMenu)
 			RageUI.ButtonWithStyle("Statut des entreprises", "Voir quelles entreprises ont un employé en service", {RightLabel = "→→→"}, true, function(_, _, s) if s then RefreshJobStatus(true) end end, StatusMenu)
 			RageUI.Separator("Serveur")
 			RageUI.ButtonWithStyle("Touches du serveur", "La liste des raccourcis clavier", {RightLabel = "→→→"}, true, function() end, KeysMenu)
@@ -553,6 +561,43 @@ local function OpenMenu()
 				RageUI.Separator("~r~Module de performances indisponible")
 			end
 		end)
+		RageUI.IsVisible(VipMenu, true, true, true, function()
+			RefreshVip(false)
+			if VipInfo == nil then
+				RageUI.ButtonWithStyle("~c~Chargement…", nil, {}, false, function() end)
+			elseif VipInfo == false then
+				RageUI.ButtonWithStyle("~r~Indisponible", nil, {}, false, function() end)
+			else
+				local function fmt(n) return tostring(n):reverse():gsub("(%d%d%d)", "%1 "):reverse():gsub("^ ", "") end
+				local cur = VipInfo.tiers[VipInfo.level]
+				if cur then
+					local left = math.max(0, VipInfo.expiration - VipInfo.now)
+					RageUI.Separator(cur.color .. cur.name .. "~s~ — " .. math.floor(left / 86400) .. " j " .. math.floor((left % 86400) / 3600) .. " h restants")
+					RageUI.ButtonWithStyle("Récompense quotidienne", VipInfo.canClaim and "Récupérer votre récompense du jour" or "Déjà récupérée, revenez plus tard", {RightLabel = VipInfo.canClaim and "~g~Disponible~s~" or "~c~Indisponible~s~"}, VipInfo.canClaim, function(_, _, sel)
+						if sel then
+							ESX.TriggerServerCallback('CorePickax:Vip:claim', function(ok, msg) ESX.ShowNotification(msg or "") RefreshVip(true) end)
+						end
+					end)
+					RageUI.ButtonWithStyle("Coffre VIP", cur.chestSlots .. " emplacements — " .. math.floor(cur.chestWeight / 1000) .. " kg", {RightLabel = "~b~Ouvrir~s~"}, true, function(_, _, sel)
+						if sel then
+							ESX.TriggerServerCallback('CorePickax:Vip:chest', function(ok, id)
+								if ok then RageUI.CloseAll() exports.ox_inventory:openInventory('stash', id) else ESX.ShowNotification(id or "") end
+							end)
+						end
+					end)
+				else
+					RageUI.Separator("~c~Vous n'êtes pas VIP")
+				end
+				for i, t in ipairs(VipInfo.tiers) do
+					RageUI.Separator(t.color .. t.name .. (i == VipInfo.level and "~s~  ← votre niveau" or ""))
+					RageUI.ButtonWithStyle("Salaire", nil, {RightLabel = "x" .. t.salaryMult}, true, function() end)
+					RageUI.ButtonWithStyle("Poids d'inventaire", nil, {RightLabel = t.maxWeight .. " kg"}, true, function() end)
+					RageUI.ButtonWithStyle("Coins boutique", nil, {RightLabel = "+" .. t.coinsPerHour .. " / heure"}, true, function() end)
+					RageUI.ButtonWithStyle("Coffre VIP", nil, {RightLabel = t.chestSlots .. " empl. / " .. math.floor(t.chestWeight / 1000) .. " kg"}, true, function() end)
+					RageUI.ButtonWithStyle("Récompense quotidienne", nil, {RightLabel = "$" .. fmt(t.daily.money) .. ((t.daily.coins or 0) > 0 and (" + " .. t.daily.coins .. " coins") or "")}, true, function() end)
+				end
+			end
+		end)
 		RageUI.IsVisible(StatusMenu, true, true, true, function()
 			RefreshJobStatus(false)
 			if JobStatus == false then
@@ -795,7 +840,7 @@ local function OpenMenu()
 			end
 		end)
 
-		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(HudMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(StatusMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
+		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(HudMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(StatusMenu) and not RageUI.Visible(VipMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
 			mainmenu = RMenu:DeleteType("mainmenu")
 		end
 	end

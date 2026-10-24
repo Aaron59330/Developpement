@@ -1,43 +1,15 @@
 IsVipPlayer = false
-
-AddEventHandler('esx:playerLoaded', function()
-	IsVipPlayer = false
-	ESX.TriggerServerCallback('CorePickax:Vip:getVIPStatus', function(vip)
-		if vip then
-	        ESX.ShowNotification("Votre vip à été chargé.")
-            ESX.PlayerData.maxWeight = ConfigVIP.maxWeightVIP
-            IsVipPlayer = true
-        else
-            ESX.PlayerData.maxWeight = ConfigVIP.maxWeightDefault
-            IsVipPlayer = false
-		end
-	end)
-end)
-
-RegisterNetEvent('CorePickax:Vip:VIPStatus')
-AddEventHandler('CorePickax:Vip:VIPStatus', function(stats)
-    IsVipPlayer = stats
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        TriggerServerEvent('CorePickax:Vip:GetVIP')
-        Wait(60000)
-    end
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Wait(ConfigVIP.TimerWait)
-        TriggerServerEvent("CorePickax:Vip:AddCoins")
-    end
-end)
-
-function GetVIP()
-    return IsVipPlayer
-end
+VipLevel = 0
+VipExpiration = 0
 
 RegisterNetEvent('CorePickax:Vip:updateVIP')
-AddEventHandler('CorePickax:Vip:updateVIP',function(vip)
-    IsVipPlayer = vip
+AddEventHandler('CorePickax:Vip:updateVIP', function(level, expiration)
+    if type(level) == 'boolean' then level = level and 1 or 0 end -- ancien format
+    VipLevel = tonumber(level) or 0
+    VipExpiration = tonumber(expiration) or 0
+    IsVipPlayer = VipLevel > 0
 end)
+
+function GetVIP() return IsVipPlayer end
+function GetVIPLevel() return VipLevel end
+exports('GetVIPLevel', GetVIPLevel)

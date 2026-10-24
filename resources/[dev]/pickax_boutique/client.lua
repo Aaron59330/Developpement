@@ -73,15 +73,16 @@ RegisterNUICallback('rpc', function(body, cb)
 end)
 
 -- Gestion des coins par joueur : mêmes appels serveur que le menu de base (pickax_core vérifie lui-même le droit d'administrer)
-local CoreAdmin = { online = 'CorePickax:boutique:admin:online', search = 'CorePickax:boutique:admin:search', recent = 'CorePickax:boutique:admin:recent', coins = 'CorePickax:boutique:admin:coins' }
+local CoreAdmin = { online = 'CorePickax:boutique:admin:online', search = 'CorePickax:boutique:admin:search', recent = 'CorePickax:boutique:admin:recent', coins = 'CorePickax:boutique:admin:coins', vip = 'CorePickax:boutique:admin:vip' }
 RegisterNUICallback('coreadmin', function(body, cb)
     local name = CoreAdmin[body.name]
     if not name then return cb({ ok = false, error = 'Appel inconnu' }) end
     local a = body.args or {}
     ESX.TriggerServerCallback(name, function(r, extra)
-        if body.name == 'coins' then cb({ ok = r == true, error = r ~= true and tostring(r == false and extra or 'Refusé') or nil, points = r == true and extra or nil })
+        if body.name == 'vip' then cb({ ok = r == true, error = r ~= true and tostring(extra or 'Refusé') or nil, message = r == true and extra or nil })
+        elseif body.name == 'coins' then cb({ ok = r == true, error = r ~= true and tostring(r == false and extra or 'Refusé') or nil, points = r == true and extra or nil })
         else cb({ ok = true, list = r or {} }) end
-    end, a[1], a[2])
+    end, a[1], a[2], a[3])
 end)
 
 -- Paiement du panier : le serveur contrôle les prix, la remise et le solde ; le client livre ensuite les articles un par un

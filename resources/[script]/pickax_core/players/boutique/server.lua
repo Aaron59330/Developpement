@@ -343,6 +343,9 @@ AddEventHandler("CorePickax:Boutique:Add", function(table)
                 elseif table.Interaction == "BuyPack" then
                     if tonumber(PriceConfigBoutique.pack[table.id].price) == tonumber(table.price) then
                         BoutiqueFunction.removePointsToPlayer(_src, table.price)
+                        for _, win in ipairs((ConfigBoutique.pack[table.id] or {}).Win or {}) do
+                            if win.vip and VipGrantByIdentifier then VipGrantByIdentifier(xPlayer.identifier, win.vip, win.days or 31) end
+                        end
 
                         TriggerEvent('esx:customDiscordLog', 'Logs boutique', 'Nouvelle achat', nil, ConfigSV.Logs["LogsBoutique"], 'ID : '.._src..'\nUtilisateur : '..GetPlayerName(_src)..'\nLicense : '..ESX.GetPlayerFromId(_src).identifier.."\nAchat : "..PriceConfigBoutique.pack[table.id].name.."\nPrix : "..table.price.." coins\nCoins Actuelle : "..PlayerCacheBoutique[ESX.GetPlayerFromId(_src).identifier].points)
                     else
@@ -804,6 +807,29 @@ ESX.RegisterServerCallback('CorePickax:boutique:admin:coins', function(source, c
     end)
 end)
 
+
+-- Donner (niveau 1-3) ou retirer (niveau 0) un VIP : `target` = identifiant OU ID serveur d'un joueur en ligne
+ESX.RegisterServerCallback('CorePickax:boutique:admin:vip', function(source, cb, target, level, days)
+    if not BoutiqueIsAdmin(source) then return cb(false, 'Permission refusée') end
+    level, days = math.floor(tonumber(level) or 0), math.floor(tonumber(days) or 0)
+    local identifier = target
+    if type(target) == 'number' then
+        local xp = ESX.GetPlayerFromId(target)
+        if not xp then return cb(false, 'Aucun joueur connecté avec cet ID') end
+        identifier = xp.identifier
+    end
+    if type(identifier) ~= 'string' or identifier == '' then return cb(false, 'Joueur introuvable') end
+    if level == 0 then
+        VipRemoveByIdentifier(identifier)
+        return cb(true, 'VIP retiré')
+    end
+    if level < 1 or level > #ConfigVIP.Tiers then return cb(false, 'Niveau invalide') end
+    if days < 1 or days > 3650 then return cb(false, 'Durée invalide (1 à 3650 jours)') end
+    if not VipGrantByIdentifier(identifier, level, days) then return cb(false, 'Impossible de donner le VIP') end
+    local adminName = (source ~= 0 and ESX.GetPlayerFromId(source)) and ESX.GetPlayerFromId(source).getName() or 'Console'
+    PerformHttpRequest(discord_webhook.url, function() end, 'POST', json.encode({ username = '', content = ('[**%s**] a reçu le **%s** (%d j) par **%s**'):format(identifier, ConfigVIP.Tiers[level].name, days, adminName) }), { ['Content-Type'] = 'application/json' })
+    cb(true, ConfigVIP.Tiers[level].name)
+end)
 
 -- ═══════════════════════════ Exports pour pickax_boutique (panier, codes, historique) ═══════════════════════════
 local BoutiqueLists = function()

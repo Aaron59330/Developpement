@@ -1544,7 +1544,8 @@ local function packContents(win)
         if i.item then out[#out + 1] = ('%dx %s'):format(tonumber(i.amount) or 1, i.item)
         elseif i.money then out[#out + 1] = ('%s $'):format(tostring(i.money))
         elseif i.weapon then out[#out + 1] = tostring(i.weapon)
-        elseif i.Vehicle then out[#out + 1] = ('Véhicule : %s'):format(tostring(i.Vehicle)) end
+        elseif i.Vehicle then out[#out + 1] = ('Véhicule : %s'):format(tostring(i.Vehicle))
+        elseif i.vip then out[#out + 1] = ('Statut VIP niveau %s pendant %s jours'):format(tostring(i.vip), tostring(i.days or 31)) end
     end
     return out
 end

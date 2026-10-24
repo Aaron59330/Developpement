@@ -1270,7 +1270,8 @@ CREATE TABLE `vehicle_sold` (
 CREATE TABLE `vips` (
   `identifier` varchar(50) NOT NULL,
   `vip` int(11) DEFAULT NULL,
-  `expiration` int(11) DEFAULT NULL
+  `expiration` int(11) DEFAULT NULL,
+  `last_claim` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

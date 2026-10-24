@@ -300,6 +300,25 @@ ConfigBoutique = {
                     weapon = "weapon_cal50"
                 }
             }
+        },
+        -- Packs VIP (niveaux et avantages : pickax_core/players/vip/config.lua). `vip` = niveau 1-3, `days` = durée ; un achat du même niveau prolonge le VIP.
+        {
+            name = "VIP Bronze (31 jours)",
+            desc = "Salaire majoré, inventaire plus grand, coins offerts chaque heure, récompense quotidienne et coffre VIP personnel.\nDétails dans le menu F5 > Espace VIP.",
+            price = "1500",
+            Win = { { vip = 1, days = 31 } }
+        },
+        {
+            name = "VIP Argent (31 jours)",
+            desc = "Tous les avantages du Bronze en plus fort : salaire x2, inventaire 48 kg, 10 coins/heure, plus grosse récompense quotidienne et coffre agrandi.\nDétails dans le menu F5 > Espace VIP.",
+            price = "3000",
+            Win = { { vip = 2, days = 31 } }
+        },
+        {
+            name = "VIP Or (31 jours)",
+            desc = "Le niveau maximum : salaire x3, inventaire 64 kg, 20 coins/heure, récompense quotidienne premium et très grand coffre VIP.\nDétails dans le menu F5 > Espace VIP.",
+            price = "5500",
+            Win = { { vip = 3, days = 31 } }
         }
     },
     
