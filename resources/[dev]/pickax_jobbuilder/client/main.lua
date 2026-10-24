@@ -13,8 +13,14 @@ local menuOrigin = nil   -- instant où une action du menu F6 a été choisie : 
 local uiKind = nil
 
 -- Couleur à afficher : celle du job (sauf éditeur) sinon la globale
-local function currentAccent()
-    local own = uiKind ~= 'builder' and State.jobConfig and State.jobConfig.accent
+local pointAccent = nil    -- couleur du job propriétaire du point ouvert (peut être un autre job : boutique / showroom publics)
+local function currentAccent(payload)
+    local own
+    if uiKind ~= 'builder' then
+        if payload and type(payload.data) == 'table' and payload.data.fromPoint then own = payload.data.accent
+        elseif pointAccent ~= nil and not payload then own = pointAccent
+        else own = State.jobConfig and State.jobConfig.accent end
+    end
     return own or (Config.UI and Config.UI.Accent)
 end
 
@@ -43,7 +49,8 @@ function OpenUI(payload)
     if payload.action == 'open' and payload.kind ~= 'menu' and menuOrigin and GetGameTimer() - menuOrigin < 4000 then payload.back = true end
     menuOrigin = nil
     -- couleur d'accentuation : celle du job du joueur si elle est définie (menus du job), sinon la couleur globale (builder : toujours la globale)
-    payload.theme = currentAccent()
+    pointAccent = (uiKind ~= 'builder' and type(payload.data) == 'table' and payload.data.fromPoint) and (payload.data.accent or false) or nil
+    payload.theme = currentAccent(payload)
     uiOpen = true
     SetNuiFocus(true, true)
     setWalkMenu(payload.action == 'open' and payload.kind == 'menu')

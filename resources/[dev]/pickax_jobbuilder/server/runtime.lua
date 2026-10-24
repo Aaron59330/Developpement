@@ -225,6 +225,9 @@ ESX.RegisterServerCallback('jobbuilder:openPoint', function(src, cb, pointId)
     local point2, xPlayer, err = getPoint(src, pointId, nil, publicShop)
     if not point2 then return cb(fail(err)) end
     local job = JB.Jobs[point.job_name]
+    -- couleur des menus du job propriétaire du point (boutique / showroom publics : celle du job qui les possède, pas celle du client)
+    local rawcb = cb
+    cb = function(r) if type(r) == 'table' and r.ok and job then r.accent, r.fromPoint = job.settings.ui_accent, true end rawcb(r) end
     local grade = xPlayer.job.grade
     local d = point.data
 
