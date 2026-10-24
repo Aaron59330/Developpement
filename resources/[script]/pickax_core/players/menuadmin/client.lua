@@ -2830,7 +2830,9 @@ end)
 -- ═══════════════ Chat staff (remplace celui du panel pickax_staff retiré) ═══════════════
 RegisterNetEvent('CorePickax:StaffChat:msg', function(m)
     if type(m) ~= 'table' then return end
-    TriggerEvent('chat:addMessage', { color = { 150, 110, 230 }, multiline = false, args = { ('[STAFF] [%s] %s | %s'):format(tostring(m.id), tostring(m.rank), tostring(m.name)), tostring(m.text) } })
+    local ar, ag, ab = 150, 110, 230
+    if PickaxChatAccent then ar, ag, ab = PickaxChatAccent() end
+    TriggerEvent('chat:addMessage', { color = { ar, ag, ab }, multiline = false, args = { ('[STAFF] [%s] %s | %s'):format(tostring(m.id), tostring(m.rank), tostring(m.name)), tostring(m.text) } })
     ESX.ShowNotification(('~p~[Staff] ~s~%s : %s'):format(tostring(m.name), tostring(m.text)))
 end)
 
