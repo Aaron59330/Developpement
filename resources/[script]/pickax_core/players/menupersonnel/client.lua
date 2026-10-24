@@ -189,6 +189,7 @@ Citizen.CreateThread(function()
 		local timer = 1000
 		local currentWeight = exports.ox_inventory:GetPlayerWeight() or 0
 		local maxWeight = exports.ox_inventory:GetPlayerMaxWeight() or 0
+		if maxWeight > 0 and maxWeight < 1000 then maxWeight = maxWeight * 1000 end -- valeur en kg -> grammes
 
 		if maxWeight > 0 and currentWeight > maxWeight then
 			timer = 0

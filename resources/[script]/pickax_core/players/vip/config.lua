@@ -1,5 +1,5 @@
 ConfigVIP = {
-    maxWeightDefault = 24,
+    maxWeightDefault = 30,    -- kg, comme inventory:weight dans server.cfg
     DureeVIP = 31,            -- durée par défaut (jours) quand aucune n'est précisée
     CheckInterval = 5,        -- minutes : vérification d'expiration des VIP en ligne
     CoinsInterval = 60,       -- minutes : intervalle de versement des coins boutique

@@ -29,7 +29,7 @@ local function apply(src, silent)
     local v = Cache[xPlayer.identifier] or loadVip(xPlayer.identifier)
     xPlayer.vip = v.level
     local t = tier(v.level)
-    pcall(function() xPlayer.setMaxWeight(t and t.maxWeight or ConfigVIP.maxWeightDefault) end)
+    pcall(function() xPlayer.setMaxWeight((t and t.maxWeight or ConfigVIP.maxWeightDefault) * 1000) -- ox_inventory travaille en grammes end)
     Player(src).state:set('vipLevel', v.level, true)
     TriggerClientEvent('CorePickax:Vip:updateVIP', src, v.level, v.expiration)
     if v.expired then
