@@ -178,11 +178,21 @@ const OS = {
     el.appendChild(h('div.dock', dock.map(id => this.appIcon(Apps.get(id), true))));
     let sx = null;
     el.addEventListener('pointerdown', e => { sx = e.clientX; });
+    // un seul changement de page par geste : la molette envoie plusieurs événements d'affilée (page 1 → 3 d'un coup)
+    const go = (dir) => {
+      const now = Date.now();
+      if (now - (this._pgAt || 0) < 450) return;
+      const np = Math.max(0, Math.min(pages.length - 1, this.homePage + dir));
+      if (np === this.homePage) return;
+      this._pgAt = now; this.homePage = np;
+      wrap.style.transform = `translateX(${-this.homePage * 390}px)`;
+      $$('.dots i', el).forEach((d, i) => d.classList.toggle('on', i === this.homePage));
+    };
     el.addEventListener('pointerup', e => {
       if (sx == null) return; const dx = e.clientX - sx; sx = null;
-      if (Math.abs(dx) > 60) { this.homePage = Math.max(0, Math.min(pages.length - 1, this.homePage + (dx < 0 ? 1 : -1))); wrap.style.transform = `translateX(${-this.homePage * 390}px)`; $$('.dots i', el).forEach((d, i) => d.classList.toggle('on', i === this.homePage)); }
+      if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
     });
-    el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) < 20 || pages.length < 2) return; this.homePage = Math.max(0, Math.min(pages.length - 1, this.homePage + (e.deltaY > 0 ? 1 : -1))); wrap.style.transform = `translateX(${-this.homePage * 390}px)`; $$('.dots i', el).forEach((d, i) => d.classList.toggle('on', i === this.homePage)); });
+    el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) < 20 || pages.length < 2) return; go(e.deltaY > 0 ? 1 : -1); });
     el.addEventListener('click', e => { if (this.editing && !e.target.closest('.appicon')) { this.editing = false; this.drawHome(); } });
   },
   appIcon(d, dock) {
@@ -437,7 +447,8 @@ const OS = {
     const base = Math.max(u.minScale || .55, Math.min(u.maxScale || 1, (window.innerHeight - (u.padY == null ? 56 : u.padY)) / 864));
     // taille choisie par le joueur (Réglages › Affichage) : multiplicateur de la taille automatique, jamais plus grand que l'écran
     const pct = Math.max(u.userMin || 60, Math.min(u.userMax || 125, (S.settings && S.settings.phoneScale) || 100)) / 100;
-    const k = Math.max(0.4, Math.min(base * pct, (window.innerHeight - 8) / 864));
+    const my = u.marginY === 'auto' ? 0 : (Number(u.marginY) || 0);
+    const k = Math.max(0.4, Math.min(base * pct, (window.innerHeight - 8 - my) / 864));
     document.documentElement.classList.toggle('noblur', u.blur !== true);   // flou d'arrière-plan : désactivé par défaut (il fait dépasser des coins noirs dans le jeu) ; Config.UI.blur = true pour le réactiver
     const st = $('#stage');
     // Changement de taille sans transition : une transition sur l'échelle laisse le navigateur du jeu garder le texte

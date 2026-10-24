@@ -56,7 +56,7 @@ Config.UI = {
     crisp    = true,       -- true = la taille du téléphone change sa vraie taille (texte net à toutes les tailles) ; false = ancien mode (image mise à l'échelle, peut être flou)
     side     = 'right',    -- 'right' | 'left'
     marginX  = 28,         -- distance au bord (px)
-    marginY  = 0,          -- distance entre le bas du téléphone et le bas de l'écran (px) : le téléphone reste toujours posé en bas, quelle que soit sa taille. 'auto' = centré verticalement
+    marginY  = 26,         -- distance entre le bas du téléphone et le bas de l'écran (px) : le téléphone reste à cette hauteur quelle que soit sa taille (0 = collé en bas). 'auto' = centré verticalement
     offsetY  = -10,        -- (mode auto) décalage vertical : négatif = plus bas, positif = plus haut
     padY     = 56,         -- marge verticale totale réservée autour du téléphone (px) : plus grand = téléphone plus petit
     userMin  = 60,         -- taille minimale choisissable par le joueur (% de la taille automatique)
