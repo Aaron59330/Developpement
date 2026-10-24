@@ -2490,7 +2490,11 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                 local object = hitEntity
             
                 _Object()
-                do
+                local hasNativeSit = false
+                for _, a in pairs(Action_Config.Object) do
+                    if a.Label == "S'assoir" and a.Props and a.Props[GetEntityModel(object)] then hasNativeSit = true break end
+                end
+                if not hasNativeSit and not CPSitting then
                     local sitItem = contextMenu:AddItem("S'asseoir", false)
                     local dist = #(GetEntityCoords(object) - GetEntityCoords(PlayerPedId()))
                     if dist < 3.0 and not IsPedInAnyVehicle(PlayerPedId(), false) then
