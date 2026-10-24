@@ -125,7 +125,7 @@ const AppStore = {
   async toggle(id, install) { const apps = await rpc('appInstall', id, install); if (apps) { S.installed = apps; OS.drawHome(); this.draw(); Toast(install ? 'Application installée' : 'Application supprimée', install ? 'download' : 'trash'); } },
   line(d, c) {
     const has = S.installed.includes(d.id); const info = APP_INFO[d.id] || ['Application', ''];
-    return Row({ left: h('div.ico', { style: `width:58px;height:58px;border-radius:13px;display:grid;place-items:center;color:#fff;overflow:hidden;background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: (window.RichIcons && RichIcons.html(d)) || icon(d.icon, 30) }), title: d.name, sub: info[0] + ' · ' + info[1],
+    return Row({ left: h('div.ico', { style: `width:58px;height:58px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: icon(d.icon, 30) }), title: d.name, sub: info[0] + ' · ' + info[1],
       trailing: has ? h('button.btn.sm.sec', { onclick: (e) => { e.stopPropagation(); (c && c.system) ? OS.openApp(d.id) : OS.openApp(d.id); } }, 'Ouvrir') : h('button.btn.sm', { onclick: (e) => { e.stopPropagation(); this.toggle(d.id, true); } }, 'Obtenir'),
       onlong: () => has && !(c && c.system) && ActionSheet(d.name, [{ label: 'Supprimer l\'application', red: true, onclick: () => this.toggle(d.id, false) }]) });
   },

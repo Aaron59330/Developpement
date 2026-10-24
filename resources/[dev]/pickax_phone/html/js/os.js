@@ -187,7 +187,7 @@ const OS = {
   },
   appIcon(d, dock) {
     const badge = S.badges[d.id] || 0;
-    const el = h('div.appicon', h('div.ico' + (this.editing ? '.wiggle' : ''), { style: `background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: (window.RichIcons && RichIcons.html(d)) || (d.glyphFn ? d.glyphFn() : (d.glyph ? d.glyph : icon(d.icon))) }), h('div.nm', d.name));
+    const el = h('div.appicon', h('div.ico' + (this.editing ? '.wiggle' : ''), { style: `background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: d.glyphFn ? d.glyphFn() : (d.glyph ? d.glyph : icon(d.icon)) }), h('div.nm', d.name));
     if (badge && !S.settings.badgeOff[d.id] && !this.editing) el.appendChild(h('div.badge', badge > 99 ? '99+' : badge));
     const sys = (S.catalog.find(a => a.id === d.id) || {}).system;
     if (this.editing && !sys) el.appendChild(h('div.rm', { html: icon('minus'), onclick: async (e) => { e.stopPropagation(); if (await Confirm('Supprimer « ' + d.name + ' » ?', 'Vous pourrez la réinstaller depuis l\'App Store.', 'Supprimer', true)) { const apps = await rpc('appInstall', d.id, false); if (apps) { S.installed = apps; this.drawHome(); } } } }));
@@ -320,7 +320,7 @@ const OS = {
   notifEl(n, lock) {
     const d = Apps.get(n.app) || { grad: ['#555', '#333'], icon: 'bell', name: 'Système' };
     const el = h('div.notif', { onclick: () => { n.cleared = true; this.drawLockNotifs(); this.drawNC(); n.onTap ? n.onTap() : this.openApp(n.app); } },
-      h('div.ni', { style: `background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: (window.RichIcons && !n.icon && RichIcons.html(d)) || icon(n.icon || d.icon) }),
+      h('div.ni', { style: `background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: icon(n.icon || d.icon) }),
       h('div.nt', h('b', n.title || d.name), n.body ? h('p', n.body) : null), h('div.nm', ago(n.at)));
     if (n.actions && n.actions.length) { const na = h('div.na'); n.actions.forEach(a => na.appendChild(h('button', { onclick: (e) => { e.stopPropagation(); a.onclick(); n.cleared = true; el.remove(); } }, a.label))); $('.nt', el).appendChild(na); }
     return el;
