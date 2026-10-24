@@ -1264,6 +1264,50 @@ menuPool.OnOpenMenu = function(screenPosition, hitSomething, worldPosition, hitE
     CreateMenu(screenPosition, worldPosition, hitEntity)
 end
 
+-- S'asseoir sur n'importe quel prop (chaise, banc, canapé...) via le menu contextuel
+local CPSitting = false
+function CPSitOnObject(obj)
+    if CPSitting or not DoesEntityExist(obj) then return end
+    local ped = PlayerPedId()
+    local model = GetEntityModel(obj)
+    local mn, mx = GetModelDimensions(model)
+    local w, d, h = mx.x - mn.x, mx.y - mn.y, mx.z - mn.z
+    local scenario = "PROP_HUMAN_SEAT_CHAIR"
+    if math.max(w, d) > 1.3 then
+        scenario = "PROP_HUMAN_SEAT_BENCH"
+    elseif w > 0.8 and d > 0.8 then
+        scenario = "PROP_HUMAN_SEAT_ARMCHAIR"
+    end
+    -- assise : milieu de l'objet, hauteur ~ moitie (max 0.55 m) au-dessus de la base
+    local base = GetOffsetFromEntityInWorldCoords(obj, 0.0, 0.0, mn.z)
+    local seatH = math.min(h * 0.5, 0.55)
+    local center = GetOffsetFromEntityInWorldCoords(obj, (mn.x + mx.x) / 2, (mn.y + mx.y) / 2, mn.z + seatH)
+    local heading = (GetEntityHeading(obj) + 180.0) % 360.0
+    -- face au joueur : choisir le cote le plus proche
+    local pc = GetEntityCoords(ped)
+    local fwd = GetEntityForwardVector(obj)
+    if ((pc.x - center.x) * fwd.x + (pc.y - center.y) * fwd.y) > 0 then
+        heading = GetEntityHeading(obj)
+    end
+    CPSitting = true
+    ClearPedTasksImmediately(ped)
+    TaskStartScenarioAtPosition(ped, scenario, center.x, center.y, center.z - 0.5 + 0.1, heading, 0, true, true)
+    CreateThread(function()
+        Wait(1500)
+        while CPSitting and IsPedUsingScenario(PlayerPedId(), scenario) do
+            BeginTextCommandDisplayHelp("STRING")
+            AddTextComponentSubstringPlayerName("~INPUT_VEH_DUCK~ Se lever")
+            EndTextCommandDisplayHelp(0, false, false, -1)
+            if IsControlJustPressed(0, 73) or IsControlJustPressed(0, 22) then
+                ClearPedTasks(PlayerPedId())
+                break
+            end
+            Wait(0)
+        end
+        CPSitting = false
+    end)
+end
+
 function CreateMenu(screenPosition, worldPosition, hitEntity)
     ESX.PlayerData = ESX.GetPlayerData()
     LastEntityHit = hitEntity
@@ -2446,6 +2490,16 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                 local object = hitEntity
             
                 _Object()
+                do
+                    local sitItem = contextMenu:AddItem("S'asseoir", false)
+                    local dist = #(GetEntityCoords(object) - GetEntityCoords(PlayerPedId()))
+                    if dist < 3.0 and not IsPedInAnyVehicle(PlayerPedId(), false) then
+                        sitItem.OnRelease = function() CPSitOnObject(object) end
+                        sitItem.closeMenuOnRelease = true
+                    else
+                        sitItem.enabled = false
+                    end
+                end
                 for k,v in pairs(Action_Config.Object) do 
                     if not v.Blocked then 
                         if v.IsRestricted then 
