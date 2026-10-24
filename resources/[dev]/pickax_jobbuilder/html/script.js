@@ -122,7 +122,7 @@ const TYPE_ICON = { police: 'shield', ems: 'heart', mecano: 'wrench', taxi: 'car
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
 const PROP_CATS = { house: 'Maison', apartment: 'Appartement', villa: 'Villa', lab: 'Laboratoire', garage: 'Garage', warehouse: 'Entrepôt', office: 'Bureau', shop: 'Local commercial', hotel: 'Hôtel / Motel', other: 'Autre' };
 const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'briefcase', shop: 'cart', wardrobe: 'shirt', safe: 'briefcase', showroom: 'tag', display: 'car', testdrive: 'clock', missions: 'route', harvest: 'sprout', kitchen: 'utensils', tuning: 'wrench', garage_return: 'login' };
-const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout' };
+const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', revive: 'heart', heal: 'plus', repair: 'wrench', clean: 'droplet', invoice: 'file', properties: 'home', dealership: 'car', government: 'landmark', missions: 'route', smallquests: 'list', serve: 'utensils', tablet: 'tablet', jobannounce: 'megaphone', emscalls: 'cross', emstablet: 'tablet', banktablet: 'tablet', leavejob: 'logout', dutyon: 'check', dutyoff: 'logout' };
 
 /* ── Thème : couleur d'accentuation (modifiable en jeu) ── */
 function applyTheme(rgb) {
@@ -2755,6 +2755,7 @@ const Runtime = {
       case 'leaveJobCancel': return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':
+        if (el.dataset.id === 'dutyon' || el.dataset.id === 'dutyoff') { const want = el.dataset.id === 'dutyon'; const r = await rpc('duty:toggle', want); if (!ok(r, want ? 'Service pris : tout ton menu et tes points sont disponibles' : 'Service quitté')) return; return close(); }
         if (el.dataset.id === 'leavejob') { this.kind = 'leaveJob'; this.data = { jobLabel: (this.menuData || {}).jobLabel || '' }; return this.render(); }
         if (el.dataset.id === 'invoice') { this.kind = 'invoiceForm'; return this.render(); }
         if (el.dataset.id === 'tablet') { const r = await rpc('tablet:open'); if (!ok(r)) return; window.JBBackFromMenu = true; window.JBBack = true; Mod = Tablet; return Tablet.open(r); }

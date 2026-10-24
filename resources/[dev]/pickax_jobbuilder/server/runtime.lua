@@ -13,6 +13,7 @@ local function getPoint(src, pointId, ptype, publicOk)
     if not (publicOk and (point.type ~= 'shop' or (point.data and point.data.public))) then
         if xPlayer.job.name ~= point.job_name then return nil, nil, 'Ce point n\'appartient pas à ton métier' end
         if xPlayer.job.grade < point.min_grade then return nil, nil, 'Ton grade est insuffisant' end
+        if not JB.isOnDuty(src) then return nil, nil, 'Prends ton service (menu F6) pour utiliser ce point' end
     end
     return point, xPlayer
 end
@@ -547,6 +548,7 @@ end)
 ESX.RegisterServerCallback('jobbuilder:action', function(src, cb, action, targetId)
     local xPlayer = ESX.GetPlayerFromId(src)
     if not xPlayer or not jobHasAction(xPlayer, action) then return cb(fail('Action non autorisée')) end
+    if not JB.isOnDuty(src) then return cb(fail('Prends ton service (menu F6) pour utiliser cette action')) end
     local cfg = Config.Actions[action]
     local target
     if cfg.target then

@@ -17,6 +17,7 @@ server_scripts {
     'server/core.lua',
     'server/builder.lua',
     'server/dlogs.lua',
+    'server/duty.lua',
     'server/runtime.lua',
     'server/property.lua',
     'server/settings.lua',

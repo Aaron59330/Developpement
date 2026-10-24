@@ -170,7 +170,7 @@ local returnVehicle   -- défini plus bas (a besoin de vehicleKind)
 CreateThread(function()
     while true do
         local sleep = 1000
-        if not uiOpen and #State.points > 0 then
+        if not uiOpen and #State.points > 0 and LocalPlayer.state.jbDuty == true then   -- points visibles et utilisables seulement en service
             local pos = GetEntityCoords(PlayerPedId())
             local nearest
             for _, p in ipairs(State.points) do
@@ -234,9 +234,16 @@ local function openJobMenu()
         return
     end
     local actions = {}
-    for _, id in ipairs(jc.actions) do
-        local a = Config.Actions[id]
-        if a then actions[#actions + 1] = { id = id, label = a.label, icon = a.icon, target = a.target } end
+    local onDuty = LocalPlayer.state.jbDuty == true
+    if not onDuty then
+        -- hors service : seul le bouton « Prendre son service » (et quitter le métier) est proposé ; le reste du menu et les points sont verrouillés
+        actions[#actions + 1] = { id = 'dutyon', label = 'Prendre son service', icon = 'check' }
+    else
+        actions[#actions + 1] = { id = 'dutyoff', label = 'Quitter son service', icon = 'logout' }
+        for _, id in ipairs(jc.actions) do
+            local a = Config.Actions[id]
+            if a then actions[#actions + 1] = { id = id, label = a.label, icon = a.icon, target = a.target } end
+        end
     end
     if Config.AllowLeave ~= false then actions[#actions + 1] = { id = 'leavejob', label = 'Quitter le métier', icon = 'logout' } end
     if #actions == 0 then
@@ -351,7 +358,7 @@ NuiRemote = {
     list = true, get = true, catalog = true, save = true, delete = true, setMyJob = true, leaveJob = true,
     ['cloak:wear'] = true, ['armory:take'] = true, ['shop:buy'] = true,
     ['boss:money'] = true, ['boss:recruit'] = true, ['boss:setGrade'] = true, ['boss:fire'] = true, ['boss:salary'] = true,
-    openPoint = true,
+    openPoint = true, ['duty:toggle'] = true,
     ['boss:poll'] = true, ['gov:balance'] = true,
     ['settings:get'] = true, ['settings:save'] = true, ['settings:reset'] = true,
 }

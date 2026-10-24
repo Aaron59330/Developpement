@@ -265,6 +265,14 @@ local function OpenMenu()
 	local PerfMenu = RageUI.CreateSubMenu(Parametres, "Performances (FPS)", "Allégez le rendu du jeu :")
 	local KeysMenu = RageUI.CreateSubMenu(mainmenu, "Touches du serveur", "Raccourcis clavier :")
 	local CmdsMenu = RageUI.CreateSubMenu(mainmenu, "Commandes du serveur", "Commandes utiles :")
+	local StatusMenu = RageUI.CreateSubMenu(mainmenu, "Statut des entreprises", "En ligne = au moins un employé en service :")
+	local JobStatus, JobStatusAt, JobStatusLoading = nil, 0, false
+	local function RefreshJobStatus(force)
+		if JobStatusLoading or (not force and GetGameTimer() - JobStatusAt < 4000) then return end
+		if GetResourceState('pickax_jobbuilder') ~= 'started' then JobStatus = false return end
+		JobStatusLoading = true
+		ESX.TriggerServerCallback('jobbuilder:dutyStatus', function(list) JobStatus = list or {} JobStatusAt = GetGameTimer() JobStatusLoading = false end)
+	end
 	local editorMenu = RageUI.CreateSubMenu(Parametres, "Rockstar editor", "Que voulez-vous faire ?")
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
@@ -290,6 +298,7 @@ local function OpenMenu()
 			local inVeh = IsPedInAnyVehicle(PlayerPedId(), false)
 			RageUI.ButtonWithStyle("Véhicule", inVeh and "Portes, fenêtres et limiteur de vitesse" or "Vous devez être dans un véhicule", {RightLabel = "→→→"}, inVeh, function() end, MenuVehicle)
 			RageUI.ButtonWithStyle("Préférences", "Réglages du jeu, apparence des menus et performances", {RightLabel = "→→→"}, true, function() end, Parametres)
+			RageUI.ButtonWithStyle("Statut des entreprises", "Voir quelles entreprises ont un employé en service", {RightLabel = "→→→"}, true, function(_, _, s) if s then RefreshJobStatus(true) end end, StatusMenu)
 			RageUI.Separator("Serveur")
 			RageUI.ButtonWithStyle("Touches du serveur", "La liste des raccourcis clavier", {RightLabel = "→→→"}, true, function() end, KeysMenu)
 			RageUI.ButtonWithStyle("Commandes du serveur", "Les commandes utiles pour les joueurs", {RightLabel = "→→→"}, true, function() end, CmdsMenu)
@@ -544,6 +553,20 @@ local function OpenMenu()
 				RageUI.Separator("~r~Module de performances indisponible")
 			end
 		end)
+		RageUI.IsVisible(StatusMenu, true, true, true, function()
+			RefreshJobStatus(false)
+			if JobStatus == false then
+				RageUI.ButtonWithStyle("~r~Indisponible", "Le système d'entreprises n'est pas démarré", {}, false, function() end)
+			elseif JobStatus == nil then
+				RageUI.ButtonWithStyle("~c~Chargement…", nil, {}, false, function() end)
+			elseif #JobStatus == 0 then
+				RageUI.ButtonWithStyle("~c~Aucune entreprise", "Aucune entreprise n'a été créée", {}, false, function() end)
+			else
+				for _, j in ipairs(JobStatus) do
+					RageUI.ButtonWithStyle(j.label, j.online and (j.count .. " employé(s) en service") or "Personne n'a pris son service", {RightLabel = j.online and ("~g~● En ligne (" .. j.count .. ")~s~") or "~r~● Hors ligne~s~"}, true, function() end)
+				end
+			end
+		end)
 		RageUI.IsVisible(KeysMenu, true, true, true, function()
 			for _, k in ipairs(MenuKeys()) do
 				RageUI.ButtonWithStyle(k[1], nil, {RightLabel = "~b~[" .. string.upper(tostring(k[2])) .. "]~s~"}, true, function() end)
@@ -772,7 +795,7 @@ local function OpenMenu()
 			end
 		end)
 
-		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(HudMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
+		if not RageUI.Visible(mainmenu) and not RageUI.Visible(Informations) and not RageUI.Visible(Parametres) and not RageUI.Visible(PrefsMenu) and not RageUI.Visible(HudMenu) and not RageUI.Visible(Docs) and not RageUI.Visible(PerfMenu) and not RageUI.Visible(KeysMenu) and not RageUI.Visible(CmdsMenu) and not RageUI.Visible(StatusMenu) and not RageUI.Visible(editorMenu) and not RageUI.Visible(Facture) and not RageUI.Visible(MenuVehicle) then
 			mainmenu = RMenu:DeleteType("mainmenu")
 		end
 	end
