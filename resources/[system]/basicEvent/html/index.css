@@ -116,6 +116,11 @@ input:focus {
 
 .msg {
 	margin-bottom: 0.28%;
+	/* messages aux couleurs du serveur : liseré + léger dégradé (couleur du config de pickax_core) */
+	padding: 0.25% 0.8%;
+	border-left: 3px solid rgb(var(--pk-rgb, 0, 164, 255));
+	background: linear-gradient(90deg, rgba(var(--pk-rgb, 0, 164, 255), 0.2), rgba(var(--pk-rgb, 0, 164, 255), 0));
+	border-radius: 0 6px 6px 0;
 }
 
 .twitter {
