@@ -895,7 +895,7 @@ const Builder = {
     if (p === '__accent') { this.accentDraft = [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)); applyTheme(this.accentDraft); if (final) this.render(); return; }
     if (!this.cur) return;
     if (p === '__shopcolor') { this.cur.settings.color = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); this.markDirty(); if (final) this.render(); return; }
-    if (p === '__shopui') { this.cur.settings.uiColor = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); applyTheme(this.cur.settings.uiColor); this.markDirty(); if (final) this.render(); return; }
+    if (p === '__shopui') { this.cur.settings.uiColor = [1, 3, 5].map(k => parseInt(v.slice(k, k + 2), 16)); this.markDirty(); if (final) this.render(); return; }
     if (p.startsWith('__pedsep:')) {
       const l = this.cur.locations[Number(p.slice(9))];
       if (l) { if (el.checked) l.ped = Object.assign({}, l.coords || {}); else delete l.ped; this.markDirty(); this.render(); }
@@ -959,7 +959,7 @@ const Builder = {
         toast('Boutique dupliquée (désactivée, sans emplacement)', 'ok'); await this.refreshList();
         this.cur = clone(r.shop); this.tab = 'locations'; this.logs = null; this.render(true); return;
       }
-      case 'shopSwatch': c.settings.uiColor = v.split(',').map(Number); applyTheme(c.settings.uiColor); this.markDirty(); this.render(); return;
+      case 'shopSwatch': c.settings.uiColor = v.split(',').map(Number); this.markDirty(); this.render(); return;
       case 'shopUiReset': delete c.settings.uiColor; this.markDirty(); this.render(); return;
       case 'shopColorReset': delete c.settings.color; this.markDirty(); this.render(); return;
       case 'checkPed': {

@@ -85,7 +85,7 @@ function OpenPanel(kind, data, ctx)
     SetNuiFocus(true, true)
     -- Couleur des menus : celle du module (si définie) sinon la couleur globale
     local mod = ctx and ctx.eid and EntityById(ctx.eid)
-    SendNUIMessage({ action = 'open', kind = kind, data = data, theme = Config.UI and Config.UI.Accent, moduleTheme = mod and mod.uiColor or nil })
+    SendNUIMessage({ action = 'open', kind = kind, data = data, theme = Config.UI and Config.UI.Accent, moduleTheme = (kind ~= 'builder' and mod and mod.uiColor) or nil })   -- jamais dans le builder : sa couleur ne change que les menus du module pour les joueurs
 end
 
 function CloseUI()

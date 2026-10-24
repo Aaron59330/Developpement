@@ -727,7 +727,7 @@ window.addEventListener('message', e => {
     case 'end':
       if (m.data.you) GS.myName = m.data.you;
       GS.res = m.data; GS.playing = true; hideProgress(); drawGame(); snd('success');
-      setTimeout(() => { GS.res = null; GS.playing = false; GS.hud = null; GS.wait = null; L.joined = false; drawGame(); }, ((m.data.ret || 6) + 0.5) * 1000);
+      setTimeout(() => { GS.res = null; GS.playing = false; GS.hud = null; GS.wait = null; L.joined = false; ['--accent', '--accent-rgb', '--pk-accent', '--pk-accent-rgb'].forEach(k => document.documentElement.style.removeProperty(k)); drawGame(); }, ((m.data.ret || 6) + 0.5) * 1000);
       break;
   }
 });
