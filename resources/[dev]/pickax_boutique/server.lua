@@ -120,7 +120,7 @@ AddEventHandler('CorePickax:Boutique:Paid', function(src, paid, full, label)
         if paid < full then code = (p.pct > 0 and p.code ~= '' and p.code) or (item.daily and 'BOUTIQUE DU JOUR') or nil end
     end
     MySQL.insert('INSERT INTO boutique_history (identifier, player_name, item_name, category, price, full_price, code) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        { xPlayer.identifier, esc(nameOf(xPlayer), 80), esc(name, 100), cat, math.floor(tonumber(paid) or 0), math.floor(tonumber(full) or 0), code })
+        { xPlayer.identifier, esc(nameOf(xPlayer), 80), esc(name, 100), cat or '', math.floor(tonumber(paid) or 0), math.floor(tonumber(full) or 0), code or '' })   -- jamais de nil : un nil final/au milieu fait perdre un paramètre à oxmysql
     log(('%s a acheté « %s » pour %d coins%s'):format(nameOf(xPlayer), name, tonumber(paid) or 0, code and (' (code ' .. code .. ')') or ''))
 end)
 
