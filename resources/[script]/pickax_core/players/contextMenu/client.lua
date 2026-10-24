@@ -1501,6 +1501,7 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                                     local it = sub:AddItem(action[1])
                                     it.OnRelease = action[2]
                                     it.closeMenuOnRelease = v.CloseOnClick
+                                    if action[3] then it.rightText = Text(action[3]) end   -- étiquette alignée à droite (ex. « ACTIF »)
                                 end
                             end
                             if #(v.Groups or {}) == 0 then cat.enabled = false end

@@ -848,9 +848,10 @@ function _Moi()
                 for _, pl in ipairs(w.places) do
                     local name = w.name
                     if pl.id == w.current then cur = pl.label end
-                    actions[#actions + 1] = { (pl.id == w.current and "~b~✔ ~s~" or "") .. pl.label, function()
+                    local on = pl.id == w.current
+                    actions[#actions + 1] = { (on and "~b~" or "") .. pl.label, function()
                         exports['pickax_weaponcarry']:SetPlacement(name, pl.id)
-                    end }
+                    end, on and "~b~ACTIF" or nil }
                 end
                 groups[#groups + 1] = { Label = ("%s ~b~· %s"):format(w.label, cur), Action = actions }
             end
@@ -866,9 +867,10 @@ function _Moi()
                 for _, st in ipairs(w.styles) do
                     local name = w.name
                     if st.id == w.current then cur = st.label end
-                    actions[#actions + 1] = { (st.id == w.current and "~b~✔ ~s~" or "") .. st.label, function()
+                    local on = st.id == w.current
+                    actions[#actions + 1] = { (on and "~b~" or "") .. st.label, function()
                         exports['pickax_weaponcarry']:SetAimStyle(name, st.id)
-                    end }
+                    end, on and "~b~ACTIF" or nil }
                 end
                 sgroups[#sgroups + 1] = { Label = ("%s ~b~· %s"):format(w.label, cur), Action = actions }
             end
