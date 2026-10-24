@@ -161,7 +161,7 @@ local function sell(label, items, currency)
     return { kind = 'sell', label = label, blip = false, ped = ped('g_m_y_mexgoon_01', 'WORLD_HUMAN_DRUG_DEALER'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 5,
         sell = { currency = currency or 'black_money', maxPerHour = 60, items = items } }
 end
-local launder = { kind = 'launder', label = 'Blanchiment', blip = false, ped = ped('a_m_m_business_01'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0,
+local launder = { kind = 'launder', reveal = { enabled = true, item = 'launder_tablet' }, label = 'Blanchiment', blip = false, ped = ped('a_m_m_business_01'), access = { jobs = {}, item = '' }, copsRequired = 0, alertChance = 0,
     launder = { rate = 70, min = 500, max = 50000, from = 'black_money', to = 'money', maxPerHour = 50000 } }
 
 -- Catalogue des drogues : choisies d'un clic dans l'éditeur (plus besoin de taper les noms d'items).

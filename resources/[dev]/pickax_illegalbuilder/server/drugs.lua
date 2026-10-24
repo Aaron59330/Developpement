@@ -1,6 +1,13 @@
 -- ─────────────────────────────── Drogues : récolte, laboratoires, vente, blanchiment ───────────────────────────────
 local Uses = {}      -- [eid:pi] = { uses, resetAt } épuisement global d'un point de récolte
 
+-- Item « tablette » exigé par un point (blanchiment…) ; nil si le point n'en exige pas
+function IB.pointRevealItem(p)
+    local r = p and p.kind == 'launder' and p.reveal
+    if r and r.enabled then return (r.item and r.item ~= '') and r.item or 'launder_tablet' end
+    return nil
+end
+
 local function resolve(src, eid, pi, kind, skipCops)
     local e = IB.Entities[tonumber(eid) or 0]
     local xPlayer = ESX.GetPlayerFromId(src)
@@ -10,6 +17,8 @@ local function resolve(src, eid, pi, kind, skipCops)
     if not p or p.kind ~= kind or not p.coords or not IB.near(src, p.coords, 4.0) then return nil, 'Trop loin' end
     local ok, err = IB.hasAccess(xPlayer, p.access)
     if not ok then return nil, err end
+    local need = IB.pointRevealItem(p)
+    if need and IB.itemCount(src, need) < 1 then return nil, 'Il te faut la tablette de blanchiment' end
     if not skipCops then
         local need = math.max(p.copsRequired or 0, e.settings.copsRequired or 0)
         if need > 0 and IB.copCount() < need then return nil, 'Impossible pour le moment (pas assez de policiers en service)' end

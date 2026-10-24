@@ -77,72 +77,79 @@ CreateThread(function()
     end
 end)
 
--- ───────── Tablette Go Fast : sans l'item, le contact n'existe pas pour le joueur ─────────
--- Le serveur n'envoie les points d'un Go Fast « à tablette » qu'aux joueurs qui possèdent l'item. Ici : on surveille l'inventaire pour
--- redemander la synchronisation quand la tablette est achetée / perdue, on affiche le contact sur la carte et on pose le GPS à l'achat.
-local gfBlips, gfCount, gfLastKey = {}, {}, ''
+-- ───────── Tablettes d'accès (Go Fast, blanchiment…) : sans l'item, le point n'existe pas pour le joueur ─────────
+-- Le serveur n'envoie les points « à tablette » qu'aux joueurs qui possèdent l'item. Ici : on surveille l'inventaire pour redemander
+-- la synchronisation quand la tablette est achetée / perdue, on affiche les points révélés sur la carte et on pose le GPS à l'achat.
+local revBlips, revCount = {}, {}
 
-local function clearGfBlips()
-    for _, b in ipairs(gfBlips) do if DoesBlipExist(b) then RemoveBlip(b) end end
-    gfBlips = {}
+local function clearRevBlips()
+    for _, b in ipairs(revBlips) do if DoesBlipExist(b) then RemoveBlip(b) end end
+    revBlips = {}
 end
 
-local function rebuildGfBlips()
-    clearGfBlips()
+local function rebuildRevBlips()
+    clearRevBlips()
     for _, e in ipairs((State and State.entities) or {}) do
-        if e.type == 'gofast' and e.gofastItem then
-            for _, p in ipairs(e.points) do
-                if p.kind == 'gfstart' and p.coords then
-                    local b = AddBlipForCoord(p.coords.x + 0.0, p.coords.y + 0.0, p.coords.z + 0.0)
-                    SetBlipSprite(b, 225) SetBlipColour(b, 1) SetBlipScale(b, 0.8) SetBlipAsShortRange(b, true)
-                    BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName('Contact Go Fast') EndTextCommandSetBlipName(b)
-                    gfBlips[#gfBlips + 1] = b
-                end
+        for _, p in ipairs(e.points) do
+            local label, sprite, colour
+            if e.type == 'gofast' and e.gofastItem and p.kind == 'gfstart' then label, sprite, colour = 'Contact Go Fast', 225, 1
+            elseif p.reveal and p.coords then label, sprite, colour = (p.label and p.label ~= '') and p.label or 'Blanchiment', 108, 2 end
+            if label and p.coords then
+                local b = AddBlipForCoord(p.coords.x + 0.0, p.coords.y + 0.0, p.coords.z + 0.0)
+                SetBlipSprite(b, sprite) SetBlipColour(b, colour) SetBlipScale(b, 0.8) SetBlipAsShortRange(b, true)
+                BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(label) EndTextCommandSetBlipName(b)
+                revBlips[#revBlips + 1] = b
             end
         end
     end
 end
 
-RegisterNetEvent('illegalbuilder:client:sync', function() SetTimeout(300, rebuildGfBlips) end)
+RegisterNetEvent('illegalbuilder:client:sync', function() SetTimeout(300, rebuildRevBlips) end)
+
+-- Premier point révélé par `item` : position + texte du message
+local function revealedBy(item)
+    for _, e in ipairs((State and State.entities) or {}) do
+        for _, p in ipairs(e.points) do
+            if p.coords and ((e.type == 'gofast' and e.gofastItem == item and p.kind == 'gfstart') or p.reveal == item) then
+                return p, (e.type == 'gofast') and 'le contact Go Fast' or 'le point de blanchiment'
+            end
+        end
+    end
+end
 
 CreateThread(function()
     while true do
         Wait(3000)
-        local changed, gained = false, nil
+        local changed, gainedItem = false, nil
+        local items, seen = {}, {}
         for _, e in ipairs((State and State.entities) or {}) do
-            local item = e.gofastItem
-            if item then
-                local ok, n = pcall(function() return exports.ox_inventory:Search('count', item) end)
-                n = ok and tonumber(n) or 0
-                if gfCount[item] == nil then gfCount[item] = n end
-                if (gfCount[item] > 0) ~= (n > 0) then
-                    changed = true
-                    if n > 0 then gained = e end
-                end
-                gfCount[item] = n
+            for _, it in ipairs(e.revealItems or {}) do if not seen[it] then seen[it] = true items[#items + 1] = it end end
+        end
+        for _, item in ipairs(items) do
+            local ok, n = pcall(function() return exports.ox_inventory:Search('count', item) end)
+            n = ok and tonumber(n) or 0
+            if revCount[item] == nil then revCount[item] = n end
+            if (revCount[item] > 0) ~= (n > 0) then
+                changed = true
+                if n > 0 then gainedItem = item end
             end
+            revCount[item] = n
         end
         if changed then
             TriggerServerEvent('illegalbuilder:server:requestSync')
-            if gained then
+            if gainedItem then
                 SetTimeout(2500, function()
-                    for _, e in ipairs((State and State.entities) or {}) do
-                        if e.id == gained.id then
-                            for _, p in ipairs(e.points) do
-                                if p.kind == 'gfstart' and p.coords then
-                                    SetNewWaypoint(p.coords.x + 0.0, p.coords.y + 0.0)
-                                    Notify('Tablette Go Fast : le contact est indiqué sur ta carte (GPS posé).', 'success')
-                                    return
-                                end
-                            end
-                        end
+                    local p, what = revealedBy(gainedItem)
+                    if p then
+                        SetNewWaypoint(p.coords.x + 0.0, p.coords.y + 0.0)
+                        Notify(('Tablette reçue : %s est indiqué sur ta carte (GPS posé).'):format(what), 'success')
                     end
                 end)
             else
-                Notify('Tu n\'as plus la tablette Go Fast : le contact n\'est plus accessible.', 'error')
+                Notify('Tu n\'as plus la tablette : l\'accès n\'est plus disponible.', 'error')
             end
         end
     end
 end)
 
-AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then clearGfBlips() end end)
+AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then clearRevBlips() end end)

@@ -389,14 +389,17 @@ function IB.publicEntity(e)
     local s, pts = e.settings, {}
     for i, p in ipairs(e.points) do
         if p.coords and p.coords.x then
-            pts[#pts + 1] = { i = i, kind = p.kind or 'main', outfit = (p.outfit and p.outfit.enabled) and p.outfit or nil,
+            pts[#pts + 1] = { i = i, kind = p.kind or 'main', reveal = IB.pointRevealItem and IB.pointRevealItem(p) or nil, outfit = (p.outfit and p.outfit.enabled) and p.outfit or nil,
                 plant = (p.harvest and p.harvest.plant and p.harvest.plant.enabled) and p.harvest.plant or nil, label = p.label, coords = p.coords, store = p.store, ret = p.ret, inside = p.inside,
                 spawns = p.spawns, ped = p.ped, blip = p.blip, color = p.color, color2 = p.color2, doors = p.doors, useKey = p.useKey, showMarker = p.showMarker, showText = p.showText, desc = p.desc, zone = (p.kind == 'zone') and { radius = p.radius, reviveEnabled = p.reviveEnabled, reviveDelay = p.reviveDelay, giveWeapons = p.giveWeapons, removeOnExit = p.removeOnExit,
                 infiniteAmmo = p.infiniteAmmo, armorOnRespawn = p.armorOnRespawn, spawnProtection = p.spawnProtection, weapons = p.weapons, spawns = p.spawns } or nil }
         end
     end
     local gfItem = IB.gofastTabletItem and IB.gofastTabletItem(e) or nil
-    return { gofastItem = gfItem, id = e.id, type = e.type, label = e.label, points = pts, blip = s.blip, color = s.color, uiColor = s.uiColor, marker = s.marker,
+    local reveal, seen = {}, {}
+    if gfItem then reveal[#reveal + 1] = gfItem seen[gfItem] = true end
+    for _, pt in ipairs(pts) do if pt.reveal and not seen[pt.reveal] then reveal[#reveal + 1] = pt.reveal seen[pt.reveal] = true end end
+    return { revealItems = #reveal > 0 and reveal or nil, gofastItem = gfItem, id = e.id, type = e.type, label = e.label, points = pts, blip = s.blip, color = s.color, uiColor = s.uiColor, marker = s.marker,
         mode = s.mode, trigger = s.trigger, weapon = s.weapon, duration = s.duration }
 end
 
@@ -408,7 +411,13 @@ function IB.syncPlayer(src)
         if IB.canSee(e, xPlayer) then
             local pub = IB.publicEntity(e)
             -- Go Fast avec tablette : sans la tablette, ni le contact ni les points ne sont envoyés au joueur (il ne sait pas où est le Go Fast)
-            if pub.gofastItem and IB.itemCount(src, pub.gofastItem) < 1 then pub.points = {} end
+            if pub.gofastItem and IB.itemCount(src, pub.gofastItem) < 1 then pub.points = {}
+            else
+                -- points « à tablette » (ex : blanchiment) : retirés tant que le joueur n'a pas l'item
+                local keep = {}
+                for _, pt in ipairs(pub.points) do if not pt.reveal or IB.itemCount(src, pt.reveal) >= 1 then keep[#keep + 1] = pt end end
+                pub.points = keep
+            end
             list[#list + 1] = pub
         end
     end

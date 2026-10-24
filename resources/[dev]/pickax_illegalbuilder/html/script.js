@@ -1051,7 +1051,9 @@ const Builder = {
       <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
       <div class="mt">${this.listEditor(`${base}.sell.items`, [{ key: 'item', label: 'Item acheté', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Prix min', kind: 'num', w: '110px' }, { key: 'max', label: 'Prix max', kind: 'num', w: '110px' }], 'sellitem', 'Ajouter un item')}</div>
       <div class="hint mt-s">Le prix unitaire est tiré au hasard entre min et max à chaque vente.</div></div>`;
-    if (k === 'launder') return `<div class="card"><div class="card-h"><div class="t">${ic('card', 17)} Blanchiment</div></div>
+    if (k === 'launder') return `<div class="card"><div class="card-h"><div class="t">${ic('tablet', 17)} Tablette d'accès</div>${this.fC('Tablette obligatoire', `${base}.reveal.enabled`, { r: 1 })}</div>
+      ${this.v(`${base}.reveal.enabled`) ? `<div class="grid2">${this.fItem('Item de la tablette', `${base}.reveal.item`)}</div><div class="hint mt-s">Sans cet item, le joueur ne voit pas ce point de blanchiment et ne peut pas l'utiliser. Avec l'item, le point apparaît sur sa carte. Par défaut : <code>launder_tablet</code> (en vente au marché noir).</div>` : '<div class="hint">Désactivée : point visible par tous.</div>'}</div>
+      <div class="card"><div class="card-h"><div class="t">${ic('card', 17)} Blanchiment</div></div>
       <div class="grid3">${this.fN('Taux reversé (%)', `${base}.launder.rate`, { min: 1, max: 100 })}${this.fN('Montant min', `${base}.launder.min`, { min: 0 })}${this.fN('Montant max (0 = aucun)', `${base}.launder.max`, { min: 0 })}
       ${this.fS('Source (black_money / money / bank / item)', `${base}.launder.from`, { max: 64 })}${this.fSel('Versé en', `${base}.launder.to`, [['money', 'Espèces'], ['bank', 'Banque'], ['black_money', 'Argent sale']])}${this.fN('Limite par heure (0 = aucune)', `${base}.launder.maxPerHour`, { min: 0 })}</div></div>`;
     return '';

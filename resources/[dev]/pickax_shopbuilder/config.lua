@@ -195,7 +195,7 @@ Config.ShopTypes = {
         categories = { 'Illégal', 'Munitions', 'Corde', 'Graines', 'Médical', 'Accès' },
         items = { { 'lockpick', 'Crochet', 80, 'Illégal' }, { 'WEAPON_SWITCHBLADE', 'Cran d\'arrêt', 250, 'Illégal' },
             { 'weed_seed', 'Graines de cannabis', 150, 'Graines' }, { 'coke_seed', 'Graines de coca', 300, 'Graines' }, { 'opium_seed', 'Graines de pavot', 250, 'Graines' },
-            { 'antidote', 'Antidote', 600, 'Médical' }, { 'gofast_tablet', 'Tablette Go Fast', 50000, 'Accès' },
+            { 'antidote', 'Antidote', 600, 'Médical' }, { 'gofast_tablet', 'Tablette Go Fast', 50000, 'Accès' }, { 'launder_tablet', 'Tablette de blanchiment', 40000, 'Accès' },
             { 'ammo-9', 'Munitions 9mm', 3, 'Munitions' }, { 'ammo-45', 'Munitions .45', 4, 'Munitions' }, { 'ammo-rifle', 'Munitions fusil d\'assaut', 6, 'Munitions' },
             { 'ammo-shotgun', 'Cartouches de fusil à pompe', 6, 'Munitions' }, { 'ammo-sniper', 'Munitions sniper', 12, 'Munitions' },
             { 'rope', 'Corde', 150, 'Corde' } },
