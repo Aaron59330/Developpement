@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_staff'
-description 'Panel staff en jeu (remplace le menu admin F11) : joueurs, reports, sanctions, véhicules, monde, équipe, journal'
+description 'Actions staff côté serveur utilisées par le menu admin (le panel UI a été retiré)'
 version '1.0.0'
 
 shared_scripts {
@@ -20,15 +20,6 @@ server_scripts {
 
 client_scripts {
     'client/main.lua',
-}
-
-ui_page 'html/index.html'
-
-files {
-    'html/index.html',
-    'html/style.css',
-    'html/script.js',
-    'html/bb-ui.js',
 }
 
 exports { 'Toggle', 'Open', 'Close' }
