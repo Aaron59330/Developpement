@@ -192,9 +192,10 @@ Config.ShopTypes = {
         label = 'Marché noir', icon = 'lock', mode = 'items',
         blip = nil, ped = 'g_m_m_chigoon_01',
         payments = { cash = false, bank = false, black_money = true },
-        categories = { 'Illégal', 'Graines' },
+        categories = { 'Illégal', 'Graines', 'Médical' },
         items = { { 'lockpick', 'Crochet', 80, 'Illégal' }, { 'WEAPON_SWITCHBLADE', 'Cran d\'arrêt', 250, 'Illégal' },
-            { 'weed_seed', 'Graines de cannabis', 150, 'Graines' }, { 'coke_seed', 'Graines de coca', 300, 'Graines' }, { 'opium_seed', 'Graines de pavot', 250, 'Graines' } },
+            { 'weed_seed', 'Graines de cannabis', 150, 'Graines' }, { 'coke_seed', 'Graines de coca', 300, 'Graines' }, { 'opium_seed', 'Graines de pavot', 250, 'Graines' },
+            { 'antidote', 'Antidote', 600, 'Médical' } },
     },
     custom = {
         label = 'Boutique personnalisée', icon = 'tag', mode = 'items',
