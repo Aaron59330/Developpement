@@ -325,7 +325,8 @@ function GB.pointsForGang(name)
         if p.gang_name == name then
             list[#list + 1] = {
                 id = id, type = p.type, label = p.label, coords = p.coords, min_grade = p.min_grade, color = color,
-                kind = p.type == 'garage' and (p.data.kind or 'car') or nil,
+                kind = (p.type == 'garage' or p.type == 'garage_return') and (p.data.kind or 'car') or nil,
+                radius = p.type == 'garage_return' and (p.data.radius or 5.0) or nil,
                 spawn = p.type == 'garage' and p.data.spawn or nil, style = mergeStyle(gang.settings and gang.settings.marker, p.data.style),
             }
         end

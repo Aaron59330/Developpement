@@ -91,7 +91,11 @@ local function cleanPoint(p, maxGrade)
     out.data.style = cleanStyle(d.style)   -- apparence propre à ce point (sinon : marker de base du serveur)
     local A = Config.Activities
 
-    if p.type == 'garage' then
+    if p.type == 'garage_return' then
+        out.data.kind = Config.GarageKinds[d.kind] and d.kind or 'car'
+        out.data.radius = math.max(2.0, math.min(20.0, tonumber(d.radius) or 5.0))
+        out.data.any = d.any == true
+    elseif p.type == 'garage' then
         out.data.kind = Config.GarageKinds[d.kind] and d.kind or 'car'
         local spawn = cleanCoords(d.spawn)
         if not spawn then return nil, ('Garage "%s" : position de sortie des véhicules manquante'):format(out.label) end

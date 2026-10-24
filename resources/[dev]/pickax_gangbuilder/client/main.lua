@@ -161,6 +161,8 @@ local function pointType(p)
     return Config.PointTypes[(p.type == 'garage' and p.kind and p.kind ~= 'car') and ('garage_' .. p.kind) or p.type] or Config.PointTypes[p.type]
 end
 
+local returnVehicle   -- défini plus bas (a besoin de vehicleKind)
+
 CreateThread(function()
     while true do
         local sleep = 1000
@@ -173,18 +175,22 @@ CreateThread(function()
                 if dist < Config.DrawDistance then
                     sleep = 0
                     DrawGBMarker(BB.Style(pointType(p), p.style), c, Config.UseGangColor and p.color or nil)
-                    if dist < Config.InteractDistance then nearest = p end
+                    if dist < (p.type == 'garage_return' and (p.radius or 5.0) or Config.InteractDistance) then nearest = p end
                 end
             end
             if nearest then
                 local t = pointType(nearest)
                 if not BB.HelpEnabled(t, nearest.style) then
+                elseif nearest.type == 'garage_return' then
+                    ESX.ShowHelpNotification(GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 and 'Appuie sur ~INPUT_CONTEXT~ : ranger le véhicule' or 'Reviens au volant d\'un véhicule du gang pour le ranger')
                 elseif nearest.label == t.label or nearest.label == '' then
                     ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s'):format(t.label))
                 else
                     ESX.ShowHelpNotification(('Appuie sur ~INPUT_CONTEXT~ : %s (%s)'):format(nearest.label, t.label))
                 end
-                if IsControlJustReleased(0, 38) then openPoint(nearest) end
+                if IsControlJustReleased(0, 38) then
+                    if nearest.type == 'garage_return' then returnVehicle(nearest) else openPoint(nearest) end
+                end
             end
         end
         Wait(sleep)
@@ -247,6 +253,26 @@ local function vehicleKind(veh)
     if c == 8 or c == 13 then return 'bike' elseif c == 14 then return 'boat' elseif c == 15 or c == 16 then return 'aircraft' end
     return 'car'
 end
+
+-- Rangement à part : au volant d'un véhicule du bon type, E = rangé (le serveur vérifie la plaque du gang)
+returnVehicle = function(point)
+    local ped = PlayerPedId()
+    local veh = GetVehiclePedIsIn(ped, false)
+    if veh == 0 or GetPedInVehicleSeat(veh, -1) ~= ped then return notify('~r~Tu dois être au volant du véhicule à ranger.') end
+    local want = point.kind or 'car'
+    if vehicleKind(veh) ~= want then
+        return notify(('~r~Ce point ne range que : %s'):format((Config.GarageKinds[want] or Config.GarageKinds.car).label:lower()))
+    end
+    ESX.TriggerServerCallback('gangbuilder:garage:return', function(res)
+        if res and res.ok then
+            ESX.Game.DeleteVehicle(veh)
+            notify('~g~Véhicule rangé.')
+        else
+            notify('~r~' .. ((res and res.error) or 'Impossible de ranger ce véhicule'))
+        end
+    end, point.id, GetVehicleNumberPlateText(veh))
+end
+
 
 local function findPoint(id)
     for _, p in ipairs(State.points) do if p.id == id then return p end end

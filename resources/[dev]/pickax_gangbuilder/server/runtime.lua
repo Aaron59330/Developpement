@@ -121,6 +121,27 @@ ESX.RegisterServerCallback('gangbuilder:garage:store', function(src, cb, pointId
     cb({ ok = true })
 end)
 
+-- Point « Rangement véhicule » (à part du garage) : seuls les véhicules du gang (plaque avec son préfixe) sont acceptés, sauf option « tous les véhicules »
+ESX.RegisterServerCallback('gangbuilder:garage:return', function(src, cb, pointId, plate)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local point = GB.Points[tonumber(pointId)]
+    if not xPlayer or not point or point.type ~= 'garage_return' then return cb(fail('Point introuvable')) end
+    if GB.distanceTo(src, point.coords) > Config.ServerDistance + (point.data.radius or 5.0) then return cb(fail('Tu es trop loin')) end
+    local name, grade = GB.job2Of(xPlayer)
+    if name ~= point.gang_name then return cb(fail('Ce point n\'appartient pas à ton gang')) end
+    if grade < point.min_grade then return cb(fail('Ton grade est insuffisant')) end
+    plate = tostring(plate or ''):gsub('%c', ''):gsub('^%s+', ''):gsub('%s+$', ''):upper()
+    if not point.data.any then
+        local gang = GB.Gangs[point.gang_name]
+        local prefix = (gang.settings.plate_prefix or '')
+        if prefix == '' then prefix = (point.gang_name:upper():gsub('[^%w]', '')):sub(1, Config.PlatePrefixLength) end
+        prefix = prefix:sub(1, 4):upper()
+        if plate:sub(1, #prefix) ~= prefix then return cb(fail('Ce véhicule n\'appartient pas au gang (plaque ' .. prefix .. '…)')) end
+    end
+    GB.log(point.gang_name, xPlayer, 'vehicle_in', plate)
+    cb({ ok = true })
+end)
+
 -- ─────────────────────────────── Vestiaire ───────────────────────────────
 ESX.RegisterServerCallback('gangbuilder:cloak:wear', function(src, cb, pointId, idx)
     local point, xPlayer, grade, err = getPoint(src, pointId, 'cloakroom')

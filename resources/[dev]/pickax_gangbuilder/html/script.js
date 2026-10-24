@@ -122,7 +122,7 @@ const ic = (n, s) => `<svg class="ic" viewBox="0 0 24 24" ${s ? `style="width:${
 
 const TYPE_ICON = { street: 'users', mafia: 'crown', biker: 'bike', cartel: 'skull', custom: 'flag' };
 const KIND_ICON = { car: 'car', bike: 'bike', aircraft: 'plane', boat: 'ship' };
-const POINT_ICON = { garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'crown', shop: 'cart', harvest: 'leaf', process: 'flask', sell: 'coins', laundry: 'wash' };
+const POINT_ICON = { garage_return: 'login', garage: 'car', cloakroom: 'shirt', armory: 'target', stash: 'box', boss: 'crown', shop: 'cart', harvest: 'leaf', process: 'flask', sell: 'coins', laundry: 'wash' };
 const ACTION_ICON = { handcuff: 'link', escort: 'users', search: 'search', info: 'skull', leave: 'door', props: 'box', tablet: 'tablet' };
 const ACCOUNT_LABEL = { '': 'Valeur par défaut (config)', dirty: 'Argent sale', money: 'Liquide', bank: 'Banque' };
 
@@ -548,6 +548,13 @@ const Builder = {
           ${fld('Grade min.', this.gradeSelect(`${base}.data.vehicles.${k}.min_grade`, v.min_grade))}
           ${fld('Couleur', `<input type="number" min="0" max="160" placeholder="auto" data-path="${base}.data.vehicles.${k}.color" data-t="n" value="${v.color ?? ''}">`)}${rowDel(base + '.data.vehicles', k)}</div>`).join('')}
           ${addBtn(base + '.data.vehicles', 'vehicle', 'Véhicule')}</div>`;
+    } else if (p.type === 'garage_return') {
+      const kinds = this.catalog.garageKinds || { car: { label: 'Voitures' } };
+      body = `<div class="card"><div class="card-h"><div class="t">${ic('login', 16)} Rangement de véhicules</div></div>
+        <div class="grid3">${fld('Type de véhicules rangés', `<select data-path="${base}.data.kind" data-t="s">${Object.entries(kinds).map(([k, v]) => `<option value="${k}" ${(d.kind || 'car') === k ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>`)}
+          ${fld('Rayon du marker (m)', `<input type="number" min="2" max="20" step="0.5" data-path="${base}.data.radius" data-t="n" value="${d.radius ?? 5}">`)}
+          <label class="chk" style="align-self:end;height:38px"><input type="checkbox" data-path="${base}.data.any" data-t="b" ${d.any ? 'checked' : ''}> Accepter tous les véhicules</label></div>
+        <p class="hint mt">Un point <b>à part</b> du garage : le membre arrive au volant sur le marker et appuie sur <b>E</b>, le véhicule est rangé. Par défaut seuls les véhicules du gang (plaque avec son préfixe) sont acceptés, pour ne jamais supprimer la voiture perso d'un joueur. Place-le où tu veux (parking, cour, quai, piste…).</p></div>`;
     } else if (p.type === 'cloakroom') {
       body = `<div class="card"><div class="card-h"><div class="t">Tenues</div></div><p class="hint" style="margin-bottom:14px">Change de tenue sur ton perso (builder fermé avec Échap), rouvre le builder puis clique <b>Capturer</b> : la tenue est enregistrée pour le genre de ton perso. Capture aussi avec un perso de l'autre genre pour couvrir les deux.</p>
         ${(d.outfits || []).map((o, k) => `<div class="form-row" style="grid-template-columns:1.3fr 1fr auto auto">
@@ -631,7 +638,7 @@ const Builder = {
   },
 
   newPoint(type) {
-    const data = { garage: { kind: 'car', spawn: null, vehicles: [] }, cloakroom: { outfits: [] }, armory: { items: [] }, stash: { slots: 50, weight: 100 }, boss: {}, shop: { public: false, account: 'money', items: [] },
+    const data = { garage_return: { kind: 'car', radius: 5, any: false }, garage: { kind: 'car', spawn: null, vehicles: [] }, cloakroom: { outfits: [] }, armory: { items: [] }, stash: { slots: 50, weight: 100 }, boss: {}, shop: { public: false, account: 'money', items: [] },
       harvest: { name: '', label: '', count: 1, seconds: 8, cooldown: 0, tool: '' }, process: { recipes: [] }, sell: { account: '', gang_cut: -1, items: [] }, laundry: { fee: -1, gang_cut: -1, min: 0, max: 0, seconds: 0 } }[type];
     return { type, label: this.catalog.pointTypes[type].label, coords: null, min_grade: type === 'boss' ? this.cur.gang.boss_grade : 0, data };
   },

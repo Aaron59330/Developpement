@@ -44,7 +44,7 @@ Config.RestartResources = {}
 -- Apparence de base commune à tous les points (modifiable en jeu : Paramètres → Markers des points) : marker 25, bleu clair turquoise
 Config.PointTypes = {
     garage    = { label = 'Garage',          color = PK_MKC(),  marker = PK_MKT },
-    garage_return = { label = 'Rangement véhicule', color = PK_MKC(), marker = PK_MKT, hidden = true },   -- désormais intégré au garage (carte « Rangement » de l'éditeur) ; ce type reste géré pour les anciens points
+    garage_return = { label = 'Rangement véhicule', color = PK_MKC(), marker = PK_MKT },   -- point À PART (en plus du rangement intégré au garage) : au volant sur le marker, E = véhicule du job rangé
     cloakroom = { label = 'Vestiaire',       color = PK_MKC(),  marker = PK_MKT },
     armory    = { label = 'Armurerie',       color = PK_MKC(),   marker = PK_MKT },
     stash     = { label = 'Coffre',          color = PK_MKC(),   marker = PK_MKT },
