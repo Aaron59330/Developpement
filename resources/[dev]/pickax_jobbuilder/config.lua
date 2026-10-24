@@ -61,7 +61,7 @@ Config.PointTypes = {
     harvest   = { label = 'Récolte',         color = PK_MKC(),  marker = PK_MKT },
     kitchen   = { label = 'Cuisine / Bar',   color = PK_MKC(),  marker = PK_MKT },
     tuning    = { label = 'Atelier tuning',  color = PK_MKC(),  marker = PK_MKT },
-    -- Métiers actifs (pickax_activejobs) : le poste d'activité démarre la mission ; les points d'activité (rôle au choix) décrivent le terrain
+    -- Métiers actifs (server/act_*.lua) : le poste d'activité démarre la mission ; les points d'activité (rôle au choix) décrivent le terrain
     activity  = { label = 'Poste d\'activité', color = PK_MKC(), marker = PK_MKT },
     actpoint  = { label = 'Point d\'activité', color = PK_MKC(), marker = PK_MKT },
 }
@@ -689,7 +689,7 @@ Config.JobTypes = {
             { name = 'boss',    label = 'Gérant',  salary = 450 },
         },
     },
-    -- ── Métiers actifs (moteur : pickax_activejobs) : une activité de terrain avec XP, niveaux et vraies missions ──
+    -- ── Métiers actifs (server/act_*.lua, client/act_*.lua) : une activité de terrain avec XP, niveaux et vraies missions ──
     garbage = {
         label = 'Éboueur', activity = true, blip = { sprite = 318, color = 25, scale = PK_BSF(0.9) },
         actions = { 'props' },

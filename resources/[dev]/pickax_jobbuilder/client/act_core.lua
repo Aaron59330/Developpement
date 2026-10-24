@@ -153,7 +153,7 @@ RegisterNetEvent('aj:client:start', function(key, data)
     local m = AJ.Mod[key]
     if m and m.start then
         local ok, err = pcall(m.start, data or {})
-        if not ok then AJ.Notify('~r~Erreur : ' .. tostring(err)) print('^1[activejobs] ' .. tostring(err) .. '^0') end
+        if not ok then AJ.Notify('~r~Erreur : ' .. tostring(err)) print('^1[jobbuilder] ' .. tostring(err) .. '^0') end
     end
 end)
 
