@@ -1565,7 +1565,7 @@ const Dealer = {
     switch (a) {
       case 'nav': this.view = v; return this.render();
       case 'more': this.limit += 60; return this.render();
-      case 'addBlank': this.draft.unshift({ model: '', label: '', category: '', vtype: 'car', price: 0, stock: -1, min_grade: 0, enabled: true, src: 'custom', _o: true }); this.dirty = true; this.cat = ''; this.q = ''; return this.render();
+      case 'addBlank': this.draft.unshift({ model: '', label: '', category: 'imports', vtype: 'car', price: 0, stock: -1, min_grade: 0, enabled: true, src: 'custom', _o: true }); this.dirty = true; this.cat = ''; this.q = ''; return this.render();
       case 'delVeh': { const r = this.draft[+v]; if (r.model) this.resets.push(r.model); this.draft.splice(+v, 1); this.dirty = true; return this.render(); }
       case 'resetVeh': {
         if (this.dirty) return toast('Enregistre d\'abord tes modifications, puis remets ce véhicule à zéro', 'err');

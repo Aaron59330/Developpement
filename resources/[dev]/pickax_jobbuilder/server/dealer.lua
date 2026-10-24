@@ -125,7 +125,7 @@ function JB.dealerCatalog(job)
     for key, o in pairs(byModel) do
         -- un véhicule de la table exclu par le filtre de catégories reste exclu ; seuls les véhicules personnalisés (hors table) s'ajoutent
         if not seen[key] and not inTable[key] then
-            list[#list + 1] = { model = o.model, label = o.label, category = o.category, vtype = o.vtype, price = o.price, stock = o.stock, min_grade = o.min_grade, enabled = o.enabled, src = 'custom' }
+            list[#list + 1] = { model = o.model, label = o.label, category = (o.category and o.category ~= '') and o.category or 'imports', vtype = o.vtype, price = o.price, stock = o.stock, min_grade = o.min_grade, enabled = o.enabled, src = 'custom' }
         end
     end
     table.sort(list, function(a, b)
@@ -151,6 +151,7 @@ local function categoryList()
         local c = v.category or ''
         if c ~= '' and not seen[c] then seen[c] = true out[#out + 1] = { name = c, label = labels[c] or c } end
     end
+    if not seen.imports then out[#out + 1] = { name = 'imports', label = labels.imports or 'Imports' } end
     table.sort(out, function(a, b) return a.label:lower() < b.label:lower() end)
     return out
 end
