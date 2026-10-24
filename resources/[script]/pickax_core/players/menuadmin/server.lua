@@ -1,3 +1,4 @@
+StaffLastPos = StaffLastPos or {}   -- position avant téléportation staff (pour « Renvoyer à sa position »)
 local items = {}
 local onTimer       = {}
 local savedCoords   = {}
@@ -729,8 +730,10 @@ RegisterNetEvent("CorePickax:ActionAdmin", function(what, action, player, args1,
         if ConfigMenuAdministrationAdmin.staffList[getLicense(source)] or ESX.GetPlayerFromId(source).getGroup() ~= "user" then
 			if what == "TP" then
 				if action == "goto" then
+					StaffLastPos[source] = GetEntityCoords(GetPlayerPed(source))
 					SetEntityCoords(GetPlayerPed(source), GetEntityCoords(GetPlayerPed(player)))
 				elseif action == "bring" then
+					StaffLastPos[tonumber(player)] = GetEntityCoords(GetPlayerPed(player))
 					SetEntityCoords(GetPlayerPed(player), GetEntityCoords(GetPlayerPed(source)))
 				elseif action == "tpatcoord" then
 					SetEntityCoords(GetPlayerPed(player), args1.x, args1.y, args1.z)
@@ -1722,3 +1725,202 @@ RegisterNetEvent('CorePickax:StaffChat:send', function(text)
     print(('[STAFFCHAT] [%d] %s : %s'):format(src, msg.name, text))
 end)
 AddEventHandler('playerDropped', function() StaffChatLast[source] = nil end)
+
+-- ═══════════════ Actions staff intégrées (remplacent pickax_staff retiré) ═══════════════
+-- Un seul point d'entrée : callback 'CorePickax:Staff:act'. Le droit demandé est celui de l'entrée du menu (func_N) ; les actions punitives
+-- ne s'appliquent pas à un membre du staff de rang égal ou supérieur.
+CreateThread(function()
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS staff_warns (
+        id INT AUTO_INCREMENT PRIMARY KEY, created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        license VARCHAR(80) NOT NULL, name VARCHAR(80) NOT NULL DEFAULT '', staff_name VARCHAR(80) NOT NULL DEFAULT '', reason VARCHAR(300) NOT NULL,
+        KEY idx_license (license)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS staff_notes (
+        id INT AUTO_INCREMENT PRIMARY KEY, created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        license VARCHAR(80) NOT NULL, staff_name VARCHAR(80) NOT NULL DEFAULT '', note VARCHAR(500) NOT NULL,
+        KEY idx_license (license)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+
+local STAFF_FUNC = { freeze = 39, kill = 40, warn = 41, notes = 42, sendback = 43, tpcoords = 44, takeMoneyCash = 45, takeMoneyBank = 46,
+    giveItem = 47, takeItem = 48, giveWeapon = 49, inventory = 50, announce = 51, weather = 52, time = 53, cleanupVehicles = 54, cleanupPeds = 55, reviveAll = 56, healAll = 57 }
+local STAFF_PUNITIVE = { freeze = true, kill = true, warn = true, takeMoney = true, takeItem = true }
+local STAFF_WEATHER = { EXTRASUNNY = 1, CLEAR = 1, NEUTRAL = 1, SMOG = 1, FOGGY = 1, OVERCAST = 1, CLOUDS = 1, CLEARING = 1, RAIN = 1, THUNDER = 1, SNOW = 1, BLIZZARD = 1, SNOWLIGHT = 1, XMAS = 1, HALLOWEEN = 1 }
+local staffFrozen = {}
+local staffLastPos = StaffLastPos
+
+local function sfail(m) return { ok = false, error = m } end
+local function sdone(m, extra) local r = { ok = true, msg = m } if extra then for k, v in pairs(extra) do r[k] = v end end return r end
+local function sclean(s, n) return (tostring(s or ''):gsub('[%c]', ' '):gsub('^%s+', ''):gsub('%s+$', '')):sub(1, n) end
+local function sox() return GetResourceState('ox_inventory') == 'started' end
+local function slicense(id) return GetPlayerIdentifierByType(id, 'license') or '' end
+local function snotify(id, msg) TriggerClientEvent('esx:showNotification', id, msg) end
+local function accountOf(a) return (a == 'cash' and 'money') or (a == 'bank' and 'bank') or nil end
+
+local STAFF_ACT = {
+    freeze = function(src, t, a)
+        local on = a.state == true
+        staffFrozen[t] = on or nil
+        TriggerClientEvent('ESXCustomAdmin:freezePlayer', t, on and 'freeze' or 'unfreeze')
+        snotify(t, on and 'Vous avez été ~r~immobilisé~s~ par le staff.' or 'Vous pouvez de nouveau bouger.')
+        return sdone(on and 'Joueur gelé' or 'Joueur libéré')
+    end,
+    kill = function(src, t) TriggerClientEvent('CorePickax:kill', t) return sdone('Joueur tué') end,
+    warn = function(src, t, a)
+        local reason = sclean(a.reason, 300)
+        if #reason < 2 then return sfail('Indique une raison') end
+        local lic = slicense(t)
+        MySQL.insert.await('INSERT INTO staff_warns (license, name, staff_name, reason) VALUES (?, ?, ?, ?)', { lic, (GetPlayerName(t) or ''):sub(1, 80), (GetPlayerName(src) or 'Console'):sub(1, 80), reason })
+        local n = MySQL.scalar.await('SELECT COUNT(*) FROM staff_warns WHERE license = ?', { lic }) or 1
+        snotify(t, ('~o~Avertissement n°%d~s~ : %s'):format(n, reason))
+        return sdone(('Avertissement n°%d enregistré'):format(n))
+    end,
+    notes = function(src, t, a)
+        local text = sclean(a.text, 500)
+        if #text < 2 then return sfail('Note vide') end
+        MySQL.insert.await('INSERT INTO staff_notes (license, staff_name, note) VALUES (?, ?, ?)', { slicense(t), (GetPlayerName(src) or 'Console'):sub(1, 80), text })
+        return sdone('Note ajoutée')
+    end,
+    sendback = function(src, t)
+        local p = staffLastPos[t]
+        if not p then return sfail('Aucune position précédente pour ce joueur') end
+        SetEntityCoords(GetPlayerPed(t), p.x, p.y, p.z)
+        staffLastPos[t] = nil
+        return sdone('Joueur renvoyé à sa position précédente')
+    end,
+    tpcoords = function(src, t, a)
+        local x, y, z = tonumber(a.x), tonumber(a.y), tonumber(a.z)
+        if not x or not y or not z then return sfail('Coordonnées invalides') end
+        staffLastPos[t] = GetEntityCoords(GetPlayerPed(t))
+        SetEntityCoords(GetPlayerPed(t), x + 0.0, y + 0.0, z + 0.0)
+        return sdone('Joueur téléporté')
+    end,
+    takeMoney = function(src, t, a, x)
+        local acc, amt = accountOf(a.account), math.floor(tonumber(a.amount) or 0)
+        if not acc or amt < 1 then return sfail('Montant ou compte invalide') end
+        if acc == 'bank' then
+            if (x.getAccount('bank').money or 0) < amt then return sfail('Solde insuffisant') end
+            x.removeAccountMoney('bank', amt)
+        else
+            if not sox() then return sfail("ox_inventory n'est pas démarré") end
+            if (exports.ox_inventory:GetItemCount(t, 'money') or 0) < amt then return sfail("Le joueur n'a pas autant") end
+            exports.ox_inventory:RemoveItem(t, 'money', amt)
+        end
+        snotify(t, ('~r~%d$ (%s) ont été retirés par le staff.'):format(amt, a.account))
+        return sdone(('%d$ retirés'):format(amt))
+    end,
+    giveItem = function(src, t, a)
+        local item, n = tostring(a.item or ''), math.floor(tonumber(a.count) or 1)
+        if not item:match('^[%w_%-%.]+$') or n < 1 or n > 100000 then return sfail('Objet ou quantité invalide') end
+        if not sox() then return sfail("ox_inventory n'est pas démarré") end
+        if not exports.ox_inventory:Items(item) then return sfail("Cet objet n'existe pas") end
+        local ok, resp = exports.ox_inventory:AddItem(t, item, n)
+        if not ok then return sfail(tostring(resp or "Impossible de donner l'objet")) end
+        return sdone(('%dx %s donné(s)'):format(n, item))
+    end,
+    takeItem = function(src, t, a)
+        local item, n = tostring(a.item or ''), math.floor(tonumber(a.count) or 1)
+        if not item:match('^[%w_%-%.]+$') or n < 1 then return sfail('Objet ou quantité invalide') end
+        if not sox() then return sfail("ox_inventory n'est pas démarré") end
+        if not exports.ox_inventory:RemoveItem(t, item, n) then return sfail("Le joueur n'a pas cet objet en quantité suffisante") end
+        return sdone(('%dx %s retiré(s)'):format(n, item))
+    end,
+    giveWeapon = function(src, t, a)
+        local w = tostring(a.weapon or ''):upper()
+        if not w:match('^WEAPON_[%w_]+$') then return sfail('Arme invalide') end
+        if not sox() then return sfail("ox_inventory n'est pas démarré") end
+        if not exports.ox_inventory:Items(w) then return sfail("Cette arme n'existe pas dans ox_inventory") end
+        local ok, resp = exports.ox_inventory:AddItem(t, w, 1)
+        if not ok then return sfail(tostring(resp or "Impossible de donner l'arme")) end
+        return sdone('Arme donnée')
+    end,
+    inventory = function(src, t)
+        if not sox() then return sfail("ox_inventory n'est pas démarré") end
+        local out = {}
+        for _, it in pairs(exports.ox_inventory:GetInventoryItems(t) or {}) do
+            if it and it.name and (it.count or 0) > 0 then out[#out + 1] = { label = it.label or it.name, count = it.count } end
+        end
+        table.sort(out, function(p, q) return tostring(p.label):lower() < tostring(q.label):lower() end)
+        return sdone('Inventaire', { items = out })
+    end,
+    -- monde
+    announce = function(src, _, a)
+        local text = sclean(a.text, 160)
+        if #text < 2 then return sfail('Annonce vide') end
+        TriggerClientEvent('CorePickax:Staff:announce', -1, text, GetPlayerName(src) or 'Staff')
+        return sdone('Annonce envoyée')
+    end,
+    weather = function(src, _, a)
+        local w = tostring(a.weather or ''):upper()
+        if not STAFF_WEATHER[w] then return sfail('Météo inconnue') end
+        ExecuteCommand('weather ' .. w)
+        return sdone('Météo : ' .. w)
+    end,
+    time = function(src, _, a)
+        local h, m = math.floor(tonumber(a.h) or -1), math.floor(tonumber(a.m) or -1)
+        if h < 0 or h > 23 or m < 0 or m > 59 then return sfail('Heure invalide') end
+        ExecuteCommand(('time %d %d'):format(h, m))
+        return sdone(('Heure : %02d:%02d'):format(h, m))
+    end,
+    cleanup = function(src, _, a)
+        local radius = math.min(300.0, math.max(5.0, tonumber(a.radius) or 50.0))
+        local origin = GetEntityCoords(GetPlayerPed(src))
+        local n = 0
+        if a.kind == 'vehicles' then
+            for _, veh in ipairs(GetAllVehicles()) do
+                if DoesEntityExist(veh) and #(GetEntityCoords(veh) - origin) <= radius then
+                    local occupied = false
+                    for seat = -1, 6 do
+                        local p = GetPedInVehicleSeat(veh, seat)
+                        if p ~= 0 and IsPedAPlayer(p) then occupied = true break end
+                    end
+                    if not occupied then DeleteEntity(veh) n = n + 1 end
+                end
+            end
+        elseif a.kind == 'peds' then
+            for _, ped in ipairs(GetAllPeds()) do
+                if DoesEntityExist(ped) and not IsPedAPlayer(ped) and #(GetEntityCoords(ped) - origin) <= radius then DeleteEntity(ped) n = n + 1 end
+            end
+        else return sfail('Type inconnu') end
+        return sdone(('%d élément(s) supprimé(s)'):format(n))
+    end,
+    reviveAll = function()
+        local n = 0
+        for _, id in ipairs(GetPlayers()) do ExecuteCommand('revive ' .. id) n = n + 1 end
+        return sdone(n .. ' joueur(s) réanimé(s)')
+    end,
+    healAll = function()
+        local n = 0
+        for _, id in ipairs(GetPlayers()) do TriggerClientEvent('esx_status:healPlayer', tonumber(id)) SetEntityHealth(GetPlayerPed(tonumber(id)), 200) n = n + 1 end
+        return sdone(n .. ' joueur(s) soigné(s)')
+    end,
+}
+local STAFF_TARGET = { freeze = true, kill = true, warn = true, notes = true, sendback = true, tpcoords = true, takeMoney = true, giveItem = true, takeItem = true, giveWeapon = true, inventory = true }
+
+ESX.RegisterServerCallback('CorePickax:Staff:act', function(src, cb, action, target, args)
+    local fn = type(action) == 'string' and STAFF_ACT[action]
+    if not fn then return cb(sfail('Action inconnue')) end
+    args = type(args) == 'table' and args or {}
+    -- droit : entrée du menu correspondante
+    local permKey = action
+    if action == 'takeMoney' then permKey = args.account == 'bank' and 'takeMoneyBank' or 'takeMoneyCash'
+    elseif action == 'cleanup' then permKey = args.kind == 'peds' and 'cleanupPeds' or 'cleanupVehicles' end
+    local fid = STAFF_FUNC[permKey]
+    if not fid or not hasPermission(src, 'func_' .. fid) then return cb(sfail('Accès refusé')) end
+    local t, x
+    if STAFF_TARGET[action] then
+        t = tonumber(target)
+        x = t and ESX.GetPlayerFromId(t)
+        if not x then return cb(sfail('Joueur hors ligne')) end
+        if STAFF_PUNITIVE[action] and t ~= src then
+            local rs, rt = tonumber(getRank(src)) or 0, tonumber(getRank(t))
+            if rt and rs < 4 and rs <= rt then return cb(sfail('Ce membre du staff a un rang égal ou supérieur au tien')) end
+        end
+    end
+    local ok, res = pcall(fn, src, t, args, x)
+    if not ok then print('^1[MENUADMIN]^7 action ' .. action .. ' : ' .. tostring(res)) return cb(sfail('Erreur serveur')) end
+    print(('[STAFF] %s [%d] %s -> %s %s'):format(GetPlayerName(src) or '?', src, action, tostring(t or '-'), (res and res.ok) and 'ok' or 'échec'))
+    cb(res)
+end)
+
+AddEventHandler('playerDropped', function() staffFrozen[source] = nil staffLastPos[source] = nil end)

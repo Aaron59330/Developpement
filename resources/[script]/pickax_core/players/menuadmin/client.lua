@@ -2841,3 +2841,69 @@ RegisterCommand('sc', function(_, args)
     local t = table.concat(args, ' ')
     if t ~= '' then TriggerServerEvent('CorePickax:StaffChat:send', t) end
 end, false)
+
+-- ═══════════════ Actions staff intégrées (remplacent pickax_staff retiré) ═══════════════
+local function staffToast(res)
+    if not res then return ESX.ShowNotification('~r~Aucune réponse') end
+    ESX.ShowNotification(res.ok and ('~g~' .. (res.msg or 'Fait')) or ('~r~' .. (res.error or 'Erreur')))
+end
+
+-- action côté serveur (droit + exécution vérifiés) ; target = ID du joueur ou nil pour une action « monde »
+function StaffAct(action, target, args)
+    ESX.TriggerServerCallback('CorePickax:Staff:act', function(res)
+        if action == 'inventory' and res and res.ok then
+            if #res.items == 0 then return ESX.ShowNotification('Inventaire vide') end
+            local lines = {}
+            for i = 1, math.min(#res.items, 14) do lines[#lines + 1] = ('%dx %s'):format(res.items[i].count, res.items[i].label) end
+            if #res.items > 14 then lines[#lines + 1] = ('… et %d autre(s)'):format(#res.items - 14) end
+            return ESX.ShowNotification(table.concat(lines, '~n~'))
+        end
+        staffToast(res)
+    end, action, target, type(args) == 'table' and args or {})
+end
+
+RegisterNetEvent('CorePickax:Staff:announce', function(text, author)
+    ESX.ShowAdvancedNotification('ANNONCE', author or 'Staff', text, 'CHAR_CALL911', 8)
+    PlaySoundFrontend(-1, 'Menu_Accept', 'Phone_SoundSet_Default', true)
+end)
+
+-- actions sur le véhicule actuel (ou le plus proche, 8 m) : exécutées ici
+local function staffTargetVehicle()
+    local ped = PlayerPedId()
+    local veh = GetVehiclePedIsIn(ped, false)
+    if veh ~= 0 then return veh end
+    local c = GetEntityCoords(ped)
+    local best, bd = 0, 8.0
+    for _, v in ipairs(GetGamePool('CVehicle')) do
+        local d = #(GetEntityCoords(v) - c)
+        if d < bd then best, bd = v, d end
+    end
+    return best
+end
+
+local function staffControl(veh)
+    if veh == 0 or not DoesEntityExist(veh) then ESX.ShowNotification('~r~Aucun véhicule à proximité') return false end
+    if not NetworkHasControlOfEntity(veh) then
+        NetworkRequestControlOfEntity(veh)
+        local t = GetGameTimer()
+        while not NetworkHasControlOfEntity(veh) and GetGameTimer() - t < 1500 do Wait(10) NetworkRequestControlOfEntity(veh) end
+    end
+    return true
+end
+
+function StaffVeh(kind)
+    local veh = staffTargetVehicle()
+    if not staffControl(veh) then return end
+    if kind == 'fuel' then
+        if GetResourceState('ox_fuel') == 'started' then Entity(veh).state.fuel = 100.0 end
+        if GetResourceState('LegacyFuel') == 'started' then pcall(function() exports['LegacyFuel']:SetFuel(veh, 100.0) end) end
+        SetVehicleFuelLevel(veh, 100.0)
+    elseif kind == 'clean' then
+        SetVehicleDirtLevel(veh, 0.0) WashDecalsFromVehicle(veh, 1.0)
+    elseif kind == 'flip' then
+        SetVehicleOnGroundProperly(veh)
+    elseif kind == 'unlock' then
+        SetVehicleDoorsLocked(veh, 1) SetVehicleDoorsLockedForAllPlayers(veh, false)
+    end
+    ESX.ShowNotification('~g~Fait')
+end
