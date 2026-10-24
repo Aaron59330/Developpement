@@ -472,7 +472,6 @@ Config.Schema = {
         { key = 'Rep.PerCapture', label = 'Territoire capturé', t = 'int', min = 0, max = 100000, server = true },
         { key = 'Rep.PerIncome', label = 'Revenu de territoire', t = 'int', min = 0, max = 100000, server = true },
         { key = 'Rep.PerSaleThousand', label = 'Par 1 000 $ vendus', t = 'int', min = 0, max = 100000, server = true },
-        { key = 'Rep.PerLaunderThousand', label = 'Par 1 000 $ blanchis', t = 'int', min = 0, max = 100000, server = true },
         { key = 'Rep.PerProcess', label = 'Par fabrication', t = 'int', min = 0, max = 100000, server = true },
         { key = 'Rep.PerHarvest', label = 'Par récolte', t = 'int', min = 0, max = 100000, server = true },
     } },
@@ -532,18 +531,12 @@ Config.Schema = {
         { key = 'Activities.MaxSell', label = 'Quantité max par vente', t = 'int', min = 1, max = 1000, server = true },
         { key = 'Activities.HarvestScenario', label = 'Animation de récolte', t = 'str', max = 60 },
         { key = 'Activities.ProcessScenario', label = 'Animation de traitement', t = 'str', max = 60 },
-        { key = 'Activities.LaunderScenario', label = 'Animation de blanchiment', t = 'str', max = 60 },
         { key = 'Activities.SellAccount', label = 'Vente : compte crédité par défaut', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale' }, { 'money', 'Liquide' }, { 'bank', 'Banque' }) },
         { key = 'Activities.SellPriceVariance', label = 'Vente : variation du prix (± %)', t = 'int', min = 0, max = 90, server = true },
         { key = 'Activities.SellGangCut', label = 'Vente : part reversée au gang (%)', t = 'int', min = 0, max = 100, server = true },
         { key = 'Activities.SellCooldown', label = 'Vente : délai entre deux ventes (s)', t = 'int', min = 0, max = 3600, server = true },
         { key = 'Activities.PoliceAlert', label = 'Vente : alerte police', t = 'bool' },
         { key = 'Activities.PoliceAlertChance', label = 'Vente : chance d\'alerte (%)', t = 'int', min = 0, max = 100 },
-        { key = 'Activities.LaunderFee', label = 'Blanchiment : commission (%)', t = 'int', min = 0, max = 100, server = true },
-        { key = 'Activities.LaunderGangCut', label = 'Blanchiment : part de la commission pour le gang (%)', t = 'int', min = 0, max = 100, server = true },
-        { key = 'Activities.LaunderMin', label = 'Blanchiment : minimum ($)', t = 'int', min = 1, max = 100000000, server = true },
-        { key = 'Activities.LaunderMax', label = 'Blanchiment : maximum ($)', t = 'int', min = 1, max = 1000000000, server = true },
-        { key = 'Activities.LaunderSeconds', label = 'Blanchiment : durée (s)', t = 'int', min = 2, max = 300, server = true },
     } },
     { id = 'ui', label = 'Apparence', fields = {
         { key = 'UI.Accent', label = 'Couleur d\'accentuation', t = 'color' },
@@ -631,14 +624,13 @@ Config.Tablet = {
     Command      = 'gangtablet',     -- commande pour ouvrir la tablette ('' = aucune)
     NewsMax      = 30,               -- actualités gardées en mémoire (visibles par tous les gangs)
     -- Quêtes : tirées au sort par gang (même tirage pour tous les membres), progression automatique.
-    -- metric : harvested | processed | sold ($) | laundered ($) | capture | conflict_win | objective | war_win
+    -- metric : harvested | processed | sold ($) | capture | conflict_win | objective | war_win
     Quests = {
         DailyCount = 3, WeeklyCount = 2, RewardAccount = 'dirty',
         Daily = {
             { id = 'd_harvest', label = 'Approvisionnement',   desc = 'Récolter 60 produits.',          metric = 'harvested', target = 60,    reward = 400,  rep = 4 },
             { id = 'd_process', label = 'Production',          desc = 'Fabriquer 30 produits.',         metric = 'processed', target = 30,    reward = 500,  rep = 5 },
             { id = 'd_sell',    label = 'Écouler la marchandise', desc = 'Vendre pour 3 000 $.',        metric = 'sold',      target = 3000,  reward = 600,  rep = 6 },
-            { id = 'd_launder', label = 'Lessive',             desc = 'Blanchir 5 000 $.',              metric = 'laundered', target = 5000,  reward = 500,  rep = 5 },
             { id = 'd_capture', label = 'Prise de territoire', desc = 'Capturer 1 territoire.',         metric = 'capture',   target = 1,     reward = 900,  rep = 12 },
             { id = 'd_win',     label = 'Garder la rue',       desc = 'Gagner 1 affrontement de zone.', metric = 'conflict_win', target = 1,  reward = 800,  rep = 10 },
         },

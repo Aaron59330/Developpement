@@ -1145,7 +1145,7 @@ const Runtime = {
         <div class="card"><div class="card-h"><div class="t">${ic('flag', 16)} Territoires</div></div>
           ${terr.map(t => `<div class="kv"><span style="color:var(--text)">${esc(t.label)}</span><span>${t.mine ? chip('À nous', 'ok') : t.ownerLabel ? chip(t.ownerLabel, 'bad') : chip('Libre', 'mute')}${t.protectedUntil > d.now ? ' ' + chip('Protégé', 'info') : ''}</span></div>`).join('') || '<p class="hint">Aucun territoire sur le serveur.</p>'}</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('target', 16)} Mes statistiques</div></div>
-        <div class="grid4">${[['Récolté', d.stats.harvested], ['Fabriqué', d.stats.processed], ['Vendu', money(d.stats.sold)], ['Blanchi', money(d.stats.laundered)]].map(([l, v]) => `<div class="stat"><div class="eyebrow">${l}</div><div class="v">${v}</div></div>`).join('')}</div>
+        <div class="grid4">${[['Récolté', d.stats.harvested], ['Fabriqué', d.stats.processed], ['Vendu', money(d.stats.sold)]].map(([l, v]) => `<div class="stat"><div class="eyebrow">${l}</div><div class="v">${v}</div></div>`).join('')}</div>
         <p class="hint mt">Contribution à la trésorerie : <b>${money(d.stats.contribution)}</b></p></div>` });
   },
 
