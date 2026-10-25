@@ -16,14 +16,15 @@ function confirmBox(title, text, yes, danger) {
 const ago = t => { const s = Math.max(0, Math.floor(Date.now() / 1000 - t)); if (s < 60) return 'à l\'instant'; if (s < 3600) return Math.floor(s / 60) + ' min'; if (s < 86400) return Math.floor(s / 3600) + ' h'; return Math.floor(s / 86400) + ' j'; };
 
 const App = {
-  tab: 'health', audit: null, backups: null, info: null, busy: false, theme: null, themeHist: [],
+  tab: 'health', audit: null, backups: null, info: null, busy: false, theme: null, themeHist: [], eco: null,
   async open() { this.tab = 'health'; $root.classList.remove('hidden'); this.render(); this.runAudit(); },
   close() { $root.classList.add('hidden'); },
   async runAudit() { this.busy = true; this.render(); const r = await rpc('audit'); this.busy = false; if (r && r.ok) this.audit = r; else toast((r && r.error) || 'Erreur', 'err'); this.render(); },
   async loadBackups() { const r = await rpc('backups'); if (r && r.ok) { this.backups = r.list; this.render(); } },
   async loadInfo() { const r = await rpc('info'); if (r && r.ok) { this.info = r; this.render(); } },
   async loadTheme() { const r = await rpc('themeGet'); if (r && r.ok) { this.theme = r.values; this.themeHist = r.history || []; this.render(); } else toast((r && r.error) || 'Erreur', 'err'); },
-  go(t) { this.tab = t; if (t === 'theme' && !this.theme) this.loadTheme(); if (t === 'backups' && !this.backups) this.loadBackups(); if ((t === 'news' || t === 'guide') && !this.info) this.loadInfo(); this.render(); },
+  async loadEco() { const r = await rpc('ecoGet'); if (r && r.ok) { this.eco = r; } else { this.eco = { markets: [], error: (r && r.error) || 'Erreur' }; } this.render(); },
+  go(t) { this.tab = t; if (t === 'eco') this.loadEco(); if (t === 'theme' && !this.theme) this.loadTheme(); if (t === 'backups' && !this.backups) this.loadBackups(); if ((t === 'news' || t === 'guide') && !this.info) this.loadInfo(); this.render(); },
 
   renderHealth() {
     const a = this.audit;
@@ -60,6 +61,19 @@ const App = {
         <div class="pvbar"><i></i></div><div class="row" style="gap:8px;margin-top:12px"><button class="pvbtn">Bouton principal</button><button>Secondaire</button></div></div>
       ${this.themeHist.length ? `<div class="card" style="margin-top:12px"><b>Revenir à une version précédente</b>${this.themeHist.map((h, i) => `<div class="bk" style="padding:8px 0"><span class="sw" style="background:${esc(h.values.AccentColor)}"></span><div style="flex:1"><b>${esc(h.values.ServerName)}</b><small>${esc(h.values.AccentColor)} · ${esc(h.by || '?')} · ${ago(h.at)}</small></div><button data-a="themeRevert" data-i="${i}">Charger</button></div>`).join('')}</div>` : ''}</div></div>`;
   },
+  renderEco() {
+    const e = this.eco; if (!e) return '<div class="card muted">Chargement…</div>';
+    if (e.error) return `<div class="card"><b>Économie indisponible</b><p class="muted" style="margin:6px 0 0">${esc(e.error)}</p></div>`;
+    if (!e.markets.length) return '<div class="card muted">Aucun marché actif pour le moment : ils apparaissent dès que les joueurs achètent en boutique ou vendent leurs récoltes.</div>';
+    const name = k => { const [t, n] = k.split(':'); return ({ shop: 'Boutique', crop: 'Récolte' }[t] || t) + ' · ' + n; };
+    return `<p class="muted" style="margin:0">Les prix suivent l'offre et la demande : les ventes des joueurs les font baisser, les achats les font monter, puis tout revient à la normale tout seul. Prix de base × multiplicateur.</p>` +
+      e.markets.map(m => { const pct = Math.round((m.mult - 1) * 100), left = Math.max(2, Math.min(98, 50 + (m.mult - 1) * 100)); const up = m.mult > 1.005, down = m.mult < 0.995;
+        return `<div class="card eco"><div class="eh"><b>${esc(name(m.key))}</b><span class="ev ${up ? 'up' : down ? 'dn' : ''}">×${m.mult.toFixed(2)} <small>(${pct > 0 ? '+' : ''}${pct} %)</small></span>${m.trend > 0.004 ? '<span class="tr up">▲</span>' : m.trend < -0.004 ? '<span class="tr dn">▼</span>' : '<span class="tr">–</span>'}
+          ${m.event ? `<span class="tag">${m.event.swing > 0 ? 'Pénurie' : 'Surplus'} · ${Math.max(1, Math.round((m.event.ends - e.now) / 3600))} h</span>` : ''}<span style="flex:1"></span>
+          <button data-a="ecoEv" data-k="${esc(m.key)}" data-s="0.2">Pénurie</button><button data-a="ecoEv" data-k="${esc(m.key)}" data-s="-0.2">Surplus</button><button data-a="ecoReset" data-k="${esc(m.key)}">Normal</button></div>
+          <div class="gauge"><i class="mid"></i><b style="left:${left}%"></b></div></div>`; }).join('') +
+      `<div class="row" style="justify-content:flex-end"><button class="danger" data-a="ecoReset" data-k="">Tout remettre à la normale</button></div>`;
+  },
   renderNews() {
     const i = this.info; if (!i) return '<div class="card muted">Chargement…</div>';
     return `<div class="tl">${i.changelog.map((c, k) => `<div class="v"><h4>${esc(c.title)}<span>v${esc(c.version)} · ${esc(c.date)}</span>${k === 0 ? '<span class="tag">Dernière</span>' : ''}</h4><ul>${c.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`;
@@ -73,12 +87,12 @@ const App = {
       + sec('Sécurité', `<ul><li>Garde le dépôt GitHub en privé et limite les accès FTP / panel.</li><li>Ne mets jamais de clé de licence, de mot de passe ou de webhook dans un fichier versionné.</li></ul>`);
   },
   render() {
-    const titles = { health: ['Santé de la base', 'Ressources, SQL, objets et données des builders'], backups: ['Sauvegardes', 'Configuration des builders : sauvegarde et restauration'], news: ['Nouveautés', 'Journal des modifications de ta base'], guide: ['Guide', 'Raccourcis et bonnes pratiques'], theme: ['Thème du serveur', 'Couleur, nom et logo de toutes les interfaces'] };
+    const titles = { health: ['Santé de la base', 'Ressources, SQL, objets et données des builders'], backups: ['Sauvegardes', 'Configuration des builders : sauvegarde et restauration'], news: ['Nouveautés', 'Journal des modifications de ta base'], guide: ['Guide', 'Raccourcis et bonnes pratiques'], theme: ['Thème du serveur', 'Couleur, nom et logo de toutes les interfaces'], eco: ['Économie dynamique', 'Prix selon l\'offre et la demande'] };
     const issues = this.audit ? this.audit.checks.filter(c => c.status === 'err').length : 0;
     const nav = (id, ico, label, n) => `<div class="nav ${this.tab === id ? 'on' : ''}" data-a="go" data-id="${id}"><span>${ico}</span>${label}${n ? `<span class="n">${n}</span>` : ''}</div>`;
-    const body = this.tab === 'health' ? this.renderHealth() : this.tab === 'backups' ? this.renderBackups() : this.tab === 'news' ? this.renderNews() : this.tab === 'theme' ? this.renderTheme() : this.renderGuide();
+    const body = this.tab === 'health' ? this.renderHealth() : this.tab === 'backups' ? this.renderBackups() : this.tab === 'news' ? this.renderNews() : this.tab === 'theme' ? this.renderTheme() : this.tab === 'eco' ? this.renderEco() : this.renderGuide();
     $root.innerHTML = `<div class="shell"><div class="side"><div class="brand"><div class="logo">⚙</div><div><b>Outils de la base</b><small data-pk="short">AERO</small></div></div>
-      ${nav('health', '🩺', 'Santé', issues)}${nav('backups', '💾', 'Sauvegardes')}${nav('theme', '🎨', 'Thème')}${nav('news', '✨', 'Nouveautés')}${nav('guide', '📘', 'Guide')}<div class="spacer"></div><button data-a="close">Fermer</button></div>
+      ${nav('health', '🩺', 'Santé', issues)}${nav('backups', '💾', 'Sauvegardes')}${nav('theme', '🎨', 'Thème')}${nav('eco', '📈', 'Économie')}${nav('news', '✨', 'Nouveautés')}${nav('guide', '📘', 'Guide')}<div class="spacer"></div><button data-a="close">Fermer</button></div>
       <div class="main"><div class="head"><div style="flex:1"><h2>${titles[this.tab][0]}</h2><p>${titles[this.tab][1]}</p></div>${this.tab === 'health' ? `<button class="primary" data-a="audit" ${this.busy ? 'disabled' : ''}>${this.busy ? 'Analyse…' : 'Relancer l\'audit'}</button>` : ''}<button class="x" data-a="close">✕</button></div>
       <div class="body">${body}</div></div></div>`;
   },
@@ -93,6 +107,8 @@ const App = {
     if (a === 'go') return this.go(el.dataset.id);
     if (a === 'close') { this.close(); return rpc('close'); }
     if (a === 'audit') return this.runAudit();
+    if (a === 'ecoEv') { const r = await rpc('ecoEvent', el.dataset.k, Number(el.dataset.s), 3); if (r && r.ok) { toast(Number(el.dataset.s) > 0 ? 'Pénurie lancée (3 h)' : 'Surplus lancé (3 h)', 'ok'); return this.loadEco(); } return toast((r && r.error) || 'Erreur', 'err'); }
+    if (a === 'ecoReset') { if (!el.dataset.k && !await confirmBox('Tout remettre à la normale ?', 'Tous les prix reviennent à leur valeur de base.', 'Réinitialiser', true)) return; const r = await rpc('ecoReset', el.dataset.k); if (r && r.ok) { toast('Marché réinitialisé', 'ok'); return this.loadEco(); } return toast((r && r.error) || 'Erreur', 'err'); }
     if (a === 'themeRevert') { this.theme = { ...this.themeHist[Number(el.dataset.i)].values }; toast('Version chargée : clique sur Enregistrer pour l\'appliquer', 'ok'); return this.render(); }
     if (a === 'themeSave') {
       if (!await confirmBox('Appliquer ce thème ?', 'Couleur, nom et logo changent pour <b>tous les joueurs</b>. L\'ancien fichier de configuration est sauvegardé.', 'Appliquer', false)) return;

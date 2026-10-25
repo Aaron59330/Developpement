@@ -15,7 +15,7 @@ RegisterCommand(Config.Command, function()
     SendNUIMessage({ action = 'open' })
 end, false)
 
-local RPC = { audit = 'basetools:audit', backups = 'basetools:backups', backup = 'basetools:backup', restore = 'basetools:restore', info = 'basetools:info', themeGet = 'basetools:themeGet', themeSave = 'basetools:themeSave' }
+local RPC = { audit = 'basetools:audit', backups = 'basetools:backups', backup = 'basetools:backup', restore = 'basetools:restore', info = 'basetools:info', themeGet = 'basetools:themeGet', themeSave = 'basetools:themeSave', ecoGet = 'basetools:ecoGet', ecoEvent = 'basetools:ecoEvent', ecoReset = 'basetools:ecoReset' }
 
 RegisterNUICallback('rpc', function(body, cb)
     local name = body and body.name

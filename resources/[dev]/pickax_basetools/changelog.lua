@@ -5,6 +5,7 @@ Changelog = {
         'Tutoriel d\'arrivée (/tutoriel) et « Mes touches » (/touches), accessibles depuis le menu F5',
         'Succès et titres de niveau pour les jobs actifs',
         'Hôtel des ventes : enchères d\'objets et de véhicules entre joueurs (/encheres)',
+        'Économie dynamique : prix des boutiques et des récoltes selon l\'offre et la demande',
         'Événements aléatoires pour les métiers en service (pannes, accidents, alarmes, décharges sauvages)',
     } },
     { version = '1.4', date = '2026-10', title = 'Concessionnaire & téléphone', items = {

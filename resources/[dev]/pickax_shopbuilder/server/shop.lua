@@ -46,8 +46,15 @@ local function discountFor(shop, xPlayer)
     return math.min(90, d)
 end
 
+-- Économie dynamique (pickax_economy, optionnelle) : multiplicateur selon l'offre et la demande de la catégorie
+local function dynMult(item)
+    if not item.category or item.category == '' or GetResourceState('pickax_economy') ~= 'started' then return 1.0 end
+    local ok, m = pcall(function() return exports.pickax_economy:Multiplier('shop:' .. tostring(item.category):lower()) end)
+    return ok and tonumber(m) or 1.0
+end
+
 local function finalPrice(item, disc)
-    local p = item.price
+    local p = item.price * dynMult(item)
     if (item.promo or 0) > 0 then p = p * (100 - item.promo) / 100 end
     if disc > 0 then p = p * (100 - disc) / 100 end
     return math.floor(p + 0.5)
@@ -240,6 +247,12 @@ local function doBuy(src, shopId, locIdx, cart, method)
         if it.stock >= 0 then it.stock = it.stock - l.qty end
         stocks[l.idx] = it.stock
         parts[#parts + 1] = ('%dx %s'):format(l.qty, l.label)
+    end
+    if GetResourceState('pickax_economy') == 'started' then   -- la demande fait monter les prix de la catégorie
+        for _, l in ipairs(given) do
+            local it = shop.items[l.idx]
+            if it and it.category and it.category ~= '' then pcall(function() exports.pickax_economy:Record('shop:' .. tostring(it.category):lower(), l.qty, 'buy') end) end
+        end
     end
     addStats(shop, total, given)
     creditSociety(shop, method, total)

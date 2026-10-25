@@ -1,4 +1,5 @@
 local KEY = 'farmer'
+local cropPrice   -- défini plus bas (prix de la récolte avec l'économie dynamique)
 local Farms = {}      -- Farms[identifier] = { [plot] = { crop, planted, watered } }
 
 local function ox() return exports.ox_inventory end
@@ -57,7 +58,7 @@ AJ.Modules[KEY] = {
         local field, market, spawn = AJ.pts(st, 'field')[1], AJ.pts(st, 'market')[1], AJ.spawnPoint(st)
         if not field or not market then return nil, 'Champ ou marché non configuré (points d\'activité « Champ » et « Marché » dans le Job Builder)' end
         local crops = {}
-        for k, c in pairs(j.crops) do crops[k] = { label = c.label, seed = c.seed, item = c.item, models = c.models, price = c.price, seedPrice = c.seedPrice } end
+        for k, c in pairs(j.crops) do crops[k] = { label = c.label, seed = c.seed, item = c.item, models = c.models, price = cropPrice(k, c), basePrice = c.price, seedPrice = c.seedPrice } end
         return { field = field, market = market, spawn = spawn, tractor = j.tractor, rows = j.fieldRows, cols = j.fieldCols, spacing = j.spacing, crops = crops, plots = snapshot(x) }
     end,
     stop = function() end,
@@ -135,6 +136,13 @@ RegisterNetEvent('aj:farm:buy', function(crop, qty)
     AJ.notify(src, ('%d graines de %s achetées : -%d $'):format(qty, c.label:lower(), cost), 'success')
 end)
 
+-- Prix du marché : prix de base × multiplicateur de l'économie dynamique (pickax_economy, optionnelle)
+cropPrice = function(key, c)
+    if GetResourceState('pickax_economy') ~= 'started' then return c.price end
+    local ok, p = pcall(function() return exports.pickax_economy:Price('crop:' .. key, c.price) end)
+    return ok and p or c.price
+end
+
 RegisterNetEvent('aj:farm:sell', function()
     local src = source
     local st = AJ.session(src, KEY)
@@ -142,9 +150,12 @@ RegisterNetEvent('aj:farm:sell', function()
     local m = AJ.pts(st, 'market')[1]
     if not m or not AJ.near(src, m, 10.0) then return end
     local base, count = 0, 0
-    for _, c in pairs(Config.Act.Jobs[KEY].crops) do
+    for ck, c in pairs(Config.Act.Jobs[KEY].crops) do
         local n = ox():Search(src, 'count', c.item) or 0
-        if n > 0 and ox():RemoveItem(src, c.item, n) then base = base + n * c.price count = count + n end
+        if n > 0 and ox():RemoveItem(src, c.item, n) then
+            base = base + n * cropPrice(ck, c) count = count + n
+            if GetResourceState('pickax_economy') == 'started' then pcall(function() exports.pickax_economy:Record('crop:' .. ck, n, 'sell') end) end   -- l'offre fait baisser le prix
+        end
     end
     if count == 0 then return AJ.notify(src, 'Tu n\'as rien à vendre.', 'error') end
     local paid = AJ.pay(src, KEY, base, count * 2, 'Vente de récolte', 1)

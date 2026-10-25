@@ -301,3 +301,36 @@ lib.callback.register('basetools:themeSave', function(src, v)
     end)
     return { ok = true, values = readConfigValues(), history = h }
 end)
+
+-- ═════════════════ ÉCONOMIE DYNAMIQUE (pickax_economy) ═════════════════
+local function eco(fn, ...)
+    if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy n\'est pas démarré' end
+    local ok, r = pcall(fn, ...)
+    if not ok then return nil, tostring(r) end
+    return r
+end
+
+lib.callback.register('basetools:ecoGet', function(src)
+    if not isAdmin(src) then return { ok = false, error = 'Accès refusé' } end
+    local snap, err = eco(function() return exports.pickax_economy:Snapshot() end)
+    if not snap then return { ok = false, error = err } end
+    return { ok = true, markets = snap, now = os.time() }
+end)
+
+lib.callback.register('basetools:ecoEvent', function(src, key, swing, hours)
+    if not isAdmin(src) then return { ok = false, error = 'Accès refusé' } end
+    swing, hours = tonumber(swing) or 0, tonumber(hours) or 3
+    if swing == 0 or math.abs(swing) > 0.5 then return { ok = false, error = 'Variation invalide' } end
+    local ok, err = eco(function() return exports.pickax_economy:Event(tostring(key or ''), swing, hours) end)
+    if not ok then return { ok = false, error = err or 'Marché introuvable' } end
+    webhook('Événement de marché', ('%s : %s sur **%s** (%+d %%, %d h)'):format(who(src), swing > 0 and 'pénurie' or 'surplus', tostring(key), math.floor(swing * 100), hours))
+    return { ok = true }
+end)
+
+lib.callback.register('basetools:ecoReset', function(src, key)
+    if not isAdmin(src) then return { ok = false, error = 'Accès refusé' } end
+    local ok, err = eco(function() return exports.pickax_economy:Reset(key ~= '' and key or nil) end)
+    if not ok then return { ok = false, error = err or 'Marché introuvable' } end
+    webhook('Marché réinitialisé', ('%s a réinitialisé %s'):format(who(src), key and key ~= '' and ('**' .. key .. '**') or 'tous les marchés'))
+    return { ok = true }
+end)
