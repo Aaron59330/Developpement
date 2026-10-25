@@ -200,6 +200,21 @@ end
 
 JB.pay, JB.societyAdd, JB.societyRemove, JB.societyBalance = pay, societyAdd, societyRemove, societyBalance
 
+-- Limitation de débit des actions sensibles (achats, offres) : au plus `max` appels par fenêtre de `sec` secondes et par joueur et par clé
+local rates = {}
+function JB.rate(src, key, max, sec)
+    local now, k = GetGameTimer(), src .. ':' .. key
+    local r = rates[k]
+    if not r or now - r.t > sec * 1000 then rates[k] = { t = now, n = 1 } return true end
+    r.n = r.n + 1
+    return r.n <= max
+end
+AddEventHandler('playerDropped', function()
+    local pre = source .. ':'
+    for k in pairs(rates) do if k:sub(1, #pre) == pre then rates[k] = nil end end
+end)
+JB.RATE_MSG = 'Trop de demandes : patiente quelques secondes.'
+
 -- ─────────────────────────────── Données boss ───────────────────────────────
 local function bossData(job)
     local employees = {}

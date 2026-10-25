@@ -331,6 +331,7 @@ end
 
 -- Offre de vente d'un véhicule à un client (le plus proche) ou à soi-même (`self` : le vendeur est aussi l'acheteur, même confirmation et même paiement)
 local function dealerOffer(src, cb, vehId, targetId, self)
+    if not JB.rate(src, 'dealer:offer', 6, 10) then return cb(fail(JB.RATE_MSG)) end
     local x, job, err = ctx(src)
     if not x then return cb(fail(err)) end
     local v = vehRow(vehId, job.name)
@@ -371,6 +372,7 @@ RegisterNetEvent('jobbuilder:server:dealerAnswer', function(id, yes, method)
 end)
 
 ESX.RegisterServerCallback('jobbuilder:dealer:buy', function(src, cb, pointId, vehId, method)
+    if not JB.rate(src, 'dealer:buy', 4, 10) then return cb(fail(JB.RATE_MSG)) end
     local p, job = showroomPoint(src, pointId)
     if not p then return cb(fail(job)) end
     if not job or job.settings.dealer_self_service ~= true then return cb(fail('Cette concession ne propose pas le libre-service : demande à un vendeur')) end

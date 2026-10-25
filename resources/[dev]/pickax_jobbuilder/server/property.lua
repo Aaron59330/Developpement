@@ -643,6 +643,7 @@ end)
 -- ─────────────────────────────── Vente / location à un joueur ───────────────────────────────
 -- Offre de vente / location au client le plus proche, ou à soi-même (`self` : l'agent est aussi l'acheteur)
 local function propOffer(src, cb, id, targetId, self)
+    if not JB.rate(src, 'prop:offer', 6, 10) then return cb(fail(JB.RATE_MSG)) end
     local x, job, err = agentCtx(src)
     if not x then return cb(fail(err)) end
     local p = Props[tonumber(id)]

@@ -150,6 +150,7 @@ end)
 
 -- (idx, cible, quantité) : la cible est injectée côté client (joueur le plus proche) ; `self` : l'employé se sert lui-même (même facture à payer)
 local function serveOffer(src, cb, idx, targetId, qty, self)
+    if not JB.rate(src, 'serve:offer', 8, 10) then return cb(fail(JB.RATE_MSG)) end
     local xPlayer = ESX.GetPlayerFromId(src)
     if not xPlayer or not JB.jobHasAction(xPlayer, 'serve') then return cb(fail('Action non autorisée')) end
     local job = JB.Jobs[xPlayer.job.name]
