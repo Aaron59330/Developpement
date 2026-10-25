@@ -1,0 +1,45 @@
+{
+  "nomBase": "Bluebay",
+  "couleur": "#fdc27d",
+  "emoji": "🚀",
+  "lienTickets": "https://discord.com/channels/ID_SERVEUR/ID_SALON_TICKETS",
+  "formules": [
+    {
+      "id": "lifetime",
+      "titre": "ABONNEMENT LIFETIME",
+      "prix": "XXX€",
+      "lignes": [
+        "Accès à la base complète à vie (Job, Gang, Illégal, Shop, World, Event Builder…)",
+        "Mises à jour incluses selon la formule choisie",
+        "Personnalisation de la base à volonté, directement en jeu",
+        "Support dédié à la base (Discord)"
+      ]
+    },
+    {
+      "id": "annuel",
+      "titre": "ABONNEMENT ANNUEL",
+      "prix": "XXX€",
+      "lignes": [
+        "Accès à la base complète pendant 365 jours",
+        "Mises à jour incluses selon la formule choisie",
+        "Personnalisation de la base à volonté, directement en jeu",
+        "Support dédié à la base (Discord)"
+      ]
+    },
+    {
+      "id": "mensuel",
+      "titre": "ABONNEMENT MENSUEL",
+      "prix": "XXX€",
+      "lignes": [
+        "Accès à la base complète pendant 30 jours",
+        "Mises à jour incluses selon la formule choisie",
+        "Personnalisation de la base à volonté, directement en jeu",
+        "Support dédié à la base (Discord)"
+      ]
+    }
+  ],
+  "infos": {
+    "titre": "INFORMATIONS SUPPLÉMENTAIRES",
+    "texte": "La base est disponible à l'achat dès maintenant.\nOuvre un ticket pour commander, poser une question ou demander une démo."
+  }
+}

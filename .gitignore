@@ -1,3 +1,4 @@
 # Exports de base de données avec données réelles : ne jamais les versionner
 sql.sql
 *.dump.sql
+tools/discord-tarifs/images/
