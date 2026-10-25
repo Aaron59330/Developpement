@@ -1,5 +1,12 @@
 -- Nouveautés affichées dans le panneau (la plus récente en premier). Ajoute une entrée à chaque mise à jour de ta base.
 Changelog = {
+    { version = '1.5', date = '2026-10', title = 'Outils, succès et vie du serveur', items = {
+        'Outils de la base : audit de santé, sauvegardes, thème modifiable en jeu (/aerotools)',
+        'Tutoriel d\'arrivée (/tutoriel) et « Mes touches » (/touches), accessibles depuis le menu F5',
+        'Succès et titres de niveau pour les jobs actifs',
+        'Hôtel des ventes : enchères d\'objets et de véhicules entre joueurs (/encheres)',
+        'Événements aléatoires pour les métiers en service (pannes, accidents, alarmes, décharges sauvages)',
+    } },
     { version = '1.4', date = '2026-10', title = 'Concessionnaire & téléphone', items = {
         'Catalogue concessionnaire refait : grille de cartes, détail du véhicule, tri et catégories',
         'Paiement liquide ou banque (libre-service et offre au client)',

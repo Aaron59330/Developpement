@@ -10,6 +10,7 @@ shared_scripts {
     'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
     'config_active.lua',
+    'config_events.lua',
 }
 
 server_scripts {
@@ -44,6 +45,7 @@ server_scripts {
     'server/act_farmer.lua',
     'server/act_firefighter.lua',
     'server/act_train.lua',
+    'server/random_events.lua',
     'server/compat.lua',
 }
 
@@ -75,6 +77,7 @@ client_scripts {
     'client/act_farmer.lua',
     'client/act_firefighter.lua',
     'client/act_train.lua',
+    'client/random_events.lua',
 }
 
 ui_page 'html/index.html'
