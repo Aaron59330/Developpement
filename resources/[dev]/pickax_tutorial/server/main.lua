@@ -31,11 +31,20 @@ local function payload()
 end
 
 -- Le client demande : doit-on afficher le tutoriel automatiquement ?
-lib.callback.register('pickax_tutorial:shouldOpen', function(src)
+-- afterCreation = le joueur vient de terminer la création de son personnage (identité + apparence + destination)
+local function hasIdentity(identifier)
+    local fn = MySQL.scalar.await('SELECT firstname FROM users WHERE identifier = ?', { identifier })
+    return fn ~= nil and fn ~= ''
+end
+
+lib.callback.register('pickax_tutorial:shouldOpen', function(src, afterCreation)
     if not Config.AutoOpen then return false end
     local x = ESX.GetPlayerFromId(src)
     if not x then return false end
-    return not seen(x.identifier)
+    if seen(x.identifier) then return false end
+    -- nouveau personnage : on attend la fin de la création (le signal « terminé » relance la demande avec afterCreation)
+    if not afterCreation and not hasIdentity(x.identifier) then return false end
+    return true
 end)
 
 lib.callback.register('pickax_tutorial:data', function(src) return payload() end)

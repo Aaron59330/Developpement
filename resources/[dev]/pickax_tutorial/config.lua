@@ -2,7 +2,8 @@ Config = {}
 
 Config.Command   = 'tutoriel'     -- rouvrir le tutoriel à tout moment
 Config.AutoOpen  = true           -- ouvrir automatiquement la première fois (une seule fois par personnage)
-Config.Delay     = 6000           -- ms d'attente après le chargement du joueur (laisse finir la création du personnage / l'écran noir)
+Config.Delay     = 6000           -- ms d'attente après le chargement d'un personnage existant
+Config.AfterCreationDelay = 4000  -- ms d'attente après la fin de création d'un nouveau personnage (laisse démarrer le choix de destination)
 Config.Skippable = true           -- bouton « Passer »
 
 -- Récompense versée UNE fois, à la fin du tutoriel (le serveur vérifie, le client ne décide de rien)
