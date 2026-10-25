@@ -55,3 +55,14 @@ kbd { background: rgba(255, 255, 255, .1); border: 1px solid var(--line); border
 #confirm .box { width: min(440px, 92vw); background: #1b1d24; border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
 #confirm h3 { margin: 0 0 8px; } #confirm p { margin: 0 0 18px; color: #c9ccd6; line-height: 1.6; }
 .muted { color: var(--muted); }
+
+.f { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; } .f > span { color: var(--muted); font-size: 12px; } .f input { width: 100%; }
+.th { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; align-items: start; }
+.pv { --c: #fdc27d; background: radial-gradient(500px 220px at 0 0, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%), rgba(255, 255, 255, .03); border-color: color-mix(in srgb, var(--c) 40%, transparent); }
+.pvh { display: flex; align-items: center; gap: 12px; } .pvh img { width: 46px; height: 46px; object-fit: contain; border-radius: 12px; background: rgba(255, 255, 255, .06); }
+.pvh b { display: block; font-size: 16px; } .pvh small { color: var(--muted); }
+.pvb { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; } .pvchip { padding: 5px 12px; border-radius: 999px; background: var(--c); color: #1a1a1a; font-weight: 700; font-size: 12px; } .pvchip.off { background: rgba(255, 255, 255, .08); color: #d6d9e2; font-weight: 500; }
+.pvbar { height: 6px; border-radius: 6px; background: rgba(255, 255, 255, .08); margin-top: 16px; } .pvbar i { display: block; width: 62%; height: 100%; border-radius: 6px; background: var(--c); }
+.pvbtn { background: var(--c); color: #1a1a1a; border-color: transparent; font-weight: 700; }
+.sw { width: 22px; height: 22px; border-radius: 7px; display: inline-block; }
+input[type=color] { cursor: pointer; }

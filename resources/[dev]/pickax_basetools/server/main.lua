@@ -211,3 +211,93 @@ lib.callback.register('basetools:info', function(src)
 end)
 
 lib.callback.register('basetools:allowed', function(src) return isAdmin(src) end)
+
+-- ═════════════════ THÈME DU SERVEUR (couleur, nom, logo) ═════════════════
+-- Écrit dans pickax_core/config.lua (source de vérité) ET dans pickax_theme/theme_live.json (léger : renvoyé aux joueurs par « restart pickax_theme »).
+local THEME_KEYS = { 'AccentColor', 'InventoryColor', 'ServerName', 'ServerShortName', 'ServerTagline', 'ServerDiscord', 'ServerLogo' }
+local THEME_HIST = 'backups/theme-history.json'
+
+local function readConfigValues()
+    local raw = LoadResourceFile('pickax_core', 'config.lua') or ''
+    raw = raw:gsub('%-%-[^\n]*', '')
+    local out = {}
+    for _, k in ipairs(THEME_KEYS) do
+        out[k] = raw:match('[%s,{]' .. k .. "%s*=%s*'([^'\n]*)'") or raw:match('[%s,{]' .. k .. '%s*=%s*"([^"\n]*)"') or ''
+    end
+    return out
+end
+
+local function themeHistory()
+    local raw = LoadResourceFile(GetCurrentResourceName(), THEME_HIST)
+    local t = raw and raw ~= '' and json.decode(raw) or {}
+    return type(t) == 'table' and t or {}
+end
+
+local function cleanTheme(v)
+    if type(v) ~= 'table' then return nil, 'Données invalides' end
+    local function txt(x, max) x = tostring(x or ''):gsub('^%s+', ''):gsub('%s+$', '') if #x > max or x:find('[\'"\\\r\n]') then return nil end return x end
+    local o = {}
+    o.AccentColor = tostring(v.AccentColor or ''):lower()
+    if not o.AccentColor:match('^#%x%x%x%x%x%x$') then return nil, 'Couleur principale invalide (format #RRGGBB)' end
+    o.InventoryColor = tostring(v.InventoryColor or ''):lower()
+    if o.InventoryColor ~= '' and not o.InventoryColor:match('^#%x%x%x%x%x%x$') then return nil, 'Couleur de l\'inventaire invalide' end
+    o.ServerName = txt(v.ServerName, 60) if not o.ServerName or o.ServerName == '' then return nil, 'Nom du serveur invalide (60 caractères max, sans guillemets)' end
+    o.ServerShortName = txt(v.ServerShortName, 24) if not o.ServerShortName or o.ServerShortName == '' then return nil, 'Nom court invalide (24 caractères max)' end
+    o.ServerTagline = txt(v.ServerTagline, 80) if not o.ServerTagline then return nil, 'Slogan invalide' end
+    o.ServerDiscord = txt(v.ServerDiscord, 80) if not o.ServerDiscord then return nil, 'Lien Discord invalide' end
+    o.ServerDiscord = o.ServerDiscord:gsub('^https?://', '')
+    local logo = txt(v.ServerLogo, 200)
+    local function logoOk(l)
+        if not l or l == '' or l:find('..', 1, true) then return false end
+        if l:match('^https://[%w%-%._~:/%?#@!$&()*+,;=%%]+$') then return true end
+        if not l:match('^[%w_%-%.]+$') then return false end
+        local ext = l:lower():match('%.(%a+)$')
+        return ext == 'png' or ext == 'jpg' or ext == 'jpeg' or ext == 'webp' or ext == 'svg' or ext == 'gif'
+    end
+    if not logoOk(logo) then return nil, 'Logo invalide : nom de fichier (.png .jpg .webp .svg) placé dans pickax_theme/logo/, ou lien https' end
+    o.ServerLogo = logo
+    return o
+end
+
+local function writeConfigValues(o)
+    local raw = LoadResourceFile('pickax_core', 'config.lua')
+    if not raw or raw == '' then return false, 'pickax_core/config.lua introuvable' end
+    SaveResourceFile(GetCurrentResourceName(), 'backups/core-config-' .. os.date('%Y%m%d-%H%M%S') .. '.lua.bak', raw, -1)
+    for _, k in ipairs(THEME_KEYS) do
+        local done = false
+        raw = raw:gsub('(\n[ \t]*' .. k .. '%s*=%s*)([\'"])(.-)%2', function(pre, q, old)
+            if done then return nil end
+            done = true
+            return pre .. "'" .. o[k] .. "'"
+        end, 1)
+        if not done then return false, 'Clé introuvable dans config.lua : ' .. k end
+    end
+    if not SaveResourceFile('pickax_core', 'config.lua', raw, -1) then return false, 'Écriture de pickax_core/config.lua impossible' end
+    local live = { accent = o.AccentColor, server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor } }
+    SaveResourceFile('pickax_theme', 'theme_live.json', json.encode(live), -1)
+    return true
+end
+
+lib.callback.register('basetools:themeGet', function(src)
+    if not isAdmin(src) then return { ok = false, error = 'Accès refusé' } end
+    local h = themeHistory()
+    return { ok = true, values = readConfigValues(), history = h }
+end)
+
+lib.callback.register('basetools:themeSave', function(src, v)
+    if not isAdmin(src) then return { ok = false, error = 'Accès refusé' } end
+    local o, err = cleanTheme(v)
+    if not o then return { ok = false, error = err } end
+    local before = readConfigValues()
+    local ok, e = writeConfigValues(o)
+    if not ok then return { ok = false, error = e } end
+    local h = themeHistory()
+    table.insert(h, 1, { at = os.time(), by = who(src), values = before })
+    while #h > 10 do table.remove(h) end
+    SaveResourceFile(GetCurrentResourceName(), THEME_HIST, json.encode(h), -1)
+    webhook('Thème du serveur modifié', ('%s : couleur **%s**, nom **%s**'):format(who(src), o.AccentColor, o.ServerName), tonumber(o.AccentColor:sub(2), 16))
+    SetTimeout(800, function()
+        for _, r in ipairs(Config.ThemeRestart) do if GetResourceState(r) == 'started' then ExecuteCommand('restart ' .. r) end end
+    end)
+    return { ok = true, values = readConfigValues(), history = h }
+end)

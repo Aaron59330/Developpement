@@ -4,6 +4,7 @@
 
 - **Santé** : ressources indispensables, tables SQL, objets ox_inventory, points sans position, métiers vides, concessions sans point Catalogue, `server.cfg` (licence, MySQL). Score sur 100.
 - **Sauvegardes** : sauvegarde / restauration de la configuration des builders (fichiers dans `backups/`, jamais versionnés). Une sauvegarde de sécurité est créée avant chaque restauration, puis les builders redémarrent.
+- **Thème** : couleur, nom, slogan, Discord et logo du serveur modifiables en jeu avec aperçu. Écrit dans `pickax_core/config.lua` (ancien fichier sauvegardé dans `backups/`) et dans `pickax_theme/theme_live.json`, puis relance `pickax_theme`. Historique des 10 dernières versions.
 - **Nouveautés** : journal des modifications (`changelog.lua`, à compléter à chaque mise à jour).
 - **Guide** : raccourcis et bonnes pratiques.
 

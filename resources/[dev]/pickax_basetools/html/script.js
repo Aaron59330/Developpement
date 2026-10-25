@@ -16,13 +16,14 @@ function confirmBox(title, text, yes, danger) {
 const ago = t => { const s = Math.max(0, Math.floor(Date.now() / 1000 - t)); if (s < 60) return 'à l\'instant'; if (s < 3600) return Math.floor(s / 60) + ' min'; if (s < 86400) return Math.floor(s / 3600) + ' h'; return Math.floor(s / 86400) + ' j'; };
 
 const App = {
-  tab: 'health', audit: null, backups: null, info: null, busy: false,
+  tab: 'health', audit: null, backups: null, info: null, busy: false, theme: null, themeHist: [],
   async open() { this.tab = 'health'; $root.classList.remove('hidden'); this.render(); this.runAudit(); },
   close() { $root.classList.add('hidden'); },
   async runAudit() { this.busy = true; this.render(); const r = await rpc('audit'); this.busy = false; if (r && r.ok) this.audit = r; else toast((r && r.error) || 'Erreur', 'err'); this.render(); },
   async loadBackups() { const r = await rpc('backups'); if (r && r.ok) { this.backups = r.list; this.render(); } },
   async loadInfo() { const r = await rpc('info'); if (r && r.ok) { this.info = r; this.render(); } },
-  go(t) { this.tab = t; if (t === 'backups' && !this.backups) this.loadBackups(); if ((t === 'news' || t === 'guide') && !this.info) this.loadInfo(); this.render(); },
+  async loadTheme() { const r = await rpc('themeGet'); if (r && r.ok) { this.theme = r.values; this.themeHist = r.history || []; this.render(); } else toast((r && r.error) || 'Erreur', 'err'); },
+  go(t) { this.tab = t; if (t === 'theme' && !this.theme) this.loadTheme(); if (t === 'backups' && !this.backups) this.loadBackups(); if ((t === 'news' || t === 'guide') && !this.info) this.loadInfo(); this.render(); },
 
   renderHealth() {
     const a = this.audit;
@@ -41,6 +42,24 @@ const App = {
     if (!l) return head + '<div class="card muted">Chargement…</div>';
     return head + (l.length ? l.map(b => `<div class="card bk"><div style="flex:1"><b>${esc(b.label || 'Sauvegarde')}</b><small>${esc(b.id)} · ${b.tables} tables · ${b.rows} lignes · par ${esc(b.by || '?')} · ${ago(b.at)}</small></div><button class="danger" data-a="restore" data-id="${esc(b.id)}">Restaurer</button></div>`).join('') : '<div class="card muted">Aucune sauvegarde pour le moment.</div>');
   },
+  themeInput(k, label, ph, extra) { const v = this.theme[k] ?? ''; return `<label class="f"><span>${label}</span><input data-th="${k}" value="${esc(v)}" placeholder="${esc(ph || '')}" ${extra || ''}></label>`; },
+  renderTheme() {
+    const t = this.theme; if (!t) return '<div class="card muted">Chargement…</div>';
+    const acc = /^#[0-9a-f]{6}$/i.test(t.AccentColor) ? t.AccentColor : '#fdc27d';
+    const logo = /^https:/.test(t.ServerLogo || '') ? t.ServerLogo : 'https://cfx-nui-pickax_theme/logo/' + (t.ServerLogo || 'logo.png');
+    return `<div class="th"><div class="card"><div class="grid2">
+        <label class="f"><span>Couleur principale</span><div class="row"><input type="color" id="th-pick" value="${acc}" style="width:54px;height:42px;padding:3px"><input data-th="AccentColor" value="${esc(t.AccentColor)}" maxlength="7" style="flex:1"></div></label>
+        <label class="f"><span>Couleur de l'inventaire (vide = identique)</span><input data-th="InventoryColor" value="${esc(t.InventoryColor)}" maxlength="7" placeholder="#dc2626"></label>
+        ${this.themeInput('ServerName', 'Nom du serveur', 'Aero Roleplay')}${this.themeInput('ServerShortName', 'Nom court', 'AERO')}
+        ${this.themeInput('ServerTagline', 'Slogan', 'RP sérieux · Free-Access')}${this.themeInput('ServerDiscord', 'Discord', 'discord.gg/…')}
+        </div>${this.themeInput('ServerLogo', 'Logo (fichier dans pickax_theme/logo/ ou lien https)', 'logo.png')}
+        <div class="row" style="margin-top:14px"><button class="primary" data-a="themeSave">Enregistrer et appliquer à tous les joueurs</button></div>
+        <p class="muted" style="margin:10px 0 0;font-size:12px">Écrit dans <b>pickax_core/config.lua</b> (une copie de l'ancien fichier est conservée) puis relance <b>pickax_theme</b>. Les interfaces changent pour tout le monde à leur prochaine ouverture. Les couleurs des markers / blips (côté Lua) suivent au prochain redémarrage de pickax_core.</p></div>
+      <div><div class="card pv" style="--c:${acc}"><div class="pvh"><img src="${esc(logo)}" onerror="this.style.display='none'"><div><b id="pv-n">${esc(t.ServerName)}</b><small id="pv-t">${esc(t.ServerTagline)}</small></div></div>
+        <div class="pvb"><span class="pvchip">${esc(t.ServerShortName)}</span><span class="pvchip off">Discord · ${esc(t.ServerDiscord)}</span></div>
+        <div class="pvbar"><i></i></div><div class="row" style="gap:8px;margin-top:12px"><button class="pvbtn">Bouton principal</button><button>Secondaire</button></div></div>
+      ${this.themeHist.length ? `<div class="card" style="margin-top:12px"><b>Revenir à une version précédente</b>${this.themeHist.map((h, i) => `<div class="bk" style="padding:8px 0"><span class="sw" style="background:${esc(h.values.AccentColor)}"></span><div style="flex:1"><b>${esc(h.values.ServerName)}</b><small>${esc(h.values.AccentColor)} · ${esc(h.by || '?')} · ${ago(h.at)}</small></div><button data-a="themeRevert" data-i="${i}">Charger</button></div>`).join('')}</div>` : ''}</div></div>`;
+  },
   renderNews() {
     const i = this.info; if (!i) return '<div class="card muted">Chargement…</div>';
     return `<div class="tl">${i.changelog.map((c, k) => `<div class="v"><h4>${esc(c.title)}<span>v${esc(c.version)} · ${esc(c.date)}</span>${k === 0 ? '<span class="tag">Dernière</span>' : ''}</h4><ul>${c.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`;
@@ -54,20 +73,32 @@ const App = {
       + sec('Sécurité', `<ul><li>Garde le dépôt GitHub en privé et limite les accès FTP / panel.</li><li>Ne mets jamais de clé de licence, de mot de passe ou de webhook dans un fichier versionné.</li></ul>`);
   },
   render() {
-    const titles = { health: ['Santé de la base', 'Ressources, SQL, objets et données des builders'], backups: ['Sauvegardes', 'Configuration des builders : sauvegarde et restauration'], news: ['Nouveautés', 'Journal des modifications de ta base'], guide: ['Guide', 'Raccourcis et bonnes pratiques'] };
+    const titles = { health: ['Santé de la base', 'Ressources, SQL, objets et données des builders'], backups: ['Sauvegardes', 'Configuration des builders : sauvegarde et restauration'], news: ['Nouveautés', 'Journal des modifications de ta base'], guide: ['Guide', 'Raccourcis et bonnes pratiques'], theme: ['Thème du serveur', 'Couleur, nom et logo de toutes les interfaces'] };
     const issues = this.audit ? this.audit.checks.filter(c => c.status === 'err').length : 0;
     const nav = (id, ico, label, n) => `<div class="nav ${this.tab === id ? 'on' : ''}" data-a="go" data-id="${id}"><span>${ico}</span>${label}${n ? `<span class="n">${n}</span>` : ''}</div>`;
-    const body = this.tab === 'health' ? this.renderHealth() : this.tab === 'backups' ? this.renderBackups() : this.tab === 'news' ? this.renderNews() : this.renderGuide();
+    const body = this.tab === 'health' ? this.renderHealth() : this.tab === 'backups' ? this.renderBackups() : this.tab === 'news' ? this.renderNews() : this.tab === 'theme' ? this.renderTheme() : this.renderGuide();
     $root.innerHTML = `<div class="shell"><div class="side"><div class="brand"><div class="logo">⚙</div><div><b>Outils de la base</b><small data-pk="short">AERO</small></div></div>
-      ${nav('health', '🩺', 'Santé', issues)}${nav('backups', '💾', 'Sauvegardes')}${nav('news', '✨', 'Nouveautés')}${nav('guide', '📘', 'Guide')}<div class="spacer"></div><button data-a="close">Fermer</button></div>
+      ${nav('health', '🩺', 'Santé', issues)}${nav('backups', '💾', 'Sauvegardes')}${nav('theme', '🎨', 'Thème')}${nav('news', '✨', 'Nouveautés')}${nav('guide', '📘', 'Guide')}<div class="spacer"></div><button data-a="close">Fermer</button></div>
       <div class="main"><div class="head"><div style="flex:1"><h2>${titles[this.tab][0]}</h2><p>${titles[this.tab][1]}</p></div>${this.tab === 'health' ? `<button class="primary" data-a="audit" ${this.busy ? 'disabled' : ''}>${this.busy ? 'Analyse…' : 'Relancer l\'audit'}</button>` : ''}<button class="x" data-a="close">✕</button></div>
       <div class="body">${body}</div></div></div>`;
+  },
+  pvUpdate() {   // aperçu sans re-rendre (garde le focus du champ)
+    const t = this.theme, pv = document.querySelector('.pv'); if (!pv) return;
+    if (/^#[0-9a-f]{6}$/i.test(t.AccentColor)) pv.style.setProperty('--c', t.AccentColor);
+    const n = document.getElementById('pv-n'), g = document.getElementById('pv-t'); if (n) n.textContent = t.ServerName; if (g) g.textContent = t.ServerTagline;
+    const chips = pv.querySelectorAll('.pvchip'); if (chips[0]) chips[0].textContent = t.ServerShortName; if (chips[1]) chips[1].textContent = 'Discord · ' + t.ServerDiscord;
   },
   async onA(el) {
     const a = el.dataset.a;
     if (a === 'go') return this.go(el.dataset.id);
     if (a === 'close') { this.close(); return rpc('close'); }
     if (a === 'audit') return this.runAudit();
+    if (a === 'themeRevert') { this.theme = { ...this.themeHist[Number(el.dataset.i)].values }; toast('Version chargée : clique sur Enregistrer pour l\'appliquer', 'ok'); return this.render(); }
+    if (a === 'themeSave') {
+      if (!await confirmBox('Appliquer ce thème ?', 'Couleur, nom et logo changent pour <b>tous les joueurs</b>. L\'ancien fichier de configuration est sauvegardé.', 'Appliquer', false)) return;
+      const r = await rpc('themeSave', this.theme);
+      if (r && r.ok) { this.theme = r.values; this.themeHist = r.history || []; toast('Thème enregistré : pickax_theme redémarre', 'ok'); this.render(); } else toast((r && r.error) || 'Erreur', 'err'); return;
+    }
     if (a === 'backup') { const r = await rpc('backup', document.getElementById('bk-l').value); if (r && r.ok) { this.backups = r.list; toast('Sauvegarde créée', 'ok'); this.render(); } else toast((r && r.error) || 'Erreur', 'err'); return; }
     if (a === 'restore') {
       if (!await confirmBox('Restaurer cette sauvegarde ?', `La configuration actuelle des builders sera <b>remplacée</b> par celle de <b>${esc(el.dataset.id)}</b>, puis les builders redémarrent.<br>Une sauvegarde de sécurité est créée automatiquement avant, pour pouvoir annuler.`, 'Restaurer', true)) return;
@@ -76,6 +107,11 @@ const App = {
     }
   },
 };
+document.addEventListener('input', e => {
+  const el = e.target; if (!App.theme) return;
+  if (el.id === 'th-pick') { App.theme.AccentColor = el.value; const h = document.querySelector('[data-th=AccentColor]'); if (h) h.value = el.value; App.pvUpdate(); return; }
+  if (el.dataset && el.dataset.th) { App.theme[el.dataset.th] = el.value; if (el.dataset.th === 'AccentColor' && /^#[0-9a-f]{6}$/i.test(el.value)) { const p = document.getElementById('th-pick'); if (p) p.value = el.value; } App.pvUpdate(); }
+});
 document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if (el) App.onA(el); });
 window.addEventListener('message', e => { const d = e.data || {}; if (d.action === 'open') App.open(); else if (d.action === 'close') App.close(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$root.classList.contains('hidden')) { App.close(); rpc('close'); } });

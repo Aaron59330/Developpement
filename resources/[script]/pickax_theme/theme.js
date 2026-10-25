@@ -61,8 +61,19 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
   var cur = (cached && okHex(cached.accent) && cached.server) ? cached : def;
   apply(cur.accent, cur.server);                                   // immédiat : dernières valeurs connues (ou secours)
 
-  // Lecture de pickax_core/config.lua puis mémorisation pour les ouvertures suivantes
-  try {
+  // Applique des valeurs lues (et les mémorise pour les ouvertures suivantes)
+  var finish = function (hex, server) {
+    hex = hex.toLowerCase();
+    var next = JSON.stringify({ accent: hex, server: server });
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    if (next !== JSON.stringify({ accent: window.PICKAX_ACCENT.toLowerCase(), server: window.PICKAX_SERVER })) {
+      apply(hex, server);
+      window.dispatchEvent(new Event('pickax-theme'));
+    }
+  };
+
+  // Lecture de pickax_core/config.lua (source de secours)
+  var fromConfig = function () {
     fetch('https://cfx-nui-pickax_core/config.lua').then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) {
       t = String(t || '').replace(/--[^\n]*/g, '');
       var get = function (k, d) {
@@ -71,18 +82,19 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
         return v ? v : d;
       };
       var hex = get('AccentColor', ''); if (!okHex(hex)) return;
-      var server = {
+      finish(hex, {
         name: get('ServerName', def.server.name), short: get('ServerShortName', def.server.short),
         tagline: get('ServerTagline', def.server.tagline), discord: get('ServerDiscord', def.server.discord).replace(/^https?:\/\//i, ''),
         logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', '')
-      };
-      hex = hex.toLowerCase();
-      var next = JSON.stringify({ accent: hex, server: server });
-      try { localStorage.setItem(KEY, next); } catch (e) {}
-      if (next !== JSON.stringify({ accent: window.PICKAX_ACCENT.toLowerCase(), server: window.PICKAX_SERVER })) {
-        apply(hex, server);
-        window.dispatchEvent(new Event('pickax-theme'));
-      }
+      });
     }).catch(function () {});
-  } catch (e) {}
+  };
+
+  // 1) thème modifié en jeu (outils de la base) : theme_live.json, léger, renvoyé aux joueurs par « restart pickax_theme »
+  // 2) sinon pickax_core/config.lua
+  try {
+    fetch('https://cfx-nui-pickax_theme/theme_live.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (j) {
+      if (j && okHex(j.accent) && j.server && typeof j.server === 'object') finish(j.accent, j.server); else fromConfig();
+    });
+  } catch (e) { fromConfig(); }
 })();
