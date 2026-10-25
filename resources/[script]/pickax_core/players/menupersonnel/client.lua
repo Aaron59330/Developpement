@@ -214,25 +214,42 @@ local function CfgGet(fn)
 	return nil
 end
 
+-- Touche réellement attribuée au joueur (pickax_keybinds lit les paramètres FiveM), sinon la touche par défaut de la config
+local function LiveKey(cmd, default)
+	if cmd and GetResourceState('pickax_keybinds') == 'started' then
+		local ok, k = pcall(function() return exports.pickax_keybinds:GetKey(cmd) end)
+		if ok and k then return k end
+	end
+	return default
+end
+
 local function MenuKeys()
 	local list = {
-		{ "Menu personnel", CfgGet(function() return ConfigMenuF5.Commande.Bind end) },
-		{ "Menu des emotes", CfgGet(function() return ConfigMenuEmote.MenuKeybind end) },
-		{ "Annuler une emote", CfgGet(function() return ConfigMenuEmote.CancelEmoteKey end) },
-		{ "Mains en l'air", CfgGet(function() return ConfigMenuEmote.HandsupKeybind end) },
-		{ "Pointer du doigt", CfgGet(function() return ConfigMenuEmote.PointingKeybind end) },
-		{ "S'accroupir", CfgGet(function() return ConfigMenuEmote.CrouchKeybind end) },
-		{ "Ramper", CfgGet(function() return ConfigMenuEmote.CrawlKeybind end) },
-		{ "S'endormir / se réveiller", CfgGet(function() return ConfigRagdoll.Commande.Bind end) },
-		{ "Boutique", CfgGet(function() return ConfigBoutique.Commande.Bind end) },
-		{ "Radio", CfgGet(function() return ConfigRadio.Commande.Bind end) },
-		{ "Clés du véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind end) },
-		{ "Ouvrir / fermer le véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind2 end) },
-		{ "Coffre du véhicule", "L" },
-		{ "Verrouiller une porte", "E" },
+		{ "Menu personnel", CfgGet(function() return ConfigMenuF5.Commande.Bind end), CfgGet(function() return ConfigMenuF5.Commande.CommandeName end) },
+		{ "Téléphone", "F1", "phone" },
+		{ "Menu du métier", "F6", "jobmenu" },
+		{ "Menu du gang", "F7", "gangmenu" },
+		{ "Meubles / laboratoire (dans sa propriété)", "F10", "decorer" },
+		{ "Mode caméra", CfgGet(function() return ConfigCamera.Commande.Bind end), CfgGet(function() return ConfigCamera.Commande.CommandeName end) },
+		{ "Menu des emotes", CfgGet(function() return ConfigMenuEmote.MenuKeybind end), "emoteui" },
+		{ "Annuler une emote", CfgGet(function() return ConfigMenuEmote.CancelEmoteKey end), "emotecancel" },
+		{ "Mains en l'air", CfgGet(function() return ConfigMenuEmote.HandsupKeybind end), "handsup" },
+		{ "Pointer du doigt", CfgGet(function() return ConfigMenuEmote.PointingKeybind end), "pointing" },
+		{ "S'accroupir", CfgGet(function() return ConfigMenuEmote.CrouchKeybind end), "+crouch" },
+		{ "Ramper", CfgGet(function() return ConfigMenuEmote.CrawlKeybind end), "crawl" },
+		{ "S'endormir / se réveiller", CfgGet(function() return ConfigRagdoll.Commande.Bind end), CfgGet(function() return ConfigRagdoll.Commande.Name end) },
+		{ "Boutique", CfgGet(function() return ConfigBoutique.Commande.Bind end), CfgGet(function() return ConfigBoutique.Commande.CommandeName end) },
+		{ "Radio", CfgGet(function() return ConfigRadio.Commande.Bind end), CfgGet(function() return ConfigRadio.Commande.Commande end) },
+		{ "Clés du véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind end), CfgGet(function() return ConfigVehicle.Commande.CommandeName end) },
+		{ "Ouvrir / fermer le véhicule", CfgGet(function() return ConfigVehicle.Commande.Bind2 end), CfgGet(function() return ConfigVehicle.Commande.CommandeName2 end) },
+		{ "Coffre du véhicule", "L", "coffre" },
+		{ "Verrouiller une porte", "E", "lockdoor" },
 	}
 	local out = {}
-	for _, k in ipairs(list) do if k[2] then out[#out + 1] = k end end
+	for _, k in ipairs(list) do
+		local key = LiveKey(k[3], k[2])
+		if key then out[#out + 1] = { k[1], key } end
+	end
 	return out
 end
 
@@ -252,6 +269,10 @@ local function MenuCommands()
 	}
 	local boutique = CfgGet(function() return ConfigBoutique.Commande.CommandeName end)
 	if boutique then list[#list + 1] = { boutique, "Ouvrir la boutique" } end
+	list[#list + 1] = { "phone", "Ouvrir le téléphone" }
+	list[#list + 1] = { "decorer", "Meubles et laboratoire (dans sa propriété)" }
+	if GetResourceState('pickax_keybinds') == 'started' then list[#list + 1] = { "touches", "Voir tes touches réelles et les conflits" } end
+	if GetResourceState('pickax_tutorial') == 'started' then list[#list + 1] = { "tutoriel", "Revoir le tutoriel d'arrivée" } end
 	return list
 end
 
@@ -311,6 +332,16 @@ local function OpenMenu()
 			RageUI.Separator("Serveur")
 			RageUI.ButtonWithStyle("Touches du serveur", "La liste des raccourcis clavier", {RightLabel = "→→→"}, true, function() end, KeysMenu)
 			RageUI.ButtonWithStyle("Commandes du serveur", "Les commandes utiles pour les joueurs", {RightLabel = "→→→"}, true, function() end, CmdsMenu)
+			if GetResourceState('pickax_keybinds') == 'started' then
+				RageUI.ButtonWithStyle("Mes touches", "Vos vraies touches, les conflits et comment les changer", {RightLabel = "↗"}, true, function(_, _, s)
+					if s then RageUI.CloseAll() ExecuteCommand('touches') end
+				end)
+			end
+			if GetResourceState('pickax_tutorial') == 'started' then
+				RageUI.ButtonWithStyle("Revoir le tutoriel", "Le guide de démarrage du serveur", {RightLabel = "↗"}, true, function(_, _, s)
+					if s then RageUI.CloseAll() ExecuteCommand('tutoriel') end
+				end)
+			end
 			RageUI.ButtonWithStyle("Serveur Discord", "Ouvre le lien du Discord dans votre navigateur", {RightLabel = "↗"}, true, function(_, _, s)
 				if s then PrefsCall('OpenUrl', ConfigMenuF5.Links.Discord) end
 			end)
