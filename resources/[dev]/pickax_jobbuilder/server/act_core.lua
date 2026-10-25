@@ -27,6 +27,9 @@ local function installTables()
     MySQL.query.await([[CREATE TABLE IF NOT EXISTS activejobs_stats (
         identifier VARCHAR(80) NOT NULL, job VARCHAR(30) NOT NULL, xp INT NOT NULL DEFAULT 0, done INT NOT NULL DEFAULT 0, earned INT NOT NULL DEFAULT 0,
         PRIMARY KEY (identifier, job)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS activejobs_achievements (
+        identifier VARCHAR(80) NOT NULL, id VARCHAR(60) NOT NULL, at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (identifier, id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
 end
 
 -- ─────────────────────────────── Lien avec le Job Builder (même ressource) ───────────────────────────────
@@ -124,6 +127,82 @@ local function vipBonus(src)
     return Config.Act.XP.VipPayBonus[l] or 0
 end
 
+-- ─────────────────────────────── Titres & succès ───────────────────────────────
+function AJ.title(level)
+    local best, bl = nil, 0
+    for lvl, t in pairs(Config.Act.XP.Titles or {}) do if lvl <= level and lvl >= bl then best, bl = t, lvl end end
+    return best
+end
+
+AJ.Ach = {}   -- AJ.Ach[identifier] = { [id] = true }
+local function achSet(identifier)
+    local set = AJ.Ach[identifier]
+    if not set then
+        set = {}
+        for _, r in ipairs(MySQL.query.await('SELECT id FROM activejobs_achievements WHERE identifier = ?', { identifier }) or {}) do set[r.id] = true end
+        AJ.Ach[identifier] = set
+    end
+    return set
+end
+AddEventHandler('playerDropped', function() local x = ESX.GetPlayerFromId(source) if x then AJ.Ach[x.identifier] = nil end end)
+
+-- Valeur actuelle d'un succès pour un joueur
+local function achProgress(xPlayer, def)
+    if def.job ~= '*' then
+        local s = AJ.stat(xPlayer, def.job)
+        if def.stat == 'done' then return s.done elseif def.stat == 'earned' then return s.earned else return levelOf(s.xp) end
+    end
+    local total, jobs, lv = 0, 0, 0
+    local earned = 0
+    for key in pairs(Config.Act.Jobs) do
+        local s = AJ.stat(xPlayer, key)
+        total = total + s.done; earned = earned + s.earned
+        if s.done > 0 then jobs = jobs + 1 end
+        if levelOf(s.xp) >= (def.level or 1) then lv = lv + 1 end
+    end
+    if def.stat == 'done' then return total elseif def.stat == 'earned' then return earned elseif def.stat == 'jobs' then return jobs else return lv end
+end
+
+-- Débloque les succès atteints (appelé après chaque paie) ; verse la récompense une seule fois (INSERT IGNORE)
+function AJ.checkAchievements(src, xPlayer, key)
+    local set = achSet(xPlayer.identifier)
+    for _, def in ipairs(Config.Act.Achievements or {}) do
+        if not set[def.id] and (def.job == '*' or def.job == key) and achProgress(xPlayer, def) >= def.target then
+            local inserted = MySQL.update.await('INSERT IGNORE INTO activejobs_achievements (identifier, id) VALUES (?, ?)', { xPlayer.identifier, def.id }) or 0
+            set[def.id] = true
+            if inserted > 0 then
+                local r = def.reward or {}
+                if (r.money or 0) > 0 then xPlayer.addAccountMoney(Config.Act.Account, r.money, 'Succès : ' .. def.label) end
+                if (r.xp or 0) > 0 and def.job ~= '*' then
+                    local s = AJ.stat(xPlayer, def.job)
+                    s.xp = s.xp + r.xp
+                    saveStat(xPlayer, def.job)
+                end
+                local bits = {}
+                if (r.money or 0) > 0 then bits[#bits + 1] = ('+%d$'):format(r.money) end
+                if (r.xp or 0) > 0 and def.job ~= '*' then bits[#bits + 1] = ('+%d XP'):format(r.xp) end
+                AJ.notify(src, ('Succès débloqué : %s%s'):format(def.label, #bits > 0 and (' (' .. table.concat(bits, ', ') .. ')') or ''), 'success')
+                TriggerClientEvent('aj:client:achievement', src, { label = def.label, desc = def.desc, reward = bits })
+            end
+        end
+    end
+end
+
+-- Liste pour le panneau : succès du métier + succès généraux, avec la progression
+function AJ.achievementList(xPlayer, key)
+    local set = achSet(xPlayer.identifier)
+    local out = {}
+    for _, def in ipairs(Config.Act.Achievements or {}) do
+        if def.job == '*' or def.job == key then
+            local cur = achProgress(xPlayer, def)
+            out[#out + 1] = { id = def.id, label = def.label, desc = def.desc, target = def.target, progress = math.min(cur, def.target), done = set[def.id] == true,
+                general = def.job == '*', reward = def.reward or {} }
+        end
+    end
+    table.sort(out, function(a, b) if a.done ~= b.done then return a.done end if a.general ~= b.general then return a.general end return a.target < b.target end)
+    return out
+end
+
 -- Paie une mission : base × (niveau + VIP) ; ajoute de l'XP (et fait monter de niveau / de grade). Retourne le montant versé.
 function AJ.pay(src, key, base, xpGain, reason, doneCount)
     local xPlayer = ESX.GetPlayerFromId(src)
@@ -154,6 +233,7 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
         end
     end
     saveStat(xPlayer, key)
+    AJ.checkAchievements(src, xPlayer, key)
     return amount
 end
 
@@ -210,7 +290,8 @@ local function panelData(src, pointId, cb)
     cb({ ok = true, kind = 'activity', pointId = pointId, key = key, label = meta.label or j.label, icon = j.icon, desc = j.desc, worker = true, gradeLabel = (meta.grades[x.job.grade + 1] or {}).label,
         level = lvl, maxLevel = Config.Act.XP.MaxLevel, xp = s.xp, xpInLevel = s.xp - (lvl - 1) * Config.Act.XP.PerLevel, xpPerLevel = Config.Act.XP.PerLevel,
         done = s.done, earned = s.earned, active = AJ.Active[src] ~= nil and AJ.Active[src].job == key,
-        payBonus = (lvl - 1) * Config.Act.XP.PayPerLevel + vipBonus(src), grades = meta.grades })
+        payBonus = (lvl - 1) * Config.Act.XP.PayPerLevel + vipBonus(src), grades = meta.grades,
+        title = AJ.title(lvl), achievements = AJ.achievementList(x, key) })
 end
 
 function JB.openActivity(src, xPlayer, point, job, cb) panelData(src, point.id, cb) end

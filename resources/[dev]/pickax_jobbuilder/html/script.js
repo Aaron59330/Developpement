@@ -84,6 +84,7 @@ const P = {
   dollar: '<path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
+  award: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
   up: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
   down: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
   link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
@@ -2734,16 +2735,28 @@ const Runtime = {
     return list.map(c => `<div class="item">${tile('box')}<div class="grow"><b>${esc(c.label)}</b><small>${esc(c.cat)}</small></div><button class="sm primary" data-a="furnPlace" data-v="${esc(c.id)}" ${full ? 'disabled' : ''}>Poser</button></div>`).join('') || '<p class="hint">Aucun meuble ne correspond.</p>';
   },
 
+  achCard(d) {
+    const l = d.achievements || []; if (!l.length) return '';
+    const done = l.filter(a => a.done).length, show = this.achAll ? l : l.filter(a => a.done).slice(-2).concat(l.filter(a => !a.done).slice(0, 4));
+    const rew = a => [a.reward.money ? money(a.reward.money) : '', a.reward.xp ? '+' + a.reward.xp + ' XP' : ''].filter(Boolean).join(' · ');
+    return `<div class="card"><div class="card-h"><div class="t">${ic('award', 16)} Succès</div>${chip(done + ' / ' + l.length, done === l.length ? 'ok' : 'info')}</div>
+      ${show.map(a => `<div class="item" style="${a.done ? '' : 'opacity:.85'}">${tile(a.done ? 'check' : 'lock')}<div class="grow"><b>${esc(a.label)}</b><small>${esc(a.desc)}${rew(a) ? ' · ' + esc(rew(a)) : ''}</small>
+        ${a.done ? '' : `<div style="height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:${Math.round(a.progress / a.target * 100)}%;background:var(--accent)"></i></div>`}</div>
+        ${a.done ? chip('Obtenu', 'ok') : `<span class="price" style="font-size:12px">${a.progress.toLocaleString('fr-FR')} / ${a.target.toLocaleString('fr-FR')}</span>`}</div>`).join('')}
+      ${l.length > show.length || this.achAll ? `<button class="sm" data-a="achToggle" style="margin-top:8px">${this.achAll ? 'Réduire' : 'Voir tous les succès (' + l.length + ')'}</button>` : ''}</div>`;
+  },
+
   renderActivity() {
     const d = this.data, pct = Math.min(100, Math.round(d.xpInLevel / d.xpPerLevel * 100));
     const grades = d.grades.map(g => `<div><b>${esc(g.label)}</b> — ${money(g.salary)} / paie</div>`).join('');
     $root.innerHTML = panel({ icon: d.icon === 'flame' ? 'siren' : ({ trash: 'trash', wrench: 'wrench', drop: 'droplet', truck: 'car', sprout: 'sprout', train: 'route' }[d.icon] || 'route'), title: d.label, sub: `Grade : ${esc(d.gradeLabel || 'employé')}`, cls: 'md',
       body: `<p class="hint" style="font-size:13px">${esc(d.desc)}</p>
-        <div class="card"><div class="card-h"><div class="t">Niveau ${d.level}${d.level >= d.maxLevel ? ' (max)' : ''}</div>${chip('+' + d.payBonus + '% de paie', 'info')}</div>
+        <div class="card"><div class="card-h"><div class="t">Niveau ${d.level}${d.level >= d.maxLevel ? ' (max)' : ''}${d.title ? ` · ${esc(d.title)}` : ''}</div>${chip('+' + d.payBonus + '% de paie', 'info')}</div>
           <div class="bar" style="height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><i style="display:block;height:100%;width:${d.level >= d.maxLevel ? 100 : pct}%;background:var(--accent)"></i></div>
           <div class="grid3 mt"><div class="stat"><div class="eyebrow">Missions</div><div class="v">${d.done}</div></div><div class="stat"><div class="eyebrow">Gagné</div><div class="v">${money(d.earned)}</div></div><div class="stat"><div class="eyebrow">XP</div><div class="v">${d.xp}</div></div></div></div>
         <div class="card hint" style="line-height:1.7">${grades}</div>
-        ${d.active ? `<div class="row">${chip('Activité en cours', 'ok')}</div><button class="danger" data-a="actStop">Terminer l'activité</button>` : `<button class="primary" data-a="actStart">${ic('route', 15)} Commencer l'activité</button>`}` });
+        ${d.active ? `<div class="row">${chip('Activité en cours', 'ok')}</div><button class="danger" data-a="actStop">Terminer l'activité</button>` : `<button class="primary" data-a="actStart">${ic('route', 15)} Commencer l'activité</button>`}
+        ${this.achCard(d)}` });
   },
 
   renderMissions() {
@@ -2965,6 +2978,7 @@ const Runtime = {
       case 'ringYes': return rpc('ringAnswer', d.ringer, d.propId, true);
       case 'ringNo': return rpc('ringAnswer', d.ringer, d.propId, false);
       /* immobilier : porte */
+      case 'achToggle': this.achAll = !this.achAll; return this.render();
       case 'actStart': { const r = await rpc('activity:start', pid); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }
       case 'actStop': return rpc('activity:stop', pid);
       case 'missionStart': { const r = await rpc('missions:start', pid, el.dataset.id); if (!r || !r.ok) toast((r && r.error) || 'Erreur', 'err'); return; }

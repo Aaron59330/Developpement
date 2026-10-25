@@ -171,3 +171,8 @@ AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     AJ.Cleanup()
 end)
+
+-- Succès débloqué : petit son de récompense (le message est affiché par la notification serveur)
+RegisterNetEvent('aj:client:achievement', function()
+    PlaySoundFrontend(-1, 'RANK_UP', 'HUD_AWARDS', true)
+end)

@@ -16,6 +16,39 @@ Config.Act.XP = {
     VipPayBonus   = { [1] = 5, [2] = 10, [3] = 15 },   -- % de paie en plus selon le VIP (pickax_core)
 }
 
+-- Titres affichés selon le niveau (le plus haut niveau atteint s'applique)
+Config.Act.XP.Titles = { [1] = 'Débutant', [3] = 'Apprenti', [5] = 'Confirmé', [8] = 'Professionnel', [12] = 'Expert', [16] = 'Maître', [20] = 'Légende' }
+
+-- ─────────────────────────────── Succès ───────────────────────────────
+-- job = clé du métier actif (garbage, towing, carwash, trucker, farmer, firefighter, train) ou '*' (tous métiers confondus)
+-- stat : 'done' (missions) · 'earned' (argent gagné) · 'level' (niveau du métier) ; pour '*' : 'done' · 'earned' · 'jobs' (métiers essayés) · 'levels' (métiers au niveau `level` ou plus)
+-- reward : money (versé sur Config.Act.Account) · xp (ajouté au métier, ignoré pour '*')
+Config.Act.Achievements = {
+    { id = 'first_mission', job = '*', stat = 'done',   target = 1,      label = 'Premier pas',          desc = 'Termine ta toute première mission',                 reward = { money = 150 } },
+    { id = 'ten_missions',  job = '*', stat = 'done',   target = 25,     label = 'Bosseur',              desc = 'Termine 25 missions, tous métiers confondus',       reward = { money = 500 } },
+    { id = 'hundred',       job = '*', stat = 'done',   target = 150,    label = 'Infatigable',          desc = 'Termine 150 missions, tous métiers confondus',      reward = { money = 2500 } },
+    { id = 'rich',          job = '*', stat = 'earned', target = 50000,  label = 'Argent honnête',       desc = 'Gagne 50 000 $ avec les métiers actifs',            reward = { money = 1500 } },
+    { id = 'tycoon',        job = '*', stat = 'earned', target = 250000, label = 'Magnat du travail',    desc = 'Gagne 250 000 $ avec les métiers actifs',           reward = { money = 7500 } },
+    { id = 'tryall',        job = '*', stat = 'jobs',   target = 4,      label = 'Touche-à-tout',        desc = 'Essaie 4 métiers actifs différents',                reward = { money = 1000 } },
+    { id = 'polyvalent',    job = '*', stat = 'levels', target = 3, level = 5, label = 'Polyvalent',     desc = 'Atteins le niveau 5 dans 3 métiers',                reward = { money = 3000 } },
+}
+-- Succès propres à chaque métier (générés : missions 10 / 50 / 200 et niveaux 5 / 10 / 20)
+do
+    local tiers = { { 10, 'Novice', 300 }, { 50, 'Habitué', 1200 }, { 200, 'Vétéran', 5000 } }
+    local lvls  = { { 5, 'Confirmé', 400 }, { 10, 'Expert', 1500 }, { 20, 'Légende', 6000 } }
+    local names = { garbage = 'des poubelles', towing = 'du dépannage', carwash = 'du lavage', trucker = 'du camion', farmer = 'de la ferme', firefighter = 'du feu', train = 'du rail' }
+    for key, nm in pairs(names) do
+        for _, t in ipairs(tiers) do
+            Config.Act.Achievements[#Config.Act.Achievements + 1] = { id = key .. '_done_' .. t[1], job = key, stat = 'done', target = t[1],
+                label = t[2] .. ' ' .. nm, desc = ('Termine %d missions'):format(t[1]), reward = { money = t[3], xp = t[1] } }
+        end
+        for _, l in ipairs(lvls) do
+            Config.Act.Achievements[#Config.Act.Achievements + 1] = { id = key .. '_lvl_' .. l[1], job = key, stat = 'level', target = l[1],
+                label = l[2] .. ' ' .. nm, desc = ('Atteins le niveau %d'):format(l[1]), reward = { money = l[3] } }
+        end
+    end
+end
+
 -- ─────────────────────────────── Les métiers ───────────────────────────────
 -- Les métiers se CRÉENT DANS LE JOB BUILDER (/jobbuilder → nouveau job → type Éboueur, Dépanneur, Laveur auto, Camionneur, Fermier, Pompier ou
 -- Conducteur de train) : grades, salaires, société, vestiaire, coffre, boss, service (F6). Ici : seulement le gameplay de chaque activité.
