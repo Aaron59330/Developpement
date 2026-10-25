@@ -132,3 +132,7 @@ body.lux input[type=checkbox]:checked { background: var(--lx-a); border-color: v
 body.lux input[type=checkbox]:checked::after { border-color: var(--on-accent, #1a1206); }
 body.lux .nav-item .count:empty { display: none; }
 body.lux .keyhint { white-space: nowrap; letter-spacing: .06em; font-size: 9.5px; }
+
+/* logo du serveur (pickax_core → ServerLogo) en haut du menu de gauche, à la place du nom et du compteur */
+body.lux .profile.logo-only { justify-content: center; padding: 8px 6px 16px; }
+body.lux .profile.logo-only .plogo { width: 100%; height: 88px; object-fit: contain; filter: drop-shadow(0 4px 18px rgba(var(--accent-rgb), .35)); }
