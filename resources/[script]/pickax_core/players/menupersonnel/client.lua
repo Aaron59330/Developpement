@@ -271,6 +271,7 @@ local function MenuCommands()
 	if boutique then list[#list + 1] = { boutique, "Ouvrir la boutique" } end
 	list[#list + 1] = { "phone", "Ouvrir le téléphone" }
 	list[#list + 1] = { "decorer", "Meubles et laboratoire (dans sa propriété)" }
+	if GetResourceState('pickax_auction') == 'started' then list[#list + 1] = { "encheres", "Hôtel des ventes : vendre et enchérir entre joueurs" } end
 	if GetResourceState('pickax_keybinds') == 'started' then list[#list + 1] = { "touches", "Voir tes touches réelles et les conflits" } end
 	if GetResourceState('pickax_tutorial') == 'started' then list[#list + 1] = { "tutoriel", "Revoir le tutoriel d'arrivée" } end
 	return list
