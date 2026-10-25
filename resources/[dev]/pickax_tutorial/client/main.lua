@@ -13,6 +13,17 @@ local function show()
     if not data then return end
     open = true
     SetNuiFocus(true, true)
+    -- touches réelles du joueur (pickax_keybinds), sinon la touche par défaut écrite dans la config
+    if GetResourceState('pickax_keybinds') == 'started' then
+        for _, st in ipairs(data.steps or {}) do
+            for _, k in ipairs(st.keys or {}) do
+                if k[3] then
+                    local ok, real = pcall(function() return exports.pickax_keybinds:GetKey(k[3]) end)
+                    if ok and real then k[1] = real end
+                end
+            end
+        end
+    end
     data.action = 'open'
     SendNUIMessage(data)
 end

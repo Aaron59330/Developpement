@@ -13,13 +13,15 @@ Config.Reward = {
     items = {},                   -- ex. { { name = 'phone', count = 1 }, { name = 'water', count = 3 } }
 }
 
--- Étapes : icon (emoji), title, text, keys = { { 'F1', 'Téléphone' } }, bullets = { '...' }
+-- Étapes : icon (emoji), title, text, keys = { { 'F1', 'Téléphone', 'phone' } }, bullets = { '...' }
+-- Pour une touche, le 3e élément est la commande du raccourci : si pickax_keybinds tourne, la touche réellement attribuée au joueur remplace la touche par défaut.
 -- Modifie librement les textes ; ajoute ou retire des étapes.
 Config.Steps = {
     { icon = '👋', title = 'Bienvenue sur {server}', text = 'Ce guide rapide te montre l\'essentiel pour bien démarrer. Il ne dure qu\'une minute et tu pourras le rouvrir avec /{command}.',
       bullets = { 'Roleplay sérieux : joue ton personnage, pas toi', 'Le staff est là pour t\'aider : demande en cas de doute' } },
     { icon = '⌨️', title = 'Les touches à connaître', text = 'Toutes les touches se modifient dans Paramètres FiveM → Touches.',
-      keys = { { 'F1', 'Téléphone' }, { 'F6', 'Menu de ton métier (en service)' }, { 'F7', 'Menu de ton gang' }, { 'F10', 'Meubles / laboratoire (dans ta propriété)' }, { 'M', 'Menu pause et carte' } } },
+      keys = { { 'F1', 'Téléphone', 'phone' }, { 'F6', 'Menu de ton métier (en service)', 'jobmenu' }, { 'F7', 'Menu de ton gang', 'gangmenu' }, { 'F10', 'Meubles / laboratoire (dans ta propriété)', 'decorer' }, { 'K', 'Menu des emotes', 'emoteui' }, { 'M', 'Menu pause et carte' } },
+      bullets = { 'Les touches affichées sont celles de TON jeu (si pickax_keybinds est démarré) — /touches pour tout voir' } },
     { icon = '📱', title = 'Ton téléphone', text = 'Contacts, messages, banque, annonces, GPS : tout est dans ton téléphone. Pense à le recharger : la batterie baisse quand il est sorti.',
       bullets = { 'Batterie externe ou recharge dans un véhicule', 'Mode avion et ne pas déranger dans les réglages' } },
     { icon = '💼', title = 'Trouver un métier', text = 'Rends-toi au centre pour l\'emploi ou aux entreprises pour postuler. Les métiers actifs (poubelles, dépannage, lavage, routier, fermier, pompier, train) sont accessibles dès le départ.',
