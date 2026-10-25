@@ -480,7 +480,20 @@ window.addEventListener('resize', () => OS.fit());
 
 /* ───── événements serveur communs ───── */
 Bus.on('push:notify', d => { const def = Apps.get(d.app); OS.notify({ app: d.app, title: d.title, body: d.body, icon: def ? def.icon : 'bell' }); });
-Bus.on('push:battery', d => { S.battery = d.level; S.charging = !!d.charging; OS.drawStatus(); if (d.level === 20 || d.level === 10 || d.level === 5) OS.notify({ app: 'settings', title: 'Batterie faible', body: d.level + ' % restants', icon: 'lightning' }); });
+// Alertes batterie : une seule fois par seuil (20 / 10 / 5 / 0 %), seulement quand le niveau baisse ; le seuil se réarme dès que la batterie remonte au-dessus
+const BATT_STEPS = [20, 10, 5, 0];
+Bus.on('push:battery', d => {
+  const prev = S.battery; S.battery = d.level; S.charging = !!d.charging; OS.drawStatus();
+  S.battWarn = S.battWarn || {};
+  let fire = null;   // seuil le plus bas franchi (une seule alerte même si plusieurs seuils sont passés d'un coup)
+  BATT_STEPS.forEach(t => {
+    if (d.level > t) { S.battWarn[t] = false; return; }
+    if (!S.battWarn[t]) { S.battWarn[t] = true; if (!d.charging && prev > d.level) fire = t; }
+  });
+  if (fire === null) return;
+  OS.notify(d.level <= 0 ? { app: 'settings', title: 'Plus de batterie', body: 'Ton téléphone n\'a plus de batterie. Recharge-le (véhicule ou batterie externe).', icon: 'lightning' }
+    : { app: 'settings', title: 'Batterie faible', body: d.level + ' % restants', icon: 'lightning' });
+});
 Bus.on('push:reset', () => { Toast('Téléphone réinitialisé'); post('close'); });
 Bus.on('push:mail', d => { S.unreadMail++; OS.setBadge('mail', S.unreadMail); OS.notify({ app: 'mail', title: d.from, body: d.subject, icon: 'mail' }); });
 Bus.on('push:airRequest', d => {

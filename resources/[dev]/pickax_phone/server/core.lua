@@ -381,7 +381,7 @@ CreateThread(function()
         Wait(Config.Battery.drainEvery * 1000)
         for id, src in pairs(Aura.src) do
             local p = Aura.phones[id]
-            if p and p.battery > 0 and not p.charging then
+            if p and p.out and p.battery > 0 and not p.charging then   -- la batterie ne se vide que téléphone sorti (ouvert ou en appel)
                 p.battery = math.max(0, p.battery - 1)
                 TriggerClientEvent('aura:push', src, 'battery', { level = p.battery, charging = false })
             end
@@ -403,6 +403,11 @@ CreateThread(function()
 end)
 CreateThread(function() -- sauvegarde périodique
     while true do Wait(300000) for id in pairs(Aura.src) do Aura.SaveSettings(id) end end
+end)
+
+RegisterNetEvent('aura:setOut', function(state)
+    local id = Aura.ident[source]; local p = id and Aura.phones[id]
+    if p then p.out = state == true end
 end)
 
 RegisterNetEvent('aura:setCharging', function(state)

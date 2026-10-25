@@ -102,6 +102,17 @@ RegisterNUICallback('dispatchGps', function(d, cb)
     cb(c and 1 or 0)
 end)
 
+-- ═════════ batterie : consommée uniquement téléphone sorti (ouvert ou en appel) ═════════
+CreateThread(function()
+    if not Config.Battery.enabled then return end
+    local out = false
+    while true do
+        Wait(1000)
+        local now = (Phone.open or Phone.inCall) and true or false
+        if now ~= out then out = now; TriggerServerEvent('aura:setOut', out) end
+    end
+end)
+
 -- ═════════ recharge en véhicule ═════════
 CreateThread(function()
     if not (Config.Battery.enabled and Config.Battery.chargeInVehicle) then return end
