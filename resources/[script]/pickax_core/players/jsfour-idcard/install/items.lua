@@ -1,6 +1,7 @@
--- À copier dans ox_inventory/data/items.lua
+-- À copier dans ox_inventory/data/items.lua : recopier uniquement les objets entre les accolades du « return » (pas le « return { » ni la dernière « } »).
 -- Les images sont dans jsfour-idcard/install/images/ -> à copier dans ox_inventory/web/images/
-
+-- (Fichier volontairement valide en Lua : le traitement escrow de FiveM refuse un .lua qui ne compile pas.)
+return {
 ['id_card'] = {
 	label = "Carte d'identité",
 	weight = 10,
@@ -27,3 +28,4 @@
 	description = "Permis de port d'arme",
 	server = { export = 'pickax_core.weapon_license' }
 },
+}
