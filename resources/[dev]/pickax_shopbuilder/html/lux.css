@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   Style « Noir & couleur du serveur » (inspiré des interfaces premium : fond noir chaud, filets fins, pastilles pleines, boutons pilules).
+   Toute la couleur vient de --accent-rgb (= Config.AccentColor du core, ou la couleur propre de la boutique). Retirer la classe « lux » du <body> pour revenir à l'ancien style.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+body.lux {
+  --lx-a: rgb(var(--accent-rgb));
+  --lx-a-hi: color-mix(in srgb, rgb(var(--accent-rgb)) 72%, #fff);
+  --lx-a-lo: color-mix(in srgb, rgb(var(--accent-rgb)) 78%, #000);
+  --lx-bg: #0a0908;
+  --lx-panel: #0e0d0b;
+  --lx-card: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+  --lx-line: rgba(var(--accent-rgb), .22);
+  --lx-line-2: rgba(var(--accent-rgb), .5);
+  --lx-font: 'Montserrat', 'Poppins', 'Segoe UI', 'Inter', system-ui, sans-serif;
+  --bg: var(--lx-bg); --surface: rgba(255, 255, 255, .03); --surface-2: rgba(255, 255, 255, .06);
+  --line: rgba(255, 255, 255, .07); --line-2: rgba(var(--accent-rgb), .28);
+  --text: #f6f3ee; --text-2: #cfc9bf; --muted: #8a8478;
+  --font: var(--lx-font);
+  font-family: var(--lx-font);
+}
+/* fond du jeu légèrement assombri et flouté derrière l'interface */
+body.lux #root:not(.hidden) { background: radial-gradient(ellipse at 50% 40%, rgba(0, 0, 0, .15), rgba(0, 0, 0, .55)); backdrop-filter: blur(4px) saturate(.9); }
+
+/* ── Coque ── */
+body.lux .shell, body.lux .panel {
+  background: radial-gradient(900px 420px at 0 0, rgba(var(--accent-rgb), .09), transparent 70%), radial-gradient(700px 360px at 100% 100%, rgba(var(--accent-rgb), .05), transparent 70%), var(--lx-bg);
+  border: 1px solid var(--lx-line-2); border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 40px 120px rgba(0, 0, 0, .8), 0 0 70px rgba(var(--accent-rgb), .10), inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+body.lux .side { background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .55)); border-right: 1px solid var(--lx-line); width: 262px; }
+body.lux .profile { background: transparent; border: 0; padding: 6px 6px 14px; border-radius: 0; border-bottom: 1px solid var(--lx-line); margin-bottom: 6px; }
+body.lux .avatar { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--lx-line-2); background: linear-gradient(145deg, rgba(var(--accent-rgb), .28), rgba(var(--accent-rgb), .06)); color: var(--lx-a); font-weight: 800; box-shadow: 0 0 22px rgba(var(--accent-rgb), .18); }
+body.lux .profile b { text-transform: uppercase; letter-spacing: .1em; font-size: 12.5px; font-weight: 800; }
+body.lux .profile small { text-transform: uppercase; letter-spacing: .14em; font-size: 9.5px; color: var(--muted); }
+body.lux .nav-label { display: flex; align-items: center; gap: 8px; color: var(--lx-a); opacity: .85; font-size: 9.5px; letter-spacing: .22em; font-weight: 800; padding: 18px 10px 8px; }
+body.lux .nav-label::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: var(--lx-a); }
+body.lux .nav-item { height: 42px; border-radius: 12px; font-weight: 600; font-size: 13px; color: var(--text-2); }
+body.lux .nav-item:hover { background: rgba(var(--accent-rgb), .06); }
+body.lux .nav-item.active { color: #fff; background: linear-gradient(90deg, rgba(var(--accent-rgb), .18), rgba(var(--accent-rgb), .04)); border-color: var(--lx-line-2); box-shadow: 0 0 24px rgba(var(--accent-rgb), .10), inset 3px 0 0 var(--lx-a); }
+body.lux .nav-item.active svg { color: var(--lx-a); }
+body.lux .nav-item .count { font-size: 10.5px; font-weight: 700; color: var(--lx-a); background: rgba(var(--accent-rgb), .12); border-radius: 999px; padding: 2px 8px; }
+
+/* ── En-tête ── */
+body.lux .head { border-bottom: 1px solid var(--lx-line); padding: 16px 26px; background: linear-gradient(180deg, rgba(var(--accent-rgb), .05), transparent); }
+body.lux .head h1 { font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+body.lux .head p { text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: var(--muted); margin-top: 4px; }
+body.lux .tile { border-radius: 12px; border: 1px solid var(--lx-line-2); background: linear-gradient(145deg, rgba(var(--accent-rgb), .20), rgba(var(--accent-rgb), .04)); color: var(--lx-a); box-shadow: 0 0 20px rgba(var(--accent-rgb), .10); }
+body.lux .tile svg { color: var(--lx-a); }
+/* bouton fermer façon « touche clavier » : [ ✕  ÉCHAP ] */
+body.lux .head .acts button[data-a="close"] { width: auto; padding: 0 12px; gap: 8px; height: 34px; border-radius: 9px; background: rgba(0, 0, 0, .4); border-color: var(--lx-line); }
+body.lux .head .acts button[data-a="close"]::after { content: 'ÉCHAP'; font-size: 9.5px; letter-spacing: .14em; font-weight: 800; color: var(--muted); }
+body.lux .head .acts button[data-a="close"]:hover::after { color: var(--lx-a); }
+
+/* ── Onglets : pilules détachées ── */
+body.lux .seg { background: transparent; border: 0; padding: 0; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+body.lux .seg button { height: 36px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--lx-line); background: rgba(0, 0, 0, .45); color: var(--text-2); font-weight: 700; font-size: 12px; letter-spacing: .04em; }
+body.lux .seg button:hover { border-color: var(--lx-line-2); color: #fff; background: rgba(var(--accent-rgb), .06); }
+body.lux .seg button.active { background: linear-gradient(180deg, var(--lx-a-hi), var(--lx-a)); color: var(--on-accent, #1a1206); border-color: transparent; box-shadow: 0 6px 22px -4px rgba(var(--accent-rgb), .55); }
+
+/* ── Cartes & lignes ── */
+body.lux .card, body.lux .stat, body.lux .cart, body.lux .tpl { background: var(--lx-card); border: 1px solid var(--lx-line); border-radius: 18px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03); }
+body.lux .card-h .t { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; }
+body.lux .card-h .t svg { color: var(--lx-a); }
+body.lux .eyebrow { color: var(--lx-a); letter-spacing: .2em; font-weight: 800; }
+body.lux .eyebrow::before { background: var(--lx-a); width: 14px; }
+body.lux .stat .v { font-size: 26px; font-weight: 800; letter-spacing: -.01em; }
+body.lux .item, body.lux .pt, body.lux .irow, body.lux .cline, body.lux .cat-row { background: rgba(255, 255, 255, .025); border: 1px solid rgba(255, 255, 255, .07); border-radius: 15px; }
+body.lux .item.click:hover, body.lux .pt:hover, body.lux .tpl:hover { border-color: var(--lx-line-2); background: rgba(var(--accent-rgb), .06); box-shadow: 0 0 26px rgba(var(--accent-rgb), .08); }
+body.lux .pt.active, body.lux .tpl.sel { border-color: var(--lx-line-2); background: rgba(var(--accent-rgb), .10); box-shadow: 0 0 26px rgba(var(--accent-rgb), .12); }
+body.lux .item .price, body.lux .item .grow b { letter-spacing: .01em; }
+body.lux .item .price { color: var(--lx-a); font-weight: 800; }
+body.lux .irow:focus-within { border-color: var(--lx-line-2); }
+body.lux .kv span:first-child { text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; font-weight: 700; }
+body.lux .money, body.lux .big { color: #fff; }
+
+/* ── Pastilles : étiquettes pleines (façon « LÉGAL / ILLÉGAL ») ── */
+body.lux .chip { border-radius: 999px; font-weight: 800; letter-spacing: .1em; font-size: 9.5px; padding: 5px 12px; }
+body.lux .chip.info { background: linear-gradient(180deg, var(--lx-a-hi), var(--lx-a)); color: var(--on-accent, #1a1206); border-color: transparent; }
+body.lux .chip.info::before { background: var(--on-accent, #1a1206); opacity: .55; }
+body.lux .chip.ok { background: rgba(74, 222, 128, .12); }
+body.lux .chip.mute { background: rgba(255, 255, 255, .05); }
+
+/* ── Boutons ── */
+body.lux button { border-radius: 11px; border-color: rgba(255, 255, 255, .12); background: rgba(0, 0, 0, .35); font-weight: 700; font-size: 12.5px; letter-spacing: .02em; }
+body.lux button:hover { border-color: var(--lx-line-2); background: rgba(var(--accent-rgb), .08); }
+body.lux button.primary { border-radius: 999px; padding: 0 22px; border: 0; background: linear-gradient(180deg, var(--lx-a-hi), var(--lx-a) 55%, var(--lx-a-lo)); color: var(--on-accent, #1a1206); font-weight: 800; letter-spacing: .03em; box-shadow: 0 10px 28px -8px rgba(var(--accent-rgb), .7), inset 0 1px 0 rgba(255, 255, 255, .35); }
+body.lux button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+body.lux button.primary.sm { height: 30px; padding: 0 16px; }
+body.lux button.danger { border-radius: 11px; }
+body.lux button.icon { border-radius: 10px; background: rgba(0, 0, 0, .4); }
+
+/* ── Champs ── */
+body.lux input, body.lux select, body.lux textarea, body.lux .searchbox { background: rgba(0, 0, 0, .45); border: 1px solid rgba(var(--accent-rgb), .16); border-radius: 11px; }
+body.lux input:focus, body.lux select:focus, body.lux textarea:focus, body.lux .searchbox:focus-within { border-color: var(--lx-a); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .14); }
+body.lux label.f > span, body.lux .lbl { letter-spacing: .16em; font-weight: 800; color: var(--muted); }
+body.lux input[type=checkbox]:checked { background: var(--lx-a); border-color: var(--lx-a); }
+
+/* ── Boutique côté joueur ── */
+body.lux .prod-grid { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 14px; }
+body.lux .prod { background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .012)); border: 1px solid rgba(var(--accent-rgb), .16); border-radius: 18px; padding: 12px 12px 14px; gap: 8px; }
+body.lux .prod:hover { border-color: var(--lx-line-2); box-shadow: 0 0 30px rgba(var(--accent-rgb), .14); transform: translateY(-2px); }
+body.lux .prod.incart { border-color: var(--lx-a); background: linear-gradient(180deg, rgba(var(--accent-rgb), .13), rgba(var(--accent-rgb), .03)); box-shadow: 0 0 34px rgba(var(--accent-rgb), .18); }
+body.lux .prod .img { height: 100px; border-radius: 13px; background: radial-gradient(circle at 50% 38%, rgba(var(--accent-rgb), .14), rgba(0, 0, 0, .55) 75%); border: 1px solid rgba(255, 255, 255, .05); }
+body.lux .prod b { font-size: 12.5px; font-weight: 700; letter-spacing: .01em; }
+/* prix = pilule pleine comme le bouton « Configurer » */
+body.lux .prod .pmeta:first-of-type { margin-top: 2px; }
+body.lux .prod .price { display: inline-flex; align-items: center; padding: 5px 13px; border-radius: 999px; font-size: 13px; font-weight: 800; background: linear-gradient(180deg, var(--lx-a-hi), var(--lx-a)); color: var(--on-accent, #1a1206); box-shadow: 0 6px 18px -6px rgba(var(--accent-rgb), .7); }
+body.lux .prod.out .price { background: rgba(255, 255, 255, .1); color: var(--muted); box-shadow: none; }
+body.lux .badge { border-radius: 999px; font-weight: 800; letter-spacing: .06em; background: var(--lx-a); color: var(--on-accent, #1a1206); box-shadow: 0 4px 14px -2px rgba(var(--accent-rgb), .7); }
+body.lux .badge.cnt { background: #fff; color: #111; }
+body.lux .cart { padding: 18px; }
+body.lux .cart-foot { border-top: 1px solid var(--lx-line); }
+body.lux .cart-foot .money { color: var(--lx-a); }
+body.lux .cart-foot button.primary.wide { height: 46px; font-size: 14px; }
+body.lux .cline { border-radius: 13px; }
+body.lux .paybtn, body.lux .paybox { background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .08); border-radius: 13px; }
+body.lux .paybtn.on { border-color: var(--lx-a); background: rgba(var(--accent-rgb), .10); box-shadow: 0 0 22px rgba(var(--accent-rgb), .12); }
+body.lux kbd { border-radius: 6px; background: rgba(0, 0, 0, .55); border: 1px solid var(--lx-line-2); color: var(--lx-a); font-weight: 800; font-size: 10px; letter-spacing: .08em; box-shadow: 0 2px 0 rgba(var(--accent-rgb), .25); }
+body.lux .keyhint { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+
+/* ── Fenêtres, confirmations, notifications ── */
+body.lux #confirm .box, body.lux .mbox { background: #0e0d0b; border: 1px solid var(--lx-line-2); border-radius: 20px; box-shadow: 0 30px 100px rgba(0, 0, 0, .85), 0 0 50px rgba(var(--accent-rgb), .10); }
+body.lux #confirm .box h2, body.lux .mbox-h h1 { text-transform: uppercase; letter-spacing: .08em; font-size: 15px; font-weight: 800; }
+body.lux .toast { background: #0e0d0b; border: 1px solid var(--lx-line-2); border-radius: 13px; font-weight: 600; }
+body.lux #placement { background: rgba(10, 9, 8, .95); border: 1px solid var(--lx-line-2); border-radius: 18px; }
+body.lux .body::-webkit-scrollbar-thumb, body.lux .nav::-webkit-scrollbar-thumb, body.lux .prod-grid::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb), .28); }
+
+/* ── Retouches ── */
+body.lux .searchbox input { border: 0; background: transparent; box-shadow: none; border-radius: 0; }
+body.lux input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; padding: 0; border-radius: 6px; background: rgba(0, 0, 0, .5); border: 1px solid rgba(var(--accent-rgb), .4); }
+body.lux input[type=checkbox]:checked { background: var(--lx-a); border-color: var(--lx-a); }
+body.lux input[type=checkbox]:checked::after { border-color: var(--on-accent, #1a1206); }
+body.lux .nav-item .count:empty { display: none; }
+body.lux .keyhint { white-space: nowrap; letter-spacing: .06em; font-size: 9.5px; }
