@@ -27,18 +27,6 @@ body.lux .shell, body.lux .panel {
   border: 1px solid var(--lx-line-2); border-radius: 22px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 40px 120px rgba(0, 0, 0, .8), 0 0 70px rgba(var(--accent-rgb), .10), inset 0 1px 0 rgba(255, 255, 255, .04);
 }
-body.lux .side { background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .55)); border-right: 1px solid var(--lx-line); width: 262px; }
-body.lux .profile { background: transparent; border: 0; padding: 6px 6px 14px; border-radius: 0; border-bottom: 1px solid var(--lx-line); margin-bottom: 6px; }
-body.lux .avatar { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--lx-line-2); background: linear-gradient(145deg, rgba(var(--accent-rgb), .28), rgba(var(--accent-rgb), .06)); color: var(--lx-a); font-weight: 800; box-shadow: 0 0 22px rgba(var(--accent-rgb), .18); }
-body.lux .profile b { text-transform: uppercase; letter-spacing: .1em; font-size: 12.5px; font-weight: 800; }
-body.lux .profile small { text-transform: uppercase; letter-spacing: .14em; font-size: 9.5px; color: var(--muted); }
-body.lux .nav-label { display: flex; align-items: center; gap: 8px; color: var(--lx-a); opacity: .85; font-size: 9.5px; letter-spacing: .22em; font-weight: 800; padding: 18px 10px 8px; }
-body.lux .nav-label::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: var(--lx-a); }
-body.lux .nav-item { height: 42px; border-radius: 12px; font-weight: 600; font-size: 13px; color: var(--text-2); }
-body.lux .nav-item:hover { background: rgba(var(--accent-rgb), .06); }
-body.lux .nav-item.active { color: #fff; background: linear-gradient(90deg, rgba(var(--accent-rgb), .18), rgba(var(--accent-rgb), .04)); border-color: var(--lx-line-2); box-shadow: 0 0 24px rgba(var(--accent-rgb), .10), inset 3px 0 0 var(--lx-a); }
-body.lux .nav-item.active svg { color: var(--lx-a); }
-body.lux .nav-item .count { font-size: 10.5px; font-weight: 700; color: var(--lx-a); background: rgba(var(--accent-rgb), .12); border-radius: 999px; padding: 2px 8px; }
 
 /* ── En-tête ── */
 body.lux .head { border-bottom: 1px solid var(--lx-line); padding: 16px 26px; background: linear-gradient(180deg, rgba(var(--accent-rgb), .05), transparent); }
@@ -130,9 +118,6 @@ body.lux .searchbox input { border: 0; background: transparent; box-shadow: none
 body.lux input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; padding: 0; border-radius: 6px; background: rgba(0, 0, 0, .5); border: 1px solid rgba(var(--accent-rgb), .4); }
 body.lux input[type=checkbox]:checked { background: var(--lx-a); border-color: var(--lx-a); }
 body.lux input[type=checkbox]:checked::after { border-color: var(--on-accent, #1a1206); }
-body.lux .nav-item .count:empty { display: none; }
 body.lux .keyhint { white-space: nowrap; letter-spacing: .06em; font-size: 9.5px; }
 
-/* logo du serveur (pickax_core → ServerLogo) en haut du menu de gauche : petit, sobre */
-body.lux .profile.logo-only { justify-content: center; padding: 10px 6px 14px; }
-body.lux .profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; filter: none; opacity: .96; }
+/* Menu de gauche (profil, rubriques) : ancien style conservé (règles de style.css). Le logo est stylé dans style.css. */
