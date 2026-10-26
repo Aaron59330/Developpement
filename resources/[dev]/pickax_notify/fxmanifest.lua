@@ -11,6 +11,7 @@ ui_page 'html/index.html'
 files {
     'html/index.html',
     'html/style.css',
+    'html/arcade.css',
     'html/app.js'
 }
 

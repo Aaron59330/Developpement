@@ -1,0 +1,10 @@
+/* Design « Arcade » de la boussole. Retirer le <link> d'arcade.css dans index.html (ou tools/design/design.sh ancien) pour revenir à l'ancien rendu. */
+.strip { border-radius: 3px; background: rgba(18,19,24,.9); border: 1.5px solid rgba(var(--acc-rgb), .55); box-shadow: 0 0 16px rgba(var(--acc-rgb), .2); }
+.t span { font-weight: 800; letter-spacing: .14em; color: rgba(255,255,255,.6); }
+.t.c span { font-style: italic; }
+.t.n span { color: var(--acc); }
+.caret { border-top-color: var(--acc); }
+.deg { font-style: italic; letter-spacing: -.01em; }
+.where { font-style: italic; text-transform: uppercase; letter-spacing: .12em; font-size: 11px; display: inline-block; padding: 2px 12px; background: rgba(18,19,24,.88); border-left: 2px solid var(--acc); text-shadow: none; transform: skewX(-8deg); }
+body.compact .strip { border-radius: 3px; }
+body.compact .where { font-size: 9.5px; padding: 1px 8px; }

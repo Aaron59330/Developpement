@@ -1,0 +1,20 @@
+/* Design « Arcade » des cartes serveur / métier / argent. Retirer le <link> d'arcade.css dans index.html (ou tools/design/design.sh ancien) pour revenir à l'ancien rendu. */
+:root { --ar: var(--pk-accent-rgb, 253,194,125); --bg: rgba(18, 19, 24, .9); }
+.card {
+    border-radius: 3px; --r: 3px;
+    background: radial-gradient(220px 90px at 0 0, rgba(var(--ar), .13), transparent 70%), var(--bg);
+    border: 1.5px solid rgba(var(--ar), .55);
+    box-shadow: 0 0 16px rgba(var(--ar), .2), 0 8px 24px rgba(0, 0, 0, .45);
+}
+.card::after { right: -1.5px; width: 5px; height: 100%; top: 0; transform: none; border-radius: 0; background: var(--main); box-shadow: 0 0 12px var(--main); clip-path: polygon(40% 0, 100% 0, 100% 100%, 0 100%); }
+.server { font-style: italic; text-transform: uppercase; letter-spacing: .02em; }
+.discord { text-transform: uppercase; letter-spacing: .08em; }
+.jobicon { border-radius: 2px; transform: skewX(-8deg); }
+.jobicon svg { transform: skewX(8deg); }
+.jobname { font-style: italic; text-transform: uppercase; letter-spacing: .01em; }
+.tag { border-radius: 0; transform: skewX(-10deg); background: var(--main); color: #15110a; font-weight: 600; }
+.tag.on { background: var(--ok); color: #0b1a12; }
+.row .lbl { letter-spacing: .14em; }
+.row .state { font-style: italic; font-weight: 600; letter-spacing: -.01em; }
+.row { border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.row:last-child { border-bottom: 0; }

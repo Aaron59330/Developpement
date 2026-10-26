@@ -11,4 +11,4 @@ client_scripts { 'pk_sound.lua', 'client.lua' }
 
 ui_page 'html/index.html'
 
-files { 'html/index.html', 'html/style.css', 'html/script.js', 'html/pk-snd.js', 'html/fonts/*.woff2' }
+files { 'html/index.html', 'html/style.css', 'html/arcade.css', 'html/script.js', 'html/pk-snd.js', 'html/fonts/*.woff2' }

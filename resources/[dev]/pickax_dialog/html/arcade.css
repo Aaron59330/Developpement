@@ -1,0 +1,12 @@
+/* Design « Arcade » du dialogue PNJ. Retirer le <link> d'arcade.css dans index.html (ou tools/design/design.sh ancien) pour revenir à l'ancien rendu. */
+.box { border-radius: 4px; border: 1.5px solid rgba(var(--acc-rgb), .6); background: radial-gradient(360px 140px at 0 0, rgba(var(--acc-rgb), .14), transparent 70%), rgba(18,19,24,.93); box-shadow: 0 0 24px rgba(var(--acc-rgb), .25), 0 26px 70px rgba(0,0,0,.6); }
+.box::before { left: 0; transform: none; width: 6px; height: 100%; border-radius: 0; background: var(--acc); box-shadow: 0 0 14px var(--acc); }
+.av { border-radius: 2px; transform: skewX(-8deg); background: var(--acc); color: #15110a; border: 0; box-shadow: 0 0 14px rgba(var(--acc-rgb), .5); }
+.av svg { transform: skewX(8deg); }
+.who b { font-style: italic; text-transform: uppercase; letter-spacing: .01em; color: var(--acc); font-size: 17px; }
+.who small { text-transform: uppercase; letter-spacing: .14em; font-size: 10px; font-weight: 700; }
+.btns button { border-radius: 0; transform: skewX(-10deg); text-transform: uppercase; font-style: italic; letter-spacing: .1em; font-size: 12px; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2); }
+.btns button > * { transform: skewX(10deg); }
+.btns button:hover { transform: skewX(-10deg) translateY(-2px); }
+.btns #ok { background: var(--acc); color: #15110a; border-color: var(--acc); box-shadow: 0 0 16px rgba(var(--acc-rgb), .5); }
+.btns kbd { border-radius: 2px; background: rgba(0,0,0,.35); color: inherit; font-style: normal; }

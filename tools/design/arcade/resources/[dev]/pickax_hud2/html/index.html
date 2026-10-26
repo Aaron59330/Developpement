@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="https://cfx-nui-pickax_theme/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickax HUD</title>
+    <link rel="stylesheet" href="css/css.css">
+    <link rel="stylesheet" href="css/arcade.css">
+</head>
+<body>
+    <div id="ui">
+        <div id="infos">
+            <!-- Serveur -->
+            <section class="card" id="serverCard">
+                <img class="logo" src="img/logo.png" alt="" data-pk-logo>
+                <div class="srv">
+                    <span class="server" id="servername" data-pk="short" data-pk-upper>BLUEBAY</span>
+                    <span class="discord" id="discord" data-pk="discord" data-pk-upper>DISCORD.GG/BLUEBAYRP</span>
+                </div>
+                <div class="chips">
+                    <span class="chip" title="Votre ID"><svg viewBox="0 0 24 24"><path d="M9.5 4L8 20M16 4l-1.5 16M4.5 9h16M3.5 15h16"></path></svg><b id="playerId">0</b></span>
+                    <span class="chip" title="Joueurs connectés"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"></circle><circle cx="17" cy="10" r="2.4"></circle><path d="M3 19c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4M15.5 14c3 0 5.5 1.7 5.5 4.6"></path></svg><b id="players">0</b></span>
+                </div>
+            </section>
+
+            <!-- Métier -->
+            <section class="card" id="jobCard">
+                <div class="jobicon" id="jobIcon"></div>
+                <div class="jobtxt">
+                    <span class="jobname" id="jobName">Chômeur</span>
+                    <span class="jobgrade" id="jobGrade">Sans emploi</span>
+                </div>
+                <span class="tag" id="jobTag">Civil</span>
+            </section>
+
+            <!-- Argent -->
+            <section class="card money" id="moneyCard">
+                <div class="row cash"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2"></rect><circle cx="12" cy="12" r="2.6"></circle><path d="M6.5 9.5v.01M17.5 14.5v.01"></path></svg></span><span class="lbl">Liquide</span><span class="state" id="money">0 $</span></div>
+                <div class="row black"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3.5l7.5 3v5.2c0 4.4-3.1 7.7-7.5 9-4.4-1.3-7.5-4.6-7.5-9V6.5z"></path><path d="M9.5 12h5M12 9.5v5"></path></svg></span><span class="lbl">Sale</span><span class="state" id="black_money">0 $</span></div>
+                <div class="row bank"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"></rect><path d="M3 10h18M7 15h4"></path></svg></span><span class="lbl">Banque</span><span class="state" id="bank">0 $</span></div>
+            </section>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

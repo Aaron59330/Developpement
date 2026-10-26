@@ -1,0 +1,36 @@
+/* Design « Arcade » du HUD (faim/soif, vie, bandeaux). Retirer la ligne <link> d'arcade.css dans index.html (ou lancer tools/design/design.sh ancien) pour revenir à l'ancien rendu. */
+:root { --ar: var(--pk-accent-rgb, 253,194,125); --ac: var(--pk-accent, #fdc27d); }
+.hud-container { gap: 6px; }
+.hud-element {
+    width: 44px; height: 44px; border-radius: 3px;
+    background: radial-gradient(60px 40px at 0 0, rgba(var(--ar), .14), transparent 70%), rgba(18, 19, 24, .88);
+    border: 1.5px solid rgba(var(--ar), .6);
+    box-shadow: 0 0 14px rgba(var(--ar), .25);
+    transform: skewX(-8deg);
+}
+.hud-circle { top: 2px; left: 2px; width: 36px; height: 36px; box-shadow: none; transform: skewX(8deg); }
+.hud-circle circle:first-child { stroke: rgba(255, 255, 255, .14); }
+.hud-circle .progress { filter: drop-shadow(0 0 3px rgba(var(--ar), .8)); }
+.hud-icon { transform: skewX(8deg); font-size: 13px; color: var(--ac); }
+
+.hh-bar {
+    height: 12px; border-radius: 0; transform: skewX(-14deg);
+    background: rgba(0, 0, 0, .6); border: 1px solid rgba(255, 255, 255, .16);
+}
+.hh-fill, .hh-ghost { border-radius: 0; }
+.hh-fill { box-shadow: 0 0 10px var(--hh-color); }
+.hh-icon { transform: translateY(-50%) skewX(14deg); left: 8px; }
+.hh-val { transform: translateY(-50%) skewX(14deg); font-style: italic; font-weight: 800; right: 10px; }
+.hh-armor { height: 3px; background: rgba(255, 255, 255, .12); }
+.hh-armor-fill { background: #9fb4d8; box-shadow: none; }
+
+.staff-bar {
+    border-radius: 3px; background: rgba(18, 19, 24, .9);
+    border: 1.5px solid rgba(var(--ar), .6); box-shadow: 0 0 18px rgba(var(--ar), .25);
+    text-transform: uppercase; font-style: italic; letter-spacing: .06em;
+}
+.staff-bar::before { display: none; }
+.safezone { border-radius: 3px; background: rgba(18, 19, 24, .9); }
+.safezone .sz-ico { border-radius: 3px; }
+.safezone .sz-ico::after { border-radius: 3px; }
+.safezone .sz-txt b { font-style: italic; }

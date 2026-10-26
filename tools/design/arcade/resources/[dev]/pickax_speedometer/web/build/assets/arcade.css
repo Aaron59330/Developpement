@@ -1,0 +1,6 @@
+/* Design « Arcade » du compteur de vitesse. Retirer le <link> d'arcade.css dans index.html (ou tools/design/design.sh ancien) pour revenir à l'ancien rendu. */
+.speedometer-container .speedometer-inside .arc-circle { filter: drop-shadow(0 0 .25vw rgba(var(--pk-accent-rgb, 253,194,125), .7)); }
+.speedometer-container .speedometer-inside .text .speed { font-style: italic; font-weight: 800; letter-spacing: -.04em; text-shadow: 0 0 .8vw rgba(var(--pk-accent-rgb, 253,194,125), .55); }
+.speedometer-container .speedometer-inside .text .kmh { font-style: italic; font-weight: 800; letter-spacing: .25em; text-transform: uppercase; color: var(--blue); }
+.speedometer-container .speedometer-icon img.active { filter: drop-shadow(0 0 .2vw var(--blue)); }
+.speedometer-container .fuel .fuel-icon { filter: drop-shadow(0 0 .2vw var(--blue)); }

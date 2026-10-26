@@ -14,5 +14,6 @@ ui_page 'index.html'
 files {
     'index.html',
     'style.css',
+    'arcade.css',
     'script.js'
 }
