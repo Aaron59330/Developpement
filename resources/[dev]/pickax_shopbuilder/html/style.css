@@ -376,3 +376,6 @@ button.wide { width: 100%; }
 /* logo du serveur en haut du menu de gauche (pickax_core → ServerLogo) : petit et centré, fonctionne avec l'ancien style */
 .profile.logo-only { justify-content: center; padding: 12px; }
 .profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
+
+/* nom du builder sous le logo (visible seulement avec le style hx, voir pickax_theme/hx.css) */
+.profile .pname { display: none; }

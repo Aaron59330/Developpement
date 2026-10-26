@@ -152,7 +152,7 @@ function renderInner() {
     body = gameBody(); bodyAttr = 'data-root="cur"';
   } else { head = { icon: 'grid', title: 'Mini-jeux Builder', sub: `${S.cat.types.length} types disponibles` }; body = homeBody(); }
   const html = `<div class="shell"><aside class="side">
-    <div class="profile"><div class="avatar">MJ</div><div><b>Mini-jeux</b><small>${n} mini-jeu${n > 1 ? 'x' : ''} · ${on} actif${on > 1 ? 's' : ''}</small></div></div>
+    <div class="profile pl"><img class="plogo" hidden data-pk-logo src="${esc(window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png')}" alt="" onerror="this.style.visibility='hidden'"><div class="avatar">MJ</div><div><b>Mini-jeux</b><small>${n} mini-jeu${n > 1 ? 'x' : ''} · ${on} actif${on > 1 ? 's' : ''}</small></div></div>
     <div class="nav">${nav.map(sec => `<div class="nav-label">${esc(sec.label)}</div>${sec.items.map(it => `<div class="nav-item ${it.id === active ? 'active' : ''}" data-a="nav" data-v="${esc(it.id)}">${ic(it.icon)}<span class="grow">${esc(it.label)}</span>${it.count ? `<span class="count">${esc(it.count)}</span>` : ''}</div>`).join('')}`).join('')}</div>
     <div class="side-foot"><small>Place les points avec le <b>mode placement</b> : tu te déplaces en jeu, <b>Entrée</b> enregistre ta position.</small></div></aside>
     <section class="main">${header(head)}<div class="body" ${bodyAttr}>${body}</div></section></div>`;

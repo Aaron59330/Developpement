@@ -70,7 +70,7 @@ const TABS = [['dash', 'Tableau de bord', 'chart'], ['players', 'Joueurs', 'user
 function frame(inner, title, sub, acts = '') {
   const nav = TABS.map(([k, l, i]) => `<div class="nav-item ${S.tab === k ? 'active' : ''}" data-a="tab" data-k="${k}">${ic(i)}<span class="grow">${l}</span>${k === 'rules' && S.dirty ? '<span class="badge">modifié</span>' : ''}</div>`).join('');
   const mode = S.cfg ? S.cfg.mode : (S.ov && S.ov.mode);
-  $root.innerHTML = `<div class="shell"><div class="side"><div class="profile"><div class="avatar">${ic('shield', 20)}</div><div><b>Anti-cheat</b><small>Pickax · panel staff</small></div></div>
+  $root.innerHTML = `<div class="shell"><div class="side"><div class="profile pl"><img class="plogo" hidden data-pk-logo src="${window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png'}" alt="" onerror="this.style.visibility='hidden'"><div class="avatar">${ic('shield', 20)}</div><div><b>Anti-cheat</b><small>Pickax · panel staff</small></div></div>
     <div class="nav"><div class="nav-label">Gestion</div>${nav}</div>
     <div class="side-foot"><span class="mode-pill ${mode === 'observe' ? 'observe' : 'protect'}">${mode === 'observe' ? 'Mode observation' : 'Mode protection'}</span>
     <small>${mode === 'observe' ? 'Les sanctions sont seulement simulées dans les journaux.' : 'Les sanctions sont appliquées automatiquement.'}</small></div></div>

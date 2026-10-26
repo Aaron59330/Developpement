@@ -174,3 +174,13 @@ body.hx .chip.acc { background: var(--hx-a); border-color: var(--hx-a); color: v
 body.hx .bar input { background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 3px; }
 body.hx .card > .body h1 { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; font-size: 34px; text-shadow: 0 0 18px rgba(var(--hx-rgb), .35); }
 body.hx .card > .body .step { color: var(--hx-a); }
+
+/* ===== En-tête commun des builders : logo du serveur (en haut à gauche) + nom du builder ===== */
+body.hx .plogo[hidden] { display: block; height: 30px; width: auto; max-width: 150px; object-fit: contain; flex: none; }
+body.hx .profile.pl, body.hx .brand.pl { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+body.hx .profile.pl .avatar, body.hx .brand.pl .logo { display: none; }
+body.hx .profile.pl b, body.hx .brand.pl b, body.hx .profile .pname { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: 13px; color: var(--hx-a); }
+body.hx .profile.pl small, body.hx .brand.pl small { margin-top: 1px; }
+body.hx .profile.logo-only { flex-direction: column; align-items: flex-start; gap: 8px; justify-content: flex-start; }
+body.hx .profile.logo-only .pname { display: block; }
+body.hx .top > .plogo[hidden], body.hx .head > .plogo[hidden] { height: 30px; margin-right: 8px; padding-right: 16px; border-right: 1px solid var(--hx-line); }
