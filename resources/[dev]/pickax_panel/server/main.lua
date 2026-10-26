@@ -9,6 +9,7 @@ local logs, results = {}, {}
 local lastResources = 0
 local lastErr = nil
 local bans, whitelist, motd = {}, {}, { enabled = false, text = '' }
+local serverCfg = {}
 
 local function now() return os.time() end
 
@@ -254,24 +255,35 @@ end
 
 local function saveDoc(key, value) SaveResourceFile(GetCurrentResourceName(), 'cache_' .. key .. '.json', json.encode(value), -1) end
 
-H.apply_theme = function()
+H.apply_theme = function(p)
     local t = docs.theme
     if not t then return nil, 'aucun thème enregistré dans le panel' end
     if GetResourceState('pickax_basetools') ~= 'started' then return nil, 'pickax_basetools non démarré' end
-    local r = exports.pickax_basetools:ApplyTheme(t, 'panel web')
+    local r = exports.pickax_basetools:ApplyTheme(t, 'panel web', p and p.core == true)
     if not r or not r.ok then return nil, (r and r.error) or 'échec' end
     return 'thème appliqué' .. (r.warning and (' (' .. r.warning .. ')') or '')
 end
 
 -- bans / whitelist / message de bienvenue (documents synchronisés)
+local function applyServerSettings()
+    local c = serverCfg or {}
+    local function ok(x) return type(x) == 'string' and x ~= '' and not x:find('"', 1, true) and not x:find('[\r\n;]') end
+    if ok(c.projectName) then ExecuteCommand('sets sv_projectName "' .. c.projectName .. '"') end
+    if ok(c.projectDesc) then ExecuteCommand('sets sv_projectDesc "' .. c.projectDesc .. '"') end
+    if ok(c.hostname) then ExecuteCommand('sv_hostname "' .. c.hostname .. '"') end
+end
+
 local function onDoc(key, value)
     docs[key] = value; saveDoc(key, value)
-    if key == 'bans' then bans = value or {} elseif key == 'whitelist' then whitelist = value or {} elseif key == 'motd' then motd = value or { enabled = false, text = '' } end
+    if key == 'bans' then bans = value or {} elseif key == 'whitelist' then whitelist = value or {} elseif key == 'motd' then motd = value or { enabled = false, text = '' }
+    elseif key == 'server' then serverCfg = value or {} applyServerSettings() PanelLog('staff', 'serveur', 'nom / description du serveur modifiés depuis le panel') end
 end
-for _, k in ipairs({ 'bans', 'whitelist', 'motd' }) do
+for _, k in ipairs({ 'bans', 'whitelist', 'motd', 'server' }) do
     local raw = LoadResourceFile(GetCurrentResourceName(), 'cache_' .. k .. '.json')
-    if raw and raw ~= '' then local ok, v = pcall(json.decode, raw) if ok then onDoc(k, v) end end
+    if raw and raw ~= '' then local ok, v = pcall(json.decode, raw) if ok then if k == 'server' then serverCfg = v docs.server = v else onDoc(k, v) end end end
 end
+-- au démarrage : réappliquer le nom / la description enregistrés dans le panel (même si le panel est injoignable)
+CreateThread(function() Wait(10000) applyServerSettings() end)
 
 AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
     local src = source

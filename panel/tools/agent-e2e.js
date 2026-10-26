@@ -11,6 +11,7 @@ const srv = require('http').createServer(app).listen(0, () => {
   q('restart_resource', { resource: 'pickax_core' }); q('restart_resource', { resource: 'oxmysql' }); q('kick', { id: 99, reason: 'x' }); q('apply_theme', {});
   db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?)').run(lid, 'theme', JSON.stringify({ AccentColor: '#00ff88', ServerName: 'E2E RP' }), 1, now());
   db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?)').run(lid, 'bans', JSON.stringify([{ identifier: 'license:zzz', name: 'X', reason: 'r', until: 0, at: 1 }]), 1, now());
+  db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?)').run(lid, 'server', JSON.stringify({ projectName: '^4E2E RP', projectDesc: 'desc', hostname: '^4E2E' }), 1, now());
   db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?)').run(lid, 'motd', JSON.stringify({ text: 'Bienvenue', enabled: true }), 1, now());
   const out = require('child_process').spawn('lua5.4', [__dirname + '/agent-harness.lua', 'http://127.0.0.1:' + srv.address().port, 'AERO-E2E', __dirname + '/../../resources/[dev]/pickax_panel'], { stdio: ['ignore', 'pipe', 'inherit'] });
   let buf = ''; out.stdout.on('data', d => buf += d); out.on('close', () => {

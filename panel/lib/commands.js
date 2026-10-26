@@ -23,11 +23,11 @@ const defs = {
   server_stop:    () => ({}),
   resource_start: (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
   resource_stop:  (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
-  apply_theme: () => ({}),
+  apply_theme: (p) => ({ core: !!p.core }),
   refresh_docs: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
-const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1 };
+const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1 };
 function validateDoc(key, v) {
   if (!DOC_KEYS[key]) return { error: 'Document inconnu' };
   if (v == null || typeof v !== 'object') return { error: 'Données invalides' };
@@ -37,11 +37,18 @@ function validateDoc(key, v) {
     t.AccentColor = v.AccentColor.toLowerCase(); t.InventoryColor = hex.test(v.InventoryColor || '') ? v.InventoryColor.toLowerCase() : '';
     const txt = (x, max, req) => { x = String(x == null ? '' : x).trim(); if (x.length > max || /['"\\\r\n]/.test(x)) return null; if (req && !x) return null; return x; };
     t.ServerName = txt(v.ServerName, 60, true); t.ServerShortName = txt(v.ServerShortName, 24, true); t.ServerTagline = txt(v.ServerTagline, 80); t.ServerDiscord = txt(v.ServerDiscord, 80); t.ServerLogo = txt(v.ServerLogo, 200, true);
+    t.Design = v.Design === 'ancien' ? 'ancien' : 'arcade';
     if (Object.values(t).includes(null)) return { error: 'Un champ du thème est invalide (pas de guillemets, longueur limitée)' };
     return { value: t };
   }
   if (key === 'bans') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: v.slice(0, 5000).map(b => ({ identifier: str(String(b.identifier || ''), 120, ID) || '', name: str(String(b.name || ''), 60) || '', reason: str(String(b.reason || ''), 120) || '', until: int(b.until || 0, 0, 4102444800) || 0, at: int(b.at || 0, 0, 4102444800) || 0 })).filter(b => b.identifier) }; }
   if (key === 'whitelist') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: [...new Set(v.map(x => str(String(x), 120, ID)).filter(Boolean))].slice(0, 20000) }; }
+  if (key === 'server') {
+    const t = (x, max) => { x = String(x == null ? '' : x).trim(); if (x.length > max || /["\\\r\n;]/.test(x)) return null; return x; };
+    const o = { projectName: t(v.projectName, 200), projectDesc: t(v.projectDesc, 200), hostname: t(v.hostname, 200) };
+    if (Object.values(o).includes(null)) return { error: 'Texte invalide : pas de guillemets, de point-virgule ni de retour à la ligne (200 caractères max)' };
+    return { value: o };
+  }
   if (key === 'motd') { const m = str(String(v.text || ''), 300); return { value: { text: m || '', enabled: !!v.enabled } }; }
 }
 // Appels « RPC » : le navigateur attend la réponse du serveur FiveM (fichiers)

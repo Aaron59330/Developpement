@@ -222,7 +222,7 @@ local function readConfigValues()
     if liveRaw and liveRaw ~= '' then
         local okj, j = pcall(json.decode, liveRaw)
         if okj and type(j) == 'table' and j.accent and type(j.server) == 'table' then
-            return { AccentColor = j.accent, InventoryColor = j.server.invColor or '', ServerName = j.server.name or '', ServerShortName = j.server.short or '',
+            return { Design = j.design or 'arcade', AccentColor = j.accent, InventoryColor = j.server.invColor or '', ServerName = j.server.name or '', ServerShortName = j.server.short or '',
                 ServerTagline = j.server.tagline or '', ServerDiscord = j.server.discord or '', ServerLogo = j.server.logo or '' }
         end
     end
@@ -245,6 +245,7 @@ local function cleanTheme(v)
     if type(v) ~= 'table' then return nil, 'Données invalides' end
     local function txt(x, max) x = tostring(x or ''):gsub('^%s+', ''):gsub('%s+$', '') if #x > max or x:find('[\'"\\\r\n]') then return nil end return x end
     local o = {}
+    o.Design = (v.Design == 'ancien' or v.Design == 'arcade') and v.Design or (readConfigValues().Design or 'arcade')
     o.AccentColor = tostring(v.AccentColor or ''):lower()
     if not o.AccentColor:match('^#%x%x%x%x%x%x$') then return nil, 'Couleur principale invalide (format #RRGGBB)' end
     o.InventoryColor = tostring(v.InventoryColor or ''):lower()
@@ -269,7 +270,7 @@ end
 
 local function writeConfigValues(o)
     -- 1) thème « vivant » dans cette ressource : l'écriture dans sa propre ressource est toujours autorisée par FiveM
-    local live = { accent = o.AccentColor, server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor } }
+    local live = { design = o.Design or 'arcade', accent = o.AccentColor, server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor } }
     if not SaveResourceFile(GetCurrentResourceName(), 'theme_live.json', json.encode(live), -1) then return false, 'Écriture de pickax_basetools/theme_live.json impossible' end
     pcall(SaveResourceFile, 'pickax_theme', 'theme_live.json', json.encode(live), -1)   -- ancien emplacement (facultatif)
     -- 2) pickax_core/config.lua : au mieux (FiveM bloque l'écriture dans une autre ressource sans add_filesystem_permission)
@@ -320,7 +321,7 @@ lib.callback.register('basetools:themeSave', function(src, v)
 end)
 
 -- Appelé par pickax_panel (panel web) : même validation et mêmes sauvegardes que le menu en jeu
-exports('ApplyTheme', function(v, by)
+exports('ApplyTheme', function(v, by, restartCore)
     local o, err = cleanTheme(v)
     if not o then return { ok = false, error = err } end
     local before = readConfigValues()
@@ -333,7 +334,11 @@ exports('ApplyTheme', function(v, by)
     SaveResourceFile(GetCurrentResourceName(), THEME_HIST, json.encode(h), -1)
     webhook('Thème du serveur modifié', ('%s : couleur **%s**, nom **%s**'):format(by or 'panel web', o.AccentColor, o.ServerName), tonumber(o.AccentColor:sub(2), 16))
     SetTimeout(800, function()
-        for _, r in ipairs(Config.ThemeRestart) do if GetResourceState(r) == 'started' then ExecuteCommand('restart ' .. r) end end
+        local list = {}
+        for _, r in ipairs(Config.ThemeRestart) do if r ~= 'pickax_basetools' then list[#list + 1] = r end end
+        if restartCore then list[#list + 1] = 'pickax_core' end    -- écran de chargement, chat, markers… lisent le thème dans pickax_core
+        list[#list + 1] = 'pickax_basetools'                      -- en dernier : il redémarre lui-même
+        for _, r in ipairs(list) do if GetResourceState(r) == 'started' then ExecuteCommand('restart ' .. r) end end
     end)
     return { ok = true, warning = warning }
 end)

@@ -56,13 +56,38 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
   };
 
+  // ── Style des interfaces : « arcade » (nouveau) ou « ancien » (style d'origine : sans arcade.css ni hx.css) — réglé depuis le panel web
+  var DKEY = 'pickax_design_v1';
+  var applyDesign = function (d) {
+    d = d === 'ancien' ? 'ancien' : 'arcade';
+    window.PICKAX_DESIGN = d;
+    try { localStorage.setItem(DKEY, d); } catch (e) {}
+    var go = function () {
+      document.documentElement.setAttribute('data-design', d);
+      var b = document.body;
+      if (b && b.classList.contains('hx')) b.setAttribute('data-hx', '1');
+      [].forEach.call(document.querySelectorAll('link[rel~="stylesheet"]'), function (l) {
+        var arc = l.getAttribute('data-arcade-href');
+        if (arc) { l.setAttribute('href', d === 'ancien' ? l.getAttribute('data-ancien-href') : arc); return; }
+        var h = l.getAttribute('href') || '';
+        if (/arcade\.css/.test(h) || /pickax_theme\/hx\.css/.test(h)) l.disabled = d === 'ancien';
+      });
+      if (b) { if (d === 'ancien') b.classList.remove('hx'); else if (b.hasAttribute('data-hx')) b.classList.add('hx'); }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  };
+  var design0 = 'arcade';
+  try { design0 = localStorage.getItem(DKEY) || 'arcade'; } catch (e) {}
+  applyDesign(design0);
+
   var cached = null;
   try { cached = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
   var cur = (cached && okHex(cached.accent) && cached.server) ? cached : def;
   apply(cur.accent, cur.server);                                   // immédiat : dernières valeurs connues (ou secours)
 
   // Applique des valeurs lues (et les mémorise pour les ouvertures suivantes)
-  var finish = function (hex, server) {
+  var finish = function (hex, server, design) {
+    if (design) applyDesign(design);
     hex = hex.toLowerCase();
     var next = JSON.stringify({ accent: hex, server: server });
     try { localStorage.setItem(KEY, next); } catch (e) {}
@@ -94,7 +119,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
   // 2) ancien emplacement pickax_theme/theme_live.json  3) pickax_core/config.lua
   var tryLive = function (url, next) {
     fetch(url + '?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (j) {
-      if (j && okHex(j.accent) && j.server && typeof j.server === 'object') finish(j.accent, j.server); else next();
+      if (j && okHex(j.accent) && j.server && typeof j.server === 'object') finish(j.accent, j.server, j.design); else next();
     });
   };
   try {
