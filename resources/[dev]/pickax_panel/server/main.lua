@@ -323,6 +323,15 @@ H.apply_theme = function(p)
     return 'thème appliqué' .. (r.warning and (' (' .. r.warning .. ')') or '')
 end
 
+H.apply_loading = function(p)
+    local t = docs.loading
+    if not t then return nil, 'aucune configuration de l\'écran de chargement enregistrée dans le panel' end
+    if GetResourceState('pickax_basetools') ~= 'started' then return nil, 'pickax_basetools non démarré' end
+    local r = exports.pickax_basetools:ApplyLoading(t, 'panel web', p and p.core == true)
+    if not r or not r.ok then return nil, (r and r.error) or 'échec' end
+    return r.restarted and 'écran de chargement appliqué (pickax_core redémarré)' or 'écran de chargement enregistré (visible après le prochain redémarrage de pickax_core)'
+end
+
 -- bans / whitelist / message de bienvenue (documents synchronisés)
 local function applyServerSettings()
     local c = serverCfg or {}

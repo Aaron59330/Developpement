@@ -76,7 +76,7 @@ function CreateThread(f) threads[#threads + 1] = f end
 function LoadResourceFile(r, f) return files[f] end
 function SaveResourceFile(r, f, c) files[f] = c return true end
 exports = setmetatable({ es_extended = { getSharedObject = function() return ESX end } }, { __call = function(t, name, fn) t[name] = fn end })
-exports.pickax_basetools = { ApplyTheme = function(_, v, by) events[#events + 1] = 'ApplyTheme ' .. v.AccentColor .. ' ' .. v.ServerName return { ok = true } end }
+exports.pickax_basetools = { ApplyLoading = function(_, v, by, core) events[#events + 1] = 'ApplyLoading tips=' .. #v.tips .. ' core=' .. tostring(core) return { ok = true, restarted = core == true } end, ApplyTheme = function(_, v, by) events[#events + 1] = 'ApplyTheme ' .. v.AccentColor .. ' ' .. v.ServerName return { ok = true } end }
 local vfs = { ['pickax_core/config.lua'] = 'A = 1\n' }
 exports.pickax_panel = { FsList = function(_, p) return { entries = { { name = 'config.lua', type = 'file', size = 6 } } } end, FsRead = function(_, p) if vfs[p] then return { content = vfs[p] } end return { error = 'fichier introuvable' } end,
   FsWrite = function(_, p, c, create) vfs[p] = c events[#events + 1] = 'FsWrite ' .. p .. ' ' .. #c return { ok = true, message = 'fichier enregistré' } end }

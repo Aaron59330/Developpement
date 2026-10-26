@@ -376,6 +376,50 @@ exports('ApplyTheme', function(v, by, restartCore)
     return { ok = true, warning = warning }
 end)
 
+-- ═════════════════ ÉCRAN DE CHARGEMENT (réglé depuis le panel web) ═════════════════
+-- Écrit pickax_core/loading/loading.json : l'écran de chargement le lit (messages, musique, liens, équipe, mises à jour, textes d'étapes).
+-- Les clients récupèrent le nouveau fichier quand pickax_core redémarre (option « appliquer maintenant »), sinon au prochain redémarrage du serveur.
+local function lstr(x, max) x = tostring(x == nil and '' or x):gsub('[%c]', ' ') return x:sub(1, max) end
+local function lurl(x) x = tostring(x or '') if x == '' then return '' end if #x <= 300 and x:match('^https://[%w%-%._~:/%?#@!%$&%(%)%*%+,;=%%]+$') then return x end return nil end
+local function cleanLoading(v)
+    if type(v) ~= 'table' then return nil, 'données invalides' end
+    local o = { tips = {}, links = {}, team = {}, updates = {}, stages = {}, music = {} }
+    for _, t in ipairs(type(v.tips) == 'table' and v.tips or {}) do local x = lstr(t, 140) if x ~= '' and #o.tips < 12 then o.tips[#o.tips + 1] = x end end
+    local L = type(v.links) == 'table' and v.links or {}
+    for _, k in ipairs({ 'reglement', 'discord', 'boutique' }) do local u = lurl(L[k]) if u == nil then return nil, 'lien invalide : ' .. k .. ' (https:// requis)' end o.links[k] = u end
+    for _, m in ipairs(type(v.team) == 'table' and v.team or {}) do if type(m) == 'table' and #o.team < 12 then local n = lstr(m.name, 40) if n ~= '' then o.team[#o.team + 1] = { name = n, role = lstr(m.role, 60) } end end end
+    for _, u in ipairs(type(v.updates) == 'table' and v.updates or {}) do
+        if type(u) == 'table' and #o.updates < 8 then
+            local t = lstr(u.title, 60)
+            if t ~= '' then
+                local items = {}
+                for _, it in ipairs(type(u.items) == 'table' and u.items or {}) do local x = lstr(it, 120) if x ~= '' and #items < 6 then items[#items + 1] = x end end
+                o.updates[#o.updates + 1] = { date = lstr(u.date, 20), title = t, items = items }
+            end
+        end
+    end
+    for i = 1, 4 do o.stages[i] = lstr((type(v.stages) == 'table' and v.stages[i]) or '', 40) end
+    local M = type(v.music) == 'table' and v.music or {}
+    local mu = lurl(M.url)
+    if mu == nil then return nil, 'adresse de la musique invalide (https:// requis)' end
+    o.music = { enabled = M.enabled ~= false, url = mu, volume = math.max(0, math.min(100, math.floor(tonumber(M.volume) or 10))), autoplay = M.autoplay ~= false }
+    o.showTeam, o.showUpdates = v.showTeam ~= false, v.showUpdates ~= false
+    return o
+end
+
+exports('ApplyLoading', function(v, by, restartCore)
+    local o, err = cleanLoading(v)
+    if not o then return { ok = false, error = err } end
+    local raw = json.encode(o)
+    SaveResourceFile(GetCurrentResourceName(), 'loading_live.json', raw, -1)
+    if not SaveResourceFile('pickax_core', 'loading/loading.json', raw, -1) then
+        return { ok = false, error = 'Écriture dans pickax_core/loading impossible : ajoute dans server.cfg « add_filesystem_permission pickax_basetools write pickax_core » puis redémarre le serveur' }
+    end
+    webhook('Écran de chargement modifié', ('%s a modifié l\'écran de chargement'):format(by or 'panel web'), 0xfdc27d)
+    if restartCore and GetResourceState('pickax_core') == 'started' then SetTimeout(800, function() ExecuteCommand('restart pickax_core') end) end
+    return { ok = true, restarted = restartCore == true }
+end)
+
 -- ═════════════════ ÉCONOMIE DYNAMIQUE (pickax_economy) ═════════════════
 local function eco(fn, ...)
     if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy n\'est pas démarré' end

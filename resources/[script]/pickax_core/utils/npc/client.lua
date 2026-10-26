@@ -87,8 +87,8 @@ Citizen.CreateThread(function()
 	end
 end)
 
-Citizen.CreateThread(function()
-	-- Ces options doivent etre appliquees meme lorsque AllowNPC = false.
+-- Natives à appliquer une fois (et à ré-appliquer quand un réglage du panel web change)
+local function applyNpcFlags()
 	SetRandomBoats(ConfigNPC.EnableBoats)
 	SetRandomTrains(ConfigNPC.EnableTrains)
 	SetGarbageTrucks(ConfigNPC.EnableGarbageTrucks)
@@ -96,23 +96,67 @@ Citizen.CreateThread(function()
 	SetCreateRandomCopsNotOnScenarios(ConfigNPC.EnablePolice)
 	SetCreateRandomCopsOnScenarios(ConfigNPC.EnablePolice)
 	SetDispatchCopsForPlayer(PlayerId(), ConfigNPC.EnablePolice)
+end
+
+local budgetZero = false
+
+Citizen.CreateThread(function()
+	-- Ces options doivent etre appliquees meme lorsque AllowNPC = false.
+	applyNpcFlags()
 
 	while true do
-		local density = ConfigNPC.AllowNPC and ConfigNPC.pnjdensity or 0.0
+		local on = ConfigNPC.AllowNPC
+		local dPed = on and ConfigNPC.pnjdensity or 0.0
+		local dVeh = on and (ConfigNPC.vehdensity or ConfigNPC.pnjdensity) or 0.0
+		local dPark = on and (ConfigNPC.parkeddensity or ConfigNPC.pnjdensity) or 0.0
 
 		-- Les natives *ThisFrame doivent etre reappliquees a chaque frame.
-		SetVehicleDensityMultiplierThisFrame(density)
-		SetPedDensityMultiplierThisFrame(density)
-		SetRandomVehicleDensityMultiplierThisFrame(density)
-		SetParkedVehicleDensityMultiplierThisFrame(density)
-		SetScenarioPedDensityMultiplierThisFrame(density, density)
+		SetVehicleDensityMultiplierThisFrame(dVeh)
+		SetPedDensityMultiplierThisFrame(dPed)
+		SetRandomVehicleDensityMultiplierThisFrame(dVeh)
+		SetParkedVehicleDensityMultiplierThisFrame(dPark)
+		SetScenarioPedDensityMultiplierThisFrame(dPed, dPed)
 
-		-- Renforce la desactivation de la population ambiante GTA.
-		if density <= 0.0 then
+		-- Renforce la desactivation de la population ambiante GTA (et la restaure si le panel la reactive).
+		if dPed <= 0.0 and dVeh <= 0.0 then
+			if not budgetZero then budgetZero = true end
 			SetPedPopulationBudget(0)
 			SetVehiclePopulationBudget(0)
+		elseif budgetZero then
+			budgetZero = false
+			SetPedPopulationBudget(3)
+			SetVehiclePopulationBudget(3)
 		end
 
 		Citizen.Wait(0)
 	end
+end)
+
+-- Reglages du panel web (pickax_settings > Monde & PNJ) : appliques en direct, sans redemarrage.
+local function onSettings(all, ov)
+	if not ov then return end
+	local touched = false
+	if ov.npc_enabled ~= nil or ov.npc_density ~= nil or ov.traffic_density ~= nil or ov.parked_density ~= nil then
+		ConfigNPC.AllowNPC = all.npc_enabled == true
+		ConfigNPC.pnjdensity = tonumber(all.npc_density) or 0.5
+		ConfigNPC.vehdensity = tonumber(all.traffic_density) or ConfigNPC.pnjdensity
+		ConfigNPC.parkeddensity = tonumber(all.parked_density) or ConfigNPC.pnjdensity
+	end
+	if ov.npc_police ~= nil then ConfigNPC.EnablePolice = all.npc_police == true touched = true end
+	if ov.npc_boats ~= nil then ConfigNPC.EnableBoats = all.npc_boats == true touched = true end
+	if ov.npc_trains ~= nil then ConfigNPC.EnableTrains = all.npc_trains == true touched = true end
+	if ov.npc_garbage ~= nil then ConfigNPC.EnableGarbageTrucks = all.npc_garbage == true touched = true end
+	if touched then
+		applyNpcFlags()
+		if ov.npc_police ~= nil then for i = 1, 15 do EnableDispatchService(i, ConfigNPC.EnablePolice) end end
+	end
+end
+AddEventHandler('pickax_settings:changed', onSettings)
+-- si pickax_core redemarre apres pickax_settings : on recupere les reglages deja recus
+Citizen.CreateThread(function()
+	Citizen.Wait(4000)
+	if GetResourceState('pickax_settings') ~= 'started' then return end
+	local ok, all = pcall(function() return exports.pickax_settings:GetAll() end)
+	local ok2, ov = pcall(function() return exports.pickax_settings:Overrides() end)
+	if ok and ok2 and type(ov) == 'table' and next(ov) then onSettings(all, ov) end
 end)

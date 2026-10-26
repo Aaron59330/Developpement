@@ -79,11 +79,12 @@ end
 
 local function get(key) local def = DEF[key] if not def then return nil end local v = over[key] if v == nil then return def.default end return v end
 exports('Get', get)
+Settings.Get = get   -- utilisé par server/gameplay.lua
 exports('GetAll', effective)
 exports('Overrides', function() return over end)
 exports('Schema', function()
     local out = {}
-    for i, k in ipairs(ORDER) do local d = DEF[k] out[i] = { key = d.key, group = d.group, label = d.label, type = d.type, default = d.default, min = d.min, max = d.max, step = d.step, options = d.options, hint = d.hint } end
+    for i, k in ipairs(ORDER) do local d = DEF[k] out[i] = { key = d.key, group = d.group, label = d.label, type = d.type, default = d.default, min = d.min, max = d.max, step = d.step, options = d.options, hint = d.hint, section = d.section } end
     return out
 end)
 

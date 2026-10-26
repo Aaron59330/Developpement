@@ -7,7 +7,9 @@ app.disable('x-powered-by');
 const secureSite = cfg.publicUrl.startsWith('https://');
 app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
 app.use('/api/agent', require('./routes/agent'));
-app.use(express.json({ limit: '2mb' }));
+// corps JSON : 2 Mo, sauf l'envoi de fichiers au Drive (musique jusqu'à 6 Mo, en base64) réservé aux requêtes qui portent un cookie de session
+const smallJson = express.json({ limit: '2mb' }), bigJson = express.json({ limit: '9mb' });
+app.use((req, res, next) => (req.method === 'POST' && /^\/api\/servers\/\d+\/drive$/.test(req.path) && String(req.headers.cookie || '').includes(A.COOKIE + '=') ? bigJson : smallJson)(req, res, next));
 app.use(cookieParser());
 app.use(A.loadUser);
 app.use(A.csrf);

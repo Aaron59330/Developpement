@@ -82,3 +82,9 @@ Paiement en ligne (Stripe/PayPal) : offres, modules et facturation gérés à la
 - **Assistant IA** : propose des actions précises (annonce, économie, redémarrage, réglage, programmation) que le client valide une à une ; chaque action est revalidée par le panel avant exécution. Nécessite `ANTHROPIC_API_KEY`.
 - Côté jeu, ces fonctions demandent la dernière version de `pickax_panel` (positions des joueurs, téléportation, métiers en base : dépend maintenant d'`oxmysql`).
 - Tests : `node tools/selftest3.js`.
+
+## Configuration depuis le panel
+Menu **Configuration** : *Identité & thème* (couleur, logo, bannières, markers, style), *Écran de chargement* (messages défilants, musique, liens, équipe, mises à jour, textes de progression), *Réglages du serveur* (une soixantaine de réglages par catégories : monde et PNJ, météo et heure, combat, nouveaux joueurs, interface, voix, économie, carnet, Discord, performance) avec recherche, export / import JSON et réinitialisation par catégorie.
+- L'écran de chargement écrit `pickax_core/loading/loading.json` (via `pickax_basetools`, qui a besoin de `add_filesystem_permission pickax_basetools write pickax_core` dans le server.cfg). Les nouveaux joueurs le voient après un redémarrage de `pickax_core` (bouton « Enregistrer et appliquer maintenant »).
+- La musique peut être envoyée dans le Drive du panel (MP3 / OGG / WAV, 6 Mo max).
+- Tests : `node tools/selftest4.js`.

@@ -1,0 +1,48 @@
+// Écran de chargement (document), musique dans le Drive, sections des réglages : node tools/selftest4.js
+process.env.DATA_DIR = './data-test4'; process.env.ADMIN_EMAIL = 'admin@test.fr'; process.env.ADMIN_PASSWORD = 'AdminTest!123';
+const fs = require('fs'), http = require('http'), assert = require('assert'); fs.rmSync(__dirname + '/../data-test4', { recursive: true, force: true });
+const app = require('../server'); const { db } = require('../lib/db'); const C = require('../lib/commands');
+const srv = http.createServer(app).listen(0, async () => {
+  const base = 'http://127.0.0.1:' + srv.address().port; const jar = {}; let n = 0;
+  const mk = name => { jar[name] = ''; return async (m, u, body) => { const r = await fetch(base + u, { method: m, headers: { 'content-type': 'application/json', origin: base, cookie: jar[name] }, body: m === 'GET' ? undefined : JSON.stringify(body || {}) }); const c = r.headers.get('set-cookie'); if (c) jar[name] = c.split(';')[0]; return r.json(); }; };
+  const client = mk('c'), other = mk('o'); const ok = (c, m) => { assert(c, m); n++; console.log('  ✓', m); };
+  try {
+    await client('POST', '/api/auth/register', { email: 'c@test.fr', username: 'Cli', password: 'ClientTest!1' }); await other('POST', '/api/auth/register', { email: 'o@test.fr', username: 'Oth', password: 'ClientTest!1' });
+    const cid = db.prepare("SELECT id FROM users WHERE email='c@test.fr'").get().id; const KEY = 'AERO-T4';
+    db.prepare("INSERT INTO licenses(key,user_id,plan_id,server_name,status,expires_at,created_at) VALUES(?,?,2,'S4','active',NULL,strftime('%s','now'))").run(KEY, cid); const lid = db.prepare('SELECT id FROM licenses WHERE key=?').get(KEY).id;
+    console.log('Écran de chargement');
+    const good = { tips: ['Bienvenue', '  ', 'Lis le règlement'], links: { reglement: '', discord: 'https://discord.gg/abc', boutique: 'https://boutique.exemple.fr/shop?x=1' }, team: [{ name: 'Aaron', role: 'Fondateur' }, { name: '', role: 'vide' }], updates: [{ date: '26/10', title: 'Nouveautés', items: ['A', '', 'B'] }], stages: ['Début', 'Carte', 'Démarrage', 'Connexion'], music: { enabled: true, url: 'https://exemple.fr/musique.mp3', volume: 35, autoplay: true }, showTeam: true, showUpdates: false };
+    const v = C.validateDoc('loading', good); ok(v.value && v.value.tips.length === 2 && v.value.team.length === 1 && v.value.updates[0].items.length === 2, 'document valide : lignes vides retirées');
+    ok(v.value.music.volume === 35 && v.value.showUpdates === false && v.value.links.discord === 'https://discord.gg/abc', 'musique, volume, affichages et liens conservés');
+    ok(C.validateDoc('loading', { ...good, links: { ...good.links, discord: 'javascript:alert(1)' } }).error, 'lien non https refusé (javascript:)');
+    ok(C.validateDoc('loading', { ...good, links: { ...good.links, boutique: 'http://exemple.fr' } }).error, 'lien http (non sécurisé) refusé');
+    ok(C.validateDoc('loading', { ...good, music: { ...good.music, url: 'file:///etc/passwd' } }).error, 'adresse de musique non https refusée');
+    ok(C.validateDoc('loading', { ...good, music: { ...good.music, url: 'https://x.fr/a b.mp3' } }).error, 'adresse avec espace refusée');
+    const big = C.validateDoc('loading', { ...good, tips: Array.from({ length: 40 }, (_, i) => 'm' + i), team: Array.from({ length: 40 }, (_, i) => ({ name: 'n' + i })), music: { ...good.music, volume: 900 } }); ok(big.value.tips.length === 12 && big.value.team.length === 12 && big.value.music.volume === 100, 'listes limitées (12) et volume plafonné à 100');
+    ok(C.validateDoc('loading', { tips: ['x'.repeat(500)] }).value.tips[0].length === 140, 'messages tronqués à 140 caractères');
+    ok(C.validateDoc('loading', null).error, 'document vide refusé');
+    ok(C.validate('apply_loading', { core: true }).payload.core === true, 'commande apply_loading disponible');
+    const put = await client('PUT', `/api/servers/${lid}/docs/loading`, { value: good }); ok(put.ok, 'enregistrement du document');
+    const get = await client('GET', `/api/servers/${lid}/docs/loading`); ok(get.value && get.value.music.volume === 35, 'relecture du document');
+    ok(!(await other('PUT', `/api/servers/${lid}/docs/loading`, { value: good })).ok, 'un autre client ne peut pas modifier ce document');
+    const sync = await fetch(base + '/api/agent/sync', { method: 'POST', headers: { 'content-type': 'application/json', 'x-license-key': KEY }, body: JSON.stringify({ players: [] }) }).then(r => r.json()); ok(sync.docs && sync.docs.loading && sync.docs.loading.value.tips.length === 2, 'le serveur de jeu reçoit le document');
+    console.log('Drive : musique');
+    const mp3 = Buffer.alloc(2000, 7).toString('base64'); const up = await client('POST', `/api/servers/${lid}/drive`, { name: 'ambiance.mp3', mime: 'audio/mpeg', data: mp3 }); ok(up.ok, 'envoi d’un fichier MP3');
+    const list = await client('GET', `/api/servers/${lid}/drive`); const f = list.files.find(x => x.mime === 'audio/mpeg'); ok(f && /\/drive\//.test(f.url), 'le MP3 apparaît dans le Drive avec son lien');
+    const pub = await fetch(f.url.replace(/^https?:\/\/[^/]+/, base)); ok(pub.status === 200 && pub.headers.get('content-type') === 'audio/mpeg', 'le lien public sert le fichier en audio/mpeg');
+    const big6 = await client('POST', `/api/servers/${lid}/drive`, { name: 'gros.mp3', mime: 'audio/mpeg', data: Buffer.alloc(6100000, 1).toString('base64') }); ok(!big6.ok && /6 Mo/.test(big6.error), 'musique de plus de 6 Mo refusée');
+    const bigImg = await client('POST', `/api/servers/${lid}/drive`, { name: 'gros.png', mime: 'image/png', data: Buffer.alloc(1600000, 1).toString('base64') }); ok(!bigImg.ok && /1,5 Mo/.test(bigImg.error), 'image de plus de 1,5 Mo toujours refusée');
+    ok(!(await client('POST', `/api/servers/${lid}/drive`, { name: 'x.exe', mime: 'application/x-msdownload', data: mp3 })).ok, 'format exécutable refusé');
+    console.log('Réglages : sections');
+    const schema = require('/tmp/schema.json');
+    await fetch(base + '/api/agent/sync', { method: 'POST', headers: { 'content-type': 'application/json', 'x-license-key': KEY }, body: JSON.stringify({ players: [], settingsSchema: schema }) });
+    const st = await client('GET', `/api/servers/${lid}/settings`); ok(st.ready && st.schema.length === schema.length, `${st.schema.length} réglages reçus du serveur de jeu`);
+    ok(st.schema.every(d => d.section), 'chaque réglage garde sa section');
+    const groups = [...new Set(st.schema.map(d => d.group))]; ok(groups.includes('Monde & PNJ') && groups.includes('Météo & heure') && groups.includes('Joueurs & combat'), 'catégories : ' + groups.join(' · '));
+    const put2 = await client('PUT', `/api/servers/${lid}/settings`, { values: { npc_enabled: true, npc_density: 0.3, weather_type: 'RAIN', welcome_message: 'Bienvenue {nom} !', friendly_fire: true } }); ok(put2.ok && put2.count === 4, '4 réglages modifiés enregistrés (friendly_fire à sa valeur par défaut = non stocké)');
+    ok(!(await client('PUT', `/api/servers/${lid}/settings`, { values: { npc_density: 7 } })).ok === false, 'une valeur hors limites est ramenée aux bornes');
+    ok(!(await client('PUT', `/api/servers/${lid}/settings`, { values: { weather_type: 'TORNADO' } })).ok, 'une option inconnue est refusée');
+    ok(!(await client('PUT', `/api/servers/${lid}/settings`, { values: { reglage_inconnu: 1 } })).ok, 'un réglage inconnu est refusé');
+  } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
+  console.log(process.exitCode ? '' : `\n${n} vérifications OK`); srv.close(); setTimeout(() => { fs.rmSync(__dirname + '/../data-test4', { recursive: true, force: true }); process.exit(process.exitCode || 0); }, 200);
+});

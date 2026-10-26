@@ -205,6 +205,7 @@ files {
     'loading/style.css',
     'loading/index.js',
     'loading/ui.js',
+    'loading/loading.json',
     'loading/background.png',
     'chat/theme.css',
     'loading/music/music.mp3',

@@ -24,12 +24,13 @@ const defs = {
   resource_start: (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
   resource_stop:  (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
   apply_theme: (p) => ({ core: !!p.core }),
+  apply_loading: (p) => ({ core: !!p.core }),
   refresh_docs: () => ({}),
   teleport:   (p) => { const id = int(p.id, 1, 65535), x = Number(p.x), y = Number(p.y); return id && Number.isFinite(x) && Number.isFinite(y) && x >= -6000 && x <= 8000 && y >= -8000 && y <= 11000 && { id, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }; },
   jobs_refresh: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
-const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1 };
+const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1, loading: 1 };
 const ECONOMY_PRESETS = ['equilibre', 'realiste', 'abuse'];
 function validateDoc(key, v) {
   if (!DOC_KEYS[key]) return { error: 'Document inconnu' };
@@ -49,6 +50,21 @@ function validateDoc(key, v) {
     t.BlipScale = num(v.BlipScale, 0.1, 3, 0.5); t.BlipColor = Math.round(num(v.BlipColor, -1, 85, -1));
     if (Object.values(t).includes(null)) return { error: 'Un champ du thème est invalide (pas de guillemets, longueur limitée)' };
     return { value: t };
+  }
+  if (key === 'loading') {
+    const clean = (x, max) => String(x == null ? '' : x).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
+    const url = x => { x = String(x == null ? '' : x).trim(); if (!x) return ''; return x.length <= 300 && /^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]+$/.test(x) ? x : null; };
+    const o = { tips: [], links: {}, team: [], updates: [], stages: [], music: {} };
+    for (const t of (Array.isArray(v.tips) ? v.tips : []).slice(0, 12)) { const x = clean(t, 140); if (x) o.tips.push(x); }
+    const L = v.links && typeof v.links === 'object' ? v.links : {};
+    for (const k of ['reglement', 'discord', 'boutique']) { const u = url(L[k]); if (u === null) return { error: `Lien « ${k} » invalide : il doit commencer par https://` }; o.links[k] = u; }
+    for (const m of (Array.isArray(v.team) ? v.team : []).slice(0, 12)) { const n = clean(m && m.name, 40); if (n) o.team.push({ name: n, role: clean(m.role, 60) }); }
+    for (const u of (Array.isArray(v.updates) ? v.updates : []).slice(0, 8)) { const t = clean(u && u.title, 60); if (t) o.updates.push({ date: clean(u.date, 20), title: t, items: (Array.isArray(u.items) ? u.items : []).map(i => clean(i, 120)).filter(Boolean).slice(0, 6) }); }
+    for (let i = 0; i < 4; i++) o.stages.push(clean(Array.isArray(v.stages) ? v.stages[i] : '', 40));
+    const M = v.music && typeof v.music === 'object' ? v.music : {}; const mu = url(M.url); if (mu === null) return { error: 'Adresse de la musique invalide : elle doit commencer par https://' };
+    const vol = Number(M.volume); o.music = { enabled: M.enabled !== false, url: mu, volume: Number.isFinite(vol) ? Math.min(100, Math.max(0, Math.round(vol))) : 10, autoplay: M.autoplay !== false };
+    o.showTeam = v.showTeam !== false; o.showUpdates = v.showUpdates !== false;
+    return { value: o };
   }
   if (key === 'bans') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: v.slice(0, 5000).map(b => ({ identifier: str(String(b.identifier || ''), 120, ID) || '', name: str(String(b.name || ''), 60) || '', reason: str(String(b.reason || ''), 120) || '', until: int(b.until || 0, 0, 4102444800) || 0, at: int(b.at || 0, 0, 4102444800) || 0 })).filter(b => b.identifier) }; }
   if (key === 'whitelist') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: [...new Set(v.map(x => str(String(x), 120, ID)).filter(Boolean))].slice(0, 20000) }; }

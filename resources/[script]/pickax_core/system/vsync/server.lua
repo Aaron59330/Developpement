@@ -357,3 +357,38 @@ RegisterCommand('realtime', function(source)
         print("L'heure suit de nouveau l'heure réelle.")
     end
 end, false)
+
+-- ─────────────── Réglages du panel web (pickax_settings > Météo & heure) ───────────────
+-- Météo dynamique ou fixe, panne de courant, heure figée : appliqués en direct, et au démarrage du serveur.
+local function applyPanelSettings(all, ov)
+    if type(all) ~= 'table' or type(ov) ~= 'table' then return end
+    local sync = false
+    if ov.weather_dynamic ~= nil or ov.weather_type ~= nil then
+        DynamicWeather = all.weather_dynamic == true
+        if not DynamicWeather and type(all.weather_type) == 'string' then CurrentWeather = all.weather_type end
+        sync = true
+    end
+    if ov.blackout ~= nil then blackout = all.blackout == true sync = true end
+    if ov.time_frozen ~= nil or ov.time_hour ~= nil then
+        if all.time_frozen == true then
+            ShiftToMinute(0)
+            ShiftToHour(math.floor(tonumber(all.time_hour) or 12))
+            freezeTime = true
+        else
+            freezeTime = false
+        end
+        sync = true
+    end
+    if sync then
+        TriggerClientEvent('DME:updateWeather', -1, CurrentWeather, blackout)
+        TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime, manualTime)
+    end
+end
+AddEventHandler('pickax_settings:changed', function(all, ov) applyPanelSettings(all, ov) end)
+CreateThread(function()
+    Wait(8000)
+    if GetResourceState('pickax_settings') ~= 'started' then return end
+    local ok, all = pcall(function() return exports.pickax_settings:GetAll() end)
+    local ok2, ov = pcall(function() return exports.pickax_settings:Overrides() end)
+    if ok and ok2 then applyPanelSettings(all, ov) end
+end)

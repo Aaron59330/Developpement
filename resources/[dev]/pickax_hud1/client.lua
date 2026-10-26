@@ -177,6 +177,7 @@ CreateThread(function()
 end)
 
 local nextStateCheck = 0
+local hideCrosshair = false
 CreateThread(function()
     local inFrontend = false
 
@@ -193,6 +194,7 @@ CreateThread(function()
             HideHudComponentThisFrame(17)
             HideHudComponentThisFrame(20)
 
+            if hideCrosshair then HideHudComponentThisFrame(14) end   -- viseur masqué depuis le panel web
             if not isShowingHiding then
                 HideHudComponentThisFrame(13)
                 HideHudComponentThisFrame(3)
@@ -275,4 +277,5 @@ AddEventHandler('pickax_settings:changed', function(all, ov)
     if ov.hud_armor ~= nil then Config.Health = Config.Health or {} Config.Health.ShowArmor = all.hud_armor end
     if ov.hud_health ~= nil or ov.hud_armor ~= nil then sendHealthConfig() end
     if ov.hud_needs ~= nil then SendNUIMessage({ action = 'setNeeds', value = all.hud_needs }) end
+    if ov.hud_crosshair ~= nil then hideCrosshair = all.hud_crosshair == false end
 end)

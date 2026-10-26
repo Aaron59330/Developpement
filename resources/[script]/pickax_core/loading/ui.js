@@ -95,4 +95,48 @@ var BACKGROUND = 'background.png';
 	document.getElementById('musicBtn').addEventListener('click', function () { this.blur(); toggleMusic(); });
 	window.onMusicToggle = function (on) { icOn.style.display = on ? '' : 'none'; icOff.style.display = on ? 'none' : ''; };
 	paintSlider();
+
+	// ===== Configuration réglée depuis le panel web (Écran de chargement) : loading/loading.json =====
+	// Chaque champ est facultatif : s'il est absent, la valeur d'origine de ce fichier est conservée.
+	var KEYC = 'pickax_loading_cfg_v1';
+	function applyCfg(c) {
+		if (!c || typeof c !== 'object') return;
+		if (c.links) ['reglement', 'discord', 'boutique'].forEach(function (k) { if (typeof c.links[k] === 'string') LINKS[k] = c.links[k]; });
+		if (Array.isArray(c.team)) { TEAM.length = 0; c.team.forEach(function (m) { TEAM.push(m); }); }
+		if (Array.isArray(c.updates)) { UPDATES.length = 0; c.updates.forEach(function (u) { UPDATES.push(u); }); }
+		if (Array.isArray(c.stages)) c.stages.forEach(function (t, i) { if (typeof t === 'string' && t) texts[i] = t; });
+		// messages du bandeau défilant
+		if (Array.isArray(c.tips) && c.tips.length) {
+			var tk = document.querySelector('.ticker');
+			if (tk) tk.innerHTML = c.tips.map(function (t) { return '<div class="ticker__item">' + esc(t) + '</div>'; }).join('');
+		}
+		// panneau équipe / mises à jour
+		var info = document.getElementById('info'), itabs = document.querySelectorAll('.itab');
+		var sT = c.showTeam !== false, sU = c.showUpdates !== false;
+		if (info) info.style.display = (sT || sU) ? '' : 'none';
+		Array.prototype.forEach.call(itabs, function (b) { var t = b.getAttribute('data-t'); b.style.display = (t === 'team' ? sT : sU) ? '' : 'none'; });
+		showInfo(sT ? 'team' : 'updates');
+		// boutons de liens : un bouton sans lien est masqué
+		Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (el) { if (c.links) el.style.display = LINKS[el.getAttribute('data-link')] ? '' : 'none'; });
+		// musique
+		var m = c.music;
+		if (m && typeof m === 'object') {
+			var vol = document.querySelector('.volume-control');
+			if (m.enabled === false) { try { myAudio.pause(); } catch (e) {} play = false; if (vol) vol.style.display = 'none'; }
+			else {
+				if (typeof m.url === 'string' && /^https:\/\//i.test(m.url)) { myAudio.src = m.url; }
+				if (typeof m.volume === 'number') { slider.value = Math.max(0, Math.min(100, Math.round(m.volume))); myAudio.volume = slider.value / 100; paintSlider(); }
+				if (m.autoplay === false) { try { myAudio.pause(); } catch (e) {} play = false; window.onMusicToggle(false); }
+				else { play = true; window.onMusicToggle(true); var pr = myAudio.play(); if (pr && pr.catch) pr.catch(function () {}); }
+			}
+		}
+	}
+	var cachedCfg = null;
+	try { cachedCfg = JSON.parse(localStorage.getItem(KEYC) || 'null'); } catch (e) {}
+	if (cachedCfg) applyCfg(cachedCfg);
+	fetch('loading.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (c) {
+		if (!c || typeof c !== 'object') return;
+		try { localStorage.setItem(KEYC, JSON.stringify(c)); } catch (e) {}
+		if (JSON.stringify(c) !== JSON.stringify(cachedCfg)) applyCfg(c);
+	});
 })();
