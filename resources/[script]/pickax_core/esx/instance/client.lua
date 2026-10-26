@@ -140,7 +140,7 @@ end)
 RegisterInstanceType('default')
 Citizen.CreateThread(function()
 	while true do
-		Citizen.Wait(0)
+		Citizen.Wait(instanceInvite and 0 or 250)   -- optimisation : au repos, un tour toutes les 250 ms
 
 		if instanceInvite then
 			ESX.ShowHelpNotification('Appuyez sur ~INPUT_CONTEXT~ pour entrer dans l\'instance')
@@ -208,9 +208,8 @@ end)
 
 Citizen.CreateThread(function()
 	while true do
-		Citizen.Wait(0)
-
 		if insideInstance then
+			Citizen.Wait(0)
 			SetVehicleDensityMultiplierThisFrame(0.0)
 			SetParkedVehicleDensityMultiplierThisFrame(0.0)
 

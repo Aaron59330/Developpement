@@ -10,5 +10,5 @@ shared_script 'config.lua'
 server_script 'server/main.lua'
 client_script 'client/main.lua'
 
-server_exports { 'Get', 'GetAll', 'Overrides', 'Set', 'SetMany', 'ApplyRemote', 'Schema', 'Reset' }
-exports { 'Get', 'GetAll', 'Overrides' }
+server_exports { 'Get', 'GetAll', 'Overrides', 'Set', 'SetMany', 'ApplyRemote', 'Schema', 'Reset', 'FpsStats' }
+exports { 'Get', 'GetAll', 'Overrides', 'IsPerf', 'Fps' }

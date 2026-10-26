@@ -12,6 +12,9 @@ local function pauseOpen()
     return state ~= nil and state ~= 0
 end
 
+local perfLow = false   -- mode performance (pickax_settings)
+AddEventHandler('pickax_perf:changed', function(on) perfLow = on == true end)
+
 local ESX = nil
 local STATUS_RESOURCE = 'esx_status'
 local STATUS_MAX = 1000000
@@ -156,6 +159,7 @@ CreateThread(function()
         if interval < 200 then
             interval = 200
         end
+        if perfLow then interval = interval * 2 end
 
         if GetResourceState(STATUS_RESOURCE) == 'started' then
             TriggerEvent('esx_status:getStatus', 'hunger', function(status)
@@ -172,6 +176,7 @@ CreateThread(function()
     end
 end)
 
+local nextStateCheck = 0
 CreateThread(function()
     local inFrontend = false
 
@@ -195,14 +200,19 @@ CreateThread(function()
             end
         end
 
+        -- Optimisation : l'état « menu pause / inventaire / changement de joueur » n'est évalué que toutes les 120 ms (au lieu de 4 natives à chaque image)
         if not uiFaded then
-            local shouldHide = pauseOpen() or IsPlayerSwitchInProgress() or inventoryOpen()   -- masqué aussi quand l'inventaire est ouvert
+            local now = GetGameTimer()
+            if now >= (nextStateCheck or 0) then
+                nextStateCheck = now + 120
+                local shouldHide = pauseOpen() or IsPlayerSwitchInProgress() or inventoryOpen()   -- masqué aussi quand l'inventaire est ouvert
 
-            -- ordre ré-envoyé toutes les secondes : un message perdu ne laisse jamais le HUD affiché derrière la carte
-            if shouldHide ~= inFrontend or GetGameTimer() - (lastHudSend or 0) > 1000 then
-                inFrontend = shouldHide
-                lastHudSend = GetGameTimer()
-                SendNUIMessage({ action = 'hideUi', value = shouldHide })
+                -- ordre ré-envoyé toutes les secondes : un message perdu ne laisse jamais le HUD affiché derrière la carte
+                if shouldHide ~= inFrontend or now - (lastHudSend or 0) > 1000 then
+                    inFrontend = shouldHide
+                    lastHudSend = now
+                    SendNUIMessage({ action = 'hideUi', value = shouldHide })
+                end
             end
         end
     end
@@ -230,7 +240,7 @@ end)
 CreateThread(function()
     local lastHealth, lastArmor, lastSend = -1, -1, 0
     while true do
-        Wait(200)
+        Wait(perfLow and 400 or 200)
         local ped = PlayerPedId()
         local health, armor = 0, 0
         if not IsEntityDead(ped) then

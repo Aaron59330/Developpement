@@ -4,6 +4,8 @@ local saved = GetResourceKvpString(KVP)
 if saved == '1' then enabled = true elseif saved == '0' then enabled = false end
 
 local hiddenByUi = false
+local perfLow = false   -- mode performance (pickax_settings) : rafraîchissement ralenti
+AddEventHandler('pickax_perf:changed', function(on) perfLow = on == true end)
 local visible = false
 
 AddEventHandler('pickax:inventory', function(open) hiddenByUi = open == true end)   -- même événement que le menu pause / inventaire : masque les HUD
@@ -48,7 +50,7 @@ CreateThread(function()
                 if st ~= street or zn ~= zone then street, zone, changed = st, zn, true end
             end
             if changed then lastH = h SendNUIMessage({ a = 'h', h = h, street = street, zone = zone }) end
-            Wait(Config.Refresh)
+            Wait(perfLow and math.max(Config.Refresh, 120) or Config.Refresh)
         else
             Wait(300)
         end

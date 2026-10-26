@@ -287,9 +287,12 @@ end
 RegisterCommand(Config.JobMenuCommand, function() toggleJobMenu('commande') end, false)
 -- Filet de sécurité : si le raccourci clavier enregistré (RegisterKeyMapping) a été perdu / réattribué dans les paramètres FiveM, F6 (contrôle 167) ouvre quand même le menu
 CreateThread(function()
+    local was = false
     while true do
-        Wait(0)
-        if IsControlJustPressed(0, 167) and not IsNuiFocused() then toggleJobMenu('touche F6') end
+        Wait(50)   -- optimisation : détection du front montant à 20 Hz (au lieu d'un test à chaque image)
+        local down = IsControlPressed(0, 167)
+        if down and not was and not IsNuiFocused() then toggleJobMenu('touche F6') end
+        was = down
     end
 end)
 RegisterKeyMapping(Config.JobMenuCommand, 'Menu métier', 'keyboard', Config.JobMenuKey)

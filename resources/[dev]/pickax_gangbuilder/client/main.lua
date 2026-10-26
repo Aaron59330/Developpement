@@ -243,9 +243,14 @@ end
 RegisterCommand(Config.GangMenuCommand, toggleGangMenu, false)
 -- Filet de sécurité : si le raccourci enregistré (RegisterKeyMapping) a été perdu / réattribué dans les paramètres FiveM, F7 (contrôle 168) ouvre quand même le menu
 CreateThread(function()
+    local was = false
     while true do
-        Wait(0)
-        if Config.GangMenuKey == 'F7' and IsControlJustPressed(0, 168) and not IsNuiFocused() then toggleGangMenu() end
+        if Config.GangMenuKey ~= 'F7' then Wait(2000) else
+            Wait(50)   -- optimisation : détection du front montant à 20 Hz (au lieu d'un test à chaque image)
+            local down = IsControlPressed(0, 168)
+            if down and not was and not IsNuiFocused() then toggleGangMenu() end
+            was = down
+        end
     end
 end)
 RegisterKeyMapping(Config.GangMenuCommand, 'Menu du gang', 'keyboard', Config.GangMenuKey)

@@ -9,9 +9,19 @@ local function isVector3(value)
     return valueType == 'vector3' or valueType == 'vector4'
 end
 
-local function markerKey(x, y, z)
-    -- Fixed coordinates are enough to identify a marker in this resource.
-    return ('%.3f:%.3f:%.3f'):format(x, y, z)
+-- Optimisation : le cache est une table imbriquée [x][y][z] (aucune chaîne créée à chaque image, contrairement à l'ancien string.format).
+local function getLocked(x, y, z)
+    local a = lockedGround[x]
+    if a then local b = a[y] if b then return b[z] end end
+    return nil
+end
+
+local function setLocked(x, y, z, value)
+    local a = lockedGround[x]
+    if not a then a = {} lockedGround[x] = a end
+    local b = a[y]
+    if not b then b = {} a[y] = b end
+    b[z] = value
 end
 
 local function addCandidate(candidates, z, sourceZ, maxDistance)
@@ -31,10 +41,8 @@ local function detectGroundOnce(x, y, sourceZ, marker)
         return sourceZ
     end
 
-    local key = markerKey(x, y, sourceZ)
-    if lockedGround[key] ~= nil then
-        return lockedGround[key]
-    end
+    local cached = getLocked(x, y, sourceZ)
+    if cached ~= nil then return cached end
 
     RequestCollisionAtCoord(x, y, sourceZ)
 
@@ -85,7 +93,7 @@ local function detectGroundOnce(x, y, sourceZ, marker)
 
     -- On verrouille uniquement le vrai Z du sol. Les compensations visuelles
     -- sont appliquées ensuite selon le type de marker.
-    lockedGround[key] = groundZ
+    setLocked(x, y, sourceZ, groundZ)
     return groundZ
 end
 
@@ -93,21 +101,34 @@ function ClearGlobalMarkerGroundCache()
     lockedGround = {}
 end
 
--- Couleur du serveur (AccentColor) : utilisée quand GlobalMarker.Color n'impose pas de r / g / b
+-- Couleur du serveur (AccentColor) : utilisée quand GlobalMarker.Color n'impose pas de r / g / b.
+-- Optimisation : décodée une seule fois (et seulement si la couleur change), pas à chaque image.
+local accHex, accR, accG, accB
 local function accentRGB()
     local h = Config and Config.AccentColor
-    if type(h) == 'string' and h:match('^#%x%x%x%x%x%x$') then
-        return tonumber(h:sub(2, 3), 16), tonumber(h:sub(4, 5), 16), tonumber(h:sub(6, 7), 16)
+    if h ~= accHex then
+        accHex = h
+        if type(h) == 'string' and h:match('^#%x%x%x%x%x%x$') then
+            accR, accG, accB = tonumber(h:sub(2, 3), 16), tonumber(h:sub(4, 5), 16), tonumber(h:sub(6, 7), 16)
+        else
+            accR, accG, accB = nil, nil, nil
+        end
     end
+    return accR, accG, accB
 end
 
+local A = {}   -- paramètres réutilisés d'un appel à l'autre : aucune table créée à chaque image
+
 function DrawGlobalMarker(...)
-    local args = { ... }
     local marker = Config and Config.GlobalMarker
 
     if not marker or marker.Enabled == false then
-        return DrawMarker(table.unpack(args))
+        return DrawMarker(...)
     end
+
+    local args = A
+    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12],
+    args[13], args[14], args[15], args[16], args[17], args[18], args[19], args[20], args[21], args[22], args[23], args[24] = ...
 
     local markerType = args[1]
     local x, y, z
@@ -126,7 +147,7 @@ function DrawGlobalMarker(...)
     end
 
     if not x or not y or not z then
-        return DrawMarker(table.unpack(args))
+        return DrawMarker(...)
     end
 
     local dirX = args[baseIndex] or 0.0

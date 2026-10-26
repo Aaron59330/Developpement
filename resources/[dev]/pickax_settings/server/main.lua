@@ -117,6 +117,24 @@ exports('Reset', function(key) return setMany({ [key] = { __reset = true } }) en
 
 RegisterNetEvent('pickax_settings:request', function() broadcast(source) end)
 
+-- FPS rapportés par les joueurs (1 message par minute et par joueur) : moyenne affichée dans le panel web
+local fpsBy = {}
+RegisterNetEvent('pickax_settings:fps', function(fps, perf)
+    local src = source
+    fps = tonumber(fps)
+    if not fps or fps < 1 or fps > 1000 then return end
+    local now = GetGameTimer()
+    local cur = fpsBy[src]
+    if cur and now - cur.at < 30000 then return end
+    fpsBy[src] = { fps = fps, perf = perf == true, at = now }
+end)
+AddEventHandler('playerDropped', function() fpsBy[source] = nil end)
+exports('FpsStats', function()
+    local n, sum, low, perf = 0, 0, 0, 0
+    for _, v in pairs(fpsBy) do n = n + 1 sum = sum + v.fps if v.fps < 30 then low = low + 1 end if v.perf then perf = perf + 1 end end
+    return { n = n, avg = n > 0 and math.floor(sum / n + 0.5) or 0, low = low, perf = perf }
+end)
+
 local function say(msg)
     TriggerClientEvent('pickax_notify:showNotification', -1, msg)
     TriggerClientEvent('chat:addMessage', -1, { args = { 'Serveur', (msg:gsub('~%a~', '')) } })

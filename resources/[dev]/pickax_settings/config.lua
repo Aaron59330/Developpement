@@ -38,6 +38,10 @@ Settings.Schema = {
     { key = 'voice_normal', group = 'Voix', label = 'Distance « normal » (m)', type = 'number', default = 7, min = 1, max = 80, step = 0.5 },
     { key = 'voice_shout', group = 'Voix', label = 'Distance « crier » (m)', type = 'number', default = 15, min = 2, max = 150, step = 0.5 },
 
+    -- ── Performance ─────────────────────────────────────────────────────────
+    { key = 'perf_mode', group = 'Performance', label = 'Mode performance des interfaces', type = 'select', default = 'auto', options = { { 'auto', 'Automatique (activé seulement si les FPS du joueur sont bas)' }, { 'on', 'Toujours activé (tous les joueurs)' }, { 'off', 'Désactivé' } }, hint = 'Supprime les ombres, lueurs, flous et animations en boucle des interfaces (HUD, menus, builders) : gain de FPS sur les PC faibles. Aucun effet sur les bons PC en mode automatique.' },
+    { key = 'perf_threshold', group = 'Performance', label = 'Seuil « FPS bas » du mode automatique', type = 'number', default = 40, min = 20, max = 60, step = 1, hint = 'Sous ce nombre d\'images par seconde pendant quelques secondes, le mode performance s\'active ; il se désactive quand les FPS remontent nettement.' },
+
     -- ── Économie ────────────────────────────────────────────────────────────
     { key = 'eco_weekend_income', group = 'Économie', label = 'Bonus de gains le week-end (×)', type = 'number', default = 1, min = 1, max = 3, step = 0.05, hint = '1 = aucun bonus. 1.5 = +50 % de gains le samedi et le dimanche (en plus du type d\'économie).' },
 }

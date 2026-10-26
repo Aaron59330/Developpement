@@ -128,3 +128,29 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     tryLive('https://cfx-nui-pickax_basetools/theme_live.json', function () { tryLive('https://cfx-nui-pickax_theme/theme_live.json', fromConfig); });
   } catch (e) { fromConfig(); }
 })();
+
+// ── Mode performance : coupe ombres, lueurs, flous et animations en boucle (gain de FPS sur les PC faibles) ──
+// État fourni par pickax_settings (NUI callback « getPerf ») : lu au chargement puis toutes les 8 s tant que la page est visible (1 requête locale, négligeable).
+(function () {
+  var st = null, on = false;
+  var apply = function (v) {
+    if (v === on) return;
+    on = v;
+    if (v) {
+      if (!st) {
+        st = document.createElement('style');
+        st.id = 'pk-perf';
+        st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;will-change:auto!important}';
+      }
+      (document.head || document.documentElement).appendChild(st);
+    } else if (st && st.parentNode) st.parentNode.removeChild(st);
+  };
+  var poll = function () {
+    if (document.hidden) return;
+    fetch('https://pickax_settings/getPerf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      .then(function (r) { return r.json(); }).then(function (j) { apply(!!(j && j.perf)); }).catch(function () {});
+  };
+  window.addEventListener('message', function (e) { if (e.data && e.data.pickaxPerf !== undefined) apply(!!e.data.pickaxPerf); });
+  poll();
+  setInterval(poll, 8000);
+})();

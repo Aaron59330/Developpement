@@ -3561,7 +3561,7 @@ function ESXCustomFonctionContextMenu:InTruck(vehicle)
     end
     Citizen.CreateThread(function()
         while true do
-            Citizen.Wait(0)
+            Citizen.Wait(inTrunk and 0 or 500)   -- optimisation : plus de tour à chaque image hors du coffre
             if inTrunk then
                 local vehicle = GetEntityAttachedTo(PlayerPedId())
                 if DoesEntityExist(vehicle) or not IsPedDeadOrDying(PlayerPedId()) or not IsPedFatallyInjured(PlayerPedId()) then

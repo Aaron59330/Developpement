@@ -192,7 +192,7 @@ Citizen.CreateThread(function()
 	SetNuiFocus(false)
 
 	while true do
-		Citizen.Wait(0)
+		Citizen.Wait((chatInputActive or chatInputActivating) and 0 or 25)   -- optimisation : 40 tests/s suffisent pour détecter la touche T
 
 		if not chatInputActive then
 			if IsControlPressed(0, 245) then
