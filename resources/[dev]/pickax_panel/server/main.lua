@@ -43,6 +43,16 @@ local function collectPlayers()
         src = tonumber(src)
         local x = ESX.GetPlayerFromId(src)
         local p = { id = src, name = GetPlayerName(src) or '?', identifier = identifierOf(src), ping = GetPlayerPing(src) }
+        -- position pour la carte live (natives serveur : OneSync requis ; sans OneSync le joueur reste simplement non localisé)
+        pcall(function()
+            local ped = GetPlayerPed(src)
+            if ped and ped ~= 0 then
+                local c = GetEntityCoords(ped)
+                p.x, p.y = math.floor(c.x * 10 + 0.5) / 10, math.floor(c.y * 10 + 0.5) / 10
+                p.h = math.floor(GetEntityHeading(ped) + 0.5)
+                p.veh = GetVehiclePedIsIn(ped, false) ~= 0
+            end
+        end)
         if x then
             local job = x.getJob and x.getJob() or x.job or {}
             p.job = job.name or ''; p.grade = job.grade or 0
@@ -101,6 +111,54 @@ end
 H.economy_event = function(p) if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy non démarré' end exports.pickax_economy:Event(p.key == 'all' and '' or p.key, p.swing, p.hours) return 'ok' end
 H.economy_reset = function(p) if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy non démarré' end exports.pickax_economy:Reset(p.key ~= '' and p.key or nil) return 'ok' end
 H.refresh_docs = function() return 'ok' end
+
+-- Téléporte un joueur à des coordonnées de la carte (le client cherche le sol, voir client/main.lua)
+H.teleport = function(p)
+    if not GetPlayerName(p.id) then return nil, 'joueur absent' end
+    TriggerClientEvent('pickax_panel:tp', p.id, p.x + 0.0, p.y + 0.0)
+    PanelLog('staff', 'teleport', ('%s téléporté en %.0f, %.0f'):format(GetPlayerName(p.id), p.x, p.y)) return 'téléporté'
+end
+local function refreshJobs() local ok = pcall(function() ESX.RefreshJobs() end) return ok end
+H.jobs_refresh = function() if not refreshJobs() then return nil, 'ESX.RefreshJobs indisponible' end return 'métiers rechargés' end
+
+-- ───────── éditeur de base : métiers et grades (tables ESX jobs / job_grades) ─────────
+local function sqlReady() return GetResourceState('oxmysql') == 'started' and MySQL ~= nil end
+H['db.jobs'] = function()
+    if not sqlReady() then return nil, 'oxmysql indisponible' end
+    local jobs = MySQL.query.await('SELECT name, label, whitelisted FROM jobs ORDER BY label') or {}
+    local grades = MySQL.query.await('SELECT job_name, grade, name, label, salary FROM job_grades ORDER BY job_name, grade') or {}
+    local by = {}
+    for _, j in ipairs(jobs) do j.whitelisted = (j.whitelisted == 1 or j.whitelisted == true) j.grades = {} by[j.name] = j end
+    for _, g in ipairs(grades) do local j = by[g.job_name] if j then j.grades[#j.grades + 1] = { grade = g.grade, name = g.name, label = g.label, salary = g.salary } end end
+    return 'ok', { jobs = jobs }
+end
+H['db.job_save'] = function(p)
+    if not sqlReady() then return nil, 'oxmysql indisponible' end
+    local j = p.job
+    if type(j) ~= 'table' or type(j.name) ~= 'string' or not j.name:match('^[a-z0-9_]+$') or #j.name > 40 then return nil, 'nom de métier invalide' end
+    if type(j.grades) ~= 'table' or #j.grades < 1 or #j.grades > 40 then return nil, 'au moins un grade est requis' end
+    local seen = {}
+    for _, g in ipairs(j.grades) do
+        if type(g.grade) ~= 'number' or g.grade < 0 or g.grade > 99 or g.grade % 1 ~= 0 or seen[g.grade] then return nil, 'numéros de grade invalides' end
+        if type(g.name) ~= 'string' or not g.name:match('^[%w_]+$') or #g.name > 40 then return nil, 'nom de grade invalide' end
+        if type(g.label) ~= 'string' or #g.label < 1 or #g.label > 50 then return nil, 'libellé de grade invalide' end
+        if type(g.salary) ~= 'number' or g.salary < 0 or g.salary > 1000000 then return nil, 'salaire invalide' end
+        seen[g.grade] = true
+    end
+    local exists = MySQL.scalar.await('SELECT 1 FROM jobs WHERE name = ?', { j.name })
+    if exists then MySQL.update.await('UPDATE jobs SET label = ?, whitelisted = ? WHERE name = ?', { j.label, j.whitelisted and 1 or 0, j.name })
+    else MySQL.insert.await('INSERT INTO jobs (name, label, whitelisted) VALUES (?, ?, ?)', { j.name, j.label, j.whitelisted and 1 or 0 }) end
+    local have = {}
+    for _, r in ipairs(MySQL.query.await('SELECT grade FROM job_grades WHERE job_name = ?', { j.name }) or {}) do have[r.grade] = true end
+    for _, g in ipairs(j.grades) do
+        if have[g.grade] then MySQL.update.await('UPDATE job_grades SET name = ?, label = ?, salary = ? WHERE job_name = ? AND grade = ?', { g.name, g.label, g.salary, j.name, g.grade })
+        else MySQL.insert.await("INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, '{}', '{}')", { j.name, g.grade, g.name, g.label, g.salary }) end
+    end
+    for gr in pairs(have) do if not seen[gr] then MySQL.update.await('DELETE FROM job_grades WHERE job_name = ? AND grade = ?', { j.name, gr }) end end
+    refreshJobs()
+    PanelLog('staff', 'jobs', ('métier %s enregistré (%d grades)'):format(j.name, #j.grades))
+    return exists and 'métier mis à jour' or 'métier créé', { message = exists and 'métier mis à jour' or 'métier créé' }
+end
 
 
 -- ───────── fichiers (fs/main.js), console, alimentation ─────────
@@ -358,7 +416,8 @@ local function runCommand(c)
     local ok, r1, r2 = pcall(f, c.payload or {})
     if not ok then PanelLog('error', 'pickax_panel', 'action ' .. tostring(c.type) .. ' : ' .. tostring(r1)) return false, tostring(r1):sub(1, 200) end
     if r1 == nil then return false, r2 or 'échec' end
-    return true, r1, (tostring(c.type):sub(1, 3) == 'fs.') and r2 or nil
+    local pre = tostring(c.type):sub(1, 3)
+    return true, r1, (pre == 'fs.' or pre == 'db.') and r2 or nil
 end
 
 local function runCommands(list)

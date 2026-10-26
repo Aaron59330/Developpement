@@ -25,6 +25,8 @@ const defs = {
   resource_stop:  (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
   apply_theme: (p) => ({ core: !!p.core }),
   refresh_docs: () => ({}),
+  teleport:   (p) => { const id = int(p.id, 1, 65535), x = Number(p.x), y = Number(p.y); return id && Number.isFinite(x) && Number.isFinite(y) && x >= -6000 && x <= 8000 && y >= -8000 && y <= 11000 && { id, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }; },
+  jobs_refresh: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
 const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1 };
@@ -62,7 +64,16 @@ function validateDoc(key, v) {
 // Appels « RPC » : le navigateur attend la réponse du serveur FiveM (fichiers)
 const PATH = /^[A-Za-z0-9_\-\.\[\] \/]{0,200}$/;
 function cleanPath(p) { if (typeof p !== 'string' || !PATH.test(p) || p.includes('..') || p.startsWith('/') || /\/\//.test(p)) return null; return p.replace(/\/+$/, ''); }
+const GR = /^[A-Za-z0-9_]{1,40}$/;
+function cleanJob(j) {
+  if (!j || typeof j !== 'object') return null; const name = str(j.name, 40, /^[a-z0-9_]+$/); const label = str(String(j.label || ''), 50); if (!name || !label || /[\u0000-\u001f]/.test(label)) return null;
+  if (!Array.isArray(j.grades) || j.grades.length < 1 || j.grades.length > 40) return null; const seen = new Set(); const grades = [];
+  for (const g of j.grades) { const grade = int(g.grade, 0, 99), gname = str(String(g.name || ''), 40, GR), glabel = str(String(g.label || ''), 50), salary = int(g.salary, 0, 1000000); if (grade === null || !gname || !glabel || salary === null || seen.has(grade) || /[\u0000-\u001f]/.test(glabel)) return null; seen.add(grade); grades.push({ grade, name: gname, label: glabel, salary }); }
+  return { name, label, whitelisted: !!j.whitelisted, grades: grades.sort((a, b) => a.grade - b.grade) };
+}
 const rpcDefs = {
+  'db.jobs':  () => ({}),
+  'db.job_save': (p) => { const job = cleanJob(p.job); return job && { job }; },
   'fs.list':  (p) => { const path = cleanPath(p.path || ''); return path !== null && { path }; },
   'fs.read':  (p) => { const path = cleanPath(p.path || ''); return path && { path }; },
   'fs.write': (p) => { const path = cleanPath(p.path || ''); if (!path || typeof p.content !== 'string' || p.content.length > 1000000) return null; return { path, content: p.content }; },

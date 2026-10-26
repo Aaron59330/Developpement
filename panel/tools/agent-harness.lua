@@ -40,7 +40,18 @@ local ESX = { GetPlayerFromId = function(id) local p = players[tostring(id)] if 
   return { getJob = function() return p.job end, getGroup = function() return p.group end, getAccount = function(a) return { money = a == 'money' and p.money or p.bank } end,
     setJob = function(j, g) p.job = { name = j, grade = g } end, setGroup = function(g) p.group = g end,
     addAccountMoney = function(a, n) if a == 'money' then p.money = p.money + n else p.bank = p.bank + n end end, removeAccountMoney = function(a, n) p.money = p.money - n end } end,
-  DoesJobExist = function(j, g) return j == 'police' or j == 'mecano' end }
+  DoesJobExist = function(j, g) return j == 'police' or j == 'mecano' end, RefreshJobs = function() events[#events + 1] = 'ESX.RefreshJobs' end }
+-- positions + base de données simulées (carte live, éditeur de métiers)
+function GetPlayerPed() return 1 end
+function GetEntityCoords() return { x = 195.34, y = -934.2, z = 30.0 } end
+function GetEntityHeading() return 90.4 end
+function GetVehiclePedIsIn() return 5 end
+local sql = {}
+MySQL = { query = { await = function(q, a) sql[#sql + 1] = q if q:find('FROM jobs') then return { { name = 'police', label = 'Police', whitelisted = 1 } } end if q:find('FROM job_grades') and not q:find('WHERE') then return { { job_name = 'police', grade = 0, name = 'recruit', label = 'Recrue', salary = 300 } } end if q:find('WHERE job_name') then return { { grade = 0 }, { grade = 5 } } end return {} end },
+  scalar = { await = function(q, a) sql[#sql + 1] = q return a[1] == 'police' and 1 or nil end },
+  update = { await = function(q, a) sql[#sql + 1] = q:sub(1, 40) .. ' ' .. table.concat(a, ',') return 1 end },
+  insert = { await = function(q, a) sql[#sql + 1] = q:sub(1, 40) .. ' ' .. table.concat(a, ',') return 1 end } }
+function GetResourceStateSql() end
 function GetConvar(k, d) return ({ aero_panel_url = URL, aero_panel_key = KEY, version = 'FXServer-sim', sv_hostname = 'HarnessRP' })[k] or d end
 function GetConvarInt(k, d) return d end
 function GetResourceMetadata() return '1.0.0' end
@@ -95,6 +106,7 @@ main()
 local n = 0
 _G.Wait = function() n = n + 1 if n > 6 then error('fin') end end
 for _, t in ipairs(threads) do pcall(t) end
+print('--- sql ---') for _, e in ipairs(sql) do print(e) end
 print('--- événements simulés ---') for _, e in ipairs(events) do print(e) end
 print('--- joueur 7 ---', players['7'] and (players['7'].job.name .. ' ' .. players['7'].job.grade .. ' ' .. players['7'].group .. ' $' .. players['7'].money) or 'absent')
 print('--- cache ---', files['cache_bans.json'], files['cache_motd.json'])

@@ -73,3 +73,12 @@ Paiement en ligne (Stripe/PayPal) : offres, modules et facturation gérés à la
 - « Commander » crée une commande **en attente** ; les instructions de paiement (Administration → Commandes) s'affichent au client.
 - L'admin clique **Valider** après réception du paiement : la licence est créée (ou prolongée pour un renouvellement) et le panel du client s'ouvre tout seul.
 - Les offres sont celles de Administration → Offres (l'offre « Essai » n'est jamais proposée à l'achat). Pour masquer une offre, désactive-la.
+
+## Carte live, éditeur de base, événements programmés, assistant IA
+
+- **Carte live** : joueurs en direct (position, cap, à pied / en véhicule, couleur par métier), clic pour agir (message, réanimer, expulser) et **téléportation en cliquant sur la carte**. Une image de fond et ses coordonnées se règlent depuis « Image de fond… » (mémorisées dans le navigateur).
+- **Éditeur de base** : métiers / grades / salaires (tables ESX `jobs` et `job_grades`, rechargés en jeu) et objets (`ox_inventory/data/items.lua` : nom, poids, empilable ; les autres lignes du fichier ne sont jamais touchées, chaque enregistrement crée une version restaurable).
+- **Événements programmés** : annonces, redémarrages, événements d'économie, avec répétition quotidienne / hebdomadaire et préavis automatique. Le planificateur tourne dans le panel (toutes les 15 s) ; un événement en retard de plus de 15 min (serveur hors ligne) est marqué « manqué ».
+- **Assistant IA** : propose des actions précises (annonce, économie, redémarrage, réglage, programmation) que le client valide une à une ; chaque action est revalidée par le panel avant exécution. Nécessite `ANTHROPIC_API_KEY`.
+- Côté jeu, ces fonctions demandent la dernière version de `pickax_panel` (positions des joueurs, téléportation, métiers en base : dépend maintenant d'`oxmysql`).
+- Tests : `node tools/selftest3.js`.

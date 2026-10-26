@@ -22,14 +22,15 @@ router.get('/:id/fs/read', async (req, res) => {
   const content = String((r.data && r.data.content) || ''); if (!lastOf(l.id, v.payload.path)) addVersion(l.id, v.payload.path, content, 'Version d’origine', null);
   res.json({ ok: true, content, size: Buffer.byteLength(content), versions: db.prepare('SELECT COUNT(*) n FROM file_versions WHERE license_id=? AND path=?').get(l.id, v.payload.path).n });
 });
-async function writeFile(req, res, l, path, content, note, create) {
-  const v = C.validateRpc(create ? 'fs.create' : 'fs.write', { path, content }); if (v.error) return res.json({ ok: false, error: v.error });
-  const r = await bus.rpc(l.id, create ? 'fs.create' : 'fs.write', v.payload, req.user.id, 20000); if (!r.ok) return res.json(r);
-  if (!create && !lastOf(l.id, path)) { /* pas d'original connu : on garde au moins la nouvelle version */ }
+// enregistre un fichier sur le serveur FiveM + historique ; renvoie { ok, version, message } sans répondre au navigateur
+async function saveFile(req, l, path, content, note, create) {
+  const v = C.validateRpc(create ? 'fs.create' : 'fs.write', { path, content }); if (v.error) return { ok: false, error: v.error };
+  const r = await bus.rpc(l.id, create ? 'fs.create' : 'fs.write', v.payload, req.user.id, 20000); if (!r.ok) return r;
   const vid = addVersion(l.id, path, content, note || (create ? 'Création' : ''), req.user.id);
   audit(req.user.id, l.id, create ? 'file:create' : 'file:write', path, A.ip(req)); db.prepare("INSERT INTO logs(license_id,level,source,message,at) VALUES(?,?,?,?,?)").run(l.id, 'staff', 'panel', `${req.user.username} a ${create ? 'créé' : 'modifié'} ${path}`, now());
-  res.json({ ok: true, version: vid, message: r.data && r.data.message });
+  return { ok: true, version: vid, message: r.data && r.data.message };
 }
+async function writeFile(req, res, l, path, content, note, create) { res.json(await saveFile(req, l, path, content, note, create)); }
 router.post('/:id/fs/write', async (req, res) => { const l = guard(req, res); if (!l) return; const b = req.body || {}; await writeFile(req, res, l, b.path, b.content, b.note, false); });
 router.post('/:id/fs/create', async (req, res) => { const l = guard(req, res); if (!l) return; const b = req.body || {}; await writeFile(req, res, l, b.path, b.content || '', 'Création', true); });
 router.get('/:id/fs/versions', (req, res) => { const l = own(req, res); if (!l) return; const path = C.cleanPath(String(req.query.path || '')); if (!path) return res.json({ ok: false, error: 'Chemin invalide' });
@@ -63,4 +64,5 @@ router.post('/:id/ai', async (req, res) => {
     audit(req.user.id, l.id, 'ai', path + ' : ' + instruction.slice(0, 100), A.ip(req)); res.json({ ok: true, note: note.trim(), content: file[1], changed: file[1] !== content });
   } catch (e) { res.json({ ok: false, error: 'Service IA injoignable' }); }
 });
+router.saveFile = saveFile; router.addVersion = addVersion; router.lastOf = lastOf;
 module.exports = router;
