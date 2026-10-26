@@ -51,6 +51,7 @@ local function startResource(n)
   rstate[n] = 'started' log.started[#log.started + 1] = n trigger('onResourceStart', n)
 end
 function ExecuteCommand(c) local n = c:match('^ensure (%S+)') if n then log.ensured[#log.ensured + 1] = n if rstate[n] ~= 'started' then startResource(n) end end end
+function StartResource(n) log.ensured[#log.ensured + 1] = n if rstate[n] ~= 'started' then startResource(n) end return true end
 function StopResource(n) if rstate[n] == 'started' then rstate[n] = 'stopped' log.stopped[#log.stopped + 1] = n end end
 function LoadResourceFile(_, f) local h = io.open(env('GUARD_DIR', '/tmp') .. '/' .. f, 'r') if not h then return nil end local s = h:read('a') h:close() return s end
 function SaveResourceFile(_, f, c) local h = io.open(env('GUARD_DIR', '/tmp') .. '/' .. f, 'w') if not h then return false end h:write(c) h:close() return true end

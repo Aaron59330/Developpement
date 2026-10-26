@@ -55,7 +55,7 @@ local function release()
         while #held > 0 and state.ok do
             local name = table.remove(held, 1)
             heldSet[name] = nil
-            ExecuteCommand('ensure ' .. name)
+            StartResource(name)   -- natif : ne dépend pas de la permission « command.ensure » (refusée chez certains hébergeurs)
             local t = 0
             while t < 150 and GetResourceState(name) == 'starting' do Wait(100) t = t + 1 end
             Wait(150)
