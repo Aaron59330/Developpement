@@ -109,3 +109,14 @@ Le script ne présuppose rien de précis : tout est dans `Config.Job2` et `serve
 - Un gang **sans coffre** ne peut pas prendre le colis. Tout est calculé côté serveur (positions, temps, livraison).
 - Réglages en jeu : `/gangbuilder` → Paramètres → **Affrontements** et **Missions colis**.
 - Export serveur : `exports.pickax_gangbuilder:StartObjective('port')`, `exports.pickax_gangbuilder:GetObjective()`.
+
+
+## Territoires 2.0 : niveaux, équité, racket
+
+Tout est réglable dans `config.lua` (`Config.Territories`) et en jeu (Paramètres → Territoires).
+
+- **Niveaux** (`Levels`) : le bureau du gang améliore un territoire depuis la tablette (Zones → Améliorer), payé par la trésorerie (`UpgradeAccount`). Chaque niveau augmente le revenu, ralentit la capture par un rival, allonge la protection après capture et augmente le racket. Un territoire capturé perd `LevelLoss` niveau(x).
+- **Équité** : `MinDefenders` (membres du propriétaire connectés requis pour capturer : plus de raid dans le dos), `Windows` (heures du serveur où la capture est permise, ex. `{ {18, 23} }`), `MaxPerGang` (plafond de territoires par gang). Les affrontements du Builder Illégal respectent les mêmes règles.
+- **Racket** : un gang qui vend de la drogue sur le territoire d'un autre paie `RacketRate` % au propriétaire (via `exports.pickax_gangbuilder:TerritoryTax`, appelé par le Builder Illégal). Les membres du gang propriétaire ne paient rien ; les notifications du propriétaire sont groupées (1 par minute et par territoire).
+- Base de données : colonne `level` ajoutée automatiquement à `gangbuilder_territories` au démarrage (aussi dans `database.sql`).
+- Tests hors jeu : `lua5.4 tools/tests/territories_test.lua` (42 vérifications).

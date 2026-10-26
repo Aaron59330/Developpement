@@ -361,7 +361,8 @@ CREATE TABLE `gangbuilder_territories` (
   `owner` varchar(50) DEFAULT NULL,
   `captured_at` int(11) NOT NULL DEFAULT 0,
   `protected_until` int(11) NOT NULL DEFAULT 0,
-  `last_income` int(11) NOT NULL DEFAULT 0
+  `last_income` int(11) NOT NULL DEFAULT 0,
+  `level` tinyint(4) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

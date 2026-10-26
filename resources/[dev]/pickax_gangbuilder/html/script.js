@@ -205,9 +205,9 @@ const Hud = {
   zone(d) {
     const el = document.getElementById('zonehud');
     if (!d) { el.classList.add('hidden'); return; }
-    const status = { capturing: ['Capture en cours', 'warn'], contested: ['Zone contestée', 'bad'], protected: [`Protégé encore ${fmtUntil(d.protectedLeft)}`, 'info'], decaying: ['Capture en recul', 'mute'], idle: ['Zone libre d\'attaque', 'mute'], short: [`Membres insuffisants (${d.need || '?'} requis)`, 'warn'], captured: ['Capturé !', 'ok'] }[d.status] || ['', 'mute'];
+    const status = { capturing: ['Capture en cours', 'warn'], contested: ['Zone contestée', 'bad'], protected: [`Protégé encore ${fmtUntil(d.protectedLeft)}`, 'info'], decaying: ['Capture en recul', 'mute'], idle: ['Zone libre d\'attaque', 'mute'], nodef: ['Aucun défenseur connecté : capture impossible', 'info'], closed: ['Capture fermée à cette heure', 'info'], cap: ['Limite de territoires atteinte', 'info'], short: [`Membres insuffisants (${d.need || '?'} requis)`, 'warn'], captured: ['Capturé !', 'ok'] }[d.status] || ['', 'mute'];
     el.style.setProperty('--zone', d.color || 'var(--accent)');
-    el.innerHTML = `<div class="eyebrow">Territoire</div><b>${esc(d.label)}</b><small>${d.owner ? 'Propriétaire : ' + esc(d.owner) : 'Aucun propriétaire'}${d.attacker ? ' · Attaquant : ' + esc(d.attacker) : ''}</small>
+    el.innerHTML = `<div class="eyebrow">Territoire</div><b>${esc(d.label)}${d.level > 1 ? ` <span class="zlvl">Niv. ${d.level}</span>` : ''}</b><small>${d.owner ? 'Propriétaire : ' + esc(d.owner) : 'Aucun propriétaire'}${d.attacker ? ' · Attaquant : ' + esc(d.attacker) : ''}</small>
       <div class="bar"><i style="width:${Math.min(100, d.progress || 0)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:8px">${chip(status[0], status[1])}<span class="muted sm-t">${Math.floor(d.progress || 0)} %</span></div>`;
     el.classList.remove('hidden');
     if (d.conflict) {

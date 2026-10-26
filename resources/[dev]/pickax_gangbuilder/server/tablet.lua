@@ -318,11 +318,19 @@ local function snapshot(src)
         local st = GB.territoryStatus and GB.territoryStatus(id) or nil
         if t.owner == gang.name then mine = mine + 1 end
         local interval = math.max(1, tonumber(t.settings and t.settings.interval) or Tc.IncomeInterval)
+        local lvl = GB.territoryLevel and GB.territoryLevel(t) or 1
+        local mul = GB.territoryMul or function() return 1.0 end
+        local nextL = t.owner == gang.name and (Tc.Levels or {})[lvl + 1] or nil
+        local blocked = nil
+        if t.owner ~= gang.name and GB.canCapture then local can, why = GB.canCapture(t, gang.name) if not can then blocked = why end end
         terr[#terr + 1] = {
             id = id, label = t.label, x = t.coords.x, y = t.coords.y, radius = t.radius,
             owner = t.owner, ownerLabel = o and o.label or nil, ownerColor = o and o.color or nil, mine = t.owner == gang.name,
             protectedLeft = math.max(0, (t.protected_until or 0) - now),
-            income = math.floor(tonumber(t.settings and t.settings.reward) or Tc.Reward), incomeEvery = interval,
+            level = lvl, maxLevel = GB.territoryMaxLevel and GB.territoryMaxLevel() or 1, blocked = blocked,
+            upgrade = nextL and { cost = math.floor(tonumber(nextL.cost) or 0), income = tonumber(nextL.income) or 1, capture = tonumber(nextL.capture) or 1, protection = tonumber(nextL.protection) or 1, account = Tc.UpgradeAccount == 'money' and 'propre' or 'sale' } or nil,
+            racket = Tc.RacketEnabled and math.floor(math.min(90, (tonumber(Tc.RacketRate) or 0) * mul(t, 'racket'))) or 0,
+            income = math.floor((tonumber(t.settings and t.settings.reward) or Tc.Reward) * mul(t, 'income')), incomeEvery = interval,
             nextIncome = t.owner and math.max(0, (t.last_income or 0) + interval * 60 - now) or nil,
             progress = st and st.progress or 0, attacker = st and st.attacker and label(st.attacker) or nil,
         }

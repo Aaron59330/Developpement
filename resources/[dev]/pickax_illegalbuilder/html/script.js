@@ -344,7 +344,7 @@ const DealerPanel = new (class extends PanelBase {
   async sell(item, qty) {
     const r = await this.act('drug:sell', this.d.eid, this.d.pi, item, qty);
     if (!r || !r.ok) return;
-    toast(`Vendu ${r.qty} × ${item} pour ${money(r.total)}`, 'ok');
+    toast(`Vendu ${r.qty} × ${item} pour ${money(r.total)}${r.tax ? ` (racket du gang local : −${money(r.tax)})` : ''}`, 'ok');
     const it = this.d.items.find(x => x.item === item); if (it) it.have -= r.qty;
     if (this.d.left >= 0) this.d.left = Math.max(0, this.d.left - r.qty);
     this.render();

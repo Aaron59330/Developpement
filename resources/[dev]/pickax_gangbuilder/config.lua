@@ -198,6 +198,27 @@ Config.Territories = {
     BlipAlpha         = 120,     -- transparence de la zone (0-255)
     DrawZone          = true,    -- dessine la zone au sol quand on est proche
     ZoneAlpha         = 35,      -- transparence de la zone au sol
+
+    -- ── Niveaux : le bureau du gang améliore un territoire depuis la tablette (Territoires → Améliorer), payé par la trésorerie ──
+    -- Chaque niveau multiplie le revenu, ralentit la capture par un rival (durée × capture), allonge la protection après capture et augmente le racket.
+    -- Un territoire capturé perd LevelLoss niveau(x) (minimum 1). Mets une seule ligne dans Levels pour supprimer les niveaux.
+    Levels = {
+        { },                                                                             -- niveau 1 : valeurs de base
+        { cost = 15000, income = 1.5, capture = 1.25, protection = 1.5, racket = 1.25 }, -- niveau 2
+        { cost = 40000, income = 2.0, capture = 1.5,  protection = 2.0, racket = 1.5 },  -- niveau 3
+    },
+    UpgradeAccount    = 'dirty', -- compte de la trésorerie qui paie l'amélioration : 'dirty' | 'money'
+    LevelLoss         = 1,       -- niveaux perdus quand le territoire est capturé
+
+    -- ── Équité : empêche les raids « dans le dos » ──
+    MinDefenders      = 1,       -- membres du propriétaire connectés requis pour pouvoir capturer son territoire (0 = pas de condition)
+    Windows           = {},      -- heures du serveur où la capture est possible : { {18, 23}, {2, 4} } (de 18h à 23h et de 2h à 4h) ; {} = 24h/24
+    MaxPerGang        = 0,       -- territoires max par gang (0 = illimité) : évite qu'un gang ramasse toute la ville
+
+    -- ── Racket : un gang qui vend de la drogue sur un territoire adverse paie une taxe au propriétaire ──
+    RacketEnabled     = true,
+    RacketRate        = 10,      -- % du prix de vente reversé à la trésorerie du propriétaire (× multiplicateur « racket » du niveau)
+    RacketAccount     = 'dirty', -- 'dirty' | 'money'
 }
 
 -- ─────────────────────────────── Activités illégales ───────────────────────────────
@@ -484,6 +505,13 @@ Config.Schema = {
         { key = 'Territories.Reward', label = 'Revenu par période ($)', t = 'int', min = 0, max = 100000000, server = true },
         { key = 'Territories.RewardAccount', label = 'Compte crédité', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale du gang' }, { 'money', 'Argent propre du gang' }) },
         { key = 'Territories.MaxTerritories', label = 'Territoires max', t = 'int', min = 1, max = 500, server = true },
+        { key = 'Territories.UpgradeAccount', label = 'Amélioration payée avec', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale du gang' }, { 'money', 'Argent propre du gang' }) },
+        { key = 'Territories.LevelLoss', label = 'Niveaux perdus à la capture', t = 'int', min = 0, max = 10, server = true },
+        { key = 'Territories.MinDefenders', label = 'Défenseurs connectés requis pour capturer', t = 'int', min = 0, max = 50, server = true },
+        { key = 'Territories.MaxPerGang', label = 'Territoires max par gang (0 = illimité)', t = 'int', min = 0, max = 500, server = true },
+        { key = 'Territories.RacketEnabled', label = 'Racket sur les ventes de drogue', t = 'bool', server = true },
+        { key = 'Territories.RacketRate', label = 'Taux du racket (%)', t = 'num', min = 0, max = 100, server = true },
+        { key = 'Territories.RacketAccount', label = 'Racket versé en', t = 'enum', server = true, opts = opts({ 'dirty', 'Argent sale du gang' }, { 'money', 'Argent propre du gang' }) },
         { key = 'Territories.DefaultRadius', label = 'Rayon par défaut (m)', t = 'num', min = 5, max = 1000, server = true },
         { key = 'Territories.MaxRadius', label = 'Rayon max (m)', t = 'num', min = 10, max = 1000, server = true },
         { key = 'Territories.AnnounceCapture', label = 'Prévenir les gangs lors d\'une capture', t = 'bool', server = true },

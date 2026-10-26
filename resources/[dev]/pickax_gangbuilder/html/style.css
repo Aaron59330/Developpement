@@ -298,3 +298,6 @@ kbd { border-color: var(--accent-line); }
 .profile.logo-only { display: flex; align-items: center; justify-content: center; padding: 12px; }
 .profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
 .profile .pname { display: none; }
+
+/* niveau d'un territoire dans le HUD de capture */
+.zlvl { margin-left: 6px; padding: 1px 7px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--pk-accent, #fdc27d); color: var(--pk-accent, #fdc27d); }

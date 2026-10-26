@@ -112,7 +112,13 @@ local function resolve(c)
         if (t.protected_until or 0) > os.time() then
             for _, s in ipairs(members(c)) do GB.notify(s, ('~y~%s~s~ est protégé : l\'affrontement ne change pas le propriétaire.'):format(name)) end
         elseif GB.captureTerritory then
-            GB.captureTerritory(t, c.intruder)
+            local can, why = true, nil
+            if GB.canCapture then can, why = GB.canCapture(t, c.intruder) end
+            if can then GB.captureTerritory(t, c.intruder)
+            else
+                local reason = why == 'cap' and 'limite de territoires atteinte' or why == 'closed' and 'capture fermée à cette heure' or 'aucun défenseur connecté'
+                for _, s in ipairs(members(c)) do GB.notify(s, ('~y~%s~s~ ne change pas de propriétaire (%s).'):format(name, reason)) end
+            end
         end
     end
     if GB.questProgress and (intruderWins and si or so) > 0 then GB.questProgress(winner, 'conflict_win', 1) end

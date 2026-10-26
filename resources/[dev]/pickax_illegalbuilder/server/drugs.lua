@@ -235,12 +235,18 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
     local total = unit * qty
     if not IB.removeItem(src, item, qty) then return cb({ ok = false, error = 'Erreur' }) end
     c.n = c.n + qty
-    IB.pay(xPlayer, ACCOUNT[s.currency] or 'black_money', total, 'Vente : ' .. item)
+    -- Racket : sur le territoire d'un gang adverse, une part de la vente est reversée au propriétaire (pickax_gangbuilder → Config.Territories.Racket*)
+    local tax = 0
+    if GetResourceState('pickax_gangbuilder') == 'started' then
+        local okT, t = pcall(function() return exports.pickax_gangbuilder:TerritoryTax(src, total, 'vente de ' .. item) end)
+        if okT then tax = math.min(total, math.max(0, math.floor(tonumber(t) or 0))) end
+    end
+    IB.pay(xPlayer, ACCOUNT[s.currency] or 'black_money', total - tax, 'Vente : ' .. item)
     maybeAlert(p, e)
     reportGang(src, 'sell')
-    IB.stat(e, 'revenue', total) IB.stat(e, 'sold', qty)
-    IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total)
-    cb({ ok = true, qty = qty, unit = unit, total = total })
+    IB.stat(e, 'revenue', total - tax) IB.stat(e, 'sold', qty)
+    IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total - tax)
+    cb({ ok = true, qty = qty, unit = unit, total = total - tax, tax = tax })
 end)
 
 -- ═══════════════ Blanchiment ═══════════════

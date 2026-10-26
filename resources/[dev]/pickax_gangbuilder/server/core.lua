@@ -225,13 +225,23 @@ exports('AddGangRep', function(gang, amount) GB.addRep(tostring(gang), amount) e
 exports('GetPlayerGang', function(src) local n, g = GB.job2Of(src) return n and GB.Gangs[n] and { name = n, grade = g, label = GB.Gangs[n].label } or nil end)
 
 -- ─────────────────────────────── Base de données ───────────────────────────────
+-- Migration : colonne « level » des territoires (niveaux améliorables depuis la tablette)
+local function migrate()
+    local has = MySQL.scalar.await("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'gangbuilder_territories' AND COLUMN_NAME = 'level'")
+    if (tonumber(has) or 0) == 0 then
+        pcall(MySQL.query.await, 'ALTER TABLE gangbuilder_territories ADD COLUMN level TINYINT NOT NULL DEFAULT 1')
+    end
+end
+
 local function installTables()
     local sql = LoadResourceFile(GetCurrentResourceName(), 'sql/install.sql')
-    if not sql then return end -- tables déjà créées par database.sql
-    sql = sql:gsub('%-%-[^\n]*', '')
-    for stmt in sql:gmatch('[^;]+') do
-        if stmt:match('%S') then MySQL.query.await(stmt) end
+    if sql then
+        sql = sql:gsub('%-%-[^\n]*', '')
+        for stmt in sql:gmatch('[^;]+') do
+            if stmt:match('%S') then MySQL.query.await(stmt) end
+        end
     end
+    pcall(migrate)
 end
 
 -- Requête de lecture des grades (colonnes de job2_grades configurables)
@@ -288,6 +298,7 @@ function GB.loadAll()
     for _, t in ipairs(MySQL.query.await('SELECT * FROM gangbuilder_territories ORDER BY id') or {}) do
         t.coords = GB.decode(t.coords, { x = 0, y = 0, z = 0 })
         t.settings = GB.decode(t.settings, {})
+        t.level = math.max(1, math.floor(tonumber(t.level) or 1))
         if t.owner and not GB.Gangs[t.owner] then t.owner = nil end
         GB.Territories[t.id] = t
     end

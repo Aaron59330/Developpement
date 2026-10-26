@@ -28,6 +28,49 @@ local function val(t, key, default)
     return default
 end
 
+-- ─────────────────────────────── Niveaux, équité (défenseurs / heures / plafond) ───────────────────────────────
+local function maxLevel() return math.max(1, #(Config.Territories.Levels or {})) end
+local function levelOf(t) return math.max(1, math.min(maxLevel(), math.floor(tonumber(t.level) or 1))) end
+-- multiplicateur d'un niveau pour une clé (income / capture / protection / racket) ; 1.0 si non défini
+local function lvlMul(t, key)
+    local L = (Config.Territories.Levels or {})[levelOf(t)]
+    local v = L and tonumber(L[key])
+    return (v and v > 0) and v or 1.0
+end
+GB.territoryLevel, GB.territoryMul, GB.territoryMaxLevel = levelOf, lvlMul, maxLevel
+
+-- Heures du serveur où la capture est possible. Windows = { {18, 23} } : de 18h00 à 22h59 ; une fenêtre peut passer minuit : { {22, 2} }
+local function inWindow()
+    local W = Config.Territories.Windows
+    if type(W) ~= 'table' or #W == 0 then return true end
+    local h = tonumber(os.date('%H'))
+    for _, w in ipairs(W) do
+        local a, b = tonumber(w[1]), tonumber(w[2])
+        if a and b then
+            if a <= b then if h >= a and h < b then return true end
+            elseif h >= a or h < b then return true end
+        end
+    end
+    return false
+end
+
+local function ownedBy(gangName)
+    local n = 0
+    for _, x in pairs(GB.Territories) do if x.owner == gangName then n = n + 1 end end
+    return n
+end
+
+-- Un gang peut-il capturer ce territoire maintenant ? Renvoie true, ou false + raison : 'closed' (hors des heures), 'nodef' (aucun défenseur connecté), 'cap' (plafond du gang atteint)
+function GB.canCapture(t, gangName)
+    local T = Config.Territories
+    if not inWindow() then return false, 'closed' end
+    local need = math.floor(tonumber(T.MinDefenders) or 0)
+    if t.owner and need > 0 and #GB.onlineMembers(t.owner) < need then return false, 'nodef' end
+    local cap = math.floor(tonumber(T.MaxPerGang) or 0)
+    if cap > 0 and gangName and ownedBy(gangName) >= cap and t.owner ~= gangName then return false, 'cap' end
+    return true
+end
+
 function GB.territoryList()
     local list = {}
     for id, t in pairs(GB.Territories) do
@@ -51,6 +94,7 @@ local function reload()
     for _, t in ipairs(MySQL.query.await('SELECT * FROM gangbuilder_territories ORDER BY id') or {}) do
         t.coords = GB.decode(t.coords, { x = 0, y = 0, z = 0 })
         t.settings = GB.decode(t.settings, {})
+        t.level = math.max(1, math.floor(tonumber(t.level) or 1))
         if t.owner and not GB.Gangs[t.owner] then t.owner = nil end
         GB.Territories[t.id] = t
     end
@@ -64,9 +108,10 @@ local function capture(t, gangName)
     local T, now = Config.Territories, os.time()
     local previous = t.owner
     t.owner, t.captured_at = gangName, now
-    t.protected_until = now + math.floor(val(t, 'protection', T.ProtectionMinutes)) * 60
+    t.level = previous and math.max(1, levelOf(t) - math.floor(tonumber(T.LevelLoss) or 1)) or 1   -- le territoire perd des niveaux quand il change de main
+    t.protected_until = now + math.floor(val(t, 'protection', T.ProtectionMinutes) * lvlMul(t, 'protection')) * 60
     t.last_income = now
-    MySQL.update('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = ?, last_income = ? WHERE id = ?', { gangName, now, t.protected_until, now, t.id })
+    MySQL.update('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = ?, last_income = ?, level = ? WHERE id = ?', { gangName, now, t.protected_until, now, t.level, t.id })
     GB.addRep(gangName, Config.Rep.PerCapture)
     if GB.questProgress then GB.questProgress(gangName, 'capture', 1) end
     if GB.news then GB.news(('%s a capturé %s%s.'):format(GB.Gangs[gangName].label, t.label, previous and GB.Gangs[previous] and (' à ' .. GB.Gangs[previous].label) or ''), 'territory') end
@@ -109,7 +154,7 @@ local function tick()
         end
 
         local minM = math.floor(val(t, 'min_members', T.MinMembers))
-        local step = 100 * T.Tick / math.max(1, val(t, 'capture_seconds', T.CaptureSeconds))
+        local step = 100 * T.Tick / math.max(1, val(t, 'capture_seconds', T.CaptureSeconds) * (t.owner and lvlMul(t, 'capture') or 1.0))
         local protected = (t.protected_until or 0) > now
         local attackers, others = {}, 0
         for gname, n in pairs(present) do
@@ -123,6 +168,14 @@ local function tick()
 
         if protected then
             st.progress, st.attacker, status = 0, nil, 'protected'
+        elseif others == 1 and #attackers == 1 and not (T.OwnerBlocks and ownerPresent) and not GB.canCapture(t, attackers[1]) then
+            -- capture impossible maintenant (hors des heures, aucun défenseur connecté, plafond du gang) : la barre redescend
+            local _, why = GB.canCapture(t, attackers[1])
+            status = why
+            if st.progress > 0 then
+                st.progress = math.max(0, st.progress - step * T.DecayFactor)
+                if st.progress == 0 then st.attacker = nil end
+            end
         elseif others == 1 and #attackers == 1 and not (T.OwnerBlocks and ownerPresent) then
             local a = attackers[1]
             if st.attacker ~= a then st.attacker, st.progress = a, 0 end
@@ -155,7 +208,7 @@ local function tick()
             local o = t.owner and GB.Gangs[t.owner]
             local a = st.attacker and GB.Gangs[st.attacker]
             TriggerClientEvent('gangbuilder:client:zone', p.src, {
-                id = id, label = t.label, progress = math.floor(st.progress * 10) / 10, status = status, need = minM,
+                id = id, label = t.label, level = levelOf(t), progress = math.floor(st.progress * 10) / 10, status = status, need = minM,
                 owner = o and o.label or nil, attacker = a and a.label or nil, color = a and a.color or (o and o.color or nil),
                 protectedLeft = protected and (t.protected_until - now) or 0,
                 conflict = GB.conflictInfo and GB.conflictInfo(id) or nil,
@@ -191,7 +244,7 @@ CreateThread(function()
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                     elseif now - t.last_income >= interval then
-                        local reward = math.floor(val(t, 'reward', T.Reward))
+                        local reward = math.floor(val(t, 'reward', T.Reward) * lvlMul(t, 'income'))
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                         if reward > 0 and GB.treasuryAdd(t.owner, T.RewardAccount == 'money' and 'money' or 'dirty', reward) then
@@ -215,7 +268,7 @@ ESX.RegisterServerCallback('gangbuilder:terr:list', function(src, cb)
         list[#list + 1] = {
             id = id, name = t.name, label = t.label, coords = t.coords, radius = t.radius, settings = t.settings or {},
             owner = t.owner, ownerLabel = o and o.label or nil, protectedUntil = t.protected_until, capturedAt = t.captured_at,
-            progress = state[id] and state[id].progress or 0,
+            progress = state[id] and state[id].progress or 0, level = levelOf(t),
         }
     end
     table.sort(list, function(a, b) return a.id < b.id end)
@@ -282,10 +335,79 @@ ESX.RegisterServerCallback('gangbuilder:terr:setOwner', function(src, cb, id, ga
     if gangName and gangName ~= '' and not GB.Gangs[gangName] then return cb(fail('Gang inconnu')) end
     local now = os.time()
     local owner = (gangName and gangName ~= '') and gangName or nil
-    t.owner, t.captured_at, t.protected_until, t.last_income = owner, owner and now or 0, 0, owner and now or 0
-    MySQL.update.await('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = 0, last_income = ? WHERE id = ?', { owner, t.captured_at, t.last_income, id })
+    t.owner, t.captured_at, t.protected_until, t.last_income, t.level = owner, owner and now or 0, 0, owner and now or 0, 1
+    MySQL.update.await('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = 0, last_income = ?, level = 1 WHERE id = ?', { owner, t.captured_at, t.last_income, id })
     if state[id] then state[id].progress, state[id].attacker = 0, nil end
     GB.syncTerritories()
     GB.log(owner or '_territories', ESX.GetPlayerFromId(src), 'territory_set_owner', ('%s -> %s'):format(t.label, owner or 'libre'))
     cb({ ok = true })
 end)
+
+
+-- ─────────────────────────────── Améliorer un territoire (tablette → Territoires) ───────────────────────────────
+-- Réservé au bureau du gang propriétaire ; payé par la trésorerie. Verrou par territoire : deux clics simultanés ne facturent pas deux fois.
+local upgrading = {}
+ESX.RegisterServerCallback('gangbuilder:tablet:terrUpgrade', function(src, cb, id)
+    local T = Config.Territories
+    local gang, grade = GB.gangOf(src)
+    if not gang then return cb(fail('Tu n\'es dans aucun gang')) end
+    if grade < (gang.boss_grade or 0) then return cb(fail('Réservé au bureau du gang')) end
+    id = tonumber(id)
+    local t = id and GB.Territories[id]
+    if not t or t.owner ~= gang.name then return cb(fail('Ce territoire n\'est pas à vous')) end
+    if upgrading[id] then return cb(fail('Amélioration déjà en cours')) end
+    local lvl = levelOf(t)
+    local nextL = (T.Levels or {})[lvl + 1]
+    if not nextL then return cb(fail('Niveau maximum atteint')) end
+    local st = state[id]
+    if st and st.progress > 0 then return cb(fail('Impossible pendant une attaque')) end
+    local cost = math.max(0, math.floor(tonumber(nextL.cost) or 0))
+    local account = T.UpgradeAccount == 'money' and 'money' or 'dirty'
+    upgrading[id] = true
+    if cost > 0 and not GB.treasuryRemove(gang.name, account, cost) then upgrading[id] = nil return cb(fail(('Trésorerie insuffisante (%d $ requis)'):format(cost))) end
+    t.level = lvl + 1
+    MySQL.update.await('UPDATE gangbuilder_territories SET level = ? WHERE id = ?', { t.level, id })
+    upgrading[id] = nil
+    GB.log(gang.name, ESX.GetPlayerFromId(src), 'territory_upgrade', ('%s → niveau %d (%d$)'):format(t.label, t.level, cost))
+    if GB.news then GB.news(('%s a amélioré %s (niveau %d).'):format(gang.label, t.label, t.level), 'territory') end
+    notifyGang(gang.name, ('~g~%s~s~ passe au niveau ~y~%d~s~ !'):format(t.label, t.level))
+    GB.syncTerritories()
+    cb({ ok = true, level = t.level })
+end)
+
+-- ─────────────────────────────── Racket : taxe sur les ventes faites sur un territoire adverse ───────────────────────────────
+-- exports.pickax_gangbuilder:TerritoryTax(src, montant, 'sell') : renvoie la taxe prélevée (déjà versée au propriétaire) ; le vendeur reçoit montant - taxe.
+-- Les membres du gang propriétaire ne paient rien. Les notifications du propriétaire sont groupées (une par minute et par territoire).
+local racket = {}   -- [territoire] = { total, nextNotify }
+exports('TerritoryTax', function(src, amount, kind)
+    local T = Config.Territories
+    amount = math.floor(tonumber(amount) or 0)
+    if not T.Enabled or not T.RacketEnabled or amount <= 0 then return 0 end
+    src = tonumber(src)
+    local ped = src and GetPlayerPed(src)
+    if not ped or ped == 0 then return 0 end
+    local c = GetEntityCoords(ped)
+    for id, t in pairs(GB.Territories) do
+        local dx, dy = c.x - t.coords.x, c.y - t.coords.y
+        if t.owner and GB.Gangs[t.owner] and dx * dx + dy * dy <= t.radius * t.radius and math.abs(c.z - t.coords.z) <= 80.0 then
+            local g = GB.PlayerGang[src]
+            if g and g.name == t.owner then return 0 end
+            local rate = math.min(0.9, math.max(0, tonumber(T.RacketRate) or 0) * lvlMul(t, 'racket') / 100)
+            local tax = math.floor(amount * rate)
+            if tax < 1 then return 0 end
+            if not GB.treasuryAdd(t.owner, T.RacketAccount == 'money' and 'money' or 'dirty', tax) then return 0 end
+            GB.log(t.owner, nil, 'territory_racket', ('%s : +%d$ (%s)'):format(t.label, tax, tostring(kind or 'vente')))
+            local r, now = racket[id] or { total = 0, nextNotify = 0 }, os.time()
+            racket[id] = r
+            r.total = r.total + tax
+            if now >= r.nextNotify then
+                notifyGang(t.owner, ('Racket sur ~y~%s~s~ : ~g~+%d$'):format(t.label, r.total))
+                r.total, r.nextNotify = 0, now + 60
+            end
+            return tax
+        end
+    end
+    return 0
+end)
+
+GB._tick = tick
