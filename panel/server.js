@@ -1,0 +1,23 @@
+const express = require('express'), helmet = require('helmet'), cookieParser = require('cookie-parser'), path = require('path');
+const cfg = require('./lib/config'); const { db, now } = require('./lib/db'); const A = require('./lib/auth');
+const app = express();
+if (cfg.trustProxy) app.set('trust proxy', 1);
+app.disable('x-powered-by');
+app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } }));
+app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
+app.use(A.loadUser);
+app.use(A.csrf);
+app.use('/api/agent', require('./routes/agent'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/servers', require('./routes/servers'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api', require('./routes/misc'));
+app.use('/api', (req, res) => res.status(404).json({ ok: false, error: 'Route inconnue' }));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'], maxAge: '5m' }));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.use((err, req, res, next) => { console.error('[panel]', err.message); res.status(err.status || 500).json({ ok: false, error: err.status === 400 ? 'Requête invalide' : 'Erreur serveur' }); });
+// nettoyage périodique
+setInterval(() => { db.prepare('DELETE FROM sessions WHERE expires_at<?').run(now()); db.prepare("DELETE FROM commands WHERE created_at<? AND status IN ('done','failed')").run(now() - 30 * 86400); }, 3600 * 1000).unref();
+if (require.main === module) app.listen(cfg.port, () => console.log(`[panel] http://localhost:${cfg.port}`));
+module.exports = app;

@@ -1,0 +1,40 @@
+const router = require('express').Router();
+const { db, now, audit, genKey } = require('../lib/db'); const A = require('../lib/auth'); const cfg = require('../lib/config');
+router.use(A.needUser, A.needAdmin);
+const ONLINE = 3 * cfg.agentIntervalSec + 5;
+router.get('/overview', (req, res) => {
+  const n = q => db.prepare(q).get().n; const t = now();
+  res.json({ ok: true, users: n("SELECT COUNT(*) n FROM users WHERE role='client'"), licenses: n('SELECT COUNT(*) n FROM licenses'), active: n(`SELECT COUNT(*) n FROM licenses WHERE status='active' AND (expires_at IS NULL OR expires_at>${t})`), expired: n(`SELECT COUNT(*) n FROM licenses WHERE expires_at IS NOT NULL AND expires_at<=${t}`),
+    online: n(`SELECT COUNT(*) n FROM licenses WHERE last_seen>${t - ONLINE}`), players: db.prepare(`SELECT COALESCE(SUM(json_array_length(s.players)),0) n FROM server_state s JOIN licenses l ON l.id=s.license_id WHERE l.last_seen>${t - ONLINE}`).get().n,
+    expiring: db.prepare(`SELECT l.id,l.server_name,l.expires_at,u.email FROM licenses l LEFT JOIN users u ON u.id=l.user_id WHERE l.expires_at BETWEEN ${t} AND ${t + 7 * 86400} ORDER BY l.expires_at LIMIT 20`).all(),
+    revenue: db.prepare('SELECT COALESCE(SUM(p.price),0) n FROM licenses l JOIN plans p ON p.id=l.plan_id').get().n });
+});
+router.get('/users', (req, res) => res.json({ ok: true, users: db.prepare('SELECT u.id,u.email,u.username,u.role,u.disabled,u.created_at,u.last_login,(SELECT COUNT(*) FROM licenses WHERE user_id=u.id) licenses FROM users u ORDER BY u.id DESC LIMIT 500').all() }));
+router.post('/users', (req, res) => { const { email, username, password } = req.body || {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) return res.json({ ok: false, error: 'E-mail invalide' }); if (String(password || '').length < 8) return res.json({ ok: false, error: 'Mot de passe : 8 caractères minimum' }); if (db.prepare('SELECT 1 FROM users WHERE email=?').get(String(email).toLowerCase())) return res.json({ ok: false, error: 'E-mail déjà utilisé' });
+  const id = db.prepare('INSERT INTO users(email,username,pass_hash,role,created_at) VALUES(?,?,?,?,?)').run(String(email).toLowerCase(), String(username || email).slice(0, 32), A.hash(password), 'client', now()).lastInsertRowid; audit(req.user.id, null, 'admin:user-create', email, A.ip(req)); res.json({ ok: true, id }); });
+router.patch('/users/:id', (req, res) => { const id = +req.params.id; const u = db.prepare('SELECT * FROM users WHERE id=?').get(id); if (!u) return res.json({ ok: false, error: 'Introuvable' }); if (id === req.user.id && (req.body.disabled || req.body.role)) return res.json({ ok: false, error: 'Tu ne peux pas modifier ton propre accès' });
+  const b = req.body || {}; if (b.disabled !== undefined) { db.prepare('UPDATE users SET disabled=? WHERE id=?').run(b.disabled ? 1 : 0, id); if (b.disabled) db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); }
+  if (b.role && ['client', 'admin'].includes(b.role)) db.prepare('UPDATE users SET role=? WHERE id=?').run(b.role, id);
+  if (b.password) { if (String(b.password).length < 8) return res.json({ ok: false, error: 'Mot de passe : 8 caractères minimum' }); db.prepare('UPDATE users SET pass_hash=? WHERE id=?').run(A.hash(String(b.password)), id); db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); }
+  audit(req.user.id, null, 'admin:user-edit', u.email, A.ip(req)); res.json({ ok: true }); });
+router.get('/licenses', (req, res) => res.json({ ok: true, licenses: db.prepare(`SELECT l.id,l.key,l.server_name,l.status,l.expires_at,l.last_seen,l.last_ip,l.bound_ip,l.version,l.note,l.user_id,u.email owner,p.name plan,(l.last_seen>${now() - ONLINE}) online FROM licenses l LEFT JOIN users u ON u.id=l.user_id LEFT JOIN plans p ON p.id=l.plan_id ORDER BY l.id DESC LIMIT 1000`).all() }));
+router.post('/licenses', (req, res) => { const b = req.body || {}; const plan = db.prepare('SELECT * FROM plans WHERE id=?').get(+b.plan_id); const days = b.days !== undefined && b.days !== '' ? Math.max(0, Math.floor(+b.days)) : (plan ? plan.days : 30);
+  if (b.user_id && !db.prepare('SELECT 1 FROM users WHERE id=?').get(+b.user_id)) return res.json({ ok: false, error: 'Client introuvable' });
+  const id = db.prepare('INSERT INTO licenses(key,user_id,plan_id,server_name,status,expires_at,created_at,note) VALUES(?,?,?,?,?,?,?,?)').run(genKey(), +b.user_id || null, plan ? plan.id : null, String(b.server_name || 'Mon serveur').slice(0, 60), 'active', days ? now() + days * 86400 : null, now(), String(b.note || '').slice(0, 200)).lastInsertRowid;
+  audit(req.user.id, id, 'admin:license-create', '', A.ip(req)); res.json({ ok: true, id, key: db.prepare('SELECT key FROM licenses WHERE id=?').get(id).key }); });
+router.patch('/licenses/:id', (req, res) => { const id = +req.params.id; const l = db.prepare('SELECT * FROM licenses WHERE id=?').get(id); if (!l) return res.json({ ok: false, error: 'Introuvable' }); const b = req.body || {};
+  if (b.status && ['active', 'suspended', 'revoked'].includes(b.status)) db.prepare('UPDATE licenses SET status=? WHERE id=?').run(b.status, id);
+  if (b.extend_days) { const base = Math.max(now(), l.expires_at || now()); db.prepare('UPDATE licenses SET expires_at=? WHERE id=?').run(base + Math.floor(+b.extend_days) * 86400, id); }
+  if (b.lifetime) db.prepare('UPDATE licenses SET expires_at=NULL WHERE id=?').run(id);
+  if (b.user_id !== undefined) db.prepare('UPDATE licenses SET user_id=? WHERE id=?').run(+b.user_id || null, id);
+  if (b.plan_id !== undefined) db.prepare('UPDATE licenses SET plan_id=? WHERE id=?').run(+b.plan_id || null, id);
+  if (b.note !== undefined) db.prepare('UPDATE licenses SET note=? WHERE id=?').run(String(b.note).slice(0, 200), id);
+  if (b.unbind) db.prepare('UPDATE licenses SET bound_ip=NULL WHERE id=?').run(id);
+  audit(req.user.id, id, 'admin:license-edit', JSON.stringify(b).slice(0, 200), A.ip(req)); res.json({ ok: true }); });
+router.delete('/licenses/:id', (req, res) => { db.prepare('DELETE FROM licenses WHERE id=?').run(+req.params.id); audit(req.user.id, +req.params.id, 'admin:license-delete', '', A.ip(req)); res.json({ ok: true }); });
+router.get('/plans', (req, res) => res.json({ ok: true, plans: db.prepare('SELECT * FROM plans ORDER BY id').all() }));
+router.post('/plans', (req, res) => { const b = req.body || {}; if (!String(b.name || '').trim()) return res.json({ ok: false, error: 'Nom requis' }); const id = db.prepare('INSERT INTO plans(name,price,days,max_players,description) VALUES(?,?,?,?,?)').run(String(b.name).slice(0, 40), +b.price || 0, Math.max(0, Math.floor(+b.days) || 0), Math.max(0, Math.floor(+b.max_players) || 0), String(b.description || '').slice(0, 200)).lastInsertRowid; res.json({ ok: true, id }); });
+router.patch('/plans/:id', (req, res) => { const b = req.body || {}; const p = db.prepare('SELECT * FROM plans WHERE id=?').get(+req.params.id); if (!p) return res.json({ ok: false, error: 'Introuvable' });
+  db.prepare('UPDATE plans SET name=?,price=?,days=?,max_players=?,description=?,active=? WHERE id=?').run(String(b.name ?? p.name).slice(0, 40), +(b.price ?? p.price), Math.max(0, Math.floor(+(b.days ?? p.days))), Math.max(0, Math.floor(+(b.max_players ?? p.max_players))), String(b.description ?? p.description).slice(0, 200), b.active === undefined ? p.active : (b.active ? 1 : 0), p.id); res.json({ ok: true }); });
+router.get('/audit', (req, res) => res.json({ ok: true, rows: db.prepare('SELECT a.id,a.action,a.detail,a.ip,a.at,a.license_id,u.email FROM audit a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.id DESC LIMIT 300').all() }));
+module.exports = router;

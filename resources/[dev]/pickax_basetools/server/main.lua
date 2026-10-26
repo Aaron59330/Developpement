@@ -302,6 +302,24 @@ lib.callback.register('basetools:themeSave', function(src, v)
     return { ok = true, values = readConfigValues(), history = h }
 end)
 
+-- Appelé par pickax_panel (panel web) : même validation et mêmes sauvegardes que le menu en jeu
+exports('ApplyTheme', function(v, by)
+    local o, err = cleanTheme(v)
+    if not o then return { ok = false, error = err } end
+    local before = readConfigValues()
+    local ok, e = writeConfigValues(o)
+    if not ok then return { ok = false, error = e } end
+    local h = themeHistory()
+    table.insert(h, 1, { at = os.time(), by = by or 'panel web', values = before })
+    while #h > 10 do table.remove(h) end
+    SaveResourceFile(GetCurrentResourceName(), THEME_HIST, json.encode(h), -1)
+    webhook('Thème du serveur modifié', ('%s : couleur **%s**, nom **%s**'):format(by or 'panel web', o.AccentColor, o.ServerName), tonumber(o.AccentColor:sub(2), 16))
+    SetTimeout(800, function()
+        for _, r in ipairs(Config.ThemeRestart) do if GetResourceState(r) == 'started' then ExecuteCommand('restart ' .. r) end end
+    end)
+    return { ok = true }
+end)
+
 -- ═════════════════ ÉCONOMIE DYNAMIQUE (pickax_economy) ═════════════════
 local function eco(fn, ...)
     if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy n\'est pas démarré' end

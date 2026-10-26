@@ -1,0 +1,52 @@
+// Test de bout en bout : node tools/selftest.js (utilise une base temporaire)
+process.env.DATA_DIR = './data-test'; process.env.ADMIN_EMAIL = 'admin@test.fr'; process.env.ADMIN_PASSWORD = 'AdminTest!123'; process.env.ALLOW_REGISTER = 'true';
+const fs = require('fs'); fs.rmSync(__dirname + '/../data-test', { recursive: true, force: true });
+const app = require('../server'); const http = require('http'); const assert = require('assert');
+const srv = http.createServer(app).listen(0, async () => {
+  const base = 'http://127.0.0.1:' + srv.address().port; let n = 0;
+  const jar = {}; const mk = (name) => { jar[name] = ''; return async (method, url, body, extra = {}) => { const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', origin: base, cookie: jar[name], ...extra }, body: body ? JSON.stringify(body) : undefined }); const sc = r.headers.get('set-cookie'); if (sc) jar[name] = sc.split(';')[0]; return r.json().catch(() => ({})); }; };
+  const admin = mk('a'), client = mk('c'), other = mk('o'), agent = mk('g');
+  const ok = (c, m) => { assert(c, m); n++; console.log('  ✓', m); };
+  try {
+    ok((await admin('POST', '/api/auth/login', { email: 'admin@test.fr', password: 'mauvais' })).ok === false, 'mauvais mot de passe refusé');
+    ok((await admin('POST', '/api/auth/login', { email: 'admin@test.fr', password: 'AdminTest!123' })).ok, 'connexion admin');
+    ok((await client('POST', '/api/auth/register', { email: 'client@test.fr', username: 'Client', password: 'ClientTest!1' })).ok, 'inscription client');
+    ok((await other('POST', '/api/auth/register', { email: 'autre@test.fr', username: 'Autre', password: 'AutreTest!12' })).ok, 'inscription 2e client');
+    ok((await client('GET', '/api/admin/overview')).ok === false, 'client sans accès admin');
+    const users = (await admin('GET', '/api/admin/users')).users; const cid = users.find(u => u.email === 'client@test.fr').id;
+    const plans = (await admin('GET', '/api/admin/plans')).plans;
+    const lic = await admin('POST', '/api/admin/licenses', { user_id: cid, plan_id: plans[1].id, server_name: 'Serveur test' }); ok(lic.ok && /^AERO-/.test(lic.key), 'licence créée ' + lic.key);
+    const list = (await client('GET', '/api/servers')).servers; ok(list.length === 1 && list[0].server_name === 'Serveur test', 'le client voit sa licence');
+    ok((await other('GET', '/api/servers/' + lic.id)).ok === false, "un autre client ne voit pas la licence");
+    ok((await agent('POST', '/api/agent/sync', {}, { 'x-license-key': 'AERO-FAUX' })).ok === false, 'clé inconnue refusée');
+    let s = await agent('POST', '/api/agent/sync', { version: '1.0', maxPlayers: 64, players: [{ id: 1, name: 'Jean', identifier: 'license:abc', job: 'police', grade: 2, money: 100, bank: 5000, ping: 40 }], stats: { uptime: 100 }, resources: [{ name: 'pickax_core', state: 'started' }], logs: [{ level: 'info', source: 'test', message: 'hello' }] }, { 'x-license-key': lic.key });
+    ok(s.ok && s.license.valid, 'sync agent valide');
+    ok((await client('GET', '/api/servers/' + lic.id + '/players')).players.length === 1, 'joueurs visibles dans le panel');
+    ok((await client('GET', '/api/servers/' + lic.id)).server.online === true, 'serveur en ligne');
+    ok((await client('POST', '/api/servers/' + lic.id + '/command', { type: 'rm_rf', payload: {} })).ok === false, 'action inconnue refusée');
+    ok((await client('POST', '/api/servers/' + lic.id + '/command', { type: 'kick', payload: { id: 'abc' } })).ok === false, 'paramètres invalides refusés');
+    const c = await client('POST', '/api/servers/' + lic.id + '/command', { type: 'announce', payload: { message: 'Redémarrage dans 5 min' } }); ok(c.ok, 'commande announce créée');
+    s = await agent('POST', '/api/agent/sync', { players: [] }, { 'x-license-key': lic.key }); ok(s.commands.length === 1 && s.commands[0].type === 'announce', "l'agent reçoit la commande");
+    await agent('POST', '/api/agent/sync', { results: [{ id: c.id, ok: true, result: 'ok' }] }, { 'x-license-key': lic.key });
+    ok((await client('GET', '/api/servers/' + lic.id + '/commands')).commands[0].status === 'done', 'résultat de commande enregistré');
+    ok((await client('PUT', '/api/servers/' + lic.id + '/docs/theme', { value: { AccentColor: 'rouge' } })).ok === false, 'thème invalide refusé');
+    ok((await client('PUT', '/api/servers/' + lic.id + '/docs/theme', { value: { AccentColor: '#ff8800', InventoryColor: '', ServerName: 'AERO RP', ServerShortName: 'AERO', ServerTagline: 'Test', ServerDiscord: 'discord.gg/x', ServerLogo: 'logo.png' } })).ok, 'thème enregistré');
+    s = await agent('POST', '/api/agent/sync', { docs: {} }, { 'x-license-key': lic.key }); ok(s.docs.theme && s.docs.theme.value.AccentColor === '#ff8800', "l'agent reçoit le thème");
+    s = await agent('POST', '/api/agent/sync', { docs: { theme: s.docs.theme.version } }, { 'x-license-key': lic.key }); ok(!s.docs.theme, 'thème déjà à jour : non renvoyé');
+    ok((await client('GET', '/api/servers/' + lic.id + '/logs')).logs.some(l => l.message === 'hello'), 'logs reçus');
+    ok((await agent('POST', '/api/agent/sync', {}, { 'x-license-key': lic.key, 'x-forwarded-for': '9.9.9.9' })).ok === true, 'même IP acceptée');
+    await admin('PATCH', '/api/admin/licenses/' + lic.id, { status: 'suspended' });
+    s = await agent('POST', '/api/agent/sync', {}, { 'x-license-key': lic.key }); ok(s.license.valid === false && s.commands.length === 0, 'licence suspendue : invalide, aucune commande');
+    ok((await client('POST', '/api/servers/' + lic.id + '/command', { type: 'announce', payload: { message: 'x' } })).ok === false, 'commande refusée sur licence suspendue');
+    await admin('PATCH', '/api/admin/licenses/' + lic.id, { status: 'active', extend_days: 30 });
+    await agent('POST', '/api/agent/sync', { players: [{ id: 1, name: 'Jean', identifier: 'license:abc' }] }, { 'x-license-key': lic.key });
+    await client('POST', '/api/servers/' + lic.id + '/command', { type: 'ban', payload: { id: 1, reason: 'test', days: 1 } });
+    ok((await client('GET', '/api/servers/' + lic.id + '/docs/bans')).value[0].identifier === 'license:abc', 'ban : liste mise à jour avec l’identifiant du joueur');
+    s = await agent('POST', '/api/agent/sync', { docs: {} }, { 'x-license-key': lic.key }); ok(s.docs.bans && s.commands.some(c => c.type === 'ban'), 'ban : document + commande envoyés au serveur');
+    const r = await fetch(base + '/api/servers/' + lic.id + '/rename', { method: 'POST', headers: { 'content-type': 'text/plain', cookie: jar.c }, body: '{}' }); ok(r.status === 415, 'CSRF : content-type non JSON refusé');
+    const r2 = await fetch(base + '/api/servers/' + lic.id + '/rename', { method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://evil.com', cookie: jar.c }, body: '{}' }); ok(r2.status === 403, 'CSRF : origine étrangère refusée');
+    ok((await admin('GET', '/api/admin/overview')).licenses === 1, 'vue admin');
+    console.log(`\n${n} vérifications OK`);
+  } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
+  srv.close(); fs.rmSync(__dirname + '/../data-test', { recursive: true, force: true }); setTimeout(() => process.exit(process.exitCode || 0), 100);
+});
