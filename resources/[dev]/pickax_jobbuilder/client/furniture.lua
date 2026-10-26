@@ -71,6 +71,7 @@ RegisterKeyMapping('decorer', 'Décorer ma propriété (meubles)', 'keyboard', F
 
 -- ─────────────────────────────── Mode placement ───────────────────────────────
 local function hint(text)
+    if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification(text) return end
     BeginTextCommandDisplayHelp('STRING')
     AddTextComponentSubstringPlayerName(text)
     EndTextCommandDisplayHelp(0, false, false, -1)

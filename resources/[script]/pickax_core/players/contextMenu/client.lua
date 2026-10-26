@@ -1295,9 +1295,13 @@ function CPSitOnObject(obj)
     CreateThread(function()
         Wait(1500)
         while CPSitting and IsPedUsingScenario(PlayerPedId(), scenario) do
-            BeginTextCommandDisplayHelp("STRING")
-            AddTextComponentSubstringPlayerName("~INPUT_VEH_DUCK~ Se lever")
-            EndTextCommandDisplayHelp(0, false, false, -1)
+            if GetResourceState('pickax_notify') == 'started' then
+                exports['pickax_notify']:ShowHelpNotification("~INPUT_VEH_DUCK~ Se lever")
+            else
+                BeginTextCommandDisplayHelp("STRING")
+                AddTextComponentSubstringPlayerName("~INPUT_VEH_DUCK~ Se lever")
+                EndTextCommandDisplayHelp(0, false, false, -1)
+            end
             if IsControlJustPressed(0, 73) or IsControlJustPressed(0, 22) then
                 ClearPedTasks(PlayerPedId())
                 break

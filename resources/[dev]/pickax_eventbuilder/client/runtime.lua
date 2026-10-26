@@ -18,6 +18,7 @@ end)
 
 -- ─────────────────────────────── Aides d'affichage ───────────────────────────────
 local function help(msg)
+    if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification(msg) return end
     BeginTextCommandDisplayHelp('STRING')
     AddTextComponentSubstringPlayerName(msg)
     EndTextCommandDisplayHelp(0, false, true, -1)

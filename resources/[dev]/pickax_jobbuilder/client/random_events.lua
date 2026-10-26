@@ -111,8 +111,8 @@ CreateThread(function()
                 local c = { x = d.x, y = d.y, z = (ev.z or d.z) }
                 if BB and BB.DrawMarker then BB.DrawMarker(nil, c) end
                 if dist < 3.0 and not busy and not IsPedInAnyVehicle(ped, false) then
-                    AddTextEntry('JBRE_HELP', '~INPUT_CONTEXT~ ' .. d.interact)
-                    BeginTextCommandDisplayHelp('JBRE_HELP') EndTextCommandDisplayHelp(0, false, false, -1)
+                    if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification('~INPUT_CONTEXT~ ' .. d.interact)
+                    else AddTextEntry('JBRE_HELP', '~INPUT_CONTEXT~ ' .. d.interact) BeginTextCommandDisplayHelp('JBRE_HELP') EndTextCommandDisplayHelp(0, false, false, -1) end
                     if IsControlJustPressed(0, 38) then
                         busy = true
                         local ok = AJ and AJ.Progress and AJ.Progress(d.progress, d.seconds, { radius = 6.0, scenario = 'WORLD_HUMAN_STAND_MOBILE' })

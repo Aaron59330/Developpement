@@ -8,6 +8,9 @@ local ESX = setmetatable({}, {
 })
 
 function ESX.ShowHelpNotification(msg)
+	if GetResourceState('pickax_notify') == 'started' then
+		return exports['pickax_notify']:ShowHelpNotification(msg)
+	end
 	TriggerEvent("ui:interaction", "E", msg)
 end
 

@@ -5,6 +5,7 @@ function AJ.Notify(msg, kind) JBNotify(msg, kind) end
 RegisterNetEvent('aj:client:notify', function(msg, kind) AJ.Notify(msg, kind) end)
 
 function AJ.Help(text)
+    if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification(text) return end
     BeginTextCommandDisplayHelp('STRING')
     AddTextComponentSubstringPlayerName(text)
     EndTextCommandDisplayHelp(0, false, false, -1)
