@@ -79,3 +79,6 @@ code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-si
 .bottom kbd { font: inherit; font-size: 10px; border: 1px solid var(--line-2); border-radius: 6px; padding: 2px 6px; margin: 0 2px; color: var(--text-2); }
 
 @media (max-width: 760px) { .grid, .sum { grid-template-columns: 1fr; } input { width: 180px; } }
+
+/* logo du serveur en haut à gauche de l'en-tête */
+.top > .plogo, .head > .plogo { height: 30px; width: auto; max-width: 150px; object-fit: contain; flex: none; margin-right: 8px; padding-right: 16px; border-right: 1px solid rgba(255, 255, 255, .14); }

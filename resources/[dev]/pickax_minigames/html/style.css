@@ -349,3 +349,8 @@ kbd { border-color: var(--accent-line); }
 .addgrid { grid-template-columns: 1fr; }
 .addgrid button { height: auto; min-height: 32px; padding: 6px 10px; justify-content: flex-start; white-space: normal; text-align: left; }
 .pt > div { min-width: 0; } .pt b, .pt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* logo du serveur en haut du menu de gauche (même rendu que le Shop Builder, ancien et nouveau style) */
+.profile.logo-only { display: flex; align-items: center; justify-content: center; padding: 12px; }
+.profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
+.profile .pname { display: none; }

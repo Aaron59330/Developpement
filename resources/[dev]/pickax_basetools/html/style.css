@@ -74,3 +74,8 @@ input[type=color] { cursor: pointer; }
 .gauge .mid { position: absolute; left: 50%; top: -3px; width: 2px; height: 14px; background: rgba(255, 255, 255, .5); }
 .gauge b { position: absolute; top: -4px; width: 14px; height: 16px; border-radius: 5px; background: rgb(var(--accent-rgb)); transform: translateX(-50%); box-shadow: 0 0 0 3px rgba(0, 0, 0, .35); }
 .eco { margin-bottom: 0; } .body > .eco { flex: none; }
+
+/* logo du serveur en haut du menu de gauche (même rendu que le Shop Builder, ancien et nouveau style) */
+.brand.logo-only { display: flex; align-items: center; justify-content: center; padding: 12px; }
+.brand.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
+.brand .pname { display: none; }

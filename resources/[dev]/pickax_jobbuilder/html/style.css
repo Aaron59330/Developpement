@@ -529,3 +529,8 @@ body.neon .n-sp { flex: 1; }
 .pay-opt small { color: var(--muted); font-size: 11px; }
 .pay-opt.on { border-color: rgb(var(--accent-rgb)); background: rgba(var(--accent-rgb), .14); }
 .pay-opt[data-low] small { color: #f87171; }
+
+/* logo du serveur en haut du menu de gauche (même rendu que le Shop Builder, ancien et nouveau style) */
+.profile.logo-only { display: flex; align-items: center; justify-content: center; padding: 12px; }
+.profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
+.profile .pname { display: none; }

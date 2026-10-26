@@ -77,3 +77,6 @@ table { width: 100%; border-collapse: collapse; } th, td { text-align: left; pad
 .autobox { max-width: 640px; }
 .autonext { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: rgba(var(--acc-rgb), .1); border: 1px solid rgba(var(--acc-rgb), .3); margin-bottom: 16px; }
 .autonext b { font-size: 22px; color: var(--acc); font-variant-numeric: tabular-nums; }
+
+/* logo du serveur en haut à gauche de l'en-tête */
+.top > .plogo, .head > .plogo { height: 30px; width: auto; max-width: 150px; object-fit: contain; flex: none; margin-right: 8px; padding-right: 16px; border-right: 1px solid rgba(255, 255, 255, .14); }
