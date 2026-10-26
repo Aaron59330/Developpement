@@ -4,7 +4,7 @@ local FILE, RES, MODE = env('FILE'), env('RES'), env('MODE', 'v')
 local src = io.open(FILE, 'r'):read('a')
 local block = src:match('(%-%- %[AERO:LIC%].-%-%- %[/AERO:LIC%])')
 assert(block, 'bloc introuvable')
-if MODE == 'v' then block = block:gsub("local AERO_PK = ''", "local AERO_PK = '" .. env('PK', '') .. "'", 1) end
+if MODE == 'v' then block = block:gsub("local AERO_PK = '[^']*'", function() return "local AERO_PK = '" .. env('PK', '') .. "'" end, 1) end
 local now, threads, stopped, prints, exported = 0, {}, {}, {}, {}
 local cur
 function GetCurrentResourceName() return RES end
