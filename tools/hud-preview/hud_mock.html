@@ -76,6 +76,16 @@ svg{width:100%;height:100%}
 .tag{position:absolute;left:34px;top:28px;display:flex;gap:10px;align-items:center}
 .tag .logo{height:22px;width:auto;filter:drop-shadow(0 4px 14px rgba(var(--a),.4))}
 .tag .pid{font-size:11px;letter-spacing:.2em;color:#9aa5b5;font-weight:800}
+
+.vc{position:absolute;right:24px;bottom:176px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.vn{display:flex;align-items:center;gap:6px;height:20px;padding:0 9px 0 5px;background:rgba(18,19,24,.88);border:1px solid rgba(255,255,255,.12);border-left:3px solid rgba(var(--a),.5);transform:skewX(-10deg);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-style:italic;color:#aab2c0}
+.vn>*{transform:skewX(10deg)}.vn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}.vn em{color:#6d7586;font-weight:700;font-size:8px}
+.vn .b{display:flex;gap:2px;align-items:flex-end;height:10px}.vn .b i{width:3px;background:rgba(255,255,255,.25)}.vn .b i.on{background:var(--ac)}
+.vn.tk{border:1px solid rgba(var(--a),.7);border-left:3px solid var(--ac);color:var(--ac);box-shadow:0 0 12px rgba(var(--a),.4)}
+.card{position:absolute;left:34px;top:58px;width:200px;padding:7px 12px;font-size:9px;letter-spacing:.1em}
+.card .r{display:flex;justify-content:space-between;padding:2px 0;color:#9aa5b5;font-weight:800;text-transform:uppercase}.card .r b{color:#fff;font-style:italic}.card .r b.a{color:var(--ac)}
+.card h5{font-size:11px;font-style:italic;text-transform:uppercase;color:var(--ac);margin-bottom:3px}
+.tui{position:absolute;left:50%;top:46%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:5px 12px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 </style></head><body>
 <div class="scene">
   <div class="bld" style="left:60px;width:170px;height:330px"></div><div class="bld" style="left:260px;width:120px;height:240px"></div>
@@ -133,4 +143,14 @@ svg{width:100%;height:100%}
   <div class="hint"><span class="key">X</span> Annuler</div>
 </div>
 <div class="panel help"><span class="key">E</span> Ouvrir le coffre du véhicule</div>
+
+<div class="vc">
+ <div class="vn"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Appel <em>Téléphone</em></div>
+ <div class="vn tk"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="11" rx="1"/><path d="m4 9 14-6"/></svg>12.5 MHz <em>TX</em></div>
+ <div class="vn"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>Normal <div class="b"><i class="on" style="height:4px"></i><i class="on" style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></div></div>
+</div>
+<div class="panel card"><h5>AERO Roleplay</h5>
+ <div class="r">Joueurs<b>84 / 128</b></div><div class="r">Discord<b class="a">discord.gg/aero</b></div>
+ <div class="r">Job<b>Police · Sergent</b></div><div class="r">Argent sale<b>$0</b></div></div>
+<div class="panel tui"><span class="key">E</span> Garage</div>
 </body></html>
