@@ -49,7 +49,7 @@ function render() {
   LIST.forEach(function (b) { if (b.stats && b.stats[0]) total += Number(b.stats[0][1]) || 0; });
   root.innerHTML =
     '<div class="shell">' +
-    '<div class="head"><img class="plogo" hidden data-pk-logo src="' + (window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png') + '" alt="" onerror="this.style.visibility=\'hidden\'"><div class="tile">' + IC.grid + '</div>' +
+    '<div class="head"><img class="plogo" data-pk-logo src="' + (window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png') + '" alt="" onerror="this.style.visibility=\'hidden\'"><div class="tile">' + IC.grid + '</div>' +
     '<div class="ttl"><h1>Builders</h1><p>Accès rapide à tous les builders du serveur</p></div>' +
     '<div class="search">' + IC.search + '<input id="q" placeholder="Rechercher un builder…" value="' + esc(QUERY) + '" autocomplete="off"></div>' +
     '<button class="icon" id="x" title="Fermer (Échap)">' + IC.close + '</button></div>' +

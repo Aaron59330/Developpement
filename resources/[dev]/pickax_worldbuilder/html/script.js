@@ -132,7 +132,7 @@ function header({ icon, title, sub, acts = '' }) {
 
 function shellSide({ profile, nav, active, foot = '', head, body, bodyCls = '' }) {
   return `<div class="shell"><aside class="side">
-    <div class="profile pl"><img class="plogo" hidden data-pk-logo src="${esc(window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png')}" alt="" onerror="this.style.visibility='hidden'"><div class="avatar">${esc(profile.initials)}</div><div><b>${esc(profile.title)}</b><small>${esc(profile.sub)}</small></div></div>
+    <div class="profile pl"><img class="plogo" data-pk-logo src="${esc(window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png')}" alt="" onerror="this.style.visibility='hidden'"><div class="avatar">${esc(profile.initials)}</div><div><b>${esc(profile.title)}</b><small>${esc(profile.sub)}</small></div></div>
     <div class="nav">${nav.map(sec => `${sec.label ? `<div class="nav-label">${esc(sec.label)}</div>` : ''}${sec.items.map(it => `<div class="nav-item ${it.id === active ? 'active' : ''}" data-a="nav" data-v="${esc(it.id)}">${ic(it.icon)}<span class="grow">${esc(it.text)}</span>${it.count != null ? `<span class="count">${esc(it.count)}</span>` : ''}</div>`).join('')}`).join('')}</div>
     <div class="side-foot">${foot}</div></aside>
     <section class="main">${header(head)}<div class="body ${bodyCls}">${body}</div></section></div>`;

@@ -56,7 +56,7 @@ const refreshList = async () => { const l = await rpc('list'); if (ok(l)) S.list
 /* ─────────────── rendu ─────────────── */
 function shell(inner) {
   const tabs = [['events', 'Événements'], ['active', 'En cours'], ['auto', 'Planification'], ['logs', 'Historique']];
-  return `<div class="top"><img class="plogo" hidden data-pk-logo src="${window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png'}" alt="" onerror="this.style.visibility='hidden'"><div class="tile">${ic('zap')}</div><div><h1>Event Builder</h1><p>Braquages, largages, livraisons, zones… créés et lancés directement en jeu</p></div><div class="sp"></div>
+  return `<div class="top"><img class="plogo" data-pk-logo src="${window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo.png'}" alt="" onerror="this.style.visibility='hidden'"><div class="tile">${ic('zap')}</div><div><h1>Event Builder</h1><p>Braquages, largages, livraisons, zones… créés et lancés directement en jeu</p></div><div class="sp"></div>
     <button data-a="hub">${ic('grid')} Panel builders</button><button class="icon" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div>
     <div class="tabs">${tabs.map(t => `<button class="tab ${S.tab === t[0] && !S.cur ? 'on' : ''}" data-a="tab" data-v="${t[0]}">${t[1]}${t[0] === 'active' && S.active.length ? ` <span class="chip acc">${S.active.length}</span>` : ''}</button>`).join('')}</div>
     <div class="body">${inner}</div>`;

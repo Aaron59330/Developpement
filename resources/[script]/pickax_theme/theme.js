@@ -154,3 +154,15 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
   poll();
   setInterval(poll, 8000);
 })();
+
+// ── En-tête commun des builders (logo du serveur + nom), identique dans l'ancien et le nouveau style ──
+// Dans le style arcade, hx.css (plus spécifique) reprend la main ; ici on garantit seulement un rendu correct sans lui.
+(function () {
+  var st = document.createElement('style');
+  st.id = 'pk-head';
+  st.textContent = '.plogo{display:block;height:32px;width:auto;max-width:150px;object-fit:contain;flex:none}' +
+    '.profile.pl,.brand.pl{display:flex;flex-direction:column;align-items:flex-start;gap:8px}' +
+    '.profile.pl .avatar,.brand.pl .logo{display:none}' +
+    '.top>.plogo,.head>.plogo{margin-right:8px;padding-right:16px;border-right:1px solid rgba(255,255,255,.14)}';
+  (document.head || document.documentElement).appendChild(st);
+})();
