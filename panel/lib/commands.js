@@ -27,7 +27,8 @@ const defs = {
   refresh_docs: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
-const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1 };
+const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1 };
+const ECONOMY_PRESETS = ['equilibre', 'realiste', 'abuse'];
 function validateDoc(key, v) {
   if (!DOC_KEYS[key]) return { error: 'Document inconnu' };
   if (v == null || typeof v !== 'object') return { error: 'Données invalides' };
@@ -38,6 +39,12 @@ function validateDoc(key, v) {
     const txt = (x, max, req) => { x = String(x == null ? '' : x).trim(); if (x.length > max || /['"\\\r\n]/.test(x)) return null; if (req && !x) return null; return x; };
     t.ServerName = txt(v.ServerName, 60, true); t.ServerShortName = txt(v.ServerShortName, 24, true); t.ServerTagline = txt(v.ServerTagline, 80); t.ServerDiscord = txt(v.ServerDiscord, 80); t.ServerLogo = txt(v.ServerLogo, 200, true);
     t.Design = v.Design === 'ancien' ? 'ancien' : 'arcade';
+    const url = x => { x = String(x == null ? '' : x).trim(); if (!x) return ''; return x.length <= 300 && /^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]+$/.test(x) ? x : null; };
+    t.MenuBanner = url(v.MenuBanner); t.LoadingBanner = url(v.LoadingBanner);
+    const num = (x, lo, hi, d) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d; };
+    t.MarkerType = Math.round(num(v.MarkerType, 0, 43, 23)); t.MarkerAlpha = Math.round(num(v.MarkerAlpha, 0, 255, 150)); t.MarkerSize = num(v.MarkerSize, 0.1, 5, 1);
+    t.MarkerColor = /^#[0-9a-fA-F]{6}$/.test(v.MarkerColor || '') ? v.MarkerColor.toLowerCase() : '';
+    t.BlipScale = num(v.BlipScale, 0.1, 3, 0.5); t.BlipColor = Math.round(num(v.BlipColor, -1, 85, -1));
     if (Object.values(t).includes(null)) return { error: 'Un champ du thème est invalide (pas de guillemets, longueur limitée)' };
     return { value: t };
   }
@@ -49,6 +56,7 @@ function validateDoc(key, v) {
     if (Object.values(o).includes(null)) return { error: 'Texte invalide : pas de guillemets, de point-virgule ni de retour à la ligne (200 caractères max)' };
     return { value: o };
   }
+  if (key === 'economy') { return ECONOMY_PRESETS.includes(v.preset) ? { value: { preset: v.preset } } : { error: 'Type d’économie inconnu' }; }
   if (key === 'motd') { const m = str(String(v.text || ''), 300); return { value: { text: m || '', enabled: !!v.enabled } }; }
 }
 // Appels « RPC » : le navigateur attend la réponse du serveur FiveM (fichiers)

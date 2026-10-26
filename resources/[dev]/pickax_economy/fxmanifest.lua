@@ -9,5 +9,5 @@ version '1.0.0'
 shared_script 'config.lua'
 server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
 
-exports { 'Multiplier', 'Price', 'Record', 'Snapshot', 'Event', 'Reset' }
+exports { 'Multiplier', 'Price', 'Record', 'Snapshot', 'Event', 'Reset', 'Preset', 'Presets', 'SetPreset', 'Scale' }
 dependencies { 'oxmysql' }

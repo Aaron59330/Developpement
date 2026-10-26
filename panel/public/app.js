@@ -1,6 +1,10 @@
 'use strict';
 // ───────── utilitaires ─────────
 const $app = document.getElementById('app');
+// 2 thèmes du panel : « sombre » (d'origine) et « clair » ; choix mémorisé dans ce navigateur
+const getTheme = () => { try { return localStorage.getItem('aero_theme') === 'clair' ? 'clair' : 'sombre'; } catch (e) { return 'sombre'; } };
+const setTheme = t => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('aero_theme', t); } catch (e) {} };
+setTheme(getTheme());
 function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
@@ -80,7 +84,7 @@ function shell(content) {
     el('div', { class: 'sec' }, 'Développement'), item('files', 'Fichiers', 'file'), item('backups', 'Sauvegardes', 'db'), item('console', 'Console', 'term'), item('webhooks', 'Webhooks', 'hook'),
     el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'),
     isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
-    el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')'))));
+    el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')'))));
   return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, content));
 }
 const needServer = () => {
@@ -171,6 +175,20 @@ async function pTheme() {
   const f = {}; const field = (k, label, type) => { f[k] = el('input', { type: type || 'text', value: v[k] || '' }); return [el('label', {}, label), f[k]]; };
   const prev = el('div', { class: 'card', style: 'margin:0' }); const drawPrev = () => { prev.style.borderLeftColor = f.AccentColor.value; prev.replaceChildren(el('h2', { style: 'color:' + f.AccentColor.value }, f.ServerShortName.value || 'Nom court'), el('p', {}, f.ServerName.value), el('p', { class: 'muted' }, f.ServerTagline.value), el('p', { class: 'muted' }, f.ServerDiscord.value)); };
   const col = [field('AccentColor', 'Couleur principale', 'color'), field('InventoryColor', 'Couleur de l’inventaire (vide = couleur principale)', 'color')];
+  const dr = ((await api('GET', `/api/servers/${s.id}/drive`)).files || []);
+  const MARKERS = [[23, 'Cercle plat épais (par défaut)'], [25, 'Cercle plat fin'], [27, 'Cercle fléché'], [1, 'Cylindre vertical'], [9, 'Anneau'], [2, 'Chevron épais'], [3, 'Chevron fin'], [20, 'Chevron vers le haut'], [29, 'Symbole dollar'], [36, 'Symbole voiture'], [0, 'Cône inversé']];
+  const BLIPCOL = [[-1, 'Couleur propre à chaque catégorie'], [0, 'Blanc'], [1, 'Rouge'], [2, 'Vert'], [3, 'Bleu'], [5, 'Jaune'], [7, 'Violet'], [17, 'Orange']];
+  const sel = (opts, cur) => el('select', {}, opts.map(o => el('option', { value: o[0], selected: String(o[0]) === String(cur) }, o[1])));
+  const pick = (target) => el('select', { onchange: e => { if (e.target.value) f[target].value = e.target.value; e.target.value = ''; drawPrev(); } }, [el('option', { value: '' }, '— Choisir une image de mon Drive —'), ...dr.map(x => el('option', { value: x.url }, x.name))]);
+  f.MenuBanner = el('input', { value: v.MenuBanner || '', placeholder: 'https://… (vide = bannière d’origine)' });
+  f.LoadingBanner = el('input', { value: v.LoadingBanner || '', placeholder: 'https://… (vide = fond d’origine)' });
+  f.MarkerType = sel(MARKERS, v.MarkerType ?? 23);
+  const autoCol = el('input', { type: 'checkbox', checked: !v.MarkerColor }); const colIn = el('input', { type: 'color', value: v.MarkerColor || '#fdc27d' });
+  f.MarkerColor = { get value() { return autoCol.checked ? '' : colIn.value; } };
+  f.MarkerAlpha = el('input', { type: 'number', min: 0, max: 255, value: v.MarkerAlpha ?? 150 });
+  f.MarkerSize = el('input', { type: 'number', min: 0.1, max: 5, step: 0.1, value: v.MarkerSize ?? 1 });
+  f.BlipScale = el('input', { type: 'number', min: 0.1, max: 3, step: 0.1, value: v.BlipScale ?? 0.5 });
+  f.BlipColor = sel(BLIPCOL, v.BlipColor ?? -1);
   f.Design = el('select', {}, [['arcade', 'Arcade (nouveau style)'], ['ancien', 'Classique (ancien style)']].map(o => el('option', { value: o[0], selected: o[0] === (v.Design || 'arcade') }, o[1])));
   const collect = () => { const val = {}; for (const k in f) val[k] = f[k].value; return val; };
   const save = async (core, msg) => { const r = await api('PUT', `/api/servers/${s.id}/docs/theme`, { value: collect() }); if (r.ok) await sendCmd('apply_theme', { core }, msg); else toast(r.error, 'bad'); };
@@ -180,7 +198,14 @@ async function pTheme() {
     el('button', { class: 'btn', title: 'Applique partout (loading, chat, markers…) en redémarrant pickax_core : coupe les menus ouverts quelques secondes', onclick: () => confirmBox('Appliquer partout', 'Le thème est enregistré puis pickax_core redémarre (écran de chargement, chat, markers, builders…). Les menus ouverts des joueurs sont coupés quelques secondes.', () => save(true, 'Thème enregistré : redémarrage du core dans quelques secondes')) }, el('span', {}, 'Enregistrer et appliquer partout')),
     el('button', { class: 'btn p', onclick: () => save(false, 'Thème enregistré : interfaces mises à jour (reconnexion pour tout voir)') }, el('span', {}, 'Enregistrer'))),
     el('div', { class: 'grid g2' }, el('div', { class: 'card' }, col, el('label', {}, 'Style des interfaces'), f.Design, field('ServerName', 'Nom du serveur'), field('ServerShortName', 'Nom court'), field('ServerTagline', 'Slogan'), field('ServerDiscord', 'Lien Discord'), field('ServerLogo', 'Logo (fichier dans pickax_theme/logo/ ou lien https)'), el('p', { class: 'muted', style: 'margin-top:10px' }, 'Pas de guillemets. Le thème est appliqué automatiquement à tous les menus, HUD, notifications et inventaire.')), el('div', {}, el('h2', {}, 'Aperçu'), prev)));
-  Object.values(f).forEach(i => i.addEventListener('input', drawPrev)); drawPrev(); return page;
+  page.append(el('div', { class: 'grid g2' },
+    el('div', { class: 'card' }, el('h2', {}, 'Bannières'), el('p', { class: 'muted' }, 'Envoie tes images dans le Drive (plus bas), puis choisis-les ici. Le menu F5 et l’écran de chargement les affichent après reconnexion (redémarrage du core pour le chargement).'),
+      el('label', {}, 'Bannière du menu F5'), f.MenuBanner, pick('MenuBanner'), el('label', {}, 'Image de l’écran de chargement'), f.LoadingBanner, pick('LoadingBanner')),
+    el('div', { class: 'card' }, el('h2', {}, 'Markers et blips (tout le serveur d’un coup)'), el('p', { class: 'muted' }, 'S’applique à tous les markers et blips des builders et du core. Appliquer avec « Enregistrer et appliquer partout ».'),
+      el('label', {}, 'Type de marker'), f.MarkerType, el('label', {}, 'Couleur des markers'), el('div', { class: 'row' }, colIn, el('label', { style: 'margin:0;display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0' }, autoCol, 'Automatique (couleur principale)')),
+      el('div', { class: 'row' }, el('div', { class: 'grow' }, el('label', {}, 'Opacité (0-255)'), f.MarkerAlpha), el('div', { class: 'grow' }, el('label', {}, 'Taille'), f.MarkerSize)),
+      el('label', {}, 'Taille des blips (0.3 petit … 1.2 grand)'), f.BlipScale, el('label', {}, 'Couleur des blips'), f.BlipColor)));
+  Object.values(f).forEach(i => i.addEventListener && i.addEventListener('input', drawPrev)); drawPrev(); return page;
 }
 async function pAccess() {
   const s = curServer(); if (!s) return needServer(); const [b, w] = await Promise.all([api('GET', `/api/servers/${s.id}/docs/bans`), api('GET', `/api/servers/${s.id}/docs/whitelist`)]);

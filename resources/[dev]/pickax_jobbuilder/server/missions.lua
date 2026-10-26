@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- ─────────────────────────────── Missions PNJ ───────────────────────────────
 -- Moteur générique : chaque type de job a ses modèles de missions (Config.Missions.Templates).
 -- Le serveur choisit les lieux, suit la progression étape par étape (position vérifiée) et verse la récompense.
@@ -162,7 +163,7 @@ ESX.RegisterServerCallback('jobbuilder:missions:complete', function(src, cb, id,
         local pct = M.DamageMaxPenalty * (1 - math.max(0, math.min(1000, health)) / 1000)
         reward = reward * (1 - pct / 100)
     end
-    reward = math.floor(reward)
+    reward = ECO('income', math.floor(reward))
 
     local paid, note = reward, nil
     if reward > 0 then

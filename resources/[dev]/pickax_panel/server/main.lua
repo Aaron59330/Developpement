@@ -9,7 +9,7 @@ local logs, results = {}, {}
 local lastResources = 0
 local lastErr = nil
 local bans, whitelist, motd = {}, {}, { enabled = false, text = '' }
-local serverCfg = {}
+local serverCfg, econCfg = {}, nil
 
 local function now() return os.time() end
 
@@ -273,17 +273,25 @@ local function applyServerSettings()
     if ok(c.hostname) then ExecuteCommand('sv_hostname "' .. c.hostname .. '"') end
 end
 
+local function applyEconomy()
+    if type(econCfg) ~= 'table' or type(econCfg.preset) ~= 'string' then return end
+    if GetResourceState('pickax_economy') ~= 'started' then return end
+    local ok, r = pcall(function() return exports.pickax_economy:SetPreset(econCfg.preset) end)
+    if ok and r then PanelLog('staff', 'economie', 'type d\'économie du serveur : ' .. econCfg.preset) end
+end
+
 local function onDoc(key, value)
     docs[key] = value; saveDoc(key, value)
     if key == 'bans' then bans = value or {} elseif key == 'whitelist' then whitelist = value or {} elseif key == 'motd' then motd = value or { enabled = false, text = '' }
+    elseif key == 'economy' then econCfg = value applyEconomy()
     elseif key == 'server' then serverCfg = value or {} applyServerSettings() PanelLog('staff', 'serveur', 'nom / description du serveur modifiés depuis le panel') end
 end
-for _, k in ipairs({ 'bans', 'whitelist', 'motd', 'server' }) do
+for _, k in ipairs({ 'bans', 'whitelist', 'motd', 'server', 'economy' }) do
     local raw = LoadResourceFile(GetCurrentResourceName(), 'cache_' .. k .. '.json')
-    if raw and raw ~= '' then local ok, v = pcall(json.decode, raw) if ok then if k == 'server' then serverCfg = v docs.server = v else onDoc(k, v) end end end
+    if raw and raw ~= '' then local ok, v = pcall(json.decode, raw) if ok then if k == 'server' then serverCfg = v docs.server = v elseif k == 'economy' then econCfg = v docs.economy = v else onDoc(k, v) end end end
 end
 -- au démarrage : réappliquer le nom / la description enregistrés dans le panel (même si le panel est injoignable)
-CreateThread(function() Wait(10000) applyServerSettings() end)
+CreateThread(function() Wait(10000) applyServerSettings() Wait(10000) applyEconomy() end)
 
 AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
     local src = source

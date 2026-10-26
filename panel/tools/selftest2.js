@@ -53,6 +53,12 @@ const srv = http.createServer(app).listen(0, async () => {
     ok((await client('PUT', `/api/servers/${lid}/docs/server`, { value: { projectName: '^4AERO RP 🌊 ^7| 👥 ^4Free-Access^7| 📌^4discord.gg/aero', projectDesc: 'FreeAccess, RP sérieux, 150 fps !', hostname: '^4AERO RP' } })).ok, 'nom du serveur : codes couleur et emojis acceptés');
     ok((await client('PUT', `/api/servers/${lid}/docs/theme`, { value: { AccentColor: '#00aa55', ServerName: 'N', ServerShortName: 'N', ServerTagline: '', ServerDiscord: '', ServerLogo: 'logo.png', Design: 'ancien' } })).ok && (await client('GET', `/api/servers/${lid}/docs/theme`)).value.Design === 'ancien', 'style des interfaces : « ancien » enregistré');
     ok((await client('PUT', `/api/servers/${lid}/docs/theme`, { value: { AccentColor: '#00aa55', ServerName: 'N', ServerShortName: 'N', ServerTagline: '', ServerDiscord: '', ServerLogo: 'logo.png', Design: 'pirate' } })).ok && (await client('GET', `/api/servers/${lid}/docs/theme`)).value.Design === 'arcade', 'style inconnu : retombe sur arcade');
+    const T = { AccentColor: '#00aa55', ServerName: 'N', ServerShortName: 'N', ServerTagline: '', ServerDiscord: '', ServerLogo: 'logo.png' };
+    ok((await client('PUT', `/api/servers/${lid}/docs/theme`, { value: { ...T, MenuBanner: 'http://x.fr/a.png' } })).ok === false, 'bannière : lien non https refusé');
+    ok((await client('PUT', `/api/servers/${lid}/docs/theme`, { value: { ...T, MenuBanner: 'https://exemple.fr/menu.png', LoadingBanner: 'https://exemple.fr/load.jpg', MarkerType: 1, MarkerColor: '#ff0000', MarkerAlpha: 999, MarkerSize: 2, BlipScale: 0.9, BlipColor: 3 } })).ok, 'bannières, markers et blips enregistrés');
+    const th = (await client('GET', `/api/servers/${lid}/docs/theme`)).value; ok(th.MarkerAlpha === 255 && th.MarkerType === 1 && th.BlipScale === 0.9 && th.MenuBanner.startsWith('https://'), 'valeurs bornées (opacité 999 → 255)');
+    ok((await client('PUT', `/api/servers/${lid}/docs/economy`, { value: { preset: 'abuse' } })).ok && (await client('GET', `/api/servers/${lid}/docs/economy`)).value.preset === 'abuse', 'type d’économie enregistré');
+    ok((await client('PUT', `/api/servers/${lid}/docs/economy`, { value: { preset: 'gratuit' } })).ok === false, 'type d’économie inconnu refusé');
     const st = await client('GET', `/api/servers/${lid}/stats-summary?days=7`); ok(st.ok, 'statistiques');
     console.log(`\n${n} vérifications OK`);
   } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }

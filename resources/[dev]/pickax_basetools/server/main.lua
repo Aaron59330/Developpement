@@ -222,8 +222,14 @@ local function readConfigValues()
     if liveRaw and liveRaw ~= '' then
         local okj, j = pcall(json.decode, liveRaw)
         if okj and type(j) == 'table' and j.accent and type(j.server) == 'table' then
+            local m, b = j.marker or {}, j.blip or {}
+            local mc = m.color
             return { Design = j.design or 'arcade', AccentColor = j.accent, InventoryColor = j.server.invColor or '', ServerName = j.server.name or '', ServerShortName = j.server.short or '',
-                ServerTagline = j.server.tagline or '', ServerDiscord = j.server.discord or '', ServerLogo = j.server.logo or '' }
+                ServerTagline = j.server.tagline or '', ServerDiscord = j.server.discord or '', ServerLogo = j.server.logo or '',
+                MenuBanner = j.server.menuBanner or '', LoadingBanner = j.server.loadingBanner or '',
+                MarkerType = m.type or 23, MarkerAlpha = m.alpha or 150, MarkerSize = (m.size and m.size.x) or 1.0,
+                MarkerColor = (type(mc) == 'table' and mc.r) and ('#%02x%02x%02x'):format(mc.r, mc.g, mc.b) or '',
+                BlipScale = b.scale or 0.5, BlipColor = b.color or -1 }
         end
     end
     local raw = LoadResourceFile('pickax_core', 'config.lua') or ''
@@ -246,6 +252,24 @@ local function cleanTheme(v)
     local function txt(x, max) x = tostring(x or ''):gsub('^%s+', ''):gsub('%s+$', '') if #x > max or x:find('[\'"\\\r\n]') then return nil end return x end
     local o = {}
     o.Design = (v.Design == 'ancien' or v.Design == 'arcade') and v.Design or (readConfigValues().Design or 'arcade')
+    local prev = readConfigValues()
+    local function url(x)
+        x = tostring(x or '')
+        if x == '' then return '' end
+        if #x > 300 or not x:match('^https://[%w%-%._~:/%?#@!$&()*+,;=%%]+$') then return nil end
+        return x
+    end
+    if v.MenuBanner ~= nil then o.MenuBanner = url(v.MenuBanner) if o.MenuBanner == nil then return nil, 'Lien de la bannière du menu invalide (https://… sans espace ni guillemet)' end else o.MenuBanner = prev.MenuBanner or '' end
+    if v.LoadingBanner ~= nil then o.LoadingBanner = url(v.LoadingBanner) if o.LoadingBanner == nil then return nil, 'Lien de l\'image de chargement invalide (https://…)' end else o.LoadingBanner = prev.LoadingBanner or '' end
+    local function clampn(x, lo, hi, def) x = tonumber(x) if not x then return def end return math.max(lo, math.min(hi, x)) end
+    o.MarkerType = math.floor(clampn(v.MarkerType, 0, 43, prev.MarkerType or 23))
+    o.MarkerAlpha = math.floor(clampn(v.MarkerAlpha, 0, 255, prev.MarkerAlpha or 150))
+    o.MarkerSize = clampn(v.MarkerSize, 0.1, 5, prev.MarkerSize or 1.0)
+    local mcol = v.MarkerColor ~= nil and tostring(v.MarkerColor):lower() or (prev.MarkerColor or '')
+    if mcol ~= '' and not mcol:match('^#%x%x%x%x%x%x$') then return nil, 'Couleur des markers invalide (#RRGGBB ou vide = couleur principale)' end
+    o.MarkerColor = mcol
+    o.BlipScale = clampn(v.BlipScale, 0.1, 3, prev.BlipScale or 0.5)
+    o.BlipColor = math.floor(clampn(v.BlipColor, -1, 85, prev.BlipColor or -1))
     o.AccentColor = tostring(v.AccentColor or ''):lower()
     if not o.AccentColor:match('^#%x%x%x%x%x%x$') then return nil, 'Couleur principale invalide (format #RRGGBB)' end
     o.InventoryColor = tostring(v.InventoryColor or ''):lower()
@@ -270,7 +294,13 @@ end
 
 local function writeConfigValues(o)
     -- 1) thème « vivant » dans cette ressource : l'écriture dans sa propre ressource est toujours autorisée par FiveM
-    local live = { design = o.Design or 'arcade', accent = o.AccentColor, server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor } }
+    local mcol
+    if o.MarkerColor and o.MarkerColor:match('^#%x%x%x%x%x%x$') then mcol = { r = tonumber(o.MarkerColor:sub(2, 3), 16), g = tonumber(o.MarkerColor:sub(4, 5), 16), b = tonumber(o.MarkerColor:sub(6, 7), 16) } end
+    local ms = o.MarkerSize or 1.0
+    local live = { design = o.Design or 'arcade', accent = o.AccentColor,
+        server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor, menuBanner = o.MenuBanner or '', loadingBanner = o.LoadingBanner or '' },
+        marker = { type = o.MarkerType or 23, size = { x = ms, y = ms, z = ms * 0.5 }, color = mcol, alpha = o.MarkerAlpha or 150 },
+        blip = { scale = o.BlipScale or 0.5, color = o.BlipColor or -1 } }
     if not SaveResourceFile(GetCurrentResourceName(), 'theme_live.json', json.encode(live), -1) then return false, 'Écriture de pickax_basetools/theme_live.json impossible' end
     pcall(SaveResourceFile, 'pickax_theme', 'theme_live.json', json.encode(live), -1)   -- ancien emplacement (facultatif)
     -- 2) pickax_core/config.lua : au mieux (FiveM bloque l'écriture dans une autre ressource sans add_filesystem_permission)
@@ -288,6 +318,9 @@ local function writeConfigValues(o)
                 return pre .. "'" .. o[k] .. "'"
             end, 1)
             if not done then warning = 'clé introuvable dans config.lua : ' .. k break end
+        end
+        for cfgKey, val in pairs({ ServerMenuBanner = o.MenuBanner or '', ServerLoadingBanner = o.LoadingBanner or '' }) do   -- clés facultatives : ignorées si absentes
+            raw = raw:gsub('(\n[ \t]*' .. cfgKey .. '%s*=%s*)([\'"])(.-)%2', function(pre) return pre .. "'" .. val .. "'" end, 1)
         end
         if not warning and not SaveResourceFile('pickax_core', 'config.lua', raw, -1) then
             warning = 'config.lua non modifié (FiveM bloque l\'écriture dans pickax_core ; facultatif : add_filesystem_permission pickax_basetools write pickax_core)'

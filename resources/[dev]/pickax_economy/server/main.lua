@@ -1,3 +1,11 @@
+local PresetName = 'equilibre'
+do
+    local saved = GetResourceKvpString('economy:preset')
+    local want = (saved and saved ~= '') and saved or Config.Preset
+    PresetName = (Config.Presets[want] and want) or 'equilibre'
+end
+local function P() return Config.Presets[PresetName] or Config.Presets.equilibre end
+
 local State = {}   -- State[clé] = { p = pression, off = écart d'événement, off_until = fin (os.time), last = dernier multiplicateur, dirty = bool }
 
 MySQL.ready(function()
@@ -21,14 +29,37 @@ local function mult(k)
     if not s then return 1.0 end
     local c = cfgOf(k)
     local off = (s.off_until > os.time()) and s.off or 0
-    return clamp(1 - Config.Sensitivity * tanh(s.p / (c.scale or Config.Scale)) + off, c.min, c.max)
+    return clamp(1 - (P().sensitivity or Config.Sensitivity) * tanh(s.p / (c.scale or Config.Scale)) + off, c.min, c.max)
 end
 
 local function cleanKey(k) k = tostring(k or ''):lower() return (k ~= '' and #k <= 80 and not k:find('[\'"\\]')) and k or nil end
 
--- Prix actuel d'un produit : base × multiplicateur (arrondi)
-exports('Multiplier', function(k) k = cleanKey(k) return k and mult(k) or 1.0 end)
-exports('Price', function(k, base) k = cleanKey(k) return math.floor((base or 0) * (k and mult(k) or 1.0) + 0.5) end)
+-- Facteur du type d'économie selon le marché : boutiques (prix) / récoltes (gains du joueur)
+local function factorOf(k)
+    if not k then return 1.0 end
+    if k:sub(1, 5) == 'shop:' then return P().prices or 1.0 end
+    if k:sub(1, 5) == 'crop:' then return P().income or 1.0 end
+    return 1.0
+end
+
+-- Prix actuel d'un produit : base × multiplicateur de l'offre/demande × type d'économie du serveur (arrondi)
+exports('Multiplier', function(k) k = cleanKey(k) return k and (mult(k) * factorOf(k)) or 1.0 end)
+exports('Price', function(k, base) k = cleanKey(k) return math.floor((base or 0) * (k and (mult(k) * factorOf(k)) or 1.0) + 0.5) end)
+
+-- Type d'économie du serveur : Preset() → nom + valeurs ; SetPreset(nom) ; Presets() → liste ; Scale('income'|'prices', montant) → montant ajusté
+exports('Preset', function() local p = P() return PresetName, p end)
+exports('Presets', function() local out = {} for id, p in pairs(Config.Presets) do out[#out + 1] = { id = id, label = p.label, desc = p.desc, income = p.income, prices = p.prices } end table.sort(out, function(a, b) return a.id < b.id end) return out end)
+exports('SetPreset', function(name)
+    if type(name) ~= 'string' or not Config.Presets[name] then return false end
+    PresetName = name
+    SetResourceKvp('economy:preset', name)
+    return true
+end)
+exports('Scale', function(kind, amount)
+    amount = tonumber(amount) or 0
+    local f = (kind == 'prices') and (P().prices or 1.0) or (P().income or 1.0)
+    return math.floor(amount * f + 0.5)
+end)
 
 -- Enregistre un échange : side = 'sell' (le joueur vend → offre) ou 'buy' (le joueur achète → demande)
 exports('Record', function(k, qty, side)

@@ -33,6 +33,8 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     });
     [].forEach.call(root.querySelectorAll('[data-pk-logo]'), function (el) { el.setAttribute('src', window.PICKAX_LOGO); });
     [].forEach.call(root.querySelectorAll('[data-pk-title]'), function (el) { el.setAttribute('title', S.name); });
+    // bannière du menu F5 réglée depuis le panel web (lien https) ; sinon l'image d'origine reste
+    [].forEach.call(root.querySelectorAll('[data-pk-banner]'), function (el) { if (/^https:\/\//i.test(String(S.menuBanner || ''))) el.setAttribute('src', S.menuBanner); });
   };
 
   var apply = function (hex, server) {
@@ -110,7 +112,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
       finish(hex, {
         name: get('ServerName', def.server.name), short: get('ServerShortName', def.server.short),
         tagline: get('ServerTagline', def.server.tagline), discord: get('ServerDiscord', def.server.discord).replace(/^https?:\/\//i, ''),
-        logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', '')
+        logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', ''), menuBanner: get('ServerMenuBanner', '')
       });
     }).catch(function () {});
   };

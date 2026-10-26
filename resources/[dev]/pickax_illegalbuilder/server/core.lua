@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 ESX = exports['es_extended']:getSharedObject()
 
 IB = {
@@ -280,7 +281,7 @@ function IB.charge(xPlayer, allowed, method, amount, reason)
 end
 
 function IB.pay(xPlayer, account, amount, reason)
-    amount = math.floor(tonumber(amount) or 0)
+    amount = ECO('income', math.floor(tonumber(amount) or 0))
     if amount > 0 then xPlayer.addAccountMoney(account, amount, reason) end
 end
 

@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- ─────────────────────────────── Course poursuite (intégration de pickax_chase) ───────────────────────────────
 -- Règle : si un poursuivant reste collé au fugitif (≤ catchDistance) pendant catchTime secondes, les poursuivants gagnent ;
 -- si le temps est écoulé, le fugitif gagne. Détection 100 % côté serveur, partie isolée dans un routing bucket.
@@ -173,7 +174,7 @@ local function endMatch(m, winner, reason, winnerSrc)
             lost = m.paid[src] and m.fee or 0
         end
         if x then
-            if reward > 0 then x.addAccountMoney(account, reward, 'Course poursuite') end
+            if reward > 0 then x.addAccountMoney(account, ECO('income', reward), 'Course poursuite') end
             if winner ~= 'none' then recordResult(x.identifier, p.name, p.role, won) end
         end
         TriggerClientEvent('worldbuilder:client:chaseFinish', src, { winner = winner, won = won, reason = reason, reward = reward, lost = lost, fee = m.fee, elapsed = elapsed, winnerName = winnerName, delay = C.EndDelay })

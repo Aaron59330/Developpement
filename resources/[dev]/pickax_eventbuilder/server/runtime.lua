@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- ═══════════════════════════ Moteur d'événements (serveur) ═══════════════════════════
 -- Le serveur est maître : il crée les entités (véhicules / PNJ), décide des étapes, valide chaque interaction (distance, durée, objet)
 -- et verse les récompenses. Les clients n'affichent que (blips, markers, butin local, barres de progression).
@@ -44,7 +45,7 @@ function EB.pay(src, def, mult)
     if not xPlayer then return nil end
     local r = def.reward
     if r.kind == 'account' then
-        local amount = math.floor(rnd(r.min, r.max) * (mult or 1))
+        local amount = ECO('income', math.floor(rnd(r.min, r.max) * (mult or 1)))
         if amount > 0 then xPlayer.addAccountMoney(r.account, amount, 'Événement : ' .. def.label) end
         EB.log(def, xPlayer, 'reward', ('%s %d'):format(r.account, amount), amount)
         return ('%d%s'):format(amount, Config.Currency), amount

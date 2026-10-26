@@ -39,6 +39,9 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     });
     [].forEach.call(root.querySelectorAll('[data-pk-logo]'), function (el) { el.setAttribute('src', window.PICKAX_LOGO); });
     [].forEach.call(root.querySelectorAll('[data-pk-title]'), function (el) { el.setAttribute('title', S.name); });
+    // image de fond de l'écran de chargement (réglée depuis le panel web)
+    var bg = root.getElementById ? root.getElementById('background') : null;
+    if (bg && /^https:\/\//i.test(String(S.loadingBanner || ''))) { bg.style.backgroundImage = 'linear-gradient(180deg, rgba(8,12,20,.35), rgba(8,12,20,.55)), url("' + S.loadingBanner + '")'; bg.style.backgroundSize = 'cover'; bg.style.backgroundPosition = 'center'; }
   };
 
   var apply = function (hex, server) {
@@ -80,7 +83,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
       var server = {
         name: get('ServerName', def.server.name), short: get('ServerShortName', def.server.short),
         tagline: get('ServerTagline', def.server.tagline), discord: get('ServerDiscord', def.server.discord).replace(/^https?:\/\//i, ''),
-        logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', '')
+        logo: get('ServerLogo', def.server.logo), invColor: get('InventoryColor', ''), loadingBanner: get('ServerLoadingBanner', '')
       };
       hex = hex.toLowerCase();
       var next = JSON.stringify({ accent: hex, server: server });
@@ -89,6 +92,13 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
         apply(hex, server);
         window.dispatchEvent(new Event('pickax-theme'));
       }
-    }).catch(function () {});
+    }).catch(function () {}).then(function () {
+      // thème modifié depuis le panel web : pickax_basetools/theme_live.json (si lisible depuis l'écran de chargement)
+      try {
+        fetch('https://cfx-nui-pickax_basetools/theme_live.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (j) {
+          if (j && okHex(j.accent) && j.server && typeof j.server === 'object') { apply(j.accent.toLowerCase(), j.server); window.dispatchEvent(new Event('pickax-theme')); }
+        });
+      } catch (e) {}
+    });
   } catch (e) {}
 })();

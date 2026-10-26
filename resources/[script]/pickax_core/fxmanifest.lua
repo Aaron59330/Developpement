@@ -21,6 +21,7 @@ shared_scripts {
     'functions/config.lua',
     'config.lua',
     'utils/**/config.lua',
+    'utils/livetheme/shared.lua',   -- applique le thème du panel web / des outils de la base (couleur, marker global, blips) à Config
     'players/**/config.lua',
     'players/menuemote/animation.lua',
 }

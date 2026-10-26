@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- ─────────────────────────────── Job Gazoline : ravitaillement des stations essence ───────────────────────────────
 local G = Config.Gazoline
 local Missions = {}        -- [src] = { eid, pi, coords, liters, pay, start, state = 'deliver' | 'return', label }
@@ -174,7 +175,7 @@ RegisterNetEvent('worldbuilder:server:gazUnloadFinish', function(done)
     e.stats = e.stats or {}
     e.stats.tank = math.min(cap, (e.stats.tank or 0) + m.liters)
     WB.stat(e, 'delivered', m.liters)
-    xp.addAccountMoney(G.PayAccount, m.pay, 'Livraison de carburant')
+    xp.addAccountMoney(G.PayAccount, ECO('income', m.pay), 'Livraison de carburant')
     WB.log(e, xp, 'delivery', ('%d L livrés'):format(m.liters), m.pay)
     m.state = 'return'
     TriggerClientEvent('worldbuilder:gaz:delivered', src, { liters = m.liters, pay = m.pay, label = m.label })

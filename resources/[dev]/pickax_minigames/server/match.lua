@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- Parties : lobby → attente → compte à rebours → partie → résultats (tout est décidé côté serveur)
 
 local function now() return os.time() end
@@ -222,7 +223,7 @@ function MG.finish(g, why)
         if ident then mult = Progress.multiplier(ident, def, won) end
         local gain = (won and S.rewardWin or S.rewardLose) + S.rewardPerPoint * math.max(0, r.score or 0)
         if T.engine == 'race' and not r.finished then gain = S.rewardLose end
-        gain = math.floor(gain * mult + (won and share or 0))
+        gain = ECO('income', math.floor(gain * mult + (won and share or 0)))
         local x = ESX.GetPlayerFromId(r.src)
         if x and gain > 0 then x.addAccountMoney(Config.RewardAccount, gain, 'minigames-reward') end
         r.won, r.gain, r.pos = won, gain, pos

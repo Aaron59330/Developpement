@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 AJ = {
     Modules = {},     -- Modules[clé] = { start = function(src, ctx) -> payload | nil, err ; stop = function(src, state) }
     Active = {},      -- Active[src] = { job = clé, state = {}, started = os.time() }
@@ -210,7 +211,7 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
     local s = AJ.stat(xPlayer, key)
     local before = levelOf(s.xp)
     local mult = 1 + (before - 1) * Config.Act.XP.PayPerLevel / 100 + vipBonus(src) / 100
-    local amount = math.floor(math.max(0, base) * mult)
+    local amount = ECO('income', math.floor(math.max(0, base) * mult))
     local meta = AJ.meta(xPlayer.job.name)
     local label = meta and meta.label or Config.Act.Jobs[key].label
     if amount > 0 then xPlayer.addAccountMoney(Config.Act.Account, amount, reason or label) end

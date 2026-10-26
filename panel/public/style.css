@@ -53,3 +53,43 @@ pre.code{background:#0a0b0e;border:1px solid var(--line);padding:10px 12px;overf
 .hl i{font-style:normal}.hl .c{color:#5d6b7c}.hl .s{color:#a5d6a7}.hl .n{color:#f0a868}.hl .k{color:#c792ea}
 .fside{border-left:1px solid var(--line);overflow:auto}.ver{padding:10px 12px;border-bottom:1px solid var(--line)}
 .diff{background:#0a0b0e;border:1px solid var(--line);font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:60vh;overflow:auto}.dl{padding:0 10px;white-space:pre-wrap;word-break:break-word}.dl .sg{display:inline-block;width:16px;color:var(--mut)}.dl.add{background:rgba(74,222,128,.14)}.dl.del{background:rgba(248,113,113,.16)}.dl.sk{color:var(--mut);text-align:center;background:rgba(255,255,255,.03)}
+
+/* ───────── 2e thème du panel : « Clair » (contenu blanc, menu sombre) — bouton en bas du menu ───────── */
+[data-theme="clair"]{--bg:#f3f4f7;--panel:#ffffff;--line:rgba(15,23,42,.12);--mut:#667085}
+[data-theme="clair"] body{background:#f3f4f7;color:#1b1d22}
+[data-theme="clair"] h1,[data-theme="clair"] h2{color:#9a5b08}
+[data-theme="clair"] .main a:not(.btn):not(.nav):not(.qa){color:#9a5b08}
+[data-theme="clair"] .card{background:#fff;border:1px solid rgba(15,23,42,.1);border-left:3px solid var(--ac);box-shadow:0 1px 2px rgba(15,23,42,.05)}
+[data-theme="clair"] .stat b{color:#111827}
+[data-theme="clair"] .muted{color:#667085}
+[data-theme="clair"] input,[data-theme="clair"] select,[data-theme="clair"] textarea{background:#fff;border:1px solid rgba(15,23,42,.18);color:#1b1d22}
+[data-theme="clair"] input:focus,[data-theme="clair"] select:focus,[data-theme="clair"] textarea:focus{border-color:#d9922b;box-shadow:0 0 0 3px rgba(217,146,43,.18)}
+[data-theme="clair"] label{color:#667085}
+[data-theme="clair"] th{color:#667085;border-bottom:1px solid rgba(15,23,42,.12)}
+[data-theme="clair"] td{border-bottom:1px solid rgba(15,23,42,.07);color:#1b1d22}
+[data-theme="clair"] tr:hover td{background:rgba(15,23,42,.03)}
+[data-theme="clair"] .btn{background:#fff;border:1px solid rgba(15,23,42,.22);color:#1b1d22}
+[data-theme="clair"] .btn:hover{border-color:#d9922b}
+[data-theme="clair"] .btn.p{background:var(--ac);color:var(--ink);border-color:var(--ac)}
+[data-theme="clair"] .btn.d{color:#b42318;border-color:rgba(180,35,24,.5);background:#fff}
+[data-theme="clair"] .pill{background:rgba(15,23,42,.07);color:#344054}
+[data-theme="clair"] .pill.ok{background:rgba(22,163,74,.14);color:#15803d}[data-theme="clair"] .pill.bad{background:rgba(220,38,38,.12);color:#b42318}[data-theme="clair"] .pill.warn{background:rgba(217,119,6,.15);color:#b45309}[data-theme="clair"] .pill.acc{background:var(--ac);color:var(--ink)}
+[data-theme="clair"] .qa{color:#1b1d22;border-bottom:1px solid rgba(15,23,42,.08)}[data-theme="clair"] .qa:hover{background:rgba(217,146,43,.1)}
+[data-theme="clair"] .ev{border-bottom:1px solid rgba(15,23,42,.07)}
+[data-theme="clair"] .key{background:#fff7e8;color:#8a4f06;border-color:rgba(217,146,43,.6)}
+[data-theme="clair"] .modal{background:rgba(15,23,42,.45)}[data-theme="clair"] .modal .box{background:#fff;color:#1b1d22;border-color:rgba(217,146,43,.7)}
+[data-theme="clair"] .toast{background:#fff;color:#1b1d22;box-shadow:0 8px 30px rgba(15,23,42,.2)}
+[data-theme="clair"] .auth .box{background:#fff;color:#1b1d22}
+[data-theme="clair"] .bar-row .bt{background:rgba(15,23,42,.1)}
+[data-theme="clair"] .empty{color:#667085}
+[data-theme="clair"] .chart text{fill:#667085}
+[data-theme="clair"] .files .fwrap{background:#fff;border-color:rgba(15,23,42,.15)}[data-theme="clair"] .sh{border-color:rgba(15,23,42,.12)}
+[data-theme="clair"] .tr{color:#344054}[data-theme="clair"] .tr:hover{background:rgba(15,23,42,.05)}[data-theme="clair"] .tr.on{background:rgba(217,146,43,.18);color:#111827}
+[data-theme="clair"] .ftab{color:#667085;border-color:rgba(15,23,42,.12)}[data-theme="clair"] .ftab.on{background:#f8f9fb;color:#111827}
+[data-theme="clair"] .ver{border-color:rgba(15,23,42,.1)}
+[data-theme="clair"] .tw{background:transparent}
+/* l'éditeur, la console et les extraits de code restent sombres */
+[data-theme="clair"] .ed,[data-theme="clair"] .console,[data-theme="clair"] .diff,[data-theme="clair"] pre.code{background:#0f1115;color:#d6dbe6}
+[data-theme="clair"] .gut{background:#0f1115;border-right:1px solid rgba(255,255,255,.1)}
+[data-theme="clair"] .edin textarea{caret-color:#fdc27d}
+[data-theme="clair"] .side select{background:#16171c;color:#eef0f4;border:1px solid rgba(255,255,255,.14)}

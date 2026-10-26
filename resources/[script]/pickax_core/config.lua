@@ -8,6 +8,8 @@ Config = {
 	ServerTagline = 'RP sérieux · Free-Access',--Slogan affiché sous le nom
 	ServerDiscord = 'discord.gg/bluebayrp',--Invitation Discord (sans https://)
 	ServerLogo = 'logo.png',--Logo principal : fichier placé dans pickax_theme/logo/ (HUD, inventaire, pause, identité…) ou lien https://...
+	ServerMenuBanner = '',--Bannière du menu F5 (lien https://… d'une image) ; vide = bannière d'origine. Réglable depuis le panel web > Personnalisation
+	ServerLoadingBanner = '',--Image de fond de l'écran de chargement (lien https://…) ; vide = fond d'origine. Réglable depuis le panel web > Personnalisation
 	TebexStore = '',--Adresse de ta boutique Tebex (ex : 'https://bluebay.tebex.io'). Le bouton « Acheter des coins » de la boutique en jeu ouvre ce lien. Vide = lien de players/boutique/config.lua
 	-- ═════════════════════════════════════════════════════════════════════════
 

@@ -1,3 +1,4 @@
+local function ECO(kind, n) if GetResourceState('pickax_economy') ~= 'started' then return n end local ok, r = pcall(function() return exports.pickax_economy:Scale(kind, n) end) return (ok and tonumber(r)) or n end   -- type d'économie du serveur (pickax_economy, optionnel)
 -- ─────────────────────────────── Pôle emploi : petits jobs en libre accès + quêtes ───────────────────────────────
 local C = Config.JobCenter
 local Active, Cool = {}, {}      -- [src] = quête en cours ; [identifier|job|quête] = fin de cooldown
@@ -264,7 +265,7 @@ ESX.RegisterServerCallback('worldbuilder:jobcenter:questFinish', function(src, c
     local st = statsOf(x.identifier, a.job)
     local reward = math.random(a.q.reward[1], math.max(a.q.reward[1], a.q.reward[2]))
     local bonus = (C.GradeBonus or {})[x.job.grade + 1] or 0
-    reward = math.floor(reward * (100 + bonus) / 100)
+    reward = ECO('income', math.floor(reward * (100 + bonus) / 100))
     x.addAccountMoney(C.RewardAccount or 'money', reward)
     Cool[a.key] = now() + (C.Cooldown or 45)
     local done = st.done + 1
