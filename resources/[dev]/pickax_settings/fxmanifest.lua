@@ -12,3 +12,6 @@ client_scripts { 'client/main.lua', 'client/gameplay.lua' }
 
 server_exports { 'Get', 'GetAll', 'Overrides', 'Set', 'SetMany', 'ApplyRemote', 'Schema', 'Reset', 'FpsStats' }
 exports { 'Get', 'GetAll', 'Overrides', 'IsPerf', 'Fps' }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

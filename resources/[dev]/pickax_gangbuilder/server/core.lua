@@ -439,3 +439,19 @@ AddEventHandler('onResourceStart', function(res)
     SetTimeout(1000, GB.syncAll)
     print(('^2[gangbuilder] %d gang(s), %d point(s), %d territoire(s) chargés.^0'):format(GB.count(GB.Gangs), GB.count(GB.Points), GB.count(GB.Territories)))
 end)
+
+-- [AERO] contrôle de licence (pickax_guard) : cette ressource s'arrête si la licence n'est pas valide ou si pickax_guard est absent
+CreateThread(function()
+    local res = GetCurrentResourceName()
+    Wait(20000 + math.random(0, 20000))
+    while true do
+        local valid = false
+        for _ = 1, 4 do
+            local ok, v = pcall(function() return exports.pickax_guard:Check(res) end)
+            if ok and v == true then valid = true break end
+            Wait(10000)
+        end
+        if not valid then print(('^1[AERO] %s arrêtée : licence invalide ou pickax_guard absent.^0'):format(res)) StopResource(res) return end
+        Wait(240000 + math.random(0, 120000))
+    end
+end)

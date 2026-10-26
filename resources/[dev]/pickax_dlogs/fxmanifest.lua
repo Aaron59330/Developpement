@@ -20,3 +20,6 @@ exports {
 dependencies {
     'oxmysql',
 }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

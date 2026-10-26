@@ -63,4 +63,10 @@ router.patch('/modules/:id', (req, res) => { const m = db.prepare('SELECT * FROM
   db.prepare('UPDATE modules SET name=?,description=?,price=?,resources=?,active=? WHERE id=?').run(String(b.name ?? m.name).slice(0, 60), String(b.description ?? m.description).slice(0, 300), +(b.price ?? m.price), JSON.stringify(r), b.active === undefined ? m.active : (b.active ? 1 : 0), m.id); res.json({ ok: true }); });
 router.post('/licenses/:id/modules', (req, res) => { const { module_id, grant } = req.body || {}; if (grant) db.prepare('INSERT OR IGNORE INTO license_modules(license_id,module_id,enabled) VALUES(?,?,0)').run(+req.params.id, +module_id); else db.prepare('DELETE FROM license_modules WHERE license_id=? AND module_id=?').run(+req.params.id, +module_id); audit(req.user.id, +req.params.id, 'admin:module-' + (grant ? 'grant' : 'revoke'), String(module_id), A.ip(req)); res.json({ ok: true }); });
 router.get('/licenses/:id/modules', (req, res) => res.json({ ok: true, owned: db.prepare('SELECT module_id FROM license_modules WHERE license_id=?').all(+req.params.id).map(x => x.module_id) }));
+// Protection de la base (pickax_guard) : clé publique à copier dans la base + dernières vérifications de chaque licence
+router.get('/guard', (req, res) => {
+  const G = require('../lib/guard'); const rows = db.prepare("SELECT l.id, l.server_name, l.key, l.status, l.bound_ip, u.email FROM licenses l LEFT JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 300").all();
+  const get = db.prepare('SELECT value FROM settings WHERE key=?');
+  res.json({ ok: true, publicKey: G.publicKey, checks: rows.map(r => { const g = get.get('guard:' + r.id); return { id: r.id, server_name: r.server_name, email: r.email, status: r.status, bound_ip: r.bound_ip, guard: g ? JSON.parse(g.value) : null }; }) });
+});
 module.exports = router;

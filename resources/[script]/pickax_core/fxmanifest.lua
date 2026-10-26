@@ -261,3 +261,6 @@ dependencies {
     'ox_inventory',
     'pickax_ui'
 }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

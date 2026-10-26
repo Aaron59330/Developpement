@@ -11,3 +11,6 @@ client_script 'client.lua'
 server_script 'server.lua'
 
 dependencies { 'es_extended', 'ox_inventory' }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

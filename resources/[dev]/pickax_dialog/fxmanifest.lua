@@ -12,3 +12,6 @@ client_scripts { 'pk_sound.lua', 'client.lua' }
 ui_page 'html/index.html'
 
 files { 'html/index.html', 'html/style.css', 'html/arcade.css', 'html/script.js', 'html/pk-snd.js', 'html/fonts/*.woff2' }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

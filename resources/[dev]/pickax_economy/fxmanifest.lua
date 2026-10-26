@@ -11,3 +11,6 @@ server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
 
 exports { 'Multiplier', 'Price', 'Record', 'Snapshot', 'Event', 'Reset', 'Preset', 'Presets', 'SetPreset', 'Scale' }
 dependencies { 'oxmysql' }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'

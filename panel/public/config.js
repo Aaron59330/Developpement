@@ -142,3 +142,22 @@ PAGES.settings = async function () {
     el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Un réglage ne change rien tant que tu ne l’as pas modifié : les valeurs d’origine de ta base restent en vigueur. Les changements sont appliqués en direct sur le serveur, sans redémarrage.'),
     el('div', { class: 'setlayout' }, rail, main), bar);
 };
+
+// ═══════════════ ADMIN : PROTECTION DE LA BASE (pickax_guard) ═══════════════
+PAGES['a-guard'] = async function () {
+  const r = await api('GET', '/api/admin/guard'); if (!r.ok) return el('div', { class: 'card' }, r.error || 'Erreur');
+  const line = `Config.PublicKey = '${r.publicKey}'`;
+  const rows = (r.checks || []).map(c => el('tr', {}, el('td', {}, c.server_name), el('td', { class: 'muted' }, c.email || '—'), el('td', {}, c.guard ? (c.guard.valid ? el('span', { class: 'pill ok' }, 'valide') : el('span', { class: 'pill bad' }, 'refusée : ' + c.guard.status)) : el('span', { class: 'pill warn' }, 'jamais vérifiée')), el('td', { class: 'mono muted' }, c.guard ? c.guard.ip : '—'), el('td', { class: 'muted' }, c.guard ? ago(c.guard.at) : '—'), el('td', { class: 'muted' }, c.guard ? c.guard.host : '')));
+  return el('div', {}, head('Protection de la base'),
+    el('div', { class: 'card' }, el('h2', {}, '1 · Clé publique à mettre dans la base'),
+      el('p', { class: 'muted' }, 'Le panel signe chaque vérification de licence avec une clé privée qui reste sur ce serveur (jamais dans la base). La base ne fait confiance qu’aux réponses signées : un faux panel est refusé. Copie cette ligne dans ', el('span', { class: 'mono' }, 'resources/[dev]/pickax_guard/config.lua'), ' (remplace la ligne Config.PublicKey), puis pousse la base. Sans elle, la base ne démarre pas.'),
+      el('pre', { class: 'code', style: 'user-select:all;white-space:pre-wrap;word-break:break-all' }, line), el('button', { class: 'btn p', onclick: () => copy(line) }, el('span', {}, 'Copier la ligne'))),
+    el('div', { class: 'card' }, el('h2', {}, '2 · Comment ça protège'), el('ul', { class: 'steps' },
+      el('li', {}, 'Sans ', el('span', { class: 'mono' }, 'set aero_panel_key'), ' valide dans le server.cfg, les ressources ', el('span', { class: 'mono' }, 'pickax_*'), ' ne démarrent pas.'),
+      el('li', {}, 'Une clé révoquée, suspendue ou expirée arrête la base en moins de 10 minutes.'),
+      el('li', {}, 'Une clé copiée sur un autre serveur (autre adresse IP) est refusée : la licence est liée à la première IP (tu peux la délier dans Licences).'),
+      el('li', {}, 'Un faux panel, une réponse rejouée ou une réponse modifiée sont refusés (signature Ed25519 + nonce).'),
+      el('li', {}, 'Si ce panel est en panne, les serveurs déjà vérifiés continuent 24 h.')),
+      el('p', { class: 'muted' }, 'Limite : les fichiers Lua d’un serveur sont lisibles par son propriétaire, qui peut en théorie supprimer ces protections. Elles rendent le vol long, visible et peu rentable ; pour une protection forte, protège aussi les fichiers (escrow Cfx.re via Tebex, ou obfuscation), voir PROTECTION.md.')),
+    el('div', { class: 'card tw' }, el('h2', {}, '3 · Dernières vérifications par licence'), rows.length ? el('table', {}, el('thead', {}, el('tr', {}, ['Serveur', 'Client', 'Dernière vérification', 'IP vue', 'Quand', 'Nom du serveur'].map(h => el('th', {}, h)))), el('tbody', {}, rows)) : el('p', { class: 'muted' }, 'Aucune licence.')));
+};

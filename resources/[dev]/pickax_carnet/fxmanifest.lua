@@ -22,3 +22,6 @@ files { 'html/index.html', 'html/style.css', 'html/script.js' }
 server_exports { 'Report', 'Snapshot' }
 
 dependencies { 'oxmysql', 'es_extended' }
+
+-- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
+dependency 'pickax_guard'
