@@ -65,3 +65,11 @@ node tools/demo-seed.js       # base de démo (DATA_DIR=./data-demo)
 
 ## Pas encore inclus
 Paiement en ligne (Stripe/PayPal) : offres, modules et facturation gérés à la main par l'admin ; e-mails automatiques (mot de passe oublié) ; accès SFTP ; sortie de console en direct (seuls les logs du panel sont affichés) ; éditeurs visuels de jobs / boutiques (à brancher sur les builders ; en attendant, tout passe par l'éditeur de fichiers).
+
+## Site public et boutique
+
+- La page d'accueil (sans connexion) présente la base et les offres ; « Se connecter » est en haut à droite.
+- Un visiteur peut créer un compte, mais tant qu'il n'a pas de licence il ne voit que la **Boutique**, le support et son compte.
+- « Commander » crée une commande **en attente** ; les instructions de paiement (Administration → Commandes) s'affichent au client.
+- L'admin clique **Valider** après réception du paiement : la licence est créée (ou prolongée pour un renouvellement) et le panel du client s'ouvre tout seul.
+- Les offres sont celles de Administration → Offres (l'offre « Essai » n'est jamais proposée à l'achat). Pour masquer une offre, désactive-la.

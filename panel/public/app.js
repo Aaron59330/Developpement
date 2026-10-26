@@ -56,35 +56,37 @@ async function loadServers() {
 function setSid(id) { state.sid = id; localStorage.setItem('aero_sid', id); render(); }
 
 // ───────── connexion / inscription ─────────
-function authView() {
-  let mode = 'login';
+function authView(startMode) {
+  let mode = startMode === 'register' && state.cfg.allowRegister !== false ? 'register' : 'login';
   const box = el('div', { class: 'box' });
   const draw = () => {
     const email = el('input', { type: 'email', placeholder: 'E-mail', autocomplete: 'email' }), pass = el('input', { type: 'password', placeholder: 'Mot de passe', autocomplete: mode === 'login' ? 'current-password' : 'new-password' }), name = el('input', { placeholder: 'Pseudo', autocomplete: 'username' });
     const err = el('div', { class: 'muted', style: 'color:var(--bad);min-height:20px;margin-top:8px' });
     const submit = async () => { const r = await api('POST', '/api/auth/' + mode, { email: email.value, password: pass.value, username: name.value }); if (!r.ok) { err.textContent = r.error || 'Erreur'; return; } const me = await api('GET', '/api/auth/me'); state.user = me.user; await loadServers(); go('overview'); render(); };
+    const toggle = () => { mode = mode === 'login' ? 'register' : 'login'; history.replaceState(null, '', '#/' + mode); draw(); };
     [email, pass, name].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
     box.replaceChildren(...[el('img', { src: 'img/logo.png', alt: 'AERO' }), el('h1', {}, mode === 'login' ? 'Connexion' : 'Créer un compte'), el('p', { class: 'muted', style: 'margin:4px 0 14px' }, 'Gère ton serveur FiveM depuis ton espace client.'),
       mode === 'register' ? [el('label', {}, 'Pseudo'), name] : null, el('label', {}, 'E-mail'), email, el('label', {}, 'Mot de passe'), pass, err,
       el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { class: 'btn p', onclick: submit }, el('span', {}, mode === 'login' ? 'Se connecter' : 'S’inscrire')),
-        (state.cfg.allowRegister || mode === 'register') ? el('a', { href: '#', onclick: e => { e.preventDefault(); mode = mode === 'login' ? 'register' : 'login'; draw(); } }, mode === 'login' ? 'Créer un compte' : 'J’ai déjà un compte') : null)].flat().filter(Boolean));
+        (state.cfg.allowRegister !== false || mode === 'register') ? el('a', { href: '#', onclick: e => { e.preventDefault(); toggle(); } }, mode === 'login' ? 'Créer un compte' : 'J’ai déjà un compte') : null)].flat().filter(Boolean));
     email.focus();
   };
-  draw(); return el('div', { class: 'auth' }, box);
+  draw(); return el('div', { class: 'auth' }, el('a', { class: 'auth-back', href: '#/' }, '← Retour au site'), box);
 }
 
 // ───────── coque ─────────
 function shell(content) {
-  const [page] = route(); const isAdmin = state.user.role === 'admin'; const srv = curServer();
+  const [page] = route(); const isAdmin = state.user.role === 'admin'; const srv = curServer(); const lonely = !isAdmin && !state.servers.length;
   const item = (id, label, icon) => el('a', { class: 'nav' + (page === id ? ' on' : ''), href: '#/' + id }, svg(ICON[icon]), el('span', {}, label));
-  const side = el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }),
+  const bottom = el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; state.servers = []; location.hash = '#/'; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')')));
+  const side = lonely ? el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }), el('div', { class: 'sec' }, 'Mon espace'), item('offers', 'Boutique', 'cart'), item('patchnotes', 'Patch notes', 'book'), bottom) : el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }),
     state.servers.length ? el('select', { onchange: e => setSid(+e.target.value), style: 'margin-bottom:6px' }, state.servers.map(s => el('option', { value: s.id, selected: s.id === (srv && srv.id) }, s.server_name + (s.online ? '' : ' (hors ligne)')))) : null,
     el('div', { class: 'sec' }, 'Général'), item('overview', 'Dashboard', 'home'), item('shop', 'Boutique', 'cart'), item('activity', 'Journal d’activités', 'list'), item('stats', 'Statistiques', 'chart'),
     el('div', { class: 'sec' }, 'Gestion'), item('theme', 'Personnalisation', 'brush'), item('settings', 'Réglages du serveur', 'sliders'), item('modules', 'Gestion des modules', 'puzzle'), item('players', 'Joueurs', 'users'), item('actions', 'Actions rapides', 'bolt'), item('access', 'Bans & whitelist', 'shield'), item('resources', 'Ressources', 'box'),
     el('div', { class: 'sec' }, 'Développement'), item('files', 'Fichiers', 'file'), item('backups', 'Sauvegardes', 'db'), item('console', 'Console', 'term'), item('webhooks', 'Webhooks', 'hook'),
-    el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'),
-    isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
-    el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')'))));
+    el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'), isAdmin ? null : item('offers', 'Offres & renouvellement', 'tag'),
+    isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-orders', 'Commandes', 'cart'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
+    bottom);
   return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, content));
 }
 const needServer = () => {
@@ -275,8 +277,10 @@ const PAGES = window.PAGES = { overview: pOverview, players: pPlayers, actions: 
 let renderId = 0;
 async function render() {
   clearInterval(state.timer); const id = ++renderId;
-  if (!state.user) { $app.replaceChildren(authView()); return; }
-  const [page] = route(); const fn = PAGES[page] || PAGES.overview;
+  if (!state.user) { $app.replaceChildren(window.publicView ? window.publicView() : authView()); return; }
+  const [page] = route(); const lonely = state.user.role !== 'admin' && !state.servers.length;
+  if (lonely && !['offers', 'support', 'account', 'patchnotes'].includes(page)) { go('offers'); return; }
+  const fn = PAGES[page] || PAGES.overview;
   if (page.startsWith('a-') && state.user.role !== 'admin') { go('overview'); return; }
   let content; try { content = await fn(); } catch (e) { console.error(e); content = el('div', { class: 'card' }, 'Erreur d’affichage : ' + e.message); }
   if (id !== renderId) return; $app.replaceChildren(shell(content));

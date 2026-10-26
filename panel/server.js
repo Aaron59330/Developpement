@@ -16,6 +16,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/servers', require('./routes/servers'));
 app.use('/api/servers', require('./routes/server-extra'));
 app.use('/api/servers', require('./routes/files'));
+app.use('/api/shop', require('./routes/shop'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/misc'));
