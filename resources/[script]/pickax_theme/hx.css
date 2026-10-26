@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   Style « Néon arcade » (inspiré des boutiques de jeu) : fond bleu nuit, bordure néon à la couleur du serveur, titres condensés italiques
+   avec léger décalage rouge/bleu, onglets inclinés, cartes produit sombres avec étiquette et bouton « + ».
+   FICHIER PARTAGÉ (pickax_theme/hx.css) : chargé par les builders et les menus de la base via https://cfx-nui-pickax_theme/hx.css.
+   Actif avec <body class="hx"> ; retirer la classe (ou la balise <link>) rend à chaque interface son style d'origine. Aucune logique ni configuration n'est touchée.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+body.hx {
+  --hx-rgb: var(--accent-rgb, var(--pk-accent-rgb, 253, 194, 125));   /* couleur du builder (ou de l'élément ouvert), sinon couleur du serveur */
+  --hx-a: rgb(var(--hx-rgb));
+  --hx-hot: rgb(var(--hx-rgb));   /* couleur d'appoint = couleur du serveur (comme l'ancien menu) */
+  --hx-bg: #16171c;
+  --hx-panel: #1b1c22;
+  --hx-card: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .02));
+  --hx-line: rgba(var(--hx-rgb), .26);
+  --hx-font: 'Barlow Condensed', 'Oswald', 'Bebas Neue', 'Segoe UI', 'Inter', system-ui, sans-serif;
+  --bg: var(--hx-bg); --surface: rgba(255, 255, 255, .035); --surface-2: rgba(255, 255, 255, .07);
+  --line: rgba(255, 255, 255, .08); --line-2: rgba(var(--hx-rgb), .3);
+  --text: #f4f4f5; --text-2: #c9c9ce; --muted: #7d7d85;
+}
+body.hx #root:not(.hidden) { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, .1), rgba(0, 0, 0, .6)); backdrop-filter: blur(3px); }
+
+/* ── Coque : panneau néon ── */
+body.hx .shell, body.hx .panel {
+  background: radial-gradient(900px 380px at 0% 0%, rgba(var(--hx-rgb), .1), transparent 70%), rgba(22, 23, 28, .97);
+  border: 1.5px solid rgba(var(--hx-rgb), .55); border-radius: 6px;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, .7), 0 0 26px rgba(var(--hx-rgb), .22);
+}
+body.hx .shell.noside .side { display: none; }
+body.hx .side { background: rgba(var(--hx-rgb), .015); border-right: 1px solid var(--line); }
+body.hx .profile { border-radius: 4px; background: linear-gradient(135deg, rgba(var(--hx-rgb), .16), rgba(255, 255, 255, .02)); border: 1px solid rgba(var(--hx-rgb), .5); }
+body.hx .nav-label { color: var(--hx-hot); font-weight: 800; letter-spacing: .2em; }
+body.hx .nav-item { border-radius: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12.5px; }
+body.hx .nav-item.active { background: var(--hx-a); color: var(--on-accent, #1a1206); border-color: var(--hx-a); box-shadow: 0 0 18px rgba(var(--hx-rgb), .45); }
+body.hx .nav-item.active svg, body.hx .nav-item.active .count { color: var(--on-accent, #1a1206); }
+
+/* ── En-tête : gros titre condensé italique ── */
+body.hx .head { border-bottom: 0; padding: 20px 28px 4px; background: none; }
+body.hx .head .ttl { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+body.hx .head h1 {
+  font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 40px; line-height: 1; letter-spacing: .01em;
+  letter-spacing: -.035em; font-size: 38px;
+  color: #fff; text-shadow: 0 0 18px rgba(var(--hx-rgb), .35);
+}
+body.hx .head p { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: .06em; color: var(--hx-hot); transform: skewX(-8deg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+body.hx .tile { border-radius: 4px; background: rgba(var(--hx-rgb), .08); border: 1px solid var(--hx-line); color: var(--hx-a); }
+body.hx .tile svg { color: var(--hx-a); }
+body.hx .head .acts button[data-a="close"] { border-radius: 3px; background: rgba(0, 0, 0, .5); border-color: var(--hx-line); }
+body.hx .body { padding-top: 14px; }
+
+/* ── Onglets inclinés ── */
+body.hx .seg, body.hx .hx-tabs { display: flex; flex-wrap: wrap; gap: 8px; background: none; border: 0; padding: 0; }
+body.hx .hx-tabs { padding: 4px 28px 14px; }
+body.hx .seg { margin-bottom: 20px; }
+body.hx .seg button, body.hx .hx-tab {
+  position: relative; isolation: isolate; border: 0; background: none; border-radius: 0; height: 34px; padding: 0 20px;
+  font-family: var(--hx-font); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-2);
+}
+body.hx .seg button::before, body.hx .hx-tab::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-14deg); background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .14); }
+body.hx .seg button:hover::before, body.hx .hx-tab:hover::before { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .08); }
+body.hx .seg button.active, body.hx .hx-tab.on { color: var(--on-accent, #1a1206); }
+body.hx .seg button.active::before, body.hx .hx-tab.on::before { background: var(--hx-a); border-color: var(--hx-a); box-shadow: 0 0 18px rgba(var(--hx-rgb), .55); }
+body.hx .seg button:hover, body.hx .hx-tab:hover { background: none; }
+
+/* ── Cartes & lignes ── */
+body.hx .card, body.hx .stat, body.hx .cart, body.hx .tpl { background: var(--hx-card); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; }
+body.hx .card-h .t, body.hx .cart .card-h .t { font-family: var(--hx-font); font-style: italic; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: .04em; }
+body.hx .card-h .t svg { color: var(--hx-a); }
+body.hx .eyebrow { color: var(--hx-hot); font-weight: 800; letter-spacing: .18em; }
+body.hx .eyebrow::before { background: var(--hx-hot); }
+body.hx .stat .v { font-family: var(--hx-font); font-style: italic; font-weight: 800; font-size: 30px; }
+body.hx .item, body.hx .pt, body.hx .irow, body.hx .cline, body.hx .cat-row { background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .08); border-radius: 3px; }
+body.hx .item.click:hover, body.hx .pt:hover, body.hx .tpl:hover { border-color: var(--hx-a); box-shadow: 0 0 16px rgba(var(--hx-rgb), .25); background: rgba(var(--hx-rgb), .06); }
+body.hx .pt.active, body.hx .tpl.sel { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .12); }
+body.hx .item .price { color: var(--hx-a); font-weight: 800; }
+body.hx .kv span:first-child { text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; font-weight: 700; }
+
+/* ── Étiquettes (« NEW ») ── */
+body.hx .chip { border-radius: 2px; font-weight: 800; letter-spacing: .08em; font-size: 10px; padding: 3px 9px; transform: skewX(-8deg); }
+body.hx .chip::before { display: none; }
+body.hx .chip.info { background: var(--hx-a); color: var(--on-accent, #1a1206); border-color: var(--hx-a); }
+body.hx .chip.ok { background: rgba(74, 222, 128, .14); }
+
+/* ── Boutons ── */
+body.hx button { border-radius: 3px; border-color: var(--line-2, rgba(255, 255, 255, .16)); background: transparent; font-weight: 700; letter-spacing: .04em; }
+body.hx button:hover { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .1); }
+body.hx button.primary { position: relative; border: 0; border-radius: 3px; background: var(--hx-a); color: var(--on-accent, #1a1206); font-family: var(--hx-font); font-style: italic; font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 0 22px rgba(var(--hx-rgb), .5); transform: skewX(-8deg); }
+body.hx button.primary:hover { filter: brightness(1.12); background: var(--hx-a); }
+body.hx button.primary > * { transform: skewX(8deg); }
+body.hx button.icon { border-radius: 3px; }
+
+/* ── Champs ── */
+body.hx input, body.hx select, body.hx textarea, body.hx .searchbox { background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 3px; }
+body.hx input:focus, body.hx select:focus, body.hx textarea:focus, body.hx .searchbox:focus-within { border-color: var(--hx-a); box-shadow: 0 0 0 2px rgba(var(--hx-rgb), .18), 0 0 14px rgba(var(--hx-rgb), .25); }
+body.hx .searchbox input { border: 0; background: transparent; box-shadow: none; }
+body.hx label.f > span, body.hx .lbl { letter-spacing: .16em; font-weight: 800; color: var(--muted); }
+body.hx input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; padding: 0; border-radius: 3px; background: rgba(0, 0, 0, .5); border: 1px solid rgba(var(--hx-rgb), .5); }
+body.hx input[type=checkbox]:checked { background: var(--hx-a); border-color: var(--hx-a); }
+body.hx input[type=checkbox]:checked::after { border-color: var(--on-accent, #1a1206); }
+
+/* ── Boutique côté joueur ── */
+body.hx .shop-wrap { padding: 4px 28px 24px; gap: 20px; }
+body.hx .prod-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
+body.hx .prod {
+  background: var(--hx-card); border: 1px solid var(--line); border-radius: 3px; padding: 12px 12px 12px; gap: 6px; overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+body.hx .prod:hover { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .07); transform: translateY(-2px); }
+body.hx .prod.incart { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .14); box-shadow: inset 0 0 0 1px var(--hx-a); }
+body.hx .prod .img { height: 108px; border-radius: 0; background: rgba(255, 255, 255, .035); border: 0; }
+body.hx .prod b { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 15px; letter-spacing: .02em; }
+body.hx .prod .price { display: inline-block; font-family: var(--hx-font); font-style: italic; font-weight: 800; font-size: 20px; color: #fff; background: none; padding: 0; box-shadow: none; }
+body.hx .prod .price::after { content: ''; }
+body.hx .badge { top: 8px; left: 8px; border-radius: 2px; transform: skewX(-8deg); background: var(--hx-a); color: var(--on-accent, #1a1206); font-weight: 800; letter-spacing: .06em; }
+body.hx .badge.cnt { background: #fff; color: var(--on-accent, #1a1206); left: auto; right: 8px; }
+body.hx .hx-plus { position: absolute; right: 10px; bottom: 18px; width: 26px; height: 26px; display: grid; place-items: center; background: #fff; color: var(--on-accent, #1a1206); font-weight: 900; font-size: 18px; line-height: 1; border-radius: 2px; }
+body.hx .hx-plus:empty { display: none; }
+body.hx .prod:hover .hx-plus { background: var(--hx-a); }
+body.hx .prod.out { opacity: .4; }
+body.hx .cart { padding: 16px; }
+body.hx .cart .card-h { border-bottom: 1px solid var(--hx-line); padding-bottom: 10px; }
+body.hx .hx-pay { margin-bottom: 4px; }
+body.hx .paybtn, body.hx .paybox { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; }
+body.hx .paybtn.on { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .12); box-shadow: 0 0 14px rgba(var(--hx-rgb), .25); }
+body.hx .cart-foot { border-top: 1px solid var(--hx-line); }
+body.hx .cart-foot .money { color: var(--hx-a); font-family: var(--hx-font); font-style: italic; }
+body.hx .cart-foot button.primary.wide { height: 46px; }
+body.hx kbd { border-radius: 2px; background: rgba(0, 0, 0, .6); border: 1px solid var(--hx-line); color: var(--hx-a); }
+
+/* ── Fenêtres, confirmations, notifications ── */
+body.hx #confirm .box, body.hx .mbox { background: var(--hx-panel); border: 1.5px solid rgba(var(--hx-rgb), .55); border-radius: 6px; box-shadow: 0 30px 100px rgba(0, 0, 0, .8); }
+body.hx #confirm .box h2, body.hx .mbox-h h1 { font-family: var(--hx-font); font-style: italic; text-transform: uppercase; font-weight: 800; font-size: 22px; }
+body.hx .toast { background: var(--hx-panel); border: 1px solid var(--hx-line); border-radius: 3px; }
+body.hx #placement { background: rgba(22, 23, 28, .95); border: 1px solid var(--hx-a); border-radius: 4px; }
+body.hx .body::-webkit-scrollbar-thumb, body.hx .prod-grid::-webkit-scrollbar-thumb, body.hx .nav::-webkit-scrollbar-thumb { background: rgba(var(--hx-rgb), .4); }
+
+/* ═════════ Adaptations aux menus de la base qui n'utilisent pas exactement la structure des builders ═════════ */
+body.hx .head h2 { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 30px; line-height: 1.05; letter-spacing: -.02em; color: #fff; text-shadow: 0 0 18px rgba(var(--hx-rgb), .35); margin: 0; }
+body.hx .head > div > p, body.hx .main > .head p { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .06em; color: var(--hx-a); }
+body.hx .brand .logo { border-radius: 4px; border: 1px solid var(--hx-line); background: rgba(var(--hx-rgb), .1); color: var(--hx-a); }
+body.hx .brand b { text-transform: uppercase; letter-spacing: .08em; font-size: 12.5px; }
+/* entrées de menu « .nav » utilisées comme éléments (outils de la base, hôtel des ventes) */
+body.hx .nav.on { background: var(--hx-a); color: var(--on-accent, #1a1206); border-color: var(--hx-a); box-shadow: 0 0 18px rgba(var(--hx-rgb), .45); border-radius: 3px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; font-size: 12.5px; }
+body.hx .nav.on .n { background: rgba(0, 0, 0, .2); color: inherit; }
+body.hx .nav:not(.on):hover { border-radius: 3px; background: rgba(var(--hx-rgb), .07); }
+/* pastilles-filtres cliquables (catégories, groupes) */
+body.hx .chip[data-a], body.hx .chips .chip, body.hx .sr-chip { cursor: pointer; transform: skewX(-10deg); font-size: 12px; padding: 6px 14px; border-radius: 2px; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .14); color: var(--text-2); }
+body.hx .chip[data-a].on, body.hx .chips .chip.on, body.hx .sr-chip.on { background: var(--hx-a); border-color: var(--hx-a); color: var(--on-accent, #1a1206); box-shadow: 0 0 14px rgba(var(--hx-rgb), .5); }
+body.hx .po, body.hx .pay-opt { border-radius: 3px; background: var(--surface); border: 1px solid var(--line); }
+body.hx .po.on, body.hx .pay-opt.on { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .12); box-shadow: 0 0 14px rgba(var(--hx-rgb), .25); }
+body.hx .detail, body.hx .sr-side { background: var(--hx-card); border: 1px solid var(--line); border-radius: 4px; }
+body.hx .card .tag, body.hx .tag { border-radius: 2px; transform: skewX(-8deg); font-weight: 800; letter-spacing: .06em; }
+body.hx .grid > .card:hover, body.hx .sr-card:hover { border-color: var(--hx-a); box-shadow: 0 0 18px rgba(var(--hx-rgb), .3); }
+body.hx .sr-card, body.hx .grid > .card { border-radius: 3px; }
+body.hx .sr-card.sel, body.hx .grid > .card.sel { border-color: var(--hx-a); box-shadow: inset 0 0 0 1px var(--hx-a); }
+body.hx .ring { box-shadow: 0 0 22px rgba(var(--hx-rgb), .3); }
+
+/* ═════════ Event Builder (structure propre : .box / .top / .tabs / .pri) ═════════ */
+body.hx .box { background: radial-gradient(900px 380px at 0% 0%, rgba(var(--hx-rgb), .1), transparent 70%), rgba(22, 23, 28, .97); border: 1.5px solid rgba(var(--hx-rgb), .55); border-radius: 6px; box-shadow: 0 40px 120px rgba(0, 0, 0, .7), 0 0 26px rgba(var(--hx-rgb), .22); }
+body.hx .top { background: none; border-bottom: 0; padding: 20px 26px 6px; }
+body.hx .top::before { display: none; }
+body.hx .top h1 { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 34px; line-height: 1; letter-spacing: -.035em; color: #fff; text-shadow: 0 0 18px rgba(var(--hx-rgb), .35); margin: 0; }
+body.hx .top p { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .06em; color: var(--hx-a); margin-top: 6px; }
+body.hx .tabs { display: flex; gap: 8px; padding: 10px 26px 0; border-bottom: 0; background: none; }
+body.hx .tabs .tab { position: relative; isolation: isolate; border: 0; background: none; border-radius: 0; height: 34px; padding: 0 20px; font-family: var(--hx-font); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-2); }
+body.hx .tabs .tab::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-14deg); background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .14); }
+body.hx .tabs .tab:hover::before { border-color: var(--hx-a); background: rgba(var(--hx-rgb), .08); }
+body.hx .tabs .tab.on { color: var(--on-accent, #1a1206); border-bottom: 0; }
+body.hx .tabs .tab.on::before { background: var(--hx-a); border-color: var(--hx-a); box-shadow: 0 0 18px rgba(var(--hx-rgb), .55); }
+body.hx button.pri { position: relative; border: 0; border-radius: 3px; background: var(--hx-a); color: var(--on-accent, #1a1206); font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 0 22px rgba(var(--hx-rgb), .5); transform: skewX(-8deg); }
+body.hx button.pri:hover { filter: brightness(1.12); background: var(--hx-a); }
+body.hx .ev, body.hx .tpl { background: var(--hx-card); border: 1px solid var(--line); border-radius: 3px; }
+body.hx .ev:hover, body.hx .tpl:hover { border-color: var(--hx-a); box-shadow: 0 0 16px rgba(var(--hx-rgb), .25); }
+body.hx .chip.acc { background: var(--hx-a); border-color: var(--hx-a); color: var(--on-accent, #1a1206); }
+body.hx .bar input { background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 3px; }
+body.hx .card > .body h1 { font-family: var(--hx-font); font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; font-size: 34px; text-shadow: 0 0 18px rgba(var(--hx-rgb), .35); }
+body.hx .card > .body .step { color: var(--hx-a); }

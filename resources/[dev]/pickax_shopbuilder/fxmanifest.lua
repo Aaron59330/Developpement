@@ -33,7 +33,6 @@ files {
     'html/style.css',
     'html/atelier.css',
     'html/lux.css',
-    'html/hx.css',
     'html/atelier.js',
     'html/script.js',
     'html/dlogs-ui.js',
