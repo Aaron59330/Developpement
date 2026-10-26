@@ -106,6 +106,8 @@ function applyTheme(rgb) {
   st.setProperty('--on-accent', (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#16171c' : '#ffffff');
 }
 
+const HX = () => document.body.classList.contains('hx');
+
 /* ── Gabarits de coque ── */
 const tile = (icon, cls = '') => `<div class="tile ${cls}">${ic(icon)}</div>`;
 const closeBtn = `<button class="icon" data-a="close" title="Fermer">${ic('x', 16)}</button>`;
@@ -278,9 +280,10 @@ const Shop = {
       nav, active: this.cat,
       foot: `<div class="side-pay">${this.payPicker()}</div>${d.shop.note ? `<small>${esc(d.shop.note)}</small>` : ''}`,
       head: { icon: this.shopIcon(), title: d.shop.label, sub: d.shop.note || 'Choisis tes articles puis paie', acts: `${this.discChip()}<div class="searchbox">${ic('search', 15)}<input id="shop-q" placeholder="Rechercher un produit…" value="${esc(this.q)}"></div>` },
-      body: `<div class="shop-wrap"><div class="prod-grid" id="prod-grid"></div><div class="cart" id="cart"></div></div>`,
+      body: `${HX() ? `<div class="hx-tabs">${nav[0].items.map(it => `<button class="hx-tab ${it.id === this.cat ? 'on' : ''}" data-a="nav" data-v="${esc(it.id)}">${esc(it.text)}</button>`).join('')}</div>` : ''}<div class="shop-wrap"><div class="prod-grid" id="prod-grid"></div><div class="cart" id="cart"></div></div>`,
       bodyCls: 'fill',
     });
+    if (HX()) { const sh = $root.querySelector('.shell'); if (sh) sh.classList.add('noside'); }
     document.getElementById('shop-q').addEventListener('input', e => { this.q = e.target.value; this.renderGrid(); });
     this.renderGrid(); this.renderCart();
   },
@@ -303,7 +306,7 @@ const Shop = {
       const out = it.stock === 0, inCart = this.cart[it.i] || 0, discounted = it.price < it.base;
       const pct = discounted ? Math.round((1 - it.price / Math.max(1, it.base)) * 100) : 0;
       return `<div class="prod ${out || it.locked ? 'out' : ''} ${inCart ? 'incart' : ''} ${this.sel === it.i ? 'sel' : ''}" data-i="${it.i}" data-a="add" data-v="${it.i}" title="${esc(it.name)}">
-        ${pct > 0 ? `<span class="badge">-${pct}%</span>` : ''}${inCart ? `<span class="badge cnt">×${inCart}</span>` : ''}
+        ${pct > 0 ? `<span class="badge">-${pct}%</span>` : ''}${inCart ? `<span class="badge cnt">×${inCart}</span>` : ''}${HX() ? `<span class="hx-plus">${out || it.locked ? '' : '+'}</span>` : ''}
         <div class="img">${productImg(this.d.imagePath, it.name)}</div>
         <b>${esc(it.label)}</b>
         <div class="pmeta"><span class="price">${money(it.price)}</span>${discounted ? `<span class="old">${money(it.base)}</span>` : ''}</div>
@@ -325,7 +328,7 @@ const Shop = {
       <div class="cart-list">${lines.length ? lines.map(it => `<div class="cline"><div class="thumb">${productImg(this.d.imagePath, it.name)}</div><div class="grow"><b>${esc(it.label)}</b><small>${money(it.price)} l'unité</small></div>
         <div class="stepper"><button class="icon" data-a="dec" data-v="${it.i}">${ic('minus', 13)}</button><span>${this.cart[it.i]}</span><button class="icon" data-a="inc" data-v="${it.i}">${ic('plus', 13)}</button></div>
         <button class="icon" data-a="rm" data-v="${it.i}" title="Retirer">${ic('x', 13)}</button></div>`).join('') : `<div class="empty small">${tile('cart')}<p>Clique sur un produit pour l'ajouter.</p></div>`}</div>
-      <div class="cart-foot"><div class="kv"><span>Total</span><span class="money sm">${money(total)}</span></div>
+      <div class="cart-foot">${HX() ? `<div class="hx-pay">${this.payPicker()}</div>` : ''}<div class="kv"><span>Total</span><span class="money sm">${money(total)}</span></div>
       ${pay && total > pay.balance ? `<div class="hint warn">Solde insuffisant (${money(pay.balance)})</div>` : ''}
       <button class="primary wide" data-a="buy" ${!lines.length || this.busy ? 'disabled' : ''}>${ic('check', 16)} Payer ${total ? money(total) : ''}</button>
       <div class="keyhint"><kbd>↑</kbd><kbd>↓</kbd> choisir <kbd>←</kbd><kbd>→</kbd> quantité <kbd>Entrée</kbd> payer</div></div>`;
