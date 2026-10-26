@@ -244,6 +244,7 @@ function MG.finish(g, why)
                 end
             end
             entry.prog = Progress.record(ident, r.name, { def = def, won = won, score = r.score, kills = r.kills, mult = mult })
+            if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(ident, 'minigame', 1) end) end
             MySQL.update('INSERT INTO minigames_stats (game_id, identifier, name, plays, wins, best, total, best_time) VALUES (?, ?, ?, 1, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), plays = plays + 1, wins = wins + VALUES(wins), best = GREATEST(best, VALUES(best)), total = total + VALUES(total), best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time)',
                 { g.id, ident, r.name, won and 1 or 0, math.max(0, r.score or 0), math.max(0, r.score or 0), bt })
         end

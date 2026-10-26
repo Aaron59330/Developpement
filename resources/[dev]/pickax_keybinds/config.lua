@@ -8,6 +8,7 @@ Config.Actions = {
     { group = 'Général',    label = 'Téléphone',                   cmd = 'phone',            default = 'F1' },
     { group = 'Général',    label = 'Menu boutique',               cmd = 'menuboutique',     default = 'F1' },
     { group = 'Général',    label = 'Menu personnel',              cmd = 'menuF5',           default = 'F5' },
+    { group = 'Général',    label = 'Carnet (objectifs et série)', cmd = 'carnet',          default = 'F3' },
     { group = 'Général',    label = 'Mode caméra',                 cmd = 'cam',              default = 'F4' },
     { group = 'Général',    label = 'Radio',                       cmd = 'MenuRadio',        default = 'F9' },
     { group = 'Général',    label = 'Menu emotes',                 cmd = 'emoteui',          default = 'K' },

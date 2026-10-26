@@ -26,6 +26,9 @@ Settings.Schema = {
     { key = 'compass_bottom', group = 'Interface', label = 'Boussole compacte : position bas (vh)', type = 'number', default = 3.4, min = 0, max = 90, step = 0.1 },
 
     -- ── Interface : HUD ─────────────────────────────────────────────────────
+    -- ── Carnet du joueur ────────────────────────────────────────────────────
+    { key = 'carnet_enabled', group = 'Carnet', label = 'Carnet du joueur activé', type = 'bool', default = true, hint = 'Série de connexion, objectifs du jour et de la semaine, défi de la ville (touche F3). Les récompenses sont versées automatiquement.' },
+    { key = 'carnet_reward_mult', group = 'Carnet', label = 'Multiplicateur des récompenses', type = 'number', default = 1.0, min = 0, max = 10, step = 0.1, hint = 'S\'applique à toutes les récompenses du carnet (série, objectifs, défi de la ville), en plus du type d\'économie du serveur.' },
     { key = 'hud_needs', group = 'Interface', label = 'HUD : afficher faim et soif', type = 'bool', default = true },
     { key = 'hud_health', group = 'Interface', label = 'HUD : afficher la barre de vie', type = 'bool', default = true },
     { key = 'hud_armor', group = 'Interface', label = 'HUD : afficher la ligne d\'armure', type = 'bool', default = true },

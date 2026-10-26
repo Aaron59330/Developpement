@@ -69,6 +69,7 @@ RegisterNetEvent('jb:re:claim', function(id)
         paid = AJ.pay(src, def.jobKey, base, def.xp or 0, def.label, 1)
     elseif x then
         x.addAccountMoney(R.Account, base, def.label)
+        if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'job_task', 1) exports.pickax_carnet:Report(src, 'earn', base) end) end
     end
     JBNotifyClient(src, ('~g~%s terminé !~s~ Récompense : ~g~%d$'):format(def.label, paid))
     local name = x and ((x.get and x.get('firstName')) or x.getName()) or 'un collègue'

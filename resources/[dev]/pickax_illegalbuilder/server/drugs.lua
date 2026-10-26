@@ -244,6 +244,7 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
     IB.pay(xPlayer, ACCOUNT[s.currency] or 'black_money', total - tax, 'Vente : ' .. item)
     maybeAlert(p, e)
     reportGang(src, 'sell')
+    if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
     IB.stat(e, 'revenue', total - tax) IB.stat(e, 'sold', qty)
     IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total - tax)
     cb({ ok = true, qty = qty, unit = unit, total = total - tax, tax = tax })

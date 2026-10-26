@@ -235,6 +235,8 @@ function AJ.pay(src, key, base, xpGain, reason, doneCount)
     end
     saveStat(xPlayer, key)
     AJ.checkAchievements(src, xPlayer, key)
+    -- Carnet du joueur : tâche de métier accomplie + argent gagné
+    if GetResourceState('pickax_carnet') == 'started' then pcall(function() if (doneCount or 0) > 0 then exports.pickax_carnet:Report(src, 'job_task', doneCount) end if amount > 0 then exports.pickax_carnet:Report(src, 'earn', amount) end end) end
     return amount
 end
 

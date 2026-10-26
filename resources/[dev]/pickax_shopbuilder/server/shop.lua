@@ -256,6 +256,8 @@ local function doBuy(src, shopId, locIdx, cart, method)
     end
     addStats(shop, total, given)
     creditSociety(shop, method, total)
+    -- Carnet du joueur : articles achetés
+    if GetResourceState('pickax_carnet') == 'started' then pcall(function() local n = 0 for _, l in ipairs(given) do n = n + (tonumber(l.qty) or 1) end exports.pickax_carnet:Report(src, 'purchase', n) end) end
     SB.log(shop, xPlayer, 'buy', ('%s — %d%s (%s)'):format(table.concat(parts, ', '), total, Config.Currency, Config.Payments[method].label), total)
     return { ok = true, paid = total, refunded = refunded, stocks = stocks, balance = balance(xPlayer, method), method = method }
 end
