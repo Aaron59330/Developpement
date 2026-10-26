@@ -9,7 +9,7 @@ var LINKS = {
 
 // ===== Équipe du serveur (créateurs, développeurs…) =====
 var TEAM = [
-	{ name: 'Aaron',  role: 'Fondateur · Développeur' },
+	{ name: 'Pickax', role: 'Fondateur · Développeur' },
 	{ name: 'Pseudo', role: 'Co-fondateur' },
 	{ name: 'Pseudo', role: 'Développeur' },
 	{ name: 'Pseudo', role: 'Responsable staff' }
