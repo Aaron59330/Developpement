@@ -333,12 +333,23 @@ H.apply_loading = function(p)
 end
 
 -- bans / whitelist / message de bienvenue (documents synchronisés)
+local lastMaxClients = nil
 local function applyServerSettings()
     local c = serverCfg or {}
     local function ok(x) return type(x) == 'string' and x ~= '' and not x:find('"', 1, true) and not x:find('[\r\n;]') end
     if ok(c.projectName) then ExecuteCommand('sets sv_projectName "' .. c.projectName .. '"') end
     if ok(c.projectDesc) then ExecuteCommand('sets sv_projectDesc "' .. c.projectDesc .. '"') end
     if ok(c.hostname) then ExecuteCommand('sv_hostname "' .. c.hostname .. '"') end
+    -- nombre de places : écrit dans server.cfg (FiveM ne le lit qu'au démarrage)
+    local want = math.floor(tonumber(c.maxClients) or 0)
+    if want >= 1 and want ~= lastMaxClients then
+        lastMaxClients = want
+        if not Config.AllowMaxClients then PanelLog('warn', 'maxclients', 'Config.AllowMaxClients = false : sv_maxclients non modifié') return end
+        local r, e = callNode('SetMaxClients', want)
+        if not r then PanelLog('error', 'maxclients', 'sv_maxclients non modifié : ' .. tostring(e))
+        elseif r.changed then PanelLog('staff', 'maxclients', ('sv_maxclients %s → %d dans server.cfg : pris en compte au prochain redémarrage du serveur'):format(tostring(r.previous or '?'), want))
+        else PanelLog('info', 'maxclients', 'sv_maxclients est déjà à ' .. want .. ' dans server.cfg') end
+    end
 end
 
 local function applyEconomy()

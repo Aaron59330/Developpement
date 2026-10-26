@@ -70,3 +70,34 @@ exports('FsWrite', (rel, content, create) => {
     return { ok: true, message: create ? 'fichier créé' : 'fichier enregistré' };
   } catch (e) { return { error: e.message }; }
 });
+
+// Nombre de places (sv_maxclients) : n'est lu qu'au démarrage du serveur, donc on le met dans server.cfg (une seule ligne, rien d'autre n'est touché).
+// server.cfg est cherché à côté du dossier resources/. Une copie de sauvegarde est faite avant chaque modification.
+exports('SetMaxClients', (value) => {
+  try {
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n) || n < 1 || n > 2048) return { error: 'nombre de places invalide (1 à 2048)' };
+    if (!ROOT) return { error: 'dossier resources introuvable' };
+    const file = path.join(path.dirname(ROOT), 'server.cfg');
+    if (!fs.existsSync(file)) return { error: 'server.cfg introuvable à côté du dossier resources' };
+    const raw = fs.readFileSync(file, 'utf8');
+    const eol = raw.includes('\r\n') ? '\r\n' : '\n';
+    const lines = raw.split(/\r?\n/);
+    const re = /^(\s*(?:set\s+)?sv_maxclients\s+)["']?(\d+)["']?(\s*(?:#.*)?)$/i;
+    let idx = lines.findIndex(l => re.test(l) && !/^\s*#/.test(l));
+    let previous = null;
+    if (idx >= 0) {
+      const m = lines[idx].match(re); previous = Number(m[2]);
+      if (previous === n) return { ok: true, changed: false, previous };
+      lines[idx] = m[1] + n + m[3];
+    } else {
+      while (lines.length && lines[lines.length - 1] === '') lines.pop();
+      lines.push('sv_maxclients ' + n, '');
+    }
+    fs.writeFileSync(file + '.aero-backup', raw, 'utf8');
+    const tmp = file + '.aero-tmp';
+    fs.writeFileSync(tmp, lines.join(eol), 'utf8');
+    fs.renameSync(tmp, file);
+    return { ok: true, changed: true, previous };
+  } catch (e) { return { error: e.message }; }
+});

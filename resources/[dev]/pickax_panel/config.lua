@@ -21,6 +21,7 @@ Config.Protected       = { 'pickax_panel', 'oxmysql', 'ox_lib', 'es_extended', '
 Config.AnnounceTitle   = 'Annonce'
 
 -- Éditeur de fichiers du panel (fs/main.js) : lecture/écriture limitées au dossier resources/ (pickax_panel exclu)
+Config.AllowMaxClients  = true     -- true = le panel peut modifier la ligne sv_maxclients du server.cfg (une seule ligne, sauvegarde automatique ; pris en compte au prochain redémarrage)
 Config.AllowFiles       = true     -- false = l'éditeur de fichiers du panel est désactivé sur ce serveur
 Config.CheckLuaSyntax   = true     -- refuse d'enregistrer un .lua qui ne compile pas (évite de casser une ressource)
 

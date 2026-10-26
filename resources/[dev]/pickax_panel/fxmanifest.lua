@@ -11,5 +11,5 @@ client_script 'client/main.lua'
 server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua', 'fs/main.js' }
 node_version '22'
 
-server_exports { 'IsLicensed', 'PanelLog', 'GetLicenseInfo', 'FsList', 'FsRead', 'FsWrite' }
+server_exports { 'IsLicensed', 'PanelLog', 'GetLicenseInfo', 'FsList', 'FsRead', 'FsWrite', 'SetMaxClients' }
 dependencies { 'es_extended', 'oxmysql' }

@@ -26,6 +26,11 @@ const srv = http.createServer(app).listen(0, async () => {
     const get = await client('GET', `/api/servers/${lid}/docs/loading`); ok(get.value && get.value.music.volume === 35, 'relecture du document');
     ok(!(await other('PUT', `/api/servers/${lid}/docs/loading`, { value: good })).ok, 'un autre client ne peut pas modifier ce document');
     const sync = await fetch(base + '/api/agent/sync', { method: 'POST', headers: { 'content-type': 'application/json', 'x-license-key': KEY }, body: JSON.stringify({ players: [] }) }).then(r => r.json()); ok(sync.docs && sync.docs.loading && sync.docs.loading.value.tips.length === 2, 'le serveur de jeu reçoit le document');
+    console.log('Nombre de places');
+    const sv = C.validateDoc('server', { projectName: 'A', projectDesc: 'B', hostname: 'C', maxClients: '48' }); ok(sv.value && sv.value.maxClients === 48, 'sv_maxclients 48 accepté');
+    ok(C.validateDoc('server', { projectName: '', projectDesc: '', hostname: '', maxClients: '' }).value.maxClients === 0, 'vide = ne pas modifier le server.cfg');
+    ok(C.validateDoc('server', { projectName: '', projectDesc: '', hostname: '', maxClients: 3000 }).error && C.validateDoc('server', { projectName: '', projectDesc: '', hostname: '', maxClients: -4 }).error && C.validateDoc('server', { projectName: '', projectDesc: '', hostname: '', maxClients: 'abc' }).error, 'valeurs hors limites ou invalides refusées');
+    const put3 = await client('PUT', `/api/servers/${lid}/docs/server`, { value: { projectName: 'A', projectDesc: '', hostname: '', maxClients: 64 } }); ok(put3.ok && (await client('GET', `/api/servers/${lid}/docs/server`)).value.maxClients === 64, 'enregistré et relu');
     console.log('Drive : musique');
     const mp3 = Buffer.alloc(2000, 7).toString('base64'); const up = await client('POST', `/api/servers/${lid}/drive`, { name: 'ambiance.mp3', mime: 'audio/mpeg', data: mp3 }); ok(up.ok, 'envoi d’un fichier MP3');
     const list = await client('GET', `/api/servers/${lid}/drive`); const f = list.files.find(x => x.mime === 'audio/mpeg'); ok(f && /\/drive\//.test(f.url), 'le MP3 apparaît dans le Drive avec son lien');
