@@ -81,14 +81,24 @@ function applyCfg(c) {
   $('banner').classList.toggle('hidden', c.banner === false);
 }
 
+// Style des menus : le thème « Arcade » (réglé depuis le panel / Personnalisation) donne le style Arcade aux menus qui sont restés sur le style par défaut « Noir » ;
+// en thème « ancien », le style Arcade redevient « Noir ». Les autres choix du joueur (Verre, Clair, Néon, Couleur du serveur) sont respectés.
+function effStyle(c) {
+  var s = c.style || 'noir', d = window.PICKAX_DESIGN || 'arcade';
+  if (d === 'arcade' && s === 'noir') return 'arcade';
+  if (d === 'ancien' && s === 'arcade') return 'noir';
+  return s;
+}
+
 function applyCfgTo(w, c) {
   var st = w.style;
-  w.setAttribute('data-style', c.style || 'noir');
+  var es = effStyle(c);
+  w.setAttribute('data-style', es);
   w.setAttribute('data-size', c.size || 'md');
   st.setProperty('--accent', c.accent || (window.PICKAX_ACCENT || '#fdc27d'));
   st.setProperty('--accent-rgb', hexRgb(c.accent));
   OVERRIDES.forEach(function (k) { st.removeProperty(k); });
-  if (c.bg) st.setProperty('--card-bg', 'rgba(' + hexRgb(c.bg) + ',' + (STYLE_ALPHA[c.style] || .94) + ')');
+  if (c.bg) st.setProperty('--card-bg', 'rgba(' + hexRgb(c.bg) + ',' + (STYLE_ALPHA[es] || .94) + ')');
   if (c.text) {
     var t = hexRgb(c.text);
     st.setProperty('--text', 'rgb(' + t + ')');

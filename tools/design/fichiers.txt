@@ -17,3 +17,4 @@ resources/[dev]/pickax_hud2/html/css/arcade.css
 resources/[dev]/pickax_notify/html/arcade.css
 resources/[dev]/pickax_speedometer/web/build/assets/arcade.css
 resources/[inventaire]/ox_inventory/web/build/assets/arcade.css
+resources/[script]/pickax_ui/html/script.js

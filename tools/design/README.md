@@ -24,3 +24,6 @@ restart pma-voice
 restart ox_inventory
 ```
 (menus F5 / builders : le style se règle dans Préférences > Apparence des menus, ou en retirant `hx.css` des pages.)
+
+## Bouton du panel (méthode recommandée)
+Panel web → **Personnalisation** → « Revenir à l'ancien style » / « Passer au style Arcade » : bascule en direct tous les menus (y compris le menu personnel F5), HUD, notifications, inventaire et builders, sans toucher aux fichiers. `design.sh` reste la méthode de secours côté fichiers.
