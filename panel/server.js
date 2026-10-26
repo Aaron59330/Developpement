@@ -3,7 +3,9 @@ const cfg = require('./lib/config'); const { db, now } = require('./lib/db'); co
 const app = express();
 if (cfg.trustProxy) app.set('trust proxy', 1);
 app.disable('x-powered-by');
-app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"] } } }));
+// En HTTP simple (test, accès par IP) il ne faut ni « upgrade-insecure-requests » ni HSTS, sinon le navigateur casse le site
+const secureSite = cfg.publicUrl.startsWith('https://');
+app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
 app.use('/api/agent', require('./routes/agent'));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
