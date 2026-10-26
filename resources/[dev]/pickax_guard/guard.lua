@@ -4,7 +4,7 @@
 -- 3) si la licence devient invalide (révoquée, expirée, clé retirée), arrête les ressources protégées.
 local SELF = GetCurrentResourceName()
 local VERSION = GetResourceMetadata(SELF, 'version', 0) or '1.0.0'
-local state = { ok = false, reason = 'démarrage', plan = nil, expires_at = nil, valid_until = 0, checked = 0 }
+local state = { ok = false, reason = 'démarrage', plan = nil, expires_at = nil, valid_until = 0, checked = 0, token = nil }
 local held, heldSet = {}, {}
 local releasing = false
 local KEY = GetConvar('aero_panel_key', '')
@@ -77,7 +77,7 @@ end
 local lastBanner = 0
 local function setBad(reason, detail)
     local was = state.ok
-    state.ok, state.reason, state.valid_until = false, reason, 0
+    state.ok, state.reason, state.valid_until, state.token = false, reason, 0, nil
     local now = os.time()
     if was or now - lastBanner > 55 then
         lastBanner = now
@@ -87,8 +87,9 @@ local function setBad(reason, detail)
     if was then stopProtected('licence invalide') end
 end
 
-local function setOk(payload, source)
+local function setOk(payload, source, resp)
     local was = state.ok
+    state.token = resp
     state.ok, state.reason, state.plan, state.expires_at = true, source or 'panel', payload.plan, payload.expires_at
     state.valid_until = (tonumber(payload.iat) or os.time()) + (tonumber(payload.grace) or 86400)
     state.checked = os.time()
@@ -115,7 +116,7 @@ local function useCache()
         local ok, resp = pcall(json.decode, raw)
         if ok then
             local p = open(resp, nil, true)   -- le cache n'est pas lié à un nonce ; la signature, l'empreinte de la clé et la durée de grâce restent contrôlées
-            if p and p.valid == true and os.time() < (tonumber(p.iat) or 0) + (tonumber(p.grace) or 0) then setOk(p, 'cache') return true end
+            if p and p.valid == true and os.time() < (tonumber(p.iat) or 0) + (tonumber(p.grace) or 0) then setOk(p, 'cache', resp) return true end
         end
     end
     return false
@@ -137,7 +138,7 @@ local function check()
         if not p then return setBad(why) end
         if p.valid == true then
             SaveResourceFile(SELF, 'cache.json', text, -1)
-            setOk(p, 'panel')
+            setOk(p, 'panel', resp)
         else
             setBad(p.status or 'unknown', p.status)
         end
@@ -158,6 +159,8 @@ end)
 exports('IsLicensed', function() return state.ok == true and os.time() < state.valid_until end)
 -- point de contrôle appelé par les ressources de la base : renvoie true seulement si la licence est valide
 exports('Check', function(resource) return state.ok == true and os.time() < state.valid_until end)
+-- réponse signée du panel (jeton) : les ressources de la base la vérifient ELLES-MÊMES (clé publique embarquée), un faux guard ne peut pas la fabriquer
+exports('Token', function() if state.ok == true and os.time() < state.valid_until then return state.token end return nil end)
 exports('Status', function() return { ok = state.ok, reason = state.reason, plan = state.plan, expires_at = state.expires_at, checked = state.checked } end)
 
 -- Une ressource protégée qui se lancerait malgré tout (démarrage forcé) est arrêtée aussitôt.

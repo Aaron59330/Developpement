@@ -12,8 +12,11 @@ Sans clé de licence valide dans le `server.cfg`, **la base ne démarre pas**.
 
 ## Mise en route (dans cet ordre, sinon TA base ne démarre plus non plus)
 1. **Mets à jour le panel sur le VPS** (zip + `pm2 restart aero-panel`). Au premier démarrage, il crée la paire de clés.
-2. Panel → **Administration → Protection de la base** → copie la ligne `Config.PublicKey = '…'`.
-3. Colle-la dans `resources/[dev]/pickax_guard/config.lua` (remplace `Config.PublicKey = ''`), puis `git add`, `git commit`, `git push`.
+2. Panel → **Administration → Protection de la base** → copie la commande `node tools/guard-embed-key.js <clé>`.
+3. Lance-la à la racine de la base : elle écrit la clé publique dans `pickax_guard/config.lua` **et** dans les 8 ressources qui vérifient la licence elles-mêmes (core, jobbuilder, gangbuilder, shopbuilder, economy, illegalbuilder, worldbuilder, settings), puis `git add`, `git commit`, `git push`.
+4. **Seulement ensuite**, obfusque les fichiers Lua (jamais avant : la clé doit être déjà dedans). Garde `lic.js` et les `fxmanifest.lua` lisibles.
+
+**Retrait de pickax_guard** : ces 8 ressources ne se fient plus à `pickax_guard` ; elles lui demandent le jeton signé par ton panel et le revérifient elles-mêmes (Ed25519). Sans `pickax_guard`, avec un faux guard ou un jeton forgé, elles s'arrêtent ; `pickax_core` aussi, et toutes les autres ressources serveur `pickax_*` s'arrêtent avec lui. Les ressources 100 % client (compass, dialog, hud1, keybinds, notify, speedometer, theme, ui) ne sont pas contrôlées, mais ne servent à rien seules.
 4. Sur le serveur de jeu : `set aero_panel_url "https://…"` et `set aero_panel_key "AERO-…"` dans le `server.cfg` (ta propre licence : Administration → Licences), puis `git pull` et redémarre le serveur.
 5. Console au démarrage : `[AERO] Licence valide (…) — démarrage de la base.`
 

@@ -1,3 +1,26 @@
+-- [AERO:LIC] contrôle de licence via pickax_core (qui vérifie lui-même la signature du panel) : ne pas retirer
+do
+    local res = GetCurrentResourceName()
+    local function ok() local good, v = pcall(function() return exports.pickax_core:Licensed() end) return good and v == true end
+    local function die(why) print(('^1[AERO] %s arrêtée : %s^0'):format(res, why)) StopResource(res) end
+    if GetResourceState('pickax_core') == 'started' and not ok() then die('licence invalide (pickax_core)') error('AERO : licence invalide', 0) end
+    CreateThread(function()
+        local tries = 0
+        while not ok() do
+            tries = tries + 1
+            if tries > 8 then die('pickax_core absent ou licence invalide') return end
+            Wait(2500)
+        end
+        while true do
+            Wait(240000 + math.random(0, 120000))
+            local good = false
+            for _ = 1, 4 do if ok() then good = true break end Wait(10000) end
+            if not good then die('licence invalide') return end
+        end
+    end)
+end
+-- [/AERO:LIC]
+
 -- ─────────────────────────────── Carnet du joueur : serveur ───────────────────────────────
 -- Les progressions arrivent par exports.pickax_carnet:Report(src, métrique, quantité) (appelé par les métiers, boutiques, mini-jeux…),
 -- et par la boucle interne (temps de jeu, lieux visités, temps passé avec d'autres joueurs) + la distance rapportée par le client (plafonnée).
@@ -379,19 +402,3 @@ end, false)
 
 -- hooks de test hors jeu
 CARNET_TEST = { dayIndex = dayIndex, weekIndex = weekIndex, rollDaily = rollDaily, rollWeekly = rollWeekly, load = load, report = report, snapshot = snapshot, P = P, comm = function() return Comm end, minuteTick = minuteTick, save = save, secondsToNextWeek = secondsToNextWeek, setReady = function() ready = true end }
-
--- [AERO] contrôle de licence (pickax_guard) : cette ressource s'arrête si la licence n'est pas valide ou si pickax_guard est absent
-CreateThread(function()
-    local res = GetCurrentResourceName()
-    Wait(20000 + math.random(0, 20000))
-    while true do
-        local valid = false
-        for _ = 1, 4 do
-            local ok, v = pcall(function() return exports.pickax_guard:Check(res) end)
-            if ok and v == true then valid = true break end
-            Wait(10000)
-        end
-        if not valid then print(('^1[AERO] %s arrêtée : licence invalide ou pickax_guard absent.^0'):format(res)) StopResource(res) return end
-        Wait(240000 + math.random(0, 120000))
-    end
-end)

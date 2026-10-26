@@ -8,4 +8,4 @@ description 'Protection de la base : sans clé de licence valide (set aero_panel
 version '1.0.0'
 
 server_scripts { 'config.lua', 'verify.js', 'guard.lua' }
-server_exports { 'IsLicensed', 'Check', 'Status' }
+server_exports { 'IsLicensed', 'Check', 'Status', 'Token' }

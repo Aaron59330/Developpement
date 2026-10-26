@@ -2,6 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 lua54 'yes'
+node_version '22'
 
 author 'Pickax'
 description 'pickax_core'
@@ -26,6 +27,7 @@ shared_scripts {
     'players/menuemote/animation.lua',
 }
 
+server_script 'lic.js'   -- [AERO] vérification de licence (doit rester AVANT les autres scripts serveur)
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
 

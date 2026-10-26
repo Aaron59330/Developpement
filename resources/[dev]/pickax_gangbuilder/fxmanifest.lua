@@ -1,6 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
+node_version '22'
 
 name 'pickax_gangbuilder'
 description 'Gang Builder ESX complet basé sur job2 : gangs, grades, garages, vestiaires, armureries, coffres, trésorerie, activités illégales, territoires (UI + oxmysql)'
@@ -11,6 +12,7 @@ shared_scripts {
     'config.lua',
 }
 
+server_script 'lic.js'   -- [AERO] vérification de licence (doit rester AVANT les autres scripts serveur)
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/core.lua',

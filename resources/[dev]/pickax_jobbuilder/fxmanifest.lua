@@ -1,6 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
+node_version '22'
 
 name 'pickax_jobbuilder'
 description 'Job Builder ESX complet : jobs, grades, garages, vestiaires, armureries, coffres, boss, boutiques (UI + oxmysql)'
@@ -13,6 +14,7 @@ shared_scripts {
     'config_events.lua',
 }
 
+server_script 'lic.js'   -- [AERO] vérification de licence (doit rester AVANT les autres scripts serveur)
 server_scripts {
     'server/notify.lua',
     '@oxmysql/lib/MySQL.lua',
