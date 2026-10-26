@@ -37,4 +37,4 @@ Config.BackupKeep = 30    -- sauvegardes conservées dans la liste
 Config.RestartAfterRestore = { 'pickax_jobbuilder', 'pickax_gangbuilder', 'pickax_illegalbuilder', 'pickax_shopbuilder', 'pickax_worldbuilder' }
 
 -- Thème en direct : ressources relancées après un changement de couleur / nom / logo (les interfaces se mettent à jour pour tous les joueurs)
-Config.ThemeRestart = { 'pickax_theme' }
+Config.ThemeRestart = { 'pickax_theme', 'pickax_basetools' }   -- pickax_basetools : le thème modifié est dans theme_live.json de cette ressource, les joueurs le récupèrent au redémarrage

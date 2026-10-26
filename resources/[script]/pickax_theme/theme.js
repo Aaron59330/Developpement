@@ -90,11 +90,14 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     }).catch(function () {});
   };
 
-  // 1) thème modifié en jeu (outils de la base) : theme_live.json, léger, renvoyé aux joueurs par « restart pickax_theme »
-  // 2) sinon pickax_core/config.lua
-  try {
-    fetch('https://cfx-nui-pickax_theme/theme_live.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (j) {
-      if (j && okHex(j.accent) && j.server && typeof j.server === 'object') finish(j.accent, j.server); else fromConfig();
+  // 1) thème modifié depuis les outils de la base ou le panel web : pickax_basetools/theme_live.json (écrit dans sa propre ressource, toujours autorisé)
+  // 2) ancien emplacement pickax_theme/theme_live.json  3) pickax_core/config.lua
+  var tryLive = function (url, next) {
+    fetch(url + '?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (j) {
+      if (j && okHex(j.accent) && j.server && typeof j.server === 'object') finish(j.accent, j.server); else next();
     });
+  };
+  try {
+    tryLive('https://cfx-nui-pickax_basetools/theme_live.json', function () { tryLive('https://cfx-nui-pickax_theme/theme_live.json', fromConfig); });
   } catch (e) { fromConfig(); }
 })();

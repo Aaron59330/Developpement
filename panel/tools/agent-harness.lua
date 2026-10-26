@@ -69,6 +69,16 @@ exports.pickax_basetools = { ApplyTheme = function(_, v, by) events[#events + 1]
 local vfs = { ['pickax_core/config.lua'] = 'A = 1\n' }
 exports.pickax_panel = { FsList = function(_, p) return { entries = { { name = 'config.lua', type = 'file', size = 6 } } } end, FsRead = function(_, p) if vfs[p] then return { content = vfs[p] } end return { error = 'fichier introuvable' } end,
   FsWrite = function(_, p, c, create) vfs[p] = c events[#events + 1] = 'FsWrite ' .. p .. ' ' .. #c return { ok = true, message = 'fichier enregistré' } end }
+if os.getenv('NODE_RESTRICTED') then
+  local e = { error = 'Access to this API has been restricted. Use --allow-fs-read to manage permissions.' }
+  exports.pickax_panel = { FsList = function() return e end, FsRead = function() return e end, FsWrite = function() return e end }
+  function GetNumResourceMetadata(r, k) if r == 'pickax_core' and (k == 'server_script' or k == 'shared_script') then return 1 end return 0 end
+  function GetResourceMetadata(r, k, i) return k == 'server_script' and 'server/main.lua' or 'config.lua' end
+  local origLoad = LoadResourceFile
+  function LoadResourceFile(r, f) if r == 'pickax_core' then return vfs['pickax_core/' .. f] end return files[f] end
+  local allow = os.getenv('FS_WRITE_OK') == '1'
+  function SaveResourceFile(r, f, c) if r == 'pickax_core' then if not allow then return false end vfs['pickax_core/' .. f] = c events[#events + 1] = 'SaveResourceFile ' .. r .. '/' .. f return true end files[f] = c return true end
+end
 exports.ox_inventory = { AddItem = function(_, id, item, n) events[#events + 1] = 'AddItem ' .. item .. ' x' .. n return true end }
 function PerformHttpRequest(url, cb, method, body, headers)
   local f = io.open('/tmp/agent_body.json', 'w') f:write(body) f:close()

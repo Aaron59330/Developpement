@@ -17,6 +17,6 @@ client_scripts { 'client/main.lua' }
 
 ui_page 'html/index.html'
 
-files { 'html/index.html', 'html/style.css', 'html/script.js' }
+files { 'html/index.html', 'html/style.css', 'html/script.js', 'theme_live.json' }
 
 dependencies { 'oxmysql', 'ox_lib', 'es_extended' }

@@ -218,6 +218,14 @@ local THEME_KEYS = { 'AccentColor', 'InventoryColor', 'ServerName', 'ServerShort
 local THEME_HIST = 'backups/theme-history.json'
 
 local function readConfigValues()
+    local liveRaw = LoadResourceFile(GetCurrentResourceName(), 'theme_live.json')
+    if liveRaw and liveRaw ~= '' then
+        local okj, j = pcall(json.decode, liveRaw)
+        if okj and type(j) == 'table' and j.accent and type(j.server) == 'table' then
+            return { AccentColor = j.accent, InventoryColor = j.server.invColor or '', ServerName = j.server.name or '', ServerShortName = j.server.short or '',
+                ServerTagline = j.server.tagline or '', ServerDiscord = j.server.discord or '', ServerLogo = j.server.logo or '' }
+        end
+    end
     local raw = LoadResourceFile('pickax_core', 'config.lua') or ''
     raw = raw:gsub('%-%-[^\n]*', '')
     local out = {}
@@ -260,22 +268,31 @@ local function cleanTheme(v)
 end
 
 local function writeConfigValues(o)
-    local raw = LoadResourceFile('pickax_core', 'config.lua')
-    if not raw or raw == '' then return false, 'pickax_core/config.lua introuvable' end
-    SaveResourceFile(GetCurrentResourceName(), 'backups/core-config-' .. os.date('%Y%m%d-%H%M%S') .. '.lua.bak', raw, -1)
-    for _, k in ipairs(THEME_KEYS) do
-        local done = false
-        raw = raw:gsub('(\n[ \t]*' .. k .. '%s*=%s*)([\'"])(.-)%2', function(pre, q, old)
-            if done then return nil end
-            done = true
-            return pre .. "'" .. o[k] .. "'"
-        end, 1)
-        if not done then return false, 'Clé introuvable dans config.lua : ' .. k end
-    end
-    if not SaveResourceFile('pickax_core', 'config.lua', raw, -1) then return false, 'Écriture de pickax_core/config.lua impossible' end
+    -- 1) thème « vivant » dans cette ressource : l'écriture dans sa propre ressource est toujours autorisée par FiveM
     local live = { accent = o.AccentColor, server = { name = o.ServerName, short = o.ServerShortName, tagline = o.ServerTagline, discord = o.ServerDiscord, logo = o.ServerLogo, invColor = o.InventoryColor } }
-    SaveResourceFile('pickax_theme', 'theme_live.json', json.encode(live), -1)
-    return true
+    if not SaveResourceFile(GetCurrentResourceName(), 'theme_live.json', json.encode(live), -1) then return false, 'Écriture de pickax_basetools/theme_live.json impossible' end
+    pcall(SaveResourceFile, 'pickax_theme', 'theme_live.json', json.encode(live), -1)   -- ancien emplacement (facultatif)
+    -- 2) pickax_core/config.lua : au mieux (FiveM bloque l'écriture dans une autre ressource sans add_filesystem_permission)
+    local warning
+    local raw = LoadResourceFile('pickax_core', 'config.lua')
+    if not raw or raw == '' then
+        warning = 'pickax_core/config.lua introuvable'
+    else
+        SaveResourceFile(GetCurrentResourceName(), 'backups/core-config-' .. os.date('%Y%m%d-%H%M%S') .. '.lua.bak', raw, -1)
+        for _, k in ipairs(THEME_KEYS) do
+            local done = false
+            raw = raw:gsub('(\n[ \t]*' .. k .. '%s*=%s*)([\'"])(.-)%2', function(pre, q, old)
+                if done then return nil end
+                done = true
+                return pre .. "'" .. o[k] .. "'"
+            end, 1)
+            if not done then warning = 'clé introuvable dans config.lua : ' .. k break end
+        end
+        if not warning and not SaveResourceFile('pickax_core', 'config.lua', raw, -1) then
+            warning = 'config.lua non modifié (FiveM bloque l\'écriture dans pickax_core ; facultatif : add_filesystem_permission pickax_basetools write pickax_core)'
+        end
+    end
+    return true, warning
 end
 
 lib.callback.register('basetools:themeGet', function(src)
@@ -309,6 +326,7 @@ exports('ApplyTheme', function(v, by)
     local before = readConfigValues()
     local ok, e = writeConfigValues(o)
     if not ok then return { ok = false, error = e } end
+    local warning = e
     local h = themeHistory()
     table.insert(h, 1, { at = os.time(), by = by or 'panel web', values = before })
     while #h > 10 do table.remove(h) end
@@ -317,7 +335,7 @@ exports('ApplyTheme', function(v, by)
     SetTimeout(800, function()
         for _, r in ipairs(Config.ThemeRestart) do if GetResourceState(r) == 'started' then ExecuteCommand('restart ' .. r) end end
     end)
-    return { ok = true }
+    return { ok = true, warning = warning }
 end)
 
 -- ═════════════════ ÉCONOMIE DYNAMIQUE (pickax_economy) ═════════════════

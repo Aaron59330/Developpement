@@ -102,16 +102,105 @@ H.refresh_docs = function() return 'ok' end
 
 
 -- ───────── fichiers (fs/main.js), console, alimentation ─────────
-local function fsCall(name, ...)
-    if not Config.AllowFiles then return nil, 'éditeur de fichiers désactivé sur ce serveur (Config.AllowFiles)' end
+local EXT_OK = { lua = true, json = true, cfg = true, meta = true, js = true, html = true, css = true, txt = true, md = true, sql = true, xml = true, yml = true, yaml = true, ini = true }
+local function extOf(p) return (p:match('%.([%w]+)$') or ''):lower() end
+
+-- Mode 1 : module Node (fs/main.js) : explore tout le dossier resources/
+local function callNode(name, ...)
     local ok, r = pcall(function(...) return exports[GetCurrentResourceName()][name](exports[GetCurrentResourceName()], ...) end, ...)
-    if not ok then return nil, 'module fichiers indisponible : ' .. tostring(r):sub(1, 120) end
+    if not ok then return nil, 'module fichiers indisponible : ' .. tostring(r):sub(1, 160) end
     if type(r) ~= 'table' then return nil, 'réponse invalide' end
     if r.error then return nil, r.error end
     return r
 end
-H['fs.list'] = function(p) local r, e = fsCall('FsList', p.path) if not r then return nil, e end return 'ok', r end
-H['fs.read'] = function(p) local r, e = fsCall('FsRead', p.path) if not r then return nil, e end return 'ok', r end
+
+-- Mode 2 : natives FiveM (si le Node intégré n'a pas le droit de lire le disque, ex. « Access to this API has been restricted »).
+-- Liste = fichiers déclarés dans le fxmanifest de chaque ressource ; lecture/écriture via LoadResourceFile / SaveResourceFile.
+local function manifestFiles(res)
+    local set = {}
+    for _, key in ipairs({ 'client_script', 'server_script', 'shared_script', 'file', 'ui_page', 'loadscreen' }) do
+        for i = 0, (GetNumResourceMetadata(res, key) or 0) - 1 do
+            local f = GetResourceMetadata(res, key, i)
+            if type(f) == 'string' and f ~= '' and not f:find('*', 1, true) and f:sub(1, 1) ~= '@' and not f:find('..', 1, true) and EXT_OK[extOf(f)] then set[f] = true end
+        end
+    end
+    for _, m in ipairs({ 'fxmanifest.lua', '__resource.lua' }) do if LoadResourceFile(res, m) then set[m] = true end end
+    return set
+end
+local function splitPath(path)
+    local res, rel = path:match('^([^/]+)/?(.*)$')
+    return res, rel
+end
+local function luaList(path)
+    if path == '' then
+        local out = {}
+        for i = 0, GetNumResources() - 1 do
+            local n = GetResourceByFindIndex(i)
+            if n and n ~= GetCurrentResourceName() then out[#out + 1] = { name = n, type = 'dir' } end
+        end
+        table.sort(out, function(a, b) return a.name < b.name end)
+        return { entries = out }
+    end
+    local res, sub = splitPath(path)
+    if res == GetCurrentResourceName() then return nil, 'la ressource pickax_panel est protégée' end
+    if GetResourceState(res) == 'missing' then return nil, 'ressource introuvable' end
+    local prefix = sub ~= '' and (sub .. '/') or ''
+    local dirs, files = {}, {}
+    for f in pairs(manifestFiles(res)) do
+        if f:sub(1, #prefix) == prefix then
+            local rest = f:sub(#prefix + 1)
+            local seg, tail = rest:match('^([^/]+)(.*)$')
+            if seg then if tail ~= '' then dirs[seg] = true else files[seg] = true end end
+        end
+    end
+    local out = {}
+    for d in pairs(dirs) do out[#out + 1] = { name = d, type = 'dir' } end
+    table.sort(out, function(a, b) return a.name < b.name end)
+    local fl = {}
+    for f in pairs(files) do fl[#fl + 1] = { name = f, type = 'file' } end
+    table.sort(fl, function(a, b) return a.name < b.name end)
+    for _, f in ipairs(fl) do out[#out + 1] = f end
+    return { entries = out }
+end
+local function luaRead(path)
+    local res, rel = splitPath(path)
+    if not res or rel == '' or rel:find('..', 1, true) then return nil, 'chemin invalide' end
+    if res == GetCurrentResourceName() then return nil, 'la ressource pickax_panel est protégée' end
+    if not EXT_OK[extOf(rel)] then return nil, 'type de fichier non modifiable' end
+    local c = LoadResourceFile(res, rel)
+    if not c then return nil, 'fichier introuvable ou illisible' end
+    if #c > 1048576 then return nil, 'fichier trop gros (1 Mo max)' end
+    return { content = c }
+end
+local function luaWrite(path, content)
+    local res, rel = splitPath(path)
+    if not res or rel == '' or rel:find('..', 1, true) then return nil, 'chemin invalide' end
+    if res == GetCurrentResourceName() then return nil, 'la ressource pickax_panel est protégée' end
+    if not EXT_OK[extOf(rel)] then return nil, 'type de fichier non modifiable' end
+    if GetResourceState(res) == 'missing' then return nil, 'ressource introuvable' end
+    if not SaveResourceFile(res, rel, content, -1) then
+        return nil, ('FiveM refuse d\'écrire dans « %s » : ajoute dans server.cfg la ligne  add_filesystem_permission pickax_panel write %s  puis redémarre le serveur'):format(res, res)
+    end
+    return { ok = true, message = 'fichier enregistré' }
+end
+
+local nodeOk, nodeAt = nil, 0
+local function useNode()
+    if nodeOk ~= nil and now() - nodeAt < 120 then return nodeOk end
+    local r = callNode('FsList', '')
+    nodeOk, nodeAt = r ~= nil, now()
+    if not nodeOk then PanelLog('warn', 'pickax_panel', 'Module Node indisponible : éditeur de fichiers en mode natives FiveM (fichiers déclarés dans les fxmanifest)') end
+    return nodeOk
+end
+local function noFiles() return nil, 'éditeur de fichiers désactivé sur ce serveur (Config.AllowFiles)' end
+H['fs.list'] = function(p) if not Config.AllowFiles then return noFiles() end local r, e if useNode() then r, e = callNode('FsList', p.path) else r, e = luaList(p.path) end if not r then return nil, e end return 'ok', r end
+H['fs.read'] = function(p) if not Config.AllowFiles then return noFiles() end local r, e if useNode() then r, e = callNode('FsRead', p.path) else r, e = luaRead(p.path) end if not r then return nil, e end return 'ok', r end
+local function fsWrite(path, content, create)
+    if not Config.AllowFiles then return noFiles() end
+    if useNode() then return callNode('FsWrite', path, content, create) end
+    if create then return nil, 'création de fichier indisponible en mode natives FiveM (module Node bloqué)' end
+    return luaWrite(path, content)
+end
 local function checkLua(path, content)
     if not Config.CheckLuaSyntax or not path:lower():match('%.lua$') then return true end
     local f, err = load(content, '=' .. path)
@@ -120,12 +209,12 @@ local function checkLua(path, content)
 end
 H['fs.write'] = function(p)
     local ok, e = checkLua(p.path, p.content) if not ok then return nil, e end
-    local r, err = fsCall('FsWrite', p.path, p.content, false) if not r then return nil, err end
+    local r, err = fsWrite(p.path, p.content, false) if not r then return nil, err end
     PanelLog('staff', 'fichier', 'modifié depuis le panel : ' .. p.path) return 'ok', { message = r.message }
 end
 H['fs.create'] = function(p)
     local ok, e = checkLua(p.path, p.content) if not ok then return nil, e end
-    local r, err = fsCall('FsWrite', p.path, p.content, true) if not r then return nil, err end
+    local r, err = fsWrite(p.path, p.content, true) if not r then return nil, err end
     PanelLog('staff', 'fichier', 'créé depuis le panel : ' .. p.path) return 'ok', { message = r.message }
 end
 H.console = function(p)
@@ -171,7 +260,7 @@ H.apply_theme = function()
     if GetResourceState('pickax_basetools') ~= 'started' then return nil, 'pickax_basetools non démarré' end
     local r = exports.pickax_basetools:ApplyTheme(t, 'panel web')
     if not r or not r.ok then return nil, (r and r.error) or 'échec' end
-    return 'thème appliqué'
+    return 'thème appliqué' .. (r.warning and (' (' .. r.warning .. ')') or '')
 end
 
 -- bans / whitelist / message de bienvenue (documents synchronisés)

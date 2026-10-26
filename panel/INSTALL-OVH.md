@@ -93,6 +93,14 @@ ensure pickax_panel
 ```
 `set`, jamais `setr`. Redémarre le serveur : la console affiche « [pickax_panel] Liaison avec le panel », et le panel passe à EN LIGNE en moins de 30 s.
 
+## 12 bis. Si l'éditeur de fichiers ou le thème est refusé (sandbox FiveM)
+FiveM interdit à une ressource d'écrire dans une autre. Si le panel affiche « FiveM refuse d'écrire dans … », ajoute dans `server.cfg` la ligne indiquée, par exemple :
+```
+add_filesystem_permission pickax_panel write pickax_core
+```
+(une ligne par ressource que tu veux modifier depuis le panel), puis redémarre le serveur. Le thème, lui, n'a besoin d'aucune autorisation : il est écrit dans `pickax_basetools`.
+Si le message est « Access to this API has been restricted. Use --allow-fs-read », le Node intégré à ton FXServer n'a pas le droit de lire le disque : la ressource bascule alors toute seule sur les fonctions natives de FiveM (explorateur limité aux fichiers déclarés dans les `fxmanifest`).
+
 ## 13. (Plus tard) HTTPS avec un nom de domaine ou DuckDNS
 ```
 sudo apt install -y nginx certbot python3-certbot-nginx
