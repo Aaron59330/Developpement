@@ -19,3 +19,12 @@ Config.Protected       = { 'pickax_panel', 'oxmysql', 'ox_lib', 'es_extended', '
 
 -- Lien du chat pour les annonces : événement client qui affiche un texte (laisse tel quel avec pickax_notify)
 Config.AnnounceTitle   = 'Annonce'
+
+-- Éditeur de fichiers du panel (fs/main.js) : lecture/écriture limitées au dossier resources/ (pickax_panel exclu)
+Config.AllowFiles       = true     -- false = l'éditeur de fichiers du panel est désactivé sur ce serveur
+Config.CheckLuaSyntax   = true     -- refuse d'enregistrer un .lua qui ne compile pas (évite de casser une ressource)
+
+-- Console du panel : seules ces commandes (premier mot) sont autorisées
+Config.AllowConsole     = true
+Config.ConsoleAllowed   = { 'ensure', 'restart', 'start', 'stop', 'refresh', 'say', 'status', 'players' }
+Config.RestartDelay     = 30       -- secondes de préavis avant « Redémarrer le serveur » (annonce aux joueurs)

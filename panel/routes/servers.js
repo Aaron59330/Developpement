@@ -2,11 +2,7 @@ const router = require('express').Router();
 const { db, now, audit, genKey } = require('../lib/db'); const A = require('../lib/auth'); const C = require('../lib/commands'); const cfg = require('../lib/config');
 router.use(A.needUser);
 const ONLINE = 3 * cfg.agentIntervalSec + 5;
-function own(req, res) {
-  const l = db.prepare('SELECT l.*, p.name plan_name, p.max_players plan_max, u.email owner FROM licenses l LEFT JOIN plans p ON p.id=l.plan_id LEFT JOIN users u ON u.id=l.user_id WHERE l.id=?').get(+req.params.id);
-  if (!l || (req.user.role !== 'admin' && l.user_id !== req.user.id)) { res.status(404).json({ ok: false, error: 'Serveur introuvable' }); return null; }
-  return l;
-}
+const { own } = require('../lib/access'); const bus = require('../lib/bus');
 const view = l => { const st = db.prepare('SELECT * FROM server_state WHERE license_id=?').get(l.id); const pl = st ? JSON.parse(st.players) : [];
   return { id: l.id, key: l.key, server_name: l.server_name, status: l.status, expired: !!(l.expires_at && l.expires_at < now()), expires_at: l.expires_at, plan: l.plan_name, owner: l.owner, version: l.version, bound_ip: l.bound_ip, last_ip: l.last_ip, last_seen: l.last_seen,
     online: !!(l.last_seen && now() - l.last_seen < ONLINE), players: pl.length, max_players: st ? st.max_players : 0, stats: st ? JSON.parse(st.stats) : {}, updated_at: st && st.updated_at }; };
@@ -27,7 +23,7 @@ router.post('/:id/command', (req, res) => {
   const { type, payload } = req.body || {}; const v = C.validate(type, payload); if (v.error) return res.json({ ok: false, error: v.error });
   const pending = db.prepare("SELECT COUNT(*) n FROM commands WHERE license_id=? AND status='pending'").get(l.id).n; if (pending > 100) return res.json({ ok: false, error: 'Trop de commandes en attente (serveur hors ligne ?)' });
   const id = db.prepare('INSERT INTO commands(license_id,type,payload,created_at,by_user) VALUES(?,?,?,?,?)').run(l.id, type, JSON.stringify(v.payload), now(), req.user.id).lastInsertRowid;
-  syncLists(l.id, type, v.payload);
+  syncLists(l.id, type, v.payload); bus.wake(l.id);
   audit(req.user.id, l.id, 'cmd:' + type, JSON.stringify(v.payload), A.ip(req)); res.json({ ok: true, id });
 });
 // bans / whitelist : le panel garde la liste à jour (le serveur la reçoit aussi comme document)

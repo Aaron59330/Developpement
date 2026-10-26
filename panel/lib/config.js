@@ -17,5 +17,9 @@ module.exports = {
   trustProxy: (env.TRUST_PROXY || 'false') === 'true',
   dataDir: path.resolve(__dirname, '..', env.DATA_DIR || './data'),
   sessionDays: 14,
+  aiKey: env.ANTHROPIC_API_KEY || '',
+  aiModel: env.AI_MODEL || 'claude-sonnet-5-5',
+  aiBase: (env.AI_BASE_URL || 'https://api.anthropic.com').replace(/\/$/, ''),
+  aiDaily: +env.AI_DAILY_LIMIT || 30,
   agentIntervalSec: 10,
 };

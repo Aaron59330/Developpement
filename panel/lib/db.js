@@ -18,11 +18,25 @@ CREATE INDEX IF NOT EXISTS idx_logs ON logs(license_id, id);
 CREATE TABLE IF NOT EXISTS docs(license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, key TEXT NOT NULL, value TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1, updated_at INTEGER NOT NULL, PRIMARY KEY(license_id, key));
 CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY, user_id INTEGER, license_id INTEGER, action TEXT NOT NULL, detail TEXT DEFAULT '', ip TEXT, at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS file_versions(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, path TEXT NOT NULL, content TEXT NOT NULL, size INTEGER NOT NULL, note TEXT DEFAULT '', by_user INTEGER, at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_fv ON file_versions(license_id, path, id);
+CREATE TABLE IF NOT EXISTS tickets(id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, license_id INTEGER, subject TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS ticket_msgs(id INTEGER PRIMARY KEY, ticket_id INTEGER NOT NULL REFERENCES tickets(id) ON DELETE CASCADE, user_id INTEGER NOT NULL, staff INTEGER NOT NULL DEFAULT 0, body TEXT NOT NULL, at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS patchnotes(id INTEGER PRIMARY KEY, version TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS suggestions(id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, title TEXT NOT NULL, body TEXT DEFAULT '', status TEXT NOT NULL DEFAULT 'new', at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS suggestion_votes(suggestion_id INTEGER NOT NULL REFERENCES suggestions(id) ON DELETE CASCADE, user_id INTEGER NOT NULL, PRIMARY KEY(suggestion_id, user_id));
+CREATE TABLE IF NOT EXISTS webhooks(license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, event TEXT NOT NULL, url TEXT NOT NULL, PRIMARY KEY(license_id, event));
+CREATE TABLE IF NOT EXISTS drive(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, token TEXT UNIQUE NOT NULL, name TEXT NOT NULL, mime TEXT NOT NULL, size INTEGER NOT NULL, at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS modules(id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT DEFAULT '', price REAL NOT NULL DEFAULT 0, resources TEXT NOT NULL DEFAULT '[]', active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS license_modules(license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, module_id INTEGER NOT NULL REFERENCES modules(id) ON DELETE CASCADE, enabled INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(license_id, module_id));
+CREATE TABLE IF NOT EXISTS backups(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, name TEXT NOT NULL, data TEXT NOT NULL, size INTEGER NOT NULL, at INTEGER NOT NULL, by_user INTEGER);
+CREATE TABLE IF NOT EXISTS ai_usage(license_id INTEGER NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(license_id, day));
 `);
 const now = () => Math.floor(Date.now() / 1000);
 function audit(userId, licenseId, action, detail, ip) { db.prepare('INSERT INTO audit(user_id,license_id,action,detail,ip,at) VALUES(?,?,?,?,?,?)').run(userId || null, licenseId || null, action, String(detail || '').slice(0, 500), ip || '', now()); }
 function genKey() { const b = crypto.randomBytes(16).toString('hex').toUpperCase(); return 'AERO-' + [b.slice(0, 6), b.slice(6, 12), b.slice(12, 18), b.slice(18, 24)].join('-'); }
 // données de départ
+if (!db.prepare('SELECT 1 FROM patchnotes').get()) db.prepare('INSERT INTO patchnotes(version,title,body,at) VALUES(?,?,?,?)').run('1.0.0', 'Ouverture du panel', 'Gestion du serveur à distance, éditeur de fichiers avec historique, console, statistiques, webhooks et support.', now());
 if (!db.prepare('SELECT 1 FROM plans').get()) {
   const ins = db.prepare('INSERT INTO plans(name,price,days,max_players,description) VALUES(?,?,?,?,?)');
   ins.run('Essai', 0, 7, 32, 'Découverte de la base pendant 7 jours');

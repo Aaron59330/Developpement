@@ -66,6 +66,9 @@ function LoadResourceFile(r, f) return files[f] end
 function SaveResourceFile(r, f, c) files[f] = c return true end
 exports = setmetatable({ es_extended = { getSharedObject = function() return ESX end } }, { __call = function(t, name, fn) t[name] = fn end })
 exports.pickax_basetools = { ApplyTheme = function(_, v, by) events[#events + 1] = 'ApplyTheme ' .. v.AccentColor .. ' ' .. v.ServerName return { ok = true } end }
+local vfs = { ['pickax_core/config.lua'] = 'A = 1\n' }
+exports.pickax_panel = { FsList = function(_, p) return { entries = { { name = 'config.lua', type = 'file', size = 6 } } } end, FsRead = function(_, p) if vfs[p] then return { content = vfs[p] } end return { error = 'fichier introuvable' } end,
+  FsWrite = function(_, p, c, create) vfs[p] = c events[#events + 1] = 'FsWrite ' .. p .. ' ' .. #c return { ok = true, message = 'fichier enregistré' } end }
 exports.ox_inventory = { AddItem = function(_, id, item, n) events[#events + 1] = 'AddItem ' .. item .. ' x' .. n return true end }
 function PerformHttpRequest(url, cb, method, body, headers)
   local f = io.open('/tmp/agent_body.json', 'w') f:write(body) f:close()

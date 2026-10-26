@@ -1,0 +1,52 @@
+// Fichiers à distance, historique, IA, tickets, drive, modules, sauvegardes, webhooks : node tools/selftest2.js
+process.env.DATA_DIR = './data-test2'; process.env.ADMIN_EMAIL = 'admin@test.fr'; process.env.ADMIN_PASSWORD = 'AdminTest!123'; process.env.ANTHROPIC_API_KEY = 'sk-test'; process.env.AI_DAILY_LIMIT = '2';
+const fs = require('fs'), http = require('http'), assert = require('assert'); fs.rmSync(__dirname + '/../data-test2', { recursive: true, force: true });
+// fausse API Anthropic
+const ai = http.createServer((req, res) => { let b = ''; req.on('data', d => b += d); req.on('end', () => { const j = JSON.parse(b); const cur = j.messages[0].content.match(/<current_file>\n([\s\S]*)\n<\/current_file>/)[1]; res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ content: [{ type: 'text', text: '<note>BlockHeadShots passé à true</note>\n<file>\n' + cur.replace('BlockHeadShots = false', 'BlockHeadShots = true') + '\n</file>' }] })); }); }).listen(0);
+process.env.AI_BASE_URL = 'http://127.0.0.1:' + ai.address().port;
+const app = require('../server'); const { db } = require('../lib/db');
+const srv = http.createServer(app).listen(0, async () => {
+  const base = 'http://127.0.0.1:' + srv.address().port; const jar = {}; let n = 0;
+  const mk = name => { jar[name] = ''; return async (m, u, body, h = {}) => { const r = await fetch(base + u, { method: m, headers: { 'content-type': 'application/json', origin: base, cookie: jar[name], ...h }, body: body ? JSON.stringify(body) : undefined }); const sc = r.headers.get('set-cookie'); if (sc) jar[name] = sc.split(';')[0]; return r.json().catch(() => ({})); }; };
+  const admin = mk('a'), client = mk('c'); const ok = (c, m) => { assert(c, m); n++; console.log('  ✓', m); };
+  // faux serveur FiveM (agent) : poll long + fichiers en mémoire
+  const KEY = 'AERO-TEST2'; const files = { 'pickax_core/config.lua': 'BlockHeadShots = false\nMax = 5\n', 'pickax_core/fxmanifest.lua': "fx_version 'cerulean'\n" }; let polling = true;
+  const H = { 'content-type': 'application/json', 'x-license-key': KEY };
+  const agent = (async () => { let results = []; while (polling) { const r = await fetch(base + '/api/agent/poll', { method: 'POST', headers: H, body: JSON.stringify({ results }) }).then(x => x.json()).catch(() => ({ commands: [] })); results = [];
+    for (const c of r.commands || []) { const p = c.payload;
+      if (c.type === 'fs.list') results.push({ id: c.id, ok: true, result: 'ok', data: { entries: Object.keys(files).filter(f => f.startsWith(p.path)).map(f => ({ name: f.split('/').pop(), type: 'file', size: files[f].length })) } });
+      else if (c.type === 'fs.read') results.push(files[p.path] != null ? { id: c.id, ok: true, result: 'ok', data: { content: files[p.path] } } : { id: c.id, ok: false, result: 'fichier introuvable' });
+      else if (c.type === 'fs.write' || c.type === 'fs.create') { files[p.path] = p.content; results.push({ id: c.id, ok: true, result: 'ok', data: { message: 'écrit' } }); }
+      else results.push({ id: c.id, ok: true, result: 'ok' }); } } })();
+  try {
+    await admin('POST', '/api/auth/login', { email: 'admin@test.fr', password: 'AdminTest!123' }); await client('POST', '/api/auth/register', { email: 'c@test.fr', username: 'Cli', password: 'ClientTest!1' });
+    const cid = (await admin('GET', '/api/admin/users')).users.find(u => u.email === 'c@test.fr').id; db.prepare("INSERT INTO licenses(key,user_id,plan_id,server_name,status,expires_at,created_at) VALUES(?,?,2,'S2','active',NULL,strftime('%s','now'))").run(KEY, cid);
+    const lid = db.prepare('SELECT id FROM licenses WHERE key=?').get(KEY).id; await fetch(base + '/api/agent/sync', { method: 'POST', headers: H, body: JSON.stringify({ players: [], resources: [{ name: 'pickax_jobbuilder', state: 'started' }] }) });
+    const t0 = Date.now(); const l = await client('GET', `/api/servers/${lid}/fs/list?path=pickax_core`); ok(l.ok && l.data.entries.length === 2 && Date.now() - t0 < 2000, 'liste de fichiers instantanée (long-poll) : ' + (Date.now() - t0) + ' ms');
+    const r = await client('GET', `/api/servers/${lid}/fs/read?path=pickax_core/config.lua`); ok(r.ok && r.content.includes('BlockHeadShots = false') && r.versions === 1, 'lecture + version d’origine enregistrée');
+    ok((await client('GET', `/api/servers/${lid}/fs/read?path=../server.cfg`)).ok === false, 'traversée de dossier refusée');
+    ok((await client('GET', `/api/servers/${lid}/fs/read?path=pickax_core/inconnu.lua`)).ok === false, 'fichier inexistant : erreur propre');
+    const ai1 = await client('POST', `/api/servers/${lid}/ai`, { path: 'pickax_core/config.lua', instruction: 'Désactive les headshots', content: r.content }); ok(ai1.ok && ai1.changed && ai1.content.includes('BlockHeadShots = true') && ai1.note, 'assistant IA : diff proposé');
+    ok(files['pickax_core/config.lua'].includes('false'), 'IA : rien n’est écrit sans validation');
+    const w = await client('POST', `/api/servers/${lid}/fs/write`, { path: 'pickax_core/config.lua', content: ai1.content, note: 'Headshots' }); ok(w.ok && files['pickax_core/config.lua'].includes('true'), 'écriture appliquée sur le serveur');
+    const v = await client('GET', `/api/servers/${lid}/fs/versions?path=pickax_core/config.lua`); ok(v.versions.length === 2, 'historique : 2 versions');
+    const old = v.versions[v.versions.length - 1]; ok((await client('POST', `/api/servers/${lid}/fs/restore`, { vid: old.id })).ok && files['pickax_core/config.lua'].includes('false'), 'restauration de la version d’origine');
+    ok((await client('POST', `/api/servers/${lid}/ai`, { path: 'a.lua', instruction: 'x', content: 'y' })).ok === true, 'IA : 2e demande'); const lim = await client('POST', `/api/servers/${lid}/ai`, { path: 'a.lua', instruction: 'x', content: 'y' }); ok(lim.ok === false && /Limite/.test(lim.error), 'IA : limite quotidienne');
+    ok((await client('POST', `/api/servers/${lid}/fs/create`, { path: 'pickax_core/nouveau.lua', content: 'print(1)' })).ok && files['pickax_core/nouveau.lua'], 'création de fichier');
+    const bk = await client('POST', `/api/servers/${lid}/backups`, { name: 'avant tests' }); ok(bk.ok && bk.files === 2, 'sauvegarde créée (2 fichiers suivis)');
+    files['pickax_core/config.lua'] = 'CASSÉ'; const rs = await client('POST', `/api/servers/${lid}/backups/${(await client('GET', `/api/servers/${lid}/backups`)).backups[0].id}/restore`); ok(rs.ok && rs.restored === 2 && files['pickax_core/config.lua'] !== 'CASSÉ', 'restauration de sauvegarde sur le serveur');
+    ok((await client('POST', `/api/servers/${lid}/console`, { cmd: 'refresh;quit' })).ok === false, 'console : « ; » refusé'); ok((await client('POST', `/api/servers/${lid}/console`, { cmd: 'refresh' })).ok, 'console : commande envoyée');
+    ok((await client('PUT', `/api/servers/${lid}/webhooks`, { staff: 'http://evil.com/x' })).ok === false, 'webhook : lien non Discord refusé'); ok((await client('PUT', `/api/servers/${lid}/webhooks`, { staff: 'https://discord.com/api/webhooks/123456/abc-DEF_1' })).ok, 'webhook Discord enregistré');
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64').toString('base64');
+    const up = await client('POST', `/api/servers/${lid}/drive`, { name: 'logo.png', mime: 'image/png', data: png }); ok(up.ok, 'drive : image envoyée'); const dl = await fetch(base + '/drive/' + up.token); ok(dl.status === 200 && dl.headers.get('content-type') === 'image/png', 'drive : lien public servi');
+    ok((await client('POST', `/api/servers/${lid}/drive`, { name: 'x.svg', mime: 'image/svg+xml', data: Buffer.from('<svg onload="x()"/>').toString('base64') })).ok === false, 'drive : SVG actif refusé'); ok((await client('POST', `/api/servers/${lid}/drive`, { name: 'x.exe', mime: 'application/x-msdownload', data: 'AAAA' })).ok === false, 'drive : format interdit');
+    const mod = await admin('POST', '/api/admin/modules', { name: 'Braquages', description: 'test', price: 20, resources: 'pickax_jobbuilder' }); ok(mod.ok, 'module créé (admin)');
+    let mods = (await client('GET', `/api/servers/${lid}/modules`)).modules; ok(mods[0].owned === false && mods[0].known, 'module payant non acquis'); ok((await client('POST', `/api/servers/${lid}/modules/${mod.id}/toggle`, { enabled: false })).ok === false, 'activation refusée sans achat');
+    await admin('POST', `/api/admin/licenses/${lid}/modules`, { module_id: mod.id, grant: true }); mods = (await client('GET', `/api/servers/${lid}/modules`)).modules; ok(mods[0].owned && mods[0].enabled, 'module accordé par l’admin'); ok((await client('POST', `/api/servers/${lid}/modules/${mod.id}/toggle`, { enabled: false })).ok, 'module désactivé (commande resource_stop)');
+    const t = await client('POST', '/api/support/tickets', { subject: 'Aide', body: 'Mon serveur plante' }); ok(t.ok, 'ticket créé'); ok((await admin('POST', `/api/support/tickets/${t.id}/reply`, { body: 'On regarde' })).ok && (await client('GET', `/api/support/tickets/${t.id}`)).messages.length === 2, 'réponse du staff visible');
+    ok((await client('POST', '/api/support/patchnotes', { title: 'x', body: 'y' })).ok === false, 'patch notes : réservé admin'); const s = await client('POST', '/api/support/suggestions', { title: 'Ajouter un garage' }); ok(s.ok && (await client('GET', '/api/support/suggestions')).rows[0].votes === 1, 'suggestion + vote automatique');
+    const st = await client('GET', `/api/servers/${lid}/stats-summary?days=7`); ok(st.ok, 'statistiques');
+    console.log(`\n${n} vérifications OK`);
+  } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
+  polling = false; srv.close(); ai.close(); fs.rmSync(__dirname + '/../data-test2', { recursive: true, force: true }); setTimeout(() => process.exit(process.exitCode || 0), 300);
+});

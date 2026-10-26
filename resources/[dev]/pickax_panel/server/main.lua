@@ -100,6 +100,69 @@ H.economy_event = function(p) if GetResourceState('pickax_economy') ~= 'started'
 H.economy_reset = function(p) if GetResourceState('pickax_economy') ~= 'started' then return nil, 'pickax_economy non démarré' end exports.pickax_economy:Reset(p.key ~= '' and p.key or nil) return 'ok' end
 H.refresh_docs = function() return 'ok' end
 
+
+-- ───────── fichiers (fs/main.js), console, alimentation ─────────
+local function fsCall(name, ...)
+    if not Config.AllowFiles then return nil, 'éditeur de fichiers désactivé sur ce serveur (Config.AllowFiles)' end
+    local ok, r = pcall(function(...) return exports[GetCurrentResourceName()][name](exports[GetCurrentResourceName()], ...) end, ...)
+    if not ok then return nil, 'module fichiers indisponible : ' .. tostring(r):sub(1, 120) end
+    if type(r) ~= 'table' then return nil, 'réponse invalide' end
+    if r.error then return nil, r.error end
+    return r
+end
+H['fs.list'] = function(p) local r, e = fsCall('FsList', p.path) if not r then return nil, e end return 'ok', r end
+H['fs.read'] = function(p) local r, e = fsCall('FsRead', p.path) if not r then return nil, e end return 'ok', r end
+local function checkLua(path, content)
+    if not Config.CheckLuaSyntax or not path:lower():match('%.lua$') then return true end
+    local f, err = load(content, '=' .. path)
+    if not f then return false, 'erreur de syntaxe Lua : ' .. tostring(err):sub(1, 160) end
+    return true
+end
+H['fs.write'] = function(p)
+    local ok, e = checkLua(p.path, p.content) if not ok then return nil, e end
+    local r, err = fsCall('FsWrite', p.path, p.content, false) if not r then return nil, err end
+    PanelLog('staff', 'fichier', 'modifié depuis le panel : ' .. p.path) return 'ok', { message = r.message }
+end
+H['fs.create'] = function(p)
+    local ok, e = checkLua(p.path, p.content) if not ok then return nil, e end
+    local r, err = fsCall('FsWrite', p.path, p.content, true) if not r then return nil, err end
+    PanelLog('staff', 'fichier', 'créé depuis le panel : ' .. p.path) return 'ok', { message = r.message }
+end
+H.console = function(p)
+    if not Config.AllowConsole then return nil, 'console désactivée (Config.AllowConsole)' end
+    local first = (p.cmd:match('^%s*(%S+)') or ''):lower()
+    local allowed = false
+    for _, c in ipairs(Config.ConsoleAllowed) do if c == first then allowed = true end end
+    if not allowed then return nil, 'commande non autorisée : ' .. first end
+    if (first == 'restart' or first == 'stop' or first == 'start' or first == 'ensure') then
+        local res = p.cmd:match('^%s*%S+%s+(%S+)') or ''
+        for _, r in ipairs(Config.Protected) do if r == res then return nil, 'ressource protégée' end end
+    end
+    ExecuteCommand(p.cmd) PanelLog('staff', 'console', 'commande lancée depuis le panel : ' .. p.cmd) return 'exécutée'
+end
+H.resource_start = function(p)
+    if GetResourceState(p.resource) == 'missing' then return nil, 'ressource introuvable' end
+    ExecuteCommand('ensure ' .. p.resource) PanelLog('staff', 'module', 'démarrage de ' .. p.resource) return 'démarrée'
+end
+H.resource_stop = function(p)
+    for _, r in ipairs(Config.Protected) do if r == p.resource then return nil, 'ressource protégée' end end
+    if GetResourceState(p.resource) == 'missing' then return nil, 'ressource introuvable' end
+    ExecuteCommand('stop ' .. p.resource) PanelLog('staff', 'module', 'arrêt de ' .. p.resource) return 'arrêtée'
+end
+H.server_restart = function()
+    local d = Config.RestartDelay or 30
+    TriggerClientEvent('pickax_notify:showNotification', -1, ('~r~Redémarrage du serveur dans %d secondes~s~'):format(d))
+    PanelLog('staff', 'serveur', 'redémarrage demandé depuis le panel')
+    SetTimeout(d * 1000, function() ExecuteCommand('quit') end)
+    return ('arrêt dans %d s (le gestionnaire txAdmin/service doit relancer le serveur)'):format(d)
+end
+H.server_stop = function()
+    TriggerClientEvent('pickax_notify:showNotification', -1, '~r~Le serveur va s’arrêter dans 15 secondes~s~')
+    PanelLog('staff', 'serveur', 'arrêt demandé depuis le panel')
+    SetTimeout(15000, function() ExecuteCommand('quit') end)
+    return 'arrêt dans 15 s'
+end
+
 local function saveDoc(key, value) SaveResourceFile(GetCurrentResourceName(), 'cache_' .. key .. '.json', json.encode(value), -1) end
 
 H.apply_theme = function()
@@ -179,7 +242,21 @@ local function runCommand(c)
     local ok, r1, r2 = pcall(f, c.payload or {})
     if not ok then PanelLog('error', 'pickax_panel', 'action ' .. tostring(c.type) .. ' : ' .. tostring(r1)) return false, tostring(r1):sub(1, 200) end
     if r1 == nil then return false, r2 or 'échec' end
-    return true, r1
+    return true, r1, (tostring(c.type):sub(1, 3) == 'fs.') and r2 or nil
+end
+
+local function runCommands(list)
+    for _, c in ipairs(list or {}) do
+        local done, res, data = runCommand(c)
+        results[#results + 1] = { id = c.id, ok = done, result = tostring(res), data = data }
+    end
+end
+local function dropResults(sent)
+    local ids = {}
+    for _, r in ipairs(sent) do ids[r.id] = true end
+    local keep = {}
+    for _, r in ipairs(results) do if not ids[r.id] then keep[#keep + 1] = r end end
+    results = keep
 end
 
 local function enforce()
@@ -202,7 +279,9 @@ local function sync()
         logs = logs, results = results, docs = docVersions,
     }
     if now() - lastResources >= Config.ResourcesEvery then body.resources = collectResources() end
-    local sentLogs, sentResults = #logs, #results
+    local sentLogs = #logs
+    local sentResults = {}
+    for i, r in ipairs(results) do sentResults[i] = r end
     PerformHttpRequest(URL .. '/api/agent/sync', function(code, text)
         if code ~= 200 then
             local ok, r = pcall(json.decode, text or '')
@@ -214,7 +293,7 @@ local function sync()
         local ok, r = pcall(json.decode, text)
         if not ok or type(r) ~= 'table' then return end
         for _ = 1, sentLogs do table.remove(logs, 1) end
-        for _ = 1, sentResults do table.remove(results, 1) end
+        dropResults(sentResults)
         if body.resources then lastResources = now() end
         if r.license then
             license.valid = r.license.valid == true; license.status = r.license.status; license.plan = r.license.plan; license.expires_at = r.license.expires_at
@@ -226,10 +305,7 @@ local function sync()
         end
         lastErr = nil; interval = tonumber(r.interval) or Config.Interval
         for k, d in pairs(r.docs or {}) do docVersions[k] = d.version onDoc(k, d.value) end
-        for _, c in ipairs(r.commands or {}) do
-            local done, res = runCommand(c)
-            results[#results + 1] = { id = c.id, ok = done, result = tostring(res) }
-        end
+        runCommands(r.commands)
         enforce()
     end, 'POST', json.encode(body), { ['Content-Type'] = 'application/json', ['X-License-Key'] = KEY })
 end
@@ -241,6 +317,32 @@ CreateThread(function()
         local ok, err = pcall(sync)
         if not ok then print('^1[pickax_panel]^7 erreur : ' .. tostring(err)) end
         Wait(math.max(5, interval) * 1000)
+    end
+end)
+
+
+-- Requête longue : le panel répond dès qu'une action (fichier, console…) est demandée → éditeur instantané
+CreateThread(function()
+    Wait(8000)
+    while true do
+        local finished, wait = false, 1
+        local sent = {}
+        for i, r in ipairs(results) do sent[i] = r end
+        PerformHttpRequest(URL .. '/api/agent/poll', function(code, text)
+            finished = true
+            if code ~= 200 then wait = 5000 return end
+            local ok, r = pcall(json.decode, text)
+            if not ok or type(r) ~= 'table' then wait = 5000 return end
+            dropResults(sent)
+            if r.license then license.valid = r.license.valid == true if license.valid then license.last_ok = now() end end
+            if r.ok == false then wait = 15000 return end
+            if r.retry then wait = r.retry * 1000 end
+            for k, d in pairs(r.docs or {}) do docVersions[k] = d.version onDoc(k, d.value) end
+            runCommands(r.commands)
+        end, 'POST', json.encode({ results = sent, docs = docVersions }), { ['Content-Type'] = 'application/json', ['X-License-Key'] = KEY })
+        local t = 0
+        while not finished and t < 40000 do Wait(50) t = t + 50 end
+        Wait(wait)
     end
 end)
 

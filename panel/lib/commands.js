@@ -18,6 +18,11 @@ const defs = {
   whitelist_remove: (p) => { const i = str(p.identifier, 120, ID); return i && { identifier: i }; },
   economy_event: (p) => { const k = str(p.key, 40, ID), s = Number(p.swing), h = int(p.hours, 1, 720); return k && Number.isFinite(s) && s >= -0.9 && s <= 3 && h && { key: k, swing: s, hours: h }; },
   economy_reset: (p) => ({ key: str(p.key || '', 40, ID) || '' }),
+  console:    (p) => { const c = str(p.cmd, 200); return c && !/[\r\n;]/.test(c) && { cmd: c }; },
+  server_restart: () => ({}),
+  server_stop:    () => ({}),
+  resource_start: (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
+  resource_stop:  (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },
   apply_theme: () => ({}),
   refresh_docs: () => ({}),
 };
@@ -39,4 +44,14 @@ function validateDoc(key, v) {
   if (key === 'whitelist') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: [...new Set(v.map(x => str(String(x), 120, ID)).filter(Boolean))].slice(0, 20000) }; }
   if (key === 'motd') { const m = str(String(v.text || ''), 300); return { value: { text: m || '', enabled: !!v.enabled } }; }
 }
-module.exports = { validate, validateDoc, DOC_KEYS };
+// Appels « RPC » : le navigateur attend la réponse du serveur FiveM (fichiers)
+const PATH = /^[A-Za-z0-9_\-\.\[\] \/]{0,200}$/;
+function cleanPath(p) { if (typeof p !== 'string' || !PATH.test(p) || p.includes('..') || p.startsWith('/') || /\/\//.test(p)) return null; return p.replace(/\/+$/, ''); }
+const rpcDefs = {
+  'fs.list':  (p) => { const path = cleanPath(p.path || ''); return path !== null && { path }; },
+  'fs.read':  (p) => { const path = cleanPath(p.path || ''); return path && { path }; },
+  'fs.write': (p) => { const path = cleanPath(p.path || ''); if (!path || typeof p.content !== 'string' || p.content.length > 1000000) return null; return { path, content: p.content }; },
+  'fs.create': (p) => { const path = cleanPath(p.path || ''); return path && { path, content: typeof p.content === 'string' ? p.content.slice(0, 1000000) : '' }; },
+};
+function validateRpc(type, payload) { const f = rpcDefs[type]; if (!f) return { error: 'Appel inconnu' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Chemin ou contenu invalide' }; }
+module.exports = { validate, validateDoc, validateRpc, cleanPath, DOC_KEYS };
