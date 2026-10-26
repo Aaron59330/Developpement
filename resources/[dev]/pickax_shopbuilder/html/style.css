@@ -372,3 +372,7 @@ button.wide { width: 100%; }
 .addgrid { grid-template-columns: 1fr; }
 .addgrid button { height: auto; min-height: 32px; padding: 6px 10px; justify-content: flex-start; white-space: normal; text-align: left; }
 .pt > div { min-width: 0; } .pt b, .pt small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* logo du serveur en haut du menu de gauche (pickax_core → ServerLogo) : petit et centré, fonctionne avec l'ancien style */
+.profile.logo-only { justify-content: center; padding: 12px; }
+.profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
