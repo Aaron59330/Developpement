@@ -44,6 +44,11 @@ window.addEventListener("message", (event) => {
         return;
     }
     // Barre de vie : réglages (position, taille, activation)
+    if (event.data.action === "setNeeds") {
+        const nc = document.querySelector(".hud-container");
+        if (nc) nc.style.display = event.data.value === false ? "none" : "";
+        return;
+    }
     if (event.data.action === "setHealthConfig") {
         const c = event.data.config || {};
         const hh = document.getElementById("healthHud");

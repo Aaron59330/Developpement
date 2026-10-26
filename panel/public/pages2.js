@@ -147,3 +147,38 @@ PAGES['a-licenses'] = async function () {
   return page;
 };
 const baseUsers = PAGES['a-users'];
+
+// ───────── Réglages du serveur (formulaires générés d'après le schéma de pickax_settings) ─────────
+PAGES.settings = async function () {
+  const s = cur(); if (!s) return needS(); const r = await api('GET', `/api/servers/${s.id}/settings`);
+  if (!r.ok) return el('div', { class: 'card' }, r.error);
+  if (!r.ready) return el('div', {}, head('Réglages du serveur'), el('div', { class: 'card empty' }, el('h2', {}, 'Réglages non disponibles'), el('p', {}, 'Ton serveur n’a pas encore envoyé la liste des réglages. Vérifie que la ressource ', el('b', {}, 'pickax_settings'), ' est démarrée (', el('span', { class: 'mono' }, 'ensure pickax_settings'), ' ou le dossier [dev]) puis redémarre ', el('b', {}, 'pickax_panel'), '.')));
+  const schema = r.schema, ov = r.overrides || {}; const ctl = {};
+  const val = d => (d.key in ov ? ov[d.key] : d.default);
+  const norm = x => JSON.stringify(x);
+  const read = d => { const c = ctl[d.key]; if (d.type === 'bool') return c.checked; if (d.type === 'number') return Number(c.value); if (d.type === 'list') return c.value.split('\n').map(x => x.trim()).filter(Boolean); return c.value; };
+  const search = el('input', { placeholder: 'Rechercher un réglage…', style: 'max-width:320px' });
+  const wrap = el('div'); const rows = [];
+  const groups = [...new Set(schema.map(d => d.group))];
+  for (const g of groups) {
+    const card = el('div', { class: 'card' }, el('h2', {}, g)); wrap.append(card);
+    for (const d of schema.filter(x => x.group === g)) {
+      let c; const v = val(d);
+      if (d.type === 'bool') c = el('input', { type: 'checkbox', checked: !!v });
+      else if (d.type === 'number') c = el('input', { type: 'number', min: d.min, max: d.max, step: d.step || 1, value: v });
+      else if (d.type === 'select') c = el('select', {}, (d.options || []).map(o => el('option', { value: o[0], selected: o[0] === v }, o[1])));
+      else if (d.type === 'list') c = el('textarea', { rows: 3, value: (v || []).join('\n') });
+      else c = el('input', { value: v == null ? '' : v });
+      ctl[d.key] = c;
+      const badge = el('span', { class: 'pill acc', style: 'margin-left:8px' }, 'modifié'); const upd = () => { badge.style.display = norm(read(d)) === norm(d.default) ? 'none' : ''; }; c.addEventListener('input', upd); c.addEventListener('change', upd); upd();
+      const row = el('div', { style: 'padding:10px 0;border-bottom:1px solid rgba(128,128,128,.15)', 'data-t': (d.label + ' ' + d.key).toLowerCase() },
+        el('div', { class: 'row' }, el('b', {}, d.label), badge, el('div', { class: 'grow' }), el('button', { class: 'btn s', onclick: () => { if (d.type === 'bool') c.checked = !!d.default; else if (d.type === 'list') c.value = (d.default || []).join('\n'); else c.value = d.default == null ? '' : d.default; upd(); } }, el('span', {}, 'Par défaut'))),
+        d.hint ? el('div', { class: 'muted', style: 'font-size:12px;margin:2px 0 6px' }, d.hint) : null, d.type === 'bool' ? el('label', { style: 'display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin:6px 0' }, c, 'Activé') : c);
+      card.append(row); rows.push(row);
+    }
+  }
+  search.addEventListener('input', () => { const t = search.value.toLowerCase(); rows.forEach(x => { x.style.display = !t || x.dataset.t.includes(t) ? '' : 'none'; }); });
+  const save = async () => { const values = {}; for (const d of schema) values[d.key] = read(d); const x = await api('PUT', `/api/servers/${s.id}/settings`, { values }); toast(x.ok ? `Réglages enregistrés (${x.count} modifié${x.count > 1 ? 's' : ''}) : appliqués sur le serveur dans quelques secondes` : x.error, x.ok ? 'ok' : 'bad'); };
+  return el('div', {}, head('Réglages du serveur', search, el('button', { class: 'btn p', onclick: save }, el('span', {}, 'Enregistrer'))),
+    el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Un réglage ne change rien tant que tu ne l’as pas modifié : les valeurs d’origine de ta base restent en vigueur. « Par défaut » remet la valeur d’origine. Appliqué en direct, sans redémarrage.'), wrap);
+};

@@ -1,6 +1,6 @@
 // Appelé par la ressource FiveM « pickax_panel » (pas par le navigateur).
 const router = require('express').Router(); const express = require('express'); const rateLimit = require('express-rate-limit');
-const { db, now } = require('../lib/db'); const A = require('../lib/auth'); const cfg = require('../lib/config'); const bus = require('../lib/bus'); const hooks = require('../lib/hooks');
+const { db, now } = require('../lib/db'); const A = require('../lib/auth'); const cfg = require('../lib/config'); const bus = require('../lib/bus'); const hooks = require('../lib/hooks'); const SET = require('../lib/settings');
 const keyOf = (req) => String(req.headers['x-license-key'] || req.ip);
 const lim = rateLimit({ windowMs: 60 * 1000, limit: 90, keyGenerator: keyOf, standardHeaders: true, legacyHeaders: false, message: { ok: false, error: 'rate' } });
 router.use(express.json({ limit: '8mb' }), lim);
@@ -24,7 +24,7 @@ function takeCommands(l) {
   if (cmds.length) db.prepare(`UPDATE commands SET status='sent', sent_at=? WHERE id IN (${cmds.map(() => '?').join(',')})`).run(now(), ...cmds.map(c => c.id));
   return cmds.map(c => ({ id: c.id, type: c.type, payload: JSON.parse(c.payload) }));
 }
-function docsFor(l, known) { const out = {}; known = known && typeof known === 'object' ? known : {}; for (const d of db.prepare('SELECT key,value,version FROM docs WHERE license_id=?').all(l.id)) if (+known[d.key] !== d.version) out[d.key] = { version: d.version, value: JSON.parse(d.value) }; return out; }
+function docsFor(l, known) { const out = {}; known = known && typeof known === 'object' ? known : {}; for (const d of db.prepare("SELECT key,value,version FROM docs WHERE license_id=? AND key<>'settings_schema'").all(l.id)) if (+known[d.key] !== d.version) out[d.key] = { version: d.version, value: JSON.parse(d.value) }; return out; }
 
 router.post('/sync', (req, res) => {
   const l = check(req, res); if (!l) return; const b = req.body || {};
@@ -40,6 +40,7 @@ router.post('/sync', (req, res) => {
     if (!last || now() - last.at >= 300) { db.prepare('INSERT INTO stats_hist(license_id,at,players) VALUES(?,?,?)').run(l.id, now(), players.length); db.prepare('DELETE FROM stats_hist WHERE license_id=? AND at<?').run(l.id, now() - 31 * 86400); }
     const newLogs = [];
     if (Array.isArray(b.logs) && b.logs.length) { const ins = db.prepare('INSERT INTO logs(license_id,level,source,message,at) VALUES(?,?,?,?,?)'); for (const x of b.logs.slice(0, 200)) { const lv = ['info', 'warn', 'error', 'staff'].includes(x.level) ? x.level : 'info'; const o = { level: lv, source: String(x.source || '').slice(0, 40), message: String(x.message || '').slice(0, 500), at: +x.at || now() }; ins.run(l.id, o.level, o.source, o.message, o.at); newLogs.push(o); } db.prepare('DELETE FROM logs WHERE license_id=? AND id<(SELECT COALESCE(MAX(id),0)-5000 FROM logs WHERE license_id=?)').run(l.id, l.id); }
+    if (b.settingsSchema) { const sch = SET.sanitizeSchema(b.settingsSchema); if (sch) { const j = JSON.stringify(sch); const cur = db.prepare("SELECT value FROM docs WHERE license_id=? AND key='settings_schema'").get(l.id); if (!cur || cur.value !== j) db.prepare("INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(license_id,key) DO UPDATE SET value=excluded.value, version=docs.version+1, updated_at=excluded.updated_at").run(l.id, 'settings_schema', j, 1, now()); } }
     saveResults(l, b.results);
     return { newLogs, commands: takeCommands(l), docs: docsFor(l, b.docs) };
   })();

@@ -31,9 +31,20 @@ local function loadSettings()
     end
 end
 
+local Remote = {}   -- limites imposées par le serveur (panel web > Réglages) : une carte désactivée l'est pour tout le monde
 local function applySettings()
-    SendNUIMessage({ action = 'setConfig', config = Settings })
+    local cfg = {}
+    for k, v in pairs(Settings) do cfg[k] = v end
+    for _, k in ipairs({ 'server', 'job', 'money' }) do if Remote[k] == false then cfg[k] = false end end
+    SendNUIMessage({ action = 'setConfig', config = cfg })
 end
+AddEventHandler('pickax_settings:changed', function(all, ov)
+    if not ov then return end
+    Remote.server = ov.hud2_server ~= nil and all.hud2_server or nil
+    Remote.job = ov.hud2_job ~= nil and all.hud2_job or nil
+    Remote.money = ov.hud2_money ~= nil and all.hud2_money or nil
+    applySettings()
+end)
 
 exports('GetSettings', function() return Settings end)
 

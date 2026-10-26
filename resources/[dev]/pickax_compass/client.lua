@@ -54,3 +54,15 @@ CreateThread(function()
         end
     end
 end)
+
+
+-- Réglages du serveur (panel web > Réglages) : format et position de la boussole.
+AddEventHandler('pickax_settings:changed', function(all, ov)
+    if not ov then return end
+    local touched = false
+    if ov.compass_layout ~= nil then Config.Layout = all.compass_layout touched = true end
+    if ov.compass_street ~= nil then Config.ShowStreet = all.compass_street touched = true end
+    if ov.compass_left ~= nil then Config.Compact.left = tostring(all.compass_left) .. 'vw' touched = true end
+    if ov.compass_bottom ~= nil then Config.Compact.bottom = tostring(all.compass_bottom) .. 'vh' touched = true end
+    if touched and visible then sendCfg() end
+end)

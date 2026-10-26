@@ -282,3 +282,13 @@ CreateThread(function()
         end
     end
 end)
+
+
+-- Réglages du serveur (panel web > Réglages) : position des notifications. Rien ne change tant que rien n'est réglé.
+AddEventHandler('pickax_settings:changed', function(all, ov)
+    if not ov then return end
+    local touched = false
+    if ov.notify_left ~= nil then Config.PositionLeft = tostring(all.notify_left) .. 'vw' touched = true end
+    if ov.notify_bottom ~= nil then Config.PositionBottom = tostring(all.notify_bottom) .. 'vh' touched = true end
+    if touched then sendUiConfig() end
+end)

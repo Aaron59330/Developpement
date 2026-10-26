@@ -5,6 +5,17 @@ const { own, active } = require('../lib/access');
 router.use(A.needUser);
 const queue = (l, uid, type, payload) => { const id = db.prepare('INSERT INTO commands(license_id,type,payload,created_at,by_user) VALUES(?,?,?,?,?)').run(l.id, type, JSON.stringify(payload), now(), uid).lastInsertRowid; bus.wake(l.id); return id; };
 
+// ───────── réglages du serveur (schéma envoyé par pickax_settings) ─────────
+const SET = require('../lib/settings');
+const docOf = (lid, key) => { const d = db.prepare('SELECT value,version FROM docs WHERE license_id=? AND key=?').get(lid, key); return d ? { v: JSON.parse(d.value), version: d.version } : null; };
+router.get('/:id/settings', (req, res) => { const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'), ov = docOf(l.id, 'settings'); res.json({ ok: true, schema: sch ? sch.v : [], overrides: ov ? ov.v : {}, ready: !!sch }); });
+router.put('/:id/settings', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); if (!sch) return res.json({ ok: false, error: 'Les réglages ne sont pas encore disponibles : la ressource pickax_settings doit tourner sur ton serveur.' });
+  const { overrides, errors } = SET.validate(sch.v, (req.body || {}).values); if (errors.length) return res.json({ ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') });
+  db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(license_id,key) DO UPDATE SET value=excluded.value, version=docs.version+1, updated_at=excluded.updated_at').run(l.id, 'settings', JSON.stringify(overrides), 1, now());
+  audit(req.user.id, l.id, 'doc:settings', Object.keys(overrides).join(','), A.ip(req)); bus.wake(l.id); res.json({ ok: true, count: Object.keys(overrides).length });
+});
+
 // ───────── statistiques ─────────
 router.get('/:id/stats-summary', (req, res) => {
   const l = own(req, res); if (!l) return; const days = Math.min(30, Math.max(1, +req.query.days || 7));

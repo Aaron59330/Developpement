@@ -6,6 +6,20 @@ do
 end
 local function P() return Config.Presets[PresetName] or Config.Presets.equilibre end
 
+-- Bonus de gains le week-end (panel web > Réglages > Économie) : n'agit que s'il a été réglé
+local weekend = 1.0
+local function readWeekend(all, ov) weekend = (ov and ov.eco_weekend_income ~= nil) and (tonumber(all.eco_weekend_income) or 1.0) or 1.0 end
+AddEventHandler('pickax_settings:changed', readWeekend)
+CreateThread(function()
+    Wait(6000)
+    if GetResourceState('pickax_settings') == 'started' then pcall(function() readWeekend(exports.pickax_settings:GetAll(), exports.pickax_settings:Overrides()) end) end
+end)
+local function weekendFactor()
+    if weekend <= 1.0 then return 1.0 end
+    local d = tonumber(os.date('%w'))
+    return (d == 0 or d == 6) and weekend or 1.0
+end
+
 local State = {}   -- State[clé] = { p = pression, off = écart d'événement, off_until = fin (os.time), last = dernier multiplicateur, dirty = bool }
 
 MySQL.ready(function()
@@ -38,7 +52,7 @@ local function cleanKey(k) k = tostring(k or ''):lower() return (k ~= '' and #k 
 local function factorOf(k)
     if not k then return 1.0 end
     if k:sub(1, 5) == 'shop:' then return P().prices or 1.0 end
-    if k:sub(1, 5) == 'crop:' then return P().income or 1.0 end
+    if k:sub(1, 5) == 'crop:' then return (P().income or 1.0) * weekendFactor() end
     return 1.0
 end
 
@@ -57,7 +71,7 @@ exports('SetPreset', function(name)
 end)
 exports('Scale', function(kind, amount)
     amount = tonumber(amount) or 0
-    local f = (kind == 'prices') and (P().prices or 1.0) or (P().income or 1.0)
+    local f = (kind == 'prices') and (P().prices or 1.0) or ((P().income or 1.0) * weekendFactor())
     return math.floor(amount * f + 0.5)
 end)
 

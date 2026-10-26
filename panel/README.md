@@ -45,6 +45,9 @@ ensure pickax_panel
 Mots de passe bcrypt, sessions en cookie httpOnly/SameSite, protection CSRF (Origin + JSON), en-têtes Helmet + CSP, limitation de débit (connexion, agent), requêtes SQL préparées, actions serveur en liste blanche, un client ne voit que ses licences.
 Limite à connaître : le Lua d'une ressource non « escrow » peut être modifié par le client ; pour que la vérification de licence soit difficile à contourner, passe `pickax_panel` (et les ressources vendues) sous l'escrow FiveM (Tebex/Keymaster).
 
+## Réglages du serveur
+La page **Réglages du serveur** est générée automatiquement d'après le schéma envoyé par la ressource `pickax_settings` (maintenance, annonces, redémarrages programmés, notifications, boussole, HUD, voix, bonus week-end…). Ajouter un réglage = une ligne dans `pickax_settings/config.lua`.
+
 ## Éditeur de fichiers et assistant IA
 - Les fichiers sont lus/écrits par la ressource (`pickax_panel/fs/main.js`, Node intégré à FiveM) dans `resources/` uniquement : pas de `..`, pas de lien symbolique, types limités (lua, json, cfg, meta, js, html, css, txt, sql…), 1 Mo max, `pickax_panel` exclu. Un `.lua` qui ne compile pas est refusé (`Config.CheckLuaSyntax`).
 - Chaque enregistrement crée une version (30 conservées par fichier) ; la version d'origine est gardée à la première ouverture.

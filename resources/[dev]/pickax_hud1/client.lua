@@ -256,3 +256,13 @@ end)
 AddEventHandler('pickax:safezone', function(on)
     SendNUIMessage({ action = 'safeZone', value = on == true })
 end)
+
+
+-- Réglages du serveur (panel web > Réglages) : affichage des jauges.
+AddEventHandler('pickax_settings:changed', function(all, ov)
+    if not ov then return end
+    if ov.hud_health ~= nil then Config.Health = Config.Health or {} Config.Health.Enabled = all.hud_health end
+    if ov.hud_armor ~= nil then Config.Health = Config.Health or {} Config.Health.ShowArmor = all.hud_armor end
+    if ov.hud_health ~= nil or ov.hud_armor ~= nil then sendHealthConfig() end
+    if ov.hud_needs ~= nil then SendNUIMessage({ action = 'setNeeds', value = all.hud_needs }) end
+end)

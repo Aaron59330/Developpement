@@ -59,6 +59,16 @@ const srv = http.createServer(app).listen(0, async () => {
     const th = (await client('GET', `/api/servers/${lid}/docs/theme`)).value; ok(th.MarkerAlpha === 255 && th.MarkerType === 1 && th.BlipScale === 0.9 && th.MenuBanner.startsWith('https://'), 'valeurs bornées (opacité 999 → 255)');
     ok((await client('PUT', `/api/servers/${lid}/docs/economy`, { value: { preset: 'abuse' } })).ok && (await client('GET', `/api/servers/${lid}/docs/economy`)).value.preset === 'abuse', 'type d’économie enregistré');
     ok((await client('PUT', `/api/servers/${lid}/docs/economy`, { value: { preset: 'gratuit' } })).ok === false, 'type d’économie inconnu refusé');
+    ok((await client('GET', `/api/servers/${lid}/settings`)).ready === false, 'réglages : pas disponibles avant l’envoi du schéma');
+    const schema = [{ key: 'maintenance_enabled', group: 'Serveur', label: 'Maintenance', type: 'bool', default: false }, { key: 'announce_interval', group: 'Serveur', label: 'Intervalle', type: 'number', default: 15, min: 1, max: 240, step: 1 }, { key: 'compass_layout', group: 'Interface', label: 'Boussole', type: 'select', default: 'compact', options: [['compact', 'C'], ['top', 'T']] }, { key: 'announce_messages', group: 'Serveur', label: 'Messages', type: 'list', default: [] }];
+    await fetch(base + '/api/agent/sync', { method: 'POST', headers: H, body: JSON.stringify({ players: [], settingsSchema: schema }) });
+    const gs = await client('GET', `/api/servers/${lid}/settings`); ok(gs.ready && gs.schema.length === 4, 'réglages : schéma reçu du serveur');
+    ok((await client('PUT', `/api/servers/${lid}/settings`, { values: { announce_interval: 'abc' } })).ok === false, 'réglages : nombre invalide refusé');
+    ok((await client('PUT', `/api/servers/${lid}/settings`, { values: { compass_layout: 'diagonale' } })).ok === false, 'réglages : option inconnue refusée');
+    ok((await client('PUT', `/api/servers/${lid}/settings`, { values: { inconnu: 1 } })).ok === false, 'réglages : clé inconnue refusée');
+    const ps = await client('PUT', `/api/servers/${lid}/settings`, { values: { maintenance_enabled: true, announce_interval: 999, compass_layout: 'compact', announce_messages: ['  Salut ', '', 'Discord'] } }); ok(ps.ok && ps.count === 3, 'réglages enregistrés (la valeur par défaut « compact » n’est pas gardée)');
+    const ov = (await client('GET', `/api/servers/${lid}/settings`)).overrides; ok(ov.announce_interval === 240 && ov.maintenance_enabled === true && ov.announce_messages.length === 2 && !('compass_layout' in ov), 'réglages : valeurs bornées et nettoyées');
+    const sy = await (await fetch(base + '/api/agent/sync', { method: 'POST', headers: H, body: JSON.stringify({ docs: {} }) })).json(); ok(sy.docs.settings && sy.docs.settings.value.announce_interval === 240 && !sy.docs.settings_schema, 'réglages : le serveur reçoit les surcharges (sans le schéma)');
     const st = await client('GET', `/api/servers/${lid}/stats-summary?days=7`); ok(st.ok, 'statistiques');
     console.log(`\n${n} vérifications OK`);
   } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
