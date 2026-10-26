@@ -21,8 +21,8 @@ var UPDATES = [
 	{ date: '19/10/2026', title: 'Interface', items: ['Couleur et logo du serveur configurables', 'Nouveau menu pause', 'Builder d\'événements'] }
 ];
 
-// ===== Fond : '' = fond dégradé aux couleurs du serveur ; sinon nom d'une image du dossier loading (ex : 'background.png') =====
-var BACKGROUND = 'background.png';
+// ===== Fond : '' = fond dégradé aux couleurs du serveur ; sinon nom d'une image du dossier loading (ex : 'background.jpg') =====
+var BACKGROUND = 'background.jpg';
 
 (function () {
 	var bars = ['INIT_BEFORE_MAP_LOADED', 'MAP', 'INIT_AFTER_MAP_LOADED', 'INIT_SESSION'];
