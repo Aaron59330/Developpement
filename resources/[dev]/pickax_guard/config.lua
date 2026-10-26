@@ -9,7 +9,7 @@ Config = {}
 
 -- Clé PUBLIQUE de ton panel (panel web → Administration → Protection de la base). Sans elle, la base refuse de démarrer.
 -- Ne mets jamais la clé privée ici : elle reste sur le VPS du panel.
-Config.PublicKey = ''
+Config.PublicKey = 'MCowBQYDK2VwAyEA3ygdLUgkYhpVm8Y7uOZQRyBbbjMZ8pAvWfCp0aAE0mU='
 
 Config.Prefix   = 'pickax_'                      -- toutes les ressources dont le nom commence ainsi sont protégées…
 Config.Exclude  = { 'pickax_guard', 'pickax_panel' }   -- …sauf celles-ci (le panel doit tourner pour afficher le statut)

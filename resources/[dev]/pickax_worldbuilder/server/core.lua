@@ -1,5 +1,5 @@
 -- [AERO:LIC] vérification autonome de la licence (jeton signé du panel, clé publique embarquée) : ne pas retirer
-local AERO_PK = ''
+local AERO_PK = 'MCowBQYDK2VwAyEA3ygdLUgkYhpVm8Y7uOZQRyBbbjMZ8pAvWfCp0aAE0mU='
 do
     local res = GetCurrentResourceName()
     local function token()

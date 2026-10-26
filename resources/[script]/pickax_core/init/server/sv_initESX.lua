@@ -1,5 +1,5 @@
 -- [AERO:LIC] vérification autonome de la licence (jeton signé du panel, clé publique embarquée) : ne pas retirer
-local AERO_PK = ''
+local AERO_PK = 'MCowBQYDK2VwAyEA3ygdLUgkYhpVm8Y7uOZQRyBbbjMZ8pAvWfCp0aAE0mU='
 local aeroLic = false
 exports('Licensed', function() return aeroLic == true end)   -- utilisé par les autres ressources de la base
 do
