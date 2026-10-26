@@ -17,6 +17,15 @@ router.patch('/users/:id', (req, res) => { const id = +req.params.id; const u = 
   if (b.role && ['client', 'admin'].includes(b.role)) db.prepare('UPDATE users SET role=? WHERE id=?').run(b.role, id);
   if (b.password) { if (String(b.password).length < 8) return res.json({ ok: false, error: 'Mot de passe : 8 caractères minimum' }); db.prepare('UPDATE users SET pass_hash=? WHERE id=?').run(A.hash(String(b.password)), id); db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); }
   audit(req.user.id, null, 'admin:user-edit', u.email, A.ip(req)); res.json({ ok: true }); });
+// Suppression d'un compte client : ses commandes, tickets, sessions et suggestions partent avec ; ses licences sont conservées (sans propriétaire) ou supprimées au choix
+router.delete('/users/:id', (req, res) => {
+  const id = +req.params.id; const u = db.prepare('SELECT * FROM users WHERE id=?').get(id); if (!u) return res.json({ ok: false, error: 'Introuvable' });
+  if (id === req.user.id) return res.json({ ok: false, error: 'Tu ne peux pas supprimer ton propre compte' });
+  if (u.role === 'admin' && db.prepare("SELECT COUNT(*) n FROM users WHERE role='admin'").get().n <= 1) return res.json({ ok: false, error: 'Impossible de supprimer le dernier administrateur' });
+  const withLic = !!(req.body || {}).delete_licenses;
+  db.transaction(() => { if (withLic) db.prepare('DELETE FROM licenses WHERE user_id=?').run(id); db.prepare('DELETE FROM users WHERE id=?').run(id); })();
+  audit(req.user.id, null, 'admin:user-delete', u.email + (withLic ? ' (+licences)' : ''), A.ip(req)); res.json({ ok: true });
+});
 router.get('/licenses', (req, res) => res.json({ ok: true, licenses: db.prepare(`SELECT l.id,l.key,l.server_name,l.status,l.expires_at,l.last_seen,l.last_ip,l.bound_ip,l.version,l.note,l.user_id,u.email owner,p.name plan,(l.last_seen>${now() - ONLINE}) online FROM licenses l LEFT JOIN users u ON u.id=l.user_id LEFT JOIN plans p ON p.id=l.plan_id ORDER BY l.id DESC LIMIT 1000`).all() }));
 router.post('/licenses', (req, res) => { const b = req.body || {}; const plan = db.prepare('SELECT * FROM plans WHERE id=?').get(+b.plan_id); const days = b.days !== undefined && b.days !== '' ? Math.max(0, Math.floor(+b.days)) : (plan ? plan.days : 30);
   if (b.user_id && !db.prepare('SELECT 1 FROM users WHERE id=?').get(+b.user_id)) return res.json({ ok: false, error: 'Client introuvable' });
