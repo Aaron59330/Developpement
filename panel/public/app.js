@@ -275,6 +275,14 @@ async function aAudit() { const r = await api('GET', '/api/admin/audit'); return
 
 const PAGES = window.PAGES = { overview: pOverview, players: pPlayers, actions: pActions, console: pConsole, theme: pTheme, access: pAccess, resources: pResources, license: pLicense, account: pAccount, 'a-overview': aOverview, 'a-users': aUsers, 'a-licenses': aLicenses, 'a-plans': aPlans, 'a-audit': aAudit };
 let renderId = 0;
+// Redessine l'écran sans perdre la position : le menu de gauche garde son défilement, et la page garde le sien quand on reste sur la même page (rafraîchissement automatique)
+let lastPage = null;
+function paint(content, page) {
+  const sb = document.querySelector('.side'), st = sb ? sb.scrollTop : 0, mt = window.scrollY;
+  $app.replaceChildren(shell(content));
+  const nb = document.querySelector('.side'); if (nb) nb.scrollTop = st;
+  window.scrollTo(0, page === lastPage ? mt : 0); lastPage = page;
+}
 async function render() {
   clearInterval(state.timer); const id = ++renderId;
   if (!state.user) { $app.replaceChildren(window.publicView ? window.publicView() : authView()); return; }
@@ -283,7 +291,7 @@ async function render() {
   const fn = PAGES[page] || PAGES.overview;
   if (page.startsWith('a-') && state.user.role !== 'admin') { go('overview'); return; }
   let content; try { content = await fn(); } catch (e) { console.error(e); content = el('div', { class: 'card' }, 'Erreur d’affichage : ' + e.message); }
-  if (id !== renderId) return; $app.replaceChildren(shell(content));
-  if (['overview', 'players'].includes(page)) state.timer = setInterval(async () => { await loadServers(); if (id === renderId && !document.querySelector('.modal') && !document.activeElement.matches('input,select,textarea')) { const c = await fn(); if (id === renderId) $app.replaceChildren(shell(c)); } }, 15000);
+  if (id !== renderId) return; paint(content, page);
+  if (['overview', 'players'].includes(page)) state.timer = setInterval(async () => { await loadServers(); if (id === renderId && !document.querySelector('.modal') && !document.activeElement.matches('input,select,textarea')) { const c = await fn(); if (id === renderId) paint(c, page); } }, 15000);
 }
 window.addEventListener('load', boot);
