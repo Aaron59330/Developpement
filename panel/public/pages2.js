@@ -121,3 +121,17 @@ PAGES['a-licenses'] = async function () {
     cell.prepend(el('button', { class: 'btn s', onclick: async () => { const o = (await api('GET', `/api/admin/licenses/${l.id}/modules`)).owned || []; ask('Modules de « ' + l.server_name + ' »', [{ name: 'module', label: 'Module', type: 'select', options: (m.modules || []).filter(x => x.price > 0).map(x => [x.id, x.name + (o.includes(x.id) ? ' (acquis)' : '')]) }, { name: 'grant', label: 'Action', type: 'select', options: [['1', 'Accorder'], ['', 'Retirer']] }], async v => { await post(`/api/admin/licenses/${l.id}/modules`, { module_id: +v.module, grant: !!v.grant }); toast('Modules mis à jour', 'ok'); }); } }, el('span', {}, 'Modules'))); });
   return page;
 };
+
+// Admin : ouvrir le panel d'un client + créer client et licence en une fois
+const baseLic2 = PAGES['a-licenses'];
+PAGES['a-licenses'] = async function () {
+  const page = await baseLic2(); const [r, p] = await Promise.all([api('GET', '/api/admin/licenses'), api('GET', '/api/admin/plans')]);
+  const rows = page.querySelectorAll('tbody tr'); (r.licenses || []).forEach((l, i) => { const cell = rows[i] && rows[i].querySelector('td:last-child .row'); if (cell) cell.prepend(el('button', { class: 'btn s p', onclick: () => openAsAdmin(l.id) }, el('span', {}, 'Ouvrir son panel'))); });
+  const bar = page.querySelector('.top'); if (bar) bar.append(el('button', { class: 'btn p', onclick: () => ask('Nouveau client + licence', [{ name: 'email', label: 'E-mail du client' }, { name: 'username', label: 'Pseudo (facultatif)' }, { name: 'server_name', label: 'Nom de son serveur', value: 'Serveur de ' }, { name: 'plan_id', label: 'Offre', type: 'select', options: (p.plans || []).map(x => [x.id, `${x.name} (${x.price} €)`]) }, { name: 'days', label: 'Durée en jours (vide = selon l’offre, 0 = à vie)', type: 'number' }], async v => {
+    const x = await post('/api/admin/onboard', v); if (!x.ok) { toast(x.error, 'bad'); return false; }
+    const msg = `Voici ton accès au panel de ton serveur :\nAdresse : ${location.origin}\nE-mail : ${v.email}\n${x.new_account ? 'Mot de passe provisoire : ' + x.password : '(tu as déjà un compte : connecte-toi avec ton mot de passe)'}\n\nTa licence : ${x.key}\nDans ton panel : Licence & installation, tout est expliqué.`;
+    modal('Accès créé : à envoyer au client', el('div', {}, el('p', { class: 'muted' }, 'Copie ce message et envoie-le au client (Discord, e-mail…).'), el('pre', { class: 'code', style: 'white-space:pre-wrap' }, msg)), close => [el('button', { class: 'btn p', onclick: () => copy(msg) }, el('span', {}, 'Copier le message')), el('button', { class: 'btn', onclick: () => { close(); render(); } }, el('span', {}, 'Fermer'))]);
+    return true; }, 'Créer') }, el('span', {}, 'Nouveau client + licence')));
+  return page;
+};
+const baseUsers = PAGES['a-users'];

@@ -43,8 +43,10 @@ async function boot() {
   if (state.user) await loadServers();
   render();
 }
+async function openAsAdmin(id, page) { const r = await api('GET', '/api/servers/' + id); if (!r.ok) return toast(r.error, 'bad'); state.extraId = id; if (!state.servers.find(x => x.id === id)) state.servers.push(r.server); state.sid = id; localStorage.setItem('aero_sid', id); go(page || 'overview'); }
 async function loadServers() {
   const r = await api('GET', '/api/servers'); state.servers = r.ok ? r.servers : [];
+  if (state.extraId && !state.servers.find(x => x.id === state.extraId)) { const e = await api('GET', '/api/servers/' + state.extraId); if (e.ok) state.servers.push(e.server); }
   if (!state.servers.find(s => s.id === state.sid)) state.sid = state.servers[0] ? state.servers[0].id : null;
 }
 function setSid(id) { state.sid = id; localStorage.setItem('aero_sid', id); render(); }
@@ -81,7 +83,13 @@ function shell(content) {
     el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')'))));
   return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, content));
 }
-const needServer = () => el('div', { class: 'card empty' }, el('h2', {}, 'Aucun serveur'), el('p', {}, 'Tu n’as pas encore de licence. Contacte-nous pour en obtenir une, ou demande un essai.'));
+const needServer = () => {
+  const box = el('div', { class: 'card empty' }, el('h2', {}, 'Ton compte est prêt'), el('p', {}, 'Il te manque encore ta licence : c’est elle qui relie ton serveur FiveM à ton panel personnel.'));
+  if (state.user.role !== 'admin') box.append(el('p', { class: 'muted' }, 'L’équipe active ton serveur après ta demande. Tu recevras la réponse dans « Aide et support ».'),
+    el('button', { class: 'btn p', onclick: async () => { const r = await api('POST', '/api/support/tickets', { subject: 'Activation de mon serveur', body: 'Bonjour, je viens de créer mon compte et je souhaite activer mon serveur (licence).' }); if (r.ok) { toast('Demande envoyée', 'ok'); go('support/' + r.id); } else toast(r.error, 'bad'); } }, el('span', {}, 'Demander l’activation de mon serveur')));
+  else box.append(el('p', { class: 'muted' }, 'En tant qu’admin, crée une licence pour toi dans Administration → Licences, ou ouvre le panel d’un client depuis cette page.'));
+  return box;
+};
 const statusPill = s => s.status !== 'active' ? el('span', { class: 'pill bad' }, s.status === 'suspended' ? 'Suspendue' : 'Révoquée') : s.expired ? el('span', { class: 'pill bad' }, 'Expirée') : s.online ? el('span', { class: 'pill ok' }, 'En ligne') : el('span', { class: 'pill warn' }, 'Hors ligne');
 const head = (title, ...right) => el('div', { class: 'top' }, el('h1', {}, title), el('div', { class: 'grow' }), ...right);
 
