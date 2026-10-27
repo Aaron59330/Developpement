@@ -27,8 +27,8 @@ const srv = http.createServer(app).listen(0, async () => {
     ok(!r.cancelled.includes('pickax_panel') && r.states.pickax_panel === 'started', 'pickax_panel n’est jamais retenu');
     ok(fs.existsSync(r.dir + '/cache.json'), 'réponse signée mémorisée pour tolérer une panne du panel');
     const cached = r.dir;
-    r = await runLua({ ...base, CV_aero_panel_key: 'AERO-GOOD-0001', HOLD: '0' });
-    ok(r.licensed === true && r.cancelled.length === 0 && r.states.pickax_core === 'started', 'HoldStart=false : aucun démarrage annulé (console propre), tout démarre');
+    r = await runLua({ ...base, CV_aero_panel_key: 'AERO-GOOD-0001', HOLD: '0', PRESTARTED: 'pickax_core,pickax_jobbuilder' });
+    ok(r.licensed === true && r.cancelled.length === 0 && r.stopped.length === 0 && r.states.pickax_core === 'started', 'HoldStart=false : aucun démarrage annulé (console propre), tout démarre');
     r = await runLua({ ...base, CV_aero_panel_key: 'AERO-EXPIRED', HOLD: '0', PRESTARTED: 'pickax_core' });
     ok(r.licensed === false && r.cancelled.length === 0 && r.states.pickax_core === 'stopped', 'HoldStart=false + licence refusée : les ressources lancées sont arrêtées quand même');
     console.log('Licence refusée');

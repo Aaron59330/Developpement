@@ -4,7 +4,7 @@
 -- 3) si la licence devient invalide (révoquée, expirée, clé retirée), arrête les ressources protégées.
 local SELF = GetCurrentResourceName()
 local VERSION = GetResourceMetadata(SELF, 'version', 0) or '1.0.0'
-local state = { ok = false, reason = 'démarrage', plan = nil, expires_at = nil, valid_until = 0, checked = 0, token = nil }
+local state = { pending = true, ok = false, reason = 'démarrage', plan = nil, expires_at = nil, valid_until = 0, checked = 0, token = nil }
 local held, heldSet = {}, {}
 local releasing = false
 local KEY = GetConvar('aero_panel_key', '')
@@ -77,6 +77,8 @@ end
 local lastBanner = 0
 local function setBad(reason, detail)
     local was = state.ok
+    local verdict = state.pending
+    state.pending = false
     state.ok, state.reason, state.valid_until, state.token = false, reason, 0, nil
     local now = os.time()
     if was or now - lastBanner > 55 then
@@ -84,11 +86,12 @@ local function setBad(reason, detail)
         say(1, '^1LICENCE INVALIDE^7 — ' .. (REASONS[reason] or REASONS[detail or ''] or tostring(detail or reason)))
         say(1, 'La base ne démarre pas tant que la licence n\'est pas valide.')
     end
-    if was then stopProtected('licence invalide') end
+    if was or (verdict and not Config.HoldStart) then stopProtected('licence invalide') end
 end
 
 local function setOk(payload, source, resp)
     local was = state.ok
+    state.pending = false
     state.token = resp
     state.ok, state.reason, state.plan, state.expires_at = true, source or 'panel', payload.plan, payload.expires_at
     state.valid_until = (tonumber(payload.iat) or os.time()) + (tonumber(payload.grace) or 86400)
@@ -147,7 +150,7 @@ end
 
 CreateThread(function()
     Wait(500)
-    stopProtected('démarrage sans licence vérifiée')   -- ressources déjà démarrées avant le guard (ordre du resources.cfg)
+    if Config.HoldStart then stopProtected('démarrage sans licence vérifiée') end   -- ressources déjà démarrées avant le guard (ordre du resources.cfg)
     check()
     while true do
         Wait(state.ok and (Config.Interval * 1000 + math.random(0, 20000)) or (Config.RetryInterval * 1000))
@@ -165,7 +168,7 @@ exports('Status', function() return { ok = state.ok, reason = state.reason, plan
 
 -- Une ressource protégée qui se lancerait malgré tout (démarrage forcé) est arrêtée aussitôt.
 AddEventHandler('onResourceStart', function(name)
-    if not state.ok and isProtected(name) then
+    if not state.ok and not state.pending and isProtected(name) then
         hold(name)
         SetTimeout(0, function() StopResource(name) end)
     end

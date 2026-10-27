@@ -27,6 +27,8 @@ try {
   console.log('Ressources dépendantes de pickax_core (auction)');
   r = run(HUB, 'hub', { CORE: 'ok' }); ok(r.stopped.length === 0, 'core licencié : la ressource tourne');
   r = run(HUB, 'hub', { CORE: 'bad' }); ok(r.stopped.includes('pickax_auction'), 'core non licencié : la ressource s’arrête');
+  r = run(HUB, 'hub', { CORE: 'later', RUN: '120' }); ok(r.stopped.length === 0, 'core encore en cours de vérification au chargement : la ressource attend, ne s’arrête pas');
+  r = run(HUB, 'hub', { CORE: 'pending', RUN: '120' }); ok(r.stopped.includes('pickax_auction'), 'core jamais vérifié : la ressource finit par s’arrêter');
   r = run(HUB, 'hub', { CORE: 'missing', RUN: '60' }); ok(r.stopped.includes('pickax_auction'), 'pickax_core retiré : la ressource s’arrête');
 } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
 console.log(process.exitCode ? '' : `\n${n} vérifications OK`);

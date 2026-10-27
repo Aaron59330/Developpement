@@ -1,7 +1,7 @@
 -- [AERO:LIC] vérification autonome de la licence (jeton signé du panel, clé publique embarquée) : ne pas retirer
 local AERO_PK = 'MCowBQYDK2VwAyEA3ygdLUgkYhpVm8Y7uOZQRyBbbjMZ8pAvWfCp0aAE0mU='
-local aeroLic = false
-exports('Licensed', function() return aeroLic == true end)   -- utilisé par les autres ressources de la base
+local aeroLic = nil   -- nil = vérification en cours, true / false ensuite
+exports('Licensed', function() return aeroLic end)   -- utilisé par les autres ressources de la base
 do
     local res = GetCurrentResourceName()
     local function token()
@@ -19,14 +19,14 @@ do
     local function die(why) print(('^1[AERO] %s arrêtée : %s^0'):format(res, why)) StopResource(res) end
     local first = verify()
     if first == false then die('licence invalide ou pickax_guard absent') error('AERO : licence invalide', 0) end
-    aeroLic = first == true
+    aeroLic = first
     CreateThread(function()
         local tries = 0
         while first ~= true and tries < 40 do
             tries = tries + 1 Wait(500)
             first = verify()
             if first == false then die('licence invalide') return end
-            aeroLic = first == true
+            aeroLic = first
         end
         if first ~= true then die('vérification de la licence impossible') return end
         while true do

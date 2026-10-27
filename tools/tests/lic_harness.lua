@@ -23,7 +23,7 @@ local tokenMode = env('TOKEN', 'good')
 local mt = {}
 local function mk(tbl) return setmetatable({}, { __index = function(_, k) return tbl[k] end }) end
 local guard = mk({ Token = function(_) if tokenMode == 'none' then return nil end return { payload = env('PAYLOAD'), sig = env('SIG') } end })
-local core = mk({ Licensed = function(_) local m = env('CORE', 'ok') if m == 'missing' then error('no such export') end return m == 'ok' end })
+local core = mk({ Licensed = function(_) local m = env('CORE', 'ok') if m == 'missing' then error('no such export') end if m == 'pending' then return nil end if m == 'later' and now < 8000 then return nil end return m ~= 'bad' end })
 local selfExp = mk({ LicVerify = function(_, p, s, pk, k) if env('NODE_READY_AFTER') and now < tonumber(env('NODE_READY_AFTER')) then error('not ready') end return verifyViaNode(p, s, pk, k) end })
 local ex = setmetatable({}, { __index = function(_, k)
   if k == RES and MODE == 'v' then return selfExp end
@@ -57,4 +57,4 @@ while now <= RUN do
 end
 local js = {}
 for _, s in ipairs(stopped) do js[#js + 1] = '"' .. s .. '"' end
-print(string.format('RESULT{"topError":%s,"stopped":[%s],"licensedExport":%s,"errs":%d}', tostring(topError), table.concat(js, ','), exported.Licensed and tostring(exported.Licensed()) or 'null', #prints))
+print(string.format('RESULT{"topError":%s,"stopped":[%s],"licensedExport":%s,"errs":%d}', tostring(topError), table.concat(js, ','), (exported.Licensed and exported.Licensed() ~= nil) and tostring(exported.Licensed()) or 'null', #prints))
