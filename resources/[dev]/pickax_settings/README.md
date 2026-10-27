@@ -34,9 +34,13 @@ end)
 | Voix | distances (chuchoter / normal / crier) | pma-voice |
 | Économie | bonus de gains du week-end | pickax_economy |
 | Carnet | activer, multiplicateur des récompenses | pickax_carnet |
+| Gangs | territoires (capture, protection, revenus, racket), affrontements, guerre de zone déclarée, zones de tribut, missions colis, guerres entre gangs | pickax_gangbuilder (`panelsettings.lua`) |
+| Drogues & labos | laboratoire interactif (qualité, rendement, anti-triche), rendu 3D et caméra du labo, intoxication, vente de drogue aux PNJ | pickax_jobbuilder, pickax_illegalbuilder (`panelsettings.lua`) |
 | Discord | statut affiché sur le profil Discord | pickax_core (`utils/discord`) |
 | Performance | mode performance des interfaces | pickax_theme, pickax_compass, pickax_hud1 |
 
 Un réglage ne change rien tant qu'il n'est pas modifié : les valeurs d'origine de la base restent en vigueur. Remis à sa valeur par défaut, l'effet précédent est annulé.
 Chaque réglage a une `section` (sous-titre dans le panel). Pour en ajouter un : une ligne dans `config.lua`, puis un consommateur qui écoute `pickax_settings:changed` (ou lit `exports.pickax_settings:Get`).
 Tests hors jeu : `lua5.4 tools/tests/settings_test.lua` et `lua5.4 tools/tests/vsync_settings_test.lua`.
+
+Les builders (gangs, jobs, illégal) appliquent leurs réglages via un fichier `panelsettings.lua` (liste `clé du réglage → chemin dans le config.lua`) : ajouter un réglage = une ligne dans `Settings.Schema` + une ligne dans ce fichier. Test : `ROOT=. lua tools/tests/panelsettings_test.lua` (vérifie aussi que chaque défaut du schéma est égal à la valeur du config.lua).

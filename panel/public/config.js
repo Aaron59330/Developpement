@@ -69,7 +69,7 @@ PAGES.loading = async function () {
 };
 
 // ═══════════════ RÉGLAGES DU SERVEUR ═══════════════
-const SET_ORDER = ['Serveur', 'Monde & PNJ', 'Météo & heure', 'Joueurs & combat', 'Nouveaux joueurs', 'Interface', 'Voix', 'Économie', 'Carnet', 'Discord', 'Performance'];
+const SET_ORDER = ['Serveur', 'Monde & PNJ', 'Météo & heure', 'Joueurs & combat', 'Nouveaux joueurs', 'Interface', 'Voix', 'Économie', 'Carnet', 'Gangs', 'Drogues & labos', 'Discord', 'Performance'];
 const SET_INFO = {
   'Serveur': ['Maintenance, annonces automatiques et redémarrages programmés.', 'M3 12h18M3 6h18M3 18h18'],
   'Monde & PNJ': ['Population, circulation, police et transports automatiques de GTA.', 'M12 21s-7-6.200-7-11a7 7 0 0 1 14 0c0 4.800-7 11-7 11z'],
@@ -80,6 +80,8 @@ const SET_INFO = {
   'Voix': ['Distances de la voix (chuchoter, normal, crier).', 'M12 3v10M8 7v2M16 7v2M5 11a7 7 0 0 0 14 0'],
   'Économie': ['Gains et prix de l’ensemble du serveur.', 'M12 3v18M16 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H8'],
   'Carnet': ['Série de connexion, objectifs du jour et défi de la ville.', 'M6 3h12v18H6zM9 8h6M9 12h6'],
+  'Gangs': ['Territoires, racket, affrontements, guerres de zone, zones de tribut, missions colis et guerres entre gangs.', 'M4 22V4M4 4h13l-2 4 2 4H4'],
+  'Drogues & labos': ['Laboratoire interactif (qualité, rendement, caméra 3D), intoxication, vente de drogue aux PNJ.', 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3'],
   'Discord': ['Statut affiché sur le profil Discord des joueurs.', 'M8 8c2.600-1 5.400-1 8 0M7 17c3.300 1.300 6.700 1.300 10 0'],
   'Performance': ['Mode économie de ressources pour les PC modestes.', 'M13 2L3 14h8l-1 8 10-12h-8z'],
 };

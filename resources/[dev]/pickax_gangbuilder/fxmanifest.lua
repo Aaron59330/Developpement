@@ -9,6 +9,7 @@ version '1.0.0'
 shared_scripts {
     'pk_theme.lua',   -- couleur principale commune (pickax_theme/theme.js)
     'config.lua',
+    'panelsettings.lua',   -- réglages modifiables depuis le panel web (pickax_settings)
 }
 
 server_scripts {
