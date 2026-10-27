@@ -13,6 +13,3 @@ ui_page 'html/index.html'
 files { 'html/index.html', 'html/style.css', 'html/script.js' }
 
 exports { 'GetKey', 'GetConflicts' }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

@@ -21,6 +21,3 @@ files {
 }
 
 dependencies { 'es_extended', 'oxmysql', 'pickax_core' }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

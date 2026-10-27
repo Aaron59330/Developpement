@@ -20,6 +20,3 @@ client_scripts {
     'config.lua',
     'client.lua'
 }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

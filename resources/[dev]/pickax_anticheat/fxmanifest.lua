@@ -24,6 +24,3 @@ files { 'html/index.html', 'html/style.css', 'html/script.js', 'html/bb-ui.js' }
 exports { 'Exempt', 'IsExempt', 'Flag', 'Ban' }
 
 dependencies { 'es_extended', 'oxmysql' }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

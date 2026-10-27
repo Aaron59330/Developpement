@@ -47,6 +47,3 @@ files {
 }
 
 dependencies { 'oxmysql', 'ox_lib' }   -- framework, inventaire et voix : détectés automatiquement (voir config.lua)
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

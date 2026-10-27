@@ -26,21 +26,6 @@ function takeCommands(l) {
 }
 function docsFor(l, known) { const out = {}; known = known && typeof known === 'object' ? known : {}; for (const d of db.prepare("SELECT key,value,version FROM docs WHERE license_id=? AND key<>'settings_schema'").all(l.id)) if (+known[d.key] !== d.version) out[d.key] = { version: d.version, value: JSON.parse(d.value) }; return out; }
 
-// ── Vérification de la licence pour pickax_guard : réponse SIGNÉE (Ed25519), liée au nonce envoyé et à la clé ──
-const GUARD = require('../lib/guard'); const GRACE = 24 * 3600;
-router.post('/verify', (req, res) => {
-  const key = String(req.headers['x-license-key'] || ''); const b = req.body || {}; const nonce = String(b.nonce || '');
-  if (!/^[A-Za-z0-9]{16,64}$/.test(nonce)) return res.status(400).json({ ok: false, error: 'nonce invalide' });
-  const l = key ? lic(key) : null; const ip = A.ip(req); let valid = false, status = 'unknown', plan = null, exp = null;
-  if (l) {
-    const expired = !!(l.expires_at && l.expires_at < now()); valid = l.status === 'active' && !expired; status = expired ? 'expired' : l.status; plan = l.plan_name; exp = l.expires_at || null;
-    if (valid && l.bound_ip && l.bound_ip !== ip) { valid = false; status = 'ip'; }
-    if (valid && !l.bound_ip) db.prepare('UPDATE licenses SET bound_ip=? WHERE id=?').run(ip, l.id);
-    db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run('guard:' + l.id, JSON.stringify({ at: now(), ip, host: String(b.host || '').slice(0, 80), build: String(b.build || '').slice(0, 20), valid, status }));
-  }
-  const payload = JSON.stringify({ v: 1, valid, status, plan, expires_at: exp, nonce, kh: GUARD.keyHash(key), iat: now(), grace: GRACE });
-  res.json({ ok: true, payload, sig: GUARD.sign(payload) });
-});
 router.post('/sync', (req, res) => {
   const l = check(req, res); if (!l) return; const b = req.body || {};
   db.prepare('UPDATE licenses SET version=? WHERE id=?').run(String(b.version || '').slice(0, 20), l.id);

@@ -86,7 +86,7 @@ function shell(content) {
     el('div', { class: 'sec' }, 'Serveur en direct'), item('players', 'Joueurs', 'users'), item('map', 'Carte live', 'map'), item('actions', 'Actions rapides', 'bolt'), item('access', 'Bans & whitelist', 'shield'), item('planner', 'Événements programmés', 'cal'), item('resources', 'Ressources', 'box'), item('assistant', 'Assistant IA', 'spark'),
     el('div', { class: 'sec' }, 'Développement'), item('editor', 'Éditeur de base', 'edit'), item('files', 'Fichiers', 'file'), item('backups', 'Sauvegardes', 'db'), item('console', 'Console', 'term'), item('webhooks', 'Webhooks', 'hook'),
     el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'), isAdmin ? null : item('offers', 'Offres & renouvellement', 'tag'),
-    isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-guard', 'Protection de la base', 'shield'), item('a-orders', 'Commandes', 'cart'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
+    isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-orders', 'Commandes', 'cart'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
     bottom);
   return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, content));
 }

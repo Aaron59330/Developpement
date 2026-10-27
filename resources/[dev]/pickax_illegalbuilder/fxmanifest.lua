@@ -1,7 +1,6 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
-node_version '22'
 
 name 'pickax_illegalbuilder'
 description 'Builder Illégal ESX : drogues (récolte / laboratoires / traitement / vente / blanchiment), braquages (supérettes, banques, bijouteries...) et Go Fast — UI + oxmysql'
@@ -12,7 +11,6 @@ shared_scripts {
     'config.lua',
 }
 
-server_script 'lic.js'   -- [AERO] vérification de licence (doit rester AVANT les autres scripts serveur)
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/core.lua',
@@ -49,6 +47,3 @@ dependencies {
     'es_extended',
     'oxmysql',
 }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'

@@ -14,6 +14,3 @@ ui_page 'html/index.html'
 files { 'html/index.html', 'html/style.css', 'html/engine.js', 'html/script.js' }
 
 dependencies { 'es_extended', 'oxmysql' }
-
--- [AERO] protection de la base : cette ressource ne démarre pas sans pickax_guard (licence valide)
-dependency 'pickax_guard'
