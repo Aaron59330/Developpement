@@ -333,6 +333,8 @@ local function snapshot(src)
             income = math.floor((tonumber(t.settings and t.settings.reward) or Tc.Reward) * mul(t, 'income')), incomeEvery = interval,
             nextIncome = t.owner and math.max(0, (t.last_income or 0) + interval * 60 - now) or nil,
             progress = st and st.progress or 0, attacker = st and st.attacker and label(st.attacker) or nil,
+            conflict = GB.conflictInfo and GB.conflictInfo(id) or nil,
+            turf = (function() if not GB.turfCheck then return nil end local can, why = GB.turfCheck(t, gang.name) return { can = can, why = why } end)(),
         }
     end
     table.sort(terr, function(a, b) return a.id < b.id end)
@@ -347,7 +349,7 @@ local function snapshot(src)
         if g then
             local tc = 0
             for _, t in pairs(GB.Territories) do if t.owner == r.name then tc = tc + 1 end end
-            ranking[#ranking + 1] = { name = r.name, label = g.label, color = g.color, rep = tonumber(r.rep) or 0, territories = tc, wars = won[r.name] or 0, online = #GB.onlineMembers(r.name), me = r.name == gang.name }
+            ranking[#ranking + 1] = { name = r.name, label = g.label, color = g.color, logo = g.settings and g.settings.logo, rep = tonumber(r.rep) or 0, territories = tc, wars = won[r.name] or 0, online = #GB.onlineMembers(r.name), me = r.name == gang.name }
         end
     end
 
@@ -378,15 +380,40 @@ local function snapshot(src)
     local W = T().Wars
     return {
         ok = true, now = now,
-        me = { name = gang.name, label = gang.label, color = gang.color, motd = gang.settings.motd or '', grade = grade, gradeLabel = (gang.grades[grade + 1] or {}).label or '', isBureau = bureau(gang, grade),
+        me = { name = gang.name, label = gang.label, color = gang.color, logo = gang.settings.logo, isBoss = grade >= (gang.boss_grade or 0), motd = gang.settings.motd or '', grade = grade, gradeLabel = (gang.grades[grade + 1] or {}).label or '', isBureau = bureau(gang, grade),
                rep = rep, money = seeMoney and money or nil, dirty = seeMoney and dirty or nil, members = GB.memberCount(gang.name), online = online, player = GB.playerName(xPlayer) },
         territories = terr, territoryCount = mine,
         quests = questList(gang.name), questsEnabled = T().Enabled,
         wars = { enabled = W.Enabled, current = current, incoming = incoming or false, history = history, rivals = rivals, targets = W.Targets, durations = W.Durations, maxStake = W.MaxStake, cooldown = W.Cooldown },
         ranking = ranking, objective = obj, logs = logs, news = news,
+        turf = { enabled = (Config.TurfWar or {}).Enabled and true or false, prep = (Config.TurfWar or {}).PrepSeconds, duration = (Config.TurfWar or {}).Duration, reasons = GB.TurfReasons },
+        tribute = { enabled = (Config.Tribute or {}).Enabled and true or false, current = GB.tributeState and GB.tributeState() or nil, history = GB.tributeHistory and GB.tributeHistory(10) or {} },
         resets = { daily = 86400 - now % 86400, weekly = (((8 - tonumber(os.date('!%w'))) % 7 == 0 and 7 or (8 - tonumber(os.date('!%w'))) % 7) * 86400) - now % 86400 },
     }
 end
+
+-- Déclarer la guerre à un territoire (bureau du gang)
+ESX.RegisterServerCallback('gangbuilder:tablet:turfDeclare', function(src, cb, id)
+    local gang, grade = GB.gangOf(src)
+    if not gang then return cb(fail('Tu n\'es dans aucun gang')) end
+    if not bureau(gang, grade) then return cb(fail('Réservé au bureau du gang')) end
+    local ok, why = GB.startTurfWar(src, tonumber(id), gang.name)
+    if not ok then return cb(fail(GB.TurfReasons[why] or 'Impossible')) end
+    cb({ ok = true })
+end)
+
+-- Logo du gang (chef) : adresse https d'une image, vide = retirer
+ESX.RegisterServerCallback('gangbuilder:tablet:setLogo', function(src, cb, url)
+    local gang, grade = GB.gangOf(src)
+    if not gang then return cb(fail('Tu n\'es dans aucun gang')) end
+    if grade < (gang.boss_grade or 0) then return cb(fail('Seul le chef peut changer le logo')) end
+    url = type(url) == 'string' and url:gsub('^%s+', ''):gsub('%s+$', '') or ''
+    if url ~= '' and (#url > 300 or not url:match('^https://[%w%-%._~:/%?#%[%]@!$&\'()*+,;=%%]+$')) then return cb(fail('Adresse invalide (https://… vers une image)')) end
+    gang.settings.logo = url ~= '' and url or nil
+    MySQL.update('UPDATE gangbuilder_gangs SET settings = ? WHERE name = ?', { json.encode(gang.settings), gang.name })
+    GB.log(gang.name, ESX.GetPlayerFromId(src), 'logo', url ~= '' and 'logo modifié' or 'logo retiré')
+    cb({ ok = true, logo = gang.settings.logo })
+end)
 
 ESX.RegisterServerCallback('gangbuilder:tablet:open', function(src, cb)
     if not T().Enabled then return cb(fail('La tablette est désactivée')) end

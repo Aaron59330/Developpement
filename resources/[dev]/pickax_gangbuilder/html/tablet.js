@@ -67,6 +67,13 @@ const Tablet = {
     const c = document.getElementById('tb-clock'); if (c) c.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   },
 
+  // pastille d'un gang : logo s'il y en a un, sinon initiales
+  badge(label, color, logo, size) {
+    const st = size ? `width:${size}px;height:${size}px;border-radius:${Math.round(size / 3.2)}px;font-size:${Math.round(size / 3)}px;` : '';
+    if (logo) return `<div class="tb-badge" style="${st}background:${esc(color || '#6b7280')} center/cover no-repeat url('${esc(logo)}')"></div>`;
+    return `<div class="tb-badge" style="${st}${color ? 'background:' + esc(color) : ''}">${esc(tbInit(label))}</div>`;
+  },
+
   cd(sec) { return `<span data-cd="${Math.max(0, Math.floor(sec || 0))}">${fmtUntil(sec || 0)}</span>`; },
 
   claimable() { return (this.d.quests || []).filter(q => !q.claimed && q.progress >= q.target).length; },
@@ -74,7 +81,7 @@ const Tablet = {
   render(scroll) {
     const d = this.d, me = d.me;
     const g = me.color || (window.PICKAX_ACCENT || '#fdc27d');
-    const nav = [['home', 'home', 'Accueil'], ['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['rank', 'trophy', 'Classement'], ['news', 'news', 'Actus'], ['log', 'log', 'Journal']];
+    const nav = [['home', 'home', 'Accueil'], ['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['trib', 'coins', 'Tributs'], ['rank', 'trophy', 'Classement'], ['news', 'news', 'Actus'], ['log', 'log', 'Journal']];
     const badge = { quest: this.claimable(), war: d.wars.incoming ? 1 : 0 };
     const inner = `
       <div class="tb-top"><div class="brand"><span class="dot"></span>${esc(me.label)}</div><span class="tb-chip inf">${esc(me.gradeLabel)}</span><div class="sp"></div>
@@ -100,14 +107,15 @@ const Tablet = {
     else if (w && w.status === 'active') alerts.push(`<div class="tb-row"><span class="tb-chip bad">En guerre</span><div class="g"><b>${esc(w.aLabel)} ${w.killsA} – ${w.killsB} ${esc(w.bLabel)}</b><small>Objectif ${w.target} kills · reste ${this.cd(w.left)}</small></div><button class="tb-btn" data-a="tbnav" data-v="war">Détails</button></div>`);
     if (this.claimable()) alerts.push(`<div class="tb-row"><span class="tb-chip ok">${this.claimable()} quête(s) terminée(s)</span><div class="g"><small>Récupère les récompenses pour la trésorerie du gang.</small></div><button class="tb-btn pri" data-a="tbnav" data-v="quest">Voir</button></div>`);
     if (o && o.active) alerts.push(`<div class="tb-row"><span class="tb-chip warn">Colis</span><div class="g"><b>${esc(o.label)}</b><small>${o.carried ? `Porté par ${esc(o.carrierGang || '?')}` : 'Au sol, à prendre'} · récompense ${money(o.reward)}</small></div><button class="tb-btn" data-a="gps" data-x="${o.x}" data-y="${o.y}">${ti('gps', 14)} GPS</button></div>`);
-    return `<div class="tb-hero"><div class="tb-badge">${esc(tbInit(me.label))}</div><div style="flex:1"><h1>${esc(me.label)}</h1><p>Bienvenue ${esc(me.player)} · ${esc(me.gradeLabel)}${me.motd ? ` · « ${esc(me.motd)} »` : ''}</p></div></div>
+    return `<div class="tb-hero">${this.badge(me.label, null, me.logo)}<div style="flex:1"><h1>${esc(me.label)}</h1><p>Bienvenue ${esc(me.player)} · ${esc(me.gradeLabel)}${me.motd ? ` · « ${esc(me.motd)} »` : ''}</p></div></div>
       <div class="tb-g4"><div class="tb-stat"><div class="l">Réputation</div><div class="v">${me.rep}</div><div class="s">${(d.ranking.findIndex(r => r.me) + 1) ? `#${d.ranking.findIndex(r => r.me) + 1} du classement` : ''}</div></div>
         <div class="tb-stat"><div class="l">Membres</div><div class="v">${me.members}</div><div class="s">${me.online.length} en ligne</div></div>
         <div class="tb-stat"><div class="l">Territoires</div><div class="v">${d.territoryCount}</div><div class="s">sur ${d.territories.length}</div></div>
         <div class="tb-stat"><div class="l">Trésorerie</div><div class="v" style="font-size:21px">${me.money != null ? money(me.money) : '—'}</div><div class="s">${me.dirty != null ? money(me.dirty) + ' sale' : 'réservé au bureau'}</div></div></div>
       <div class="tb-g2"><div class="tb-card"><h3>${ti('bolt', 15)} À surveiller</h3>${alerts.join('') || '<div class="tb-empty">Rien d\'urgent pour le moment.</div>'}</div>
         <div class="tb-card"><h3>${ti('users', 15)} En ligne (${me.online.length})</h3>${me.online.map(m => `<div class="tb-row"><div class="g"><b>${esc(m.name)}</b></div><span class="tb-chip">${esc(m.gradeLabel)}</span></div>`).join('') || '<div class="tb-empty">Personne.</div>'}</div></div>
-      <div class="tb-card"><h3>${ti('news', 15)} Dernières actualités</h3>${this.newsList(d.news.slice(0, 4))}</div>`;
+      <div class="tb-card"><h3>${ti('news', 15)} Dernières actualités</h3>${this.newsList(d.news.slice(0, 4))}</div>
+      ${me.isBoss ? `<div class="tb-card"><h3>${ti('flag', 15)} Logo du gang</h3><div class="tb-form"><label>Adresse https d'une image (carrée de préférence)<input data-sk="logo" value="${esc(this.form.logo != null ? this.form.logo : (me.logo || ''))}" maxlength="300" placeholder="https://…/logo.png"></label></div><div style="margin-top:12px;display:flex;gap:10px"><button class="tb-btn pri" data-a="logoSave">Enregistrer</button>${me.logo ? '<button class="tb-btn d" data-a="logoDel">Retirer</button>' : ''}</div></div>` : ''}`;
   },
 
   newsList(list) {
@@ -139,7 +147,33 @@ const Tablet = {
       ${t.protectedLeft > 0 ? `<span class="tb-chip inf">Protégé ${this.cd(t.protectedLeft)}</span>` : t.attacker ? `<span class="tb-chip bad">${esc(t.attacker)} ${Math.round(t.progress)} %</span>` : t.mine ? '<span class="tb-chip ok">À nous</span>' : t.blocked ? '<span class="tb-chip">Verrouillé</span>' : '<span class="tb-chip">Capturable</span>'}</div>`;
     return this.head('Territoires', `${d.territoryCount} contrôlé(s) sur ${list.length} · reste dans la zone pour la capturer`) +
       `<div class="tb-terr"><div class="tb-map"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg></div>
-        <div class="tb-card" style="overflow:auto;max-height:460px">${sel ? `<div class="tb-card" style="margin-bottom:12px;border-color:${esc(sel.ownerColor || '#444')}"><b style="font-size:16px">${esc(sel.label)}</b><div style="color:var(--muted);font-size:12.5px;margin:4px 0 10px">${sel.owner ? 'Propriétaire : ' + esc(sel.ownerLabel) : 'Aucun propriétaire'} · rayon ${Math.round(sel.radius)} m</div><div style="font-size:12.5px;margin-bottom:10px">Niveau <b>${sel.level}</b> / ${sel.maxLevel} · revenu <b>${money(sel.income)}</b> / ${sel.incomeEvery} min${sel.racket ? ` · racket ${sel.racket} %` : ''}${sel.blocked ? `<div style="color:var(--muted);margin-top:4px">${{ closed: 'Capture fermée à cette heure', nodef: 'Capture impossible : aucun défenseur connecté', cap: 'Limite de territoires atteinte pour votre gang' }[sel.blocked] || ''}</div>` : ''}</div>${sel.mine && sel.upgrade ? `<div class="tb-card" style="margin-bottom:10px"><div style="font-size:12.5px;margin-bottom:8px">Niveau ${sel.level + 1} : revenu ×${sel.upgrade.income}, capture ×${sel.upgrade.capture} plus lente, protection ×${sel.upgrade.protection}</div>${this.d.me.isBureau ? `<button class="tb-btn pri" data-a="tupg" data-v="${sel.id}">Améliorer (${money(sel.upgrade.cost)} · argent ${sel.upgrade.account})</button>` : '<small style="color:var(--muted)">Réservé au bureau du gang</small>'}</div>` : ''}<button class="tb-btn pri" data-a="gps" data-x="${sel.x}" data-y="${sel.y}">${ti('gps', 14)} Définir le GPS</button></div>` : ''}${list.map(row).join('')}</div></div>`;
+        <div class="tb-card" style="overflow:auto;max-height:460px">${sel ? `<div class="tb-card" style="margin-bottom:12px;border-color:${esc(sel.ownerColor || '#444')}"><b style="font-size:16px">${esc(sel.label)}</b><div style="color:var(--muted);font-size:12.5px;margin:4px 0 10px">${sel.owner ? 'Propriétaire : ' + esc(sel.ownerLabel) : 'Aucun propriétaire'} · rayon ${Math.round(sel.radius)} m</div><div style="font-size:12.5px;margin-bottom:10px">Niveau <b>${sel.level}</b> / ${sel.maxLevel} · revenu <b>${money(sel.income)}</b> / ${sel.incomeEvery} min${sel.racket ? ` · racket ${sel.racket} %` : ''}${sel.blocked ? `<div style="color:var(--muted);margin-top:4px">${{ closed: 'Capture fermée à cette heure', nodef: 'Capture impossible : aucun défenseur connecté', cap: 'Limite de territoires atteinte pour votre gang' }[sel.blocked] || ''}</div>` : ''}</div>${sel.mine && sel.upgrade ? `<div class="tb-card" style="margin-bottom:10px"><div style="font-size:12.5px;margin-bottom:8px">Niveau ${sel.level + 1} : revenu ×${sel.upgrade.income}, capture ×${sel.upgrade.capture} plus lente, protection ×${sel.upgrade.protection}</div>${this.d.me.isBureau ? `<button class="tb-btn pri" data-a="tupg" data-v="${sel.id}">Améliorer (${money(sel.upgrade.cost)} · argent ${sel.upgrade.account})</button>` : '<small style="color:var(--muted)">Réservé au bureau du gang</small>'}</div>` : ''}${this.turfBlock(sel)}<button class="tb-btn pri" data-a="gps" data-x="${sel.x}" data-y="${sel.y}">${ti('gps', 14)} Définir le GPS</button></div>` : ''}${list.map(row).join('')}</div></div>`;
+  },
+
+  // Guerre de zone : état de la dispute en cours ou bouton pour la déclarer
+  turfBlock(t) {
+    const d = this.d; if (!d.turf || !d.turf.enabled || t.mine) return '';
+    const c = t.conflict;
+    if (c) return `<div class="tb-card" style="margin-bottom:10px;border-color:rgba(248,113,113,.4)"><b>Guerre de zone</b><div style="font-size:12.5px;margin-top:6px">${esc(c.ownerLabel)} <b>${c.owner}</b> – <b>${c.intruder}</b> ${esc(c.intruderLabel)}</div><small style="color:var(--muted)">${c.prep > 0 ? `Début dans ${this.cd(c.prep)}` : `Reste ${this.cd(c.left)}`}</small></div>`;
+    if (!t.owner) return '';
+    const why = t.turf && !t.turf.can ? (d.turf.reasons || {})[t.turf.why] : '';
+    return `<div class="tb-card" style="margin-bottom:10px"><b>Guerre de zone</b><div style="font-size:12.5px;color:var(--muted);margin:4px 0 10px">Préparation ${Math.round(d.turf.prep / 60)} min, puis ${Math.round(d.turf.duration / 60)} min de dispute : chaque kill dans la zone rapporte 1 point.</div>
+      ${d.me.isBureau ? `<button class="tb-btn d" data-a="turf" data-v="${t.id}" ${t.turf && t.turf.can ? '' : 'disabled'}>${ti('war', 14)} Déclarer la guerre</button>${why ? `<div style="color:var(--muted);font-size:12px;margin-top:6px">${esc(why)}</div>` : ''}` : '<small style="color:var(--muted)">Réservé au bureau du gang</small>'}</div>`;
+  },
+
+  /* ───────── Tributs ───────── */
+  p_trib() {
+    const d = this.d, T = d.tribute, c = T && T.current;
+    if (!T || !T.enabled) return this.head('Tributs', 'Zones de tribut désactivées') + '<div class="tb-card tb-empty">Le serveur n\'utilise pas les zones de tribut.</div>';
+    let cur = '<div class="tb-card"><h3>' + ti('coins', 15) + ' Événement en cours</h3><div class="tb-empty">Aucune zone de tribut pour le moment. Un événement se lance régulièrement : sois prêt.</div></div>';
+    if (c) {
+      const fight = c.phase === 'fight', mine = c.winner === d.me.name;
+      cur = `<div class="tb-card" style="border-color:rgba(253,194,125,.45)"><h3>${ti('coins', 15)} ${fight ? 'Zone disputée' : 'Tribut à collecter'} · ${esc(c.label)}</h3>
+        <div class="tb-row"><span class="tb-chip ${fight ? 'warn' : mine ? 'ok' : 'inf'}">${fight ? 'Dispute' : mine ? 'Victoire' : 'Collecte'}</span><div class="g"><b>${fight ? 'Le gang avec le plus de survivants dans la zone gagne' : `${esc(c.winnerLabel)} remporte la zone${mine ? ' : allez collecter le tribut au commerce' : ''}`}</b><small>${fight ? 'Temps restant' : 'Temps pour collecter'} : ${this.cd(c.left)}</small></div><button class="tb-btn" data-a="gps" data-x="${(c.collect && !fight ? c.collect : c.coords).x}" data-y="${(c.collect && !fight ? c.collect : c.coords).y}">${ti('gps', 14)} GPS</button></div>
+        ${fight ? (c.counts || []).map(g => `<div class="tb-row"><div class="g"><b>${esc(g.label)}</b></div><span class="tb-chip">${g.count} vivant(s)</span></div>`).join('') || '<div class="tb-empty">Personne dans la zone.</div>' : ''}</div>`;
+    }
+    const hist = `<div class="tb-card"><h3>${ti('log', 15)} Derniers tributs</h3>${(T.history || []).map(h => `<div class="tb-row"><span class="tb-chip ${h.winner ? (h.winner === d.me.name ? 'ok' : 'inf') : ''}">${h.winner ? (h.winner === d.me.name ? 'Nous' : 'Rival') : 'Personne'}</span><div class="g"><b>${esc(h.zone)}</b><small>${h.winner ? `${esc(h.winnerLabel)} · ${h.collected ? 'collecté ' + money(h.reward) : 'non collecté'}` : 'Aucun vainqueur'} · ${tbTime(h.t)}</small></div></div>`).join('') || '<div class="tb-empty">Aucun tribut joué.</div>'}</div>`;
+    return this.head('Tributs', 'Dispute un commerce : le gang qui garde le plus de survivants collecte le tribut') + cur + hist;
   },
 
   /* ───────── Quêtes ───────── */
@@ -194,7 +228,7 @@ const Tablet = {
   p_rank() {
     const r = this.d.ranking;
     return this.head('Classement', 'Réputation des gangs de la ville') + `<div class="tb-card"><div class="tb-rank head"><span>#</span><span>Gang</span><span>Réputation</span><span>Territoires</span><span>Guerres</span><span>En ligne</span></div>
-      ${r.map((g, i) => `<div class="tb-rank ${g.me ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm"><i style="background:${esc(g.color)}"></i>${esc(g.label)}</span><b>${g.rep}</b><span>${g.territories}</span><span>${g.wars} gagnée(s)</span><span>${g.online}</span></div>`).join('')}</div>`;
+      ${r.map((g, i) => `<div class="tb-rank ${g.me ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm">${g.logo ? `<img class="tb-lg" src="${esc(g.logo)}">` : `<i style="background:${esc(g.color)}"></i>`}${esc(g.label)}</span><b>${g.rep}</b><span>${g.territories}</span><span>${g.wars} gagnée(s)</span><span>${g.online}</span></div>`).join('')}</div>`;
   },
 
   p_news() { return this.head('Actualités', 'Ce qui se passe entre les gangs') + `<div class="tb-card">${this.newsList(this.d.news)}</div>`; },
@@ -218,6 +252,12 @@ const Tablet = {
         const r = await rpc('tablet:warPropose', f.target, Number(f.kills), Number(f.minutes), Number(f.stake) || 0);
         if (done(r, 'Défi envoyé')) { f.target = ''; await this.refresh(); } return;
       }
+      case 'turf': {
+        if (!await confirmBox('Déclarer la guerre ?', `Les deux gangs sont prévenus. Préparation ${Math.round(this.d.turf.prep / 60)} min puis ${Math.round(this.d.turf.duration / 60)} min de dispute pour cette zone.`, 'Déclarer')) return;
+        const r = await rpc('tablet:turfDeclare', Number(el.dataset.v)); if (done(r, 'Guerre déclarée')) await this.refresh(); return;
+      }
+      case 'logoSave': { const r = await rpc('tablet:setLogo', String(this.form.logo != null ? this.form.logo : (this.d.me.logo || ''))); if (done(r, 'Logo enregistré')) { this.form.logo = null; await this.refresh(); } return; }
+      case 'logoDel': { const r = await rpc('tablet:setLogo', ''); if (done(r, 'Logo retiré')) { this.form.logo = null; await this.refresh(); } return; }
       case 'warYes': { const r = await rpc('tablet:warRespond', Number(el.dataset.id), true); if (done(r, 'Guerre acceptée')) await this.refresh(); return; }
       case 'warNo': { const r = await rpc('tablet:warRespond', Number(el.dataset.id), false); if (done(r, 'Fait')) await this.refresh(); return; }
     }

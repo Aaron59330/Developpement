@@ -135,6 +135,23 @@ Config.Conflicts = {
 -- Un colis apparaît dans une zone. Le premier gang qui le prend doit RESTER dans la zone `Hold` secondes avec le colis
 -- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
 -- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
+-- ── Guerre de zone déclarée : le bureau d'un gang déclare la guerre au propriétaire d'un territoire (tablette → Zones, ou /startturfwar <id>) ──
+-- Préparation (les deux camps sont prévenus et se placent), puis dispute : chaque kill entre les deux gangs dans la zone = 1 point. Le vainqueur gagne de la réputation ;
+-- si c'est l'attaquant (avec MinKillsToWin kills d'avance) et que le territoire peut changer de main (défenseurs, horaires, plafond), il le capture.
+Config.TurfWar = {
+    Enabled       = true,
+    Command       = 'startturfwar',
+    PrepSeconds   = 120,     -- préparation avant le début des points
+    Duration      = 600,     -- durée de la dispute (secondes)
+    MinAttackers  = 2,       -- membres connectés du gang attaquant requis
+    MinDefenders  = 1,       -- membres connectés du propriétaire requis
+    Cooldown      = 1800,    -- délai avant qu'un gang puisse redéclarer une guerre sur la même zone (secondes)
+    MinKillsToWin = 1,       -- kills d'avance minimum pour que l'attaquant l'emporte
+    RepWin        = 30,      -- réputation du gagnant
+    RepLoss       = 10,      -- réputation retirée au perdant
+    AllowProtected = false,  -- true : on peut déclarer la guerre à un territoire encore protégé
+}
+
 -- ── Zones de tribut : les gangs se disputent un commerce ; à la fin, le gang qui a le plus de membres VIVANTS dans la zone gagne le droit d'aller y collecter le tribut ──
 Config.Tribute = {
     Enabled         = true,

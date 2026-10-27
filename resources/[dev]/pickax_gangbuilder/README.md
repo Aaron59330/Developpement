@@ -131,3 +131,12 @@ Un commerce de la ville est disputé entre les gangs, puis le vainqueur va y col
 - Les commerces sont dans `Config.Tribute.Zones` (nom, libellé, centre, rayon, point de collecte, `reward` facultatif par commerce) : adapte les coordonnées à ta map.
 - Export serveur : `exports.pickax_gangbuilder:StartTribute('ammunation')`.
 - Tests hors jeu : `ROOT=. lua tools/tests/tribute_test.lua` (18 vérifications).
+
+## Guerre de zone déclarée, logo, page Tributs (complète les scripts de territoires du commerce)
+
+- **Guerre de zone (`Config.TurfWar`)** : le bureau d'un gang déclare la guerre au propriétaire d'un territoire — tablette → *Zones* → territoire → **Déclarer la guerre**, ou `/startturfwar <id du territoire>`.
+  Conditions vérifiées côté serveur : territoire avec propriétaire adverse, pas protégé (sauf `AllowProtected`), `MinAttackers` attaquants et `MinDefenders` défenseurs connectés, fenêtre horaire et plafond de territoires respectés, délai `Cooldown` entre deux déclarations sur la même zone.
+  Déroulé : les deux camps sont prévenus (alerte + zone qui clignote), **préparation** `PrepSeconds` (aucun point), puis **dispute** `Duration` : chaque kill entre les deux gangs dans la zone = 1 point. Gagnant : réputation (`RepWin`), perdant : `RepLoss` ; si l'attaquant gagne avec `MinKillsToWin` kills d'avance, il **capture** le territoire. Résultat dans les actus, le journal et les quêtes.
+- **Logo du gang** : le chef l'enregistre depuis la tablette (Accueil → *Logo du gang*, adresse https d'une image). Il s'affiche dans la tablette (accueil, classement).
+- **Page « Tributs »** de la tablette : zone de tribut en cours (survivants par gang, temps, GPS) et historique des derniers tributs (table `gangbuilder_tributes` créée automatiquement).
+- Tests hors jeu : `ROOT=. lua tools/tests/turfwar_test.lua` (15 vérifications), `tribute_test.lua` (18).

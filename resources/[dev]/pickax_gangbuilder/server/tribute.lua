@@ -6,6 +6,36 @@
 local Tr = nil   -- { zone, phase = 'fight' | 'collect', endsAt, total, presence = { [gang] = secondes }, counts = { [gang] = n }, winner, notifyAt }
 local nextAuto = 0
 
+-- Historique (table créée au démarrage ; sans base, tout continue de marcher sans historique)
+local historyOK = false
+CreateThread(function()
+    if not MySQL or not MySQL.ready then return end
+    MySQL.ready(function()
+        local ok = pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS gangbuilder_tributes (
+            id INT AUTO_INCREMENT PRIMARY KEY, zone VARCHAR(100) NOT NULL, winner VARCHAR(50) DEFAULT NULL, reward INT NOT NULL DEFAULT 0,
+            collected TINYINT(1) NOT NULL DEFAULT 0, created_at INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+        historyOK = ok
+    end)
+end)
+local function record(zone, winner)
+    if not historyOK then return nil end
+    local ok, id = pcall(MySQL.insert.await, 'INSERT INTO gangbuilder_tributes (zone, winner, reward, collected, created_at) VALUES (?, ?, 0, 0, ?)', { zone, winner, os.time() })
+    return ok and id or nil
+end
+local function recordCollect(id, reward)
+    if historyOK and id then MySQL.update('UPDATE gangbuilder_tributes SET collected = 1, reward = ? WHERE id = ?', { reward, id }) end
+end
+-- Derniers événements (tablette)
+function GB.tributeHistory(n)
+    if not historyOK then return {} end
+    local out = {}
+    for _, r in ipairs(MySQL.query.await('SELECT zone, winner, reward, collected, created_at FROM gangbuilder_tributes ORDER BY id DESC LIMIT ?', { n or 8 }) or {}) do
+        out[#out + 1] = { zone = r.zone, winner = r.winner, winnerLabel = r.winner and (GB.Gangs[r.winner] and GB.Gangs[r.winner].label or r.winner) or nil,
+            reward = tonumber(r.reward) or 0, collected = tonumber(r.collected) == 1, t = tonumber(r.created_at) or 0 }
+    end
+    return out
+end
+
 local function label(name) return GB.Gangs[name] and GB.Gangs[name].label or name end
 local function cfg() return Config.Tribute end
 
@@ -54,6 +84,8 @@ local function snapshot()
         winner = Tr.winner, winnerLabel = Tr.winner and label(Tr.winner) or nil, counts = list }
 end
 
+function GB.tributeState() return snapshot() end
+
 local function push()
     local snap = snapshot()
     everyone(function(src) TriggerClientEvent('gangbuilder:client:tribute', src, snap) end)
@@ -93,10 +125,12 @@ local function finishFight()
     if not winner then
         everyone(function(src) GB.notify(src, ('~y~Tribut~s~ : personne n\'a tenu ~b~%s~s~. Aucun tribut cette fois.'):format(Tr.zone.label)) end)
         if GB.news then GB.news(('Tribut de %s : aucun vainqueur.'):format(Tr.zone.label), 'tribute') end
+        record(Tr.zone.label, nil)
         push(); Tr = nil
         return
     end
     Tr.phase, Tr.winner, Tr.endsAt, Tr.total, Tr.collected = 'collect', winner, os.time() + C.CollectWindow, C.CollectWindow, false
+    Tr.rowId = record(Tr.zone.label, winner)
     everyone(function(src)
         local g = GB.PlayerGang[src]
         if g and g.name == winner then GB.notify(src, ('~g~Victoire~s~ ! Allez collecter le tribut chez ~b~%s~s~ (%d min).'):format(Tr.zone.label, math.ceil(C.CollectWindow / 60)))
@@ -125,6 +159,7 @@ RegisterNetEvent('gangbuilder:tribute:collect', function()
     local dx, dy, dz = p.x - c.x, p.y - c.y, p.z - c.z
     if dx * dx + dy * dy + dz * dz > (C.CollectDistance + 1.0) ^ 2 then return end
     Tr.collected = true
+    recordCollect(Tr.rowId, math.floor(tonumber(Tr.zone.reward or C.Reward) or 0))
     local reward = math.floor(tonumber(Tr.zone.reward or C.Reward) or 0)
     if reward > 0 then GB.treasuryAdd(g.name, C.RewardAccount, reward) end
     GB.addRep(g.name, C.RewardRep)
