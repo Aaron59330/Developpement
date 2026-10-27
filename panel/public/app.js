@@ -3,6 +3,8 @@
 const $app = document.getElementById('app');
 // 2 thèmes du panel : « sombre » (d'origine) et « clair » ; choix mémorisé dans ce navigateur
 const getTheme = () => { try { return localStorage.getItem('aero_theme') === 'clair' ? 'clair' : 'sombre'; } catch (e) { return 'sombre'; } };
+const getDesign = () => document.documentElement.getAttribute('data-design') === 'v1' ? 'v1' : 'v2';
+const setDesign = d => { document.documentElement.setAttribute('data-design', d); try { localStorage.setItem('aero_design', d); } catch (e) {} };
 const setTheme = t => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('aero_theme', t); } catch (e) {} };
 setTheme(getTheme());
 function el(tag, attrs, ...kids) {
@@ -78,7 +80,7 @@ function authView(startMode) {
 function shell(content) {
   const [page] = route(); const isAdmin = state.user.role === 'admin'; const srv = curServer(); const lonely = !isAdmin && !state.servers.length;
   const item = (id, label, icon) => el('a', { class: 'nav' + (page === id ? ' on' : ''), href: '#/' + id }, svg(ICON[icon]), el('span', {}, label));
-  const bottom = el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; state.servers = []; location.hash = '#/'; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')')));
+  const bottom = el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setDesign(getDesign() === 'v2' ? 'v1' : 'v2'); render(); } }, svg('M4 5h16v14H4zM9 5v14'), el('span', {}, getDesign() === 'v2' ? 'Design : Nouveau → ancien' : 'Design : Ancien → nouveau')), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; state.servers = []; location.hash = '#/'; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')')));
   const side = lonely ? el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }), el('div', { class: 'sec' }, 'Mon espace'), item('offers', 'Boutique', 'cart'), item('patchnotes', 'Patch notes', 'book'), bottom) : el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }),
     state.servers.length ? el('select', { onchange: e => setSid(+e.target.value), style: 'margin-bottom:6px' }, state.servers.map(s => el('option', { value: s.id, selected: s.id === (srv && srv.id) }, s.server_name + (s.online ? '' : ' (hors ligne)')))) : null,
     el('div', { class: 'sec' }, 'Général'), item('overview', 'Dashboard', 'home'), item('activity', 'Journal d’activités', 'list'), item('stats', 'Statistiques', 'chart'),
@@ -88,7 +90,10 @@ function shell(content) {
     el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'), isAdmin ? null : item('offers', 'Offres & renouvellement', 'tag'),
     isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-orders', 'Commandes', 'cart'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
     bottom);
-  return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, content));
+  const on = side.querySelector('.nav.on'); let sec = '', prev = on;
+  if (on) { for (let n = on.previousElementSibling; n; n = n.previousElementSibling) { if (n.classList.contains('sec')) { sec = n.textContent; break; } } }
+  const crumb = el('div', { class: 'crumb' }, sec ? el('span', { class: 'c1' }, sec) : null, sec ? el('span', { class: 'sl' }, '/') : null, el('b', {}, on ? on.textContent : 'AERO'), el('div', { class: 'grow' }), el('div', { class: 'who' }, el('i', {}), el('span', {}, (srv && srv.server_name) || state.user.username || '')));
+  return el('div', { class: 'layout' }, side, el('main', { class: 'main' }, crumb, el('div', { class: 'page' }, content)));
 }
 const needServer = () => {
   const box = el('div', { class: 'card empty' }, el('h2', {}, 'Ton compte est prêt'), el('p', {}, 'Il te manque encore ta licence : c’est elle qui relie ton serveur FiveM à ton panel personnel.'));
