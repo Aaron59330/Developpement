@@ -19,7 +19,7 @@ body.lux {
   font-family: var(--lx-font);
 }
 /* fond du jeu légèrement assombri et flouté derrière l'interface */
-body.lux #root:not(.hidden) { background: radial-gradient(ellipse at 50% 40%, rgba(0, 0, 0, .15), rgba(0, 0, 0, .55)); backdrop-filter: blur(4px) saturate(.9); }
+body.lux #root:not(.hidden) { background: transparent; }
 
 /* ── Coque ── */
 body.lux .shell, body.lux .panel {

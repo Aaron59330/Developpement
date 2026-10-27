@@ -17,9 +17,27 @@ local PRESETS = {
 local GROUP = { tshirt = 'top', torso = 'top', decals = 'top', arms = 'top', bproof = 'top', chain = 'top', bags = 'top', watches = 'top', bracelets = 'top',
     pants = 'legs', shoes = 'feet', helmet = 'head', glasses = 'head', mask = 'head', ears = 'head', hair = 'head', beard = 'head', makeup = 'head', lipstick = 'head', blush = 'head' }
 
+-- distance libre (murs, meubles) entre le sujet et la caméra, dans la direction dir : évite une caméra dans un mur (écran noir)
+local function freeDist(target, dir, d, z)
+    local to = vector3(target.x + dir.x * d, target.y + dir.y * d, z)
+    local h = StartExpensiveSynchronousShapeTestLosProbe(target.x, target.y, z, to.x, to.y, to.z, 1 + 16, PlayerPedId(), 4)
+    local _, hit, pos = GetShapeTestResult(h)
+    if hit == 1 and pos then return math.max(0.0, #(vector3(pos.x, pos.y, pos.z) - vector3(target.x, target.y, z)) - 0.2) end
+    return d
+end
+
 local function camPoint(c, key)
     local p = PRESETS[key] or PRESETS.body
-    return vector3(c.base.x + c.fwd.x * p.d, c.base.y + c.fwd.y * p.d, c.base.z + p.z), vector3(c.base.x, c.base.y, c.base.z + p.t)
+    local target = vector3(c.base.x, c.base.y, c.base.z + p.t)
+    local best, bestD = c.fwd, -1.0
+    local dirs = { c.fwd, vector3(c.fwd.y, -c.fwd.x, 0.0), vector3(-c.fwd.y, c.fwd.x, 0.0), vector3(-c.fwd.x, -c.fwd.y, 0.0) }
+    for i, dir in ipairs(dirs) do
+        local fd = freeDist(target, dir, p.d, c.base.z + p.z)
+        if fd >= p.d * 0.9 then best, bestD = dir, p.d break end               -- côté dégagé (le devant en priorité)
+        if fd > bestD then best, bestD = dir, fd end
+    end
+    local d = math.max(0.45, math.min(p.d, bestD))
+    return vector3(c.base.x + best.x * d, c.base.y + best.y * d, c.base.z + p.z), target
 end
 
 function CabinCamera(key)

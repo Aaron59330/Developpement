@@ -17,7 +17,7 @@ body.hx {
   --line: rgba(255, 255, 255, .08); --line-2: rgba(var(--hx-rgb), .3);
   --text: #f4f4f5; --text-2: #c9c9ce; --muted: #7d7d85;
 }
-body.hx #root:not(.hidden) { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, .1), rgba(0, 0, 0, .6)); backdrop-filter: blur(3px); }
+body.hx #root:not(.hidden) { background: transparent; }   /* pas de voile noir/flou derrière les menus */
 
 /* ── Coque : panneau néon ── */
 body.hx .shell, body.hx .panel {
