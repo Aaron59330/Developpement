@@ -187,7 +187,7 @@ local POINTS = {
     drug = {
         harvest = merge(DRUGBASE, { harvest = obj({ item = ITEM, min = { 'n', 1, 1000, 1 }, max = { 'n', 1, 1000, 3 }, time = { 'n', 1, 600, 6 }, anim = ANIM, tool = TOOL,
             cooldown = { 'n', 0, 3600, 10 }, maxUses = { 'n', 0, 10000, 0 }, regen = { 'n', 10, 86400, 300 }, plant = PLANT }) }),
-        sell = merge(DRUGBASE, { reveal = obj({ enabled = { 'b', false }, item = ITEM }), sell = obj({ currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' }, maxPerHour = { 'n', 0, 100000, 0 },
+        sell = merge(DRUGBASE, { reveal = obj({ enabled = { 'b', false }, item = ITEM }), sell = obj({ enabled = { 'b', true }, currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' }, maxPerHour = { 'n', 0, 100000, 0 },
             items = { 'a', obj({ item = ITEM, min = { 'n', 0, 100000000, 1 }, max = { 'n', 0, 100000000, 1 } }), Config.Max.Items, function(x) return x.item ~= '' end } }) }),
         launder = merge(DRUGBASE, { reveal = obj({ enabled = { 'b', false }, item = ITEM }), launder = obj({ rate = { 'n', 1, 100, 70 }, min = { 'n', 0, 100000000, 0 }, max = { 'n', 0, 100000000, 100000 }, from = ITEM,
             to = { 'e', { 'money', 'bank', 'black_money' }, 'money' }, maxPerHour = { 'n', 0, 1000000000, 0 } }) }),
@@ -315,7 +315,7 @@ ESX.RegisterServerCallback('illegalbuilder:catalog', function(src, cb)
     local anims = {}
     for _, a in ipairs(Config.Animations) do anims[#anims + 1] = { id = a.id, label = a.label } end
     cb({ ok = true, types = types, drugs = Config.Drugs, drugOrder = Config.DrugOrder, items = IB.itemCatalog(), jobs = jobList(), jobs2 = jobs2List(), weapons = {}, payments = pay, scenarios = Config.PedScenarios, animations = anims, jobcenter = {},
-        vehicleTypes = Config.VehicleTypes, inventory = IB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent,
+        vehicleTypes = Config.VehicleTypes, inventory = IB.inventory(), imagePath = Config.ImagePath, currency = Config.Currency, accent = Config.UI.Accent, pedSales = Config.PedSales.Enabled ~= false,
         policeJobs = Config.PoliceJobs, limits = { points = Config.Max.Points, fleet = Config.Max.Fleet, recipes = Config.Max.Recipes } })
 end)
 
@@ -447,6 +447,15 @@ ESX.RegisterServerCallback('illegalbuilder:logs', function(src, cb, id)
         rows = MySQL.query.await('SELECT entity_label, type, player_name, action, detail, amount, UNIX_TIMESTAMP(created_at) AS t FROM illegalbuilder_logs ORDER BY id DESC LIMIT 60')
     end
     cb({ ok = true, logs = rows or {} })
+end)
+
+ESX.RegisterServerCallback('illegalbuilder:settings:pedSales', function(src, cb, on)
+    if not admin(src, cb) then return end
+    on = on == true
+    Config.PedSales.Enabled = on
+    MySQL.update.await("INSERT INTO illegalbuilder_settings (k, v) VALUES ('pedsales', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)", { on and '1' or '0' })
+    IB.syncAll()
+    cb({ ok = true, enabled = on })
 end)
 
 ESX.RegisterServerCallback('illegalbuilder:settings:save', function(src, cb, accent)

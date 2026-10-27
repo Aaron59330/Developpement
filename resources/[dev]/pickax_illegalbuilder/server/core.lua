@@ -177,6 +177,8 @@ end
 
 -- ─────────────────────────────── Réglages (apparence) ───────────────────────────────
 function IB.loadSettings()
+    local ps = MySQL.scalar.await("SELECT v FROM illegalbuilder_settings WHERE k = 'pedsales'")
+    if ps ~= nil then Config.PedSales.Enabled = tostring(ps) ~= '0' end
     local r = MySQL.scalar.await("SELECT v FROM illegalbuilder_settings WHERE k = 'accent'")
     local acc = IB.decode(r, nil)
     if type(acc) == 'table' and #acc == 3 then Config.UI.Accent = { tonumber(acc[1]) or 239, tonumber(acc[2]) or 68, tonumber(acc[3]) or 68 } end
@@ -386,10 +388,15 @@ function IB.canSee(e, xPlayer)
     return true
 end
 
+-- Un dealer est-il utilisable ? (interrupteur général + interrupteur du point)
+function IB.sellEnabled(p)
+    return Config.PedSales.Enabled ~= false and not (p and p.sell and p.sell.enabled == false)
+end
+
 function IB.publicEntity(e)
     local s, pts = e.settings, {}
     for i, p in ipairs(e.points) do
-        if p.coords and p.coords.x and p.kind ~= 'process' then   -- le traitement se fait désormais dans les laboratoires (propriétés, Job Builder)
+        if p.coords and p.coords.x and p.kind ~= 'process' and (p.kind ~= 'sell' or IB.sellEnabled(p)) then   -- le traitement se fait désormais dans les laboratoires (propriétés, Job Builder)
             pts[#pts + 1] = { i = i, kind = p.kind or 'main', reveal = IB.pointRevealItem and IB.pointRevealItem(p) or nil, outfit = (p.outfit and p.outfit.enabled) and p.outfit or nil,
                 plant = (p.harvest and p.harvest.plant and p.harvest.plant.enabled) and p.harvest.plant or nil, label = p.label, coords = p.coords, store = p.store, ret = p.ret, inside = p.inside,
                 spawns = p.spawns, ped = p.ped, blip = p.blip, color = p.color, color2 = p.color2, doors = p.doors, useKey = p.useKey, showMarker = p.showMarker, showText = p.showText, desc = p.desc, zone = (p.kind == 'zone') and { radius = p.radius, reviveEnabled = p.reviveEnabled, reviveDelay = p.reviveDelay, giveWeapons = p.giveWeapons, removeOnExit = p.removeOnExit,

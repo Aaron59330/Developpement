@@ -433,7 +433,7 @@ end)
 
 -- ─────────────────────────────── RPC NUI -> client/serveur ───────────────────────────────
 -- Callbacks serveur autorisés (nom JS -> 'illegalbuilder:<nom>')
-for _, n in ipairs({ 'catalog', 'list', 'get', 'create', 'save', 'delete', 'duplicate', 'toggle', 'resetStats', 'logs', 'settings:save',
+for _, n in ipairs({ 'catalog', 'list', 'get', 'create', 'save', 'delete', 'duplicate', 'toggle', 'resetStats', 'logs', 'settings:save', 'settings:pedSales',
     'drug:processInfo', 'drug:sellInfo', 'drug:sell', 'drug:launderInfo', 'drug:launder' }) do NuiRemote[n] = true end
 
 NuiLocal.close = function(_, cb) CloseUI() cb({}) end

@@ -31,3 +31,8 @@ Groupes ESX `_dev`, `admin`, `superadmin` (`Config.AllowedGroups`) ou permission
 - La tablette est en vente chez le marchand des tablettes (Shop Builder, catégorie *Accès*, 30 000 $), avec les tablettes Go Fast et blanchiment. Le PNJ (modèle, animation, position) se règle sur le point comme pour les autres points.
 - Les nouveaux dealers créés depuis le builder ont la tablette activée par défaut ; les dealers déjà créés restent visibles par tous tant que tu n'actives pas l'option.
 - Items : `dealer_tablet` est déclaré dans `ox_inventory/data/items.lua`.
+
+## Activer / désactiver la vente de drogue aux PNJ
+- **Interrupteur général** : builder illégal → *Paramètres* → **Vente de drogue aux PNJ** (case « Activée », enregistrée en base, sans redémarrage). Désactivé : tous les dealers à PNJ disparaissent (PNJ et blips retirés chez tous les joueurs) et le serveur refuse toute vente. Valeur par défaut au premier démarrage : `Config.PedSales.Enabled`.
+- **Par dealer** : dans l'éditeur du point, case **Vente active (ce dealer)** (activée par défaut) ; la vente peut ainsi être coupée sur un seul dealer.
+- Cumulable avec la tablette vendeur (section précédente).

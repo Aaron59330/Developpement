@@ -466,7 +466,7 @@ const NEWP = {
   pump: () => ({ kind: 'pump', label: 'Pompe', blip: false, ped: PED0() }),
   harvest: () => ({ kind: 'harvest', label: 'Point de récolte', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, harvest: { item: '', min: 1, max: 3, time: 6, anim: 'harvest', tool: TOOL0(), cooldown: 10, maxUses: 0, regen: 300 } }),
   process: () => ({ kind: 'process', label: 'Laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, recipes: [NEWROW.recipe()] }),
-  sell: () => ({ kind: 'sell', label: 'Dealer', reveal: { enabled: true, item: 'dealer_tablet' }, blip: false, ped: { enabled: true, model: 'g_m_y_mexgoon_01', scenario: 'WORLD_HUMAN_DRUG_DEALER' }, access: ACC0(), copsRequired: 0, alertChance: 5, sell: { currency: 'black_money', maxPerHour: 0, items: [NEWROW.sellitem()] } }),
+  sell: () => ({ kind: 'sell', label: 'Dealer', reveal: { enabled: true, item: 'dealer_tablet' }, blip: false, ped: { enabled: true, model: 'g_m_y_mexgoon_01', scenario: 'WORLD_HUMAN_DRUG_DEALER' }, access: ACC0(), copsRequired: 0, alertChance: 5, sell: { enabled: true, currency: 'black_money', maxPerHour: 0, items: [NEWROW.sellitem()] } }),
   launder: () => ({ kind: 'launder', label: 'Blanchiment', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, launder: { rate: 70, min: 500, max: 50000, from: 'black_money', to: 'money', maxPerHour: 0 } }),
   door: () => ({ kind: 'door', label: 'Entrée du laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0 }),
   clerk: () => ({ kind: 'clerk', label: 'Vendeur', blip: false, ped: { enabled: true, model: 'mp_m_shopkeep_01', scenario: 'WORLD_HUMAN_STAND_IMPATIENT' } }),
@@ -580,6 +580,8 @@ const Builder = {
         <div class="lbl" style="margin-bottom:10px">Couleur d'accentuation (tous les joueurs)</div>
         <div class="row wrap">${SWATCHES.map(s => `<button class="swatch-pick ${s.join() === c.join() ? 'on' : ''}" style="background:rgb(${s.join(',')})" data-a="swatch" data-v="${s.join(',')}"></button>`).join('')}
           <input type="color" data-path="__accent" value="${hex}" style="width:60px"><span class="spacer"></span><button class="primary" data-a="saveAccent">Enregistrer</button></div></div>
+      <div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Vente de drogue aux PNJ</div><label class="chk"><input type="checkbox" data-a="togglePedSales" ${this.cat.pedSales !== false ? 'checked' : ''}> Activée</label></div>
+        <div class="hint">Interrupteur général : désactivé, tous les dealers à PNJ disparaissent et plus aucune vente n'est possible. Chaque dealer a aussi son propre interrupteur « Vente active » dans l'éditeur du point.</div></div>
       <div class="card"><div class="card-h"><div class="t">${ic('box', 17)} Système</div></div>
         <div class="kv"><span>Inventaire détecté</span><span>${esc(this.cat.inventory === 'ox' ? 'ox_inventory' : 'ESX (inventaire classique)')}</span></div>
         <div class="kv"><span>Items dans le catalogue</span><span>${this.cat.items.length}</span></div>
@@ -1057,6 +1059,7 @@ const Builder = {
     if (k === 'sell') return this.drugPicker(base, p) + `<div class="card"><div class="card-h"><div class="t">${ic('tablet', 17)} Tablette vendeur</div>${this.fC('Tablette obligatoire', `${base}.reveal.enabled`, { r: 1 })}</div>
       ${this.v(`${base}.reveal.enabled`) ? `<div class="grid2">${this.fItem('Item de la tablette', `${base}.reveal.item`)}</div><div class="hint mt-s">Sans cet item, le joueur ne voit pas ce dealer (le PNJ n'apparaît pas) et ne peut pas lui vendre. Avec l'item, le dealer apparaît sur sa carte. Par défaut : <code>dealer_tablet</code> (en vente chez le marchand, avec les tablettes Go Fast et blanchiment). Le PNJ se règle dans l'onglet du point.</div>` : '<div class="hint">Désactivée : dealer visible par tous.</div>'}</div>
       <div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
+      <div class="mb-s">${this.fC('Vente active (ce dealer)', `${base}.sell.enabled`)}</div>
       <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
       <div class="mt">${this.listEditor(`${base}.sell.items`, [{ key: 'item', label: 'Item acheté', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Prix min', kind: 'num', w: '110px' }, { key: 'max', label: 'Prix max', kind: 'num', w: '110px' }], 'sellitem', 'Ajouter un item')}</div>
       <div class="hint mt-s">Le prix unitaire est tiré au hasard entre min et max à chaque vente.</div></div>`;
@@ -1226,6 +1229,11 @@ const Builder = {
       case 'bbPreview': { await rpc('previewMarker', Object.assign({}, getPath(this.cur, v), { color: this.cur.settings.color })); toast('Aperçu affiché devant toi (8 s)'); return; }
       case 'colorReset': this.delPath('settings.color'); this.markDirty(); return this.render();
       case 'swatch': this.accentDraft = v.split(',').map(Number); applyTheme(this.accentDraft); return this.render();
+      case 'togglePedSales': {
+        const r = await rpc('settings:pedSales', !!el.checked);
+        if (!r || !r.ok) { el.checked = !el.checked; return toast((r && r.error) || 'Erreur', 'err'); }
+        this.cat.pedSales = r.enabled; return toast(r.enabled ? 'Vente aux PNJ activée' : 'Vente aux PNJ désactivée', 'ok');
+      }
       case 'saveAccent': {
         const r = await rpc('settings:save', this.accentDraft);
         if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');

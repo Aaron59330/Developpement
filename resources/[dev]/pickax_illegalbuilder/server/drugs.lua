@@ -15,6 +15,7 @@ local function resolve(src, eid, pi, kind, skipCops)
     local idx = tonumber(pi) or 0
     local p = e.points[idx]
     if not p or p.kind ~= kind or not p.coords or not IB.near(src, p.coords, 4.0) then return nil, 'Trop loin' end
+    if kind == 'sell' and not IB.sellEnabled(p) then return nil, 'La vente de drogue à ce dealer est désactivée' end
     local ok, err = IB.hasAccess(xPlayer, p.access)
     if not ok then return nil, err end
     local need = IB.pointRevealItem(p)

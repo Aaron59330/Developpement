@@ -56,6 +56,7 @@ Config.Payments = {
 local PK_MK = PickaxTheme and PickaxTheme.marker
 Config.Marker = PK_MK and { type = PK_MK.type, color = { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] }, alpha = PK_MK.alpha, scale = { x = PK_MK.scale.x, y = PK_MK.scale.y, z = PK_MK.scale.z }, offset = -0.95 }
     or { type = 23, color = { 253, 194, 125 }, alpha = 150, scale = { x = 1.0, y = 1.0, z = 0.5 }, offset = -0.95 }
+Config.PedSales = { Enabled = true }   -- vente de drogue aux PNJ (dealers) : interrupteur général, modifiable en jeu (Paramètres → Vente aux PNJ)
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────
