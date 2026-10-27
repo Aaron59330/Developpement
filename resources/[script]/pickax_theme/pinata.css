@@ -165,3 +165,29 @@ html[data-design="pinata"] body.hx input, html[data-design="pinata"] body.hx sel
 #chwrap[data-style="pinata"] .ch-item.act { color: #fff; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .09); }
 #chwrap[data-style="pinata"] .ch-item.act .go, #chwrap[data-style="pinata"] .ch-item.act small { color: #fff; }
 #chwrap[data-style="pinata"] .ch-item b { text-transform: none; font-weight: 600; letter-spacing: 0; font-style: normal; }
+
+/* ───────── Builders (modèle commun : menu à gauche, cartes, statistiques) — tout en phrases, sans italique ni lueur ───────── */
+html[data-design="pinata"] body.hx, html[data-design="pinata"] body.hx * { text-transform: none !important; font-style: normal !important; text-shadow: none !important; }
+html[data-design="pinata"] body.hx h1, html[data-design="pinata"] body.hx h2, html[data-design="pinata"] body.hx h3 { font-weight: 600; letter-spacing: -.015em; }
+html[data-design="pinata"] body.hx h1 { font-size: 26px; }
+html[data-design="pinata"] body.hx .eyebrow, html[data-design="pinata"] body.hx .nav-label, html[data-design="pinata"] body.hx .bb-lbl, html[data-design="pinata"] body.hx .stat .k, html[data-design="pinata"] body.hx .pname { letter-spacing: 0; font-weight: 500; color: var(--pi-mut); }
+html[data-design="pinata"] body.hx .eyebrow::before, html[data-design="pinata"] body.hx .eyebrow::after { display: none; }
+html[data-design="pinata"] body.hx .nav-label { font-size: 12.5px; }
+html[data-design="pinata"] body.hx .nav-item { border-radius: 12px; letter-spacing: 0; font-weight: 500; transform: none; clip-path: none; box-shadow: none; }
+html[data-design="pinata"] body.hx .nav-item::before { display: none; }
+html[data-design="pinata"] body.hx .nav-item.active { background: rgba(255, 255, 255, .09); color: #fff; border: 1px solid rgba(255, 255, 255, .14); box-shadow: none; }
+html[data-design="pinata"] body.hx .nav-item.active svg { color: var(--pi-acc); }
+html[data-design="pinata"] body.hx .nav-item .count { letter-spacing: 0; }
+html[data-design="pinata"] body.hx .stat .v, html[data-design="pinata"] body.hx .v { font-weight: 600; letter-spacing: -.02em; }
+html[data-design="pinata"] body.hx .stat, html[data-design="pinata"] body.hx .card, html[data-design="pinata"] body.hx .panel-card { border-radius: 14px; border: 1px solid var(--pi-line); background: rgba(255, 255, 255, .03); box-shadow: none; clip-path: none; }
+html[data-design="pinata"] body.hx .stat::before, html[data-design="pinata"] body.hx .card::before { display: none; }
+html[data-design="pinata"] body.hx .close, html[data-design="pinata"] body.hx .x { border-radius: 10px; }
+html[data-design="pinata"] body.hx .side { background: transparent; border-right: 1px solid var(--pi-line); }
+html[data-design="pinata"] body.hx .brand, html[data-design="pinata"] body.hx .logo-box { border-radius: 14px; border: 1px solid var(--pi-line); background: rgba(255, 255, 255, .03); box-shadow: none; }
+html[data-design="pinata"] body.hx button:not(.primary):not(.pri) { border-radius: 10px; }
+html[data-design="pinata"] body.hx .tab.active, html[data-design="pinata"] body.hx .hx-tab.active, html[data-design="pinata"] body.hx .seg button.active { color: #fff; }
+html[data-design="pinata"] body.hx .profile { background: rgba(255, 255, 255, .03); border: 1px solid var(--pi-line); box-shadow: none; }
+html[data-design="pinata"] body.hx .head p { color: var(--pi-mut); }
+/* une seule couleur pour les builders : les accents (onglets actifs, bordures, focus…) passent en gris très clair, comme les boutons principaux */
+html[data-design="pinata"] body.hx, html[data-design="pinata"] body.hx #root, html[data-design="pinata"] body.hx .shell, html[data-design="pinata"] body.hx [style*="--accent"] { --hx-rgb: 236, 236, 239; --accent: #ececef; --accent-rgb: 236, 236, 239; }
+html[data-design="pinata"] body.hx .shell::before, html[data-design="pinata"] body.hx .shell::after, html[data-design="pinata"] body.hx .panel::before, html[data-design="pinata"] body.hx .panel::after { display: none; }
