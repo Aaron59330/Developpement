@@ -167,6 +167,19 @@ local function use(q)
     busy = true
     ESX.TriggerServerCallback('jobbuilder:lab:begin', function(res)
         if not res or not res.ok then busy = false return JBNotify('~r~' .. ((res and res.error) or 'Impossible')) end
+        if res.experience and LabExperience then
+            -- laboratoire interactif : étapes jouées à la souris, caméra sur la table
+            CreateThread(function()
+                local results = LabExperience(q, res.session)
+                if not results then TriggerServerEvent('jobbuilder:lab:cancel') busy = false return end
+                if z and not outfitOK(z.outfit) then JBNotify('~r~Tenue retirée : action annulée.') TriggerServerEvent('jobbuilder:lab:cancel') busy = false return end
+                ESX.TriggerServerCallback('jobbuilder:lab:finishExp', function(r)
+                    busy = false
+                    if r and r.ok then JBNotify(r.message or 'Terminé.') else JBNotify('~r~' .. ((r and r.error) or 'Erreur')) end
+                end, results)
+            end)
+            return
+        end
         CreateThread(function()
             local done = progress(res.label, res.seconds, SCEN[res.sub] or 'WORLD_HUMAN_CLIPBOARD')
             if done and z and not outfitOK(z.outfit) then done = false JBNotify('~r~Tenue retirée : action annulée.') end

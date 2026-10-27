@@ -228,6 +228,17 @@ ESX.RegisterServerCallback('jobbuilder:lab:begin', function(src, cb, id)
         local have = itemCount(src, d.raw)
         local batches = math.min(L.BatchMax, math.floor(have / d.recipe.count))
         if batches < 1 then return cb(fail(('Il te faut %d × %s'):format(d.recipe.count, d.raw))) end
+        -- Laboratoire interactif : une suite d'étapes jouées à la souris remplace la barre de progression
+        local X, tpl = L.Experience, L.Experience and L.Experience.Templates and L.Experience.Templates[q.drug]
+        if X and X.Enabled and tpl and tpl.steps and #tpl.steps > 0 then
+            local iname = L.Experience.ItemLabels and L.Experience.ItemLabels[d.raw]
+            local ok, items = pcall(function() return exports.ox_inventory:Items() end)
+            local label = iname or (ok and items and items[d.raw] and items[d.raw].label) or d.raw
+            Pending[src] = { id = q.id, pid = p.id, sub = 'process', exp = true, batches = batches, nsteps = #tpl.steps,
+                ready = GetGameTimer() + LabExp.minMs(tpl.steps, X), expires = GetGameTimer() + 25 * 60000 }
+            return cb({ ok = true, experience = true, session = { lab = 'Laboratoire', title = tpl.title or d.label, batches = batches, steps = LabExp.publicSteps(tpl.steps),
+                inventory = { { label = label, sub = ('Lots : ×%d'):format(batches), count = have, icon = d.raw } }, cam = X.Cam } })
+        end
         sub, secs, label = 'process', d.recipe.time * batches, ('%s ×%d'):format(d.recipe.label, batches)
         Pending[src] = { id = q.id, pid = p.id, sub = sub, ready = GetGameTimer() + math.floor(secs * 1000 * L.Grace), expires = GetGameTimer() + secs * 1000 + 60000, batches = batches }
         return cb({ ok = true, seconds = secs, label = label, sub = sub })
@@ -275,6 +286,29 @@ ESX.RegisterServerCallback('jobbuilder:lab:finish', function(src, cb)
         return cb({ ok = true, message = ('Fabrication terminée : %d lot(s)%s.'):format(made, failed > 0 and (', ' .. failed .. ' raté(s)') or '') })
     end
     cb(fail('Action inconnue'))
+end)
+
+-- Fin d'un laboratoire interactif : le client envoie le résultat de chaque étape ; le serveur contrôle la durée, calcule la qualité, retire les ingrédients et remet les pochons
+ESX.RegisterServerCallback('jobbuilder:lab:finishExp', function(src, cb, results)
+    local a = Pending[src]
+    Pending[src] = nil
+    if not a or not a.exp or GetGameTimer() < a.ready or GetGameTimer() > a.expires then return cb(fail('Action invalide')) end
+    local x, p, err = ctx(src, false)
+    if not x or p.id ~= a.pid then return cb(fail(err or 'Erreur')) end
+    local q = find(p.id, a.id)
+    if not q or not near(src, q, 8.0) then return cb(fail('Trop loin')) end
+    local d = L.Drugs[q.drug]
+    local ok, quality = LabExp.validate(results, a.nsteps)
+    if not ok then return cb(fail(quality)) end
+    local need = d.recipe.count * a.batches
+    if itemCount(src, d.raw) < need then return cb(fail('Ingrédients manquants')) end
+    local made, failed, bonus = LabExp.outcome(quality, a.batches, d.recipe.fail, L.Experience)
+    local give = made + bonus
+    if give > 0 and not exports.ox_inventory:CanCarryItem(src, d.pooch, give) then return cb(fail('Tu ne peux pas porter plus.')) end
+    exports.ox_inventory:RemoveItem(src, d.raw, need)
+    local pct = math.floor(quality * 100 + 0.5)
+    if give > 0 then exports.ox_inventory:AddItem(src, d.pooch, give, { purity = pct, description = ('Pureté : %d %%'):format(pct) }) end   -- la pureté suit le pochon (visible dans l'inventaire)
+    cb({ ok = true, quality = pct, message = ('Fabrication terminée (qualité %d %%) : %d pochon(s)%s%s.'):format(pct, give, bonus > 0 and (' dont ' .. bonus .. ' bonus') or '', failed > 0 and (', ' .. failed .. ' lot(s) raté(s)') or '') })
 end)
 
 -- ─────────────────────────────── Intoxication (zone de tenue sans la tenue) ───────────────────────────────

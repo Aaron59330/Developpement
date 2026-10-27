@@ -1,0 +1,44 @@
+/* Laboratoire interactif — HUD sobre et sombre (couleur du serveur). Voir labexp.js. */
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('https://cfx-nui-pickax_theme/fonts/geist-latin.woff2') format('woff2'); }
+#labx { position: fixed; inset: 0; z-index: 90; font-family: 'Geist', 'Inter', 'Segoe UI', system-ui, sans-serif; color: #f1f1f4; --lx-acc: #fdc27d; --lx-acc-rgb: 253, 194, 125; user-select: none; }
+#labx.hidden { display: none; }
+#labx canvas { position: absolute; inset: 0; cursor: default; touch-action: none; }
+#labx::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .55) 100%), linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, .4)); pointer-events: none; }
+#labx.flash::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(var(--lx-acc-rgb), .18), transparent 60%); pointer-events: none; animation: lxflash .38s ease-out; }
+@keyframes lxflash { from { opacity: 1; } to { opacity: 0; } }
+.lx-top { position: absolute; left: 34px; top: 30px; pointer-events: none; }
+.lx-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: rgba(14, 14, 17, .85); border: 1px solid rgba(255, 255, 255, .12); font-size: 12px; font-weight: 500; color: #d8d8de; }
+.lx-badge svg { color: var(--lx-acc); }
+.lx-stepno { margin-top: 16px; font-size: 12.5px; font-weight: 600; color: var(--lx-acc); letter-spacing: .02em; }
+.lx-title { margin: 4px 0 0; font-size: 44px; line-height: 1.05; font-weight: 700; letter-spacing: -.03em; text-shadow: 0 4px 26px rgba(0, 0, 0, .55); max-width: 760px; }
+.lx-pills { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+.lx-pills .p { min-width: 26px; height: 26px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border-radius: 99px; background: rgba(14, 14, 17, .78); border: 1px solid rgba(255, 255, 255, .12); font-size: 12px; font-weight: 600; color: #8d8d96; }
+.lx-pills .p.done { background: var(--lx-acc); border-color: var(--lx-acc); color: #15110a; }
+.lx-pills .p.cur { background: #f4f4f5; border-color: #f4f4f5; color: #0f0f12; }
+.lx-pills .p.cur b { font-weight: 700; }
+.lx-inv { position: absolute; left: 34px; top: 262px; width: 264px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.lx-invh { align-self: flex-start; padding: 3px 10px; border-radius: 99px; background: rgba(14, 14, 17, .85); border: 1px solid rgba(255, 255, 255, .1); font-size: 11px; font-weight: 600; color: #aaaab3; }
+.lx-item { display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 14px 0 8px; border-radius: 14px; background: rgba(14, 14, 17, .86); border: 1px solid rgba(255, 255, 255, .09); }
+.lx-item .ic { position: relative; width: 42px; height: 42px; border-radius: 10px; background: rgba(255, 255, 255, .06); display: grid; place-items: center; flex: none; color: #8d8d96; overflow: hidden; }
+.lx-item .ic img { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); object-fit: contain; }
+.lx-item .nm { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.15; display: flex; flex-direction: column; }
+.lx-item .nm small { font-size: 10.5px; font-weight: 500; color: #8d8d96; }
+.lx-item b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+.lx-card { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); width: min(620px, calc(100vw - 80px)); border-radius: 16px; background: rgba(14, 14, 17, .88); border: 1px solid rgba(255, 255, 255, .11); overflow: hidden; pointer-events: none; }
+.lx-hint { display: flex; align-items: center; gap: 10px; padding: 12px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.lx-hint svg { color: var(--lx-acc); flex: none; }
+.lx-body { padding: 14px 18px 16px; position: relative; }
+.lx-count { display: flex; align-items: baseline; gap: 8px; }
+.lx-count b { font-size: 50px; line-height: 1; font-weight: 700; letter-spacing: -.04em; }
+.lx-count span { font-size: 19px; font-weight: 600; color: #8d8d96; }
+.lx-bar { margin-top: 12px; height: 7px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.lx-bar i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--lx-acc); transition: width .12s linear; }
+.lx-pct { position: absolute; right: 18px; top: 18px; font-size: 12px; font-weight: 600; color: #8d8d96; }
+.lx-quit { position: absolute; right: 34px; bottom: 36px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 12px; background: rgba(14, 14, 17, .85); border: 1px solid rgba(255, 255, 255, .1); font-size: 13px; font-weight: 600; color: #d8d8de; pointer-events: none; }
+.lx-quit kbd { padding: 2px 8px; border-radius: 6px; background: rgba(255, 255, 255, .1); font: inherit; font-size: 11.5px; }
+.lx-done { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; background: rgba(8, 8, 10, .62); backdrop-filter: blur(6px); text-align: center; }
+.lx-done.hidden { display: none; }
+.lx-done .ok { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--lx-acc); color: #15110a; margin-bottom: 6px; }
+.lx-done h2 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -.02em; }
+.lx-done p { margin: 0; color: #c9c9d0; font-size: 15px; }
+.lx-done p b { color: var(--lx-acc); }

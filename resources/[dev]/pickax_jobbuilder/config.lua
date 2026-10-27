@@ -554,6 +554,47 @@ Config.Real = {
             meth  = { label = 'Méthamphétamine', seed = nil,          raw = 'meth',  pooch = 'meth_pooch',  grow = 0,  plantSeconds = 0, yield = { 0, 0 }, recipe = { count = 4, time = 15, fail = 10, label = 'Sachet de meth' } },
         },
         DrugOrder = { 'weed', 'coke', 'opium', 'meth' },
+        -- ═══ Laboratoire interactif : la fabrication sur une table de traitement devient une suite d'étapes jouées à la souris (caméra sur la table) ═══
+        -- Types d'étape : add (verser en maintenant le clic) · stir (mélanger en cercles) · heat (garder la température) · scrape (gratter la pâte) · pour (transvaser des bols) · timing (cadence)
+        -- Qualité = moyenne des étapes (erreurs = points perdus). Elle règle le rendement et le risque de lot raté. Mets Enabled = false pour revenir à la simple barre de progression.
+        Experience = {
+            Enabled         = true,
+            YieldFromQuality = 0.4,     -- part du rendement qui dépend de la qualité (0.4 : qualité 50 % → ×0.8 de pochons)
+            FailFromQuality = 35,       -- % de lot raté en plus quand la qualité tombe à 0 (qualité 100 % : aucun risque ajouté)
+            PerfectBonus    = { quality = 0.92, extra = 1 },   -- pochon bonus (une fois) si la qualité atteint ce seuil
+            MinStepMs       = 1200,     -- anti-triche : durée minimale d'une étape
+            Cam             = { distance = 0.85, height = 1.2, pitch = -64.0, fov = 45.0 },   -- caméra au-dessus de la table
+            Templates = {
+                coke = { title = 'Cocaïne', steps = {
+                    { type = 'add',    label = 'Feuilles', title = 'Ajoute les feuilles',        hint = 'Maintiens le clic au-dessus du bol',                       amount = 9,  seconds = 6, color = '#5f8f3c' },
+                    { type = 'add',    label = 'Solvant',  title = 'Verse l’acétone',             hint = 'Maintiens le clic au-dessus du bol',                       amount = 12, seconds = 5, color = '#9cc7d6' },
+                    { type = 'stir',   label = 'Mélange',  title = 'Mélange la préparation',      hint = 'Tourne autour de la casserole sans aller trop vite',       turns = 6,   color = '#8a7a3b' },
+                    { type = 'heat',   label = 'Chauffe',  title = 'Chauffe doucement',           hint = 'Clic = chauffer · garde la température dans la zone verte', hold = 7,   color = '#7a5a2a' },
+                    { type = 'scrape', label = 'Grattage', title = 'Gratte les casseroles',       hint = 'Maintiens le clic et racle toute la pâte du fond',         coverage = 0.93, color = '#e8ece8' },
+                    { type = 'pour',   label = 'Transvase', title = 'Transvase dans les casseroles', hint = 'Attrape chaque bol et verse-le dans sa casserole',      bowls = 2, seconds = 3, color = '#8a7a3b' },
+                    { type = 'timing', label = 'Pressage', title = 'Presse en briques',           hint = 'Clique quand le curseur est dans la zone verte',           hits = 5, speed = 0.8 },
+                } },
+                meth = { title = 'Méthamphétamine', steps = {
+                    { type = 'add',    label = 'Précurseurs', title = 'Ajoute les précurseurs',    hint = 'Maintiens le clic au-dessus du bol',                    amount = 10, seconds = 5, color = '#c9d3d8' },
+                    { type = 'stir',   label = 'Mélange',     title = 'Mélange à la spatule',      hint = 'Tourne autour de la casserole sans aller trop vite',    turns = 7,  color = '#a7b8c4' },
+                    { type = 'heat',   label = 'Cuisson',     title = 'Cuis à bonne température',  hint = 'Clic = chauffer · garde la température dans la zone verte', hold = 9, low = 0.5, high = 0.68, color = '#8fa3b0' },
+                    { type = 'scrape', label = 'Cristaux',    title = 'Détache les cristaux',      hint = 'Maintiens le clic et racle tout le fond',               coverage = 0.92, color = '#bfe3f2' },
+                    { type = 'timing', label = 'Conditionnement', title = 'Conditionne les cristaux', hint = 'Clique quand le curseur est dans la zone verte',      hits = 6, speed = 0.9 },
+                } },
+                weed = { title = 'Cannabis', steps = {
+                    { type = 'add',    label = 'Têtes',    title = 'Dépose les têtes de cannabis', hint = 'Maintiens le clic au-dessus du bol',                      amount = 8, seconds = 4, color = '#5f8f3c' },
+                    { type = 'timing', label = 'Manucure', title = 'Taille les feuilles',          hint = 'Clique quand le curseur est dans la zone verte',          hits = 5, speed = 0.7 },
+                    { type = 'timing', label = 'Pesée',    title = 'Pèse et conditionne',          hint = 'Clique quand le curseur est dans la zone verte',          hits = 4, speed = 0.85 },
+                } },
+                opium = { title = 'Opium / Héroïne', steps = {
+                    { type = 'add',    label = 'Résine',   title = 'Ajoute la résine',             hint = 'Maintiens le clic au-dessus du bol',                      amount = 8, seconds = 5, color = '#6b4a2a' },
+                    { type = 'heat',   label = 'Chauffe',  title = 'Chauffe la résine',            hint = 'Clic = chauffer · garde la température dans la zone verte', hold = 7, color = '#7a5a2a' },
+                    { type = 'stir',   label = 'Mélange',  title = 'Remue sans éclabousser',       hint = 'Tourne autour de la casserole sans aller trop vite',      turns = 5, color = '#6b4a2a' },
+                    { type = 'scrape', label = 'Filtrage', title = 'Gratte le résidu',             hint = 'Maintiens le clic et racle tout le fond',                 coverage = 0.9, color = '#d8c9a8' },
+                    { type = 'timing', label = 'Pochons',  title = 'Remplis les pochons',          hint = 'Clique quand le curseur est dans la zone verte',          hits = 5, speed = 0.8 },
+                } },
+            },
+        },
         Toxic = {   -- sans la tenue dans une zone : intoxication progressive (un seul remède : l'antidote)
             Enabled = true, CureItem = 'antidote', Tick = 5, ExposureGain = 6, SickGain = 1, DamageFrom = 60, DamageHealth = 4, KillAt = 100, WarnAt = { 20, 50, 80 },
         },

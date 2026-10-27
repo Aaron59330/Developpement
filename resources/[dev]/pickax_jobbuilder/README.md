@@ -276,3 +276,21 @@ Tables créées automatiquement : `jobbuilder_bank_clients`, `jobbuilder_bank_en
 - **Points intérieurs** : coffre, **coffre-fort** (réservé au propriétaire / locataire, pas aux détenteurs de clés) et penderie.
 - **Dupliquer** un bien (même immeuble, plusieurs appartements identiques) : copie type, prix, intérieur et points ; il ne reste qu'à placer la nouvelle entrée.
 - Mise à jour automatique de la base : les colonnes `category`, `description` et `ipl` de `jobbuilder_properties` sont ajoutées au démarrage si elles manquent.
+
+## Laboratoire interactif (tables de traitement)
+Sur une table de traitement d'un laboratoire, la fabrication n'est plus une simple barre de progression : le joueur passe en caméra au-dessus de la table et enchaîne des étapes jouées à la souris (interface `html/labexp.js`).
+
+| Type d'étape | Geste | Réglages |
+|---|---|---|
+| `add` | maintenir le clic au-dessus du bol pour verser l'ingrédient | `amount`, `seconds`, `color` |
+| `stir` | tourner autour de la casserole sans aller trop vite | `turns`, `color` |
+| `heat` | clic = chauffer, relâcher = refroidir ; garder la température dans la zone verte | `hold`, `low`, `high` |
+| `scrape` | racler toute la pâte du fond (pas trop vite) | `coverage`, `speedLimit` |
+| `pour` | attraper chaque bol et le verser dans sa casserole | `bowls`, `seconds` |
+| `timing` | cliquer quand le curseur est dans la zone | `hits`, `speed` |
+
+- Les recettes se règlent dans `Config.Real.Lab.Experience.Templates` (une suite d'étapes par drogue : `coke`, `meth`, `weed`, `opium`). Ajoute, retire ou réordonne les étapes librement.
+- **Qualité** = moyenne des étapes (chaque erreur retire des points). Elle règle le rendement (`YieldFromQuality`), le risque de lot raté (`FailFromQuality`) et un pochon bonus au-delà de `PerfectBonus.quality`.
+- Anti-triche : le serveur impose une durée minimale par étape, vérifie que toutes les étapes sont réussies, borne les scores, retire les ingrédients et remet les pochons lui-même. Quitter (Échap) annule sans rien consommer.
+- `Experience.Enabled = false` : retour à l'ancienne barre de progression.
+- Test des règles de rendement : `ROOT=. lua5.4 tools/tests/labexp_test.lua`.
