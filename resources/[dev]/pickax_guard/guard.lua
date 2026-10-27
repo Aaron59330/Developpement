@@ -45,7 +45,7 @@ local function hold(name) if not heldSet[name] then heldSet[name] = true held[#h
 -- ─────────────── Démarrage des ressources protégées ───────────────
 -- Tant que la licence n'est pas valide, on annule leur démarrage ; dès qu'elle l'est, on les relance dans l'ordre où elles ont été demandées.
 AddEventHandler('onResourceStarting', function(name)
-    if not state.ok and isProtected(name) then hold(name) CancelEvent() end
+    if Config.HoldStart and not state.ok and isProtected(name) then hold(name) CancelEvent() end
 end)
 
 local function release()

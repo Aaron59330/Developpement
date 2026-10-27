@@ -89,7 +89,7 @@ function PerformHttpRequest(url, cb, method, body, headers)
 end
 
 math.randomseed(42)
-Config = {} dofile(root .. 'config.lua') Config.PublicKey = env('PUBKEY', '')
+Config = {} dofile(root .. 'config.lua') Config.PublicKey = env('PUBKEY', '') Config.HoldStart = env('HOLD', '1') == '1'
 local overrideInterval = tonumber(env('INTERVAL', '')) if overrideInterval then Config.Interval = overrideInterval end
 dofile(root .. 'guard.lua')
 

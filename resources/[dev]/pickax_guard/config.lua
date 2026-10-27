@@ -18,3 +18,7 @@ Config.Protect  = {}                             -- ressources protégées en pl
 Config.Interval      = 600                       -- secondes entre deux vérifications quand tout va bien
 Config.RetryInterval = 30                        -- secondes entre deux tentatives quand la licence n'est pas (encore) valide
 Config.Timeout       = 10000                     -- délai maximum d'une requête au panel (ms)
+
+-- false (défaut) : les ressources démarrent normalement puis s'arrêtent d'elles-mêmes si la licence est refusée (console propre).
+-- true : leur démarrage est annulé tant que la licence n'est pas validée (la console affiche alors « Couldn't start resource … » à chaque lancement).
+Config.HoldStart = false

@@ -8,7 +8,7 @@ do
         local tries = 0
         while not ok() do
             tries = tries + 1
-            if tries > 8 then die('pickax_core absent ou licence invalide') return end
+            if tries > 16 then die('pickax_core absent ou licence invalide') return end
             Wait(2500)
         end
         while true do
