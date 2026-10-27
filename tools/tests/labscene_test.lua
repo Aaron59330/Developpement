@@ -25,6 +25,11 @@ function DrawMarker(...) cnt('marker') end
 function DrawLightWithRange() cnt('light') end
 function RegisterNUICallback() end
 function RegisterCommand() end
+json = { encode = function() return '{}' end }
+function PlayerPedId() return 1 end
+function StartExpensiveSynchronousShapeTestLosProbe() return 7 end
+local SHAPE_HIT = { 1, { x = 100.0, y = 200.0, z = 30.97 } }
+function GetShapeTestResult() return 2, SHAPE_HIT[1], SHAPE_HIT[2] end
 local threads = {}
 function CreateThread(f) threads[#threads + 1] = f end
 -- caméra à 0.85 m derrière la table, 1.2 m de haut, regardant la table (q.z+0.92)
@@ -37,6 +42,10 @@ function GetCamRot() return { x = pitch, y = 0.0, z = 0.0 } end
 function GetCamCoord() return cp end
 dofile(ROOT .. '/resources/[dev]/pickax_jobbuilder/client/labscene.lua')
 
+local sz = LabScene.findSurface(q)
+assert(math.abs(sz - 30.974) < 0.001, 'plateau trouvé par rayon ' .. sz)
+SHAPE_HIT[1] = 0
+assert(math.abs(LabScene.findSurface(q) - 30.924) < 0.001, 'repli sur Surface')
 local sc = LabScene.init(q, 1, { fov = 45.0 })
 assert(sc and sc.rel > 0 and sc.potR == 0.15, 'init')
 -- le centre de l'écran tombe sur le point visé
@@ -80,6 +89,7 @@ assert(calls.light and calls.light > 0, 'lueur de chauffe')
 -- le bol existe (modèle 2e de la liste), les modèles inconnus sont ignorés
 local alive = 0; for _ in pairs(ents) do alive = alive + 1 end
 LabScene.stop()
+do local m0 = calls.marker or 0; LabScene.init(q, 1, { fov = 45.0 }); local n = 0; local oW = Wait; Wait = function() n = n + 1; if n >= 3 then LabScene.stop() end end; threads[#threads]() ; Wait = oW; assert((calls.marker or 0) > m0, 'scène par défaut sans données') end
 local left = 0; for _ in pairs(ents) do left = left + 1 end
 assert(left == 0, 'objets restants : ' .. left)
 Config.Real.Lab.Experience.Scene3D.Enabled = false

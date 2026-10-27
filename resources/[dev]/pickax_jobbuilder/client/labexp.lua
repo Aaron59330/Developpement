@@ -19,7 +19,7 @@ local function makeCam(q)
     local h = math.rad(tonumber(q.h) or 0.0)
     local fx, fy = -math.sin(h), math.cos(h)                      -- direction vers laquelle regarde la table
     local dist, pitch = tonumber(c.distance) or 0.85, math.rad(tonumber(c.pitch) or -64.0)
-    local top = q.z + (tonumber((X.Scene3D or {}).Surface) or 0.92)          -- plateau de la table
+    local top = q.surf or (q.z + (tonumber((X.Scene3D or {}).Surface) or 0.92))          -- plateau de la table
     local back, up = math.cos(pitch) * dist, -math.sin(pitch) * dist          -- distance de la caméra au plateau = dist, vue plongeante
     local cam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', q.x - fx * back, q.y - fy * back, top + up, tonumber(c.pitch) or -64.0, 0.0, tonumber(q.h) or 0.0, tonumber(c.fov) or 45.0, false, 0)
     PointCamAtCoord(cam, q.x, q.y, top)
@@ -34,6 +34,7 @@ function LabExperience(q, session)
     local ped = PlayerPedId()
     local radarWasOff = IsRadarHidden()
     FreezeEntityPosition(ped, true)
+    q = { x = q.x, y = q.y, z = q.z, h = q.h, surf = LabScene and LabScene.findSurface and LabScene.findSurface(q) or nil }
     local cam = makeCam(q)
     SetCamActive(cam, true)
     RenderScriptCams(true, true, 700, true, true)

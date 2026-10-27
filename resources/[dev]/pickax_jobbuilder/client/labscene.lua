@@ -41,6 +41,17 @@ local function W(p, dz)                                      -- {nx, ny} → mon
     return w or { x = st.q.x, y = st.q.y, z = st.surf + (dz or 0.0) }
 end
 
+-- hauteur réelle du plateau : rayon vers le bas sur la table du labo (sinon position + Surface)
+function LabScene.findSurface(q)
+    local def = q.z + (tonumber(S3.Surface) or 0.92)
+    local ok, z = pcall(function()
+        local h = StartExpensiveSynchronousShapeTestLosProbe(q.x, q.y, q.z + 2.2, q.x, q.y, q.z - 0.4, 1 + 16, PlayerPedId(), 4)
+        local _, hit, pos = GetShapeTestResult(h)
+        if hit == 1 and pos and pos.z > q.z + 0.3 and pos.z < q.z + 1.7 then return pos.z end
+    end)
+    return (ok and z or def) + 0.004
+end
+
 -- ─── objets ───
 local function loadFirst(list)
     for _, name in ipairs(list or {}) do
@@ -78,8 +89,11 @@ local function drawPot(p, level, col)
     st.potI = st.potI + 1
     if e then place(e, p, 0.0, 0.0, 0.0)
     else
-        disc(V(p, 0, 0, POT_H / 2), R, POT_H, { 74, 79, 86 })                 -- corps
-        disc(V(p, 0, 0, POT_H + 0.001), R * 0.97, 0.003, { 150, 156, 164 })   -- bord
+        disc(V(p, 0, 0, POT_H * 0.25), R, POT_H * 0.5, { 58, 62, 68 })             -- bas du corps
+        disc(V(p, 0, 0, POT_H * 0.72), R * 1.01, POT_H * 0.56, { 104, 110, 119 })   -- haut du corps (plus clair)
+        disc(V(p, 0, 0, POT_H + 0.002), R * 1.03, 0.006, { 176, 182, 190 })         -- rebord
+        disc(V(p, R + 0.03, 0, POT_H * 0.8), 0.022, 0.016, { 40, 43, 48 })          -- anses
+        disc(V(p, -R - 0.03, 0, POT_H * 0.8), 0.022, 0.016, { 40, 43, 48 })
     end
     disc(V(p, 0, 0, tonumber(S3.PotFillZ) or (POT_H - 0.004)), R * 0.9, 0.004, { 12, 13, 16 })     -- intérieur sombre
     if level and level > 0 then disc(V(p, 0, 0, (tonumber(S3.PotFillZ) or (POT_H - 0.004)) + 0.003 + level * 0.012), R * 0.86, 0.004, col or { 138, 122, 59 }) end
@@ -199,14 +213,15 @@ end
 
 -- ─── cycle de vie ───
 local function frame()
-    if not st or not st.a then return end
-    local a = st.a
+    if not st then return end
+    local a = st.a or st.idle
     st.ar = tonumber(a.ar) or st.ar
     local fn = R[a.t]
     if not fn then return end
     st.used, st.potI = {}, 1
     local c = hex(a.c, nil)
     if not a.c or a.c == '' then c = nil end
+    if S3.Light ~= false then DrawLightWithRange(st.q.x, st.q.y, st.surf + 0.8, 255, 244, 226, 2.2, 2.2) end   -- éclaire la table même de nuit
     if S3.Mat ~= false then disc(V(st.q, 0, 0, st.surf + 0.001), 0.46, 0.002, { 14, 15, 18 }, 235) end
     fn(a, c or { 138, 122, 59 }, GetGameTimer() / 1000.0)
     for _, e in pairs(st.ents) do if not st.used[e] then SetEntityVisible(e, false, false) end end
@@ -219,8 +234,9 @@ function LabScene.init(q, cam, camCfg)
     local cp = GetCamCoord(cam)
     local fov = tonumber(camCfg.fov) or 45.0
     local f, r, u = basis(rot)
-    local surf = q.z + (tonumber(S3.Surface) or 0.92)
-    st = { q = { x = q.x, y = q.y, z = q.z }, surf = surf, cp = { x = cp.x, y = cp.y, z = cp.z }, f = f, r = r, u = u,
+    local surf = tonumber(q.surf) or (q.z + (tonumber(S3.Surface) or 0.92))
+    local idle = { t = 'stir', pot = { 0.5, 0.5 }, swirl = 0.0, rm = 0.1, p = { 0.5, 0.5 }, d = 0, c = '', ar = 16 / 9 }
+    st = { idle = idle, q = { x = q.x, y = q.y, z = q.z }, surf = surf, cp = { x = cp.x, y = cp.y, z = cp.z }, f = f, r = r, u = u,
         th = tan(rad(fov) / 2), ar = 16 / 9, ents = {}, used = {}, potI = 1, active = true, models = {} }
     local D = sqrt((q.x - cp.x) ^ 2 + (q.y - cp.y) ^ 2 + (surf - cp.z) ^ 2)
     local rel = 1.0 / (2.0 * D * st.th)                      -- fraction de la hauteur d'écran par mètre, au niveau de la table
@@ -240,6 +256,7 @@ function LabScene.init(q, cam, camCfg)
             SetModelAsNoLongerNeeded(h)
         end
     end
+    print(('[jobbuilder] labo 3D : plateau z=%.2f · caméra %.2f %.2f %.2f · échelle %.2f · modèles : %s'):format(surf, cp.x, cp.y, cp.z, rel, next(st.models) and json.encode(st.models) or 'aucun (formes dessinées par le jeu)'))
     CreateThread(function()
         local mine = st
         local fails = 0
