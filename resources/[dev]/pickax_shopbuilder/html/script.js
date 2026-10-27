@@ -245,7 +245,7 @@ window.addEventListener('message', e => {
 });
 
 /* ── Cabine d'essayage : catégories, vignettes (images dans html/clothes/<m|f>/<pièce>/<numéro>.webp, sinon silhouette) ── */
-const CAB_CATS = [['haut', 'Haut', ['tshirt', 'torso', 'arms', 'bproof', 'decals']], ['bas', 'Bas', ['pants']], ['pieds', 'Chaussures', ['shoes']], ['tete', 'Tête', ['helmet', 'glasses', 'ears', 'mask']], ['acc', 'Accessoires', ['chain', 'bags', 'watches', 'bracelets']]];
+const CAB_CATS = [['haut', 'Haut', ['tshirt', 'torso', 'arms', 'bproof', 'decals'], 'tshirt'], ['bas', 'Bas', ['pants'], 'pants'], ['pieds', 'Chaussures', ['shoes'], 'shoes'], ['tete', 'Tête', ['helmet', 'glasses', 'ears', 'mask'], 'helmet'], ['acc', 'Accessoires', ['chain', 'bags', 'watches', 'bracelets'], 'watches']];
 const CAB_TITLE = { tshirt: 'T-shirt', torso: 'Haut / veste', arms: 'Bras', bproof: 'Gilet', decals: 'Motifs', pants: 'Pantalon', shoes: 'Chaussures', helmet: 'Chapeau / casque', glasses: 'Lunettes', ears: 'Boucles d\'oreilles', mask: 'Masque', chain: 'Collier / chaîne', bags: 'Sac', watches: 'Montre', bracelets: 'Bracelet' };
 const CAB_SVG = {
   tshirt: '<path d="M16 8l-8 5 4 7 4-2v22h16V18l4 2 4-7-8-5c-1 3-4 5-8 5s-7-2-8-5z"/>',
@@ -280,8 +280,8 @@ function cabGroups(list) {
   return out;
 }
 function cabTabs(groups) {
-  const tabs = CAB_CATS.filter(c => groups.some(g => g.cat === c[0])).map(c => ({ k: c[0], l: c[1] }));
-  if (groups.some(g => g.cat === 'autres')) tabs.push({ k: 'autres', l: 'Autres' });
+  const tabs = CAB_CATS.filter(c => groups.some(g => g.cat === c[0])).map(c => ({ k: c[0], l: c[1], i: c[3] }));
+  if (groups.some(g => g.cat === 'autres')) tabs.push({ k: 'autres', l: 'Autres', i: '_' });
   return tabs;
 }
 const CLOTH_URL_FN = () => `https://cfx-nui-${resName()}/html/clothes`;
@@ -402,70 +402,77 @@ const Shop = {
 
   async tryOn() {
     const r = await rpc('clothing:start', this.method);
-    if (r && r.cabin) { this.cabin = r.components; this.cabSex = r.sex === 1 ? 'f' : 'm'; this.cabTab = null; this.cabPage = {}; this.cabinBusy = false; this.inCabin = true; this.cabinSel = 0; return this.renderCabin(); }
+    if (r && r.cabin) { this.cabin = r.components; this.cabSex = r.sex === 1 ? 'f' : 'm'; this.cabTab = null; this.cabAct = null; this.cabPage = {}; this.cabinBusy = false; this.inCabin = true; this.cabinSel = 0; return this.renderCabin(); }
     if (r && r.ok === false) toast(r.error || 'Impossible', 'err');
   },
 
-  /* Cabine d'essayage : galerie de vignettes (une image par pièce), onglets par catégorie, le joueur reste visible à l'écran */
+  /* Cabine d'essayage : rail d'icônes (catégories) + grille de vignettes (une image par pièce) ; le joueur reste visible à l'écran */
   renderCabin() {
     const d = this.d;
     $root.classList.add('corner');
     this.cabGroups = cabGroups(this.cabin);
     const tabs = cabTabs(this.cabGroups);
     if (!tabs.some(x => x.k === this.cabTab)) this.cabTab = (tabs[0] || {}).k;
-    const body = `<div class="cb-tabs">${tabs.map(x => `<button class="cb-tab ${x.k === this.cabTab ? 'on' : ''}" data-a="ctab" data-v="${x.k}">${esc(x.l)}</button>`).join('')}</div>
-      <div class="cb-list">${this.cabList()}</div>
+    const inTab = this.cabGroups.filter(g => g.cat === this.cabTab);
+    if (!inTab.some(g => g.base === this.cabAct)) this.cabAct = (inTab[0] || {}).base;
+    const rail = tabs.map(x => `<button class="cb2-ico ${x.k === this.cabTab ? 'on' : ''}" data-a="ctab" data-v="${x.k}" title="${esc(x.l)}">${cabIcon(x.i)}</button>`).join('');
+    const body = `<div class="cb2">
+        <nav class="cb2-rail">${rail}</nav>
+        <div class="cb2-main">${this.cabMain()}</div>
+      </div>
       <div class="cb-hid">${this.cabin.map(c => `<input type="range" data-cab="${esc(c.name)}" min="${c.min}" max="${Math.max(c.min, c.max)}" value="${c.value}">`).join('')}</div>
-      <div class="cb-cams">${[['body', 'Corps'], ['head', 'Tête'], ['top', 'Haut'], ['legs', 'Bas'], ['feet', 'Pieds']].map(c => `<button class="sm" data-a="ccam" data-v="${c[0]}">${c[1]}</button>`).join('')}<button class="sm" data-a="crot" data-v="-1">${ic('minus', 12)}↺</button><button class="sm" data-a="crot" data-v="1">↻</button></div>
-      <button class="primary wide" data-a="cpay" ${this.cabinBusy ? 'disabled' : ''}>${ic('check', 16)} Valider et payer ${money(d.price)}</button>
-      <button class="wide" data-a="close">Annuler (tenue d'origine)</button>
+      <div class="cb2-cams">${[['body', 'Corps'], ['head', 'Tête'], ['top', 'Haut'], ['legs', 'Bas'], ['feet', 'Pieds']].map(c => `<button class="sm" data-a="ccam" data-v="${c[0]}">${c[1]}</button>`).join('')}<button class="sm" data-a="crot" data-v="-1">↺</button><button class="sm" data-a="crot" data-v="1">↻</button></div>
+      <div class="cb2-foot"><button data-a="close">Annuler</button><button class="primary" data-a="cpay" ${this.cabinBusy ? 'disabled' : ''}>${ic('check', 15)} Payer ${money(d.price)}</button></div>
       <div class="keyhint"><kbd>↑</kbd><kbd>↓</kbd> pièce <kbd>←</kbd><kbd>→</kbd> changer <kbd>Maj</kbd> ×5</div>`;
     $root.innerHTML = panel({ icon: this.shopIcon(), title: d.shop.label, sub: 'Cabine d\'essayage', body, cls: 'corner cabin cb' });
     this.cabBind();
   },
 
   cabBind() {
-    $root.querySelectorAll('.cb-sec').forEach(r => r.addEventListener('mouseenter', () => this.cabinSelect(this.cabin.findIndex(c => c.name === r.dataset.row), false)));
     $root.querySelectorAll('input[data-cab]').forEach(i => {
       i.addEventListener('input', () => this.cabinSet(i.dataset.cab, Number(i.value), false));
       i.addEventListener('change', () => this.cabinSet(i.dataset.cab, Number(i.value), true));
     });
+    const q = $root.querySelector('.cb2-q');
+    if (q) q.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return; e.stopPropagation();
+      const g = this.cabGroups.find(x => x.base === this.cabAct), n = Number(q.value);
+      if (g && q.value !== '' && n >= g.main.min && n <= g.main.max) this.cabinSet(g.main.name, n, true); else toast('Numéro hors limites', 'err');
+    });
   },
 
-  cabList() {
-    const cur = this.cabin[this.cabinSel];
-    return this.cabGroups.filter(g => g.cat === this.cabTab).map(g => this.cabSection(g, cur)).join('') || '<div class="empty-s">Rien à essayer ici.</div>';
-  },
-
-  cabSection(g, cur) {
-    const c = g.main, per = 8, val = c.value;
+  cabMain() {
+    const g = this.cabGroups.find(x => x.base === this.cabAct && x.cat === this.cabTab);
+    if (!g) return '<div class="empty-s">Rien à essayer ici.</div>';
+    const inTab = this.cabGroups.filter(x => x.cat === this.cabTab);
+    const c = g.main, per = 12, val = c.value;
     const pages = Math.max(1, Math.ceil((c.max - c.min + 1) / per));
     let page = this.cabPage[g.base]; if (page == null) page = Math.floor((val - c.min) / per);
     page = Math.max(0, Math.min(pages - 1, page)); this.cabPage[g.base] = page;
     const from = c.min + page * per, to = Math.min(c.max, from + per - 1);
     const tv = g.tex ? g.tex.value : 0;
+    const pills = inTab.length > 1 ? `<div class="cb2-pills">${inTab.map(x => `<button class="cb2-pill ${x.base === g.base ? 'on' : ''}" data-a="cgrp" data-v="${x.base}">${esc(cabTitle(x))}</button>`).join('')}</div>` : '';
     let tiles = '';
     for (let v = from; v <= to; v++) {
-      const src = `${CLOTH_URL_FN()}/${this.cabSex}/${g.base}/${v}.webp`;
       const big = v === val && g.tex ? `<img class="v" loading="lazy" src="${CLOTH_URL_FN()}/${this.cabSex}/${g.base}/${v}_${tv}.webp" onerror="this.remove()">` : '';
-      tiles += `<button class="cb-tile ${v === val ? 'on' : ''}" data-a="cpick" data-v="${esc(c.name)}:${v}" title="${esc(c.label)} ${v}">${cabIcon(g.base)}<img loading="lazy" src="${src}" onerror="this.remove()">${big}<i>${v}</i></button>`;
+      tiles += `<button class="cb-tile ${v === val ? 'on' : ''}" data-a="cpick" data-v="${esc(c.name)}:${v}" title="${esc(cabTitle(g))} ${v}">${cabIcon(g.base)}<img loading="lazy" src="${CLOTH_URL_FN()}/${this.cabSex}/${g.base}/${v}.webp" onerror="this.remove()">${big}<i>${v}</i></button>`;
     }
     let vars = '';
     if (g.tex && g.tex.max > g.tex.min) {
-      const lo = Math.max(g.tex.min, Math.min(tv - 6, g.tex.max - 13)), hi = Math.min(g.tex.max, lo + 13);
+      const lo = Math.max(g.tex.min, Math.min(tv - 7, g.tex.max - 15)), hi = Math.min(g.tex.max, lo + 15);
       for (let t2 = lo; t2 <= hi; t2++) vars += `<button class="cb-chip ${t2 === tv ? 'on' : ''}" data-a="cpick" data-v="${esc(g.tex.name)}:${t2}">${t2}</button>`;
-      vars = `<div class="cb-var"><small>Variante</small>${vars}<small class="muted">${tv} / ${g.tex.max}</small></div>`;
+      vars = `<div class="cb-var"><small>Variante</small>${vars}</div>`;
     }
-    const sel = cur && (cur.name === c.name || (g.tex && cur.name === g.tex.name));
-    return `<section class="cb-sec ${sel ? 'sel' : ''}" data-row="${esc(c.name)}">
-      <header class="cb-h"><b>${esc(cabTitle(g))}</b><span class="cnt">${val} / ${c.max}</span>
-        <span class="cb-arrows"><button class="icon" data-a="cpage" data-v="${g.base}:-1" ${page <= 0 ? 'disabled' : ''}>${ic('minus', 12)}</button><button class="icon" data-a="cpage" data-v="${g.base}:1" ${page >= pages - 1 ? 'disabled' : ''}>${ic('plus', 12)}</button></span></header>
-      <div class="cb-grid">${tiles}</div>${vars}</section>`;
+    return `<div class="cb2-top"><h3>${esc(cabTitle(g))}</h3><label class="cb2-search">${ic('search', 14)}<input class="cb2-q" inputmode="numeric" placeholder="N° ${c.min}–${c.max}"></label></div>
+      ${pills}<div class="cb-grid">${tiles}</div>${vars}
+      <div class="cb2-pager"><button class="icon" data-a="cpage" data-v="${g.base}:-1" ${page <= 0 ? 'disabled' : ''}>‹</button><span>${val} / ${c.max} · page ${page + 1}/${pages}</span><button class="icon" data-a="cpage" data-v="${g.base}:1" ${page >= pages - 1 ? 'disabled' : ''}>›</button></div>`;
   },
 
   cabRefresh() {
-    const l = $root.querySelector('.cb-list'); if (!l) return;
-    const y = l.scrollTop; l.innerHTML = this.cabList(); l.scrollTop = y; this.cabBind();
+    const m = $root.querySelector('.cb2-main'); if (!m) return;
+    const q = m.querySelector('.cb2-q'), keep = q && document.activeElement === q ? q.value : null;
+    m.innerHTML = this.cabMain(); this.cabBind();
+    if (keep != null) { const n = m.querySelector('.cb2-q'); n.value = keep; n.focus(); }
   },
 
   // Met à jour les valeurs sans tout re-rendre (conserve le défilement)
@@ -483,19 +490,19 @@ const Shop = {
 
   async cabinSet(name, value, refresh) {
     const c = this.cabin.find(x => x.name === name);
-    if (c) { c.value = value; const i = $root.querySelector(`input[data-cab="${CSS.escape(name)}"]`); if (i) i.value = value; this.cabGroups = cabGroups(this.cabin); this.cabRefresh(); }
+    if (c) { c.value = value; const i = $root.querySelector(`input[data-cab="${CSS.escape(name)}"]`); if (i) i.value = value; this.cabGroups = cabGroups(this.cabin); if (c.name.endsWith('_1') || !/_2$/.test(c.name)) delete this.cabPage[cabBaseOf(name)]; this.cabRefresh(); }
     clearTimeout(this._ct);
     const send = async () => { const r = await rpc('cabin:change', name, value); if (refresh && r && r.ok) this.cabinApply(r.components); };
     if (refresh) send(); else this._ct = setTimeout(send, 40);
   },
 
-  cabinSelect(idx, scroll = true) {
+  cabinSelect(idx) {
     if (idx < 0 || idx >= this.cabin.length) return;
     this.cabinSel = idx;
     const g = (this.cabGroups || []).find(x => x.main.name === this.cabin[idx].name || (x.tex && x.tex.name === this.cabin[idx].name));
-    if (g && g.cat !== this.cabTab) { this.cabTab = g.cat; this.renderCabin(); return; }
-    $root.querySelectorAll('.cb-sec').forEach(r => r.classList.toggle('sel', !!g && r.dataset.row === g.main.name));
-    if (scroll) { const r = $root.querySelector('.cb-sec.sel'); if (r) r.scrollIntoView({ block: 'nearest' }); }
+    if (!g) return;
+    if (g.cat !== this.cabTab) { this.cabTab = g.cat; this.cabAct = g.base; this.renderCabin(); return; }
+    if (g.base !== this.cabAct) { this.cabAct = g.base; this.cabRefresh(); }
   },
 
   // Clavier : ↑/↓ choisit, ←/→ modifie (Maj = ×5), Entrée paie. Fonctionne en cabine et en boutique.
@@ -587,7 +594,8 @@ const Shop = {
     if (a === 'buy') return this.buy();
     if (a === 'tryon') return this.tryOn();
     if (a === 'cpay') return this.cabinPay();
-    if (a === 'ctab') { this.cabTab = v; this.renderCabin(); return; }
+    if (a === 'ctab') { this.cabTab = v; this.cabAct = null; this.renderCabin(); return; }
+    if (a === 'cgrp') { this.cabAct = v; this.cabRefresh(); return; }
     if (a === 'cpage') { const [base, dir] = v.split(':'); this.cabPage[base] = (this.cabPage[base] || 0) + Number(dir); this.cabRefresh(); return; }
     if (a === 'cpick') { const [name, val] = v.split(':'); this.cabinSet(name, Number(val), true); return; }
     if (a === 'ccam') { rpc('cabin:cam', v); return; }
