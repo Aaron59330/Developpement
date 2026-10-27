@@ -83,30 +83,33 @@ local function ball(p, r, c, a) DrawMarker(28, p.x, p.y, p.z, 0.0, 0.0, 0.0, 0.0
 local function V(p, dx, dy, dz) return { x = p.x + (dx or 0), y = p.y + (dy or 0), z = p.z + (dz or 0) } end
 
 local POT_H = 0.11
+local function potTop() return tonumber(S3.PotFillZ) or (POT_H + 0.012) end
+-- Les marqueurs trop fins (< 1 cm) ressortent translucides : tout est empilé en cylindres épais et opaques.
 local function drawPot(p, level, col)
     local R = tonumber(S3.PotRadius) or 0.15
     local e = prop('pot', st.potI)
     st.potI = st.potI + 1
     if e then place(e, p, 0.0, 0.0, 0.0)
     else
-        disc(V(p, 0, 0, POT_H * 0.25), R, POT_H * 0.5, { 58, 62, 68 })             -- bas du corps
-        disc(V(p, 0, 0, POT_H * 0.72), R * 1.01, POT_H * 0.56, { 104, 110, 119 })   -- haut du corps (plus clair)
-        disc(V(p, 0, 0, POT_H + 0.002), R * 1.03, 0.006, { 176, 182, 190 })         -- rebord
-        disc(V(p, R + 0.03, 0, POT_H * 0.8), 0.022, 0.016, { 40, 43, 48 })          -- anses
-        disc(V(p, -R - 0.03, 0, POT_H * 0.8), 0.022, 0.016, { 40, 43, 48 })
+        disc(V(p, 0, 0, POT_H / 2), R, POT_H, { 92, 98, 107 })                                   -- corps en inox
+        disc(V(p, R + 0.04, 0, POT_H * 0.7), 0.026, 0.024, { 38, 40, 45 })                       -- anses
+        disc(V(p, -R - 0.04, 0, POT_H * 0.7), 0.026, 0.024, { 38, 40, 45 })
+        disc(V(p, 0, 0, POT_H - 0.006), R * 1.04, 0.026, { 186, 192, 200 })                      -- rebord clair
     end
-    disc(V(p, 0, 0, tonumber(S3.PotFillZ) or (POT_H - 0.004)), R * 0.9, 0.004, { 12, 13, 16 })     -- intérieur sombre
-    if level and level > 0 then disc(V(p, 0, 0, (tonumber(S3.PotFillZ) or (POT_H - 0.004)) + 0.003 + level * 0.012), R * 0.86, 0.004, col or { 138, 122, 59 }) end
+    disc(V(p, 0, 0, potTop() / 2 + 0.002), R * 0.86, potTop(), { 16, 17, 20 })                   -- intérieur sombre
+    if level and level > 0 then
+        disc(V(p, 0, 0, (potTop() + 0.012) / 2), R * 0.86 * (0.3 + 0.7 * min(1, level)), potTop() + 0.012, col or { 138, 122, 59 })   -- contenu
+    end
 end
 local function drawBowl(p, level, col, tilt, slot)
     local R = tonumber(S3.BowlRadius) or 0.10
     local e = prop('bowl', slot or 1)
     if e then place(e, p, tilt or 0.0, 0.0, 0.0)
     else
-        disc(V(p, 0, 0, 0.022), R, 0.044, { 132, 132, 128 })
-        disc(V(p, 0, 0, 0.046), R * 0.86, 0.003, { 38, 38, 36 })
+        disc(V(p, 0, 0, 0.03), R, 0.06, { 168, 170, 175 })
+        disc(V(p, 0, 0, 0.034), R * 0.84, 0.066, { 44, 44, 48 })
     end
-    if level and level > 0.02 then disc(V(p, 0, 0, 0.044 + level * 0.02), R * 0.78 * (0.35 + 0.65 * level), 0.006, col or { 124, 154, 75 }) end
+    if level and level > 0.02 then disc(V(p, 0, 0, 0.04 + level * 0.014), R * 0.8 * (0.35 + 0.65 * level), 0.08 + level * 0.014, col or { 124, 154, 75 }) end
 end
 local function tool(key, p, down, yaw)                      -- spatule / cuillère / sachet suivant la souris
     local e = prop(key)
@@ -146,9 +149,9 @@ R.scrape = function(a, c, t)
             end end
         end
         local cell = (tonumber(a.rm) or 0.1) / 6 * 1.25
-        local z = (tonumber(S3.PotFillZ) or (POT_H - 0.004)) + 0.004
+        local z = potTop() + 0.006
         for i = 1, 144 do
-            if rows:byte(i) == 49 then local w = st.cells[i]; disc({ x = w.x, y = w.y, z = p.z + z }, cell, 0.006, c) end
+            if rows:byte(i) == 49 then local w = st.cells[i]; disc({ x = w.x, y = w.y, z = p.z + z }, cell, 0.02, c) end
         end
     end
     tool('spatula', W(a.p, 0.0), a.d == 1, 35.0)
@@ -161,7 +164,7 @@ R.stir = function(a, c, t)
     for i = 1, 6 do
         local ang = (a.swirl or 0) * (1.0 + i * 0.15) + i * 1.05
         local rr = Rp * (0.3 + 0.12 * i)
-        ball({ x = p.x + cos(ang) * rr, y = p.y + sin(ang) * rr, z = p.z + (tonumber(S3.PotFillZ) or POT_H - 0.004) + 0.018 }, 0.009, { 235, 235, 235 }, 110)
+        ball({ x = p.x + cos(ang) * rr, y = p.y + sin(ang) * rr, z = p.z + potTop() + 0.02 }, 0.011, { 240, 240, 240 }, 150)
     end
     tool('spoon', W(a.p, 0.0), a.d == 1, 0.0)
 end
@@ -169,7 +172,7 @@ end
 R.heat = function(a, c, t)
     local p = W(a.pot, 0.0)
     local temp = clamp(a.temp or 0, 0, 1)
-    disc(V(p, 0, 0, 0.002), (tonumber(S3.PotRadius) or 0.15) * 0.8, 0.004, { 255, floor(70 + 90 * (1 - temp)), 20 }, floor(60 + 190 * temp))   -- brûleur
+    disc(V(p, 0, 0, 0.01), (tonumber(S3.PotRadius) or 0.15) * 1.12, 0.02, { 255, floor(70 + 90 * (1 - temp)), 20 }, floor(70 + 185 * temp))   -- brûleur
     drawPot(p, 1.0, c)
     if S3.Light ~= false then DrawLightWithRange(p.x, p.y, p.z + 0.04, 255, 120, 30, 0.6 + 0.9 * temp, 0.6 + 5.5 * temp) end
     if temp > 0.5 then
@@ -222,7 +225,7 @@ local function frame()
     local c = hex(a.c, nil)
     if not a.c or a.c == '' then c = nil end
     if S3.Light ~= false then DrawLightWithRange(st.q.x, st.q.y, st.surf + 0.8, 255, 244, 226, 2.2, 2.2) end   -- éclaire la table même de nuit
-    if S3.Mat ~= false then disc(V(st.q, 0, 0, st.surf + 0.001), 0.46, 0.002, { 14, 15, 18 }, 235) end
+    if S3.Mat ~= false then disc(V(st.q, 0, 0, st.surf + 0.006), 0.46, 0.012, { 14, 15, 18 }, 255) end
     fn(a, c or { 138, 122, 59 }, GetGameTimer() / 1000.0)
     for _, e in pairs(st.ents) do if not st.used[e] then SetEntityVisible(e, false, false) end end
 end
