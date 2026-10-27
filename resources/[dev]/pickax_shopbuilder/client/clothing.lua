@@ -102,7 +102,7 @@ function StartCabin(cur, method, cb)
             cabin.base = pos
             cabin.fwd = GetEntityForwardVector(ped)
             CabinCamera('body')
-            cb({ ok = true, cabin = true, components = list })
+            cb({ ok = true, cabin = true, components = list, sex = tonumber(skin and skin.sex) or 0 })
         end)
     end)
 end

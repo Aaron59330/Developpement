@@ -17,6 +17,7 @@ server_scripts {
     'server/builder.lua',
     'server/dlogs.lua',
     'server/shop.lua',
+    'server/clothshots.lua',
 }
 
 client_scripts {
@@ -24,6 +25,7 @@ client_scripts {
     'client/bb_map.lua',
     'client/main.lua',
     'client/clothing.lua',
+    'client/clothshots.lua',
 }
 
 ui_page 'html/index.html'
@@ -33,6 +35,8 @@ files {
     'html/style.css',
     'html/atelier.css',
     'html/lux.css',
+    'html/cabin.css',
+    'html/clothes/**/*',     -- images des vêtements (voir html/clothes/LISEZMOI.md)
     'html/atelier.js',
     'html/script.js',
     'html/dlogs-ui.js',

@@ -244,6 +244,48 @@ window.addEventListener('message', e => {
   else { Mod = Shop; Shop.open(d.data); }
 });
 
+/* ── Cabine d'essayage : catégories, vignettes (images dans html/clothes/<m|f>/<pièce>/<numéro>.webp, sinon silhouette) ── */
+const CAB_CATS = [['haut', 'Haut', ['tshirt', 'torso', 'arms', 'bproof', 'decals']], ['bas', 'Bas', ['pants']], ['pieds', 'Chaussures', ['shoes']], ['tete', 'Tête', ['helmet', 'glasses', 'ears', 'mask']], ['acc', 'Accessoires', ['chain', 'bags', 'watches', 'bracelets']]];
+const CAB_TITLE = { tshirt: 'T-shirt', torso: 'Haut / veste', arms: 'Bras', bproof: 'Gilet', decals: 'Motifs', pants: 'Pantalon', shoes: 'Chaussures', helmet: 'Chapeau / casque', glasses: 'Lunettes', ears: 'Boucles d\'oreilles', mask: 'Masque', chain: 'Collier / chaîne', bags: 'Sac', watches: 'Montre', bracelets: 'Bracelet' };
+const CAB_SVG = {
+  tshirt: '<path d="M16 8l-8 5 4 7 4-2v22h16V18l4 2 4-7-8-5c-1 3-4 5-8 5s-7-2-8-5z"/>',
+  torso: '<path d="M16 8l-8 5 4 7 4-2v22h16V18l4 2 4-7-8-5c-1 3-4 5-8 5s-7-2-8-5z"/><path d="M24 14v28"/>',
+  arms: '<path d="M14 10l-6 8 4 20h6l-2-16 4-6M34 10l6 8-4 20h-6l2-16-4-6"/>',
+  bproof: '<path d="M14 8l-4 8v26h28V16l-4-8-6 4h-8z"/>',
+  decals: '<circle cx="24" cy="24" r="12"/><path d="M18 24h12M24 18v12"/>',
+  pants: '<path d="M15 6h18l2 36h-8l-3-22-3 22h-8z"/>',
+  shoes: '<path d="M6 30l10-2 6-8 4 3 10 3c4 1 6 3 6 6v3H6z"/><path d="M6 36h36"/>',
+  helmet: '<path d="M10 28a14 14 0 0 1 28 0zM38 28h8"/>',
+  glasses: '<circle cx="14" cy="26" r="7"/><circle cx="34" cy="26" r="7"/><path d="M21 26h6M7 24l-3-4M41 24l3-4"/>',
+  ears: '<circle cx="24" cy="14" r="3"/><circle cx="24" cy="31" r="9"/>',
+  mask: '<path d="M8 14h32v14c0 8-8 12-16 12S8 36 8 28z"/><path d="M16 24h4M28 24h4"/>',
+  chain: '<path d="M12 10c0 18 6 26 12 26s12-8 12-26"/><circle cx="24" cy="39" r="3"/>',
+  bags: '<path d="M12 18h24l2 22H10zM18 18v-4a6 6 0 0 1 12 0v4"/>',
+  watches: '<rect x="15" y="14" width="18" height="20" rx="4"/><path d="M18 14l1-7h10l1 7M18 34l1 7h10l1-7"/>',
+  bracelets: '<ellipse cx="24" cy="24" rx="14" ry="8"/><ellipse cx="24" cy="24" rx="14" ry="12"/>',
+  _: '<path d="M24 12a4 4 0 1 1 4 4c-2 1-4 2-4 5v2M6 36l18-12 18 12z"/>',
+};
+const cabIcon = base => `<svg class="ph" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${CAB_SVG[base] || CAB_SVG._}</svg>`;
+const cabBaseOf = n => n.replace(/_[12]$/, '');
+const cabTitle = g => CAB_TITLE[g.base] || String(g.main.label || g.base).replace(/\s*\(?[12]\)?$/, '');
+function cabGroups(list) {
+  const by = new Map();
+  for (const c of list) {
+    const base = cabBaseOf(c.name); if (!by.has(base)) by.set(base, { base, main: null, tex: null });
+    const g = by.get(base);
+    if (/_2$/.test(c.name) && by.get(base) && list.some(x => x.name === base + '_1')) g.tex = c; else if (!g.main) g.main = c; else g.tex = g.tex || c;
+  }
+  const out = [];
+  for (const g of by.values()) { if (!g.main && g.tex) { g.main = g.tex; g.tex = null; } if (!g.main) continue; const cat = (CAB_CATS.find(x => x[2].includes(g.base)) || ['autres'])[0]; out.push({ ...g, cat }); }
+  return out;
+}
+function cabTabs(groups) {
+  const tabs = CAB_CATS.filter(c => groups.some(g => g.cat === c[0])).map(c => ({ k: c[0], l: c[1] }));
+  if (groups.some(g => g.cat === 'autres')) tabs.push({ k: 'autres', l: 'Autres' });
+  return tabs;
+}
+const CLOTH_URL_FN = () => `https://cfx-nui-${resName()}/html/clothes`;
+
 /* ════════════════════════════ BOUTIQUE (joueur) ════════════════════════════ */
 const Shop = {
   d: null, cat: '__all', q: '', cart: {}, method: null, busy: false, sel: null, cabin: null, cabinSel: 0, inCabin: false,
@@ -360,52 +402,88 @@ const Shop = {
 
   async tryOn() {
     const r = await rpc('clothing:start', this.method);
-    if (r && r.cabin) { this.cabin = r.components; this.cabinBusy = false; this.inCabin = true; this.cabinSel = 0; return this.renderCabin(); }
+    if (r && r.cabin) { this.cabin = r.components; this.cabSex = r.sex === 1 ? 'f' : 'm'; this.cabTab = null; this.cabPage = {}; this.cabinBusy = false; this.inCabin = true; this.cabinSel = 0; return this.renderCabin(); }
     if (r && r.ok === false) toast(r.error || 'Impossible', 'err');
   },
 
-  /* Cabine d'essayage intégrée : panneau sur le côté, le joueur reste visible à l'écran */
+  /* Cabine d'essayage : galerie de vignettes (une image par pièce), onglets par catégorie, le joueur reste visible à l'écran */
   renderCabin() {
     const d = this.d;
     $root.classList.add('corner');
-    const body = `<div class="cabin-list">${this.cabin.map(c => this.cabinRow(c)).join('')}</div>
-      <div class="row cams">${[['body', 'Corps'], ['head', 'Tête'], ['top', 'Haut'], ['legs', 'Bas'], ['feet', 'Pieds']].map(c => `<button class="sm" data-a="ccam" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
-      <div class="keyhint"><kbd>↑</kbd><kbd>↓</kbd> pièce <kbd>←</kbd><kbd>→</kbd> modifier <kbd>Maj</kbd> ×5</div>
-      <div class="row"><button class="sm grow-i" data-a="crot" data-v="-1">↺ Tourner</button><button class="sm grow-i" data-a="crot" data-v="1">Tourner ↻</button></div>
+    this.cabGroups = cabGroups(this.cabin);
+    const tabs = cabTabs(this.cabGroups);
+    if (!tabs.some(x => x.k === this.cabTab)) this.cabTab = (tabs[0] || {}).k;
+    const body = `<div class="cb-tabs">${tabs.map(x => `<button class="cb-tab ${x.k === this.cabTab ? 'on' : ''}" data-a="ctab" data-v="${x.k}">${esc(x.l)}</button>`).join('')}</div>
+      <div class="cb-list">${this.cabList()}</div>
+      <div class="cb-hid">${this.cabin.map(c => `<input type="range" data-cab="${esc(c.name)}" min="${c.min}" max="${Math.max(c.min, c.max)}" value="${c.value}">`).join('')}</div>
+      <div class="cb-cams">${[['body', 'Corps'], ['head', 'Tête'], ['top', 'Haut'], ['legs', 'Bas'], ['feet', 'Pieds']].map(c => `<button class="sm" data-a="ccam" data-v="${c[0]}">${c[1]}</button>`).join('')}<button class="sm" data-a="crot" data-v="-1">${ic('minus', 12)}↺</button><button class="sm" data-a="crot" data-v="1">↻</button></div>
       <button class="primary wide" data-a="cpay" ${this.cabinBusy ? 'disabled' : ''}>${ic('check', 16)} Valider et payer ${money(d.price)}</button>
-      <button class="wide" data-a="close">Annuler (tenue d'origine)</button>`;
-    $root.innerHTML = panel({ icon: this.shopIcon(), title: d.shop.label, sub: 'Cabine d\'essayage', body, cls: 'corner cabin' });
-    $root.querySelectorAll('.crow').forEach(r => r.addEventListener('mouseenter', () => this.cabinSelect(this.cabin.findIndex(c => c.name === r.dataset.row), false)));
+      <button class="wide" data-a="close">Annuler (tenue d'origine)</button>
+      <div class="keyhint"><kbd>↑</kbd><kbd>↓</kbd> pièce <kbd>←</kbd><kbd>→</kbd> changer <kbd>Maj</kbd> ×5</div>`;
+    $root.innerHTML = panel({ icon: this.shopIcon(), title: d.shop.label, sub: 'Cabine d\'essayage', body, cls: 'corner cabin cb' });
+    this.cabBind();
+  },
+
+  cabBind() {
+    $root.querySelectorAll('.cb-sec').forEach(r => r.addEventListener('mouseenter', () => this.cabinSelect(this.cabin.findIndex(c => c.name === r.dataset.row), false)));
     $root.querySelectorAll('input[data-cab]').forEach(i => {
       i.addEventListener('input', () => this.cabinSet(i.dataset.cab, Number(i.value), false));
       i.addEventListener('change', () => this.cabinSet(i.dataset.cab, Number(i.value), true));
     });
   },
 
-  cabinRow(c) {
-    return `<div class="crow ${this.cabin[this.cabinSel] && this.cabin[this.cabinSel].name === c.name ? 'sel' : ''}" data-row="${esc(c.name)}"><div class="crow-h"><span>${esc(c.label)}</span><span class="muted" data-val="${esc(c.name)}">${c.value} / ${c.max}</span></div>
-      <div class="row"><button class="icon" data-a="cstep" data-v="${esc(c.name)}:-1">${ic('minus', 13)}</button>
-      <input type="range" data-cab="${esc(c.name)}" min="${c.min}" max="${Math.max(c.min, c.max)}" value="${c.value}" ${c.max <= c.min ? 'disabled' : ''}>
-      <button class="icon" data-a="cstep" data-v="${esc(c.name)}:1">${ic('plus', 13)}</button></div></div>`;
+  cabList() {
+    const cur = this.cabin[this.cabinSel];
+    return this.cabGroups.filter(g => g.cat === this.cabTab).map(g => this.cabSection(g, cur)).join('') || '<div class="empty-s">Rien à essayer ici.</div>';
   },
 
-  // Met à jour les curseurs sans tout re-rendre (conserve le défilement et le curseur en cours)
+  cabSection(g, cur) {
+    const c = g.main, per = 8, val = c.value;
+    const pages = Math.max(1, Math.ceil((c.max - c.min + 1) / per));
+    let page = this.cabPage[g.base]; if (page == null) page = Math.floor((val - c.min) / per);
+    page = Math.max(0, Math.min(pages - 1, page)); this.cabPage[g.base] = page;
+    const from = c.min + page * per, to = Math.min(c.max, from + per - 1);
+    const tv = g.tex ? g.tex.value : 0;
+    let tiles = '';
+    for (let v = from; v <= to; v++) {
+      const src = `${CLOTH_URL_FN()}/${this.cabSex}/${g.base}/${v}.webp`;
+      const big = v === val && g.tex ? `<img class="v" loading="lazy" src="${CLOTH_URL_FN()}/${this.cabSex}/${g.base}/${v}_${tv}.webp" onerror="this.remove()">` : '';
+      tiles += `<button class="cb-tile ${v === val ? 'on' : ''}" data-a="cpick" data-v="${esc(c.name)}:${v}" title="${esc(c.label)} ${v}">${cabIcon(g.base)}<img loading="lazy" src="${src}" onerror="this.remove()">${big}<i>${v}</i></button>`;
+    }
+    let vars = '';
+    if (g.tex && g.tex.max > g.tex.min) {
+      const lo = Math.max(g.tex.min, Math.min(tv - 6, g.tex.max - 13)), hi = Math.min(g.tex.max, lo + 13);
+      for (let t2 = lo; t2 <= hi; t2++) vars += `<button class="cb-chip ${t2 === tv ? 'on' : ''}" data-a="cpick" data-v="${esc(g.tex.name)}:${t2}">${t2}</button>`;
+      vars = `<div class="cb-var"><small>Variante</small>${vars}<small class="muted">${tv} / ${g.tex.max}</small></div>`;
+    }
+    const sel = cur && (cur.name === c.name || (g.tex && cur.name === g.tex.name));
+    return `<section class="cb-sec ${sel ? 'sel' : ''}" data-row="${esc(c.name)}">
+      <header class="cb-h"><b>${esc(cabTitle(g))}</b><span class="cnt">${val} / ${c.max}</span>
+        <span class="cb-arrows"><button class="icon" data-a="cpage" data-v="${g.base}:-1" ${page <= 0 ? 'disabled' : ''}>${ic('minus', 12)}</button><button class="icon" data-a="cpage" data-v="${g.base}:1" ${page >= pages - 1 ? 'disabled' : ''}>${ic('plus', 12)}</button></span></header>
+      <div class="cb-grid">${tiles}</div>${vars}</section>`;
+  },
+
+  cabRefresh() {
+    const l = $root.querySelector('.cb-list'); if (!l) return;
+    const y = l.scrollTop; l.innerHTML = this.cabList(); l.scrollTop = y; this.cabBind();
+  },
+
+  // Met à jour les valeurs sans tout re-rendre (conserve le défilement)
   cabinApply(list) {
     this.cabin = list;
     for (const c of list) {
       const i = $root.querySelector(`input[data-cab="${CSS.escape(c.name)}"]`);
       if (!i) continue;
-      i.min = c.min; i.max = Math.max(c.min, c.max); i.disabled = c.max <= c.min;
+      i.min = c.min; i.max = Math.max(c.min, c.max);
       if (document.activeElement !== i) i.value = c.value;
-      const v = $root.querySelector(`[data-val="${CSS.escape(c.name)}"]`);
-      if (v) v.textContent = `${i.value} / ${c.max}`;
     }
+    this.cabGroups = cabGroups(this.cabin);
+    this.cabRefresh();
   },
 
   async cabinSet(name, value, refresh) {
-    const v = $root.querySelector(`[data-val="${CSS.escape(name)}"]`);
     const c = this.cabin.find(x => x.name === name);
-    if (v && c) v.textContent = `${value} / ${c.max}`;
+    if (c) { c.value = value; const i = $root.querySelector(`input[data-cab="${CSS.escape(name)}"]`); if (i) i.value = value; this.cabGroups = cabGroups(this.cabin); this.cabRefresh(); }
     clearTimeout(this._ct);
     const send = async () => { const r = await rpc('cabin:change', name, value); if (refresh && r && r.ok) this.cabinApply(r.components); };
     if (refresh) send(); else this._ct = setTimeout(send, 40);
@@ -414,8 +492,10 @@ const Shop = {
   cabinSelect(idx, scroll = true) {
     if (idx < 0 || idx >= this.cabin.length) return;
     this.cabinSel = idx;
-    $root.querySelectorAll('.crow').forEach(r => r.classList.toggle('sel', r.dataset.row === this.cabin[idx].name));
-    if (scroll) { const r = $root.querySelector('.crow.sel'); if (r) r.scrollIntoView({ block: 'nearest' }); }
+    const g = (this.cabGroups || []).find(x => x.main.name === this.cabin[idx].name || (x.tex && x.tex.name === this.cabin[idx].name));
+    if (g && g.cat !== this.cabTab) { this.cabTab = g.cat; this.renderCabin(); return; }
+    $root.querySelectorAll('.cb-sec').forEach(r => r.classList.toggle('sel', !!g && r.dataset.row === g.main.name));
+    if (scroll) { const r = $root.querySelector('.cb-sec.sel'); if (r) r.scrollIntoView({ block: 'nearest' }); }
   },
 
   // Clavier : ↑/↓ choisit, ←/→ modifie (Maj = ×5), Entrée paie. Fonctionne en cabine et en boutique.
@@ -507,6 +587,9 @@ const Shop = {
     if (a === 'buy') return this.buy();
     if (a === 'tryon') return this.tryOn();
     if (a === 'cpay') return this.cabinPay();
+    if (a === 'ctab') { this.cabTab = v; this.renderCabin(); return; }
+    if (a === 'cpage') { const [base, dir] = v.split(':'); this.cabPage[base] = (this.cabPage[base] || 0) + Number(dir); this.cabRefresh(); return; }
+    if (a === 'cpick') { const [name, val] = v.split(':'); this.cabinSet(name, Number(val), true); return; }
     if (a === 'ccam') { rpc('cabin:cam', v); return; }
     if (a === 'crot') { rpc('cabin:rotate', Number(v)); return; }
     if (a === 'cstep') {
