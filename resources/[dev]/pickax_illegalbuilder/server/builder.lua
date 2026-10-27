@@ -187,7 +187,7 @@ local POINTS = {
     drug = {
         harvest = merge(DRUGBASE, { harvest = obj({ item = ITEM, min = { 'n', 1, 1000, 1 }, max = { 'n', 1, 1000, 3 }, time = { 'n', 1, 600, 6 }, anim = ANIM, tool = TOOL,
             cooldown = { 'n', 0, 3600, 10 }, maxUses = { 'n', 0, 10000, 0 }, regen = { 'n', 10, 86400, 300 }, plant = PLANT }) }),
-        sell = merge(DRUGBASE, { sell = obj({ currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' }, maxPerHour = { 'n', 0, 100000, 0 },
+        sell = merge(DRUGBASE, { reveal = obj({ enabled = { 'b', false }, item = ITEM }), sell = obj({ currency = { 'e', { 'black_money', 'money', 'bank' }, 'black_money' }, maxPerHour = { 'n', 0, 100000, 0 },
             items = { 'a', obj({ item = ITEM, min = { 'n', 0, 100000000, 1 }, max = { 'n', 0, 100000000, 1 } }), Config.Max.Items, function(x) return x.item ~= '' end } }) }),
         launder = merge(DRUGBASE, { reveal = obj({ enabled = { 'b', false }, item = ITEM }), launder = obj({ rate = { 'n', 1, 100, 70 }, min = { 'n', 0, 100000000, 0 }, max = { 'n', 0, 100000000, 100000 }, from = ITEM,
             to = { 'e', { 'money', 'bank', 'black_money' }, 'money' }, maxPerHour = { 'n', 0, 1000000000, 0 } }) }),

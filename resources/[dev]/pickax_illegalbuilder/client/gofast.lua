@@ -94,7 +94,7 @@ local function revealedBy(item)
     for _, e in ipairs((State and State.entities) or {}) do
         for _, p in ipairs(e.points) do
             if p.coords and ((e.type == 'gofast' and e.gofastItem == item and p.kind == 'gfstart') or p.reveal == item) then
-                return p, (e.type == 'gofast') and 'le contact Go Fast' or 'le point de blanchiment'
+                return p, (e.type == 'gofast') and 'le contact Go Fast' or (p.kind == 'sell' and 'l\'acheteur' or 'le point de blanchiment')
             end
         end
     end

@@ -466,7 +466,7 @@ const NEWP = {
   pump: () => ({ kind: 'pump', label: 'Pompe', blip: false, ped: PED0() }),
   harvest: () => ({ kind: 'harvest', label: 'Point de récolte', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, harvest: { item: '', min: 1, max: 3, time: 6, anim: 'harvest', tool: TOOL0(), cooldown: 10, maxUses: 0, regen: 300 } }),
   process: () => ({ kind: 'process', label: 'Laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, recipes: [NEWROW.recipe()] }),
-  sell: () => ({ kind: 'sell', label: 'Dealer', blip: false, ped: { enabled: true, model: 'g_m_y_mexgoon_01', scenario: 'WORLD_HUMAN_DRUG_DEALER' }, access: ACC0(), copsRequired: 0, alertChance: 5, sell: { currency: 'black_money', maxPerHour: 0, items: [NEWROW.sellitem()] } }),
+  sell: () => ({ kind: 'sell', label: 'Dealer', reveal: { enabled: true, item: 'dealer_tablet' }, blip: false, ped: { enabled: true, model: 'g_m_y_mexgoon_01', scenario: 'WORLD_HUMAN_DRUG_DEALER' }, access: ACC0(), copsRequired: 0, alertChance: 5, sell: { currency: 'black_money', maxPerHour: 0, items: [NEWROW.sellitem()] } }),
   launder: () => ({ kind: 'launder', label: 'Blanchiment', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0, launder: { rate: 70, min: 500, max: 50000, from: 'black_money', to: 'money', maxPerHour: 0 } }),
   door: () => ({ kind: 'door', label: 'Entrée du laboratoire', blip: false, ped: PED0(), access: ACC0(), copsRequired: 0, alertChance: 0 }),
   clerk: () => ({ kind: 'clerk', label: 'Vendeur', blip: false, ped: { enabled: true, model: 'mp_m_shopkeep_01', scenario: 'WORLD_HUMAN_STAND_IMPATIENT' } }),
@@ -1054,7 +1054,9 @@ const Builder = {
       <div class="grid2 mt">${this.toolFields(`${base}.harvest`)}</div></div>`;
     if (k === 'process') return this.drugPicker(base, p) + this.outfitCard(base) + `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${(p.recipes || []).length})</div><button class="sm" data-a="rowAdd" data-v="${base}.recipes|recipe">${ic('plus', 14)} Recette</button></div>
       ${(p.recipes || []).map((r, j) => this.recipeEditor(`${base}.recipes.${j}`, r, j)).join('') || '<div class="hint">Aucune recette.</div>'}</div>`;
-    if (k === 'sell') return this.drugPicker(base, p) + `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
+    if (k === 'sell') return this.drugPicker(base, p) + `<div class="card"><div class="card-h"><div class="t">${ic('tablet', 17)} Tablette vendeur</div>${this.fC('Tablette obligatoire', `${base}.reveal.enabled`, { r: 1 })}</div>
+      ${this.v(`${base}.reveal.enabled`) ? `<div class="grid2">${this.fItem('Item de la tablette', `${base}.reveal.item`)}</div><div class="hint mt-s">Sans cet item, le joueur ne voit pas ce dealer (le PNJ n'apparaît pas) et ne peut pas lui vendre. Avec l'item, le dealer apparaît sur sa carte. Par défaut : <code>dealer_tablet</code> (en vente chez le marchand, avec les tablettes Go Fast et blanchiment). Le PNJ se règle dans l'onglet du point.</div>` : '<div class="hint">Désactivée : dealer visible par tous.</div>'}</div>
+      <div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Achats du dealer</div></div>
       <div class="grid2">${this.fSel('Paiement', `${base}.sell.currency`, [['black_money', 'Argent sale'], ['money', 'Espèces'], ['bank', 'Banque']])}${this.fN('Limite par joueur et par heure (0 = aucune)', `${base}.sell.maxPerHour`, { min: 0 })}</div>
       <div class="mt">${this.listEditor(`${base}.sell.items`, [{ key: 'item', label: 'Item acheté', kind: 'item', w: '1.5fr' }, { key: 'min', label: 'Prix min', kind: 'num', w: '110px' }, { key: 'max', label: 'Prix max', kind: 'num', w: '110px' }], 'sellitem', 'Ajouter un item')}</div>
       <div class="hint mt-s">Le prix unitaire est tiré au hasard entre min et max à chaque vente.</div></div>`;
