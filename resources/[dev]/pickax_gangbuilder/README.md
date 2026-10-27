@@ -120,3 +120,14 @@ Tout est réglable dans `config.lua` (`Config.Territories`) et en jeu (Paramètr
 - **Racket** : un gang qui vend de la drogue sur le territoire d'un autre paie `RacketRate` % au propriétaire (via `exports.pickax_gangbuilder:TerritoryTax`, appelé par le Builder Illégal). Les membres du gang propriétaire ne paient rien ; les notifications du propriétaire sont groupées (1 par minute et par territoire).
 - Base de données : colonne `level` ajoutée automatiquement à `gangbuilder_territories` au démarrage (aussi dans `database.sql`).
 - Tests hors jeu : `lua5.4 tools/tests/territories_test.lua` (42 vérifications).
+
+## Zones de tribut (`Config.Tribute`)
+
+Un commerce de la ville est disputé entre les gangs, puis le vainqueur va y collecter un tribut.
+1. L'événement se lance tout seul toutes les `Interval` minutes (si `MinGangsOnline` gangs sont connectés) ou à la main : `/starttribute [nom]`, arrêt : `/stoptribute` (staff `_dev`). Tous les gangs sont prévenus, la zone s'affiche sur la carte et au sol.
+2. Pendant `CaptureSeconds`, on se bat dans la zone. Le serveur compte chaque seconde les membres **vivants** de chaque gang dans la zone (HUD : temps restant et survivants par gang).
+3. À la fin, le gang avec le plus de survivants gagne (égalité : celui qui a été le plus présent ; égalité parfaite ou moins de `MinPerGang` membres : pas de vainqueur).
+4. Le gang vainqueur a `CollectWindow` secondes pour aller au point de collecte du commerce (touche E, vérifié côté serveur : gang, vie, distance). Il touche `Reward` dans la trésorerie (`RewardAccount`) et `RewardRep` de réputation ; l'annonce est publiée dans les actus. Une seule collecte par événement.
+- Les commerces sont dans `Config.Tribute.Zones` (nom, libellé, centre, rayon, point de collecte, `reward` facultatif par commerce) : adapte les coordonnées à ta map.
+- Export serveur : `exports.pickax_gangbuilder:StartTribute('ammunation')`.
+- Tests hors jeu : `ROOT=. lua tools/tests/tribute_test.lua` (18 vérifications).

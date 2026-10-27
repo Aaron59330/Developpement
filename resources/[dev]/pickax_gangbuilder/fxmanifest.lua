@@ -23,6 +23,7 @@ server_scripts {
     'server/props.lua',
     'server/conflicts.lua',
     'server/objectives.lua',
+    'server/tribute.lua',
     'server/tablet.lua',
     'server/settings.lua',
 }
@@ -37,6 +38,7 @@ client_scripts {
     'client/props.lua',
     'client/conflicts.lua',
     'client/objectives.lua',
+    'client/tribute.lua',
 }
 
 ui_page 'html/index.html'

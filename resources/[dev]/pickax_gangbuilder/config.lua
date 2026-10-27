@@ -135,6 +135,26 @@ Config.Conflicts = {
 -- Un colis apparaît dans une zone. Le premier gang qui le prend doit RESTER dans la zone `Hold` secondes avec le colis
 -- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
 -- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
+-- ── Zones de tribut : les gangs se disputent un commerce ; à la fin, le gang qui a le plus de membres VIVANTS dans la zone gagne le droit d'aller y collecter le tribut ──
+Config.Tribute = {
+    Enabled         = true,
+    AutoStart       = true,    -- lance un événement automatiquement (/starttribute [nom] pour en lancer un à la main, /stoptribute pour l'arrêter)
+    Interval        = 60,      -- minutes entre deux événements automatiques
+    MinGangsOnline  = 2,       -- gangs ayant des membres connectés pour lancer un événement automatique
+    MinPerGang      = 1,       -- membres vivants minimum dans la zone pour pouvoir gagner
+    CaptureSeconds  = 300,     -- durée de la dispute de la zone (secondes) : on compte les survivants à la fin
+    CollectWindow   = 600,     -- secondes laissées au gang vainqueur pour aller collecter au commerce
+    CollectDistance = 3.5,     -- distance du point de collecte
+    RewardAccount   = 'dirty', -- 'dirty' | 'money'
+    Reward          = 3000,    -- tribut versé à la trésorerie (modifiable par commerce)
+    RewardRep       = 15,      -- réputation du gang vainqueur
+    Zones = {                  -- commerces à disputer : coords = centre de la zone, collect = point où le gang vainqueur récupère le tribut
+        { name = 'ammunation', label = 'Ammu-Nation de Pillbox', coords = vector3(21.0, -1106.0, 29.8),   radius = 55.0, collect = vector3(21.5, -1106.9, 29.8) },
+        { name = 'barber',     label = 'Barbier de Davis',       coords = vector3(137.0, -1708.0, 29.3),  radius = 45.0, collect = vector3(136.8, -1708.4, 29.3) },
+        { name = 'tattoo',     label = 'Tatoueur de Vespucci',   coords = vector3(-1153.0, -1425.0, 4.9), radius = 45.0, collect = vector3(-1153.7, -1425.7, 4.9) },
+    },
+}
+
 Config.Objectives = {
     Enabled         = true,
     AutoStart       = true,    -- lance une mission automatiquement
