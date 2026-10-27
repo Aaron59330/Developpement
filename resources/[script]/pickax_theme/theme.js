@@ -61,19 +61,28 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
   // ── Style des interfaces : « arcade » (nouveau) ou « ancien » (style d'origine : sans arcade.css ni hx.css) — réglé depuis le panel web
   var DKEY = 'pickax_design_v1';
   var applyDesign = function (d) {
-    d = d === 'ancien' ? 'ancien' : 'arcade';
+    d = d === 'ancien' ? 'ancien' : (d === 'pinata' ? 'pinata' : 'arcade');
     window.PICKAX_DESIGN = d;
     try { localStorage.setItem(DKEY, d); } catch (e) {}
     var go = function () {
-      document.documentElement.setAttribute('data-design', d);
+      var de = document.documentElement;
+      de.setAttribute('data-design', d);
+      de.setAttribute('data-res', String(location.hostname || '').replace(/^cfx-nui-/, ''));   // limite les règles Piñata à l'interface courante
       var b = document.body;
       if (b && b.classList.contains('hx')) b.setAttribute('data-hx', '1');
+      var plain = d === 'ancien' || d === 'pinata';                                              // base « d'origine » : Piñata s'habille par-dessus, sans arcade.css
       [].forEach.call(document.querySelectorAll('link[rel~="stylesheet"]'), function (l) {
         var arc = l.getAttribute('data-arcade-href');
-        if (arc) { l.setAttribute('href', d === 'ancien' ? l.getAttribute('data-ancien-href') : arc); return; }
+        if (arc) { l.setAttribute('href', plain ? l.getAttribute('data-ancien-href') : arc); return; }
         var h = l.getAttribute('href') || '';
-        if (/arcade\.css/.test(h) || /pickax_theme\/hx\.css/.test(h)) l.disabled = d === 'ancien';
+        if (/arcade\.css/.test(h)) l.disabled = plain;
+        else if (/pickax_theme\/hx\.css/.test(h)) l.disabled = d === 'ancien';                  // hx.css reste actif en Piñata (structure des menus)
       });
+      var pl = document.getElementById('pickax-pinata-css');
+      if (d === 'pinata') {
+        if (!pl) { pl = document.createElement('link'); pl.id = 'pickax-pinata-css'; pl.rel = 'stylesheet'; pl.href = 'https://cfx-nui-pickax_theme/pinata.css'; (document.head || de).appendChild(pl); }
+        pl.disabled = false;
+      } else if (pl) pl.disabled = true;
       if (b) { if (d === 'ancien') b.classList.remove('hx'); else if (b.hasAttribute('data-hx')) b.classList.add('hx'); }
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();

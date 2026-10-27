@@ -41,7 +41,7 @@ function validateDoc(key, v) {
     t.AccentColor = v.AccentColor.toLowerCase(); t.InventoryColor = hex.test(v.InventoryColor || '') ? v.InventoryColor.toLowerCase() : '';
     const txt = (x, max, req) => { x = String(x == null ? '' : x).trim(); if (x.length > max || /['"\\\r\n]/.test(x)) return null; if (req && !x) return null; return x; };
     t.ServerName = txt(v.ServerName, 60, true); t.ServerShortName = txt(v.ServerShortName, 24, true); t.ServerTagline = txt(v.ServerTagline, 80); t.ServerDiscord = txt(v.ServerDiscord, 80); t.ServerLogo = txt(v.ServerLogo, 200, true);
-    t.Design = v.Design === 'ancien' ? 'ancien' : 'arcade';
+    t.Design = ['ancien', 'pinata'].includes(v.Design) ? v.Design : 'arcade';
     const url = x => { x = String(x == null ? '' : x).trim(); if (!x) return ''; return x.length <= 300 && /^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]+$/.test(x) ? x : null; };
     t.MenuBanner = url(v.MenuBanner); t.LoadingBanner = url(v.LoadingBanner);
     const num = (x, lo, hi, d) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d; };

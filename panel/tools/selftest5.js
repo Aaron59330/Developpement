@@ -16,6 +16,10 @@ const srv = http.createServer(app).listen(0, async () => {
     for (const bad of [{ accent: 'rouge' }, { accent: '#12345' }, { accent: 'red;}</style>' }, { design: 'v3' }, { theme: 'x' }]) { r = await a('PUT', '/api/auth/prefs', bad); ok(r.ok === false, 'valeur refusée : ' + JSON.stringify(bad)); }
     me = await b('GET', '/api/auth/me'); ok(me.user.prefs.design === 'v2' && me.user.prefs.accent === null, 'les préférences d’un client ne touchent pas celles des autres');
     const anon = mk(); r = await fetch(base + '/api/auth/prefs', { method: 'PUT', headers: { 'content-type': 'application/json', origin: base }, body: '{}' }); ok(r.status === 401 || r.status === 403, 'refusé sans connexion');
+    const C = require('../lib/commands'); const th = { AccentColor: '#fdc27d', ServerName: 'AERO', ServerShortName: 'AERO', ServerTagline: 't', ServerDiscord: 'd', ServerLogo: 'logo.png', MenuBanner: '', LoadingBanner: '', MarkerType: 23, MarkerAlpha: 150, MarkerSize: 1, BlipScale: .5, BlipColor: -1, MarkerColor: '' };
+    const des = d => { const x = C.validateDoc('theme', { ...th, Design: d }); return x.error ? x.error : (x.value || x.payload || x).Design; };
+    ok(des('pinata') === 'pinata' && des('ancien') === 'ancien' && des('arcade') === 'arcade', 'style des interfaces : Piñata, ancien et Arcade acceptés');
+    ok(des('autre') === 'arcade' && des(undefined) === 'arcade', 'style inconnu : retour à Arcade');
   } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
   console.log(process.exitCode ? '' : `\n${n} vérifications OK`); srv.close(); setTimeout(() => process.exit(process.exitCode || 0), 200);
 });

@@ -6,7 +6,7 @@ local DEFAULTS = {
     btnRadius = 12, cardRadius = 18,
     sound = true, volume = 60,
 }
-local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true }
+local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true, pinata = true }
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }
 local RADIUS = { btnRadius = { 0, 6, 12, 18, 24, 999 }, cardRadius = { 0, 8, 14, 18, 24, 28 } }

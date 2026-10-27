@@ -72,7 +72,7 @@ function hexRgb(h) {
   return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : (window.PICKAX_ACCENT_RGB || '253,194,125');
 }
 
-var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96, arcade: .96 };
+var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96, arcade: .96, pinata: .96 };
 var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
 
 function applyCfg(c) {
@@ -85,8 +85,9 @@ function applyCfg(c) {
 // en thème « ancien », le style Arcade redevient « Noir ». Les autres choix du joueur (Verre, Clair, Néon, Couleur du serveur) sont respectés.
 function effStyle(c) {
   var s = c.style || 'noir', d = window.PICKAX_DESIGN || 'arcade';
+  if (d === 'pinata' && (s === 'noir' || s === 'arcade')) return 'pinata';
   if (d === 'arcade' && s === 'noir') return 'arcade';
-  if (d === 'ancien' && s === 'arcade') return 'noir';
+  if ((d === 'ancien' || d === 'pinata') && s === 'arcade') return d === 'pinata' ? 'pinata' : 'noir';
   return s;
 }
 

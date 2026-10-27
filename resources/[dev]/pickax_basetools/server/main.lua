@@ -251,7 +251,7 @@ local function cleanTheme(v)
     if type(v) ~= 'table' then return nil, 'Données invalides' end
     local function txt(x, max) x = tostring(x or ''):gsub('^%s+', ''):gsub('%s+$', '') if #x > max or x:find('[\'"\\\r\n]') then return nil end return x end
     local o = {}
-    o.Design = (v.Design == 'ancien' or v.Design == 'arcade') and v.Design or (readConfigValues().Design or 'arcade')
+    o.Design = (v.Design == 'ancien' or v.Design == 'arcade' or v.Design == 'pinata') and v.Design or (readConfigValues().Design or 'arcade')
     local prev = readConfigValues()
     local function url(x)
         x = tostring(x or '')

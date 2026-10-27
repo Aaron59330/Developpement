@@ -20,3 +20,5 @@ Après modification : `restart pickax_theme`, puis relance les ressources voulue
 - `theme.js` contient des valeurs de secours si `pickax_core/config.lua` est illisible.
 - `server.cfg` (`sv_projectName`, `sets discord`…) reste à modifier à la main : ce fichier n'est pas lisible par les scripts.
 - Les choix faits en jeu par les joueurs (menu personnel) ou enregistrés dans un builder priment sur la couleur par défaut.
+
+- Styles des interfaces : `arcade` (défaut), `ancien` ou `pinata` (festif, `pinata.css` + police `fonts/fredoka-latin.woff2`), réglés depuis le panel web (Identité & thème).
