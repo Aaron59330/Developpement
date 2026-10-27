@@ -2155,3 +2155,18 @@ CreateThread(function()
 		end
 	end
 end)
+
+-- Filet de sécurité : le flou plein écran ne doit exister que pendant que l'inventaire est ouvert.
+-- Si un autre menu (boutique, builders, menu F5…) a pris le focus pendant la fermeture, le flou restait collé à l'écran.
+CreateThread(function()
+	local stuck = 0
+	while true do
+		Wait(600)
+		if invOpen ~= true and not invClosing and IsScreenblurFadeRunning() then
+			stuck = stuck + 1
+			if stuck >= 2 then Utils.blurOut() stuck = 0 end
+		else
+			stuck = 0
+		end
+	end
+end)
