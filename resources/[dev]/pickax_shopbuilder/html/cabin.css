@@ -43,3 +43,4 @@
 .cb .empty-s { padding: 18px; text-align: center; color: var(--muted, #8d8d96); font-size: 13px; }
 .cb .keyhint { margin-top: 10px; }
 .cb .cb2-foot button.primary, body.hx .cb .cb2-foot button.primary { background: var(--cba) !important; color: var(--cbi) !important; border: 1px solid var(--cba) !important; }
+body #root:not(.hidden) { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }   /* jamais de voile ni de flou derrière la cabine */

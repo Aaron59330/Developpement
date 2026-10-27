@@ -80,7 +80,7 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
       });
       var pl = document.getElementById('pickax-pinata-css');
       if (d === 'pinata') {
-        if (!pl) { pl = document.createElement('link'); pl.id = 'pickax-pinata-css'; pl.rel = 'stylesheet'; pl.href = 'https://cfx-nui-pickax_theme/pinata.css'; (document.head || de).appendChild(pl); }
+        if (!pl) { pl = document.createElement('link'); pl.id = 'pickax-pinata-css'; pl.rel = 'stylesheet'; pl.href = 'https://cfx-nui-pickax_theme/pinata.css?v=2'; (document.head || de).appendChild(pl); }
         pl.disabled = false;
       } else if (pl) pl.disabled = true;
       if (b) { if (d === 'ancien') b.classList.remove('hx'); else if (b.hasAttribute('data-hx')) b.classList.add('hx'); }
