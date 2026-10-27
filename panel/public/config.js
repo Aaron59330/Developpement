@@ -142,3 +142,38 @@ PAGES.settings = async function () {
     el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Un réglage ne change rien tant que tu ne l’as pas modifié : les valeurs d’origine de ta base restent en vigueur. Les changements sont appliqués en direct sur le serveur, sans redémarrage.'),
     el('div', { class: 'setlayout' }, rail, main), bar);
 };
+
+// ═══════════════ PERSONNALISATION DU PANEL (design, thème, couleur principale — propre à chaque compte) ═══════════════
+PAGES['custom'] = function () {
+  const PRESETS = [['#fdc27d', 'Jaune AERO'], ['#ff9f43', 'Orange'], ['#f87171', 'Rouge'], ['#f472b6', 'Rose'], ['#c084fc', 'Violet'], ['#818cf8', 'Indigo'], ['#60a5fa', 'Bleu'], ['#22d3ee', 'Cyan'], ['#4ade80', 'Vert'], ['#e5e7eb', 'Blanc']];
+  const DEF = '#fdc27d';
+  const root = el('div', {});
+  const mock = kind => kind === 'v2'
+    ? el('div', { class: 'mk mk2' }, el('div', { class: 'mk-side' }, el('i', {}), el('i', { class: 'on' }), el('i', {}), el('i', {})), el('div', { class: 'mk-frame' }, el('b', {}), el('div', { class: 'mk-cards' }, el('s', {}), el('s', {}), el('s', {})), el('em', {})))
+    : el('div', { class: 'mk mk1' }, el('div', { class: 'mk-side' }, el('i', {}), el('i', { class: 'on' }), el('i', {}), el('i', {})), el('div', { class: 'mk-frame' }, el('b', {}), el('div', { class: 'mk-cards' }, el('s', {}), el('s', {}), el('s', {})), el('em', {})));
+  const opt = (sel, title, desc, onclick, preview) => el('button', { class: 'opt' + (sel ? ' on' : ''), onclick }, preview, el('div', { class: 'opt-t' }, el('b', {}, title), sel ? el('span', { class: 'pill acc' }, 'Actuel') : null), el('small', { class: 'muted' }, desc));
+  const themeMock = t => el('div', { class: 'mk mkt ' + t }, el('div', { class: 'mk-side' }, el('i', {}), el('i', { class: 'on' }), el('i', {})), el('div', { class: 'mk-frame' }, el('b', {}), el('s', {}), el('s', {})));
+  const build = () => {
+    const pr = state.user.prefs || { design: 'v2', theme: 'sombre', accent: null };
+    const accent = (pr.accent || DEF).toLowerCase();
+    const sw = PRESETS.map(([hex, name]) => el('button', { class: 'swc' + (accent === hex ? ' on' : ''), title: name, style: 'background:' + hex, onclick: async () => { await savePrefs({ accent: hex === DEF ? null : hex }); toast('Couleur « ' + name + ' » appliquée'); redraw(); } }));
+    const picker = el('input', { type: 'color', value: accent, style: 'width:54px;height:42px;padding:3px', oninput: e => applyAccent(e.target.value), onchange: async e => { await savePrefs({ accent: e.target.value }); toast('Couleur enregistrée'); redraw(); } });
+    const hex = el('input', { type: 'text', value: accent, maxlength: 7, style: 'max-width:130px;font-family:ui-monospace,Menlo,monospace', onkeydown: async e => { if (e.key !== 'Enter') return; const v = e.target.value.trim(); if (!/^#[0-9a-fA-F]{6}$/.test(v)) return toast('Code couleur invalide (ex. #fdc27d)', 'bad'); await savePrefs({ accent: v.toLowerCase() }); toast('Couleur enregistrée'); redraw(); } });
+    return [head('Personnalisation du panel'),
+      el('p', { class: 'muted', style: 'margin:-6px 0 18px' }, 'Ces choix ne concernent que ton compte : ils s’appliquent tout de suite et te suivent sur tous tes appareils.'),
+      el('div', { class: 'card' }, el('h2', {}, 'Design du panel'), el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Garde le nouveau design ou reviens à l’ancien style.'),
+        el('div', { class: 'opts' },
+          opt(pr.design !== 'v1', 'Nouveau design', 'Cadre arrondi, boutons blancs, police Geist.', async () => { await savePrefs({ design: 'v2' }); toast('Nouveau design activé'); redraw(); }, mock('v2')),
+          opt(pr.design === 'v1', 'Ancien design', 'Style incliné et italique d’origine.', async () => { await savePrefs({ design: 'v1' }); toast('Ancien design activé'); redraw(); }, mock('v1')))),
+      el('div', { class: 'card' }, el('h2', {}, 'Thème'), el('div', { class: 'opts' },
+        opt(pr.theme !== 'clair', 'Sombre', 'Fond sombre, reposant pour les yeux.', async () => { await savePrefs({ theme: 'sombre' }); toast('Thème sombre'); redraw(); }, themeMock('dark')),
+        opt(pr.theme === 'clair', 'Clair', 'Contenu blanc, menu sombre.', async () => { await savePrefs({ theme: 'clair' }); toast('Thème clair'); redraw(); }, themeMock('light')))),
+      el('div', { class: 'card' }, el('h2', {}, 'Couleur principale'), el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Change le jaune du panel : menu actif, pastilles, interrupteurs, graphiques, liens.'),
+        el('div', { class: 'swrow' }, sw),
+        el('div', { class: 'row', style: 'margin-top:14px' }, el('span', { class: 'muted' }, 'Couleur libre'), picker, hex, el('button', { class: 'btn', onclick: async () => { await savePrefs({ accent: null }); toast('Jaune AERO rétabli'); redraw(); } }, el('span', {}, 'Rétablir le jaune AERO'))),
+        el('div', { class: 'cprev' }, el('span', { class: 'muted' }, 'Aperçu'), el('button', { class: 'btn p' }, el('span', {}, 'Bouton principal')), el('span', { class: 'pill acc' }, 'Pastille'), el('a', { href: '#' , onclick: e => e.preventDefault() }, 'Lien'), el('div', { class: 'bar-row', style: 'width:160px;margin:0' }, el('div', { class: 'bt' }, el('i', { style: 'display:block;height:100%;width:62%;background:var(--ac)' })))))];
+  };
+  const redraw = () => root.replaceChildren(...build().filter(Boolean));
+  redraw();
+  return root;
+};

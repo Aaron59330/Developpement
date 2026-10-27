@@ -5,8 +5,16 @@ const $app = document.getElementById('app');
 const getTheme = () => { try { return localStorage.getItem('aero_theme') === 'clair' ? 'clair' : 'sombre'; } catch (e) { return 'sombre'; } };
 const getDesign = () => document.documentElement.getAttribute('data-design') === 'v1' ? 'v1' : 'v2';
 const setDesign = d => { document.documentElement.setAttribute('data-design', d); try { localStorage.setItem('aero_design', d); } catch (e) {} };
+const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const applyAccent = hex => {
+  const r = document.documentElement.style;
+  if (!hex) { r.removeProperty('--a'); r.removeProperty('--ink'); } else { const [R, G, B] = hexRgb(hex); r.setProperty('--a', R + ',' + G + ',' + B); r.setProperty('--ink', (0.299 * R + 0.587 * G + 0.114 * B) > 150 ? '#15110a' : '#ffffff'); }
+  try { if (hex) localStorage.setItem('aero_accent', hex); else localStorage.removeItem('aero_accent'); } catch (e) {}
+};
 const setTheme = t => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('aero_theme', t); } catch (e) {} };
 setTheme(getTheme());
+const applyPrefs = p => { if (!p) return; setDesign(p.design === 'v1' ? 'v1' : 'v2'); setTheme(p.theme === 'clair' ? 'clair' : 'sombre'); applyAccent(p.accent || null); };
+const savePrefs = async patch => { state.user.prefs = { ...(state.user.prefs || {}), ...patch }; applyPrefs(state.user.prefs); const r = await api('PUT', '/api/auth/prefs', patch); if (!r.ok) toast(r.error || 'Erreur', 'bad'); };
 function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
@@ -45,7 +53,7 @@ const go = p => { location.hash = '#/' + p; };
 function curServer() { return state.servers.find(s => s.id === state.sid) || state.servers[0] || null; }
 async function boot() {
   state.cfg = await api('GET', '/api/auth/config');
-  const me = await api('GET', '/api/auth/me'); state.user = me.ok ? me.user : null;
+  const me = await api('GET', '/api/auth/me'); state.user = me.ok ? me.user : null; if (state.user) applyPrefs(state.user.prefs);
   if (state.user) await loadServers();
   render();
 }
@@ -64,7 +72,7 @@ function authView(startMode) {
   const draw = () => {
     const email = el('input', { type: 'email', placeholder: 'E-mail', autocomplete: 'email' }), pass = el('input', { type: 'password', placeholder: 'Mot de passe', autocomplete: mode === 'login' ? 'current-password' : 'new-password' }), name = el('input', { placeholder: 'Pseudo', autocomplete: 'username' });
     const err = el('div', { class: 'muted', style: 'color:var(--bad);min-height:20px;margin-top:8px' });
-    const submit = async () => { const r = await api('POST', '/api/auth/' + mode, { email: email.value, password: pass.value, username: name.value }); if (!r.ok) { err.textContent = r.error || 'Erreur'; return; } const me = await api('GET', '/api/auth/me'); state.user = me.user; await loadServers(); go('overview'); render(); };
+    const submit = async () => { const r = await api('POST', '/api/auth/' + mode, { email: email.value, password: pass.value, username: name.value }); if (!r.ok) { err.textContent = r.error || 'Erreur'; return; } const me = await api('GET', '/api/auth/me'); state.user = me.user; applyPrefs(state.user.prefs); await loadServers(); go('overview'); render(); };
     const toggle = () => { mode = mode === 'login' ? 'register' : 'login'; history.replaceState(null, '', '#/' + mode); draw(); };
     [email, pass, name].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
     box.replaceChildren(...[el('img', { src: 'img/logo.png', alt: 'AERO' }), el('h1', {}, mode === 'login' ? 'Connexion' : 'Créer un compte'), el('p', { class: 'muted', style: 'margin:4px 0 14px' }, 'Gère ton serveur FiveM depuis ton espace client.'),
@@ -80,7 +88,7 @@ function authView(startMode) {
 function shell(content) {
   const [page] = route(); const isAdmin = state.user.role === 'admin'; const srv = curServer(); const lonely = !isAdmin && !state.servers.length;
   const item = (id, label, icon) => el('a', { class: 'nav' + (page === id ? ' on' : ''), href: '#/' + id }, svg(ICON[icon]), el('span', {}, label));
-  const bottom = el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setDesign(getDesign() === 'v2' ? 'v1' : 'v2'); render(); } }, svg('M4 5h16v14H4zM9 5v14'), el('span', {}, getDesign() === 'v2' ? 'Design : Nouveau → ancien' : 'Design : Ancien → nouveau')), el('a', { class: 'nav', href: '#', onclick: e => { e.preventDefault(); setTheme(getTheme() === 'clair' ? 'sombre' : 'clair'); render(); } }, svg('M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'), el('span', {}, getTheme() === 'clair' ? 'Thème : Clair → passer au sombre' : 'Thème : Sombre → passer au clair')), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; state.servers = []; location.hash = '#/'; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')')));
+  const bottom = el('div', { class: 'bottom' }, item('account', 'Paramètres du compte', 'user'), item('support', 'Aide et support', 'help'), item('custom', 'Personnalisation du panel', 'brush'), el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/api/auth/logout', {}); state.user = null; state.servers = []; location.hash = '#/'; render(); } }, svg(ICON.out), el('span', {}, 'Déconnexion (' + state.user.username + ')')));
   const side = lonely ? el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }), el('div', { class: 'sec' }, 'Mon espace'), item('offers', 'Boutique', 'cart'), item('patchnotes', 'Patch notes', 'book'), bottom) : el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }),
     state.servers.length ? el('select', { onchange: e => setSid(+e.target.value), style: 'margin-bottom:6px' }, state.servers.map(s => el('option', { value: s.id, selected: s.id === (srv && srv.id) }, s.server_name + (s.online ? '' : ' (hors ligne)')))) : null,
     el('div', { class: 'sec' }, 'Général'), item('overview', 'Dashboard', 'home'), item('activity', 'Journal d’activités', 'list'), item('stats', 'Statistiques', 'chart'),
@@ -293,7 +301,7 @@ async function render() {
   clearInterval(state.timer); const id = ++renderId;
   if (!state.user) { $app.replaceChildren(window.publicView ? window.publicView() : authView()); return; }
   const [page] = route(); const lonely = state.user.role !== 'admin' && !state.servers.length;
-  if (lonely && !['offers', 'support', 'account', 'patchnotes'].includes(page)) { go('offers'); return; }
+  if (lonely && !['offers', 'support', 'account', 'patchnotes', 'custom'].includes(page)) { go('offers'); return; }
   const fn = PAGES[page] || PAGES.overview;
   if (page.startsWith('a-') && state.user.role !== 'admin') { go('overview'); return; }
   let content; try { content = await fn(); } catch (e) { console.error(e); content = el('div', { class: 'card' }, 'Erreur d’affichage : ' + e.message); }

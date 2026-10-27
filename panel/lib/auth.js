@@ -26,5 +26,16 @@ function csrf(req, res, next) {
   if (!req.is('application/json')) return res.status(415).json({ ok: false, error: 'JSON requis' });
   next();
 }
-const publicUser = u => ({ id: u.id, email: u.email, username: u.username, role: u.role, created_at: u.created_at });
-module.exports = { COOKIE, startSession, loadUser, needUser, needAdmin, csrf, publicUser, ip, hash: p => bcrypt.hashSync(p, 11), check: (p, h) => bcrypt.compareSync(p, h) };
+// préférences d'affichage du panel (design, thème, couleur principale), propres à chaque compte
+const DEFAULT_PREFS = { design: 'v2', theme: 'sombre', accent: null };
+function getPrefs(uid) { try { const r = db.prepare('SELECT value FROM settings WHERE key=?').get('uprefs:' + uid); return { ...DEFAULT_PREFS, ...(r ? JSON.parse(r.value) : {}) }; } catch (e) { return { ...DEFAULT_PREFS }; } }
+function cleanPrefs(b) {
+  b = b || {}; const out = {};
+  if (b.design !== undefined) { if (!['v1', 'v2'].includes(b.design)) return null; out.design = b.design; }
+  if (b.theme !== undefined) { if (!['sombre', 'clair'].includes(b.theme)) return null; out.theme = b.theme; }
+  if (b.accent !== undefined) { if (b.accent !== null && !/^#[0-9a-fA-F]{6}$/.test(b.accent)) return null; out.accent = b.accent ? b.accent.toLowerCase() : null; }
+  return out;
+}
+function setPrefs(uid, patch) { const next = { ...getPrefs(uid), ...patch }; db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run('uprefs:' + uid, JSON.stringify(next)); return next; }
+const publicUser = u => ({ id: u.id, email: u.email, username: u.username, role: u.role, created_at: u.created_at, prefs: getPrefs(u.id) });
+module.exports = { getPrefs, setPrefs, cleanPrefs, COOKIE, startSession, loadUser, needUser, needAdmin, csrf, publicUser, ip, hash: p => bcrypt.hashSync(p, 11), check: (p, h) => bcrypt.compareSync(p, h) };

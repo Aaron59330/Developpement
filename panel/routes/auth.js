@@ -28,6 +28,10 @@ router.post('/login', lim, (req, res) => {
 });
 router.post('/logout', (req, res) => { if (req.sid) db.prepare('DELETE FROM sessions WHERE token=?').run(req.sid); res.clearCookie(A.COOKIE); res.json({ ok: true }); });
 router.get('/me', (req, res) => req.user ? res.json({ ok: true, user: A.publicUser(req.user) }) : res.json({ ok: false }));
+router.put('/prefs', A.needUser, (req, res) => {
+  const patch = A.cleanPrefs(req.body); if (!patch) return res.json({ ok: false, error: 'Préférence invalide' });
+  res.json({ ok: true, prefs: A.setPrefs(req.user.id, patch) });
+});
 router.post('/password', A.needUser, lim, (req, res) => {
   const { current, next } = req.body || {};
   if (!A.check(String(current || ''), req.user.pass_hash)) return res.json({ ok: false, error: 'Mot de passe actuel incorrect' });
