@@ -294,3 +294,16 @@ Sur une table de traitement d'un laboratoire, la fabrication n'est plus une simp
 - Anti-triche : le serveur impose une durée minimale par étape, vérifie que toutes les étapes sont réussies, borne les scores, retire les ingrédients et remet les pochons lui-même. Quitter (Échap) annule sans rien consommer.
 - `Experience.Enabled = false` : retour à l'ancienne barre de progression.
 - Test des règles de rendement : `ROOT=. lua5.4 tools/tests/labexp_test.lua`.
+
+### Scène 3D du laboratoire
+
+Les étapes se jouent sur de vrais objets 3D posés sur la table (`client/labscene.lua`) : casserole avec contenu coloré, bols, spatule/cuillère qui suit la souris,
+gouttes qui tombent, pâte à gratter qui disparaît case par case, vapeur et lueur orange pendant la chauffe, presse qui descend à chaque clic.
+La logique et le HUD restent dans `html/labexp.js` (qui publie l'état de l'étape au jeu) ; la caméra plonge sur la table (`Experience.Cam`).
+
+- `Experience.Scene3D.Enabled = false` → retour à l'ancien rendu 2D.
+- `Scene3D.Models` : liste de modèles essayés dans l'ordre pour chaque accessoire (bol, spatule, cuillère, sachet, bloc). Le premier qui existe sur ton serveur est utilisé ;
+  sinon l'accessoire est dessiné par le jeu (marqueurs 3D). La casserole est dessinée par le jeu par défaut ; mets un modèle dans `Models.pot` pour la remplacer.
+- Commande `/labprops` (console F8) : indique quel modèle est trouvé pour chaque accessoire.
+- Si la table de ton labo n'est pas à 0.92 m au-dessus de la position configurée, règle `Scene3D.Surface`.
+- Tests : `ROOT=. lua tools/tests/labscene_test.lua`.

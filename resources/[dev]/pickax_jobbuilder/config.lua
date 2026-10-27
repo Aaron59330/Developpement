@@ -563,7 +563,26 @@ Config.Real = {
             FailFromQuality = 35,       -- % de lot raté en plus quand la qualité tombe à 0 (qualité 100 % : aucun risque ajouté)
             PerfectBonus    = { quality = 0.92, extra = 1 },   -- pochon bonus (une fois) si la qualité atteint ce seuil
             MinStepMs       = 1200,     -- anti-triche : durée minimale d'une étape
-            Cam             = { distance = 0.85, height = 1.2, pitch = -64.0, fov = 45.0 },   -- caméra au-dessus de la table
+            Cam             = { distance = 0.85, pitch = -64.0, fov = 45.0 },   -- caméra : distance au plateau (m), inclinaison de la vue, champ
+            Scene3D = {         -- vrais objets 3D sur la table (client/labscene.lua) ; Enabled = false → ancien rendu 2D
+                Enabled = true,
+                Surface = 0.92,         -- hauteur du plateau de la table au-dessus de la position du labo
+                PotRadius = 0.15, BowlRadius = 0.10,   -- tailles en mètres (casserole dessinée par le jeu, bol)
+                PotFillZ = 0.105,       -- hauteur du contenu dans la casserole (si Models.pot est un vrai modèle)
+                Mat = true,             -- tapis sombre sous les objets
+                Light = true,           -- lueur orange pendant la chauffe
+                -- Modèles essayés dans l'ordre ; le premier qui existe sur ton serveur est utilisé. Rien de valide → repli dessiné par le jeu.
+                -- Teste avec la commande /labprops (liste ce qui est trouvé).
+                Models = {
+                    pot      = {},
+                    bowl     = { 'prop_cs_bowl_01', 'v_res_mbowl' },
+                    spatula  = { 'bkr_prop_coke_spatula_01', 'bkr_prop_coke_spatula_02', 'bkr_prop_meth_scoop_01a' },
+                    spoon    = { 'bkr_prop_meth_scoop_01a', 'bkr_prop_coke_spatula_02' },
+                    ingr     = { 'bkr_prop_meth_openbag_01a', 'bkr_prop_weed_smallbag_01a', 'bkr_prop_coke_powder_01a' },
+                    block    = { 'bkr_prop_coke_block_01a', 'bkr_prop_coke_tin_01' },
+                },
+                Pool = { pot = 4, bowl = 4 },   -- nombre d'exemplaires par modèle (défaut 1)
+            },
             Templates = {
                 coke = { title = 'Cocaïne', steps = {
                     { type = 'add',    label = 'Feuilles', title = 'Ajoute les feuilles',        hint = 'Maintiens le clic au-dessus du bol',                       amount = 9,  seconds = 6, color = '#5f8f3c' },

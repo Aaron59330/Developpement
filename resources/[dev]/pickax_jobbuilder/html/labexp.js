@@ -1,6 +1,8 @@
 /* Laboratoire interactif : une fabrication en plusieurs étapes jouées à la souris (ajouter, gratter, mélanger, chauffer, transvaser, cadence…).
    La caméra du jeu montre la table de laboratoire ; cette couche dessine les accessoires, le HUD (étape, ingrédients, consigne, progression) et gère la souris.
    Message d'ouverture : { action:'labx', cmd:'start', session:{ lab, title, steps:[{ type, title, hint, ... }], inventory:[{ label, count, icon }] } } · 'abort' pour fermer.
+   Mode 3D : si session.scene3d = { rel, potR } est fourni, les accessoires sont de vrais objets 3D dessinés par le jeu (client/labscene.lua) ;
+   cette couche ne garde que la souris, le HUD et les repères, et publie l'état de la scène (labxScene) au jeu.
    Résultat envoyé au jeu : labxDone { results:[{ ok, score, ms }] } ou labxAbort. Types d'étape : add, scrape, stir, heat, pour, timing. */
 (function () {
   'use strict';
@@ -26,21 +28,29 @@
   var svg = function (p, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 16) + '" height="' + (s || 16) + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
 
   /* ───────────── géométrie de la scène ───────────── */
-  var geo = function () { var R = Math.min(W * 0.22, H * 0.30); return { cx: W * 0.5, cy: H * 0.47, R: R }; };
+  var D3 = function () { return !!(S && S.scene3d); };
+  var meters = function (px) { return px / (S.scene3d.rel * H); };       // pixels écran → mètres sur la table (mode 3D)
+  var geo = function () {
+    if (D3()) return { cx: W * 0.5, cy: H * 0.5, R: (S.scene3d.rel * H * S.scene3d.potR) / 1.18 };   // la casserole 3D fait potR mètres
+    var R = Math.min(W * 0.22, H * 0.30); return { cx: W * 0.5, cy: H * 0.47, R: R };
+  };
 
   /* ───────────── dessin des accessoires ───────────── */
   function metal(x, y, r, tilt) {
+    if (D3()) return;
     var grd = g.createRadialGradient(x - r * 0.3, y - r * 0.4, r * 0.1, x, y, r * 1.05);
     grd.addColorStop(0, '#8b9197'); grd.addColorStop(0.6, '#4a5056'); grd.addColorStop(1, '#2b2f33');
     g.fillStyle = grd; g.beginPath(); g.ellipse(x, y, r, r * tilt, 0, 0, Math.PI * 2); g.fill();
   }
   function pot(x, y, r, fill, tilt) {
+    if (D3()) return;
     tilt = tilt || 0.9;
     metal(x, y + r * 0.04, r * 1.06, tilt);
     g.fillStyle = '#0c0d10'; g.beginPath(); g.ellipse(x, y, r * 0.93, r * 0.93 * tilt, 0, 0, Math.PI * 2); g.fill();
     if (fill) { g.fillStyle = fill; g.beginPath(); g.ellipse(x, y, r * 0.8, r * 0.8 * tilt, 0, 0, Math.PI * 2); g.fill(); }
   }
   function bowl(x, y, r, level, col) {
+    if (D3()) return;
     var grd = g.createRadialGradient(x - r * 0.3, y - r * 0.35, r * 0.1, x, y, r);
     grd.addColorStop(0, '#9a9a95'); grd.addColorStop(1, '#4b4b48');
     g.fillStyle = grd; g.beginPath(); g.ellipse(x, y, r, r * 0.82, 0, 0, Math.PI * 2); g.fill();
@@ -48,6 +58,7 @@
     if (level > 0) { g.fillStyle = col || '#7c9a4b'; g.beginPath(); g.ellipse(x, y + r * 0.05 * (1 - level), r * 0.7 * Math.min(1, 0.35 + level), r * 0.54 * Math.min(1, 0.35 + level), 0, 0, Math.PI * 2); g.fill(); }
   }
   function leaf(x, y, s, rot, col) {
+    if (D3()) return;
     g.save(); g.translate(x, y); g.rotate(rot); g.fillStyle = col || '#4c7a34';
     g.beginPath(); g.moveTo(0, -s); g.quadraticCurveTo(s * 0.55, -s * 0.2, 0, s); g.quadraticCurveTo(-s * 0.55, -s * 0.2, 0, -s); g.fill();
     g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, -s * 0.9); g.lineTo(0, s * 0.9); g.stroke(); g.restore();
@@ -117,12 +128,13 @@
         r.sample = 0.12; var data = r.px.getImageData(0, 0, 256, 256).data, cnt = 0, n = 0;
         for (var y = 8; y < 256; y += 8) for (var xx = 8; xx < 256; xx += 8) { if (Math.hypot(xx - 128, y - 128) < 118) { n++; if (data[(y * 256 + xx) * 4 + 3] > 40) cnt++; } }
         if (!r.total) r.total = cnt || 1; r.cov = clamp(1 - cnt / r.total, 0, 1);
+        if (D3()) { var m = ''; for (var gy = 0; gy < 12; gy++) for (var gx = 0; gx < 12; gx++) { var u = (gx + 0.5) / 6 - 1, v = (gy + 0.5) / 6 - 1; m += (u * u + v * v > 0.92) ? '0' : (data[((Math.floor((gy + 0.5) * 256 / 12)) * 256 + Math.floor((gx + 0.5) * 256 / 12)) * 4 + 3] > 40 ? '1' : '0'); } r.mask = m; }
       }
       return clamp(r.cov / (st.coverage || 0.93), 0, 1);
     },
     draw: function (r, st) {
       pot(r.cx, r.cy, r.R * 1.18, null, 0.96);
-      g.drawImage(r.paste, r.cx - r.R, r.cy - r.R, r.R * 2, r.R * 2);
+      if (!D3()) g.drawImage(r.paste, r.cx - r.R, r.cy - r.R, r.R * 2, r.R * 2);
       ring(r.cx, r.cy, r.R * 1.0); if (r.warn && performance.now() < r.warn.t) tag(r.cx + r.R * 0.62, r.cy - r.R * 0.4, r.warn.text, true);
       g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 3; g.beginPath(); g.arc(ptr.x, ptr.y, 9, 0, 6.3); g.stroke();
     },
@@ -151,7 +163,7 @@
       g.save(); g.translate(r.cx, r.cy); g.rotate(r.swirl); g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = 6; g.lineCap = 'round';
       for (var i = 0; i < 3; i++) { g.beginPath(); g.arc(0, 0, r.R * (0.3 + i * 0.22), 0.4, 2.2); g.stroke(); } g.restore();
       ring(r.cx, r.cy, r.R * 0.95);
-      if (ptr.down) { g.strokeStyle = '#d8d0c0'; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(ptr.x + 60, ptr.y - 110); g.lineTo(ptr.x, ptr.y); g.stroke(); }
+      if (ptr.down && !D3()) { g.strokeStyle = '#d8d0c0'; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(ptr.x + 60, ptr.y - 110); g.lineTo(ptr.x, ptr.y); g.stroke(); }
       if (r.warn && performance.now() < r.warn.t) tag(r.cx + r.R * 0.7, r.cy - r.R * 0.5, r.warn.text, true);
     },
     count: function (r, st) { return Math.floor(r.turns) + ' / ' + (st.turns || 6) + ' tours'; },
@@ -247,6 +259,27 @@
     pct: function (r, st) { return clamp(r.hits / (st.hits || 5), 0, 1); },
   };
 
+
+  /* ───────────── état publié pour la scène 3D ───────────── */
+  var nx = function (x) { return Math.round(x / W * 10000) / 10000; }, ny = function (y) { return Math.round(y / H * 10000) / 10000; };
+  var pt = function (x, y) { return [nx(x), ny(y)]; };
+  TYPES.add.actors = function (r) { return { bowl: pt(r.tx, r.ty + r.tr * 0.1), prog: r.prog, hold: r.holding ? 1 : 0 }; };
+  TYPES.scrape.actors = function (r) { return { pot: pt(r.cx, r.cy), rn: ny(r.R), rm: meters(r.R), mask: r.mask || '' }; };
+  TYPES.stir.actors = function (r) { return { pot: pt(r.cx, r.cy), swirl: r.swirl, rm: meters(r.R) }; };
+  TYPES.heat.actors = function (r) { return { pot: pt(r.cx, r.cy), temp: r.temp, lo: r.lo, hi: r.hi }; };
+  TYPES.pour.actors = function (r) {
+    return { cur: r.cur, drag: r.drag ? 1 : 0, pots: r.items.map(function (i) { return { p: pt(i.potX, i.potY), f: (i.done || i.pour > 0) ? Math.max(i.pour, i.done ? 1 : 0) : 0 }; }),
+      bowls: r.items.map(function (i) { return { p: pt(i.x, i.y), f: i.done ? 0 : i.fill, pour: i.pour, done: i.done ? 1 : 0 }; }) };
+  };
+  TYPES.timing.actors = function (r) { return { pos: pt(r.cx, r.cy), x: r.x, flash: r.flash, hits: r.hits, clk: ptr.nclicks || 0 }; };
+  var lastScene = 0;
+  function sendScene(t) {
+    if (!D3() || !run || t - lastScene < 33) return; lastScene = t;
+    var a = run.T.actors ? run.T.actors(run, run.st) : {};
+    a.t = run.st.type; a.p = pt(ptr.x, ptr.y); a.d = ptr.down ? 1 : 0; a.c = run.st.color || ''; a.ar = Math.round(W / H * 1000) / 1000; a.fin = run.finished ? 1 : 0; a.nc = ptr.nclicks || 0;
+    post('labxScene', a);
+  }
+
   /* ───────────── moteur ───────────── */
   function resize() {
     DPR = window.devicePixelRatio || 1; W = window.innerWidth; H = window.innerHeight;
@@ -270,7 +303,7 @@
       '<div class="lx-card"><div class="lx-hint">' + svg(ICO.hand, 15) + '<span></span></div><div class="lx-body"><div class="lx-count"></div><div class="lx-bar"><i></i></div><small class="lx-pct"></small></div></div>' +
       '<div class="lx-quit"><kbd>Échap</kbd> Quitter</div><div class="lx-done hidden"></div>';
     cv = $('#lx-c'); g = cv.getContext('2d'); resize();
-    cv.addEventListener('pointerdown', function (e) { ptr.down = true; ptr.clicks = (ptr.clicks || 0) + 1; mv(e); try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+    cv.addEventListener('pointerdown', function (e) { ptr.down = true; ptr.clicks = (ptr.clicks || 0) + 1; ptr.nclicks = (ptr.nclicks || 0) + 1; mv(e); try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
     cv.addEventListener('pointerup', function () { ptr.down = false; });
     cv.addEventListener('pointercancel', function () { ptr.down = false; });
     cv.addEventListener('pointermove', mv);
@@ -325,7 +358,7 @@
     var wasDown = ptr.down; if (performance.now() - run.t0 < 450) ptr.down = false;      // le clic maintenu de l'étape précédente est ignoré un instant
     var p = run.finished ? 1 : run.T.tick(run, run.st, dt);
     ptr.down = wasDown;
-    run.T.draw(run, run.st);
+    run.T.draw(run, run.st); sendScene(t);
     var c = $('.lx-count'), b = $('.lx-bar i'), pc = $('.lx-pct');
     if (c) { c.innerHTML = run.T.count(run, run.st).replace(/^(\S+)(.*)$/, '<b>$1</b><span>$2</span>'); b.style.width = Math.round(p * 100) + '%'; pc.textContent = Math.round(p * 100) + ' %'; }
     if (!run.finished && p >= 1) finishStep();
@@ -350,5 +383,5 @@
     if (d.cmd === 'start' && d.session && Array.isArray(d.session.steps) && d.session.steps.length) start(d.session);
     else if (d.cmd === 'abort') close();
   });
-  window.LabX = { dbg: function () { return run; }, start: start, abort: abort, state: function () { return S && { idx: S.idx, results: S.results.slice() }; }, geo: geo };
+  window.LabX = { dbg: function () { return run; }, scene: function () { return D3(); }, start: start, abort: abort, state: function () { return S && { idx: S.idx, results: S.results.slice() }; }, geo: geo };
 })();

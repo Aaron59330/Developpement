@@ -18,9 +18,11 @@ local function makeCam(q)
     local c = X.Cam or {}
     local h = math.rad(tonumber(q.h) or 0.0)
     local fx, fy = -math.sin(h), math.cos(h)                      -- direction vers laquelle regarde la table
-    local dist, height = tonumber(c.distance) or 0.85, tonumber(c.height) or 1.2
-    local cam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', q.x - fx * dist, q.y - fy * dist, q.z + height, tonumber(c.pitch) or -64.0, 0.0, 0.0, tonumber(c.fov) or 45.0, false, 0)
-    PointCamAtCoord(cam, q.x, q.y, q.z + 0.92)
+    local dist, pitch = tonumber(c.distance) or 0.85, math.rad(tonumber(c.pitch) or -64.0)
+    local top = q.z + (tonumber((X.Scene3D or {}).Surface) or 0.92)          -- plateau de la table
+    local back, up = math.cos(pitch) * dist, -math.sin(pitch) * dist          -- distance de la caméra au plateau = dist, vue plongeante
+    local cam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', q.x - fx * back, q.y - fy * back, top + up, tonumber(c.pitch) or -64.0, 0.0, tonumber(q.h) or 0.0, tonumber(c.fov) or 45.0, false, 0)
+    PointCamAtCoord(cam, q.x, q.y, top)
     SetCamUseShallowDofMode(cam, true)
     SetCamNearDof(cam, 0.15); SetCamFarDof(cam, 2.6); SetCamDofStrength(cam, 0.85)
     return cam
@@ -37,6 +39,8 @@ function LabExperience(q, session)
     RenderScriptCams(true, true, 700, true, true)
     DisplayRadar(false)
     Wait(750)
+    local sc = LabScene and LabScene.init(q, cam, X.Cam or {})          -- vrais objets 3D sur la table (nil → rendu 2D)
+    if sc then session.scene3d = sc end
     SetNuiFocus(true, true)
     SendNUIMessage({ action = 'labx', cmd = 'start', session = session })
     while not finished do
@@ -48,6 +52,7 @@ function LabExperience(q, session)
     end
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'labx', cmd = 'abort' })
+    if LabScene then LabScene.stop() end
     RenderScriptCams(false, true, 600, true, true)
     Wait(620)
     DestroyCam(cam, false)

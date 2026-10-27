@@ -59,6 +59,7 @@ client_scripts {
     'client/property.lua',
     'client/furniture.lua',
     'client/lab.lua',
+    'client/labscene.lua',
     'client/labexp.lua',
     'client/dealer.lua',
     'client/gov.lua',
