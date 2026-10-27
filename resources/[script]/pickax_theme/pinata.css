@@ -191,3 +191,8 @@ html[data-design="pinata"] body.hx .head p { color: var(--pi-mut); }
 /* une seule couleur pour les builders : les accents (onglets actifs, bordures, focus…) passent en gris très clair, comme les boutons principaux */
 html[data-design="pinata"] body.hx, html[data-design="pinata"] body.hx #root, html[data-design="pinata"] body.hx .shell, html[data-design="pinata"] body.hx [style*="--accent"] { --hx-rgb: 236, 236, 239; --accent: #ececef; --accent-rgb: 236, 236, 239; }
 html[data-design="pinata"] body.hx .shell::before, html[data-design="pinata"] body.hx .shell::after, html[data-design="pinata"] body.hx .panel::before, html[data-design="pinata"] body.hx .panel::after { display: none; }
+
+/* ───────── Pas de fond noir/flou derrière les menus : on voit le jeu ───────── */
+html[data-design="pinata"] body.hx #root:not(.hidden), html[data-design="pinata"] body.lux #root:not(.hidden), html[data-design="pinata"] #root:not(.hidden) { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html[data-design="pinata"] #dlgwrap, html[data-design="pinata"] #confirm, html[data-design="pinata"] #modal { background: rgba(0, 0, 0, .22) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html[data-design="pinata"] body::before, html[data-design="pinata"] body::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
