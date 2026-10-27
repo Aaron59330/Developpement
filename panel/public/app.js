@@ -205,7 +205,7 @@ async function pTheme() {
   f.MarkerSize = el('input', { type: 'number', min: 0.1, max: 5, step: 0.1, value: v.MarkerSize ?? 1 });
   f.BlipScale = el('input', { type: 'number', min: 0.1, max: 3, step: 0.1, value: v.BlipScale ?? 0.5 });
   f.BlipColor = sel(BLIPCOL, v.BlipColor ?? -1);
-  f.Design = el('select', {}, [['arcade', 'Arcade (néon)'], ['pinata', 'Piñata (festif)'], ['ancien', 'Classique (ancien style)']].map(o => el('option', { value: o[0], selected: o[0] === (v.Design || 'arcade') }, o[1])));
+  f.Design = el('select', {}, [['arcade', 'Arcade (néon)'], ['pinata', 'Piñata (épuré sombre)'], ['ancien', 'Classique (ancien style)']].map(o => el('option', { value: o[0], selected: o[0] === (v.Design || 'arcade') }, o[1])));
   const collect = () => { const val = {}; for (const k in f) val[k] = f[k].value; return val; };
   const save = async (core, msg) => { const r = await api('PUT', `/api/servers/${s.id}/docs/theme`, { value: collect() }); if (r.ok) await sendCmd('apply_theme', { core }, msg); else toast(r.error, 'bad'); };
   const curDesign = v.Design || 'arcade';
@@ -213,7 +213,7 @@ async function pTheme() {
   const page = el('div', {}, head('Thème & identité',
     styleBtn('arcade', 'Passer au style Arcade', 'Tous les menus, HUD, notifications, builders et l’inventaire passent au style Arcade (néon).'),
     styleBtn('ancien', 'Revenir à l’ancien style', 'Tous les menus, HUD, notifications, builders et l’inventaire retrouvent leur style d’origine.'),
-    styleBtn('pinata', 'Passer au style Piñata', 'Tous les menus, HUD, notifications, builders et l’inventaire passent au style Piñata (festif, rond et coloré).'),
+    styleBtn('pinata', 'Passer au style Piñata', 'Tous les menus, HUD, notifications, builders et l’inventaire passent au style Piñata (épuré, sombre, une seule couleur).'),
     el('button', { class: 'btn', title: 'Applique partout (loading, chat, markers…) en redémarrant pickax_core : coupe les menus ouverts quelques secondes', onclick: () => confirmBox('Appliquer partout', 'Le thème est enregistré puis pickax_core redémarre (écran de chargement, chat, markers, builders…). Les menus ouverts des joueurs sont coupés quelques secondes.', () => save(true, 'Thème enregistré : redémarrage du core dans quelques secondes')) }, el('span', {}, 'Enregistrer et appliquer partout')),
     el('button', { class: 'btn p', onclick: () => save(false, 'Thème enregistré : interfaces mises à jour (reconnexion pour tout voir)') }, el('span', {}, 'Enregistrer'))),
     el('div', { class: 'grid g2' }, el('div', { class: 'card' }, col, el('label', {}, 'Style des interfaces'), f.Design, field('ServerName', 'Nom du serveur'), field('ServerShortName', 'Nom court'), field('ServerTagline', 'Slogan'), field('ServerDiscord', 'Lien Discord'), field('ServerLogo', 'Logo (fichier dans pickax_theme/logo/ ou lien https)'), el('p', { class: 'muted', style: 'margin-top:10px' }, 'Pas de guillemets. Le thème est appliqué automatiquement à tous les menus, HUD, notifications et inventaire.')), el('div', {}, el('h2', {}, 'Aperçu'), prev)));
