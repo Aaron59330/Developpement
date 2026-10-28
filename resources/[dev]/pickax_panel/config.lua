@@ -29,3 +29,11 @@ Config.CheckLuaSyntax   = true     -- refuse d'enregistrer un .lua qui ne compil
 Config.AllowConsole     = true
 Config.ConsoleAllowed   = { 'ensure', 'restart', 'start', 'stop', 'refresh', 'say', 'status', 'players' }
 Config.RestartDelay     = 30       -- secondes de préavis avant « Redémarrer le serveur » (annonce aux joueurs)
+
+-- Plaintes en jeu : /plainte <id du joueur visé ou 0> <message> → page « Plaintes » du panel
+Config.ReportCommand  = 'plainte'
+Config.ReportCooldown = 60         -- secondes entre deux plaintes d'un joueur
+
+-- Sauvegarde de la base depuis le panel (lecture seule) : tables dont le nom commence par ces préfixes (+ jobs et job_grades)
+Config.DbBackupPrefixes = { 'jobbuilder_', 'gangbuilder_', 'worldbuilder_', 'illegalbuilder_', 'shopbuilder_', 'pickax_' }
+Config.DbBackupMaxRows  = 5000     -- lignes maximum exportées par table

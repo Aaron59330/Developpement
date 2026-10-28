@@ -107,12 +107,12 @@ router.put('/:id/discord/reminders', (req, res) => {
 });
 
 // ── alertes automatiques ──
-router.get('/:id/discord/alerts', (req, res) => { const l = own(req, res); if (!l) return; const d = db.prepare("SELECT value FROM docs WHERE license_id=? AND key='alerts'").get(l.id); res.json({ ok: true, config: d ? JSON.parse(d.value) : { enabled: false, channelId: null, offline: true, errors: true, errorLimit: 20, rich: false, richLimit: 5000000 } }); });
+router.get('/:id/discord/alerts', (req, res) => { const l = own(req, res); if (!l) return; const d = db.prepare("SELECT value FROM docs WHERE license_id=? AND key='alerts'").get(l.id); res.json({ ok: true, config: d ? JSON.parse(d.value) : { enabled: false, channelId: null, offline: true, errors: true, errorLimit: 20, rich: false, richLimit: 5000000, reports: true } }); });
 router.put('/:id/discord/alerts', (req, res) => {
   const l = own(req, res); if (!l) return; const b = req.body || {}; const ch = b.channelId ? db.prepare('SELECT id FROM discord_channels WHERE id=? AND license_id=?').get(+b.channelId, l.id) : null;
   if (b.enabled && !ch) return res.json({ ok: false, error: 'Choisis le salon qui recevra les alertes.' });
   const lim = (v, d, max) => { v = Math.floor(+v); return Number.isFinite(v) && v >= 0 && v <= max ? v : d; };
-  putDoc(l.id, 'alerts', { enabled: !!b.enabled, channelId: ch ? ch.id : null, offline: !!b.offline, errors: !!b.errors, errorLimit: lim(b.errorLimit, 20, 10000), rich: !!b.rich, richLimit: lim(b.richLimit, 5000000, 1e12) }); res.json({ ok: true });
+  putDoc(l.id, 'alerts', { enabled: !!b.enabled, channelId: ch ? ch.id : null, offline: !!b.offline, errors: !!b.errors, errorLimit: lim(b.errorLimit, 20, 10000), rich: !!b.rich, richLimit: lim(b.richLimit, 5000000, 1e12), reports: b.reports !== false }); res.json({ ok: true });
 });
 
 module.exports = router;

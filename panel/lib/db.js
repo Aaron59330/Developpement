@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS econ_hist(id INTEGER PRIMARY KEY, license_id INTEGER 
 CREATE INDEX IF NOT EXISTS idx_econ ON econ_hist(license_id, at);
 CREATE TABLE IF NOT EXISTS applications(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, job TEXT NOT NULL, name TEXT NOT NULL, discord TEXT NOT NULL DEFAULT '', answers TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL DEFAULT 'new', at INTEGER NOT NULL, ip TEXT);
 CREATE INDEX IF NOT EXISTS idx_apps ON applications(license_id, at);
+CREATE TABLE IF NOT EXISTS reports(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, at INTEGER NOT NULL, reporter TEXT NOT NULL, reporter_ident TEXT NOT NULL DEFAULT '', target TEXT, target_ident TEXT, message TEXT NOT NULL, x REAL, y REAL, status TEXT NOT NULL DEFAULT 'new', note TEXT NOT NULL DEFAULT '');
+CREATE INDEX IF NOT EXISTS idx_reports ON reports(license_id, at);
+CREATE TABLE IF NOT EXISTS db_backups(id INTEGER PRIMARY KEY, license_id INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE, name TEXT NOT NULL, at INTEGER NOT NULL, by_user INTEGER, size INTEGER NOT NULL, tables INTEGER NOT NULL, data BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS ai_usage(license_id INTEGER NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(license_id, day));
 `);
 const now = () => Math.floor(Date.now() / 1000);

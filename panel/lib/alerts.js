@@ -33,6 +33,14 @@ async function run(send, at = now()) {
   }
   return sent;
 }
+// Une plainte vient d'arriver : notification dans le salon d'alertes si le client l'a demandé (option « Plaintes »)
+function reportAlert(l, rep, at, send) {
+  try {
+    const cfg = doc(l.id, 'alerts'); if (!cfg || !cfg.enabled || !cfg.channelId || cfg.reports === false) return;
+    const ch = db.prepare('SELECT url FROM discord_channels WHERE id=? AND license_id=?').get(cfg.channelId, l.id); if (!ch) return;
+    (send || realSend)(ch.url, { username: 'AERO Panel', embeds: [{ title: '📣  Nouvelle plainte', description: `**${rep.reporter}**${rep.target ? ` contre **${rep.target}**` : ''}\n${rep.message.slice(0, 300)}\n\nÀ traiter dans le panel → Plaintes.`, color: 0xfb923c, timestamp: new Date(at * 1000).toISOString() }], allowed_mentions: { parse: [] } });
+  } catch (e) {}
+}
 const realSend = async (url, body) => { try { const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(10000) }); return r.ok; } catch (e) { return false; } };
 function start() { setInterval(() => run(realSend).catch(() => {}), 60000).unref(); }
-module.exports = { evaluate, run, start };
+module.exports = { evaluate, run, start, reportAlert };

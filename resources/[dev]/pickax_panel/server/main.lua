@@ -5,7 +5,7 @@ local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or '
 
 local license = { valid = nil, status = 'inconnu', plan = nil, expires_at = nil, last_ok = 0 }
 local docs, docVersions = {}, {}
-local logs, results = {}, {}
+local logs, results, reports = {}, {}, {}
 local lastResources = 0
 local lastErr = nil
 local bans, whitelist, motd = {}, {}, { enabled = false, text = '' }
@@ -120,6 +120,65 @@ H.teleport = function(p)
 end
 local function refreshJobs() local ok = pcall(function() ESX.RefreshJobs() end) return ok end
 H.jobs_refresh = function() if not refreshJobs() then return nil, 'ESX.RefreshJobs indisponible' end return 'métiers rechargés' end
+
+-- ───────── plaintes en jeu → panel (Plaintes) ─────────
+-- /plainte <id du joueur visé, 0 si aucun> <message> : le panel reçoit qui, quand, où, avec l'identifiant du joueur visé. Délai et file d'attente limités.
+local lastReport = {}
+local function identOf(src)
+    for _, id in ipairs(GetPlayerIdentifiers(src)) do if id:sub(1, 8) == 'license:' then return id end end
+    return ''
+end
+local function submitReport(src, targetId, message)
+    if #reports >= 30 then return false, 'Trop de plaintes en attente de transmission : réessaie dans un instant.' end
+    message = tostring(message or ''):gsub('[%c]', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    if #message < 5 then return false, 'Décris le problème (5 caractères minimum).' end
+    local t = now()
+    if (lastReport[src] or 0) + (Config.ReportCooldown or 60) > t then return false, 'Patiente avant une nouvelle plainte.' end
+    lastReport[src] = t
+    local target = tonumber(targetId)
+    if target and (target <= 0 or not GetPlayerName(target)) then target = nil end
+    local c = GetEntityCoords(GetPlayerPed(src))
+    reports[#reports + 1] = { at = t, reporter = GetPlayerName(src) or '?', reporter_id = src, reporter_ident = identOf(src),
+        target = target and GetPlayerName(target) or nil, target_id = target, target_ident = target and identOf(target) or nil, message = message:sub(1, 400), x = c.x, y = c.y, z = c.z }
+    PanelLog('info', 'plainte', ('%s a déposé une plainte%s'):format(GetPlayerName(src) or '?', target and (' contre ' .. (GetPlayerName(target) or '?')) or ''))
+    return true
+end
+exports('PanelReport', submitReport)   -- utilisable par un téléphone ou un menu : exports.pickax_panel:PanelReport(src, idVisé, message)
+RegisterCommand(Config.ReportCommand or 'plainte', function(src, args)
+    if src == 0 then return end
+    local ok, err = submitReport(src, args[1], table.concat(args, ' ', 2))
+    TriggerClientEvent('chat:addMessage', src, { color = ok and { 74, 222, 128 } or { 239, 68, 68 }, args = { 'Plainte', ok and 'Ta plainte a été transmise au staff. Merci.' or err } })
+end, false)
+AddEventHandler('playerDropped', function() lastReport[source] = nil end)
+
+-- ───────── sauvegarde de la base (tables des builders) ─────────
+-- Lecture seule : db.tables liste les tables autorisées (préfixes de Config.DbBackupPrefixes + jobs / job_grades), db.export renvoie leurs lignes (plafonnées).
+local function allowedTable(name)
+    if type(name) ~= 'string' or not name:match('^[%w_]+$') or #name > 64 then return false end
+    if name == 'jobs' or name == 'job_grades' then return true end
+    for _, p in ipairs(Config.DbBackupPrefixes or {}) do if name:sub(1, #p) == p then return true end end
+    return false
+end
+local function sqlReady2() return GetResourceState('oxmysql') == 'started' and MySQL ~= nil end
+H['db.tables'] = function()
+    if not sqlReady2() then return nil, 'oxmysql indisponible' end
+    local out = {}
+    for _, r in ipairs(MySQL.query.await('SELECT table_name AS name, table_rows AS n FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY table_name') or {}) do
+        if allowedTable(r.name) then out[#out + 1] = { name = r.name, rows = tonumber(r.n) or 0 } end
+    end
+    return 'ok', { tables = out }
+end
+H['db.export'] = function(p)
+    if not sqlReady2() then return nil, 'oxmysql indisponible' end
+    local out, budget = {}, 900000
+    for _, name in ipairs(type(p.tables) == 'table' and p.tables or {}) do
+        if not allowedTable(name) then return nil, 'table non autorisée : ' .. tostring(name) end
+        local rows = MySQL.query.await(('SELECT * FROM `%s` LIMIT %d'):format(name, Config.DbBackupMaxRows or 5000)) or {}
+        local enc = json.encode(rows)
+        if #enc > budget then out[name] = { truncated = true, rows = {} } else out[name] = { rows = rows } budget = budget - #enc end
+    end
+    return 'ok', { tables = out }
+end
 
 -- ───────── éditeur de base : métiers et grades (tables ESX jobs / job_grades) ─────────
 local function sqlReady() return GetResourceState('oxmysql') == 'started' and MySQL ~= nil end
@@ -471,7 +530,7 @@ local function sync()
     local body = {
         version = VERSION, maxPlayers = GetConvarInt('sv_maxclients', 48), players = collectPlayers(),
         stats = { uptime = math.floor(GetGameTimer() / 1000), version = GetConvar('version', ''), hostname = GetConvar('sv_projectName', GetConvar('sv_hostname', '')), memory = math.floor(collectgarbage('count') / 1024) },
-        logs = logs, results = results, docs = docVersions,
+        logs = logs, results = results, docs = docVersions, reports = reports,
     }
     if GetResourceState('pickax_settings') == 'started' then
         local okA, act = pcall(function() return exports.pickax_settings:Activity() end)       -- activité du jour / de la semaine (ventes, saisies, labos, gangs…) pour la page Statistiques
@@ -482,7 +541,7 @@ local function sync()
         local okS, sch = pcall(function() return exports.pickax_settings:Schema() end)
         if okS and type(sch) == 'table' and #sch > 0 then body.settingsSchema = sch end
     end
-    local sentLogs = #logs
+    local sentLogs, sentReports = #logs, #reports
     local sentResults = {}
     for i, r in ipairs(results) do sentResults[i] = r end
     PerformHttpRequest(URL .. '/api/agent/sync', function(code, text)
@@ -496,6 +555,7 @@ local function sync()
         local ok, r = pcall(json.decode, text)
         if not ok or type(r) ~= 'table' then return end
         for _ = 1, sentLogs do table.remove(logs, 1) end
+        for _ = 1, sentReports do table.remove(reports, 1) end
         dropResults(sentResults)
         if body.resources then lastResources = now() end
         if body.settingsSchema then schemaSent = true end

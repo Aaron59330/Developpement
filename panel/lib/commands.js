@@ -92,6 +92,8 @@ function cleanJob(j) {
 const rpcDefs = {
   'db.jobs':  () => ({}),
   'db.job_save': (p) => { const job = cleanJob(p.job); return job && { job }; },
+  'db.tables': () => ({}),
+  'db.export': (p) => { const t = Array.isArray(p.tables) ? p.tables.filter(x => typeof x === 'string' && /^[A-Za-z0-9_]{1,64}$/.test(x)) : []; return t.length && t.length <= 8 && t.length === p.tables.length && { tables: t }; },
   'fs.list':  (p) => { const path = cleanPath(p.path || ''); return path !== null && { path }; },
   'fs.read':  (p) => { const path = cleanPath(p.path || ''); return path && { path }; },
   'fs.write': (p) => { const path = cleanPath(p.path || ''); if (!path || typeof p.content !== 'string' || p.content.length > 1000000) return null; return { path, content: p.content }; },
