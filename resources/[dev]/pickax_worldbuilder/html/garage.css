@@ -1,0 +1,42 @@
+/* ── Garage : grande vue du véhicule, performances, carrousel ── (pas de flou ni de fond noir sur l'écran : seul le panneau est sombre) */
+.gx { --gx-r: 22px; width: min(1280px, 96vw); height: min(780px, 94vh); display: flex; flex-direction: column; border-radius: var(--gx-r); overflow: hidden;
+  background: radial-gradient(900px 420px at 18% 0%, rgba(var(--accent-rgb), .09), transparent 70%), rgba(15, 15, 19, .97); border: 1px solid rgba(var(--accent-rgb), .26); box-shadow: 0 30px 80px rgba(0, 0, 0, .55); }
+.gx-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.gx-title { display: flex; align-items: center; gap: 10px; min-width: 0; } .gx-title svg { color: var(--accent); }
+.gx-title b { font-size: 16px; font-weight: 700; } .gx-title small { color: var(--muted); font-size: 12px; }
+.gx-tools { display: flex; align-items: center; gap: 10px; }
+.gx-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(255, 255, 255, .03); color: var(--muted); }
+.gx-search input { border: 0; background: transparent; height: 34px; width: 210px; padding: 0; color: var(--text); outline: none; }
+.gx-x { height: 36px; display: flex; align-items: center; gap: 8px; } .gx-x kbd, .gx kbd { font: 600 10px var(--font); padding: 2px 6px; border-radius: 5px; background: #fff; color: #16171c; }
+.gx-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 340px; gap: 18px; padding: 18px 22px; }
+.gx-main.empty { grid-template-columns: 1fr; }
+.gx-hero { position: relative; min-height: 0; border-radius: 18px; border: 1px solid var(--line); overflow: hidden;
+  background: radial-gradient(520px 300px at 55% 62%, rgba(var(--accent-rgb), .14), transparent 70%), linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01)); }
+.gx-info { position: absolute; left: 26px; top: 22px; z-index: 2; }
+.gx-info small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.gx-info h1 { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; margin: 6px 0 12px; }
+.gx-plate { display: inline-block; font: 600 12px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--text-2); background: rgba(0, 0, 0, .25); }
+.gx-car { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 40px 30px 20px; }
+.gx-big { max-width: 92%; max-height: 92%; object-fit: contain; filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .55)); animation: gxin .35s ease; }
+@keyframes gxin { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: none; } }
+.gx-noimg { display: flex; align-items: center; justify-content: center; color: var(--muted); } .gx-car .gx-noimg svg { width: 110px; height: 110px; opacity: .35; stroke-width: 1.2; }
+.gx-side { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; padding-right: 2px; }
+.gx-card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: rgba(255, 255, 255, .025); }
+.gx-card h3 { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 12px; } .gx-card h3 small { color: var(--muted); font-weight: 400; font-size: 11px; }
+.gx-ok { display: flex; align-items: center; gap: 7px; color: var(--ok); font-weight: 600; font-size: 13px; margin-bottom: 12px; }
+.gx-cond { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; } .gx-perf { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+.gx-stat { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: 11.5px; color: var(--muted); } .gx-stat b { color: var(--text); font-size: 15px; font-weight: 700; text-align: right; }
+.gx-stat i { grid-column: 1 / -1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .1); overflow: hidden; } .gx-stat u { display: block; height: 100%; border-radius: 3px; background: var(--accent); text-decoration: none; }
+.gx-act { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+.gx-take { height: 46px; font-size: 14px; } .gx-store { height: 38px; justify-content: center; }
+.gx-bottom { padding: 6px 22px 18px; border-top: 1px solid var(--line); }
+.gx-bar { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; padding: 12px 0 10px; }
+.gx-nav { display: flex; align-items: center; gap: 8px; } .gx-nav button { width: 30px; height: 30px; padding: 0; border-radius: 8px; justify-content: center; }
+.gx-rail { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px; } .gx-rail::-webkit-scrollbar { display: none; }
+.gx-tile { flex: 0 0 168px; padding: 8px 10px 10px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .025); cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
+.gx-tile:hover { border-color: var(--line-2); transform: translateY(-2px); } .gx-tile.on { border-color: var(--accent); background: rgba(var(--accent-rgb), .1); }
+.gx-tile .gx-thumb, .gx-tile .gx-noimg { display: flex; width: 100%; height: 66px; object-fit: contain; margin-bottom: 6px; } .gx-tile .gx-noimg svg { width: 30px; height: 30px; opacity: .4; }
+.gx-tile b { display: block; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .gx-tile small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.gx-mute { color: var(--muted); font-size: 12.5px; padding: 18px 4px; }
+.gx-emptybox { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; border: 1px dashed var(--line-2); border-radius: 18px; }
+@media (max-width: 1000px) { .gx-main { grid-template-columns: 1fr; overflow-y: auto; } .gx-hero { min-height: 280px; } .gx-info h1 { font-size: 28px; } }

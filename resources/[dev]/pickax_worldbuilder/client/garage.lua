@@ -43,8 +43,27 @@ local function findVehicle(c, radius)
     return veh ~= 0 and veh or nil
 end
 
+-- Note sur 100 (0 si le modèle est inconnu)
+local function score(v, max) return math.max(0, math.min(100, math.floor((tonumber(v) or 0) / max * 100 + 0.5))) end
+
 local function enrich(list)
-    for _, v in ipairs(list or {}) do v.name = VehicleLabel(v.model) end
+    for _, v in ipairs(list or {}) do
+        v.name = VehicleLabel(v.model)
+        local hash = type(v.model) == 'string' and joaat(v.model) or v.model
+        if hash and IsModelInCdimage(hash) then
+            local make = GetMakeNameFromVehicleModel(hash)
+            local label = make and GetLabelText(make)
+            v.make = (label and label ~= 'NULL') and label or (make or '')
+            v.img = (GetDisplayNameFromVehicleModel(hash) or ''):lower()
+            -- performances du modèle (natives de handling), ramenées sur 100
+            v.perf = {
+                speed = score(GetVehicleModelEstimatedMaxSpeed(hash), 60),
+                accel = score(GetVehicleModelAcceleration(hash), 0.45),
+                brake = score(GetVehicleModelMaxBraking(hash), 1.4),
+                grip  = score((GetVehicleModelMaxTraction(hash) or 0) - 1.0, 2.0),
+            }
+        end
+    end
 end
 
 local function reportSpawned(veh, plate)

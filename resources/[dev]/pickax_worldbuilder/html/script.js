@@ -75,6 +75,8 @@ const P = {
   dollar: '<path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
+  chevL: '<path d="m15 18-6-6 6-6"/>',
+  chevR: '<path d="m9 18 6-6-6-6"/>',
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
   clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
@@ -304,28 +306,105 @@ class PanelBase {
   }
 }
 
-/* ── Garage ── */
+/* ── Garage : grande vue du véhicule choisi, performances, carrousel en bas ── */
 const GaragePanel = new (class extends PanelBase {
-  render() {
-    const d = this.d, job = d.mode === 'job';
-    const rows = job
-      ? d.fleet.map(f => `<div class="item"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(f.name)}</b><small class="mono">${esc(f.model)}</small></div>${f.price ? `<span class="price">${money(f.price)}</span>` : chip('Gratuit', 'ok')}<button class="primary sm" data-a="take" data-v="${f.i}">Sortir</button></div>`).join('')
-      : d.vehicles.map(v => `<div class="item"><div class="tile">${ic('car')}</div><div class="grow"><b>${esc(v.name)}</b><small class="mono">${esc(v.plate)}</small>
-          <div class="minis">${pctBar('Moteur', v.engine ?? 1000, 1000)}${pctBar('Carrosserie', v.body ?? 1000, 1000)}${pctBar('Essence', v.fuel ?? 100, 100)}</div></div>
-          <button class="primary sm" data-a="take" data-v="${esc(v.plate)}">Sortir${d.fee ? ` · ${money(d.fee)}` : ''}</button></div>`).join('');
-    const empty = job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.';
-    const needPay = job ? d.fleet.some(f => f.price > 0) : d.fee > 0;
-    $root.innerHTML = panel({ icon: job ? 'shield' : 'car', title: d.label, sub: job ? 'Flotte de service' : `${d.vehicles.length} véhicule${d.vehicles.length > 1 ? 's' : ''} disponible${d.vehicles.length > 1 ? 's' : ''}`, cls: 'md',
-      body: `${needPay ? payRow(d.payments, this.method) : ''}<div class="list">${rows || emptyState('car', 'Garage vide', empty)}</div>
-        <button class="wide" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 16)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun véhicule à proximité)'}</button>` });
+  init(d) {
+    this.q = ''; this.tab = 'all'; this.dispo = true; this.i = 0;
+    const job = d.mode === 'job';
+    this.items = job
+      ? d.fleet.map(f => ({ key: String(f.i), name: f.name || f.label, make: f.make || '', model: f.model, img: f.img || String(f.model || '').toLowerCase(), plate: '', perf: f.perf, price: f.price || 0, fuel: 100, engine: 1000, body: 1000, out: false }))
+      : d.vehicles.map(v => ({ key: v.plate, name: v.name, make: v.make || '', model: v.model, img: v.img || '', plate: v.plate, perf: v.perf, price: 0, fuel: v.fuel ?? 100, engine: v.engine ?? 1000, body: v.body ?? 1000, out: false }));
+    if (!document.getElementById('gx-key')) { const m = document.createElement('meta'); m.id = 'gx-key'; document.head.append(m); }
   }
+  visible() {
+    const q = this.q.trim().toLowerCase();
+    return this.items.filter(v => !q || `${v.name} ${v.make} ${v.plate} ${v.model}`.toLowerCase().includes(q));
+  }
+  cur() { const l = this.visible(); return l[Math.min(this.i, Math.max(0, l.length - 1))]; }
+  img(v, cls) {
+    if (!v || !v.img) return `<span class="gx-noimg">${ic('car', 34)}</span>`;
+    return `<img class="${cls}" src="vehicles/${esc(v.img)}.webp" data-fb="https://docs.fivem.net/vehicles/${esc(v.img)}.webp" alt="" draggable="false">`;
+  }
+  bar(label, val, max = 100) { const pc = Math.max(0, Math.min(100, Math.round((Number(val) || 0) / max * 100))); return `<div class="gx-stat"><span>${label}</span><b>${pc}</b><i><u style="width:${pc}%"></u></i></div>`; }
+  heroHtml() {
+    const d = this.d, job = d.mode === 'job', v = this.cur();
+    const needPay = job ? (v && v.price > 0) : d.fee > 0;
+    const hero = v ? `
+      <div class="gx-hero">
+        <div class="gx-info">
+          <small>${esc(v.make || (job ? 'Flotte de service' : ''))}</small>
+          <h1>${esc(v.name)}</h1>
+          ${v.plate ? `<div class="gx-plate">${esc(v.plate)}</div>` : ''}
+        </div>
+        <div class="gx-car">${this.img(v, 'gx-big')}</div>
+      </div>
+      <div class="gx-side">
+        <div class="gx-card"><div class="gx-ok">${ic('check', 15)} Prêt à rouler</div>
+          <div class="gx-cond">${this.bar('Essence', v.fuel, 100)}${this.bar('Moteur', v.engine, 1000)}${this.bar('Carrosserie', v.body, 1000)}</div></div>
+        <div class="gx-card"><h3>Performances <small>Notes sur 100</small></h3>
+          ${v.perf ? `<div class="gx-perf">${this.bar('Vitesse', v.perf.speed)}${this.bar('Accélération', v.perf.accel)}${this.bar('Freinage', v.perf.brake)}${this.bar('Adhérence', v.perf.grip)}</div>` : '<p class="gx-mute">Modèle non répertorié.</p>'}</div>
+        <div class="gx-card gx-act">${needPay ? payRow(d.payments, this.method) : ''}
+          <button class="primary gx-take" data-a="take" data-v="${esc(v.key)}">Sortir le véhicule${job ? (v.price ? ` · ${money(v.price)}` : '') : (d.fee ? ` · ${money(d.fee)}` : '')}</button>
+          <button class="gx-store" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 15)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>
+      </div>`
+      : `<div class="gx-emptybox">${emptyState('car', job ? 'Aucun véhicule' : 'Garage vide', job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.')}
+          <button class="gx-store" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 15)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>`;
+    return hero;
+  }
+  render() {
+    const d = this.d, job = d.mode === 'job', list = this.visible(), v = this.cur();
+    const ph = job ? 'Nom, modèle…' : 'Nom, modèle ou plaque…';
+    const hero = this.heroHtml();
+    $root.innerHTML = `<div class="gx">
+      <div class="gx-top"><div class="gx-title">${ic(job ? 'shield' : 'car', 18)}<b>${esc(d.label)}</b><small>${this.items.length} ${job ? 'véhicule(s) de service' : 'au garage'}</small></div>
+        <div class="gx-tools"><label class="gx-search">${ic('search', 14)}<input data-path="q" value="${esc(this.q)}" placeholder="${ph}" autocomplete="off"></label>
+          <button class="gx-x" data-a="close">Fermer <kbd>ESC</kbd></button></div></div>
+      <div class="gx-main ${v ? '' : 'empty'}">${hero}</div>
+      <div class="gx-bottom"><div class="gx-bar"><span id="gx-count">${list.length ? Math.min(this.i, list.length - 1) + 1 : 0} / ${this.items.length}</span>
+        <span class="gx-nav">Parcourir <button data-a="prev" aria-label="Précédent">${ic('chevL', 14)}</button><button data-a="next" aria-label="Suivant">${ic('chevR', 14)}</button></span></div>
+        <div class="gx-rail" id="gx-rail">${this.rail(list)}</div></div></div>`;
+    this.scrollTo();
+  }
+  rail(list) {
+    const cur = this.cur();
+    return list.map(x => `<div class="gx-tile ${cur && x.key === cur.key ? 'on' : ''}" data-a="gsel" data-v="${esc(x.key)}">${this.img(x, 'gx-thumb')}<b>${esc(x.name)}</b><small>${esc(x.plate || x.make || '')}</small></div>`).join('') || '<div class="gx-mute">Aucun résultat.</div>';
+  }
+  scrollTo() { const r = document.getElementById('gx-rail'), on = r && r.querySelector('.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
+  afterInput(p) {
+    if (p !== 'q') return;
+    this.i = 0;
+    const list = this.visible(), main = document.querySelector('.gx-main'), rail = document.getElementById('gx-rail'), cnt = document.getElementById('gx-count');
+    if (main) { main.classList.toggle('empty', !this.cur()); main.innerHTML = this.heroHtml(); }
+    if (rail) rail.innerHTML = this.rail(list);
+    if (cnt) cnt.textContent = `${list.length ? 1 : 0} / ${this.items.length}`;
+  }
+  move(dx) { const l = this.visible(); if (!l.length) return; this.i = (this.i + dx + l.length) % l.length; const q = document.querySelector('.gx-search input'), had = q && document.activeElement === q; this.render(); }
   async onA(el) {
     const a = el.dataset.a;
     if (a === 'pay') { this.method = el.dataset.v; return this.render(); }
+    if (a === 'gsel') { const l = this.visible(); this.i = Math.max(0, l.findIndex(x => x.key === el.dataset.v)); return this.render(); }
+    if (a === 'prev') return this.move(-1);
+    if (a === 'next') return this.move(1);
     if (a === 'take') { const r = await this.act('garage:take', el.dataset.v, this.method); if (r && r.ok) $root.classList.add('hidden'); }
     if (a === 'store') { const r = await this.act('garage:store'); if (r && r.ok) $root.classList.add('hidden'); }
   }
 })();
+/* clavier : ← → pour parcourir, Entrée pour sortir le véhicule (sauf pendant la saisie dans la recherche) */
+document.addEventListener('keydown', e => {
+  if (typeof Mod === 'undefined' || Mod !== GaragePanel || $root.classList.contains('hidden')) return;
+  if (e.target && e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); GaragePanel.move(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); GaragePanel.move(1); }
+  else if (e.key === 'Enter') { const v = GaragePanel.cur(); if (v) GaragePanel.onA({ dataset: { a: 'take', v: v.key } }); }
+});
+/* image du véhicule : fichier local, sinon docs.fivem.net, sinon icône */
+document.addEventListener('error', e => {
+  const t = e.target;
+  if (!t || t.tagName !== 'IMG' || !t.dataset.fb) return;
+  if (t.dataset.fb === 'x') { t.replaceWith(Object.assign(document.createElement('span'), { className: 'gx-noimg', innerHTML: ic('car', 34) })); return; }
+  const next = t.dataset.fb; t.dataset.fb = 'x'; t.src = next;
+}, true);
+document.addEventListener('wheel', e => { const r = e.target.closest && e.target.closest('#gx-rail'); if (r) { r.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
 
 /* ── Fourrière ── */
 const ImpoundPanel = new (class extends PanelBase {
