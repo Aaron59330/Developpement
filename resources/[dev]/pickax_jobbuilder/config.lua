@@ -564,6 +564,19 @@ Config.Real = {
             PerfectBonus    = { quality = 0.92, extra = 1 },   -- pochon bonus (une fois) si la qualité atteint ce seuil
             MinStepMs       = 1200,     -- anti-triche : durée minimale d'une étape
             Cam             = { distance = 0.85, pitch = -64.0, fov = 45.0 },   -- caméra : distance au plateau (m), inclinaison de la vue, champ
+            -- Accidents : une fabrication de mauvaise qualité peut mal tourner (fuite toxique, incendie, explosion). Le risque monte quand la qualité passe sous Threshold.
+            Accidents = {
+                Enabled = true, Threshold = 0.5,   -- en dessous de 50 % de qualité
+                Chance = 60,                       -- % de risque à qualité 0 (proportionnel jusqu'au seuil)
+                Kinds = { { kind = 'leak', weight = 60 }, { kind = 'fire', weight = 30 }, { kind = 'explosion', weight = 10 } },
+                LeakExposure = 40,                 -- niveau d'intoxication ajouté par une fuite
+                FireDamage = 30, ExplosionDamage = 70,   -- points de vie perdus
+                LoseBatch = true,                  -- incendie / explosion : le lot est perdu
+            },
+            -- Catalyseur : ingrédient optionnel (item) consommé à la fin ; il améliore la qualité et réduit le risque d'accident.
+            Catalyst = { Enabled = true, Item = 'lab_catalyst', Label = 'Catalyseur de laboratoire', Consume = 1, Quality = 0.12, AccidentFactor = 0.5 },
+            -- Niveaux de laborantin : XP à chaque fabrication ; le niveau n+1 demande Base × n² XP. Chaque niveau : + qualité, - accidents. minLevel (par recette) verrouille les recettes.
+            Levels = { Enabled = true, XpPerBatch = 10, Base = 100, Max = 10, QualityPerLevel = 0.015, AccidentPerLevel = 0.06 },
             Scene3D = {         -- vrais objets 3D sur la table (client/labscene.lua) ; Enabled = false → ancien rendu 2D
                 Enabled = true,
                 Surface = 0.92,         -- hauteur du plateau de la table au-dessus de la position du labo
@@ -584,7 +597,7 @@ Config.Real = {
                 Pool = { pot = 4, bowl = 4 },   -- nombre d'exemplaires par modèle (défaut 1)
             },
             Templates = {
-                coke = { title = 'Cocaïne', steps = {
+                coke = { title = 'Cocaïne', minLevel = 2, steps = {
                     { type = 'add',    label = 'Feuilles', title = 'Ajoute les feuilles',        hint = 'Maintiens le clic au-dessus du bol',                       amount = 9,  seconds = 6, color = '#5f8f3c' },
                     { type = 'add',    label = 'Solvant',  title = 'Verse l’acétone',             hint = 'Maintiens le clic au-dessus du bol',                       amount = 12, seconds = 5, color = '#9cc7d6' },
                     { type = 'stir',   label = 'Mélange',  title = 'Mélange la préparation',      hint = 'Tourne autour de la casserole sans aller trop vite',       turns = 6,   color = '#8a7a3b' },
@@ -593,7 +606,7 @@ Config.Real = {
                     { type = 'pour',   label = 'Transvase', title = 'Transvase dans les casseroles', hint = 'Attrape chaque bol et verse-le dans sa casserole',      bowls = 2, seconds = 3, color = '#8a7a3b' },
                     { type = 'timing', label = 'Pressage', title = 'Presse en briques',           hint = 'Clique quand le curseur est dans la zone verte',           hits = 5, speed = 0.8 },
                 } },
-                meth = { title = 'Méthamphétamine', steps = {
+                meth = { title = 'Méthamphétamine', minLevel = 3, steps = {
                     { type = 'add',    label = 'Précurseurs', title = 'Ajoute les précurseurs',    hint = 'Maintiens le clic au-dessus du bol',                    amount = 10, seconds = 5, color = '#c9d3d8' },
                     { type = 'stir',   label = 'Mélange',     title = 'Mélange à la spatule',      hint = 'Tourne autour de la casserole sans aller trop vite',    turns = 7,  color = '#a7b8c4' },
                     { type = 'heat',   label = 'Cuisson',     title = 'Cuis à bonne température',  hint = 'Clic = chauffer · garde la température dans la zone verte', hold = 9, low = 0.5, high = 0.68, color = '#8fa3b0' },
@@ -605,7 +618,7 @@ Config.Real = {
                     { type = 'timing', label = 'Manucure', title = 'Taille les feuilles',          hint = 'Clique quand le curseur est dans la zone verte',          hits = 5, speed = 0.7 },
                     { type = 'timing', label = 'Pesée',    title = 'Pèse et conditionne',          hint = 'Clique quand le curseur est dans la zone verte',          hits = 4, speed = 0.85 },
                 } },
-                opium = { title = 'Opium / Héroïne', steps = {
+                opium = { title = 'Opium / Héroïne', minLevel = 2, steps = {
                     { type = 'add',    label = 'Résine',   title = 'Ajoute la résine',             hint = 'Maintiens le clic au-dessus du bol',                      amount = 8, seconds = 5, color = '#6b4a2a' },
                     { type = 'heat',   label = 'Chauffe',  title = 'Chauffe la résine',            hint = 'Clic = chauffer · garde la température dans la zone verte', hold = 7, color = '#7a5a2a' },
                     { type = 'stir',   label = 'Mélange',  title = 'Remue sans éclabousser',       hint = 'Tourne autour de la casserole sans aller trop vite',      turns = 5, color = '#6b4a2a' },

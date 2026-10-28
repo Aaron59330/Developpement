@@ -297,7 +297,7 @@
     }).join('');
     root.innerHTML =
       '<canvas id="lx-c"></canvas>' +
-      '<div class="lx-top"><div class="lx-badge">' + svg(ICO.flask, 14) + '<span>' + esc(S.lab || 'Laboratoire') + ' · ' + esc(S.title || '') + '</span></div>' +
+      '<div class="lx-top"><div class="lx-badge">' + svg(ICO.flask, 14) + '<span>' + esc(S.lab || 'Laboratoire') + ' · ' + esc(S.title || '') + (S.level ? ' · Niv. ' + esc(S.level) + (S.xpNeed ? ' (' + esc(Math.floor(S.xp || 0)) + '/' + esc(S.xpNeed) + ' XP)' : '') : '') + '</span></div>' +
       '<div class="lx-stepno"></div><h1 class="lx-title"></h1><div class="lx-pills"></div></div>' +
       (inv ? '<div class="lx-inv"><div class="lx-invh">Inventaire</div>' + inv + '</div>' : '') +
       '<div class="lx-card"><div class="lx-hint">' + svg(ICO.hand, 15) + '<span></span></div><div class="lx-body"><div class="lx-count"></div><div class="lx-bar"><i></i></div><small class="lx-pct"></small></div></div>' +

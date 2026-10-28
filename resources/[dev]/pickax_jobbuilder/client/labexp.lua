@@ -62,3 +62,23 @@ function LabExperience(q, session)
     LabExpActive = false
     return results
 end
+
+-- Accident de fabrication décidé par le serveur : fuite (intoxication gérée côté serveur), incendie, explosion (dégâts en points de vie)
+RegisterNetEvent('jobbuilder:client:labAccident', function(kind, damage)
+    local ped = PlayerPedId()
+    local c = GetEntityCoords(ped)
+    damage = math.max(0, math.floor(tonumber(damage) or 0))
+    if kind == 'leak' then
+        ShakeGameplayCam('DRUNK_SHAKE', 0.6)
+        SetTimeout(5000, function() StopGameplayCamShaking(true) end)
+        PlaySoundFrontend(-1, 'Beep_Red', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    elseif kind == 'fire' then
+        StartEntityFire(ped)
+        ShakeGameplayCam('SMALL_EXPLOSION_SHAKE', 0.2)
+        if damage > 0 then SetEntityHealth(ped, math.max(0, GetEntityHealth(ped) - damage)) end
+        SetTimeout(4000, function() StopEntityFire(PlayerPedId()) end)
+    elseif kind == 'explosion' then
+        AddExplosion(c.x + 0.0, c.y + 0.0, c.z + 0.0, 2, 0.6, true, false, 1.0)
+        if damage > 0 then SetEntityHealth(ped, math.max(0, GetEntityHealth(ped) - damage)) end
+    end
+end)

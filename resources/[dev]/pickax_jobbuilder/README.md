@@ -307,3 +307,9 @@ La logique et le HUD restent dans `html/labexp.js` (qui publie l'état de l'éta
 - Commande `/labprops` (console F8) : indique quel modèle est trouvé pour chaque accessoire.
 - Si la table de ton labo n'est pas à 0.92 m au-dessus de la position configurée, règle `Scene3D.Surface`.
 - Tests : `ROOT=. lua tools/tests/labscene_test.lua`.
+
+### Accidents, catalyseur et niveaux de laborantin
+- **Accidents** (`Experience.Accidents`) : sous 50 % de qualité, la fabrication peut mal tourner (risque proportionnel : 60 % à qualité 0). Trois types tirés au sort : **fuite toxique** (intoxication, guérie par l'antidote), **incendie** (dégâts + lot perdu), **explosion** (gros dégâts + lot perdu). Tout est décidé par le serveur ; le client joue les effets.
+- **Catalyseur** (`Experience.Catalyst`, item `lab_catalyst`, vendu chez le marchand « Illégal », 2 500 $) : ingrédient optionnel consommé à la fin ; **+12 % de qualité** et **risque d'accident ÷ 2**. Il apparaît dans l'inventaire de l'interface si le joueur en a.
+- **Niveaux de laborantin** (`Experience.Levels`) : chaque fabrication donne de l'XP (stockée en base, table `jobbuilder_lab_xp`). Niveau n+1 = 100 × n² XP (niveau 2 : 100, niveau 3 : 400…). Chaque niveau : **+1,5 % de qualité** et **−6 % de risque d'accident**. `minLevel` par recette verrouille les recettes (cocaïne et opium : niveau 2, méthamphétamine : niveau 3 ; cannabis libre). Le niveau et l'XP s'affichent en haut de l'interface. Export : `exports.pickax_jobbuilder:GetLabLevel(src)`.
+- Tout est réglable dans le panel : *Réglages du serveur → Drogues & labos* (Accidents de labo, Catalyseur, Niveaux de laborantin, y compris le niveau requis par recette). Tests : `ROOT=. lua tools/tests/labexp_test.lua` (32 vérifications).

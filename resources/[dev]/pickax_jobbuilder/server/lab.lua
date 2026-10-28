@@ -7,6 +7,7 @@ local T = L.Toxic
 local Cache = {}        -- [propId] = liste { id, kind, drug, x, y, z, h, radius, outfit, planted }
 local Pending = {}      -- [src] = action chronométrée { id, sub, ready, batches }
 local Level, Last, Warned = {}, {}, {}   -- intoxication
+local Xp = {}                            -- [identifiant] = XP de laborantin (cache)
 
 local function fail(msg) return { ok = false, error = msg } end
 
@@ -16,6 +17,7 @@ CreateThread(function()
         id INT AUTO_INCREMENT PRIMARY KEY, property_id INT NOT NULL, kind VARCHAR(12) NOT NULL, drug VARCHAR(12) NULL,
         x FLOAT NOT NULL, y FLOAT NOT NULL, z FLOAT NOT NULL, h FLOAT NOT NULL DEFAULT 0, radius FLOAT NULL, outfit TEXT NULL, planted BIGINT NULL, placed_by VARCHAR(80) NULL,
         INDEX idx_prop (property_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS jobbuilder_lab_xp (identifier VARCHAR(80) NOT NULL PRIMARY KEY, xp INT NOT NULL DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
     MySQL.query.await([[CREATE TABLE IF NOT EXISTS jobbuilder_lab_toxic (identifier VARCHAR(80) NOT NULL PRIMARY KEY, level INT NOT NULL DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
 end)
 
@@ -207,6 +209,22 @@ local function near(src, q, dist)
     return #(vector3(c.x, c.y, c.z) - vector3(q.x, q.y, q.z)) <= (dist or 4.0)
 end
 
+-- ─── XP de laborantin ───
+local function getXp(identifier)
+    if Xp[identifier] == nil then
+        local row = MySQL.single.await('SELECT xp FROM jobbuilder_lab_xp WHERE identifier = ?', { identifier })
+        Xp[identifier] = row and tonumber(row.xp) or 0
+    end
+    return Xp[identifier]
+end
+local function addXp(identifier, n)
+    local v = getXp(identifier) + math.max(0, math.floor(n))
+    Xp[identifier] = v
+    MySQL.update('INSERT INTO jobbuilder_lab_xp (identifier, xp) VALUES (?, ?) ON DUPLICATE KEY UPDATE xp = VALUES(xp)', { identifier, v })
+    return v
+end
+exports('GetLabLevel', function(src) local x = ESX.GetPlayerFromId(tonumber(src)) return x and LabExp.levelFor(getXp(x.identifier), L.Experience and L.Experience.Levels) or 1 end)
+
 -- Début d'une action chronométrée : retourne la durée (le serveur vérifie qu'elle a été respectée à la fin)
 ESX.RegisterServerCallback('jobbuilder:lab:begin', function(src, cb, id)
     if Pending[src] then return cb(fail('Action déjà en cours')) end
@@ -231,13 +249,23 @@ ESX.RegisterServerCallback('jobbuilder:lab:begin', function(src, cb, id)
         -- Laboratoire interactif : une suite d'étapes jouées à la souris remplace la barre de progression
         local X, tpl = L.Experience, L.Experience and L.Experience.Templates and L.Experience.Templates[q.drug]
         if X and X.Enabled and tpl and tpl.steps and #tpl.steps > 0 then
+            local LV, CAT = X.Levels, X.Catalyst
+            local xp = getXp(x.identifier)
+            local level = LabExp.levelFor(xp, LV)
+            if LV and LV.Enabled ~= false and (tonumber(tpl.minLevel) or 1) > level then
+                return cb(fail(('Niveau de laborantin insuffisant : cette recette demande le niveau %d (tu es niveau %d).'):format(tpl.minLevel, level)))
+            end
             local iname = L.Experience.ItemLabels and L.Experience.ItemLabels[d.raw]
             local ok, items = pcall(function() return exports.ox_inventory:Items() end)
             local label = iname or (ok and items and items[d.raw] and items[d.raw].label) or d.raw
+            local inv = { { label = label, sub = ('Lots : ×%d'):format(batches), count = have, icon = d.raw } }
+            if CAT and CAT.Enabled ~= false and itemCount(src, CAT.Item) >= (CAT.Consume or 1) then
+                inv[#inv + 1] = { label = CAT.Label or CAT.Item, sub = 'Optionnel : + qualité, - accidents', count = itemCount(src, CAT.Item), icon = CAT.Item }
+            end
             Pending[src] = { id = q.id, pid = p.id, sub = 'process', exp = true, batches = batches, nsteps = #tpl.steps,
                 ready = GetGameTimer() + LabExp.minMs(tpl.steps, X), expires = GetGameTimer() + 25 * 60000 }
             return cb({ ok = true, experience = true, session = { lab = 'Laboratoire', title = tpl.title or d.label, batches = batches, steps = LabExp.publicSteps(tpl.steps),
-                inventory = { { label = label, sub = ('Lots : ×%d'):format(batches), count = have, icon = d.raw } }, cam = X.Cam } })
+                inventory = inv, cam = X.Cam, level = level, xp = (LabExp.nextLevel(xp, LV)) or nil, xpNeed = select(2, LabExp.nextLevel(xp, LV)) } })
         end
         sub, secs, label = 'process', d.recipe.time * batches, ('%s ×%d'):format(d.recipe.label, batches)
         Pending[src] = { id = q.id, pid = p.id, sub = sub, ready = GetGameTimer() + math.floor(secs * 1000 * L.Grace), expires = GetGameTimer() + secs * 1000 + 60000, batches = batches }
@@ -302,13 +330,34 @@ ESX.RegisterServerCallback('jobbuilder:lab:finishExp', function(src, cb, results
     if not ok then return cb(fail(quality)) end
     local need = d.recipe.count * a.batches
     if itemCount(src, d.raw) < need then return cb(fail('Ingrédients manquants')) end
-    local made, failed, bonus = LabExp.outcome(quality, a.batches, d.recipe.fail, L.Experience)
+    local X = L.Experience
+    local level = LabExp.levelFor(getXp(x.identifier), X.Levels)
+    local CAT = X.Catalyst
+    local boost = CAT and CAT.Enabled ~= false and itemCount(src, CAT.Item) >= (CAT.Consume or 1)
+    quality = LabExp.adjustQuality(quality, level, boost, X.Levels, CAT)
+    local A = X.Accidents
+    local accident
+    local chance = LabExp.accidentChance(quality, level, boost, A, X.Levels, CAT)
+    if chance > 0 and math.random(100) <= chance then accident = LabExp.pickAccident(A) end
+    local made, failed, bonus = LabExp.outcome(quality, a.batches, d.recipe.fail, X)
+    if accident and (accident == 'fire' or accident == 'explosion') and A.LoseBatch ~= false then failed, made, bonus = failed + made, 0, 0 end
     local give = made + bonus
     if give > 0 and not exports.ox_inventory:CanCarryItem(src, d.pooch, give) then return cb(fail('Tu ne peux pas porter plus.')) end
     exports.ox_inventory:RemoveItem(src, d.raw, need)
+    if boost then exports.ox_inventory:RemoveItem(src, CAT.Item, CAT.Consume or 1) end
     local pct = math.floor(quality * 100 + 0.5)
+    -- XP et niveau
+    local gain = LabExp.xpGain(made, failed, quality, X.Levels)
+    local newLevel = level
+    if gain > 0 then newLevel = LabExp.levelFor(addXp(x.identifier, gain), X.Levels) end
+    -- accident : effets côté client / intoxication côté serveur
+    if accident == 'leak' then TriggerEvent('jobbuilder:lab:addToxic', src, A.LeakExposure or 40) end
+    if accident then TriggerClientEvent('jobbuilder:client:labAccident', src, accident, accident == 'fire' and (A.FireDamage or 0) or accident == 'explosion' and (A.ExplosionDamage or 0) or 0) end
     if give > 0 then exports.ox_inventory:AddItem(src, d.pooch, give, { purity = pct, description = ('Pureté : %d %%'):format(pct) }) end   -- la pureté suit le pochon (visible dans l'inventaire)
-    cb({ ok = true, quality = pct, message = ('Fabrication terminée (qualité %d %%) : %d pochon(s)%s%s.'):format(pct, give, bonus > 0 and (' dont ' .. bonus .. ' bonus') or '', failed > 0 and (', ' .. failed .. ' lot(s) raté(s)') or '') })
+    local ACCIDENT_TEXT = { leak = ' ~r~Fuite toxique : tu es intoxiqué !~s~', fire = ' ~r~Incendie : le lot est perdu !~s~', explosion = ' ~r~Explosion : le lot est perdu !~s~' }
+    cb({ ok = true, quality = pct, accident = accident, level = newLevel, xp = gain,
+        message = ('Fabrication terminée (qualité %d %%) : %d pochon(s)%s%s.%s%s%s'):format(pct, give, bonus > 0 and (' dont ' .. bonus .. ' bonus') or '', failed > 0 and (', ' .. failed .. ' lot(s) raté(s)') or '',
+            boost and ' Catalyseur utilisé.' or '', gain > 0 and (' +' .. gain .. ' XP') or '', (newLevel > level and (' ~g~Niveau ' .. newLevel .. ' !~s~') or '') .. (accident and ACCIDENT_TEXT[accident] or '')) })
 end)
 
 -- ─────────────────────────────── Intoxication (zone de tenue sans la tenue) ───────────────────────────────
@@ -318,6 +367,8 @@ local function setLevel(src, v)
     if Player(src) then Player(src).state:set('labToxic', math.floor(v), true) end
     TriggerClientEvent('jobbuilder:client:toxic', src, math.floor(v))
 end
+
+AddEventHandler('jobbuilder:lab:addToxic', function(src, amount) if T.Enabled then setLevel(src, (Level[src] or 0) + (tonumber(amount) or 0)) end end)
 
 local function saveTox(src)
     local x = ESX.GetPlayerFromId(src)

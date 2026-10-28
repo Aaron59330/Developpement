@@ -29,4 +29,31 @@ local lo, hi = fails(0.1), fails(1.0)
 function_ok(lo > hi + 0.2, ('qualité basse = plus de lots ratés (%.0f %% contre %.0f %%)'):format(lo * 100, hi * 100))
 local pub = LabExp.publicSteps({ { type = 'add', label = 'x', secret = 'ne pas envoyer', amount = 3 } })
 function_ok(pub[1].amount == 3 and pub[1].secret == nil, 'seuls les champs d’interface sont envoyés au client')
+-- niveaux / catalyseur / accidents
+local LV = { Enabled = true, XpPerBatch = 10, Base = 100, Max = 5, QualityPerLevel = 0.015, AccidentPerLevel = 0.06 }
+local CAT = { Enabled = true, Quality = 0.12, AccidentFactor = 0.5 }
+local A = { Enabled = true, Threshold = 0.5, Chance = 60, Kinds = { { kind = 'leak', weight = 60 }, { kind = 'fire', weight = 30 }, { kind = 'explosion', weight = 10 } } }
+function_ok(LabExp.levelFor(0, LV) == 1 and LabExp.levelFor(99, LV) == 1 and LabExp.levelFor(100, LV) == 2 and LabExp.levelFor(400, LV) == 3 and LabExp.levelFor(900, LV) == 4, 'niveaux : 100 / 400 / 900 XP')
+function_ok(LabExp.levelFor(10 ^ 9, LV) == 5, 'niveau maximum respecté')
+function_ok(LabExp.levelFor(10 ^ 9, { Enabled = false }) == 1, 'niveaux désactivés = niveau 1')
+local got, need = LabExp.nextLevel(250, LV)
+function_ok(got == 150 and need == 300, ('progression vers le niveau suivant : %s / %s'):format(tostring(got), tostring(need)))
+function_ok(LabExp.nextLevel(10 ^ 9, LV) == nil, 'pas de niveau suivant au maximum')
+function_ok(LabExp.xpGain(2, 1, 1.0, LV) == math.floor(10 * (2 * 1.5 + 0.3) + 0.5), 'XP : lots réussis + lots ratés')
+function_ok(LabExp.xpGain(1, 0, 1, { Enabled = false }) == 0, 'XP désactivée')
+function_ok(math.abs(LabExp.adjustQuality(0.5, 3, false, LV, CAT) - 0.53) < 1e-9, 'bonus de niveau : +1,5 % par niveau au-dessus du 1')
+function_ok(math.abs(LabExp.adjustQuality(0.5, 1, true, LV, CAT) - 0.62) < 1e-9, 'catalyseur : +12 %')
+function_ok(LabExp.adjustQuality(0.95, 5, true, LV, CAT) == 1, 'qualité bornée à 100 %')
+function_ok(LabExp.accidentChance(0.5, 1, false, A, LV, CAT) == 0, 'aucun accident au seuil de qualité')
+function_ok(math.abs(LabExp.accidentChance(0, 1, false, A, LV, CAT) - 60) < 1e-9, 'qualité 0 : risque maximum')
+function_ok(math.abs(LabExp.accidentChance(0.25, 1, false, A, LV, CAT) - 30) < 1e-9, 'risque proportionnel à la qualité')
+function_ok(math.abs(LabExp.accidentChance(0, 1, true, A, LV, CAT) - 30) < 1e-9, 'catalyseur : risque ÷ 2')
+function_ok(math.abs(LabExp.accidentChance(0, 6, false, A, { Enabled = true, AccidentPerLevel = 0.06 }, CAT) - 42) < 1e-9, 'niveau 6 : -30 % de risque')
+function_ok(LabExp.accidentChance(0, 1, false, { Enabled = false }, LV, CAT) == 0, 'accidents désactivés')
+local counts = { leak = 0, fire = 0, explosion = 0 }
+math.randomseed(3)
+for _ = 1, 6000 do counts[LabExp.pickAccident(A)] = counts[LabExp.pickAccident(A)] + 0 end
+for _ = 1, 6000 do local k = LabExp.pickAccident(A) counts[k] = counts[k] + 1 end
+function_ok(counts.leak > counts.fire and counts.fire > counts.explosion, ('tirage pondéré : fuite %d > incendie %d > explosion %d'):format(counts.leak, counts.fire, counts.explosion))
+function_ok(LabExp.pickAccident({ Kinds = {} }) == nil, 'aucun type configuré : pas d\'accident')
 print('\n' .. n .. ' vérifications OK')
