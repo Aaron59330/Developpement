@@ -28,6 +28,7 @@ end
 RegisterNetEvent('pickax_shopbuilder:clothshotCheck', function()
     local src = source
     local ok = isAdmin(src) and GetResourceState('screenshot-basic') == 'started'
+    if not ok then print(('^3[clothshots] refusé pour %s : admin=%s, screenshot-basic=%s^0'):format(tostring(src), tostring(isAdmin(src)), GetResourceState('screenshot-basic'))) end
     TriggerClientEvent('pickax_shopbuilder:clothshotGo', src, ok, ok and '' or (GetResourceState('screenshot-basic') == 'started' and 'Réservé aux administrateurs.' or 'La ressource « screenshot-basic » doit être démarrée.'))
 end)
 
