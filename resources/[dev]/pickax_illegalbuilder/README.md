@@ -61,3 +61,15 @@ Le joueur vend d'abord ses unités **les plus pures** ; le message de vente affi
 - Chaque saisie est enregistrée (table `illegalbuilder_seizures` et journal du builder) ; `/saisies` affiche les dernières.
 - Réglable dans le panel : *Réglages du serveur → Drogues & labos → Perquisitions et saisies (police)*. Tests : `ROOT=. lua tools/tests/seizure_test.lua` (14 vérifications).
 - **pickax_core** : `players/contextMenu/function.lua` ajoute l'entrée « Perquisition (drogue) » au menu d'un joueur (visible seulement pour la police).
+
+## Marché noir, contrats de livraison et casier judiciaire
+
+Tout se règle depuis le panel (Réglages → Drogues & labos) ou dans `config.lua` (`Config.BlackMarket`, `Config.Contracts`, `Config.Record`).
+
+- **Marché noir à rotation** — un vendeur change de lieu, de stock et de prix à chaque rotation (24 h par défaut), identique pour tous les joueurs. `/marchenoir` indique où le trouver (et pose le GPS), sur place il liste le stock ; `/acheter <n°> [quantité]` achète en argent sale. Limite par joueur et par produit, alerte police possible. Lieux et produits : `Config.BlackMarket.Locations` / `Items` (utilise des noms d'objets existants dans ox_inventory).
+- **Contrats de livraison** — `/contrat` donne une destination avec un temps imparti ; paiement = base + prime au kilomètre, prime de rapidité, chance d'alerter la police. Le serveur vérifie la position, la durée et rejette les vitesses impossibles. `/annulercontrat` abandonne.
+- **Casier judiciaire** — `/casier <id>` (police) montre les infractions et amendes ; `/inculper <id> <amende> <motif>` ajoute une ligne et prélève l'amende sur le compte en banque, reversée à la société de police. Chaque saisie ajoute automatiquement une ligne. Table `illegalbuilder_records`.
+
+## Gangs — tags de territoire (pickax_gangbuilder)
+
+`/tag` dans un territoire possédé par ton gang pose une marque visible au sol (couleur du gang) qui augmente le revenu du territoire (4 % par tag, plafonné, 5 tags max par défaut) et expire après 7 jours. `/effacer` près d'un tag rival le supprime. Réglages : `Config.Tags` ou panel → Gangs → Tags de gang.

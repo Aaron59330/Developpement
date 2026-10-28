@@ -109,6 +109,62 @@ Config.Seizure = {
     Evidence = true,                  -- les objets saisis vont dans le casier de preuves (sinon : détruits)
     StashSlots = 200, StashWeight = 500000,
 }
+-- Marché noir : un vendeur change de lieu et de stock à chaque rotation (/marchenoir pour le trouver, /acheter <n°> [quantité])
+Config.BlackMarket = {
+    Enabled = true,
+    RotationHours = 24,            -- durée d'une rotation (lieu + stock + prix)
+    OffersPerRotation = 4,         -- produits proposés
+    PriceMin = 0.8, PriceMax = 1.4,   -- le prix varie entre ces multiplicateurs
+    PerPlayerLimit = 3,            -- quantité maximale par produit et par joueur et par rotation
+    Account = 'black_money',       -- compte débité
+    Radius = 4.0,
+    AlertChance = 10,              -- % de chance qu'un achat alerte la police
+    Locations = {
+        { label = 'Entrepôt du port',      hint = 'près des conteneurs du port',          coords = { x = 1000.2, y = -2527.5, z = 28.3 } },
+        { label = 'Casse auto',            hint = 'du côté de la casse de La Mesa',        coords = { x = 1127.6, y = -2024.9, z = 31.5 } },
+        { label = 'Ruelle de Vinewood',    hint = 'dans une ruelle de Vinewood',           coords = { x = 357.6, y = 288.6, z = 103.2 } },
+        { label = 'Parking de Sandy',      hint = 'sur un parking à Sandy Shores',         coords = { x = 1698.1, y = 3757.9, z = 34.7 } },
+    },
+    Items = {   -- price = prix de base ($ sale), stock = quantité maximale, rare = mis en avant
+        { item = 'lockpick',      label = 'Crochet',          price = 400,  stock = 10 },
+        { item = 'WEAPON_SWITCHBLADE', label = 'Couteau à cran', price = 1800, stock = 3 },
+        { item = 'WEAPON_PISTOL', label = 'Pistolet',         price = 9000, stock = 2, rare = true },
+        { item = 'armor',        label = 'Gilet pare-balles', price = 2500, stock = 4 },
+        { item = 'radio',         label = 'Radio',            price = 600,  stock = 6 },
+    },
+}
+
+-- Contrats de livraison : /contrat donne une livraison chronométrée, payée en argent sale
+Config.Contracts = {
+    Enabled = true,
+    Account = 'black_money',
+    BaseReward = 600, PerKm = 900,   -- paiement = base + prime au kilomètre
+    FastRatio = 0.6, FastBonus = 40, -- livré en moins de 60 % du temps → +40 %
+    AvgSpeed = 18,                   -- m/s utilisés pour calculer le temps imparti
+    TimeMargin = 1.5, MinSeconds = 90,
+    MinDistance = 300,
+    Radius = 15.0,
+    Cooldown = 120,                  -- secondes entre deux contrats
+    AlertChance = 25,                -- % de chance d'alerter la police au départ
+    Destinations = {
+        { label = 'Marina de Del Perro', coords = { x = -1850.3, y = -1236.4, z = 8.6 } },
+        { label = 'Pont de Tataviam',    coords = { x = 1735.6, y = 4713.5, z = 42.0 } },
+        { label = 'Raffinerie de Sandy', coords = { x = 2742.3, y = 3438.8, z = 55.5 } },
+        { label = 'Quartier de Strawberry', coords = { x = 98.3, y = -1936.0, z = 20.8 } },
+        { label = 'Gare de Davis',       coords = { x = 457.1, y = -1717.7, z = 29.1 } },
+        { label = 'Parc de Mirror Park', coords = { x = 1086.2, y = -241.0, z = 69.1 } },
+    },
+}
+
+-- Casier judiciaire : /casier <id> et /inculper <id> <amende> <motif> (police)
+Config.Record = {
+    Enabled = true,
+    AutoSeizure = true,          -- chaque saisie ajoute une ligne au casier
+    MaxFine = 50000,
+    Distance = 6.0,              -- distance maximale policier ↔ suspect pour /inculper
+    Society = 'society_police',  -- compte société qui reçoit les amendes ('' = personne)
+}
+
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────

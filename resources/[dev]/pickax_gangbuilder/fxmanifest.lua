@@ -27,6 +27,7 @@ server_scripts {
     'server/tribute.lua',
     'server/season.lua',
     'server/hq.lua',
+    'server/tags.lua',
     'server/tablet.lua',
     'server/settings.lua',
 }
@@ -43,6 +44,7 @@ client_scripts {
     'client/objectives.lua',
     'client/tribute.lua',
     'client/hq.lua',
+    'client/tags.lua',
 }
 
 ui_page 'html/index.html'

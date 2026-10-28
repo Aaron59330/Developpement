@@ -112,6 +112,9 @@ ESX.RegisterServerCallback('illegalbuilder:seize:take', function(src, cb, target
             exports.pickax_settings:Discord('police', 'Saisie', ('%s a fouillé %s : %d objet(s), %d $ d\'argent sale saisis.'):format(IB.playerName(officer), IB.playerName(t), #taken, black), 3447003)
         end)
     end
+    if IB.recordAdd and #taken + black > 0 and (Config.Record or {}).Enabled ~= false and (Config.Record or {}).AutoSeizure ~= false then
+        IB.recordAdd(t.identifier, IB.playerName(t), 'Détention de produits illicites', 0, IB.playerName(officer))
+    end
     IB.log(nil, officer, 'seizure', ('%s : %d objets, %d $ sale'):format(IB.playerName(t), #taken, black), black)
     TriggerClientEvent('illegalbuilder:client:notify', target, 'La police t\'a fouillé et a saisi ta marchandise illégale.', 'error')
     cb({ ok = true, items = taken, black = black })

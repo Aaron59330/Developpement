@@ -244,7 +244,7 @@ CreateThread(function()
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                     elseif now - t.last_income >= interval then
-                        local reward = math.floor(val(t, 'reward', T.Reward) * lvlMul(t, 'income') * (GB.hqMul and GB.hqMul(t.owner, 'income') or 1.0))
+                        local reward = math.floor(val(t, 'reward', T.Reward) * lvlMul(t, 'income') * (GB.hqMul and GB.hqMul(t.owner, 'income') or 1.0) * (GB.tagMul and GB.tagMul(id, t.owner) or 1.0))
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                         if reward > 0 and GB.treasuryAdd(t.owner, T.RewardAccount == 'money' and 'money' or 'dirty', reward) then

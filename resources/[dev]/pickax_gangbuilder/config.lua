@@ -136,6 +136,20 @@ Config.Conflicts = {
 -- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
 -- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
 -- ── QG de gang : le coffre du gang (point « Coffre ») est son QG. Le bureau l'améliore avec la trésorerie ; un gang rival peut le RAIDER pour piller de l'argent sale ──
+-- Tags de gang : /tag dans un territoire possédé, /effacer sur un tag rival
+Config.Tags = {
+    Enabled = true,
+    MaxPerTerritory = 5,       -- tags par gang et par territoire
+    IncomePercent = 4,         -- % de revenu en plus par tag
+    IncomeMaxPercent = 20,     -- plafond du bonus
+    ExpireDays = 7,            -- un tag disparaît après ce nombre de jours (0 = jamais)
+    Cooldown = 30,             -- secondes entre deux tags
+    EraseCooldown = 60,        -- secondes entre deux effacements
+    EraseDistance = 3.0,
+    MinSpacing = 8.0,          -- distance minimale entre deux tags
+    RepPlace = 1, RepErase = 2,   -- réputation de gang gagnée
+}
+
 Config.HQ = {
     Enabled = true,
     UpgradeAccount = 'dirty',   -- compte de la trésorerie qui paie l'amélioration : 'dirty' | 'money'
