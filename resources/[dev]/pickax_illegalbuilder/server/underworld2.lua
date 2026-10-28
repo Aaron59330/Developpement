@@ -10,7 +10,6 @@ local function STA() return Config.Stashes or {} end
 CreateThread(function()
     Wait(2200)
     if not (MySQL and MySQL.query) then return end
-    pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS illegalbuilder_jail (identifier VARCHAR(80) PRIMARY KEY, until_at INT NOT NULL, total INT NOT NULL, reduced INT NOT NULL DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
     pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS illegalbuilder_stashes (id INT AUTO_INCREMENT PRIMARY KEY, owner VARCHAR(80) NOT NULL, x DOUBLE NOT NULL, y DOUBLE NOT NULL, z DOUBLE NOT NULL, created_at INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
     local ok, rows = pcall(MySQL.query.await, 'SELECT * FROM illegalbuilder_stashes')
     if ok and rows then
@@ -29,12 +28,19 @@ function IB.recidiveMul(priors)
     return 1.0 + math.min(tonumber(R.MaxPercent) or 0, math.max(0, priors) * (tonumber(R.PercentPerPrior) or 0)) / 100
 end
 
+-- Antécédents récents : lus dans le casier de la tablette police (pickax_jobbuilder)
 function IB.priorCount(identifier)
+    if GetResourceState('pickax_jobbuilder') ~= 'started' then return 0 end
     local R = (Config.Record or {}).Recidive or {}
-    local since = os.time() - math.floor(tonumber(R.WindowDays) or 30) * 86400
-    local rows = MySQL.query.await('SELECT COUNT(*) AS n FROM illegalbuilder_records WHERE identifier = ? AND created_at >= ?', { identifier, since })
-    return rows and rows[1] and math.floor(tonumber(rows[1].n) or 0) or 0
+    local ok, n = pcall(function() return exports.pickax_jobbuilder:RecordPriors(identifier, tonumber(R.WindowDays) or 30) end)
+    return ok and math.floor(tonumber(n) or 0) or 0
 end
+
+-- Utilisé par la tablette police pour aggraver une amende (export)
+exports('RecidiveMul', function(identifier)
+    if not ((Config.Record or {}).Enabled and ((Config.Record or {}).Recidive or {}).Enabled) then return 1.0 end
+    return IB.recidiveMul(IB.priorCount(identifier))
+end)
 
 -- ═══════════════════════════ Informateurs ═══════════════════════════
 local lastInfo = {}
@@ -92,7 +98,16 @@ ESX.RegisterServerCallback('illegalbuilder:informant:buy', function(src, cb, kin
 end)
 
 -- ═══════════════════════════ Prison ═══════════════════════════
-local jailed = {}   -- [src] = { identifier, untilAt, total, reduced, lastWork }
+-- La prison est celle de pickax_core (players/jail) : même lieu, tenue et minuteur que le /jail du staff. Ici : la peine donnée par la police (avec récidive et prime)
+-- et les travaux qui la réduisent. Aucun second système de prison.
+local worked = {}   -- [identifiant] = { total, reduced, lastWork }
+
+local function core(fn, ...)
+    if GetResourceState('pickax_core') ~= 'started' then return nil end
+    local ok, a, b = pcall(function(...) return exports.pickax_core[fn](exports.pickax_core, ...) end, ...)
+    if ok then return a, b end
+    return nil
+end
 
 -- Réduction de peine possible : plafonnée à MaxReductionPercent de la peine totale
 function IB.jailReduce(j, seconds)
@@ -100,82 +115,35 @@ function IB.jailReduce(j, seconds)
     return math.max(0, math.min(seconds, cap - j.reduced))
 end
 
-local function pushJail(src)
-    local j = jailed[src]
-    TriggerClientEvent('illegalbuilder:client:jail', src, j and math.max(0, j.untilAt - os.time()) or 0)
-end
-
-local function teleport(src, c)
-    local ped = GetPlayerPed(src)
-    if ped and ped ~= 0 then SetEntityCoords(ped, c.x + 0.0, c.y + 0.0, c.z + 0.0, false, false, false, false) end
-end
-
-function IB.jailPlayer(target, minutes, byName, reason)
+function IB.jailPlayer(target, minutes, officer, reason)
     local x = ESX.GetPlayerFromId(target)
-    if not x then return false end
+    if not x then return false, 'Cible introuvable' end
     minutes = math.max(1, math.min(math.floor(tonumber(PR().MaxMinutes) or 60), math.floor(tonumber(minutes) or 0)))
-    local secs = minutes * 60
-    jailed[target] = { identifier = x.identifier, untilAt = os.time() + secs, total = secs, reduced = 0, lastWork = 0 }
-    MySQL.update('REPLACE INTO illegalbuilder_jail (identifier, until_at, total, reduced) VALUES (?, ?, ?, 0)', { x.identifier, jailed[target].untilAt, secs })
-    teleport(target, PR().Coords)
-    pushJail(target)
-    IB.notify(target, ('Tu es en prison pour %d minute(s). Travaille pour réduire ta peine.'):format(minutes), 'error')
-    return true, minutes
+    local ok, res = core('JailPlayer', target, minutes * 60, IB.playerName(officer), reason, officer.source)
+    if ok == nil then return false, 'La prison (pickax_core) n\'est pas disponible.' end
+    if not ok then return false, res end
+    worked[x.identifier] = { total = res, reduced = 0, lastWork = 0 }
+    return true, math.floor(res / 60)
 end
-
-local function release(src, silent)
-    local j = jailed[src]
-    if not j then return end
-    jailed[src] = nil
-    MySQL.update('DELETE FROM illegalbuilder_jail WHERE identifier = ?', { j.identifier })
-    teleport(src, PR().ExitCoords or PR().Coords)
-    pushJail(src)
-    if not silent then IB.notify(src, 'Tu es libre.', 'success') end
-end
-
-AddEventHandler('esx:playerLoaded', function(src, xPlayer)
-    if not PR().Enabled then return end
-    xPlayer = xPlayer or ESX.GetPlayerFromId(src)
-    if not xPlayer then return end
-    local ok, rows = pcall(MySQL.query.await, 'SELECT * FROM illegalbuilder_jail WHERE identifier = ?', { xPlayer.identifier })
-    local r = ok and rows and rows[1]
-    if r and r.until_at > os.time() then
-        jailed[src] = { identifier = xPlayer.identifier, untilAt = r.until_at, total = r.total, reduced = r.reduced or 0, lastWork = 0 }
-        SetTimeout(5000, function() if jailed[src] then teleport(src, PR().Coords) pushJail(src) end end)
-    elseif r then MySQL.update('DELETE FROM illegalbuilder_jail WHERE identifier = ?', { r.identifier }) end
-end)
-
-CreateThread(function()
-    while true do
-        Wait(5000)
-        if PR().Enabled then
-            for src, j in pairs(jailed) do
-                if not ESX.GetPlayerFromId(src) then jailed[src] = nil
-                elseif os.time() >= j.untilAt then release(src)
-                else
-                    local ped = GetPlayerPed(src)
-                    if ped and ped ~= 0 and dist(GetEntityCoords(ped), PR().Coords) > (tonumber(PR().Radius) or 60.0) then teleport(src, PR().Coords) end
-                end
-            end
-        end
-    end
-end)
 
 ESX.RegisterServerCallback('illegalbuilder:jail:work', function(src, cb)
-    local j = jailed[src]
-    if not PR().Enabled or not j then return cb({ ok = false, error = 'Tu n\'es pas en prison.' }) end
+    local x = ESX.GetPlayerFromId(src)
+    local left = x and core('JailTimeLeft', src) or 0
+    if not PR().Enabled or not x or not left or left <= 0 then return cb({ ok = false, error = 'Tu n\'es pas en prison.' }) end
     local near
     for _, s in ipairs((PR().Work or {}).Spots or {}) do if IB.distanceTo(src, s.coords) <= 3.5 then near = s end end
     if not near then return cb({ ok = false, error = 'Rends-toi à un poste de travail.' }) end
     local W = PR().Work or {}
+    -- peine donnée par le staff ou avant un redémarrage : le plafond se calcule sur le temps restant au premier travail
+    local j = worked[x.identifier]
+    if not j then j = { total = left, reduced = 0, lastWork = 0 } worked[x.identifier] = j end
     if os.time() - j.lastWork < (tonumber(W.Cooldown) or 45) then return cb({ ok = false, error = 'Reprends ton souffle.' }) end
     local cut = IB.jailReduce(j, math.floor(tonumber(W.Reduce) or 30))
     if cut <= 0 then return cb({ ok = false, error = 'Ta peine ne peut plus être réduite par le travail.' }) end
     j.lastWork = os.time()
     j.reduced = j.reduced + cut
-    j.untilAt = j.untilAt - cut
-    MySQL.update('UPDATE illegalbuilder_jail SET until_at = ?, reduced = ? WHERE identifier = ?', { j.untilAt, j.reduced, j.identifier })
-    cb({ ok = true, cut = cut, left = math.max(0, j.untilAt - os.time()), job = near.label })
+    local remaining = core('ReduceJail', src, cut) or 0
+    cb({ ok = true, cut = cut, left = remaining, job = near.label })
 end)
 
 RegisterCommand('emprisonner', function(src, args)
@@ -190,15 +158,16 @@ RegisterCommand('emprisonner', function(src, args)
     if not a or a == 0 or not b or b == 0 or dist(GetEntityCoords(a), GetEntityCoords(b)) > (tonumber((Config.Record or {}).Distance) or 6.0) then return IB.notify(src, 'Le suspect est trop loin.', 'error') end
     local priors = IB.priorCount(t.identifier)
     minutes = math.floor(minutes * IB.recidiveMul(priors) + 0.5)
-    local ok, real = IB.jailPlayer(t.source, minutes, IB.playerName(officer), reason)
-    if not ok then return end
-    IB.recordAdd(t.identifier, IB.playerName(t), ('Peine de %d min : %s'):format(real, reason), 0, IB.playerName(officer))
+    local ok, real = IB.jailPlayer(t.source, minutes, officer, reason)
+    if not ok then return IB.notify(src, real or 'Impossible', 'error') end
+    IB.recordAdd(officer, t, 'jail', ('Peine de %d min : %s'):format(real, reason), 0)
     local B = PR().ArrestBonus or {}
     local bonus = 0
     if B.Enabled and priors > 0 then
         bonus = math.min(math.floor(tonumber(B.Max) or 0), priors * math.floor(tonumber(B.PerPrior) or 0))
         if bonus > 0 then officer.addAccountMoney(B.Account or 'bank', bonus, 'Prime d\'arrestation') end
     end
+    IB.notify(t.source, ('Tu es en prison pour %d minute(s). Travaille aux postes pour réduire ta peine.'):format(real), 'error')
     IB.notify(src, ('%s en prison pour %d min%s%s'):format(IB.playerName(t), real, priors > 0 and (' (récidive : %d antécédent(s))'):format(priors) or '', bonus > 0 and (' · prime %d $'):format(bonus) or ''), 'success')
 end, false)
 
@@ -207,8 +176,7 @@ RegisterCommand('liberer', function(src, args)
     local x = ESX.GetPlayerFromId(src)
     if not x or not (IB.isPoliceJob(x.job.name) or IB.isAdmin(src)) then return IB.notify(src, 'Réservé à la police.', 'error') end
     local t = tonumber(args[1])
-    if not t or not jailed[t] then return IB.notify(src, 'Ce joueur n\'est pas en prison.', 'error') end
-    release(t)
+    if not t or not core('UnjailPlayer', t) then return IB.notify(src, 'Ce joueur n\'est pas en prison.', 'error') end
     IB.notify(src, 'Détenu libéré.', 'success')
 end, false)
 
@@ -283,9 +251,11 @@ RegisterCommand('fouillerplanque', function(src)
     IB.notify(src, 'Planque découverte ! Tout ce qu\'elle contient est à toi.', 'success')
     for _, id in ipairs(GetPlayers()) do
         local o = ESX.GetPlayerFromId(tonumber(id))
-        if o and o.identifier == best.owner then IB.notify(o.source, 'La police a découvert une de tes planques.', 'error') end
+        if o and o.identifier == best.owner then
+            IB.notify(o.source, 'La police a découvert une de tes planques.', 'error')
+            IB.recordAdd(x, o, 'seizure', 'Planque découverte par la police', 0)
+        end
     end
-    pcall(function() IB.recordAdd(best.owner, nil, 'Planque découverte par la police', 0, IB.playerName(x)) end)
 end, false)
 
-AddEventHandler('playerDropped', function() lastInfo[source] = nil lastStash[source] = nil jailed[source] = nil end)
+AddEventHandler('playerDropped', function() lastInfo[source] = nil lastStash[source] = nil end)

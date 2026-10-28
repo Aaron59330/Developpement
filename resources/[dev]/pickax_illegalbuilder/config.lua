@@ -156,31 +156,28 @@ Config.Contracts = {
     },
 }
 
--- Casier judiciaire : /casier <id> et /inculper <id> <amende> <motif> (police)
+-- Casier judiciaire : c'est celui de la tablette police (pickax_jobbuilder). Les saisies et les peines de prison y sont ajoutées automatiquement ;
+-- la récidive aggrave les amendes de la tablette et les peines de /emprisonner.
 Config.Record = {
     Enabled = true,
     AutoSeizure = true,          -- chaque saisie ajoute une ligne au casier
-    MaxFine = 50000,
-    Distance = 6.0,              -- distance maximale policier ↔ suspect pour /inculper
-    Society = 'society_police',  -- compte société qui reçoit les amendes ('' = personne)
+    Distance = 6.0,              -- distance maximale policier ↔ suspect pour /emprisonner
     -- Récidive : chaque infraction récente aggrave les amendes et les peines de prison
     Recidive = { Enabled = true, PercentPerPrior = 20, MaxPercent = 100, WindowDays = 30 },
 }
 
--- Prison : /emprisonner <id> <minutes> <motif> (police), /liberer <id>. Le détenu peut travailler pour réduire sa peine.
+-- Prison : /emprisonner <id> <minutes> <motif> (police), /liberer <id>. C'est la prison de pickax_core (players/jail) : même lieu, tenue et minuteur que le /jail du staff.
+-- Le détenu peut travailler aux postes pour réduire sa peine. Les postes doivent rester à moins de 10 m de ConfigJail.LieuJail (sinon le détenu est ramené).
 Config.Prison = {
     Enabled = true,
-    Coords = { x = 1690.0, y = 2591.0, z = 45.6 },
-    ExitCoords = { x = 1848.0, y = 2586.0, z = 45.7 },
-    Radius = 60.0,               -- au-delà, le détenu est ramené
-    MaxMinutes = 60,
+    MaxMinutes = 60,             -- peine maximale (plafonnée aussi par ConfigJail.MaxJailPolice dans pickax_core)
     Work = {
         Reduce = 30,             -- secondes retirées par travail effectué
         Cooldown = 45,           -- secondes entre deux travaux
         Spots = {
-            { label = 'Cuisine', coords = { x = 1699.0, y = 2576.0, z = 45.6 } },
-            { label = 'Atelier', coords = { x = 1706.0, y = 2606.0, z = 45.6 } },
-            { label = 'Buanderie', coords = { x = 1676.0, y = 2600.0, z = 45.6 } },
+            { label = 'Cuisine',   coords = { x = 1645.0, y = 2571.0, z = 45.5 } },
+            { label = 'Atelier',   coords = { x = 1638.0, y = 2575.0, z = 45.5 } },
+            { label = 'Buanderie', coords = { x = 1641.6, y = 2565.0, z = 45.5 } },
         },
     },
     MaxReductionPercent = 50,    -- le travail ne peut retirer que cette part de la peine

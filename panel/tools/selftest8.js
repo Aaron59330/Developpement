@@ -55,6 +55,12 @@ const srv = http.createServer(app).listen(0, async () => {
     ok((await a('POST', `/api/servers/${id}/schedules`, { name: 'Mode RP', type: 'settings_profile', payload: { profile: 'inexistant' }, run_at: now() + 3600, every: 'none', warn_min: 0 })).ok === false, 'profil inconnu refusé');
     const sc = await a('POST', `/api/servers/${id}/schedules`, { name: 'Mode RP', type: 'settings_profile', payload: { profile: 'rp' }, run_at: now() + 3600, every: 'none', warn_min: 0 }); ok(sc.ok, 'changement de profil programmé');
     ok(require('../lib/enqueue').enqueue(id, 'settings_profile', { profile: 'debutant' }, 1).ok && JSON.stringify((await a('GET', `/api/servers/${id}/settings`))).includes('facile'), 'le profil est appliqué par le planificateur');
+    // données propres au panel : jamais envoyées au serveur de jeu
+    const sy = await ag('POST', '/api/agent/sync', { docs: {} }, H); ok(!['recruit', 'alerts', 'alerts_state', 'reminders', 'reminders_state'].some(k => sy.docs[k]) && sy.docs.settings, 'les données du panel (alertes, candidatures, rappels) ne partent pas vers le jeu');
+    // ── webhooks : un salon de Message Discord peut servir de webhook ──
+    ok((await a('PUT', `/api/servers/${id}/webhooks`, { staff: 'salon:9999' })).ok === false, 'salon inconnu refusé pour un webhook');
+    ok((await a('PUT', `/api/servers/${id}/webhooks`, { staff: `salon:${ch.id}` })).ok && (await a('GET', `/api/servers/${id}/webhooks`)).hooks.staff === hook, 'un salon de Message Discord sert de webhook (une seule adresse à gérer)');
+    ok((await b('PUT', `/api/servers/${id}/webhooks`, { staff: `salon:${ch.id}` })).ok === false, 'le salon d\'un autre client n\'est pas utilisable');
     // ── candidatures ──
     ok((await realFetch(base + '/api/public/apply/nimportequoi')).status === 404, 'formulaire inconnu : introuvable');
     ok((await a('PUT', `/api/servers/${id}/recruit`, { open: true, jobs: [] })).ok === false, 'au moins un poste');

@@ -1,7 +1,6 @@
 'use strict';
 // ───────── Assistant d'installation, profils de serveur et historique des réglages ─────────
 const fmtSetVal = (v, type) => v === null || v === undefined ? 'par défaut' : type === 'bool' ? (v ? 'activé' : 'désactivé') : Array.isArray(v) ? (v.length ? v.join(' · ').slice(0, 60) : 'vide') : String(v).slice(0, 60) || 'vide';
-const fmtDate = t => new Date(t * 1000).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
 // ── Historique des réglages ──
 PAGES.history = async function () {

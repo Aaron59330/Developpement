@@ -1,18 +1,18 @@
 -- ─────────────────────────────── Pègre (suite, client) : informateurs et prison ───────────────────────────────
 local function money(n) return ('%d $'):format(n) end
 
--- /indic : parler à un informateur proche ; /info <sujet> achète un tuyau
+-- /indic : parler à un informateur proche ; /tuyau <sujet> achète un tuyau
 RegisterCommand('indic', function()
     ESX.TriggerServerCallback('illegalbuilder:informant:info', function(r)
         if not r or not r.ok then return Notify((r and r.error) or 'Indisponible', 'error') end
         if not r.near then return Notify('Aucun informateur ici. Ils traînent dans les coins sombres de la ville.', 'info') end
         if #r.offers == 0 then return Notify('Il n\'a rien à te vendre.', 'info') end
-        Notify('Que veux-tu savoir ? /info <sujet>', 'info')
-        for _, o in ipairs(r.offers) do Notify(('%s — %s : /info %s'):format(o.label, money(o.price), o.kind), 'info') end
+        Notify('Que veux-tu savoir ? /tuyau <sujet>', 'info')
+        for _, o in ipairs(r.offers) do Notify(('%s — %s : /tuyau %s'):format(o.label, money(o.price), o.kind), 'info') end
     end)
 end, false)
 
-RegisterCommand('info', function(_, args)
+RegisterCommand('tuyau', function(_, args)
     ESX.TriggerServerCallback('illegalbuilder:informant:buy', function(r)
         if not r or not r.ok then return Notify((r and r.error) or 'Impossible', 'error') end
         Notify(('%s (%s)'):format(r.text, money(r.paid)), 'success')
@@ -38,12 +38,11 @@ CreateThread(function()
     end
 end)
 
--- prison : compte à rebours + postes de travail
-local jailLeft, jailAt = 0, 0
+-- prison : la peine, la tenue et le minuteur sont ceux de pickax_core ; ici seulement les postes de travail qui la réduisent
+local jailed = false
 
-RegisterNetEvent('illegalbuilder:client:jail', function(seconds)
-    jailLeft, jailAt = seconds or 0, GetGameTimer()
-end)
+RegisterNetEvent('CorePickax:SetJail', function() jailed = true end)
+RegisterNetEvent('CorePickax:unjailPlayer', function() jailed = false end)
 
 local function text(y, str, r, g, b)
     SetTextFont(4); SetTextScale(0.0, 0.4); SetTextColour(r, g, b, 235); SetTextOutline(); SetTextCentre(true)
@@ -52,10 +51,8 @@ end
 
 CreateThread(function()
     while true do
-        if jailLeft <= 0 then Wait(1500) else
+        if not jailed or (Config.Prison or {}).Enabled == false then Wait(1500) else
             Wait(0)
-            local left = math.max(0, jailLeft - (GetGameTimer() - jailAt) // 1000)
-            text(0.93, ('PRISON · %d:%02d restantes'):format(left // 60, left % 60), 255, 255, 255)
             local p = GetEntityCoords(PlayerPedId())
             for _, s in ipairs(((Config.Prison or {}).Work or {}).Spots or {}) do
                 local c = s.coords
@@ -66,7 +63,6 @@ CreateThread(function()
                         if IsControlJustReleased(0, 38) then
                             ESX.TriggerServerCallback('illegalbuilder:jail:work', function(r)
                                 if not r or not r.ok then return Notify((r and r.error) or 'Impossible', 'error') end
-                                jailLeft, jailAt = r.left, GetGameTimer()
                                 Notify(('Travail effectué : peine réduite de %d s.'):format(r.cut), 'success')
                             end)
                         end

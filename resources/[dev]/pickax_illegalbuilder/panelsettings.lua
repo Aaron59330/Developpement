@@ -17,8 +17,6 @@ local MAP = {
     { 'ib_ct_cool', 'Contracts.Cooldown' },
     { 'ib_ct_alert', 'Contracts.AlertChance' },
     { 'ib_rec_enabled', 'Record.Enabled' },
-    { 'ib_rec_maxfine', 'Record.MaxFine' },
-    { 'ib_rec_society', 'Record.Society' },
     { 'ib_rec_recidive', 'Record.Recidive.Enabled' },
     { 'ib_rec_recpct', 'Record.Recidive.PercentPerPrior' },
     { 'ib_prison_enabled', 'Prison.Enabled' },

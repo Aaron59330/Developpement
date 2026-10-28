@@ -1,5 +1,6 @@
 ConfigJail = {
-	MaxJail = 15,
+	MaxJail = 15,		-- durée maximale (minutes) pour la commande /jail du staff
+	MaxJailPolice = 60,	-- durée maximale (minutes) pour les peines données par la police (pickax_illegalbuilder : /emprisonner)
 	LieuJail = vector3(1641.6, 2571.0, 45.5),
 	LieuUnJail = vector3(1857.28, 2605.16, 45.67),
 

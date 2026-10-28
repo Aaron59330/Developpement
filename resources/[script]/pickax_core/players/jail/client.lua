@@ -36,8 +36,13 @@ RegisterNetEvent('CorePickax:unjailPlayer', function()
 	end)
 end)
 
+-- La peine a été réduite côté serveur (travail en prison)
+RegisterNetEvent('CorePickax:JailReduce', function(left)
+	if isInJail then jailTime = tonumber(left) or jailTime end
+end)
+
 RegisterNetEvent("CorePickax:SetJail", function(_jailTime, author, reason)
-	local jailTime = _jailTime
+	jailTime = _jailTime
 	local playerPed = PlayerPedId()
 
 	TriggerEvent("skinchanger:getSkin", function(skin)

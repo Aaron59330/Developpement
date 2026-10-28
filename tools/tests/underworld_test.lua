@@ -38,7 +38,7 @@ Config = {
         Items = { { item = 'a', price = 1000, stock = 5 }, { item = 'b', price = 500, stock = 1 }, { item = 'c', price = 200, stock = 9 }, { item = 'd', price = 300, stock = 2 } } },
     Contracts = { Enabled = true, Account = 'black_money', BaseReward = 500, PerKm = 1000, FastRatio = 0.5, FastBonus = 50, AvgSpeed = 20, TimeMargin = 1.5, MinSeconds = 60, MinDistance = 100, Radius = 15.0, Cooldown = 100, AlertChance = 100,
         Destinations = { { label = 'Loin', coords = { x = 2000.0, y = 0.0, z = 0.0 } } } },
-    Record = { Enabled = true, MaxFine = 1000, Distance = 6.0, Society = 'society_police' },
+    Record = { Enabled = true, Distance = 6.0 },
 }
 dofile(ROOT .. '/resources/[dev]/pickax_illegalbuilder/server/underworld.lua')
 local function call(name, src, ...) local out; cbs[name](src, function(r) out = r end, ...) return out end
@@ -131,28 +131,12 @@ peds[1].pos = { x = 2000.0, y = 0.0, z = 0.0 }
 r = call('illegalbuilder:contract:done', 1)
 ok(not r.ok and r.failed, 'téléportation (livraison instantanée) refusée')
 
--- casier
-local n, fines = IB.recordSummary({ { fine = 100 }, { fine = 250 }, {} })
-ok(n == 3 and fines == 350, 'casier : total des infractions et amendes')
-ok(IB.recordAdd('id1', 'X', 'vol', 50, 'cop') and inserts[#inserts][3] == 'vol', 'infraction ajoutée')
-ok(not IB.recordAdd('id1', 'X', '', 0, 'c'), 'motif vide refusé')
-local count = #inserts
-cmds.inculper(1, { '3', '100', 'vol' })
-ok(#inserts == count and notes[#notes]:find('Réservé à la police'), 'un civil ne peut pas inculper')
-peds[3].pos = { x = 500.0, y = 0.0, z = 0.0 }; peds[2].pos = { x = 0.0, y = 0.0, z = 0.0 }
-cmds.inculper(2, { '3', '100', 'vol' })
-ok(#inserts == count and notes[#notes]:find('trop loin'), 'suspect trop loin refusé')
-peds[3].pos = { x = 2.0, y = 0.0, z = 0.0 }
-cmds.inculper(2, { '3', '100', 'vol', 'à', 'main', 'armée' })
-ok(#inserts == count + 1 and inserts[#inserts][3] == 'vol à main armée' and players[3].acc.bank == 200 and society[#society][2] == 100, 'inculpation : motif, amende prélevée et reversée')
-cmds.inculper(2, { '3', '999999', 'récidive' })
-ok(players[3].acc.bank == 0 and society[#society][2] == 200 and inserts[#inserts][4] == 1000, 'amende plafonnée et limitée au solde bancaire')
-count = #inserts
-cmds.inculper(2, { '3', '100' })
-ok(#inserts == count, 'motif obligatoire')
-cmds.inculper(2, { '2', '100', 'x' })
-ok(#inserts == count, 'on ne s\'inculpe pas soi-même')
-Config.Record.Enabled = false
-cmds.inculper(2, { '3', '100', 'x' })
-ok(#inserts == count, 'casier désactivé')
+-- casier : un seul casier, celui de la tablette police (pickax_jobbuilder)
+local added = {}
+exports = setmetatable({}, { __index = function() return { AddRecordEntry = function(_, job, target, kind, label, amount, details, by) added[#added + 1] = { job, target, kind, label, amount, by } return 5 end } end })
+GetResourceState = function() return 'started' end
+ok(IB.recordAdd(players[2], players[3], 'seizure', 'Détention de produits illicites', 700) and added[1][1] == 'police' and added[1][2] == 3 and added[1][3] == 'seizure' and added[1][5] == 700, 'ligne ajoutée au casier de la tablette police (job de l\'agent)')
+GetResourceState = function() return 'stopped' end
+ok(not IB.recordAdd(players[2], players[3], 'seizure', 'x', 0), 'tablette police arrêtée : rien n\'est écrit')
+ok(cmds.casier == nil and cmds.inculper == nil, 'plus de /casier ni /inculper : pas de doublon avec la tablette police')
 print(('underworld_test : %d vérifications OK'):format(checks))

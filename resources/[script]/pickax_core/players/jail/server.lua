@@ -204,6 +204,46 @@ function SetPedJail(playerId)
 	SetEntityCoords(GetPlayerPed(playerId), ConfigJail.LieuJail.x, ConfigJail.LieuJail.y, ConfigJail.LieuJail.z)
 end
 
+-- ─────────── API pour les autres ressources (pickax_illegalbuilder : peines de police, travaux qui réduisent la peine) ───────────
+-- Même prison, même tenue, même minuteur que la commande du staff : pas de second système.
+exports('JailPlayer', function(playerId, seconds, authorName, reason, officerId)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	if not xPlayer then return false, 'Le joueur n\'est pas sur le serveur.' end
+	if playersInJail[xPlayer.identifier] then return false, 'Le joueur est déjà en jail.' end
+	seconds = math.floor(tonumber(seconds) or 0)
+	seconds = math.max(60, math.min(seconds, (ConfigJail.MaxJailPolice or ConfigJail.MaxJail) * 60))
+	local officer = officerId and ESX.GetPlayerFromId(officerId)
+	reason = tostring(reason or ''):sub(1, 25)
+	SetPedJail(playerId)
+	TriggerClientEvent("CorePickax:SetJail", playerId, seconds, authorName or 'Police', reason)
+	playersInJail[xPlayer.identifier] = {name = GetPlayerName(playerId), id = playerId, temps = seconds, identifier = xPlayer.getIdentifier(), identifiersource = officer and officer.getIdentifier() or xPlayer.getIdentifier(), source = authorName or 'Police', reason = reason}
+	return true, seconds
+end)
+
+-- Secondes restantes de la peine (0 si le joueur n'est pas en jail)
+exports('JailTimeLeft', function(playerId)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local j = xPlayer and playersInJail[xPlayer.identifier]
+	return j and j.temps or 0
+end)
+
+-- Retire des secondes à la peine (travail en prison) ; renvoie les secondes restantes
+exports('ReduceJail', function(playerId, seconds)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local j = xPlayer and playersInJail[xPlayer.identifier]
+	if not j then return 0 end
+	j.temps = math.max(1, j.temps - math.max(0, math.floor(tonumber(seconds) or 0)))
+	TriggerClientEvent("CorePickax:JailReduce", playerId, j.temps)
+	return j.temps
+end)
+
+exports('UnjailPlayer', function(playerId)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	if not xPlayer or not playersInJail[xPlayer.identifier] then return false end
+	unjailPlayer(playerId)
+	return true
+end)
+
 RegisterNetEvent("CorePickax:SendServerSideJail", function()--Send to client side
 	TriggerClientEvent("CorePickax:AddClientSideJail", source, playersInJail)
 end)

@@ -68,7 +68,7 @@ Tout se règle depuis le panel (Réglages → Drogues & labos) ou dans `config.l
 
 - **Marché noir à rotation** — un vendeur change de lieu, de stock et de prix à chaque rotation (24 h par défaut), identique pour tous les joueurs. `/marchenoir` indique où le trouver (et pose le GPS), sur place il liste le stock ; `/acheter <n°> [quantité]` achète en argent sale. Limite par joueur et par produit, alerte police possible. Lieux et produits : `Config.BlackMarket.Locations` / `Items` (utilise des noms d'objets existants dans ox_inventory).
 - **Contrats de livraison** — `/contrat` donne une destination avec un temps imparti ; paiement = base + prime au kilomètre, prime de rapidité, chance d'alerter la police. Le serveur vérifie la position, la durée et rejette les vitesses impossibles. `/annulercontrat` abandonne.
-- **Casier judiciaire** — `/casier <id>` (police) montre les infractions et amendes ; `/inculper <id> <amende> <motif>` ajoute une ligne et prélève l'amende sur le compte en banque, reversée à la société de police. Chaque saisie ajoute automatiquement une ligne. Table `illegalbuilder_records`.
+- **Casier judiciaire** — c'est celui de la tablette police (`pickax_jobbuilder`, casiers et amendes) : chaque saisie et chaque peine de prison y est ajoutée automatiquement. Les amendes se donnent depuis la tablette.
 
 ## Gangs — tags de territoire (pickax_gangbuilder)
 
@@ -78,9 +78,9 @@ Tout se règle depuis le panel (Réglages → Drogues & labos) ou dans `config.l
 
 Réglages dans le panel (Drogues & labos) ou `Config.Record.Recidive`, `Config.Prison`, `Config.Informants`, `Config.Stashes`.
 
-- **Récidive** — chaque infraction des 30 derniers jours aggrave de 20 % (plafonné à +100 %) les amendes de `/inculper` et les peines de `/emprisonner`. Le policier qui arrête un récidiviste touche une prime.
-- **Prison** — `/emprisonner <id> <minutes> <motif>` (police) téléporte le détenu, `/liberer <id>` le libère. La peine continue hors ligne. Le détenu travaille aux postes (touche E) pour réduire sa peine, dans la limite de 50 %. S'il s'éloigne, il est ramené.
-- **Informateurs** — des PNJ aux coins de la ville : `/indic` puis `/info blackmarket` (position du marché noir) ou `/info contract` (police : zone approximative d'une livraison en cours), payés en liquide.
+- **Récidive** — chaque infraction des 30 derniers jours (lue dans le casier de la tablette police) aggrave de 20 % (plafonné à +100 %) les amendes envoyées depuis la tablette et les peines de `/emprisonner`. Le policier qui arrête un récidiviste touche une prime.
+- **Prison** — c'est la prison de `pickax_core` (`players/jail`, la même que le `/jail` du staff : même lieu, tenue, minuteur et reprise après déconnexion). `/emprisonner <id> <minutes> <motif>` (police) y envoie le détenu, `/liberer <id>` le libère. Le détenu travaille aux postes (touche E) pour réduire sa peine, dans la limite de 50 %. Les postes sont à moins de 10 m de la prison (au-delà, `pickax_core` ramène le détenu) ; durée max de la police : `ConfigJail.MaxJailPolice`.
+- **Informateurs** — des PNJ aux coins de la ville : `/indic` puis `/tuyau blackmarket` (position du marché noir) ou `/tuyau contract` (police : zone approximative d'une livraison en cours), payés en liquide.
 - **Planques** — `/planque` crée une cachette (2 max) ou ouvre celle à proximité (coffre ox_inventory). La police peut la dénicher avec `/fouillerplanque` (chance décroissante avec la distance) : elle est alors ouverte pour elle, supprimée et notée au casier. Une planque oubliée expire après 14 jours.
 
 ## Convois de gang (pickax_gangbuilder)

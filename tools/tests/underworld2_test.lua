@@ -16,8 +16,7 @@ function TriggerClientEvent() end
 function GetResourceState() return 'started' end
 function GetPlayers() return { '1', '2', '3' } end
 function SetEntityCoords(ped, x, y, z) teleports[#teleports + 1] = { ped, x, y, z } end
-local priorRows = { { n = 0 } }
-MySQL = { query = { await = function(sql) if sql:find('COUNT') then return priorRows end return {} end }, update = function(sql, p) updates[#updates + 1] = sql end,
+MySQL = { query = { await = function(sql) return {} end }, update = function(sql, p) updates[#updates + 1] = sql end,
     insert = { await = function(sql, p) inserted[#inserted + 1] = p return 7 end } }
 local peds = { [1] = { ped = 11, pos = { x = 0.0, y = 0.0, z = 0.0 } }, [2] = { ped = 12, pos = { x = 1.0, y = 0.0, z = 0.0 } } }
 function GetPlayerPed(s) return peds[s] and peds[s].ped or 0 end
@@ -31,17 +30,24 @@ local function mkp(id, job, money, bank)
 end
 local players = { [1] = mkp(1, 'police', 0, 0), [2] = mkp(2, 'unemployed', 5000, 0), [3] = mkp(3, 'police', 0, 0) }
 ESX = { RegisterServerCallback = function(n, f) cbs[n] = f end, GetPlayerFromId = function(s) return players[s] end }
-exports = setmetatable({}, { __index = function() return { forceOpenInventory = function(_, s, k, id) opened[#opened + 1] = id end, RegisterStash = function() end } end })
+local jail = {}   -- [source] = secondes restantes
+local coreApi = { JailPlayer = function(_, id, secs, author, reason, off) if jail[id] then return false, 'déjà' end jail[id] = secs return true, secs end,
+    JailTimeLeft = function(_, id) return jail[id] or 0 end,
+    ReduceJail = function(_, id, s) jail[id] = math.max(1, jail[id] - s) return jail[id] end,
+    UnjailPlayer = function(_, id) if not jail[id] then return false end jail[id] = nil return true end }
+local handlers, priorN, lastDays = {}, 0, nil
+local jobApi = { RecordPriors = function(_, id, days) lastDays = days return priorN end }
+exports = setmetatable({ pickax_core = coreApi, pickax_jobbuilder = jobApi }, { __call = function(_, name, f) handlers[name] = f end, __index = function() return { forceOpenInventory = function(_, s, k, id) opened[#opened + 1] = id end, RegisterStash = function() end } end })
 local records = {}
 IB = { isPoliceJob = function(n) return n == 'police' end, playerName = function(x) return x.identifier end, log = function() end, isAdmin = function() return false end, copCount = function() return 1 end,
     notify = function(s, m) notes[#notes + 1] = s .. ':' .. m end,
-    recordAdd = function(i, n, r, f, b) records[#records + 1] = { i, r, f } return true end,
+    recordAdd = function(officer, target, kind, label, amount) records[#records + 1] = { target.identifier, label, kind } return true end,
     bmLocation = function() return { label = 'Casse', hint = 'à la casse', coords = { x = 500.0, y = 500.0, z = 0.0 } } end,
     contractZones = function() return { { x = 2000.0, y = 0.0, z = 0.0 } } end,
     distanceTo = function(s, c) local p = peds[s].pos local dx, dy = p.x - c.x, p.y - c.y return math.sqrt(dx * dx + dy * dy) end }
-Config = { Record = { Distance = 6.0, Recidive = { Enabled = true, PercentPerPrior = 20, MaxPercent = 60, WindowDays = 30 } },
+Config = { Record = { Enabled = true, Distance = 6.0, Recidive = { Enabled = true, PercentPerPrior = 20, MaxPercent = 60, WindowDays = 30 } },
     Informants = { Enabled = true, Radius = 3.0, Locations = { { label = 'x', coords = { x = 0.0, y = 0.0, z = 0.0 } } }, Offers = { blackmarket = { label = 'BM', price = 2500 }, contract = { label = 'C', price = 1500, police = true } } },
-    Prison = { Enabled = true, Coords = { x = 1000.0, y = 1000.0, z = 0.0 }, ExitCoords = { x = 0.0, y = 0.0, z = 0.0 }, Radius = 60.0, MaxMinutes = 60,
+    Prison = { Enabled = true, MaxMinutes = 60,
         Work = { Reduce = 30, Cooldown = 45, Spots = { { label = 'Cuisine', coords = { x = 1000.0, y = 1000.0, z = 0.0 } } } }, MaxReductionPercent = 50, ArrestBonus = { Enabled = true, PerPrior = 150, Max = 400, Account = 'bank' } },
     Stashes = { Enabled = true, Max = 2, ExpireDays = 14, SearchRadius = 5.0, FindChance = 100, SearchCooldown = 20, MinCops = 0 } }
 dofile(ROOT .. '/resources/[dev]/pickax_illegalbuilder/server/underworld2.lua')
@@ -52,9 +58,16 @@ ok(IB.recidiveMul(0) == 1.0 and math.abs(IB.recidiveMul(2) - 1.4) < 1e-9 and mat
 Config.Record.Recidive.Enabled = false
 ok(IB.recidiveMul(5) == 1.0, 'récidive désactivée : ×1')
 Config.Record.Recidive.Enabled = true
-priorRows = { { n = 3 } }
-ok(IB.priorCount('x') == 3, 'antécédents récents comptés')
-priorRows = { { n = 0 } }
+priorN = 3
+ok(IB.priorCount('x') == 3 and lastDays == 30, 'antécédents des 30 derniers jours lus dans le casier de la tablette police')
+ok(math.abs(handlers.RecidiveMul('x') - 1.6) < 1e-9, 'export RecidiveMul (tablette police) : +60 % pour 3 antécédents')
+Config.Record.Enabled = false
+ok(handlers.RecidiveMul('x') == 1.0, 'casier désactivé : amendes non aggravées')
+Config.Record.Enabled = true
+GetResourceState = function(r) return r == 'pickax_jobbuilder' and 'stopped' or 'started' end
+ok(IB.priorCount('x') == 0, 'tablette police arrêtée : aucun antécédent')
+GetResourceState = function() return 'started' end
+priorN = 0
 
 -- informateurs
 ok(call('illegalbuilder:informant:info', 2).near and #call('illegalbuilder:informant:info', 2).offers == 1, 'civil : seul le tuyau du marché noir')
@@ -73,11 +86,15 @@ peds[2].pos = { x = 300.0, y = 0.0, z = 0.0 }
 ok(call('illegalbuilder:informant:buy', 2, 'blackmarket').error == 'Aucun indic à proximité.', 'loin de l\'indic : refusé')
 peds[2].pos = { x = 1.0, y = 0.0, z = 0.0 }
 
--- prison
-local okj, mins = IB.jailPlayer(2, 10, 'cop', 'x')
-ok(okj and mins == 10 and teleports[#teleports][2] == 1000.0, 'détenu téléporté en prison')
-ok(select(2, IB.jailPlayer(2, 500, 'cop', 'x')) == 60, 'peine plafonnée')
-IB.jailPlayer(2, 10, 'cop', 'x')
+-- prison (pickax_core)
+local officer1 = players[1]
+local okj, mins = IB.jailPlayer(2, 10, officer1, 'x')
+ok(okj and mins == 10 and jail[2] == 600, 'peine envoyée à la prison de pickax_core')
+ok(select(2, IB.jailPlayer(2, 5, officer1, 'x')) == 'déjà', 'déjà en prison : refusé')
+jail[2] = nil
+ok(select(2, IB.jailPlayer(2, 500, officer1, 'x')) == 60, 'peine plafonnée à 60 min')
+jail[2] = nil
+IB.jailPlayer(2, 10, officer1, 'x')
 local j = { total = 600, reduced = 0 }
 ok(IB.jailReduce(j, 30) == 30 and IB.jailReduce({ total = 600, reduced = 290 }, 30) == 10 and IB.jailReduce({ total = 600, reduced = 300 }, 30) == 0, 'réduction plafonnée à 50 % de la peine')
 ok(call('illegalbuilder:jail:work', 1).error == 'Tu n\'es pas en prison.', 'travail réservé aux détenus')
@@ -85,22 +102,35 @@ peds[2].pos = { x = 0.0, y = 0.0, z = 0.0 }
 ok(call('illegalbuilder:jail:work', 2).error == 'Rends-toi à un poste de travail.', 'travail loin du poste refusé')
 peds[2].pos = { x = 1000.0, y = 1001.0, z = 0.0 }
 r = call('illegalbuilder:jail:work', 2)
-ok(r.ok and r.cut == 30 and r.left == 570, 'travail : peine réduite de 30 s')
+ok(r.ok and r.cut == 30 and r.left == 570 and jail[2] == 570, 'travail : peine réduite de 30 s dans pickax_core')
 ok(call('illegalbuilder:jail:work', 2).error == 'Reprends ton souffle.', 'délai entre deux travaux')
 for i = 1, 20 do now = now + 50 call('illegalbuilder:jail:work', 2) end
 r = call('illegalbuilder:jail:work', 2)
-ok(not r.ok and r.error:find('ne peut plus'), 'plafond de réduction atteint')
+ok(not r.ok and r.error:find('ne peut plus') and jail[2] >= 300, 'plafond de réduction atteint (la peine reste ≥ 50 %)')
+jail[2] = nil
+-- peine donnée par le staff : le plafond se calcule au premier travail
+jail[2] = 200; players[2].identifier = 'idstaff'; now = now + 100
+r = call('illegalbuilder:jail:work', 2)
+ok(r.ok and r.cut == 30 and jail[2] == 170, 'peine du staff : travail accepté')
+players[2].identifier = 'id2'; jail[2] = nil
 -- commande /emprisonner
-IB.jailPlayer(2, 1, 'x', 'x')
 peds[2].pos = { x = 1.0, y = 0.0, z = 0.0 }; peds[1].pos = { x = 0.0, y = 0.0, z = 0.0 }
-priorRows = { { n = 2 } }
+priorN = 2
 cmds.emprisonner(2, { '1', '5', 'vol' })
 ok(notes[#notes]:find('Réservé à la police'), 'un civil ne peut pas emprisonner')
 cmds.emprisonner(1, { '2', '5', 'vol', 'armé' })
-ok(players[1].acc.bank == 300 and records[#records][2] == 'Peine de 7 min : vol armé', 'récidive : 5 min × 1,4 = 7 min, prime de 300 $ au policier')
-priorRows = { { n = 9 } }
+ok(jail[2] == 420 and players[1].acc.bank == 300 and records[#records][2] == 'Peine de 7 min : vol armé', 'récidive : 5 min × 1,4 = 7 min, prime de 300 $ au policier')
+jail[2] = nil
+priorN = 9
 cmds.emprisonner(1, { '2', '5', 'vol' })
 ok(players[1].acc.bank == 700, 'prime plafonnée (400)')
+cmds.liberer(1, { '2' })
+ok(jail[2] == nil and notes[#notes]:find('libéré'), '/liberer libère le détenu')
+cmds.liberer(1, { '2' })
+ok(notes[#notes]:find('pas en prison'), 'libération d\'un non-détenu refusée')
+GetResourceState = function(r) return r == 'pickax_core' and 'stopped' or 'started' end
+ok(select(2, IB.jailPlayer(2, 5, officer1, 'x')):find('pas disponible'), 'pickax_core arrêté : message clair')
+GetResourceState = function() return 'started' end
 
 -- planques
 cmds.planque(2)

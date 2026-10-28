@@ -8,14 +8,9 @@ local bought = {}   -- [identifiant] = { rotation, [offre] = quantité achetée 
 
 local function BM() return Config.BlackMarket or {} end
 local function CT() return Config.Contracts or {} end
-local function RC() return Config.Record or {} end
 
 CreateThread(function()
     Wait(2000)
-    if MySQL and MySQL.query then
-        pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS illegalbuilder_records (id INT AUTO_INCREMENT PRIMARY KEY, identifier VARCHAR(80) NOT NULL, name VARCHAR(100) NULL,
-            reason VARCHAR(200) NOT NULL, fine INT NOT NULL DEFAULT 0, by_name VARCHAR(100) NULL, created_at INT NOT NULL, INDEX (identifier)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
-    end
 end)
 
 -- ═══════════════════════════ Marché noir ═══════════════════════════
@@ -176,67 +171,16 @@ end
 RegisterNetEvent('illegalbuilder:server:contractCancel', function() contracts[source] = nil end)
 
 -- ═══════════════════════════ Casier judiciaire ═══════════════════════════
-function IB.recordAdd(identifier, name, reason, fine, by)
-    reason = tostring(reason or ''):gsub('[%c]', ' '):sub(1, 200)
-    if reason == '' or not identifier then return false end
-    MySQL.insert('INSERT INTO illegalbuilder_records (identifier, name, reason, fine, by_name, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-        { identifier, name, reason, math.max(0, math.floor(tonumber(fine) or 0)), by, os.time() })
-    return true
+-- Un seul casier : celui de la tablette police de pickax_jobbuilder (casiers + amendes). Ici on y ajoute les saisies et les peines de prison, et on lit
+-- les antécédents pour la récidive (voir underworld2.lua). Les amendes se donnent depuis la tablette police.
+
+-- Ajoute une ligne (kind : seizure | jail | note …) au casier du joueur connecté, pour le job de l'agent
+function IB.recordAdd(officer, target, kind, label, amount, details)
+    if GetResourceState('pickax_jobbuilder') ~= 'started' or not officer or not target then return false end
+    local ok, res = pcall(function()
+        return exports.pickax_jobbuilder:AddRecordEntry(officer.job.name, target.source, kind, label, amount or 0, details, IB.playerName(officer))
+    end)
+    return ok and res and true or false
 end
-
-function IB.recordSummary(rows)
-    local fines = 0
-    for _, r in ipairs(rows) do fines = fines + (tonumber(r.fine) or 0) end
-    return #rows, fines
-end
-
-local function police(src)
-    local x = ESX.GetPlayerFromId(src)
-    if not x or not IB.isPoliceJob(x.job.name) then IB.notify(src, 'Réservé à la police.', 'error') return nil end
-    return x
-end
-
-RegisterCommand('casier', function(src, args)
-    if src == 0 or not RC().Enabled or not police(src) then return end
-    local t = ESX.GetPlayerFromId(tonumber(args[1]))
-    if not t then return IB.notify(src, 'Usage : /casier <id du joueur>', 'error') end
-    local rows = MySQL.query.await('SELECT reason, fine, by_name, created_at FROM illegalbuilder_records WHERE identifier = ? ORDER BY id DESC LIMIT 20', { t.identifier }) or {}
-    local n, fines = IB.recordSummary(rows)
-    if n == 0 then return IB.notify(src, ('%s a un casier vierge.'):format(IB.playerName(t)), 'info') end
-    IB.notify(src, ('Casier de %s : %d infraction(s), %d $ d\'amendes'):format(IB.playerName(t), n, fines), 'warning')
-    for i = 1, math.min(5, n) do
-        local r = rows[i]
-        IB.notify(src, ('%s · %s%s'):format(os.date('%d/%m', r.created_at), r.reason, (r.fine or 0) > 0 and (' (%d $)'):format(r.fine) or ''), 'info')
-    end
-end, false)
-
-RegisterCommand('inculper', function(src, args)
-    if src == 0 or not RC().Enabled then return end
-    local officer = police(src)
-    if not officer then return end
-    local t = ESX.GetPlayerFromId(tonumber(args[1]))
-    local fine = math.floor(tonumber(args[2]) or -1)
-    local reason = table.concat(args, ' ', 3)
-    if not t or t.source == src or fine < 0 or reason == '' then return IB.notify(src, 'Usage : /inculper <id> <amende> <motif>', 'error') end
-    local a, b = GetPlayerPed(src), GetPlayerPed(t.source)
-    if not a or a == 0 or not b or b == 0 or dist(GetEntityCoords(a), GetEntityCoords(b)) > (tonumber(RC().Distance) or 6.0) then return IB.notify(src, 'Le suspect est trop loin.', 'error') end
-    local priors = IB.priorCount and IB.priorCount(t.identifier) or 0
-    local mul = IB.recidiveMul and IB.recidiveMul(priors) or 1.0
-    fine = math.min(math.floor(fine * mul + 0.5), math.floor((tonumber(RC().MaxFine) or 50000) * mul))
-    local paid = 0
-    if fine > 0 then
-        local acc = t.getAccount('bank')
-        paid = math.min(fine, acc and acc.money or 0)
-        if paid > 0 then
-            t.removeAccountMoney('bank', paid, 'Amende')
-            if (RC().Society or '') ~= '' then IB.society(RC().Society, paid) end
-        end
-    end
-    IB.recordAdd(t.identifier, IB.playerName(t), reason, fine, IB.playerName(officer))
-    IB.log(nil, officer, 'record', ('%s : %s'):format(IB.playerName(t), reason), fine)
-    IB.notify(src, ('%s inculpé : %s (%d $ prélevés sur %d $)'):format(IB.playerName(t), reason, paid, fine), 'success')
-    IB.notify(t.source, ('Tu as été inculpé : %s — amende de %d $.'):format(reason, fine), 'error')
-    if GetResourceState('pickax_settings') == 'started' then pcall(function() exports.pickax_settings:Count('fines', paid, 'Amendes encaissées ($)') end) end
-end, false)
 
 AddEventHandler('playerDropped', function() lastBuy[source] = nil contracts[source] = nil end)

@@ -24,7 +24,7 @@ function takeCommands(l) {
   if (cmds.length) db.prepare(`UPDATE commands SET status='sent', sent_at=? WHERE id IN (${cmds.map(() => '?').join(',')})`).run(now(), ...cmds.map(c => c.id));
   return cmds.map(c => ({ id: c.id, type: c.type, payload: JSON.parse(c.payload) }));
 }
-function docsFor(l, known) { const out = {}; known = known && typeof known === 'object' ? known : {}; for (const d of db.prepare("SELECT key,value,version FROM docs WHERE license_id=? AND key<>'settings_schema'").all(l.id)) if (+known[d.key] !== d.version) out[d.key] = { version: d.version, value: JSON.parse(d.value) }; return out; }
+function docsFor(l, known) { const out = {}; known = known && typeof known === 'object' ? known : {}; for (const d of db.prepare("SELECT key,value,version FROM docs WHERE license_id=? AND key NOT IN ('settings_schema','recruit','alerts','alerts_state','reminders','reminders_state')").all(l.id)) if (+known[d.key] !== d.version) out[d.key] = { version: d.version, value: JSON.parse(d.value) }; return out; }
 
 router.post('/sync', (req, res) => {
   const l = check(req, res); if (!l) return; const b = req.body || {};

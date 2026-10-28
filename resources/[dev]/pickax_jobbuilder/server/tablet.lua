@@ -393,6 +393,26 @@ ESX.RegisterServerCallback('jobbuilder:records:fromNearest', function(src, cb, _
     cb({ ok = true, id = ensureRecord(job.name, target, JB.playerName(x)) })
 end)
 
+-- API pour les autres ressources (pickax_illegalbuilder : saisies, peines de prison, récidive) : un seul casier, celui de la tablette police.
+-- Ajoute une ligne au casier du joueur (connecté) pour le job de l'agent.
+exports('AddRecordEntry', function(jobName, targetSrc, kind, label, amount, details, officerName)
+    if not ENTRY_KINDS[kind] or not JB.Jobs[jobName] then return false end
+    local target = ESX.GetPlayerFromId(tonumber(targetSrc))
+    if not target then return false end
+    label = str(tostring(label or ''), 120)
+    if label == '' then return false end
+    local rid = ensureRecord(jobName, target, officerName or 'Système')
+    addEntry(rid, jobName, kind, label, math.max(0, math.floor(tonumber(amount) or 0)), details, officerName or 'Système')
+    return rid
+end)
+
+-- Nombre d'infractions (amendes payées, arrestations, peines, saisies) d'un joueur sur N jours, tous jobs confondus
+exports('RecordPriors', function(identifier, days)
+    if not identifier then return 0 end
+    return MySQL.scalar.await([[SELECT COUNT(*) FROM jobbuilder_record_entries e JOIN jobbuilder_records r ON r.id = e.record_id
+        WHERE r.identifier = ? AND e.kind IN ('fine', 'arrest', 'jail', 'seizure') AND e.created_at > (NOW() - INTERVAL ? DAY)]], { identifier, math.max(1, math.floor(tonumber(days) or 30)) }) or 0
+end)
+
 -- ── Amendes ── (casier optionnel, joueur proche, n° du catalogue ou 0 pour une amende libre, motif, montant, remarque)
 ESX.RegisterServerCallback('jobbuilder:fine:send', function(src, cb, recId, targetId, idx, label, amount, note)
     local x, job, s, err = ctx(src, 'fine')
@@ -411,6 +431,15 @@ ESX.RegisterServerCallback('jobbuilder:fine:send', function(src, cb, recId, targ
         if label == '' then return cb(fail('Le motif est obligatoire')) end
     end
     if amount < P.MinFine or amount > P.MaxFine then return cb(fail(('Montant invalide (%d à %d $)'):format(P.MinFine, P.MaxFine))) end
+
+    -- récidive (pickax_illegalbuilder) : les infractions récentes aggravent l'amende
+    if GetResourceState('pickax_illegalbuilder') == 'started' then
+        local ok, mul = pcall(function() return exports.pickax_illegalbuilder:RecidiveMul(target.identifier) end)
+        if ok and type(mul) == 'number' and mul > 1.0 then
+            amount = math.min(math.floor(amount * mul + 0.5), math.floor(P.MaxFine * mul))
+            label = ('%s (récidive +%d %%)'):format(label, math.floor((mul - 1) * 100 + 0.5))
+        end
+    end
 
     local officer = JB.playerName(x)
     local rid

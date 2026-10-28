@@ -127,14 +127,16 @@ router.post('/:id/power', (req, res) => {
 
 // ───────── webhooks Discord ─────────
 router.get('/:id/webhooks', (req, res) => { const l = own(req, res); if (!l) return; res.json({ ok: true, events: hooks.EVENTS, hooks: Object.fromEntries(db.prepare('SELECT event,url FROM webhooks WHERE license_id=?').all(l.id).map(h => [h.event, h.url])) }); });
+// « salon:<id> » désigne un salon déjà ajouté dans Message Discord : une seule adresse à gérer pour tout le panel
+const hookUrl = (l, v) => { v = String(v || '').trim(); const m = /^salon:(\d+)$/.exec(v); if (!m) return v; const c = db.prepare('SELECT url FROM discord_channels WHERE id=? AND license_id=?').get(+m[1], l.id); return c ? c.url : 'salon-inconnu'; };
 router.put('/:id/webhooks', (req, res) => {
-  const l = own(req, res); if (!l) return; const b = req.body || {};
+  const l = own(req, res); if (!l) return; const b = Object.fromEntries(Object.entries(req.body || {}).map(([k, v]) => [k, hookUrl(l, v)]));
   for (const ev of hooks.EVENTS) { const u = String(b[ev] || '').trim(); if (u && !hooks.okUrl(u)) return res.json({ ok: false, error: 'Lien de webhook Discord invalide pour « ' + ev + ' »' }); }
   for (const ev of hooks.EVENTS) { const u = String(b[ev] || '').trim(); if (u) db.prepare('INSERT INTO webhooks(license_id,event,url) VALUES(?,?,?) ON CONFLICT(license_id,event) DO UPDATE SET url=excluded.url').run(l.id, ev, u); else db.prepare('DELETE FROM webhooks WHERE license_id=? AND event=?').run(l.id, ev); }
   audit(req.user.id, l.id, 'webhooks', '', A.ip(req)); res.json({ ok: true });
 });
 router.post('/:id/webhooks/test', async (req, res) => {
-  const l = own(req, res); if (!l) return; const u = String((req.body || {}).url || ''); if (!hooks.okUrl(u)) return res.json({ ok: false, error: 'Lien invalide' });
+  const l = own(req, res); if (!l) return; const u = hookUrl(l, (req.body || {}).url); if (!hooks.okUrl(u)) return res.json({ ok: false, error: 'Lien invalide' });
   try { const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: 'AERO Panel', content: 'Test du webhook depuis le panel ✅' }), signal: AbortSignal.timeout(6000) }); res.json({ ok: r.ok, error: r.ok ? undefined : 'Discord a refusé (HTTP ' + r.status + ')' }); } catch (e) { res.json({ ok: false, error: 'Discord injoignable' }); }
 });
 

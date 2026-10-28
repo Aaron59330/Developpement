@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } }); const p = await ctx.newPage(); const base = 'http://127.0.0.1:3199';
+ const errs = []; p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => m.type() === 'error' && errs.push('CONSOLE ' + m.text()));
+ p.on('response', r => { if (r.url().includes('/api/') && r.status() >= 400 && r.status() !== 404) errs.push(`HTTP ${r.status()} ${r.url()}`); });
+ await ctx.request.post(base + '/api/auth/login', { data: { email: 'client@demo.fr', password: 'ClientDemo!1' }, headers: { origin: base } });
+ const J = async (m, u, body) => (await ctx.request.fetch(base + u, { method: m, data: body, headers: { origin: base } })).json();
+ const srv = (await J('GET', '/api/servers')).servers[0].id; console.log('serveur', srv);
+ // salon + formulaire + événement via API (pas de vrai Discord)
+ const step = async (name, fn) => { errs.length = 0; try { await fn(); } catch (e) { errs.push('EXC ' + e.message.split('\n')[0]); } console.log(name.padEnd(34), errs.length ? 'ERREURS ' + errs.join(' | ') : 'ok'); };
+ await step('recruit: config puis page publique', async () => { const r = await J('PUT', `/api/servers/${srv}/recruit`, { open: true, title: 'Police', jobs: ['Police'], questions: ['Pourquoi ?'] }); const pg = await ctx.newPage(); pg.on('pageerror', e => errs.push('PUBERR ' + e.message)); pg.on('console', m => m.type() === 'error' && errs.push('PUBCONSOLE ' + m.text())); await pg.goto(base + '/apply.html?t=' + r.token); await pg.waitForSelector('select'); await pg.fill('input[placeholder*="personnage"]', 'Jean Test'); await pg.fill('textarea', 'Parce que je veux aider'); await pg.click('button'); await pg.waitForSelector('.ok', { timeout: 4000 }); console.log('   candidature publique OK'); await pg.close(); });
+ await step('recruit: page panel avec candidature', async () => { await p.goto(base + '/#/recruit'); await p.waitForTimeout(900); const t = await p.evaluate(() => document.body.innerText); if (!/Jean Test/.test(t)) throw new Error('candidature absente'); });
+ await step('wizard: étapes', async () => { await p.goto(base + '/#/setup'); await p.waitForTimeout(800); for (let i = 0; i < 3; i++) { const nb = p.locator('button:has-text("Suivant")'); if (await nb.count()) { await nb.first().click(); await p.waitForTimeout(500); } } });
+ await step('diag: score visible', async () => { await p.goto(base + '/#/diag'); await p.waitForTimeout(800); const t = await p.evaluate(() => document.body.innerText); if (!/\/\s*100|%|score/i.test(t)) throw new Error('pas de score: ' + t.slice(0, 200)); });
+ await step('history: export bouton', async () => { await p.goto(base + '/#/history'); await p.waitForTimeout(800); await p.locator('button:has-text("Exporter")').click(); await p.waitForTimeout(500); });
+ await step('economy', async () => { await p.goto(base + '/#/economy'); await p.waitForTimeout(800); });
+ await step('alerts: enregistrer sans salon', async () => { await p.goto(base + '/#/alerts'); await p.waitForTimeout(800); });
+ await step('events', async () => { await p.goto(base + '/#/events'); await p.waitForTimeout(800); });
+ await step('planner: ouvrir formulaire profil', async () => { await p.goto(base + '/#/planner'); await p.waitForTimeout(800); const nb = p.locator('button:has-text("Nouvel")'); if (await nb.count()) { await nb.first().click(); await p.waitForTimeout(400); await p.selectOption('.modal select >> nth=0', 'settings_profile'); await p.waitForTimeout(300); const t = await p.evaluate(() => document.body.innerText); if (!/Profil à appliquer/.test(t)) throw new Error('champ profil absent'); } else throw new Error('bouton nouvel événement introuvable'); });
+ await step('webhooks', async () => { await p.goto(base + '/#/webhooks'); await p.waitForTimeout(800); });
+ await p.screenshot({ path: '/tmp/smoke3.png' }); await b.close(); })();

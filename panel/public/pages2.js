@@ -51,11 +51,12 @@ PAGES.stats = async function () {
 
 // ───────── Webhooks ─────────
 PAGES.webhooks = async function () {
-  const s = cur(); if (!s) return needS(); const r = await api('GET', `/api/servers/${s.id}/webhooks`); const inputs = {};
+  const s = cur(); if (!s) return needS(); const [r, dc] = await Promise.all([api('GET', `/api/servers/${s.id}/webhooks`), api('GET', `/api/servers/${s.id}/discord`)]); const inputs = {}; const chans = dc.channels || [];
   const labels = { staff: ['Actions staff', 'Kick, ban, argent donné, fichiers modifiés…'], error: ['Erreurs serveur', 'Erreurs de scripts signalées par le panel'], connexion: ['Connexions', 'Joueurs qui arrivent / partent'] };
   return el('div', {}, head('Webhooks Discord', el('button', { class: 'btn p', onclick: async () => { const body = {}; for (const k in inputs) body[k] = inputs[k].value; const x = await api('PUT', `/api/servers/${s.id}/webhooks`, body); toast(x.ok ? 'Webhooks enregistrés' : x.error, x.ok ? 'ok' : 'bad'); } }, el('span', {}, 'Enregistrer'))),
-    el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Colle le lien d’un webhook Discord (Paramètres du salon → Intégrations → Webhooks). Laisse vide pour désactiver.'),
-    r.events.map(ev => el('div', { class: 'card' }, el('div', { class: 'row' }, el('div', { class: 'grow' }, el('h2', { style: 'margin:0' }, labels[ev][0]), el('div', { class: 'muted' }, labels[ev][1])), el('button', { class: 'btn s', onclick: async () => { const x = await post(`/api/servers/${s.id}/webhooks/test`, { url: inputs[ev].value }); toast(x.ok ? 'Message de test envoyé' : x.error, x.ok ? 'ok' : 'bad'); } }, el('span', {}, 'Tester'))), (inputs[ev] = el('input', { value: r.hooks[ev] || '', placeholder: 'https://discord.com/api/webhooks/…', style: 'margin-top:10px' })))));
+    el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Choisis un salon déjà ajouté dans « Message Discord », ou colle le lien d’un webhook Discord (Paramètres du salon → Intégrations → Webhooks). Laisse vide pour désactiver.'),
+    r.events.map(ev => el('div', { class: 'card' }, el('div', { class: 'row' }, el('div', { class: 'grow' }, el('h2', { style: 'margin:0' }, labels[ev][0]), el('div', { class: 'muted' }, labels[ev][1])), el('button', { class: 'btn s', onclick: async () => { const x = await post(`/api/servers/${s.id}/webhooks/test`, { url: inputs[ev].value }); toast(x.ok ? 'Message de test envoyé' : x.error, x.ok ? 'ok' : 'bad'); } }, el('span', {}, 'Tester'))), (inputs[ev] = el('input', { value: r.hooks[ev] || '', placeholder: 'https://discord.com/api/webhooks/…', style: 'margin-top:10px' })),
+      chans.length ? el('select', { style: 'margin-top:8px', onchange: e => { if (e.target.value) inputs[ev].value = 'salon:' + e.target.value; e.target.value = ''; } }, [el('option', { value: '' }, 'Utiliser un salon de Message Discord…'), ...chans.map(c => el('option', { value: c.id }, '# ' + c.name))]) : null)));
 };
 
 // ───────── Sauvegardes ─────────
