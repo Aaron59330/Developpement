@@ -274,6 +274,8 @@ Settings.Schema = {
     { key = 'ib_bail_hours', group = 'Drogues & labos', section = 'Caution', label = 'Durée du bracelet (heures)', type = 'number', default = 12, min = 1, max = 168, step = 1 },
     { key = 'ib_just_enabled', group = 'Drogues & labos', section = 'Justice', label = 'Avocats et juges activés', type = 'bool', default = true, hint = '/defendre <id> <honoraires> (avocat), /gracier <id> (juge). Les jobs doivent exister dans le builder.' },
     { key = 'ib_just_lawyer', group = 'Drogues & labos', section = 'Justice', label = 'Réduction par plaidoirie (%)', type = 'number', default = 25, min = 0, max = 100, step = 5 },
+    { key = 'ib_crew_enabled', group = 'Drogues & labos', section = 'Équipes de braquage', label = 'Équipes activées', type = 'bool', default = true, hint = '/equipe : les rôles (pirate, tireur, conducteur, guetteur) donnent des bonus aux braquages.' },
+    { key = 'ib_crew_max', group = 'Drogues & labos', section = 'Équipes de braquage', label = 'Taille maximale d\'une équipe', type = 'number', default = 4, min = 2, max = 10, step = 1 },
     { key = 'ib_inf_enabled', group = 'Drogues & labos', section = 'Informateurs', label = 'Informateurs activés', type = 'bool', default = true, hint = '/indic près d\'un informateur, puis /tuyau <sujet> pour acheter un tuyau.' },
     { key = 'ib_inf_bm', group = 'Drogues & labos', section = 'Informateurs', label = 'Prix du tuyau « marché noir » ($)', type = 'number', default = 2500, min = 0, max = 1000000, step = 100 },
     { key = 'ib_inf_ct', group = 'Drogues & labos', section = 'Informateurs', label = 'Prix du tuyau « livraison » pour la police ($)', type = 'number', default = 1500, min = 0, max = 1000000, step = 100 },

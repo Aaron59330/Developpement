@@ -70,9 +70,14 @@ ESX.RegisterServerCallback('illegalbuilder:rob:start', function(src, cb, eid, pi
     if req and req.item ~= '' and IB.itemCount(src, req.item) < (req.count or 1) then return cb({ ok = false, error = 'Il te faut : ' .. req.item }) end
     if req and req.item ~= '' and req.consume then IB.removeItem(src, req.item, req.count or 1) end
 
-    Active[e.id] = { owner = src, endsAt = os.time() + (s.duration or 240), done = {}, coop = s.coop ~= false, total = targetCount(e) }
+    -- équipe : rôles présents sur place → bonus (voir crew.lua) ; `crewMin` (réglage du braquage) impose une équipe d'une taille minimale
+    local roles, crewSize = {}, 1
+    if IB.crewRolesNear then roles, crewSize = IB.crewRolesNear(src, 40) end
+    if (s.crewMin or 0) > crewSize then return cb({ ok = false, error = ('Il faut une équipe de %d personnes sur place (/equipe).'):format(s.crewMin) }) end
+    local mods = IB.crewMods and IB.crewMods(roles) or { timeMul = 1.0, loot = 0, alert = 0, duration = 0 }
+    Active[e.id] = { owner = src, endsAt = os.time() + (s.duration or 240) + mods.duration, done = {}, coop = s.coop ~= false, total = targetCount(e), mods = mods }
     IB.setState('rob:' .. e.id, os.time() + (s.cooldown or 0) + (s.duration or 0))
-    if (s.alert and s.alert.chance or 100) >= math.random(100) then
+    if math.max(0, (s.alert and s.alert.chance or 100) - mods.alert) >= math.random(100) then
         IB.alertPolice(p.coords, s.alert and s.alert.label or 'Braquage en cours', ('%s : braquage en cours'):format(e.label))
     end
     IB.stat(e, 'attempts', 1)
@@ -97,9 +102,11 @@ ESX.RegisterServerCallback('illegalbuilder:rob:begin', function(src, cb, eid, pi
     if p.tool and p.tool.item ~= '' and IB.itemCount(src, p.tool.item) < 1 then return cb({ ok = false, error = 'Il te faut : ' .. p.tool.item }) end
     a.busy = a.busy or {}
     if a.busy[pi] and a.busy[pi] ~= src and GetGameTimer() < a.busy[pi .. 't'] then return cb({ ok = false, error = 'Quelqu\'un s\'en occupe déjà' }) end
-    a.busy[pi], a.busy[pi .. 't'] = src, GetGameTimer() + (p.time or 10) * 1000 + 5000
-    IB.beginAct(src, { kind = 'rob', eid = e.id, pi = pi }, p.time or 10)
-    cb({ ok = true, seconds = p.time or 10, anim = p.anim, minigame = p.minigame == true, label = p.label ~= '' and p.label or p.kind })
+    local seconds = p.time or 10
+    if (p.kind == 'safe' or p.kind == 'vault') and a.mods then seconds = math.max(2, math.floor(seconds * a.mods.timeMul + 0.5)) end
+    a.busy[pi], a.busy[pi .. 't'] = src, GetGameTimer() + seconds * 1000 + 5000
+    IB.beginAct(src, { kind = 'rob', eid = e.id, pi = pi }, seconds)
+    cb({ ok = true, seconds = seconds, anim = p.anim, minigame = p.minigame == true, label = p.label ~= '' and p.label or p.kind })
 end)
 
 RegisterNetEvent('illegalbuilder:server:robFinish', function(done)
@@ -122,12 +129,14 @@ RegisterNetEvent('illegalbuilder:server:robFinish', function(done)
     local cash = 0
     if p.cash and (p.cash.max or 0) > 0 then
         cash = math.random(math.floor(p.cash.min or 0), math.floor(math.max(p.cash.min or 0, p.cash.max)))
+        cash = math.floor(cash * (1 + ((a.mods and a.mods.loot) or 0) / 100))
         IB.pay(xPlayer, ACCOUNT[e.settings.currency] or 'black_money', cash, 'Braquage : ' .. e.label)
     end
     local got = {}
     for _, it in ipairs(p.items or {}) do
         if math.random(100) <= (it.chance or 100) then
             local n = math.random(it.min or 1, math.max(it.min or 1, it.max or 1))
+            n = math.max(1, math.floor(n * (1 + ((a.mods and a.mods.loot) or 0) / 100) + 0.5))
             if IB.addItem(src, it.item, n) then got[#got + 1] = ('%d× %s'):format(n, it.item)
             else IB.notify(src, 'Inventaire plein : ' .. it.item .. ' perdu', 'error') end
         end

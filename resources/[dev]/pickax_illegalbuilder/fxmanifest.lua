@@ -23,6 +23,7 @@ server_scripts {
     'server/underworld2.lua',
     'server/underworld3.lua',
     'server/street.lua',
+    'server/crew.lua',
     'server/robbery.lua',
     'server/plants.lua',
     'server/gofast.lua',

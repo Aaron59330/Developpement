@@ -222,6 +222,22 @@ Config.Justice = {
     JudgeCooldown = 30,
 }
 
+-- Équipes de braquage : /equipe creer | inviter <id> | accepter | role <rôle> | quitter | infos. Les rôles des membres présents (40 m) au début d'un braquage donnent des bonus.
+Config.Crew = {
+    Enabled = true,
+    Command = 'equipe',
+    MaxMembers = 4,
+    InviteDistance = 8.0,
+    -- timeMul : durée des coffres / chambres fortes ×  · loot : % de butin en plus · alert : points de chance d'alerte police en moins · duration : secondes en plus pour le braquage
+    Roles = {
+        pirate     = { label = 'Pirate',     timeMul = 0.7 },
+        tireur     = { label = 'Tireur',     loot = 10 },
+        conducteur = { label = 'Conducteur', alert = 20 },
+        guetteur   = { label = 'Guetteur',   alert = 10, duration = 60 },
+    },
+    MinTimeMul = 0.5, MaxLoot = 40, MaxAlert = 60,   -- plafonds des bonus cumulés
+}
+
 -- Informateurs : des PNJ qui vendent des tuyaux (/indic puis /info <sujet>)
 Config.Informants = {
     Enabled = true,

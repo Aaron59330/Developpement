@@ -33,6 +33,8 @@ local MAP = {
     { 'ib_bail_hours', 'Bail.BraceletHours' },
     { 'ib_just_enabled', 'Justice.Enabled' },
     { 'ib_just_lawyer', 'Justice.LawyerReducePercent' },
+    { 'ib_crew_enabled', 'Crew.Enabled' },
+    { 'ib_crew_max', 'Crew.MaxMembers' },
     { 'ib_inf_enabled', 'Informants.Enabled' },
     { 'ib_inf_bm', 'Informants.Offers.blackmarket.price' },
     { 'ib_inf_ct', 'Informants.Offers.contract.price' },
