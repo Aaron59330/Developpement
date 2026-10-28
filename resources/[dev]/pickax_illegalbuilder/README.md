@@ -54,3 +54,10 @@ Le joueur vend d'abord ses unités **les plus pures** ; le message de vente affi
 - **Réputation** (`Config.StreetRep`, table `illegalbuilder_dealer_rep`) : chaque unité vendue dans la rue rapporte 1 point. 5 paliers (Petit revendeur → Baron : 0 / 40 / 120 / 300 / 700). Chaque niveau au-dessus du 1 : **+4 % d'acceptation** des PNJ et **+4 % de prix**. Commande joueur : **`/dealer`** (niveau, réputation, état du secteur). Export : `exports.pickax_illegalbuilder:GetDealerRep(src)`.
 - **Quartiers** (`Config.StreetZones`) : la ville est découpée en secteurs de 300 m (ou en zones nommées `Named`, avec une `demand` qui multiplie le prix). Chaque vente **sature** le secteur (jusqu'à −40 % de prix) et le **chauffe** (plus d'alertes police, moins d'acceptation) ; saturation et chaleur retombent avec le temps (−3 et −2 par minute) : il faut **changer de quartier**.
 - Tout est réglable dans le panel : *Réglages du serveur → Drogues & labos → Réputation de dealer / Quartiers*. Test : `ROOT=. lua tools/tests/street_test.lua` (26 vérifications).
+
+## Perquisitions et saisies (police)
+- Un **policier** (`Config.PoliceJobs`) clique sur un joueur avec le menu contextuel → **Perquisition (drogue)** : *Inspecter le suspect* (affiche ce qu'il porte d'illégal : drogues du catalogue — récolte, pochons, graines —, objets de `Config.Seizure.Items`, argent sale) ou *Saisir drogue et argent sale*.
+- Contrôlé côté serveur : métier de police, distance (3 m), délai entre deux saisies. Les objets saisis, **avec leur pureté**, vont dans le **casier de preuves** (`/preuves`, police) ; l'argent sale est retiré et reversé à la **société de police** (`Society`, `SocietyShare`). Le suspect est prévenu.
+- Chaque saisie est enregistrée (table `illegalbuilder_seizures` et journal du builder) ; `/saisies` affiche les dernières.
+- Réglable dans le panel : *Réglages du serveur → Drogues & labos → Perquisitions et saisies (police)*. Tests : `ROOT=. lua tools/tests/seizure_test.lua` (14 vérifications).
+- **pickax_core** : `players/contextMenu/function.lua` ajoute l'entrée « Perquisition (drogue) » au menu d'un joueur (visible seulement pour la police).

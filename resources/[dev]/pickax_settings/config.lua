@@ -229,4 +229,11 @@ Settings.Schema = {
     { key = 'gb_raid_maxsteal', group = 'Gangs', section = 'Raids de QG', label = 'Pillage maximum ($)', type = 'number', default = 20000, min = 0, max = 100000000, step = 500 },
     { key = 'gb_raid_cool', group = 'Gangs', section = 'Raids de QG', label = 'Délai avant de raider le même QG (secondes)', type = 'number', default = 3600, min = 0, max = 86400, step = 60 },
     { key = 'gb_raid_acool', group = 'Gangs', section = 'Raids de QG', label = 'Délai entre deux raids du même gang (secondes)', type = 'number', default = 1800, min = 0, max = 86400, step = 60 },
+    { key = 'ib_seize_enabled', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Perquisitions activées', type = 'bool', default = true, hint = 'Un policier fouille un joueur (menu contextuel → Perquisition) et saisit drogue et argent sale.' },
+    { key = 'ib_seize_distance', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Distance policier ↔ suspect (m)', type = 'number', default = 3.0, min = 1, max = 10, step = 0.5 },
+    { key = 'ib_seize_cooldown', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Délai entre deux saisies d\'un policier (secondes)', type = 'number', default = 4, min = 0, max = 120, step = 1 },
+    { key = 'ib_seize_black', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Saisir aussi l\'argent sale', type = 'bool', default = true },
+    { key = 'ib_seize_share', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Part de l\'argent sale reversée à la société (%)', type = 'number', default = 100, min = 0, max = 100, step = 1 },
+    { key = 'ib_seize_society', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Compte société qui reçoit l\'argent saisi', type = 'text', default = 'society_police', hint = 'Vide = personne.' },
+    { key = 'ib_seize_evidence', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Objets saisis placés dans le casier de preuves (/preuves)', type = 'bool', default = true, hint = 'Sinon : détruits.' },
 }

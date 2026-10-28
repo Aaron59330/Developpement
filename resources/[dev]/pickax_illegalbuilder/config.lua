@@ -94,6 +94,19 @@ Config.StreetZones = {
     HeatAlert = 0.3, HeatAccept = 0.25,                   -- % d'alerte en plus / % d'acceptation en moins par point de chaleur
     Named = {},               -- zones nommées facultatives : { { name = 'Grove Street', coords = vector3(0.0, 0.0, 0.0), radius = 150.0, demand = 1.2 } } (demand : prix ×)
 }
+-- ── Perquisitions et saisies : un policier fouille un joueur (menu contextuel → Perquisition) et saisit drogue + argent sale ──
+-- Les drogues vont dans le casier de preuves (/preuves), l'argent sale est reversé à la société de police. Tout est enregistré (/saisies).
+Config.Seizure = {
+    Enabled = true,
+    Distance = 3.0,                   -- distance maximale policier ↔ suspect
+    Cooldown = 4,                     -- secondes entre deux saisies d'un même policier
+    SeizeBlackMoney = true,           -- saisir aussi l'argent sale
+    Society = 'society_police',       -- compte société qui reçoit l'argent sale saisi ('' = personne)
+    SocietyShare = 100,               -- % de l'argent sale saisi reversé à la société
+    Items = {},                       -- items illégaux en plus des drogues du catalogue (récolte + pochons) : { 'lockpick', 'weapon_switchblade' }
+    Evidence = true,                  -- les objets saisis vont dans le casier de preuves (sinon : détruits)
+    StashSlots = 200, StashWeight = 500000,
+}
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────

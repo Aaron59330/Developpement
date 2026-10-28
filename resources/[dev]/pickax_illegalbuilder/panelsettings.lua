@@ -4,6 +4,13 @@
 -- Ajouter un réglage : une ligne dans pickax_settings/config.lua (Settings.Schema) + une ligne ci-dessous.
 local MAP = {
     { 'ib_pedsales', 'PedSales.Enabled' },
+    { 'ib_seize_enabled', 'Seizure.Enabled' },
+    { 'ib_seize_distance', 'Seizure.Distance' },
+    { 'ib_seize_cooldown', 'Seizure.Cooldown' },
+    { 'ib_seize_black', 'Seizure.SeizeBlackMoney' },
+    { 'ib_seize_share', 'Seizure.SocietyShare' },
+    { 'ib_seize_society', 'Seizure.Society' },
+    { 'ib_seize_evidence', 'Seizure.Evidence' },
     { 'ib_rep_enabled', 'StreetRep.Enabled' },
     { 'ib_rep_unit', 'StreetRep.PerUnit' },
     { 'ib_rep_accept', 'StreetRep.AcceptPerLevel' },

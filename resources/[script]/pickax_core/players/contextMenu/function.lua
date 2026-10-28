@@ -1575,6 +1575,12 @@ function _Vehicle()
 end
 
 function _Player()
+    -- Perquisition (Builder Illégal) : réservée à la police ; le serveur revérifie tout
+    local canSeize = false
+    if GetResourceState('pickax_illegalbuilder') == 'started' then
+        local okS, on = pcall(function() return exports.pickax_illegalbuilder:SeizureAvailable() end)
+        canSeize = okS and on == true
+    end
     Action_Config = {
         Joueur = {
             {
@@ -1661,6 +1667,18 @@ function _Player()
                 OnClick = function()
                     ESXCustomFonctionContextMenu:Fouille(LastEntityHit)
                 end,
+            },
+            {
+                Type = "buttom-submenu",
+                Label = "Perquisition (drogue)",
+                Blocked = not canSeize,
+                IsRestricted = false,
+                CloseOnClick = true,
+                Distance = 3.0,
+                Action = {
+                    { "Inspecter le suspect", function() exports.pickax_illegalbuilder:Inspect(LastEntityHit) end },
+                    { "Saisir drogue et argent sale", function() exports.pickax_illegalbuilder:Seize(LastEntityHit) end },
+                },
             },
             {
                 Type = "buttom-submenu",
