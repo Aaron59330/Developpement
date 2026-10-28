@@ -19,4 +19,30 @@ router.post('/event/:token/signup', (req, res) => {
   db.prepare('INSERT INTO dc_signups(event_id,name,discord,at,ip) VALUES(?,?,?,?,?)').run(e.id, name, discord, now(), ip);
   res.json({ ok: true, event: view(e) });
 });
+
+// ── candidatures : formulaire public ouvert par le client ──
+const license = lid => db.prepare('SELECT id,server_name FROM licenses WHERE id=?').get(lid);
+function recruitByToken(token) {
+  token = String(token || '').slice(0, 64); if (token.length < 8) return null;
+  for (const d of db.prepare("SELECT license_id,value FROM docs WHERE key='recruit' AND value LIKE ?").all(`%${token.replace(/[%_"\\]/g, '')}%`)) { const c = JSON.parse(d.value); if (c.token === token) return { lid: d.license_id, c }; }
+  return null;
+}
+router.get('/apply/:token', (req, res) => {
+  const r = recruitByToken(req.params.token); if (!r || !r.c.open) return res.status(404).json({ ok: false, error: 'Les candidatures sont fermées.' });
+  res.json({ ok: true, form: { title: r.c.title, intro: r.c.intro, jobs: r.c.jobs, questions: r.c.questions, server: (license(r.lid) || {}).server_name || '' } });
+});
+router.post('/apply/:token', async (req, res) => {
+  const ip = A.ip(req); if (limited(ip)) return res.status(429).json({ ok: false, error: 'Trop de tentatives : réessaie dans une minute.' });
+  const r = recruitByToken(req.params.token); if (!r || !r.c.open) return res.status(404).json({ ok: false, error: 'Les candidatures sont fermées.' });
+  const b = req.body || {}; const clean = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000b-\u001f]/g, ' ').trim().slice(0, n);
+  const name = clean(b.name, 40), discord = clean(b.discord, 40), job = clean(b.job, 40);
+  if (name.length < 2) return res.json({ ok: false, error: 'Indique le nom de ton personnage.' }); if (!r.c.jobs.includes(job)) return res.json({ ok: false, error: 'Choisis un poste.' });
+  const answers = r.c.questions.map((q, i) => ({ q, a: clean((b.answers || [])[i], 1200) })); if (answers.some(x => x.a.length < 3)) return res.json({ ok: false, error: 'Réponds à toutes les questions.' });
+  if (db.prepare("SELECT COUNT(*) n FROM applications WHERE license_id=? AND lower(name)=lower(?) AND job=? AND status IN ('new','interview')").get(r.lid, name, job).n) return res.json({ ok: false, error: 'Tu as déjà une candidature en cours pour ce poste.' });
+  if (db.prepare("SELECT COUNT(*) n FROM applications WHERE license_id=? AND status='new'").get(r.lid).n >= 500) return res.json({ ok: false, error: 'Trop de candidatures en attente : réessaie plus tard.' });
+  db.prepare('INSERT INTO applications(license_id,job,name,discord,answers,at,ip) VALUES(?,?,?,?,?,?,?)').run(r.lid, job, name, discord, JSON.stringify(answers), now(), ip);
+  const ch = r.c.channelId ? db.prepare('SELECT url FROM discord_channels WHERE id=? AND license_id=?').get(r.c.channelId, r.lid) : null;
+  if (ch) fetch(ch.url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: 'AERO Panel', embeds: [{ title: '📝  Nouvelle candidature : ' + job, description: `**${name}**${discord ? ' · ' + discord : ''}\nÀ traiter dans le panel → Candidatures.`, color: 0xfdc27d }], allowed_mentions: { parse: [] } }), signal: AbortSignal.timeout(10000) }).catch(() => {});
+  res.json({ ok: true });
+});
 module.exports = router;

@@ -19,6 +19,7 @@ const defs = {
   economy_event: (p) => { const k = str(p.key, 40, ID), s = Number(p.swing), h = int(p.hours, 1, 720); return k && Number.isFinite(s) && s >= -0.9 && s <= 3 && h && { key: k, swing: s, hours: h }; },
   economy_reset: (p) => ({ key: str(p.key || '', 40, ID) || '' }),
   console:    (p) => { const c = str(p.cmd, 200); return c && !/[\r\n;]/.test(c) && { cmd: c }; },
+  settings_profile: (p) => { const id = str(p.profile, 30, ID); return id && require('./profiles').PROFILES.some(x => x.id === id) && { profile: id }; },
   server_restart: () => ({}),
   server_stop:    () => ({}),
   resource_start: (p) => { const r = str(p.resource, 60, ID); return r && { resource: r }; },

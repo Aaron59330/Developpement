@@ -36,6 +36,31 @@ router.post('/:id/settings/profile', (req, res) => {
   const { overrides, errors } = SET.validate(sch.v, merged); if (errors.length) return res.json({ ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') });
   const n = saveSettings(l, req.user, A.ip(req), overrides, 'profil : ' + String(b.name || 'sans nom').slice(0, 40)); res.json({ ok: true, changed: n, skipped });
 });
+// Applique un profil de serveur sans requête HTTP (planificateur) : mêmes règles que POST /settings/profile
+function applyProfile(licenseId, profileId, userId) {
+  const l = db.prepare('SELECT * FROM licenses WHERE id=?').get(licenseId); const sch = docOf(licenseId, 'settings_schema'); const p = require('../lib/profiles').PROFILES.find(x => x.id === profileId);
+  if (!l || !p) return { ok: false, error: 'Profil introuvable' }; if (!sch) return { ok: false, error: 'Réglages indisponibles : pickax_settings ne tourne pas' };
+  const known = new Set(sch.v.map(d => d.key)); const merged = { ...((docOf(licenseId, 'settings') || { v: {} }).v || {}) };
+  for (const [k, v] of Object.entries(p.values)) if (known.has(k)) merged[k] = v;
+  const { overrides, errors } = SET.validate(sch.v, merged); if (errors.length) return { ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') };
+  const n = saveSettings(l, { id: userId || null }, 'planificateur', overrides, 'planificateur : ' + p.name); return { ok: true, id: 0, changed: n };
+}
+router.applyProfile = applyProfile;
+// Export / import : un fichier JSON portable des réglages modifiés (les valeurs secrètes comme le webhook Discord ne sont jamais exportées)
+router.get('/:id/settings/export', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = (docOf(l.id, 'settings_schema') || { v: [] }).v; const secret = new Set(sch.filter(d => d.secret).map(d => d.key)); const ov = (docOf(l.id, 'settings') || { v: {} }).v || {};
+  res.json({ ok: true, file: { format: 'aero-settings', version: 1, exported_at: now(), server: l.server_name, values: Object.fromEntries(Object.entries(ov).filter(([k]) => !secret.has(k))) } });
+});
+router.post('/:id/settings/import', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); if (!sch) return res.json({ ok: false, error: 'Les réglages ne sont pas encore disponibles : pickax_settings doit tourner sur ton serveur.' });
+  const b = req.body || {}; const f = b.file; if (!f || f.format !== 'aero-settings' || !f.values || typeof f.values !== 'object' || Array.isArray(f.values)) return res.json({ ok: false, error: 'Ce fichier n’est pas un export de réglages AERO.' });
+  const by = Object.fromEntries(sch.v.map(d => [d.key, d])); const cur = (docOf(l.id, 'settings') || { v: {} }).v || {}; const next = { ...cur }; const unknown = [], secret = [];
+  for (const [k, v] of Object.entries(f.values).slice(0, 1000)) { if (!by[k]) { unknown.push(k); continue; } if (by[k].secret) { secret.push(k); continue; } next[k] = v; }
+  const { overrides, errors } = SET.validate(sch.v, next); if (errors.length) return res.json({ ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') });
+  const diff = []; for (const k of new Set([...Object.keys(cur), ...Object.keys(overrides)])) if (JSON.stringify(cur[k]) !== JSON.stringify(overrides[k])) diff.push({ key: k, label: by[k] ? by[k].label : k, from: cur[k] === undefined ? null : cur[k], to: overrides[k] === undefined ? null : overrides[k], type: by[k] ? by[k].type : 'text' });
+  if (!b.apply) return res.json({ ok: true, preview: true, diff, unknown, secret });
+  const n = saveSettings(l, req.user, A.ip(req), overrides, 'import : ' + String(f.server || 'fichier').slice(0, 40)); res.json({ ok: true, changed: n, unknown, secret });
+});
 router.get('/:id/settings/profiles', (req, res) => {
   const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); const known = new Set(sch ? sch.v.map(d => d.key) : []);
   res.json({ ok: true, ready: !!sch, profiles: require('../lib/profiles').PROFILES.map(p => { const values = Object.fromEntries(Object.entries(p.values).filter(([k]) => known.has(k))); return { id: p.id, name: p.name, icon: p.icon, desc: p.desc, count: Object.keys(values).length, values }; }) });

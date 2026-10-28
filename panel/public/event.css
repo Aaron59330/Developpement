@@ -7,3 +7,4 @@ pre{white-space:pre-wrap;font:inherit;margin:12px 0}label{display:block;margin:1
 input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t);font:inherit}
 button{margin-top:16px;width:100%;padding:11px;border:0;border-radius:8px;background:var(--a);color:#1a1205;font-weight:600;font-size:15px;cursor:pointer}
 .ok{color:#4ade80}.bad{color:#f87171;margin-top:10px}
+textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--t);font:inherit}option{color:#000}

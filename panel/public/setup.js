@@ -7,7 +7,7 @@ const fmtDate = t => new Date(t * 1000).toLocaleString('fr-FR', { day: '2-digit'
 PAGES.history = async function () {
   const s = curServer(); if (!s) return needServer();
   const r = await api('GET', `/api/servers/${s.id}/settings/history`); if (!r.ok) return el('div', { class: 'card' }, r.error);
-  return el('div', {}, head('Historique des réglages'),
+  return el('div', {}, head('Historique des réglages'), settingsPortCard(s),
     el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Chaque enregistrement de réglages est conservé : qui l’a fait, quand, et ce qui a changé. « Annuler ce changement » remet les réglages tels qu’ils étaient juste avant.'),
     r.rows.length ? r.rows.map(h => el('div', { class: 'card' },
       el('div', { class: 'row' }, el('b', {}, fmtDate(h.at)), el('span', { class: 'pill' }, h.source), el('span', { class: 'muted' }, 'par ', h.user), el('div', { class: 'grow' }),

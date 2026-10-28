@@ -1,7 +1,7 @@
 // Planificateur : exécute à l'heure prévue les actions programmées (annonces, redémarrages, événements d'économie…)
 const { db, now, audit } = require('./db'); const cfg = require('./config'); const { enqueue } = require('./enqueue');
 const ONLINE = 3 * cfg.agentIntervalSec + 5, LATE = 15 * 60, STEP = { daily: 86400, weekly: 7 * 86400 };
-const SCHEDULABLE = ['announce', 'restart_resource', 'server_restart', 'economy_event', 'economy_reset'];
+const SCHEDULABLE = ['announce', 'restart_resource', 'server_restart', 'economy_event', 'economy_reset', 'settings_profile'];
 function warnText(s, payload) {
   const m = s.warn_min, mins = m + (m > 1 ? ' minutes' : ' minute');
   if (s.type === 'server_restart') return `Redémarrage du serveur dans ${mins}.`;
