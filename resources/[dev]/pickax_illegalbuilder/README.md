@@ -49,3 +49,8 @@ Le joueur clique sur un **PNJ de la rue** avec le menu contextuel (pickax_core) 
 ## Pureté → prix de vente (`Config.Purity`)
 Le produit fabriqué dans un laboratoire interactif porte une **pureté** (métadonnée du pochon, 0-100 %). Chez les dealers du builder et dans la rue, le prix tiré est multiplié par un facteur : `MinFactor` (×0,6) à 0 %, `MaxFactor` (×1,4) à 100 %, ×1 à 50 %. Un produit sans pureté (récolte, ancien stock) compte pour `Default` %.
 Le joueur vend d'abord ses unités **les plus pures** ; le message de vente affiche la pureté moyenne. Réglable dans le panel : *Réglages du serveur → Drogues & labos → Pureté du produit*. Test : `ROOT=. lua tools/tests/purity_test.lua`.
+
+## Réputation de dealer et quartiers (vente de rue)
+- **Réputation** (`Config.StreetRep`, table `illegalbuilder_dealer_rep`) : chaque unité vendue dans la rue rapporte 1 point. 5 paliers (Petit revendeur → Baron : 0 / 40 / 120 / 300 / 700). Chaque niveau au-dessus du 1 : **+4 % d'acceptation** des PNJ et **+4 % de prix**. Commande joueur : **`/dealer`** (niveau, réputation, état du secteur). Export : `exports.pickax_illegalbuilder:GetDealerRep(src)`.
+- **Quartiers** (`Config.StreetZones`) : la ville est découpée en secteurs de 300 m (ou en zones nommées `Named`, avec une `demand` qui multiplie le prix). Chaque vente **sature** le secteur (jusqu'à −40 % de prix) et le **chauffe** (plus d'alertes police, moins d'acceptation) ; saturation et chaleur retombent avec le temps (−3 et −2 par minute) : il faut **changer de quartier**.
+- Tout est réglable dans le panel : *Réglages du serveur → Drogues & labos → Réputation de dealer / Quartiers*. Test : `ROOT=. lua tools/tests/street_test.lua` (26 vérifications).

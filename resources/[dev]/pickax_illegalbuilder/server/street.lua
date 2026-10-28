@@ -74,8 +74,14 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
     if limit > 0 and ctr.n >= limit then return cb({ ok = false, error = 'Tu as trop vendu, fais une pause' }) end
     last[src] = now
     local coords = GetEntityCoords(ped)
-    if math.random(100) > (C.AcceptChance or 60) then      -- le PNJ refuse
-        if math.random(100) <= (C.RefuseAlertChance or 0) then IB.alertPolice(coords, 'Activité suspecte', 'Un passant signale une proposition de drogue dans la rue') end
+    -- réputation du joueur + état du secteur (saturation, chaleur)
+    local rep = IB.getRep(xPlayer.identifier)
+    local zkey, named = IB.streetZoneKey(coords)
+    local zone = IB.streetZoneState(zkey)
+    local accept, priceMult, alertChance, repLvl = IB.streetModifiers(rep, zone, named)
+    if math.random(100) > accept then      -- le PNJ refuse
+        IB.streetZoneAfter(zone, 0)
+        if math.random(100) <= (C.RefuseAlertChance or 0) + zone.heat * 0.1 then IB.alertPolice(coords, 'Activité suspecte', 'Un passant signale une proposition de drogue dans la rue') end
         return cb({ ok = true, accepted = false })
     end
     local qty = math.min(have, roll(C.QtyMin or 1, C.QtyMax or 1))
@@ -84,7 +90,7 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
     local unit = roll(entry.min, entry.max)
     local took, factor, purity = IB.takeUnits(src, entry.item, qty)
     if not took then return cb({ ok = false, error = 'Erreur' }) end
-    local total = math.floor(unit * qty * factor + 0.5)
+    local total = math.floor(unit * qty * factor * priceMult + 0.5)
     ctr.n = ctr.n + qty
     local tax = 0
     if GetResourceState('pickax_gangbuilder') == 'started' then
@@ -93,10 +99,15 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
         pcall(function() exports.pickax_gangbuilder:ReportIllegalActivity(src, 'sell') end)
     end
     IB.pay(xPlayer, (C.Account == 'money' or C.Account == 'bank') and C.Account or 'black_money', total - tax, 'Vente de rue : ' .. entry.item)
-    if math.random(100) <= (C.AlertChance or 0) then IB.alertPolice(coords, 'Vente de drogue', 'Un témoin signale une vente de drogue dans la rue') end
+    if math.random(100) <= alertChance then IB.alertPolice(coords, 'Vente de drogue', 'Un témoin signale une vente de drogue dans la rue') end
+    IB.streetZoneAfter(zone, qty)
+    local newRep = rep
+    if (Config.StreetRep or {}).Enabled ~= false then newRep = IB.addRep(xPlayer.identifier, qty * ((Config.StreetRep or {}).PerUnit or 1)) end
+    local newLvl, lvlName = IB.repLevel(newRep)
     if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
     IB.log(nil, xPlayer, 'street_sell', ('%s ×%d'):format(entry.item, qty), total - tax)
-    cb({ ok = true, accepted = true, item = entry.item, label = entry.label, qty = qty, total = total - tax, tax = tax, purity = purity })
+    cb({ ok = true, accepted = true, item = entry.item, label = entry.label, qty = qty, total = total - tax, tax = tax, purity = purity,
+        levelUp = newLvl > repLvl and lvlName or nil, saturation = math.floor(zone.sat), heat = math.floor(zone.heat) })
 end)
 
 AddEventHandler('playerDropped', function() last[source] = nil end)

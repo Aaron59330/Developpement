@@ -17,6 +17,7 @@ server_scripts {
     'server/core.lua',
     'server/builder.lua',
     'server/drugs.lua',
+    'server/street_rep.lua',
     'server/street.lua',
     'server/robbery.lua',
     'server/plants.lua',

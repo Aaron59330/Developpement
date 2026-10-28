@@ -78,6 +78,22 @@ Config.StreetSales = {
 -- ── Pureté : le produit fabriqué dans un laboratoire interactif porte une pureté (0-100 %, métadonnée du pochon) qui change son prix de vente ──
 -- Prix final = prix tiré × facteur : MinFactor à 0 % de pureté, MaxFactor à 100 %. Un produit sans pureté (récolte, ancien stock) compte pour `Default` %.
 Config.Purity = { Enabled = true, Default = 50, MinFactor = 0.6, MaxFactor = 1.4 }
+-- ── Vente de rue : réputation de dealer et quartiers ──
+-- Réputation (par joueur, en base) : chaque unité vendue en rapporte ; chaque niveau améliore l'acceptation des PNJ et le prix.
+-- Quartiers : la rue est découpée en secteurs de `Cell` mètres (ou en zones nommées `Named`). Vendre beaucoup au même endroit SATURE le secteur (prix en baisse)
+-- et le rend CHAUD (plus d'alertes, moins d'acceptation) ; les deux retombent avec le temps : il faut bouger.
+Config.StreetRep = {
+    Enabled = true, PerUnit = 1, Levels = { 0, 40, 120, 300, 700 }, Names = { 'Petit revendeur', 'Revendeur', 'Dealer', 'Caïd', 'Baron' },
+    AcceptPerLevel = 4,       -- % d'acceptation en plus par niveau au-dessus du 1
+    PricePerLevel = 0.04,     -- +4 % de prix par niveau au-dessus du 1
+}
+Config.StreetZones = {
+    Enabled = true, Cell = 300,
+    SatPerUnit = 4, SatDecay = 3, MaxPriceDrop = 0.4,     -- saturation (0-100) par unité vendue, retombée par minute, baisse de prix maximale à saturation 100
+    HeatPerSale = 6, HeatPerRefuse = 3, HeatDecay = 2,    -- chaleur (0-100)
+    HeatAlert = 0.3, HeatAccept = 0.25,                   -- % d'alerte en plus / % d'acceptation en moins par point de chaleur
+    Named = {},               -- zones nommées facultatives : { { name = 'Grove Street', coords = vector3(0.0, 0.0, 0.0), radius = 150.0, demand = 1.2 } } (demand : prix ×)
+}
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────

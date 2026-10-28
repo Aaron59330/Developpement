@@ -51,6 +51,9 @@ local function doSell(ped, item)
         SetPedAsNoLongerNeeded(ped)
         busy = false
         Notify(('Vendu : %d × %s pour %s $%s'):format(r.qty, r.label or r.item, r.total, r.purity and (' (pureté ' .. r.purity .. ' %)') or ''), 'success')
+        if r.levelUp then Notify(('Nouvelle réputation : %s !'):format(r.levelUp), 'success') end
+        if (r.heat or 0) >= 60 then Notify('Le quartier est chaud : change de secteur.', 'warning')
+        elseif (r.saturation or 0) >= 60 then Notify('Le quartier est saturé : les prix baissent.', 'warning') end
     end, item)
 end
 
