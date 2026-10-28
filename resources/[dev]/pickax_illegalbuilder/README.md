@@ -86,3 +86,12 @@ Réglages dans le panel (Drogues & labos) ou `Config.Record.Recidive`, `Config.P
 ## Convois de gang (pickax_gangbuilder)
 
 `/convoi` (bureau du gang, en véhicule) lance un convoi : mène le véhicule à destination avant la fin du temps imparti pour toucher une prime dans la trésorerie. Les rivaux voient une zone approximative ; s'ils restent près du véhicule 30 secondes cumulées, ils le détournent et volent la moitié de la prime. Réglages : `Config.Convoy` ou panel → Gangs → Convois.
+
+## Évasion, caution, justice et équipes de braquage
+
+Réglages dans le panel (Drogues & labos) ou `Config.Escape`, `Config.Bail`, `Config.Justice`, `Config.Crew`.
+
+- **Évasion** — un détenu se rend à un point d'évasion de la prison (touche G maintenue, objet consommé, durée vérifiée par le serveur). Il se retrouve dehors, la police est alertée. Repris par `/emprisonner`, il reprend son reste de peine + une pénalité. Les points doivent rester à moins de 10 m de la prison de `pickax_core`.
+- **Caution** — `/caution <id>` : un proche (ou le détenu) paie 400 $ par minute de peine restante (30 min maximum) ; le détenu sort avec un bracelet électronique pendant quelques heures (zone autour de la sortie) ; l'argent va à la société de police.
+- **Justice** — `/defendre <id> <honoraires>` (job `avocat`) : le client accepte avec `/accepter` et paie, sa peine baisse de 25 % (une fois par peine). `/gracier <id> [%]` (job `juge`) efface tout ou partie de la peine. Crée les jobs `avocat` et `juge` dans le builder (noms réglables dans `Config.Justice`).
+- **Équipes de braquage** — `/equipe creer | inviter <id> | accepter | role <rôle> | quitter`. Rôles : pirate (coffres −30 % de temps), tireur (+10 % de butin), conducteur (alerte police −20 points), guetteur (alerte −10, +60 s). Les rôles présents (40 m) au début du braquage comptent.

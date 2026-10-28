@@ -323,3 +323,7 @@ Onglet **Bracelets** de la tablette (F6 → Tablette) ou commande `/bracelet <id
 - **Retrait** : uniquement depuis la tablette d'un agent habilité. Le porteur est prévenu à la pose, au retrait et à chaque connexion. La pose est notée au casier.
 - **Réglages** (builder, carte « Tablette ») : activer les bracelets, grade minimum. Valeurs globales dans `Config.Police.Bracelets` (distance, intervalle, maximum par service, rayon min/max, délai d'alerte).
 - Export pour d'autres ressources : `exports.pickax_jobbuilder:HasBracelet(identifier)`.
+
+## Entreprises de joueurs
+
+`/entreprise creer <modèle> <nom>` : un joueur fonde son entreprise sans admin (frais en banque, 1 par joueur par défaut). Le job est créé par le builder avec un bureau de patron et un coffre à l'endroit où il se trouve ; il en est le patron (embauche, trésorerie, salaires depuis le bureau). `/entreprise dissoudre` puis `/entreprise confirmer` la supprime : le solde de la société est reversé au patron. Modèles et frais : `Config.Company` (option `Registry` pour limiter la création à un registre du commerce).
