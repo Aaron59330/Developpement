@@ -263,6 +263,49 @@ function IB.removeItem(src, name, count)
     return true
 end
 
+-- ─────────────────────────────── Pureté du produit ───────────────────────────────
+-- Facteur de prix d'une pureté (0-100) ; 1.0 si la pureté est désactivée
+function IB.purityFactor(p)
+    local P = Config.Purity or {}
+    if P.Enabled == false then return 1.0 end
+    p = math.max(0, math.min(100, tonumber(p) or P.Default or 50))
+    local lo, hi = tonumber(P.MinFactor) or 1.0, tonumber(P.MaxFactor) or 1.0
+    return lo + (hi - lo) * p / 100
+end
+
+-- Retire `count` unités de `name` (les plus pures d'abord) et renvoie ok, facteur de prix moyen, pureté moyenne.
+function IB.takeUnits(src, name, count)
+    count = math.floor(tonumber(count) or 0)
+    if count <= 0 then return true, 1.0, nil end
+    if IB.itemCount(src, name) < count then return false end
+    local P = Config.Purity or {}
+    local def = tonumber(P.Default) or 50
+    if IB.inventory() ~= 'ox' then
+        if not IB.removeItem(src, name, count) then return false end
+        return true, IB.purityFactor(def), def
+    end
+    local slots = exports.ox_inventory:Search(src, 'slots', name) or {}
+    table.sort(slots, function(a, b) return (tonumber(a.metadata and a.metadata.purity) or def) > (tonumber(b.metadata and b.metadata.purity) or def) end)
+    local left, fsum, psum = count, 0.0, 0.0
+    local plan = {}
+    for _, s in ipairs(slots) do
+        if left <= 0 then break end
+        local take = math.min(left, s.count or 0)
+        if take > 0 then
+            local pur = tonumber(s.metadata and s.metadata.purity) or def
+            plan[#plan + 1] = { slot = s.slot, take = take, pur = pur }
+            left = left - take
+        end
+    end
+    if left > 0 then return false end
+    for _, s in ipairs(plan) do
+        if not exports.ox_inventory:RemoveItem(src, name, s.take, nil, s.slot) then return false end
+        fsum = fsum + IB.purityFactor(s.pur) * s.take
+        psum = psum + s.pur * s.take
+    end
+    return true, fsum / count, math.floor(psum / count + 0.5)
+end
+
 -- ─────────────────────────────── Argent ───────────────────────────────
 function IB.balance(xPlayer, method)
     local p = Config.Payments[method]

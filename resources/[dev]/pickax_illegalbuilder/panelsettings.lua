@@ -4,6 +4,10 @@
 -- Ajouter un réglage : une ligne dans pickax_settings/config.lua (Settings.Schema) + une ligne ci-dessous.
 local MAP = {
     { 'ib_pedsales', 'PedSales.Enabled' },
+    { 'ib_purity_enabled', 'Purity.Enabled' },
+    { 'ib_purity_default', 'Purity.Default' },
+    { 'ib_purity_min', 'Purity.MinFactor' },
+    { 'ib_purity_max', 'Purity.MaxFactor' },
     { 'ib_street_enabled', 'StreetSales.Enabled' },
     { 'ib_street_tablet', 'StreetSales.RequireTablet' },
     { 'ib_street_chance', 'StreetSales.AcceptChance' },

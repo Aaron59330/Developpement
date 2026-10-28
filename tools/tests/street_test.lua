@@ -14,6 +14,7 @@ ESX = { RegisterServerCallback = function(n, f) cbs[n] = f end, GetPlayerFromId 
 IB = { itemCount = function(_, n) return inv[n] or 0 end, removeItem = function(_, n, c) if (inv[n] or 0) < c then return false end inv[n] = inv[n] - c return true end,
     copCount = function() return 0 end, alertPolice = function(c, t) alerts[#alerts + 1] = t end, log = function() end, Counters = {},
     pay = function(_, acc, amount) paid[#paid + 1] = { acc, amount } end }
+IB.takeUnits = function(src, n, c) if IB.removeItem(src, n, c) then return true, 1.0, 50 end return false end
 function IB.counter(key, w) local c = IB.Counters[key] if not c then c = { n = 0, since = 0 } IB.Counters[key] = c end return c end
 Config = { PedSales = { Enabled = true }, DrugOrder = { 'weed' }, Drugs = { weed = { label = 'Cannabis', pooch = 'weed_pooch', price = { pooch = { 100, 200 } } } },
     StreetSales = { Enabled = true, RequireTablet = true, TabletItem = 'dealer_tablet', AcceptChance = 100, QtyMin = 1, QtyMax = 3, PriceFactor = 0.8, Account = 'black_money', Cooldown = 8, MaxPerHour = 10, AlertChance = 0, RefuseAlertChance = 0, CopsRequired = 0, Items = {} } }

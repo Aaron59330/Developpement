@@ -50,7 +50,7 @@ local function doSell(ped, item)
         playExchange(ped)
         SetPedAsNoLongerNeeded(ped)
         busy = false
-        Notify(('Vendu : %d × %s pour %s $'):format(r.qty, r.label or r.item, r.total), 'success')
+        Notify(('Vendu : %d × %s pour %s $%s'):format(r.qty, r.label or r.item, r.total, r.purity and (' (pureté ' .. r.purity .. ' %)') or ''), 'success')
     end, item)
 end
 

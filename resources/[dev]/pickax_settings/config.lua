@@ -167,4 +167,8 @@ Settings.Schema = {
     { key = 'ib_street_alert', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Alerte police après une vente (%)', type = 'number', default = 20, min = 0, max = 100, step = 1 },
     { key = 'ib_street_refuse', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Alerte police quand le PNJ refuse (%)', type = 'number', default = 10, min = 0, max = 100, step = 1 },
     { key = 'ib_street_cops', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Policiers en service requis', type = 'number', default = 0, min = 0, max = 30, step = 1, hint = '0 = aucun.' },
+    { key = 'ib_purity_enabled', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Pureté : influence sur le prix', type = 'bool', default = true, hint = 'La pureté du produit fabriqué au labo interactif change son prix chez les dealers et dans la rue.' },
+    { key = 'ib_purity_default', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Pureté d\'un produit sans pureté (%)', type = 'number', default = 50, min = 0, max = 100, step = 1, hint = 'Récolte, ancien stock…' },
+    { key = 'ib_purity_min', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Prix à 0 % de pureté (×)', type = 'number', default = 0.6, min = 0.1, max = 1, step = 0.05 },
+    { key = 'ib_purity_max', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Prix à 100 % de pureté (×)', type = 'number', default = 1.4, min = 1, max = 3, step = 0.05 },
 }

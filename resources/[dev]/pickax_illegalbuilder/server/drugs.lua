@@ -233,8 +233,9 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
         qty = math.min(qty, left)
     end
     local unit = roll(entry.min, entry.max)
-    local total = unit * qty
-    if not IB.removeItem(src, item, qty) then return cb({ ok = false, error = 'Erreur' }) end
+    local took, factor, purity = IB.takeUnits(src, item, qty)
+    if not took then return cb({ ok = false, error = 'Erreur' }) end
+    local total = math.floor(unit * qty * factor + 0.5)
     c.n = c.n + qty
     -- Racket : sur le territoire d'un gang adverse, une part de la vente est reversée au propriétaire (pickax_gangbuilder → Config.Territories.Racket*)
     local tax = 0
@@ -248,7 +249,7 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
     if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
     IB.stat(e, 'revenue', total - tax) IB.stat(e, 'sold', qty)
     IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total - tax)
-    cb({ ok = true, qty = qty, unit = unit, total = total - tax, tax = tax })
+    cb({ ok = true, qty = qty, unit = unit, total = total - tax, tax = tax, purity = purity })
 end)
 
 -- ═══════════════ Blanchiment ═══════════════

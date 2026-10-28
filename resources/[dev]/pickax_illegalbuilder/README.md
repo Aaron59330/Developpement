@@ -45,3 +45,7 @@ Le joueur clique sur un **PNJ de la rue** avec le menu contextuel (pickax_core) 
 - Tous ces réglages sont modifiables depuis le panel web : *Réglages du serveur → Drogues & labos → Vente dans la rue*.
 - **pickax_core** : `players/contextMenu/function.lua` utilise ce système à la place de l'ancienne vente (qui faisait confiance au client) dès que `pickax_illegalbuilder` est démarré ; sans lui, l'ancien comportement reste.
 - Tests : `ROOT=. lua tools/tests/street_test.lua`.
+
+## Pureté → prix de vente (`Config.Purity`)
+Le produit fabriqué dans un laboratoire interactif porte une **pureté** (métadonnée du pochon, 0-100 %). Chez les dealers du builder et dans la rue, le prix tiré est multiplié par un facteur : `MinFactor` (×0,6) à 0 %, `MaxFactor` (×1,4) à 100 %, ×1 à 50 %. Un produit sans pureté (récolte, ancien stock) compte pour `Default` %.
+Le joueur vend d'abord ses unités **les plus pures** ; le message de vente affiche la pureté moyenne. Réglable dans le panel : *Réglages du serveur → Drogues & labos → Pureté du produit*. Test : `ROOT=. lua tools/tests/purity_test.lua`.

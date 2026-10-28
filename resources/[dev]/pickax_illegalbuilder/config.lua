@@ -75,6 +75,9 @@ Config.StreetSales = {
     CopsRequired   = 0,               -- policiers en service requis (0 = aucun)
     Items          = {},              -- vide = toutes les drogues du catalogue (pochons) ; sinon { { item = 'weed_pooch', label = 'Cannabis', min = 70, max = 110 }, … }
 }
+-- ── Pureté : le produit fabriqué dans un laboratoire interactif porte une pureté (0-100 %, métadonnée du pochon) qui change son prix de vente ──
+-- Prix final = prix tiré × facteur : MinFactor à 0 % de pureté, MaxFactor à 100 %. Un produit sans pureté (récolte, ancien stock) compte pour `Default` %.
+Config.Purity = { Enabled = true, Default = 50, MinFactor = 0.6, MaxFactor = 1.4 }
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────

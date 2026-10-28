@@ -81,8 +81,10 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
     local qty = math.min(have, roll(C.QtyMin or 1, C.QtyMax or 1))
     if limit > 0 then qty = math.min(qty, limit - ctr.n) end
     if qty < 1 then return cb({ ok = false, error = 'Tu as trop vendu, fais une pause' }) end
-    local total = roll(entry.min, entry.max) * qty
-    if not IB.removeItem(src, entry.item, qty) then return cb({ ok = false, error = 'Erreur' }) end
+    local unit = roll(entry.min, entry.max)
+    local took, factor, purity = IB.takeUnits(src, entry.item, qty)
+    if not took then return cb({ ok = false, error = 'Erreur' }) end
+    local total = math.floor(unit * qty * factor + 0.5)
     ctr.n = ctr.n + qty
     local tax = 0
     if GetResourceState('pickax_gangbuilder') == 'started' then
@@ -94,7 +96,7 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
     if math.random(100) <= (C.AlertChance or 0) then IB.alertPolice(coords, 'Vente de drogue', 'Un témoin signale une vente de drogue dans la rue') end
     if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
     IB.log(nil, xPlayer, 'street_sell', ('%s ×%d'):format(entry.item, qty), total - tax)
-    cb({ ok = true, accepted = true, item = entry.item, label = entry.label, qty = qty, total = total - tax, tax = tax })
+    cb({ ok = true, accepted = true, item = entry.item, label = entry.label, qty = qty, total = total - tax, tax = tax, purity = purity })
 end)
 
 AddEventHandler('playerDropped', function() last[source] = nil end)
