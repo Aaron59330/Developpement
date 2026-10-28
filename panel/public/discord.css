@@ -1,0 +1,57 @@
+/* ───────── Message Discord : éditeur + aperçu fidèle de Discord (thème sombre), cadre aux couleurs du panel ───────── */
+.dm-wrap { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 1180px) { .dm-wrap { grid-template-columns: 1fr; } .dm-sticky { position: static !important; } }
+.dm-edit { display: grid; gap: 14px; min-width: 0; }
+.dm-edit .card { margin: 0; }
+.dm-row { display: grid; gap: 10px; } .dm-row.two { grid-template-columns: 1fr 1fr; } @media (max-width: 700px) { .dm-row.two { grid-template-columns: 1fr; } }
+.dm-edit textarea { width: 100%; resize: vertical; font-family: inherit; }
+.dm-json { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace !important; font-size: 12.5px; }
+.dm-colors { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.dm-sw { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; box-shadow: 0 0 0 1px rgba(255, 255, 255, .15) inset; }
+.dm-sw.on { border-color: #fff; transform: scale(1.08); }
+.dm-chk { display: flex !important; align-items: center; gap: 8px; margin: 8px 0 !important; text-transform: none !important; letter-spacing: 0 !important; }
+.dm-chk input { width: auto; }
+.dm-field { padding: 10px; border: 1px dashed var(--line); border-radius: 12px; margin: 8px 0; display: grid; gap: 4px; }
+.dm-embedcard { padding: 0 !important; overflow: hidden; }
+.dm-eh { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: color-mix(in srgb, var(--card2, #16161a) 80%, transparent); flex-wrap: wrap; }
+.dm-ehs { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-eb { padding: 6px 16px 16px; display: grid; gap: 8px; } .dm-eb.hidden { display: none; }
+.dm-side { min-width: 0; } .dm-sticky { position: sticky; top: 14px; }
+.dm-label { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
+.dm-dot { width: 8px; height: 8px; border-radius: 50%; background: #57f287; box-shadow: 0 0 10px #57f287; }
+
+/* fenêtre Discord */
+.dm-prev { padding: 1px; border-radius: 20px; background: linear-gradient(145deg, rgba(var(--a), .55), rgba(88, 101, 242, .35) 45%, rgba(255, 255, 255, .06)); box-shadow: 0 30px 80px rgba(0, 0, 0, .5), 0 0 60px rgba(var(--a), .12); }
+.dm-win { background: #313338; border-radius: 19px; overflow: hidden; font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #dbdee1; font-size: 15.5px; line-height: 1.375; }
+.dm-bar { display: flex; align-items: center; gap: 8px; padding: 13px 16px; background: #2b2d31; border-bottom: 1px solid #1f2023; color: #f2f3f5; }
+.dm-bar .dm-hash { color: #80848e; font-size: 22px; font-weight: 400; line-height: 1; }
+.dm-bar b { font-weight: 600; } .dm-sep { width: 1px; height: 20px; background: #3f4147; margin: 0 6px; } .dm-topic { color: #949ba4; font-size: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dm-msgs { padding: 18px 16px 22px; min-height: 220px; }
+.dm-empty { color: #949ba4; text-align: center; padding: 60px 20px; }
+.dm-msg { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; }
+.dm-av { width: 40px; height: 40px; border-radius: 50%; background: #5865f2 center/cover; display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 18px; margin-top: 2px; }
+.dm-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dm-name { color: #f2f3f5; font-weight: 500; }
+.dm-tag { display: inline-flex; align-items: center; gap: 3px; background: #5865f2; color: #fff; font-size: 10.5px; font-weight: 600; padding: 1px 5px; border-radius: 4px; line-height: 15px; }
+.dm-tag i { font-style: normal; font-size: 9px; }
+.dm-time { color: #949ba4; font-size: 12px; margin-left: 4px; }
+.dm-text { margin-top: 2px; overflow-wrap: anywhere; }
+.dm-win .dm-text a, .dm-win .dm-ed a, .dm-win .dm-fv a { color: #00a8fc !important; text-decoration: none; } .dm-win .dm-text a:hover, .dm-win .dm-ed a:hover { text-decoration: underline; }
+.dm-mention { background: rgba(88, 101, 242, .3); color: #c9cdfb; border-radius: 3px; padding: 0 2px; font-weight: 500; }
+.dm-code { background: #1e1f22; border-radius: 4px; padding: 1px 5px; font-family: Consolas, 'Courier New', monospace; font-size: 85%; }
+.dm-pre { background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; padding: 8px 10px; margin: 6px 0; font-family: Consolas, 'Courier New', monospace; font-size: 13.5px; white-space: pre-wrap; }
+.dm-spoiler { background: #1e1f22; color: transparent; border-radius: 3px; padding: 0 2px; } .dm-spoiler:hover { color: inherit; background: rgba(255, 255, 255, .1); }
+.dm-win blockquote { margin: 2px 0; padding: 0 8px 0 12px; border-left: 4px solid #4e5058; }
+.dm-h1 { font-size: 1.5em; font-weight: 700; margin: 8px 0 2px; } .dm-h2 { font-size: 1.25em; font-weight: 700; margin: 8px 0 2px; } .dm-h3 { font-size: 1.1em; font-weight: 700; margin: 6px 0 2px; } .dm-sub { font-size: 12px; color: #949ba4; }
+/* embed */
+.dm-embed { margin-top: 6px; max-width: 520px; background: #2b2d31; border: 1px solid #1e1f22; border-left: 4px solid #202225; border-radius: 4px; overflow: hidden; }
+.dm-eg { position: relative; padding: 8px 16px 16px 12px; display: grid; gap: 8px; }
+.dm-ea { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #f2f3f5; padding-right: 90px; } .dm-ea img { width: 24px; height: 24px; border-radius: 50%; } .dm-win .dm-ea a { color: #f2f3f5 !important; text-decoration: none; }
+.dm-et { font-weight: 700; color: #f2f3f5; font-size: 16px; padding-right: 90px; overflow-wrap: anywhere; } .dm-win .dm-et.link { color: #00a8fc !important; text-decoration: none; } .dm-et.link:hover { text-decoration: underline; }
+.dm-ed { font-size: 14px; color: #dbdee1; overflow-wrap: anywhere; }
+.dm-ef { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.dm-f { grid-column: 1 / -1; min-width: 0; } .dm-f.in { grid-column: span 1; }
+.dm-fn { font-size: 14px; font-weight: 700; color: #f2f3f5; margin-bottom: 2px; overflow-wrap: anywhere; } .dm-fv { font-size: 14px; color: #dbdee1; overflow-wrap: anywhere; }
+.dm-ei { max-width: 100%; max-height: 300px; border-radius: 4px; object-fit: contain; justify-self: start; margin-top: 8px; }
+.dm-eth { position: absolute; top: 8px; right: 16px; width: 80px; height: 80px; object-fit: cover; border-radius: 4px; }
+.dm-eft { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #b5bac1; } .dm-eft img { width: 20px; height: 20px; border-radius: 50%; }

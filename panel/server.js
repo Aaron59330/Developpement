@@ -17,6 +17,7 @@ app.use('/drive', require('./routes/drive-public'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/servers', require('./routes/servers'));
 app.use('/api/servers', require('./routes/server-extra'));
+app.use('/api/servers', require('./routes/discord'));
 app.use('/api/servers', require('./routes/files'));
 app.use('/api/servers', require('./routes/base'));
 app.use('/api/servers', require('./routes/planner'));
