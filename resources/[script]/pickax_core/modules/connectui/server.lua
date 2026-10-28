@@ -101,9 +101,13 @@ end
 
 local function refreshCards()
     local card = buildCard()
+    -- La carte n'est ré-affichée QUE si son contenu a changé (nouveau joueur en connexion…) : la redessiner toutes les 3 s la faisait clignoter
+    -- et un clic sur « Jouer » pouvait être perdu pendant le rafraîchissement.
+    local sig = json.encode(card)
 
     for src, player in pairs(connectingPlayers) do
-        if player.ready and not player.finished then
+        if player.ready and not player.finished and player.sig ~= sig then
+            player.sig = sig
             local activePlayer = player
             activePlayer.deferrals.presentCard(card, function(data)
                 if data and data.action == Config.Buttons.play.action then
@@ -172,7 +176,7 @@ AddEventHandler('playerConnecting', function(name, setReason, deferrals)
     startRefreshLoop()
 
     local elapsed = 0
-    while not player.finished and elapsed < 30000 do
+    while not player.finished and elapsed < (Config.WaitSeconds or 120) * 1000 do
         Wait(1000)
         elapsed = elapsed + 1000
     end

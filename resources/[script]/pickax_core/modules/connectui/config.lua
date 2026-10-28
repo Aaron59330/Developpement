@@ -5,6 +5,7 @@ Config.ServerName = "Bienvenue sur " .. ((PickaxTheme and PickaxTheme.short) or 
 Config.MaxClientsConvar = "sv_maxclients"
 
 --  File d'attente
+Config.WaitSeconds = 120        -- secondes laissées au joueur pour cliquer sur « Jouer » (après : la connexion continue toute seule)
 Config.SecondsPerPlayer = 5
 Config.NoPlayerText = "Aucun joueur en connexion"
 
