@@ -5,6 +5,7 @@ local Stock = {}     -- [eid] = { n, at } : stock disponible, reconstitué avec 
 
 -- Nom de l'item « tablette » exigé par ce module (nil si la tablette n'est pas activée)
 function IB.gofastTabletItem(e)
+    if (Config.Tablets or {}).Required == false then return nil end
     local t = e.type == 'gofast' and e.settings and e.settings.tablet
     if t and t.enabled then return (t.item and t.item ~= '') and t.item or 'gofast_tablet' end
     return nil

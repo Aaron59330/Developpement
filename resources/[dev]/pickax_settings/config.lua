@@ -89,24 +89,24 @@ Settings.Schema = {
     -- ═══ Réglages des builders (gangs, laboratoires, drogues) : appliqués par panelsettings.lua de chaque ressource ═══
     -- ── Gangs ──────────────────────────────────
     { key = 'gb_terr_enabled', group = 'Gangs', section = 'Territoires', label = 'Territoires activés', type = 'bool', default = true, hint = 'Désactivé : plus de capture ni de revenu de zone.' },
-    { key = 'gb_capture_seconds', group = 'Gangs', section = 'Territoires', label = 'Durée de capture (secondes)', type = 'number', default = 120, min = 15, max = 3600, step = 5, hint = 'Temps passé dans la zone, seul, pour la capturer.' },
+    { key = 'gb_capture_seconds', group = 'Gangs', section = 'Territoires', label = 'Durée de capture (secondes)', type = 'number', default = 120, min = 15, max = 3600, step = 5, hint = 'Temps passé dans la zone, seul, pour la capturer.', easy = 60 },
     { key = 'gb_capture_members', group = 'Gangs', section = 'Territoires', label = 'Membres minimum pour capturer', type = 'number', default = 1, min = 1, max = 30, step = 1 },
     { key = 'gb_owner_blocks', group = 'Gangs', section = 'Territoires', label = 'La présence du propriétaire bloque la capture', type = 'bool', default = true },
-    { key = 'gb_protection_min', group = 'Gangs', section = 'Territoires', label = 'Protection après une capture (minutes)', type = 'number', default = 30, min = 0, max = 1440, step = 5 },
+    { key = 'gb_protection_min', group = 'Gangs', section = 'Territoires', label = 'Protection après une capture (minutes)', type = 'number', default = 30, min = 0, max = 1440, step = 5, easy = 10 },
     { key = 'gb_income_interval', group = 'Gangs', section = 'Territoires', label = 'Intervalle des revenus (minutes)', type = 'number', default = 15, min = 1, max = 240, step = 1 },
     { key = 'gb_income_reward', group = 'Gangs', section = 'Territoires', label = 'Revenu par période ($)', type = 'number', default = 500, min = 0, max = 1000000, step = 50, hint = 'Multiplié par le niveau du territoire.' },
     { key = 'gb_income_account', group = 'Gangs', section = 'Territoires', label = 'Compte crédité par les revenus', type = 'select', default = 'dirty', options = { { 'dirty', 'Argent sale' }, { 'money', 'Argent propre' } } },
-    { key = 'gb_min_defenders', group = 'Gangs', section = 'Territoires', label = 'Défenseurs connectés requis pour capturer', type = 'number', default = 1, min = 0, max = 30, step = 1, hint = '0 = pas de condition (raid possible même si le gang est hors ligne).' },
+    { key = 'gb_min_defenders', group = 'Gangs', section = 'Territoires', label = 'Défenseurs connectés requis pour capturer', type = 'number', default = 1, min = 0, max = 30, step = 1, hint = '0 = pas de condition (raid possible même si le gang est hors ligne).', easy = 0 },
     { key = 'gb_max_per_gang', group = 'Gangs', section = 'Territoires', label = 'Territoires maximum par gang', type = 'number', default = 0, min = 0, max = 50, step = 1, hint = '0 = illimité.' },
     { key = 'gb_alert_owner', group = 'Gangs', section = 'Territoires', label = 'Prévenir le propriétaire quand on attaque sa zone', type = 'bool', default = true },
-    { key = 'gb_racket_enabled', group = 'Gangs', section = 'Racket', label = 'Racket activé', type = 'bool', default = true, hint = 'Un gang qui vend de la drogue sur le territoire d\'un autre paie une taxe au propriétaire.' },
+    { key = 'gb_racket_enabled', group = 'Gangs', section = 'Racket', label = 'Racket activé', type = 'bool', default = true, hint = 'Un gang qui vend de la drogue sur le territoire d\'un autre paie une taxe au propriétaire.', easy = false },
     { key = 'gb_racket_rate', group = 'Gangs', section = 'Racket', label = 'Taux du racket (%)', type = 'number', default = 10, min = 0, max = 90, step = 1 },
-    { key = 'gb_conf_enabled', group = 'Gangs', section = 'Affrontements', label = 'Affrontements activés', type = 'bool', default = true, hint = 'Une activité illégale sur le territoire d\'un autre gang déclenche un affrontement.' },
+    { key = 'gb_conf_enabled', group = 'Gangs', section = 'Affrontements', label = 'Affrontements activés', type = 'bool', default = true, hint = 'Une activité illégale sur le territoire d\'un autre gang déclenche un affrontement.', easy = false },
     { key = 'gb_conf_duration', group = 'Gangs', section = 'Affrontements', label = 'Durée (secondes)', type = 'number', default = 300, min = 60, max = 3600, step = 30 },
     { key = 'gb_conf_cooldown', group = 'Gangs', section = 'Affrontements', label = 'Délai entre deux affrontements (secondes)', type = 'number', default = 900, min = 60, max = 7200, step = 60 },
     { key = 'gb_conf_capture', group = 'Gangs', section = 'Affrontements', label = 'L\'intrus qui gagne capture le territoire', type = 'bool', default = true },
     { key = 'gb_conf_rep', group = 'Gangs', section = 'Affrontements', label = 'Réputation du gagnant', type = 'number', default = 20, min = 0, max = 1000, step = 1 },
-    { key = 'gb_turf_enabled', group = 'Gangs', section = 'Guerre de zone déclarée', label = 'Guerre de zone activée', type = 'bool', default = true, hint = 'Le bureau d\'un gang déclare la guerre au propriétaire d\'un territoire (tablette ou /startturfwar).' },
+    { key = 'gb_turf_enabled', group = 'Gangs', section = 'Guerre de zone déclarée', label = 'Guerre de zone activée', type = 'bool', default = true, hint = 'Le bureau d\'un gang déclare la guerre au propriétaire d\'un territoire (tablette ou /startturfwar).', easy = false },
     { key = 'gb_turf_prep', group = 'Gangs', section = 'Guerre de zone déclarée', label = 'Préparation avant le début (secondes)', type = 'number', default = 120, min = 0, max = 1800, step = 15 },
     { key = 'gb_turf_duration', group = 'Gangs', section = 'Guerre de zone déclarée', label = 'Durée de la dispute (secondes)', type = 'number', default = 600, min = 120, max = 3600, step = 30 },
     { key = 'gb_turf_attackers', group = 'Gangs', section = 'Guerre de zone déclarée', label = 'Attaquants connectés requis', type = 'number', default = 2, min = 1, max = 30, step = 1 },
@@ -139,7 +139,7 @@ Settings.Schema = {
     { key = 'gb_wars_replose', group = 'Gangs', section = 'Guerres entre gangs (tablette)', label = 'Réputation retirée au perdant', type = 'number', default = 15, min = 0, max = 1000, step = 1 },
 
     -- ── Drogues & labos ──────────────────────────────────
-    { key = 'jb_lab_enabled', group = 'Drogues & labos', section = 'Laboratoire interactif', label = 'Fabrication interactive activée', type = 'bool', default = true, hint = 'Désactivé : les tables de traitement reviennent à l\'ancienne barre de progression.' },
+    { key = 'jb_lab_enabled', group = 'Drogues & labos', section = 'Laboratoire interactif', label = 'Fabrication interactive activée', type = 'bool', default = true, hint = 'Désactivé : les tables de traitement reviennent à l\'ancienne barre de progression.', easy = false },
     { key = 'jb_lab_yield', group = 'Drogues & labos', section = 'Laboratoire interactif', label = 'Part du rendement qui dépend de la qualité', type = 'number', default = 0.4, min = 0, max = 1, step = 0.05, hint = '0 = la qualité ne change pas le nombre de pochons ; 1 = rendement proportionnel à la qualité.' },
     { key = 'jb_lab_fail', group = 'Drogues & labos', section = 'Laboratoire interactif', label = 'Risque de lot raté à qualité 0 (%)', type = 'number', default = 35, min = 0, max = 100, step = 1, hint = 'Ajouté au risque de la recette ; aucun risque ajouté à qualité 100 %.' },
     { key = 'jb_lab_bonus_q', group = 'Drogues & labos', section = 'Laboratoire interactif', label = 'Seuil de qualité du bonus (0-1)', type = 'number', default = 0.92, min = 0.5, max = 1, step = 0.01 },
@@ -151,37 +151,37 @@ Settings.Schema = {
     { key = 'jb_lab_cam_dist', group = 'Drogues & labos', section = 'Rendu 3D et caméra du labo', label = 'Distance de la caméra (m)', type = 'number', default = 0.85, min = 0.4, max = 2.5, step = 0.05 },
     { key = 'jb_lab_cam_pitch', group = 'Drogues & labos', section = 'Rendu 3D et caméra du labo', label = 'Inclinaison de la caméra (°)', type = 'number', default = -64, min = -90, max = -20, step = 1, hint = '-90 = vue de dessus, -30 = vue rasante.' },
     { key = 'jb_lab_cam_fov', group = 'Drogues & labos', section = 'Rendu 3D et caméra du labo', label = 'Champ de vision de la caméra (°)', type = 'number', default = 45, min = 25, max = 75, step = 1 },
-    { key = 'jb_toxic_enabled', group = 'Drogues & labos', section = 'Intoxication des laboratoires', label = 'Intoxication activée', type = 'bool', default = true, hint = 'Sans la tenue dans une zone de laboratoire, le joueur s\'intoxique ; seul l\'antidote guérit.' },
+    { key = 'jb_toxic_enabled', group = 'Drogues & labos', section = 'Intoxication des laboratoires', label = 'Intoxication activée', type = 'bool', default = true, hint = 'Sans la tenue dans une zone de laboratoire, le joueur s\'intoxique ; seul l\'antidote guérit.', easy = false },
     { key = 'jb_toxic_gain', group = 'Drogues & labos', section = 'Intoxication des laboratoires', label = 'Vitesse d\'intoxication', type = 'number', default = 6, min = 1, max = 50, step = 1 },
     { key = 'jb_toxic_damage', group = 'Drogues & labos', section = 'Intoxication des laboratoires', label = 'Dégâts à partir du seuil (PV par tick)', type = 'number', default = 4, min = 0, max = 50, step = 1 },
     { key = 'jb_toxic_kill', group = 'Drogues & labos', section = 'Intoxication des laboratoires', label = 'Niveau mortel (0-100)', type = 'number', default = 100, min = 50, max = 100, step = 1 },
     { key = 'ib_pedsales', group = 'Drogues & labos', section = 'Vente de drogue aux PNJ', label = 'Vente de drogue aux PNJ (dealers)', type = 'bool', default = true, hint = 'Désactivé : tous les dealers à PNJ disparaissent et plus aucune vente n\'est possible.' },
     { key = 'ib_street_enabled', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Vente dans la rue activée', type = 'bool', default = true, hint = 'Vendre sa drogue à un PNJ de la rue avec le menu contextuel (clic sur le PNJ). Désactivé aussi par « Vente de drogue aux PNJ ».' },
-    { key = 'ib_street_tablet', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Tablette vendeur obligatoire', type = 'bool', default = true, hint = 'Item dealer_tablet, en vente chez le marchand des tablettes.' },
-    { key = 'ib_street_chance', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Chance qu\'un PNJ accepte (%)', type = 'number', default = 60, min = 0, max = 100, step = 1 },
+    { key = 'ib_street_tablet', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Tablette vendeur obligatoire', type = 'bool', default = true, hint = 'Item dealer_tablet, en vente chez le marchand des tablettes.', easy = false },
+    { key = 'ib_street_chance', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Chance qu\'un PNJ accepte (%)', type = 'number', default = 60, min = 0, max = 100, step = 1, easy = 85 },
     { key = 'ib_street_qmin', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Quantité minimum par vente', type = 'number', default = 1, min = 1, max = 50, step = 1 },
     { key = 'ib_street_qmax', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Quantité maximum par vente', type = 'number', default = 3, min = 1, max = 50, step = 1 },
     { key = 'ib_street_factor', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Prix de rue (× le prix du dealer)', type = 'number', default = 0.8, min = 0.1, max = 3, step = 0.05, hint = '1 = même prix que chez un dealer.' },
     { key = 'ib_street_cooldown', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Délai entre deux ventes (secondes)', type = 'number', default = 8, min = 0, max = 300, step = 1 },
-    { key = 'ib_street_hour', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Unités vendues par joueur et par heure', type = 'number', default = 30, min = 0, max = 1000, step = 1, hint = '0 = illimité.' },
-    { key = 'ib_street_alert', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Alerte police après une vente (%)', type = 'number', default = 20, min = 0, max = 100, step = 1 },
+    { key = 'ib_street_hour', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Unités vendues par joueur et par heure', type = 'number', default = 30, min = 0, max = 1000, step = 1, hint = '0 = illimité.', easy = 100 },
+    { key = 'ib_street_alert', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Alerte police après une vente (%)', type = 'number', default = 20, min = 0, max = 100, step = 1, easy = 5 },
     { key = 'ib_street_refuse', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Alerte police quand le PNJ refuse (%)', type = 'number', default = 10, min = 0, max = 100, step = 1 },
     { key = 'ib_street_cops', group = 'Drogues & labos', section = 'Vente dans la rue (menu contextuel)', label = 'Policiers en service requis', type = 'number', default = 0, min = 0, max = 30, step = 1, hint = '0 = aucun.' },
-    { key = 'ib_purity_enabled', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Pureté : influence sur le prix', type = 'bool', default = true, hint = 'La pureté du produit fabriqué au labo interactif change son prix chez les dealers et dans la rue.' },
+    { key = 'ib_purity_enabled', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Pureté : influence sur le prix', type = 'bool', default = true, hint = 'La pureté du produit fabriqué au labo interactif change son prix chez les dealers et dans la rue.', easy = false },
     { key = 'ib_purity_default', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Pureté d\'un produit sans pureté (%)', type = 'number', default = 50, min = 0, max = 100, step = 1, hint = 'Récolte, ancien stock…' },
     { key = 'ib_purity_min', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Prix à 0 % de pureté (×)', type = 'number', default = 0.6, min = 0.1, max = 1, step = 0.05 },
     { key = 'ib_purity_max', group = 'Drogues & labos', section = 'Pureté du produit', label = 'Prix à 100 % de pureté (×)', type = 'number', default = 1.4, min = 1, max = 3, step = 0.05 },
-    { key = 'jb_acc_enabled', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Accidents activés', type = 'bool', default = true, hint = 'Une fabrication de mauvaise qualité peut provoquer une fuite toxique, un incendie ou une explosion.' },
+    { key = 'jb_acc_enabled', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Accidents activés', type = 'bool', default = true, hint = 'Une fabrication de mauvaise qualité peut provoquer une fuite toxique, un incendie ou une explosion.', easy = false },
     { key = 'jb_acc_threshold', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Seuil de qualité (0-1) sous lequel un accident est possible', type = 'number', default = 0.5, min = 0.1, max = 1, step = 0.05 },
     { key = 'jb_acc_chance', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Risque d\'accident à qualité 0 (%)', type = 'number', default = 60, min = 0, max = 100, step = 1, hint = 'Proportionnel jusqu\'au seuil.' },
     { key = 'jb_acc_leak', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Fuite : intoxication ajoutée (0-100)', type = 'number', default = 40, min = 0, max = 100, step = 1 },
     { key = 'jb_acc_fire', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Incendie : points de vie perdus', type = 'number', default = 30, min = 0, max = 200, step = 1 },
     { key = 'jb_acc_explosion', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Explosion : points de vie perdus', type = 'number', default = 70, min = 0, max = 200, step = 1 },
     { key = 'jb_acc_lose', group = 'Drogues & labos', section = 'Accidents de labo', label = 'Incendie / explosion : le lot est perdu', type = 'bool', default = true },
-    { key = 'jb_cat_enabled', group = 'Drogues & labos', section = 'Catalyseur', label = 'Catalyseur activé', type = 'bool', default = true, hint = 'Ingrédient optionnel (item lab_catalyst) consommé à la fin : améliore la qualité et réduit le risque d\'accident.' },
+    { key = 'jb_cat_enabled', group = 'Drogues & labos', section = 'Catalyseur', label = 'Catalyseur activé', type = 'bool', default = true, hint = 'Ingrédient optionnel (item lab_catalyst) consommé à la fin : améliore la qualité et réduit le risque d\'accident.', easy = false },
     { key = 'jb_cat_quality', group = 'Drogues & labos', section = 'Catalyseur', label = 'Bonus de qualité (0-1)', type = 'number', default = 0.12, min = 0, max = 0.5, step = 0.01 },
     { key = 'jb_cat_factor', group = 'Drogues & labos', section = 'Catalyseur', label = 'Risque d\'accident avec catalyseur (×)', type = 'number', default = 0.5, min = 0, max = 1, step = 0.05, hint = '0 = aucun risque.' },
-    { key = 'jb_lvl_enabled', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveaux activés', type = 'bool', default = true, hint = 'XP à chaque fabrication ; le niveau améliore la qualité, réduit les accidents et débloque les recettes.' },
+    { key = 'jb_lvl_enabled', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveaux activés', type = 'bool', default = true, hint = 'XP à chaque fabrication ; le niveau améliore la qualité, réduit les accidents et débloque les recettes.', easy = false },
     { key = 'jb_lvl_xp', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'XP par lot réussi', type = 'number', default = 10, min = 1, max = 1000, step = 1 },
     { key = 'jb_lvl_base', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'XP du niveau 2 (le niveau n+1 demande Base × n²)', type = 'number', default = 100, min = 10, max = 100000, step = 10 },
     { key = 'jb_lvl_max', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveau maximum', type = 'number', default = 10, min = 1, max = 50, step = 1 },
@@ -190,11 +190,11 @@ Settings.Schema = {
     { key = 'jb_lvl_coke', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveau requis : cocaïne', type = 'number', default = 2, min = 1, max = 50, step = 1 },
     { key = 'jb_lvl_meth', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveau requis : méthamphétamine', type = 'number', default = 3, min = 1, max = 50, step = 1 },
     { key = 'jb_lvl_opium', group = 'Drogues & labos', section = 'Niveaux de laborantin', label = 'Niveau requis : opium / héroïne', type = 'number', default = 2, min = 1, max = 50, step = 1 },
-    { key = 'ib_rep_enabled', group = 'Drogues & labos', section = 'Réputation de dealer', label = 'Réputation de dealer activée', type = 'bool', default = true, hint = 'Chaque unité vendue dans la rue rapporte de la réputation ; chaque niveau améliore l\'acceptation et le prix. Commande joueur : /dealer.' },
+    { key = 'ib_rep_enabled', group = 'Drogues & labos', section = 'Réputation de dealer', label = 'Réputation de dealer activée', type = 'bool', default = true, hint = 'Chaque unité vendue dans la rue rapporte de la réputation ; chaque niveau améliore l\'acceptation et le prix. Commande joueur : /dealer.', easy = false },
     { key = 'ib_rep_unit', group = 'Drogues & labos', section = 'Réputation de dealer', label = 'Réputation par unité vendue', type = 'number', default = 1, min = 0, max = 100, step = 1 },
     { key = 'ib_rep_accept', group = 'Drogues & labos', section = 'Réputation de dealer', label = 'Acceptation en plus par niveau (%)', type = 'number', default = 4, min = 0, max = 20, step = 1 },
     { key = 'ib_rep_price', group = 'Drogues & labos', section = 'Réputation de dealer', label = 'Prix en plus par niveau (0-1)', type = 'number', default = 0.04, min = 0, max = 0.3, step = 0.01 },
-    { key = 'ib_zone_enabled', group = 'Drogues & labos', section = 'Quartiers (saturation et chaleur)', label = 'Quartiers activés', type = 'bool', default = true, hint = 'Vendre beaucoup au même endroit sature le secteur (prix en baisse) et le rend chaud (alertes, refus) : il faut bouger.' },
+    { key = 'ib_zone_enabled', group = 'Drogues & labos', section = 'Quartiers (saturation et chaleur)', label = 'Quartiers activés', type = 'bool', default = true, hint = 'Vendre beaucoup au même endroit sature le secteur (prix en baisse) et le rend chaud (alertes, refus) : il faut bouger.', easy = false },
     { key = 'ib_zone_cell', group = 'Drogues & labos', section = 'Quartiers (saturation et chaleur)', label = 'Taille d\'un secteur (m)', type = 'number', default = 300, min = 50, max = 2000, step = 10 },
     { key = 'ib_zone_sat', group = 'Drogues & labos', section = 'Quartiers (saturation et chaleur)', label = 'Saturation par unité vendue', type = 'number', default = 4, min = 0, max = 50, step = 1 },
     { key = 'ib_zone_satdecay', group = 'Drogues & labos', section = 'Quartiers (saturation et chaleur)', label = 'Retombée de la saturation (par minute)', type = 'number', default = 3, min = 0, max = 50, step = 1 },
@@ -218,7 +218,7 @@ Settings.Schema = {
     { key = 'gb_hq_cost2', group = 'Gangs', section = 'QG de gang', label = 'Coût du niveau 2 ($)', type = 'number', default = 25000, min = 0, max = 100000000, step = 1000 },
     { key = 'gb_hq_cost3', group = 'Gangs', section = 'QG de gang', label = 'Coût du niveau 3 ($)', type = 'number', default = 60000, min = 0, max = 100000000, step = 1000 },
     { key = 'gb_hq_cost4', group = 'Gangs', section = 'QG de gang', label = 'Coût du niveau 4 ($)', type = 'number', default = 120000, min = 0, max = 100000000, step = 1000 },
-    { key = 'gb_raid_enabled', group = 'Gangs', section = 'Raids de QG', label = 'Raids de QG activés', type = 'bool', default = true, hint = 'Un gang rival tient la zone du QG sans défenseur et vole une part de l\'argent sale.' },
+    { key = 'gb_raid_enabled', group = 'Gangs', section = 'Raids de QG', label = 'Raids de QG activés', type = 'bool', default = true, hint = 'Un gang rival tient la zone du QG sans défenseur et vole une part de l\'argent sale.', easy = false },
     { key = 'gb_raid_hold', group = 'Gangs', section = 'Raids de QG', label = 'Temps à tenir (secondes)', type = 'number', default = 90, min = 15, max = 1800, step = 5 },
     { key = 'gb_raid_radius', group = 'Gangs', section = 'Raids de QG', label = 'Rayon de la zone (m)', type = 'number', default = 12.0, min = 3, max = 100, step = 1 },
     { key = 'gb_raid_max', group = 'Gangs', section = 'Raids de QG', label = 'Durée maximale d\'un raid (secondes)', type = 'number', default = 600, min = 60, max = 3600, step = 30 },
@@ -243,4 +243,26 @@ Settings.Schema = {
     { key = 'discord_cat_labs', group = 'Discord', section = 'Alertes Discord', label = 'Laboratoires : accidents graves (incendie, explosion)', type = 'bool', default = true },
     { key = 'discord_digest', group = 'Discord', section = 'Résumé quotidien', label = 'Résumé quotidien de l\'activité', type = 'bool', default = false, hint = 'Un message par jour avec les chiffres du jour (ventes, saisies, laboratoires, gangs).' },
     { key = 'discord_digest_hour', group = 'Discord', section = 'Résumé quotidien', label = 'Heure du résumé (heure du serveur)', type = 'number', default = 20, min = 0, max = 23, step = 1 },
+    { key = 'game_mode', group = 'Serveur', section = 'Mode de jeu', label = 'Mode de jeu du serveur', type = 'select', default = 'difficile', options = { { 'difficile', 'Difficile : systèmes complets' }, { 'facile', 'Facile : systèmes simplifiés' } }, hint = 'Un seul réglage qui règle d\'un coup des dizaines de systèmes : table de traitement et accidents au labo, tablettes, intoxication, quartiers, raids, guerres… Les réglages détaillés restent prioritaires sur le mode.' },
+    { key = 'ib_tablets_required', group = 'Drogues & labos', section = 'Tablettes', label = 'Tablettes obligatoires (blanchiment, Go Fast, dealers)', type = 'bool', default = true, hint = 'Désactivé : les points qui exigent une tablette sont visibles et utilisables par tout le monde.', easy = false },
 }
+
+-- ─── Mode de jeu : valeur active d'un réglage = réglage modifié, sinon valeur `easy` si le mode est « facile », sinon valeur par défaut ───
+local function sameValue(a, b)
+    if type(a) ~= type(b) then return false end
+    if type(a) == 'table' then if #a ~= #b then return false end for i = 1, #a do if a[i] ~= b[i] then return false end end return true end
+    return a == b
+end
+-- def = { [clé] = entrée du schéma }, over = réglages modifiés → surcharges ACTIVES (réglages modifiés + préréglage du mode)
+function Settings.ActiveOverrides(def, over)
+    local out = {}
+    for k, v in pairs(over) do out[k] = v end
+    local mode = over.game_mode
+    if mode == nil and def.game_mode then mode = def.game_mode.default end
+    if mode == 'facile' then
+        for k, d in pairs(def) do
+            if d.easy ~= nil and out[k] == nil and not sameValue(d.easy, d.default) then out[k] = d.easy end
+        end
+    end
+    return out
+end

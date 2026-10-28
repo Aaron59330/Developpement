@@ -3,6 +3,7 @@ local Uses = {}      -- [eid:pi] = { uses, resetAt } épuisement global d'un poi
 
 -- Item « tablette » exigé par un point (blanchiment…) ; nil si le point n'en exige pas
 function IB.pointRevealItem(p)
+    if (Config.Tablets or {}).Required == false then return nil end
     local r = p and (p.kind == 'launder' or p.kind == 'sell') and p.reveal
     if r and r.enabled then return (r.item and r.item ~= '') and r.item or (p.kind == 'sell' and 'dealer_tablet' or 'launder_tablet') end
     return nil

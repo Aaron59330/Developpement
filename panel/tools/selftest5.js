@@ -20,6 +20,8 @@ const srv = http.createServer(app).listen(0, async () => {
     const des = d => { const x = C.validateDoc('theme', { ...th, Design: d }); return x.error ? x.error : (x.value || x.payload || x).Design; };
     ok(des('pinata') === 'pinata' && des('ancien') === 'ancien' && des('arcade') === 'arcade', 'style des interfaces : Piñata, ancien et Arcade acceptés');
     ok(des('autre') === 'arcade' && des(undefined) === 'arcade', 'style inconnu : retour à Arcade');
+    const SET = require('../lib/settings'); const sch = SET.sanitizeSchema([{ key: 'game_mode', type: 'select', group: 'Serveur', default: 'difficile', options: [['difficile', 'D'], ['facile', 'F']] }, { key: 'cap', type: 'number', group: 'Gangs', default: 120, easy: 60 }, { key: 'bad', type: 'number', group: 'Gangs', default: 1, easy: 'x' }, { key: 'flag', type: 'bool', group: 'Gangs', default: true, easy: false }]);
+    ok(sch[1].easy === 60 && sch[3].easy === false && sch[2].easy === undefined && sch[0].easy === undefined, 'schéma : la valeur « mode facile » est conservée seulement si son type est bon');
   } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
   console.log(process.exitCode ? '' : `\n${n} vérifications OK`); srv.close(); setTimeout(() => process.exit(process.exitCode || 0), 200);
 });

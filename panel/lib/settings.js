@@ -19,7 +19,7 @@ function validate(schema, values) {
 function sanitizeSchema(arr) {
   if (!Array.isArray(arr) || arr.length > 300) return null; const out = [];
   for (const d of arr) { if (!d || typeof d.key !== 'string' || !/^[a-z0-9_]{1,60}$/.test(d.key) || !['bool', 'number', 'select', 'text', 'list'].includes(d.type)) return null;
-    out.push({ key: d.key, group: String(d.group || 'Général').slice(0, 40), section: d.section ? String(d.section).slice(0, 60) : undefined, label: String(d.label || d.key).slice(0, 120), type: d.type, default: d.default === undefined ? (d.type === 'list' ? [] : null) : d.default, min: d.min, max: d.max, step: d.step, options: Array.isArray(d.options) ? d.options.slice(0, 40).map(o => [String(o[0]), String(o[1])]) : undefined, hint: d.hint ? String(d.hint).slice(0, 300) : undefined }); }
+    out.push({ key: d.key, group: String(d.group || 'Général').slice(0, 40), section: d.section ? String(d.section).slice(0, 60) : undefined, label: String(d.label || d.key).slice(0, 120), type: d.type, default: d.default === undefined ? (d.type === 'list' ? [] : null) : d.default, min: d.min, max: d.max, step: d.step, options: Array.isArray(d.options) ? d.options.slice(0, 40).map(o => [String(o[0]), String(o[1])]) : undefined, hint: d.hint ? String(d.hint).slice(0, 300) : undefined, easy: d.easy !== undefined && d.type !== 'list' && typeof d.easy === typeof d.default ? d.easy : undefined }); }
   return out;
 }
 module.exports = { validate, sanitizeSchema };

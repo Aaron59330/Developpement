@@ -4,6 +4,7 @@
 -- Ajouter un réglage : une ligne dans pickax_settings/config.lua (Settings.Schema) + une ligne ci-dessous.
 local MAP = {
     { 'ib_pedsales', 'PedSales.Enabled' },
+    { 'ib_tablets_required', 'Tablets.Required' },
     { 'ib_seize_enabled', 'Seizure.Enabled' },
     { 'ib_seize_distance', 'Seizure.Distance' },
     { 'ib_seize_cooldown', 'Seizure.Cooldown' },

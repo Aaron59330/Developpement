@@ -142,7 +142,23 @@ PAGES.settings = async function () {
   drawRail(); drawMain();
   return el('div', {}, head('Réglages du serveur', search, el('button', { class: 'btn s', onclick: exportJson, title: 'Télécharge tes réglages modifiés (sauvegarde ou copie vers un autre serveur)' }, el('span', {}, 'Exporter')), el('button', { class: 'btn s', onclick: () => file.click() }, el('span', {}, 'Importer')), file),
     el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Un réglage ne change rien tant que tu ne l’as pas modifié : les valeurs d’origine de ta base restent en vigueur. Les changements sont appliqués en direct sur le serveur, sans redémarrage.'),
-    el('div', { class: 'setlayout' }, rail, main), bar);
+    modeCard(), el('div', { class: 'setlayout' }, rail, main), bar);
+  // ── Mode de jeu : facile / difficile en un clic ──
+  function modeCard() {
+    if (!by.game_mode) return null;
+    const easy = schema.filter(d => d.easy !== undefined && norm(d.easy) !== norm(d.default));
+    const show = (d, v) => d.type === 'bool' ? (v ? 'Activé' : 'Désactivé') : String(v);
+    const now = cur.game_mode === 'facile' ? 'facile' : 'difficile';
+    const choice = (v, title, desc) => el('button', { class: 'opt' + (now === v ? ' on' : ''), onclick: async () => { if (now === v) return; cur.game_mode = v; await save(); render(); } },
+      el('div', { class: 'opt-t' }, el('b', {}, title), now === v ? el('span', { class: 'pill acc' }, 'Actuel') : null), el('small', { class: 'muted' }, desc));
+    return el('div', { class: 'card' }, el('h2', {}, 'Mode de jeu'),
+      el('p', { class: 'muted', style: 'margin:-6px 0 12px' }, 'Un seul choix pour régler la difficulté de toute la base. Ensuite, tu peux ajuster n’importe quel système dans les catégories ci-dessous : un réglage modifié passe toujours avant le mode.'),
+      el('div', { class: 'opts' },
+        choice('difficile', 'Difficile · systèmes complets', 'Table de traitement en plusieurs étapes avec accidents et niveaux de laborantin, tablettes obligatoires, intoxication, réputation et quartiers pour la vente de rue, raids de QG, guerres de zone.'),
+        choice('facile', 'Facile · systèmes simplifiés', 'Fabrication au labo avec une simple barre de progression, ni accident ni intoxication, aucune tablette exigée, ventes de rue plus faciles, captures de territoires rapides, ni raids ni guerres de zone.')),
+      easy.length ? el('details', { style: 'margin-top:12px' }, el('summary', { class: 'muted', style: 'cursor:pointer' }, `Voir ce que change le mode facile (${easy.length} réglages)`),
+        el('div', { style: 'margin-top:8px;display:grid;gap:4px' }, easy.map(d => el('div', { class: 'row', style: 'justify-content:space-between;gap:12px;font-size:13px' }, el('span', {}, `${d.group} · ${d.label}`), el('span', { class: 'muted' }, `${show(d, d.default)} → `, el('b', {}, show(d, d.easy))))))) : null);
+  }
 };
 
 // ═══════════════ PERSONNALISATION DU PANEL (design, thème, couleur principale — propre à chaque compte) ═══════════════

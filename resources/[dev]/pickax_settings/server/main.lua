@@ -60,9 +60,10 @@ local function persist()
     SetTimeout(2000, function() saveTimer = false SaveResourceFile(SELF, FILE, json.encode(over), -1) end)
 end
 
+local function active() return Settings.ActiveOverrides(DEF, over) end     -- réglages modifiés + préréglage du mode de jeu
 local function effective()
-    local all = {}
-    for k, def in pairs(DEF) do local v = over[k] if v == nil then v = def.default end all[k] = v end
+    local all, ov = {}, active()
+    for k, def in pairs(DEF) do local v = ov[k] if v == nil then v = def.default end all[k] = v end
     return all
 end
 
@@ -73,24 +74,24 @@ local function clientView(tbl)
     return o
 end
 local function broadcast(target)
-    TriggerClientEvent('pickax_settings:sync', target or -1, clientView(effective()), clientView(over))
+    TriggerClientEvent('pickax_settings:sync', target or -1, clientView(effective()), clientView(active()))
 end
 
 local features = {}   -- applicateurs (annonces, redémarrages, maintenance) : réévalués à chaque changement
 local function changed(keys)
-    TriggerEvent('pickax_settings:changed', effective(), over, keys)
+    TriggerEvent('pickax_settings:changed', effective(), active(), keys)
     broadcast()
     for _, f in ipairs(features) do pcall(f) end
 end
 
-local function get(key) local def = DEF[key] if not def then return nil end local v = over[key] if v == nil then return def.default end return v end
+local function get(key) local def = DEF[key] if not def then return nil end local v = active()[key] if v == nil then return def.default end return v end
 exports('Get', get)
 Settings.Get = get   -- utilisé par server/gameplay.lua
 exports('GetAll', effective)
-exports('Overrides', function() return over end)
+exports('Overrides', function() return active() end)
 exports('Schema', function()
     local out = {}
-    for i, k in ipairs(ORDER) do local d = DEF[k] out[i] = { key = d.key, group = d.group, label = d.label, type = d.type, default = d.default, min = d.min, max = d.max, step = d.step, options = d.options, hint = d.hint, section = d.section } end
+    for i, k in ipairs(ORDER) do local d = DEF[k] out[i] = { key = d.key, group = d.group, label = d.label, type = d.type, default = d.default, min = d.min, max = d.max, step = d.step, options = d.options, hint = d.hint, section = d.section, easy = d.easy } end
     return out
 end)
 
