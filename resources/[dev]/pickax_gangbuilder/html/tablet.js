@@ -115,7 +115,27 @@ const Tablet = {
       <div class="tb-g2"><div class="tb-card"><h3>${ti('bolt', 15)} À surveiller</h3>${alerts.join('') || '<div class="tb-empty">Rien d\'urgent pour le moment.</div>'}</div>
         <div class="tb-card"><h3>${ti('users', 15)} En ligne (${me.online.length})</h3>${me.online.map(m => `<div class="tb-row"><div class="g"><b>${esc(m.name)}</b></div><span class="tb-chip">${esc(m.gradeLabel)}</span></div>`).join('') || '<div class="tb-empty">Personne.</div>'}</div></div>
       <div class="tb-card"><h3>${ti('news', 15)} Dernières actualités</h3>${this.newsList(d.news.slice(0, 4))}</div>
+      ${this.hqCard()}
       ${me.isBoss ? `<div class="tb-card"><h3>${ti('flag', 15)} Logo du gang</h3><div class="tb-form"><label>Adresse https d'une image (carrée de préférence)<input data-sk="logo" value="${esc(this.form.logo != null ? this.form.logo : (me.logo || ''))}" maxlength="300" placeholder="https://…/logo.png"></label></div><div style="margin-top:12px;display:flex;gap:10px"><button class="tb-btn pri" data-a="logoSave">Enregistrer</button>${me.logo ? '<button class="tb-btn d" data-a="logoDel">Retirer</button>' : ''}</div></div>` : ''}`;
+  },
+
+  // QG du gang : niveau, avantages, amélioration
+  hqCard() {
+    const h = this.d.hq, me = this.d.me; if (!h || !h.enabled) return '';
+    const pct = v => `+${Math.round((v - 1) * 100)} %`;
+    return `<div class="tb-card"><h3>${ti('flag', 15)} QG du gang · niveau ${h.level} / ${h.max}</h3>
+      ${h.hasHQ ? '' : '<div class="tb-empty">Ton gang n\'a pas de coffre : crée un point « Coffre » dans le builder pour avoir un QG.</div>'}
+      <div class="tb-row"><div class="g"><b>Avantages actuels</b><small>Revenu des territoires ${pct(h.income)} · protection après capture ${pct(h.protection)} · pillage d'un raid ×${h.steal}</small></div></div>
+      ${h.upgrade ? `<div class="tb-row"><div class="g"><b>Niveau ${h.level + 1}</b><small>Revenu ${pct(h.upgrade.income)} · protection ${pct(h.upgrade.protection)} · pillage ×${h.upgrade.steal}</small></div>${me.isBureau ? `<button class="tb-btn pri" data-a="hqUp">Améliorer (${money(h.upgrade.cost)} · argent ${h.upgrade.account})</button>` : '<small style="color:var(--muted)">Réservé au bureau</small>'}</div>` : '<div class="tb-empty">QG au niveau maximum.</div>'}</div>`;
+  },
+
+  // Raids de QG : cibles et raid en cours
+  raidCard() {
+    const h = this.d.hq, me = this.d.me; if (!h || !h.enabled || !h.raidEnabled) return '';
+    const r = h.raid;
+    const cur = r ? `<div class="tb-row"><span class="tb-chip bad">Raid en cours</span><div class="g"><b>${esc(r.attackerLabel)} → QG de ${esc(r.targetLabel)}</b><small>Prise ${Math.min(100, Math.round(r.progress / r.hold * 100))} % · reste ${this.cd(r.left)}</small></div><button class="tb-btn" data-a="gps" data-x="${r.coords.x}" data-y="${r.coords.y}">${ti('gps', 14)} GPS</button></div>` : '';
+    return `<div class="tb-card"><h3>${ti('skull', 15)} Raid de QG</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:10px">Tiens la zone du QG d'un rival ${h.hold} s sans qu'aucun défenseur n'y soit : tu voles une part de son argent sale.</div>${cur}
+      ${(h.targets || []).map(t => `<div class="tb-row"><i style="width:12px;height:12px;border-radius:50%;background:${esc(t.color || '#6b7280')};flex:none"></i><div class="g"><b>${esc(t.label)}</b><small>QG niveau ${t.level} · ${t.online} en ligne${!t.can && h.reasons && h.reasons[t.why] ? ' · ' + esc(h.reasons[t.why]) : ''}</small></div>${me.isBureau ? `<button class="tb-btn d" data-a="hqRaid" data-v="${esc(t.name)}" ${t.can ? '' : 'disabled'}>Raider</button>` : ''}</div>`).join('') || '<div class="tb-empty">Aucun QG rival.</div>'}</div>`;
   },
 
   newsList(list) {
@@ -221,7 +241,7 @@ const Tablet = {
         <label>Mise ($ sale, max ${W.maxStake})<input type="number" min="0" max="${W.maxStake}" step="500" data-sk="stake" value="${f.stake}"></label></div>
         <div style="margin-top:14px;display:flex;gap:12px;align-items:center"><button class="tb-btn pri" data-a="warSend" ${f.target ? '' : 'disabled'}>Envoyer le défi</button><span style="color:var(--muted);font-size:12.5px">Le gang a 5 min pour répondre. Les mises sont prélevées sur les trésoreries et gagnées en totalité par le vainqueur (égalité = remboursées).</span></div>` : '<div class="tb-empty">Seul le bureau du gang peut lancer un défi.</div>'}</div>`;
     const hist = `<div class="tb-card"><h3>${ti('log', 15)} Dernières guerres</h3>${W.history.map(h => `<div class="tb-row"><span class="tb-chip ${h.winner === me.name ? 'ok' : h.winner ? 'bad' : ''}">${h.winner === me.name ? 'Victoire' : h.winner ? 'Défaite' : 'Égalité'}</span><div class="g"><b>${esc(h.aLabel)} ${h.killsA} – ${h.killsB} ${esc(h.bLabel)}</b><small>Mise ${money(h.stake)} · objectif ${h.target} kills</small></div></div>`).join('') || '<div class="tb-empty">Aucune guerre jouée.</div>'}</div>`;
-    return this.head('Guerres', 'Défie un autre gang : premier à N kills ou plus de kills au bout du temps') + cur + propose + hist;
+    return this.head('Guerres', 'Défie un autre gang : premier à N kills ou plus de kills au bout du temps') + cur + propose + this.raidCard() + hist;
   },
 
   /* ───────── Classement ───────── */
@@ -263,6 +283,8 @@ const Tablet = {
       }
       case 'logoSave': { const r = await rpc('tablet:setLogo', String(this.form.logo != null ? this.form.logo : (this.d.me.logo || ''))); if (done(r, 'Logo enregistré')) { this.form.logo = null; await this.refresh(); } return; }
       case 'logoDel': { const r = await rpc('tablet:setLogo', ''); if (done(r, 'Logo retiré')) { this.form.logo = null; await this.refresh(); } return; }
+      case 'hqUp': { if (!await confirmBox('Améliorer le QG ?', 'Le coût est prélevé sur la trésorerie du gang.', 'Améliorer')) return; const r = await rpc('tablet:hqUpgrade'); if (done(r, r && r.ok ? `QG niveau ${r.level}` : '')) await this.refresh(); return; }
+      case 'hqRaid': { if (!await confirmBox('Lancer le raid ?', 'Les deux gangs sont prévenus et le QG est visible sur la carte.', 'Raider')) return; const r = await rpc('tablet:hqRaid', el.dataset.v); if (done(r, 'Raid lancé')) await this.refresh(); return; }
       case 'warYes': { const r = await rpc('tablet:warRespond', Number(el.dataset.id), true); if (done(r, 'Guerre acceptée')) await this.refresh(); return; }
       case 'warNo': { const r = await rpc('tablet:warRespond', Number(el.dataset.id), false); if (done(r, 'Fait')) await this.refresh(); return; }
     }

@@ -135,6 +135,31 @@ Config.Conflicts = {
 -- Un colis apparaît dans une zone. Le premier gang qui le prend doit RESTER dans la zone `Hold` secondes avec le colis
 -- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
 -- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
+-- ── QG de gang : le coffre du gang (point « Coffre ») est son QG. Le bureau l'améliore avec la trésorerie ; un gang rival peut le RAIDER pour piller de l'argent sale ──
+Config.HQ = {
+    Enabled = true,
+    UpgradeAccount = 'dirty',   -- compte de la trésorerie qui paie l'amélioration : 'dirty' | 'money'
+    -- income : revenu des territoires du gang · protection : durée de protection après capture · steal : part de l'argent sale qu'un raid peut piller (× la valeur de base)
+    Levels = {
+        { },                                                                 -- niveau 1 : valeurs de base
+        { cost = 25000,  income = 1.10, protection = 1.15, steal = 0.80 },   -- niveau 2
+        { cost = 60000,  income = 1.20, protection = 1.30, steal = 0.60 },   -- niveau 3
+        { cost = 120000, income = 1.35, protection = 1.50, steal = 0.40 },   -- niveau 4
+    },
+    Raid = {
+        Enabled = true,
+        HoldSeconds = 90,       -- temps à tenir près du coffre, sans défenseur dans la zone
+        Radius = 12.0,          -- rayon de la zone du QG
+        MaxSeconds = 600,       -- durée maximale d'un raid
+        MinAttackers = 2, MinDefenders = 1,
+        StealPercent = 10,      -- % de l'argent sale de la trésorerie volé en cas de succès (× niveau du QG)
+        MinDirty = 2000,        -- le QG doit avoir au moins cette somme (sinon rien à piller)
+        MaxSteal = 20000,
+        Cooldown = 3600,        -- délai avant qu'un QG puisse être raidé de nouveau (secondes)
+        AttackerCooldown = 1800,-- délai entre deux raids lancés par le même gang
+    },
+}
+
 -- ── Saisons de gangs : classement par points (= réputation gagnée pendant la saison), récompenses aux meilleurs, remise à zéro à la fin ──
 Config.Season = {
     Enabled = true,

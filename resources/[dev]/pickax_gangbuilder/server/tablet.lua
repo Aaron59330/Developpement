@@ -385,7 +385,7 @@ local function snapshot(src)
         territories = terr, territoryCount = mine,
         quests = questList(gang.name), questsEnabled = T().Enabled,
         wars = { enabled = W.Enabled, current = current, incoming = incoming or false, history = history, rivals = rivals, targets = W.Targets, durations = W.Durations, maxStake = W.MaxStake, cooldown = W.Cooldown },
-        ranking = ranking, objective = obj, logs = logs, news = news, season = GB.seasonInfo and GB.seasonInfo(gang.name) or { enabled = false },
+        ranking = ranking, objective = obj, logs = logs, news = news, season = GB.seasonInfo and GB.seasonInfo(gang.name) or { enabled = false }, hq = GB.hqInfo and GB.hqInfo(gang.name) or { enabled = false },
         turf = { enabled = (Config.TurfWar or {}).Enabled and true or false, prep = (Config.TurfWar or {}).PrepSeconds, duration = (Config.TurfWar or {}).Duration, reasons = GB.TurfReasons },
         tribute = { enabled = (Config.Tribute or {}).Enabled and true or false, current = GB.tributeState and GB.tributeState() or nil, history = GB.tributeHistory and GB.tributeHistory(10) or {} },
         resets = { daily = 86400 - now % 86400, weekly = (((8 - tonumber(os.date('!%w'))) % 7 == 0 and 7 or (8 - tonumber(os.date('!%w'))) % 7) * 86400) - now % 86400 },
@@ -399,6 +399,25 @@ ESX.RegisterServerCallback('gangbuilder:tablet:turfDeclare', function(src, cb, i
     if not bureau(gang, grade) then return cb(fail('Réservé au bureau du gang')) end
     local ok, why = GB.startTurfWar(src, tonumber(id), gang.name)
     if not ok then return cb(fail(GB.TurfReasons[why] or 'Impossible')) end
+    cb({ ok = true })
+end)
+
+-- QG : amélioration (bureau) et raid d'un QG rival (bureau)
+ESX.RegisterServerCallback('gangbuilder:tablet:hqUpgrade', function(src, cb)
+    local gang, grade = GB.gangOf(src)
+    if not gang then return cb(fail('Tu n\'es dans aucun gang')) end
+    if not bureau(gang, grade) then return cb(fail('Réservé au bureau du gang')) end
+    local ok, r = GB.hqUpgrade(gang.name)
+    if not ok then return cb(fail(r == 'max' and 'Ton QG est au niveau maximum' or r == 'funds' and 'Pas assez d\'argent dans la trésorerie' or 'QG désactivé')) end
+    cb({ ok = true, level = r })
+end)
+
+ESX.RegisterServerCallback('gangbuilder:tablet:hqRaid', function(src, cb, target)
+    local gang, grade = GB.gangOf(src)
+    if not gang then return cb(fail('Tu n\'es dans aucun gang')) end
+    if not bureau(gang, grade) then return cb(fail('Réservé au bureau du gang')) end
+    local ok, why = GB.hqStartRaid(tostring(target), gang.name)
+    if not ok then return cb(fail(GB.HqReasons[why] or 'Impossible')) end
     cb({ ok = true })
 end)
 

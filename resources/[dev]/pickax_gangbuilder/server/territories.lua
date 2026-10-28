@@ -109,7 +109,7 @@ local function capture(t, gangName)
     local previous = t.owner
     t.owner, t.captured_at = gangName, now
     t.level = previous and math.max(1, levelOf(t) - math.floor(tonumber(T.LevelLoss) or 1)) or 1   -- le territoire perd des niveaux quand il change de main
-    t.protected_until = now + math.floor(val(t, 'protection', T.ProtectionMinutes) * lvlMul(t, 'protection')) * 60
+    t.protected_until = now + math.floor(val(t, 'protection', T.ProtectionMinutes) * lvlMul(t, 'protection') * (GB.hqMul and GB.hqMul(gangName, 'protection') or 1.0)) * 60
     t.last_income = now
     MySQL.update('UPDATE gangbuilder_territories SET owner = ?, captured_at = ?, protected_until = ?, last_income = ?, level = ? WHERE id = ?', { gangName, now, t.protected_until, now, t.level, t.id })
     GB.addRep(gangName, Config.Rep.PerCapture)
@@ -244,7 +244,7 @@ CreateThread(function()
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                     elseif now - t.last_income >= interval then
-                        local reward = math.floor(val(t, 'reward', T.Reward) * lvlMul(t, 'income'))
+                        local reward = math.floor(val(t, 'reward', T.Reward) * lvlMul(t, 'income') * (GB.hqMul and GB.hqMul(t.owner, 'income') or 1.0))
                         t.last_income = now
                         MySQL.update('UPDATE gangbuilder_territories SET last_income = ? WHERE id = ?', { now, id })
                         if reward > 0 and GB.treasuryAdd(t.owner, T.RewardAccount == 'money' and 'money' or 'dirty', reward) then
