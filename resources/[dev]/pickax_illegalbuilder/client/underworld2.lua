@@ -72,3 +72,44 @@ CreateThread(function()
         end
     end
 end)
+
+-- évasion : maintenir E au point d'évasion pendant la durée demandée par le serveur
+local escaping = false
+CreateThread(function()
+    while true do
+        local E = Config.Escape or {}
+        if not jailed or E.Enabled == false or escaping then Wait(1000) else
+            Wait(0)
+            local p = GetEntityCoords(PlayerPedId())
+            for _, s in ipairs(E.Spots or {}) do
+                local c = s.coords
+                if #(p - vector3(c.x, c.y, c.z)) < 12.0 then
+                    DrawMarker(1, c.x + 0.0, c.y + 0.0, c.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 239, 68, 68, 150, false, false, 2, false, nil, nil, false)
+                    if #(p - vector3(c.x, c.y, c.z)) < 2.0 then
+                        text(0.86, ('[G] Tenter de s\'évader — %s'):format(s.label or 'issue'), 239, 68, 68)
+                        if IsControlJustReleased(0, 47) then
+                            ESX.TriggerServerCallback('illegalbuilder:escape:start', function(r)
+                                if not r or not r.ok then return Notify((r and r.error) or 'Impossible', 'error') end
+                                escaping = true
+                                local endAt, ok = GetGameTimer() + r.seconds * 1000, true
+                                TaskStartScenarioInPlace(PlayerPedId(), 'WORLD_HUMAN_WELDING', 0, true)
+                                while GetGameTimer() < endAt do
+                                    Wait(0)
+                                    local pp = GetEntityCoords(PlayerPedId())
+                                    if #(pp - vector3(c.x, c.y, c.z)) > 3.0 or not IsControlPressed(0, 47) then ok = false break end
+                                    text(0.9, ('Évasion… %d s (reste sur place, maintiens G)'):format(math.ceil((endAt - GetGameTimer()) / 1000)), 255, 255, 255)
+                                end
+                                ClearPedTasks(PlayerPedId())
+                                if not ok then TriggerServerEvent('illegalbuilder:server:escapeCancel') escaping = false return Notify('Tentative interrompue.', 'error') end
+                                ESX.TriggerServerCallback('illegalbuilder:escape:finish', function(f)
+                                    escaping = false
+                                    Notify((f and f.ok) and 'Tu t\'es évadé ! Les gardes sont à tes trousses.' or ((f and f.error) or 'Échec'), (f and f.ok) and 'success' or 'error')
+                                end)
+                            end)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)

@@ -562,6 +562,7 @@ CreateThread(function()
     pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS jobbuilder_bracelets (id INT AUTO_INCREMENT PRIMARY KEY, job_name VARCHAR(60) NOT NULL, identifier VARCHAR(80) NOT NULL,
         name VARCHAR(100) NOT NULL, placed_by VARCHAR(100) NULL, placed_at INT NOT NULL, zone_x DOUBLE NULL, zone_y DOUBLE NULL, zone_z DOUBLE NULL, zone_r DOUBLE NULL,
         last_x DOUBLE NULL, last_y DOUBLE NULL, last_z DOUBLE NULL, last_at INT NULL, UNIQUE KEY uq_ident (identifier), INDEX (job_name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+    pcall(MySQL.query.await, 'ALTER TABLE jobbuilder_bracelets ADD COLUMN expires_at INT NULL')   -- bracelets de liberté sous caution : fin automatique
 end)
 
 local function bracelet(id, jobName)
@@ -733,6 +734,27 @@ AddEventHandler('esx:playerLoaded', function(src, xPlayer)
         local n = MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE identifier = ?', { xPlayer.identifier }) or 0
         if n > 0 then JBNotifyClient(src, '~r~Tu portes un bracelet électronique : ta position est suivie par la police.') end
     end)
+end)
+
+-- Bracelet posé sans agent (liberté sous caution) : durée en heures, zone facultative { x, y, r }
+exports('AutoBracelet', function(targetSrc, jobName, hours, byLabel, zone)
+    local t = ESX.GetPlayerFromId(tonumber(targetSrc))
+    if not t or not JB.Jobs[jobName] then return false end
+    if (MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE identifier = ?', { t.identifier }) or 0) > 0 then return false end
+    local first, last = identity(t)
+    local z = type(zone) == 'table' and zone or {}
+    MySQL.insert.await('INSERT INTO jobbuilder_bracelets (job_name, identifier, name, placed_by, placed_at, zone_x, zone_y, zone_r, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        { jobName, t.identifier, first .. ' ' .. last, byLabel or 'Liberté sous caution', os.time(), z.x, z.y, z.r, os.time() + math.max(1, math.floor(tonumber(hours) or 24)) * 3600 })
+    JBNotifyClient(t.source, '~r~Tu es libre sous caution et portes un bracelet électronique : ne quitte pas ta zone.')
+    return true
+end)
+
+-- Fin automatique des bracelets de caution
+CreateThread(function()
+    while true do
+        Wait(60000)
+        pcall(MySQL.update.await, 'DELETE FROM jobbuilder_bracelets WHERE expires_at IS NOT NULL AND expires_at < ?', { os.time() })
+    end
 end)
 
 exports('HasBracelet', function(identifier)

@@ -184,6 +184,44 @@ Config.Prison = {
     ArrestBonus = { Enabled = true, PerPrior = 150, Max = 1500, Account = 'bank' },   -- prime au policier qui arrête un récidiviste
 }
 
+-- Évasion : un détenu peut tenter de s'échapper à un point précis de la prison (objet consommé, durée, alerte police). Repris, il retrouve son reste de peine + une pénalité.
+-- Les points doivent rester à moins de 10 m de ConfigJail.LieuJail (pickax_core), sinon le détenu est ramené avant.
+Config.Escape = {
+    Enabled = true,
+    Item = 'lockpick',            -- objet consommé à la tentative ('' = aucun)
+    Seconds = 45,                 -- durée de la tentative (le joueur doit rester sur place)
+    MinCops = 0,                  -- policiers connectés nécessaires pour tenter
+    PenaltyMinutes = 10,          -- peine supplémentaire à la reprise
+    ForgetMinutes = 45,           -- au-delà, l'évadé n'est plus recherché
+    Spots = { { label = 'Grillage du fond', coords = { x = 1648.0, y = 2566.0, z = 45.5 } } },
+    Exit = { x = 1695.0, y = 2535.0, z = 45.6 },   -- où l'évadé se retrouve (hors de la prison)
+}
+
+-- Caution : un proche (ou le détenu) paie pour sortir, avec un bracelet électronique pendant quelques heures. /caution <id>
+Config.Bail = {
+    Enabled = true,
+    PerMinute = 400,              -- $ par minute de peine restante
+    MaxMinutes = 30,              -- au-delà, pas de caution possible
+    Account = 'bank',
+    Society = 'society_police',   -- reçoit la caution ('' = personne)
+    BraceletJob = 'police',       -- service qui reçoit les alertes du bracelet
+    BraceletHours = 12,           -- durée du bracelet
+    ZoneRadius = 300.0,           -- zone autour de la sortie de prison (0 = sans zone)
+    Exit = { x = 1848.0, y = 2586.0, z = 45.7 },
+}
+
+-- Justice : l'avocat plaide pour un détenu client (honoraires acceptés par le client), le juge peut gracier. Les jobs doivent exister dans le builder.
+Config.Justice = {
+    Enabled = true,
+    LawyerJobs = { 'avocat' }, JudgeJobs = { 'juge' },
+    Distance = 6.0,               -- distance avocat ↔ client
+    LawyerReducePercent = 25,     -- part de la peine restante retirée par une plaidoirie (une fois par peine)
+    FeeMin = 100, FeeMax = 20000, -- honoraires
+    OfferSeconds = 60,            -- le client a ce temps pour accepter
+    JudgeMaxPercent = 100,        -- part maximale de la peine qu'un juge peut effacer
+    JudgeCooldown = 30,
+}
+
 -- Informateurs : des PNJ qui vendent des tuyaux (/indic puis /info <sujet>)
 Config.Informants = {
     Enabled = true,

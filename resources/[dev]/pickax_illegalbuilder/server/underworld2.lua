@@ -101,6 +101,7 @@ end)
 -- La prison est celle de pickax_core (players/jail) : même lieu, tenue et minuteur que le /jail du staff. Ici : la peine donnée par la police (avec récidive et prime)
 -- et les travaux qui la réduisent. Aucun second système de prison.
 local worked = {}   -- [identifiant] = { total, reduced, lastWork }
+IB.Escapees = IB.Escapees or {}   -- [identifiant] = { left = secondes de peine restantes, at } : évadés, repris par /emprisonner
 
 local function core(fn, ...)
     if GetResourceState('pickax_core') ~= 'started' then return nil end
@@ -158,6 +159,8 @@ RegisterCommand('emprisonner', function(src, args)
     if not a or a == 0 or not b or b == 0 or dist(GetEntityCoords(a), GetEntityCoords(b)) > (tonumber((Config.Record or {}).Distance) or 6.0) then return IB.notify(src, 'Le suspect est trop loin.', 'error') end
     local priors = IB.priorCount(t.identifier)
     minutes = math.floor(minutes * IB.recidiveMul(priors) + 0.5)
+    local esc = IB.Escapees[t.identifier]
+    if esc then minutes = minutes + IB.escapeExtra(esc.left) IB.Escapees[t.identifier] = nil end   -- évadé repris : reste de peine + pénalité
     local ok, real = IB.jailPlayer(t.source, minutes, officer, reason)
     if not ok then return IB.notify(src, real or 'Impossible', 'error') end
     IB.recordAdd(officer, t, 'jail', ('Peine de %d min : %s'):format(real, reason), 0)

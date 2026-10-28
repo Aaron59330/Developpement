@@ -237,6 +237,17 @@ exports('ReduceJail', function(playerId, seconds)
 	return j.temps
 end)
 
+-- Évasion : le joueur n'est plus retenu par la prison ; renvoie les secondes de peine qu'il lui restait (la ressource appelante les garde pour l'arrestation suivante)
+exports('EscapePlayer', function(playerId)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local j = xPlayer and playersInJail[xPlayer.identifier]
+	if not j then return nil end
+	local left = j.temps
+	playersInJail[xPlayer.identifier] = nil
+	TriggerClientEvent('CorePickax:unjailPlayer', playerId)
+	return left
+end)
+
 exports('UnjailPlayer', function(playerId)
 	local xPlayer = ESX.GetPlayerFromId(playerId)
 	if not xPlayer or not playersInJail[xPlayer.identifier] then return false end

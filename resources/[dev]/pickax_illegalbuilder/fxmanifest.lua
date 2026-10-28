@@ -21,6 +21,7 @@ server_scripts {
     'server/seizure.lua',
     'server/underworld.lua',
     'server/underworld2.lua',
+    'server/underworld3.lua',
     'server/street.lua',
     'server/robbery.lua',
     'server/plants.lua',
