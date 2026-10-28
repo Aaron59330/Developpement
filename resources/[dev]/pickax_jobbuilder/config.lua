@@ -744,6 +744,21 @@ Config.Real = {
 
 -- ─────────────────────────────── Templates de jobs ───────────────────────────────
 -- Chaque template pré-remplit le builder (grades, blip, actions). Tout reste modifiable dans l'UI.
+-- Entreprises de joueurs : /entreprise creer <modèle> <nom> (sans passer par un admin). Le patron gère employés et trésorerie depuis son bureau ; /entreprise dissoudre la ferme (solde reversé).
+Config.Company = {
+    Enabled = true,
+    Command = 'entreprise',
+    Cost = 25000,                 -- frais de création ($, compte bancaire) — modifiable par modèle avec `cost`
+    MaxPerPlayer = 1,
+    Registry = {},                -- optionnel : { { coords = { x = .., y = .., z = .. }, radius = 6.0 } } : lieux où l'on peut fonder une entreprise (vide = partout)
+    Templates = {
+        { id = 'commerce', label = 'Commerce', type = 'custom', actions = { 'invoice' }, cost = 25000, stashSlots = 60, stashWeight = 150,
+          grades = { { name = 'employe', label = 'Employé', salary = 80 }, { name = 'gerant', label = 'Gérant', salary = 140 }, { name = 'patron', label = 'Patron', salary = 0 } } },
+        { id = 'atelier', label = 'Atelier', type = 'custom', actions = { 'invoice' }, cost = 40000, stashSlots = 100, stashWeight = 300,
+          grades = { { name = 'apprenti', label = 'Apprenti', salary = 90 }, { name = 'ouvrier', label = 'Ouvrier', salary = 150 }, { name = 'patron', label = 'Patron', salary = 0 } } },
+    },
+}
+
 Config.JobTypes = {
     police = {
         label = 'Police', blip = { sprite = 60, color = 29, scale = PK_BSF(0.9) },

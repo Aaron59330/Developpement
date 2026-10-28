@@ -461,8 +461,8 @@ ESX.RegisterServerCallback('jobbuilder:catalog', function(src, cb)
     cb({ items = items, vehicles = vehicles, vehicleCategories = (JB.vehicleCategories and JB.vehicleCategories() or {}), blipScale = PickaxTheme and PickaxTheme.blipScale or nil, activityRoles = Config.ActivityRoles, jobTypes = Config.JobTypes, pointTypes = Config.PointTypes, garageKinds = Config.GarageKinds, categoryTypes = Config.Dealer.CategoryTypes, maxItems = Config.MaxItemsPerPoint, actions = Config.Actions, clothesKeys = Config.ClothesKeys, kitchen = Config.Kitchen, announceTypes = Config.Announce.Types, announce = Config.Announce, police = Config.Police, tuning = Config.Tuning, ems = Config.Ems, bank = Config.Bank, pointRules = JB_POINT_RULES })
 end)
 
-ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)
-    if not JB.isDev(src) then return cb(fail('Permission refusée')) end
+-- Création / modification d'un job (builder admin ET entreprises de joueurs, voir company.lua) : les droits sont vérifiés par l'appelant
+local function saveJob(src, cb, payload)
     local job, grades, points = cleanJob(payload)
     if not job then return cb(fail(grades)) end
 
@@ -550,10 +550,15 @@ ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)
     if JB.registerSociety then JB.registerSociety(job.name) end
     local compat = JB.compatRefresh and JB.compatRefresh() or nil
     cb({ ok = true, name = job.name, created = isNew, compat = compat })
+end
+JB.saveJob = saveJob
+ESX.RegisterServerCallback('jobbuilder:save', function(src, cb, payload)
+    if not JB.isDev(src) then return cb(fail('Permission refusée')) end
+    saveJob(src, cb, payload)
 end)
 
-ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
-    if not JB.isDev(src) then return cb(fail('Permission refusée')) end
+-- Suppression complète d'un job (builder admin ET dissolution d'une entreprise de joueur) : les droits sont vérifiés par l'appelant
+local function deleteJob(src, cb, name)
     local job = JB.Jobs[name]
     if not job then return cb(fail('Ce job n\'est pas géré par le builder (suppression refusée)')) end
 
@@ -634,6 +639,11 @@ ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
         return cb({ ok = true, compat = compat, warning = ('Job supprimé, mais ces éléments ont échoué (voir console serveur) : %s'):format(table.concat(failed, ', ')) })
     end
     cb({ ok = true, compat = compat })
+end
+JB.deleteJob = deleteJob
+ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
+    if not JB.isDev(src) then return cb(fail('Permission refusée')) end
+    deleteJob(src, cb, name)
 end)
 
 -- Se mettre soi-même dans un job pour le tester
