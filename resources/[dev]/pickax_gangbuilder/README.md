@@ -140,3 +140,9 @@ Un commerce de la ville est disputé entre les gangs, puis le vainqueur va y col
 - **Logo du gang** : le chef l'enregistre depuis la tablette (Accueil → *Logo du gang*, adresse https d'une image). Il s'affiche dans la tablette (accueil, classement).
 - **Page « Tributs »** de la tablette : zone de tribut en cours (survivants par gang, temps, GPS) et historique des derniers tributs (table `gangbuilder_tributes` créée automatiquement).
 - Tests hors jeu : `ROOT=. lua tools/tests/turfwar_test.lua` (15 vérifications), `tribute_test.lua` (18).
+
+## Saisons de gangs (`Config.Season`)
+- **Points de saison = réputation gagnée** pendant la saison (captures, victoires de guerre / d'affrontement, colis, tributs, quêtes…) : rien à brancher, tout ce qui rapporte de la réputation compte.
+- Une saison dure `Days` jours (7). À la fin, les gangs avec au moins `MinPoints` points sont classés ; les 3 premiers reçoivent leur récompense (argent dans la trésorerie + réputation, `Rewards`), les membres en ligne sont prévenus, l'actu est publiée, le résultat est conservé (tables `gangbuilder_seasons`, `gangbuilder_season_points`, `gangbuilder_season_results`) et une **nouvelle saison démarre à zéro**.
+- Tablette → **Classement** : saison en cours (top 10, ton rang, récompenses, temps restant) et podium de la saison précédente. Staff : `/endseason` termine la saison tout de suite. Export : `exports.pickax_gangbuilder:GetSeasonInfo(gang)`.
+- Réglable dans le panel : *Réglages du serveur → Gangs → Saisons de gangs*. Tests : `ROOT=. lua tools/tests/season_test.lua` (14 vérifications).

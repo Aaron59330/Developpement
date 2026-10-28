@@ -8,6 +8,8 @@ function CreateThread() end
 function Wait() end
 function GetResourceState() return 'missing' end
 function IsDuplicityVersion() return true end
+function vector3(x, y, z) return { x = x, y = y, z = z } end
+vector2 = function(x, y) return { x = x, y = y } end
 local function load(res, cfg)
     Config = cfg; handler = nil
     dofile(ROOT .. '/resources/[dev]/' .. res .. '/panelsettings.lua')
@@ -35,6 +37,7 @@ local function configOf(res, rootName)
 end
 for _, res in ipairs({ 'pickax_gangbuilder', 'pickax_jobbuilder', 'pickax_illegalbuilder' }) do
     local cfg = configOf(res)
+    ok(cfg, res .. ' : config.lua doit se charger dans le test')
     if cfg then
         local h = load(res, cfg)
         ok(h, res .. ' : écoute pickax_settings:changed')
@@ -42,7 +45,7 @@ for _, res in ipairs({ 'pickax_gangbuilder', 'pickax_jobbuilder', 'pickax_illega
         for key, path in mapSrc:gmatch("{ '([%w_]+)', '([%w%.]+)' }") do
             ok(def[key], res .. ' : ' .. key .. ' absent du schéma')
             local t = cfg
-            for seg in path:gmatch('[^%.]+') do t = type(t) == 'table' and t[seg] or nil end
+            for seg in path:gmatch('[^%.]+') do if type(t) == 'table' then t = t[tonumber(seg) or seg] else t = nil end end
             ok(t ~= nil, res .. ' : chemin introuvable dans le config : ' .. path)
             ok(t == def[key].default, ('%s : défaut du schéma (%s) ≠ config (%s) pour %s'):format(res, tostring(def[key].default), tostring(t), key))
         end

@@ -44,7 +44,7 @@ local ORIG = {}
 local function walk(path, create)
     local t = Config
     local keys = {}
-    for k in path:gmatch('[^%.]+') do keys[#keys + 1] = k end
+    for k in path:gmatch('[^%.]+') do keys[#keys + 1] = tonumber(k) or k end
     for i = 1, #keys - 1 do
         if type(t[keys[i]]) ~= 'table' then if not create then return nil end t[keys[i]] = {} end
         t = t[keys[i]]

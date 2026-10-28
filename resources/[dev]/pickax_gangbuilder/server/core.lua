@@ -205,6 +205,7 @@ function GB.addRep(name, amount)
     amount = math.floor(tonumber(amount) or 0)
     if not Config.Rep.Enabled or amount <= 0 then return end
     MySQL.update('UPDATE gangbuilder_gangs SET rep = rep + ? WHERE name = ?', { amount, name })
+    if GB.seasonAdd then GB.seasonAdd(name, amount) end     -- la réputation gagnée compte pour le classement de la saison
 end
 
 -- Statistiques par membre (récolté, fabriqué, vendu, blanchi) — alimente la fiche du gang

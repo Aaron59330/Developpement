@@ -25,6 +25,7 @@ server_scripts {
     'server/conflicts.lua',
     'server/objectives.lua',
     'server/tribute.lua',
+    'server/season.lua',
     'server/tablet.lua',
     'server/settings.lua',
 }

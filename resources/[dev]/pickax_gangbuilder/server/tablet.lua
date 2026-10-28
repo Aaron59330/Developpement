@@ -385,7 +385,7 @@ local function snapshot(src)
         territories = terr, territoryCount = mine,
         quests = questList(gang.name), questsEnabled = T().Enabled,
         wars = { enabled = W.Enabled, current = current, incoming = incoming or false, history = history, rivals = rivals, targets = W.Targets, durations = W.Durations, maxStake = W.MaxStake, cooldown = W.Cooldown },
-        ranking = ranking, objective = obj, logs = logs, news = news,
+        ranking = ranking, objective = obj, logs = logs, news = news, season = GB.seasonInfo and GB.seasonInfo(gang.name) or { enabled = false },
         turf = { enabled = (Config.TurfWar or {}).Enabled and true or false, prep = (Config.TurfWar or {}).PrepSeconds, duration = (Config.TurfWar or {}).Duration, reasons = GB.TurfReasons },
         tribute = { enabled = (Config.Tribute or {}).Enabled and true or false, current = GB.tributeState and GB.tributeState() or nil, history = GB.tributeHistory and GB.tributeHistory(10) or {} },
         resets = { daily = 86400 - now % 86400, weekly = (((8 - tonumber(os.date('!%w'))) % 7 == 0 and 7 or (8 - tonumber(os.date('!%w'))) % 7) * 86400) - now % 86400 },

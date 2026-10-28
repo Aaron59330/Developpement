@@ -135,6 +135,19 @@ Config.Conflicts = {
 -- Un colis apparaît dans une zone. Le premier gang qui le prend doit RESTER dans la zone `Hold` secondes avec le colis
 -- (le compteur avance même si aucun gang adverse ne vient), puis le ramener à SON coffre de gang. Si le porteur meurt, le colis tombe
 -- et n'importe quel gang peut le prendre (le gang qui le reprend doit alors refaire le temps de zone, ou la livraison si elle est en cours).
+-- ── Saisons de gangs : classement par points (= réputation gagnée pendant la saison), récompenses aux meilleurs, remise à zéro à la fin ──
+Config.Season = {
+    Enabled = true,
+    Days = 7,                  -- durée d'une saison
+    MinPoints = 10,            -- points minimum pour être classé et récompensé
+    RewardAccount = 'dirty',   -- compte de la trésorerie crédité : 'dirty' | 'money'
+    Rewards = {                -- par rang : argent et réputation (la réputation gagnée ici compte aussi pour la saison suivante)
+        { money = 15000, rep = 50 },
+        { money = 8000,  rep = 30 },
+        { money = 4000,  rep = 15 },
+    },
+}
+
 -- ── Guerre de zone déclarée : le bureau d'un gang déclare la guerre au propriétaire d'un territoire (tablette → Zones, ou /startturfwar <id>) ──
 -- Préparation (les deux camps sont prévenus et se placent), puis dispute : chaque kill entre les deux gangs dans la zone = 1 point. Le vainqueur gagne de la réputation ;
 -- si c'est l'attaquant (avec MinKillsToWin kills d'avance) et que le territoire peut changer de main (défenseurs, horaires, plafond), il le capture.

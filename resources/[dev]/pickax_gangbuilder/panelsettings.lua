@@ -52,13 +52,23 @@ local MAP = {
     { 'gb_wars_cooldown', 'Tablet.Wars.Cooldown' },
     { 'gb_wars_repwin', 'Tablet.Wars.RepWin' },
     { 'gb_wars_replose', 'Tablet.Wars.RepLoss' },
+    { 'gb_season_enabled', 'Season.Enabled' },
+    { 'gb_season_days', 'Season.Days' },
+    { 'gb_season_min', 'Season.MinPoints' },
+    { 'gb_season_account', 'Season.RewardAccount' },
+    { 'gb_season_r1', 'Season.Rewards.1.money' },
+    { 'gb_season_r2', 'Season.Rewards.2.money' },
+    { 'gb_season_r3', 'Season.Rewards.3.money' },
+    { 'gb_season_rep1', 'Season.Rewards.1.rep' },
+    { 'gb_season_rep2', 'Season.Rewards.2.rep' },
+    { 'gb_season_rep3', 'Season.Rewards.3.rep' },
 }
 local ORIG = {}
 
 local function walk(path, create)
     local t = Config
     local keys = {}
-    for k in path:gmatch('[^%.]+') do keys[#keys + 1] = k end
+    for k in path:gmatch('[^%.]+') do keys[#keys + 1] = tonumber(k) or k end
     for i = 1, #keys - 1 do
         if type(t[keys[i]]) ~= 'table' then if not create then return nil end t[keys[i]] = {} end
         t = t[keys[i]]

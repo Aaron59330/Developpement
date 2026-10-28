@@ -25,8 +25,8 @@ const hexToRgbStr = h => { h = String(h || (window.PICKAX_ACCENT || '#fdc27d'));
 const tbInit = n => String(n || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 const tbTime = t => new Date(t * 1000).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const METRIC_ICON = { harvested: 'box', processed: 'bolt', sold: 'coins', laundered: 'coins', capture: 'flag', conflict_win: 'skull', objective: 'box', war_win: 'war' };
-const NEWS_ICON = { territory: 'flag', war: 'war', quest: 'quest', conflict: 'skull', objective: 'box', info: 'news' };
-const NEWS_COLOR = { war: '#f87171', territory: (window.PICKAX_ACCENT || '#fdc27d'), quest: '#4ade80', conflict: '#fbbf24', objective: '#a78bfa' };
+const NEWS_ICON = { season: 'trophy', tribute: 'coins', territory: 'flag', war: 'war', quest: 'quest', conflict: 'skull', objective: 'box', info: 'news' };
+const NEWS_COLOR = { season: '#fbbf24', tribute: '#fdc27d', war: '#f87171', territory: (window.PICKAX_ACCENT || '#fdc27d'), quest: '#4ade80', conflict: '#fbbf24', objective: '#a78bfa' };
 const TB_LOG = {
   territory_captured: 'Territoire capturé', territory_income: 'Revenu de territoire', conflict_win: 'Affrontement gagné', objective_delivered: 'Colis livré',
   quest_done: 'Quête terminée', war_propose: 'Défi lancé', war_win: 'Guerre gagnée', war_loss: 'Guerre perdue', treasury_deposit: 'Dépôt', treasury_withdraw: 'Retrait',
@@ -226,8 +226,13 @@ const Tablet = {
 
   /* ───────── Classement ───────── */
   p_rank() {
-    const r = this.d.ranking;
-    return this.head('Classement', 'Réputation des gangs de la ville') + `<div class="tb-card"><div class="tb-rank head"><span>#</span><span>Gang</span><span>Réputation</span><span>Territoires</span><span>Guerres</span><span>En ligne</span></div>
+    const r = this.d.ranking, S = this.d.season;
+    const season = S && S.enabled ? `<div class="tb-card"><h3>${ti('trophy', 15)} Saison ${S.id}<span style="margin-left:auto;text-transform:none;letter-spacing:0">fin dans ${this.cd(S.left)}</span></h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">${(S.rewards || []).map((rw, i) => `<span class="tb-chip ${i === 0 ? 'warn' : 'inf'}">#${i + 1} : ${Number(rw.money).toLocaleString('fr-FR')} $ · +${rw.rep} rép.</span>`).join('')}<span class="tb-chip">Minimum ${S.minPoints} pts</span></div>
+      ${S.top.map(g => `<div class="tb-row ${g.me ? 'tb-sel' : ''}"><span class="tb-chip ${g.rank === 1 ? 'warn' : ''}">#${g.rank}</span><div class="g"><b>${g.logo ? `<img class="tb-lg" src="${esc(g.logo)}">` : ''}${esc(g.label)}</b></div><b>${g.points} pts</b></div>`).join('') || '<div class="tb-empty">Aucun point pour le moment : capturez, gagnez, livrez.</div>'}
+      ${S.mine && !S.top.some(g => g.me) ? `<div class="tb-row tb-sel"><span class="tb-chip">#${S.mine.rank}</span><div class="g"><b>Ton gang</b></div><b>${S.mine.points} pts</b></div>` : ''}
+      ${S.last && S.last.length ? `<div style="color:var(--muted);font-size:12px;margin-top:10px">Saison précédente : ${S.last.map(l => `#${l.rank} ${esc(l.label)} (${l.points} pts)`).join(' · ')}</div>` : ''}</div>` : '';
+    return this.head('Classement', 'Réputation des gangs de la ville · saison en cours') + season + `<div class="tb-card"><div class="tb-rank head"><span>#</span><span>Gang</span><span>Réputation</span><span>Territoires</span><span>Guerres</span><span>En ligne</span></div>
       ${r.map((g, i) => `<div class="tb-rank ${g.me ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm">${g.logo ? `<img class="tb-lg" src="${esc(g.logo)}">` : `<i style="background:${esc(g.color)}"></i>`}${esc(g.label)}</span><b>${g.rep}</b><span>${g.territories}</span><span>${g.wars} gagnée(s)</span><span>${g.online}</span></div>`).join('')}</div>`;
   },
 
