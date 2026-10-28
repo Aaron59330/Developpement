@@ -57,6 +57,24 @@ local PK_MK = PickaxTheme and PickaxTheme.marker
 Config.Marker = PK_MK and { type = PK_MK.type, color = { PK_MK.color[1], PK_MK.color[2], PK_MK.color[3] }, alpha = PK_MK.alpha, scale = { x = PK_MK.scale.x, y = PK_MK.scale.y, z = PK_MK.scale.z }, offset = -0.95 }
     or { type = 23, color = { 253, 194, 125 }, alpha = 150, scale = { x = 1.0, y = 1.0, z = 0.5 }, offset = -0.95 }
 Config.PedSales = { Enabled = true }   -- vente de drogue aux PNJ (dealers) : interrupteur général, modifiable en jeu (Paramètres → Vente aux PNJ)
+-- ── Vente dans la rue : le joueur vend sa drogue à un PNJ de la rue avec le menu contextuel (clic sur le PNJ → « Vendre de la drogue ») ──
+-- Tout est décidé côté serveur (acceptation, quantité, prix, paiement, limites). Activée seulement si Config.PedSales.Enabled l'est aussi.
+Config.StreetSales = {
+    Enabled        = true,
+    RequireTablet  = true,            -- exige la tablette vendeur (en vente chez le marchand, avec les tablettes Go Fast et blanchiment)
+    TabletItem     = 'dealer_tablet',
+    AcceptChance   = 60,              -- % de PNJ qui acceptent
+    QtyMin         = 1,               -- quantité vendue par PNJ (tirée au hasard, limitée à ce que le joueur possède)
+    QtyMax         = 3,
+    PriceFactor    = 0.8,             -- prix de rue = prix du dealer (Config.Drugs, pochon) × ce facteur
+    Account        = 'black_money',   -- 'black_money' | 'money' | 'bank'
+    Cooldown       = 8,               -- secondes minimum entre deux ventes d'un même joueur
+    MaxPerHour     = 30,              -- unités vendues par joueur et par heure (0 = illimité)
+    AlertChance    = 20,              -- % d'alerte police après une vente réussie
+    RefuseAlertChance = 10,           -- % d'alerte police quand le PNJ refuse
+    CopsRequired   = 0,               -- policiers en service requis (0 = aucun)
+    Items          = {},              -- vide = toutes les drogues du catalogue (pochons) ; sinon { { item = 'weed_pooch', label = 'Cannabis', min = 70, max = 110 }, … }
+}
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)
 
 -- ─────────────────────────────── Types de modules ───────────────────────────────

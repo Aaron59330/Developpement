@@ -429,7 +429,9 @@ function IB.syncPlayer(src)
             list[#list + 1] = pub
         end
     end
+    local st = Config.StreetSales or {}
     TriggerClientEvent('illegalbuilder:client:sync', src, { entities = list, accent = Config.UI.Accent, config = {
+        street = { enabled = Config.PedSales.Enabled ~= false and st.Enabled ~= false, tablet = st.RequireTablet and st.TabletItem or nil, items = IB.streetCatalog and IB.streetCatalog() or {} },
         marker = Config.Marker, drawDistance = Config.DrawDistance, interactDistance = Config.InteractDistance, pedDistance = Config.PedDistance,
     } })
     if IB.syncRobberies then IB.syncRobberies(src) end

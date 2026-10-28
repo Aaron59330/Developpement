@@ -4,6 +4,17 @@
 -- Ajouter un réglage : une ligne dans pickax_settings/config.lua (Settings.Schema) + une ligne ci-dessous.
 local MAP = {
     { 'ib_pedsales', 'PedSales.Enabled' },
+    { 'ib_street_enabled', 'StreetSales.Enabled' },
+    { 'ib_street_tablet', 'StreetSales.RequireTablet' },
+    { 'ib_street_chance', 'StreetSales.AcceptChance' },
+    { 'ib_street_qmin', 'StreetSales.QtyMin' },
+    { 'ib_street_qmax', 'StreetSales.QtyMax' },
+    { 'ib_street_factor', 'StreetSales.PriceFactor' },
+    { 'ib_street_cooldown', 'StreetSales.Cooldown' },
+    { 'ib_street_hour', 'StreetSales.MaxPerHour' },
+    { 'ib_street_alert', 'StreetSales.AlertChance' },
+    { 'ib_street_refuse', 'StreetSales.RefuseAlertChance' },
+    { 'ib_street_cops', 'StreetSales.CopsRequired' },
 }
 local ORIG = {}
 

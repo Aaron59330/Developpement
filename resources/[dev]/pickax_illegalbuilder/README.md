@@ -36,3 +36,12 @@ Groupes ESX `_dev`, `admin`, `superadmin` (`Config.AllowedGroups`) ou permission
 - **Interrupteur général** : builder illégal → *Paramètres* → **Vente de drogue aux PNJ** (case « Activée », enregistrée en base, sans redémarrage). Désactivé : tous les dealers à PNJ disparaissent (PNJ et blips retirés chez tous les joueurs) et le serveur refuse toute vente. Valeur par défaut au premier démarrage : `Config.PedSales.Enabled`.
 - **Par dealer** : dans l'éditeur du point, case **Vente active (ce dealer)** (activée par défaut) ; la vente peut ainsi être coupée sur un seul dealer.
 - Cumulable avec la tablette vendeur (section précédente).
+
+## Vente dans la rue (menu contextuel)
+Le joueur clique sur un **PNJ de la rue** avec le menu contextuel (pickax_core) → **Vendre de la drogue** → choisit l'article (seuls ceux qu'il possède sont proposés).
+- Tout est décidé **côté serveur** (`server/street.lua`) : interrupteur général (`Config.PedSales`) et `Config.StreetSales.Enabled`, tablette vendeur (`RequireTablet`, item `dealer_tablet`), policiers requis, délai entre deux ventes, limite par heure, **acceptation du PNJ** (`AcceptChance`), quantité (`QtyMin`–`QtyMax`), prix (prix du dealer du catalogue × `PriceFactor`, ou liste `Items` à toi), paiement (`Account`, par défaut argent sale).
+- Le PNJ peut refuser (alerte police possible : `RefuseAlertChance`) ; une vente réussie peut alerter la police (`AlertChance`), paie le racket au propriétaire du territoire, compte pour les affrontements de gang et le carnet.
+- Un même PNJ n'est sollicité qu'une fois. Impossible en véhicule.
+- Tous ces réglages sont modifiables depuis le panel web : *Réglages du serveur → Drogues & labos → Vente dans la rue*.
+- **pickax_core** : `players/contextMenu/function.lua` utilise ce système à la place de l'ancienne vente (qui faisait confiance au client) dès que `pickax_illegalbuilder` est démarré ; sans lui, l'ancien comportement reste.
+- Tests : `ROOT=. lua tools/tests/street_test.lua`.

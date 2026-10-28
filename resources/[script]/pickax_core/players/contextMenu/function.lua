@@ -1,4 +1,18 @@
+-- Vente de rue du Builder Illégal (pickax_illegalbuilder) : sert à la place de l'ancien système (tablette vendeur, interrupteur panel, décisions côté serveur)
+local function streetSale()
+    if GetResourceState('pickax_illegalbuilder') ~= 'started' then return nil end
+    local ok, on = pcall(function() return exports.pickax_illegalbuilder:StreetAvailable() end)
+    if not ok or not on then return false end
+    local ok2, items = pcall(function() return exports.pickax_illegalbuilder:StreetItems() end)
+    local actions = {}
+    for _, it in ipairs(ok2 and items or {}) do
+        actions[#actions + 1] = { it.label, function() exports.pickax_illegalbuilder:StreetSell(LastEntityHit, it.item) end }
+    end
+    return actions
+end
+
 function _Peds()
+    local street = streetSale()      -- nil : Builder Illégal absent (ancien système) · false : vente désactivée / pas de tablette · table : actions
     Action_Config = {
         Peds = {
             {
@@ -27,7 +41,7 @@ function _Peds()
             {
                 Type = "buttom-submenu",
                 Label = "Vendre de la drogue",
-                Blocked = false,
+                Blocked = street ~= nil,
                 IsRestricted = false,
                 CloseOnClick = true,
                 Distance = 3.0,
@@ -44,6 +58,15 @@ function _Peds()
                         end
                     },
                 },
+            },
+            {
+                Type = "buttom-submenu",
+                Label = "Vendre de la drogue",
+                Blocked = not (type(street) == 'table' and #street > 0),
+                IsRestricted = false,
+                CloseOnClick = true,
+                Distance = 3.0,
+                Action = type(street) == 'table' and street or {},
             },
             {
                 Type = "buttom-submenu",
