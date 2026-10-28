@@ -44,3 +44,9 @@ Chaque réglage a une `section` (sous-titre dans le panel). Pour en ajouter un :
 Tests hors jeu : `lua5.4 tools/tests/settings_test.lua` et `lua5.4 tools/tests/vsync_settings_test.lua`.
 
 Les builders (gangs, jobs, illégal) appliquent leurs réglages via un fichier `panelsettings.lua` (liste `clé du réglage → chemin dans le config.lua`) : ajouter un réglage = une ligne dans `Settings.Schema` + une ligne dans ce fichier. Test : `ROOT=. lua tools/tests/panelsettings_test.lua` (vérifie aussi que chaque défaut du schéma est égal à la valeur du config.lua).
+
+## Activité du serveur et alertes Discord
+- **Activité** : les ressources comptent leurs événements avec `exports.pickax_settings:Count('clé', n, 'Libellé')` (ventes de rue et chez les dealers, saisies, fabrications et accidents de labo, événements de gangs…). Les compteurs du jour et des 7 derniers jours (14 jours conservés) sont envoyés au panel avec chaque synchronisation : **panel web → Statistiques → Activité du serveur**.
+- **Discord** (panel → *Réglages du serveur → Discord → Alertes Discord*) : colle l'URL d'un webhook, choisis les catégories (gangs : guerres, territoires, tributs, raids de QG, saisons · police : saisies · laboratoires : accidents graves) et, si tu veux, un **résumé quotidien** à l'heure de ton choix. `exports.pickax_settings:Discord('gangs', 'Titre', 'Texte', couleur)` pour tes propres scripts.
+- L'adresse du webhook est un réglage **secret** (`secret = true` dans `Settings.Schema`) : elle n'est **jamais envoyée aux joueurs** (seulement conservée côté serveur). Seules les URL `https://discord.com/api/webhooks/…` sont acceptées ; envoi limité à un message toutes les 1,3 s.
+- Tests : `ROOT=. lua tools/tests/activity_test.lua` (13 vérifications) ; panel : `node tools/selftest2.js`.

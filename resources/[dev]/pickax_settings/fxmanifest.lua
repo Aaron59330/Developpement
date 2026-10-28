@@ -7,8 +7,8 @@ description 'Réglages du serveur modifiables depuis le panel web : maintenance,
 version '1.0.0'
 
 shared_script 'config.lua'
-server_scripts { 'server/main.lua', 'server/gameplay.lua' }
+server_scripts { 'server/main.lua', 'server/gameplay.lua', 'server/activity.lua' }
 client_scripts { 'client/main.lua', 'client/gameplay.lua' }
 
-server_exports { 'Get', 'GetAll', 'Overrides', 'Set', 'SetMany', 'ApplyRemote', 'Schema', 'Reset', 'FpsStats' }
+server_exports { 'Count', 'Activity', 'Discord', 'Get', 'GetAll', 'Overrides', 'Set', 'SetMany', 'ApplyRemote', 'Schema', 'Reset', 'FpsStats' }
 exports { 'Get', 'GetAll', 'Overrides', 'IsPerf', 'Fps' }

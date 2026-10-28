@@ -236,4 +236,11 @@ Settings.Schema = {
     { key = 'ib_seize_share', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Part de l\'argent sale reversée à la société (%)', type = 'number', default = 100, min = 0, max = 100, step = 1 },
     { key = 'ib_seize_society', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Compte société qui reçoit l\'argent saisi', type = 'text', default = 'society_police', hint = 'Vide = personne.' },
     { key = 'ib_seize_evidence', group = 'Drogues & labos', section = 'Perquisitions et saisies (police)', label = 'Objets saisis placés dans le casier de preuves (/preuves)', type = 'bool', default = true, hint = 'Sinon : détruits.' },
+    { key = 'discord_alerts', group = 'Discord', section = 'Alertes Discord', label = 'Alertes Discord activées', type = 'bool', default = false, hint = 'Envoie les événements importants (guerres, saisons, saisies…) sur un salon Discord via un webhook.' },
+    { key = 'discord_webhook', group = 'Discord', section = 'Alertes Discord', label = 'Adresse du webhook Discord', type = 'text', default = '', secret = true, hint = 'Discord → Paramètres du salon → Intégrations → Webhooks → Copier l\'URL. Elle reste sur le serveur : elle n\'est jamais envoyée aux joueurs.' },
+    { key = 'discord_cat_gangs', group = 'Discord', section = 'Alertes Discord', label = 'Gangs : guerres, territoires, tributs, raids de QG, saisons', type = 'bool', default = true },
+    { key = 'discord_cat_police', group = 'Discord', section = 'Alertes Discord', label = 'Police : saisies', type = 'bool', default = true },
+    { key = 'discord_cat_labs', group = 'Discord', section = 'Alertes Discord', label = 'Laboratoires : accidents graves (incendie, explosion)', type = 'bool', default = true },
+    { key = 'discord_digest', group = 'Discord', section = 'Résumé quotidien', label = 'Résumé quotidien de l\'activité', type = 'bool', default = false, hint = 'Un message par jour avec les chiffres du jour (ventes, saisies, laboratoires, gangs).' },
+    { key = 'discord_digest_hour', group = 'Discord', section = 'Résumé quotidien', label = 'Heure du résumé (heure du serveur)', type = 'number', default = 20, min = 0, max = 23, step = 1 },
 }

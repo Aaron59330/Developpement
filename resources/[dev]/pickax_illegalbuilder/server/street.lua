@@ -105,6 +105,7 @@ ESX.RegisterServerCallback('illegalbuilder:street:sell', function(src, cb, item)
     if (Config.StreetRep or {}).Enabled ~= false then newRep = IB.addRep(xPlayer.identifier, qty * ((Config.StreetRep or {}).PerUnit or 1)) end
     local newLvl, lvlName = IB.repLevel(newRep)
     if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
+    if GetResourceState('pickax_settings') == 'started' then pcall(function() exports.pickax_settings:Count('street_units', qty, 'Drogue vendue dans la rue (unités)') exports.pickax_settings:Count('street_money', total - tax, 'Argent gagné dans la rue ($)') end) end
     IB.log(nil, xPlayer, 'street_sell', ('%s ×%d'):format(entry.item, qty), total - tax)
     cb({ ok = true, accepted = true, item = entry.item, label = entry.label, qty = qty, total = total - tax, tax = tax, purity = purity,
         levelUp = newLvl > repLvl and lvlName or nil, saturation = math.floor(zone.sat), heat = math.floor(zone.heat) })

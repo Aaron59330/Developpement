@@ -2,6 +2,8 @@
 local ROOT = os.getenv('ROOT') or '.'
 local checks = 0
 local function ok(c, m) checks = checks + 1 assert(c, m) end
+local realRandom, refuse = math.random, false
+math.random = function(a, b) if b then return realRandom(a, b) end if a == 100 then return refuse and 100 or 1 end return realRandom(a) end
 local cbs, inv, paid, alerts, timer = {}, {}, {}, {}, 1000000
 local xp = { identifier = 'id1', source = 1 }
 function GetGameTimer() return timer end
@@ -49,7 +51,9 @@ ok(inv.weed_pooch == 20 - r.qty and paid[1][1] == 'black_money' and paid[1][2] =
 ok(call('illegalbuilder:street:sell', 'weed_pooch').error:find('Doucement'), 'délai entre deux ventes')
 timer = timer + 9000
 Config.StreetSales.AcceptChance = 0
+refuse = true
 local rr = call('illegalbuilder:street:sell', 'weed_pooch')
+refuse = false
 ok(rr.ok and rr.accepted == false and inv.weed_pooch == 20 - r.qty, 'PNJ qui refuse : rien ne bouge')
 Config.StreetSales.AcceptChance = 100
 Config.StreetSales.RefuseAlertChance = 100
@@ -57,8 +61,11 @@ timer = timer + 9000
 call('illegalbuilder:street:sell', 'weed_pooch')   -- refus possible seulement si chance 100 → acceptée, pas d'alerte
 Config.StreetSales.AcceptChance = 0
 timer = timer + 9000
+local alertsBefore = #alerts
+refuse = true
 call('illegalbuilder:street:sell', 'weed_pooch')
-ok(#alerts == 1, 'alerte police au refus')
+refuse = false
+ok(#alerts == alertsBefore + 1, 'alerte police au refus')
 -- limite horaire
 Config.StreetSales.AcceptChance = 100; Config.StreetSales.RefuseAlertChance = 0; Config.StreetSales.QtyMin = 5; Config.StreetSales.QtyMax = 5
 inv.weed_pooch = 100

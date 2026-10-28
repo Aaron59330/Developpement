@@ -45,6 +45,7 @@ PAGES.stats = async function () {
   return el('div', {}, head('Statistiques', el('select', { style: 'max-width:160px', onchange: e => { sessionStorage.setItem('aero_days', e.target.value); render(); } }, [1, 7, 14, 30].map(d => el('option', { value: d, selected: d === days }, d === 1 ? '24 heures' : d + ' jours')))),
     el('div', { class: 'grid g4' }, stat2('Pic de joueurs', r.peak), stat2('Moyenne', r.avg), stat2('Joueurs en ligne', r.count), stat2('Argent en circulation', money(r.total_money), 'joueurs connectés')),
     el('div', { class: 'card' }, el('h2', {}, 'Fréquentation'), lineChart(r.points || [])),
+    el('div', { class: 'card' }, el('h2', {}, 'Activité du serveur'), el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, 'Chiffres du jour (et des 7 derniers jours) : ventes de drogue, saisies, laboratoires, gangs…'), (r.activity || []).length ? el('div', { class: 'grid g4' }, r.activity.map(x => stat2(x.label, x.today, `7 jours : ${x.week}`))) : el('div', { class: 'empty' }, 'Aucune activité enregistrée pour le moment.')),
     el('div', { class: 'grid g2' }, el('div', { class: 'card' }, el('h2', {}, 'Métiers en ligne'), (r.jobs || []).length ? bars(r.jobs) : el('div', { class: 'empty' }, 'Personne en ligne')), el('div', { class: 'card' }, el('h2', {}, 'Joueurs moyens par heure'), bars(r.hours.map((v, i) => [String(i).padStart(2, '0') + 'h', v]).filter((_, i) => i % 2 === 0)))));
 };
 

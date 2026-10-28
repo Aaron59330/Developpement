@@ -24,7 +24,8 @@ router.get('/:id/stats-summary', (req, res) => {
   const st = db.prepare('SELECT players FROM server_state WHERE license_id=?').get(l.id); const pl = st ? JSON.parse(st.players) : [];
   const jobs = {}; for (const p of pl) jobs[p.job || '—'] = (jobs[p.job || '—'] || 0) + 1;
   const byHour = Array(24).fill(0), cnt = Array(24).fill(0); for (const p of pts) { const h = new Date(p.at * 1000).getHours(); byHour[h] += p.players; cnt[h]++; }
-  res.json({ ok: true, points: pts, peak, avg, jobs: Object.entries(jobs).sort((a, b) => b[1] - a[1]).slice(0, 10), hours: byHour.map((v, i) => cnt[i] ? Math.round(v / cnt[i] * 10) / 10 : 0), total_money: pl.reduce((s, p) => s + p.money + p.bank, 0), count: pl.length });
+  let activity = []; try { activity = (JSON.parse((db.prepare('SELECT stats FROM server_state WHERE license_id=?').get(l.id) || {}).stats || '{}').activity) || []; } catch (e) {}
+  res.json({ ok: true, activity, points: pts, peak, avg, jobs: Object.entries(jobs).sort((a, b) => b[1] - a[1]).slice(0, 10), hours: byHour.map((v, i) => cnt[i] ? Math.round(v / cnt[i] * 10) / 10 : 0), total_money: pl.reduce((s, p) => s + p.money + p.bank, 0), count: pl.length });
 });
 router.get('/:id/activity', (req, res) => { const l = own(req, res); if (!l) return; res.json({ ok: true, rows: db.prepare('SELECT a.id,a.action,a.detail,a.at,u.username FROM audit a LEFT JOIN users u ON u.id=a.user_id WHERE a.license_id=? ORDER BY a.id DESC LIMIT 100').all(l.id) }); });
 

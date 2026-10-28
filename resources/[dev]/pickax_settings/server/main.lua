@@ -66,8 +66,14 @@ local function effective()
     return all
 end
 
+-- Les réglages « secrets » (ex : adresse du webhook Discord) ne sont JAMAIS envoyés aux joueurs
+local function clientView(tbl)
+    local o = {}
+    for k, v in pairs(tbl) do if not (DEF[k] and DEF[k].secret) then o[k] = v end end
+    return o
+end
 local function broadcast(target)
-    TriggerClientEvent('pickax_settings:sync', target or -1, effective(), over)
+    TriggerClientEvent('pickax_settings:sync', target or -1, clientView(effective()), clientView(over))
 end
 
 local features = {}   -- applicateurs (annonces, redémarrages, maintenance) : réévalués à chaque changement

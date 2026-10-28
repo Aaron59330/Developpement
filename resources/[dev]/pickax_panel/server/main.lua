@@ -473,6 +473,10 @@ local function sync()
         stats = { uptime = math.floor(GetGameTimer() / 1000), version = GetConvar('version', ''), hostname = GetConvar('sv_projectName', GetConvar('sv_hostname', '')), memory = math.floor(collectgarbage('count') / 1024) },
         logs = logs, results = results, docs = docVersions,
     }
+    if GetResourceState('pickax_settings') == 'started' then
+        local okA, act = pcall(function() return exports.pickax_settings:Activity() end)       -- activité du jour / de la semaine (ventes, saisies, labos, gangs…) pour la page Statistiques
+        if okA and type(act) == 'table' then body.stats.activity = act end
+    end
     if now() - lastResources >= Config.ResourcesEvery then body.resources = collectResources() end
     if not schemaSent and GetResourceState('pickax_settings') == 'started' then
         local okS, sch = pcall(function() return exports.pickax_settings:Schema() end)

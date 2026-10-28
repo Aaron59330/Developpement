@@ -69,7 +69,10 @@ const srv = http.createServer(app).listen(0, async () => {
     const ps = await client('PUT', `/api/servers/${lid}/settings`, { values: { maintenance_enabled: true, announce_interval: 999, compass_layout: 'compact', announce_messages: ['  Salut ', '', 'Discord'] } }); ok(ps.ok && ps.count === 3, 'réglages enregistrés (la valeur par défaut « compact » n’est pas gardée)');
     const ov = (await client('GET', `/api/servers/${lid}/settings`)).overrides; ok(ov.announce_interval === 240 && ov.maintenance_enabled === true && ov.announce_messages.length === 2 && !('compass_layout' in ov), 'réglages : valeurs bornées et nettoyées');
     const sy = await (await fetch(base + '/api/agent/sync', { method: 'POST', headers: H, body: JSON.stringify({ docs: {} }) })).json(); ok(sy.docs.settings && sy.docs.settings.value.announce_interval === 240 && !sy.docs.settings_schema, 'réglages : le serveur reçoit les surcharges (sans le schéma)');
+    await fetch(base + '/api/agent/sync', { method: 'POST', headers: H, body: JSON.stringify({ players: [], stats: { uptime: 5, activity: [{ key: 'street_units', label: 'Drogue vendue dans la rue (unités)', today: 12, week: 80 }, { label: 'sans clé' }, { key: 'x'.repeat(100), label: 'y', today: 'abc', week: 3.7 }] } }) });
     const st = await client('GET', `/api/servers/${lid}/stats-summary?days=7`); ok(st.ok, 'statistiques');
+    ok(Array.isArray(st.activity) && st.activity.length === 2 && st.activity[0].key === 'street_units' && st.activity[0].today === 12 && st.activity[0].week === 80, "l'activité du serveur (ventes, saisies…) remonte du jeu dans la page Statistiques");
+    ok(st.activity[1].key.length === 40 && st.activity[1].today === 0 && st.activity[1].week === 4, 'activité nettoyée : clé tronquée, valeurs invalides ramenées à 0, entrées sans clé ignorées');
     console.log(`\n${n} vérifications OK`);
   } catch (e) { console.error('ÉCHEC :', e.message); process.exitCode = 1; }
   polling = false; srv.close(); ai.close(); fs.rmSync(__dirname + '/../data-test2', { recursive: true, force: true }); setTimeout(() => process.exit(process.exitCode || 0), 300);

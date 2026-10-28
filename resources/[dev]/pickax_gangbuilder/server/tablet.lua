@@ -13,9 +13,19 @@ local ready = false
 local function label(name) return GB.Gangs[name] and GB.Gangs[name].label or name end
 
 -- ─────────────────────────────── Actualités ───────────────────────────────
+local NEWS_STAT = { war = 'Guerres et raids', territory = 'Territoires', tribute = 'Tributs', season = 'Saisons', conflict = 'Affrontements de zone', objective = 'Colis livrés', quest = 'Quêtes' }
+local NEWS_TITLE = { war = 'Guerre', territory = 'Territoire', tribute = 'Tribut', season = 'Saison', conflict = 'Affrontement', objective = 'Colis' }
+local NEWS_COLOR = { war = 15158332, territory = 16626301, tribute = 16626301, season = 16766720, conflict = 15105570, objective = 10181046 }
 function GB.news(text, kind)
     News[#News + 1] = { t = os.time(), text = tostring(text):sub(1, 200), kind = kind or 'info' }
     while #News > (T().NewsMax or 30) do table.remove(News, 1) end
+    -- panel web : compteur du jour par type d'événement ; Discord : événement publié (si activé dans le panel)
+    if GetResourceState('pickax_settings') == 'started' then
+        pcall(function()
+            if NEWS_STAT[kind] then exports.pickax_settings:Count('gang_' .. kind, 1, 'Gangs : ' .. NEWS_STAT[kind]) end
+            if NEWS_TITLE[kind] then exports.pickax_settings:Discord('gangs', NEWS_TITLE[kind], tostring(text):sub(1, 200), NEWS_COLOR[kind]) end
+        end)
+    end
 end
 
 local function notifyGang(name, msg)

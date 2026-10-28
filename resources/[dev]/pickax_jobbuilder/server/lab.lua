@@ -350,6 +350,16 @@ ESX.RegisterServerCallback('jobbuilder:lab:finishExp', function(src, cb, results
     local gain = LabExp.xpGain(made, failed, quality, X.Levels)
     local newLevel = level
     if gain > 0 then newLevel = LabExp.levelFor(addXp(x.identifier, gain), X.Levels) end
+    if GetResourceState('pickax_settings') == 'started' then
+        pcall(function()
+            exports.pickax_settings:Count('lab_made', made + bonus, 'Pochons fabriqués au labo')
+            exports.pickax_settings:Count('lab_failed', failed, 'Lots ratés au labo')
+            if accident then
+                exports.pickax_settings:Count('lab_accidents', 1, 'Accidents de labo')
+                if accident ~= 'leak' then exports.pickax_settings:Discord('labs', 'Accident de laboratoire', ('%s : %s pendant une fabrication de %s.'):format(x.getName and x.getName() or 'Un joueur', accident == 'fire' and 'incendie' or 'explosion', d.label or q.drug), 15105570) end
+            end
+        end)
+    end
     -- accident : effets côté client / intoxication côté serveur
     if accident == 'leak' then TriggerEvent('jobbuilder:lab:addToxic', src, A.LeakExposure or 40) end
     if accident then TriggerClientEvent('jobbuilder:client:labAccident', src, accident, accident == 'fire' and (A.FireDamage or 0) or accident == 'explosion' and (A.ExplosionDamage or 0) or 0) end

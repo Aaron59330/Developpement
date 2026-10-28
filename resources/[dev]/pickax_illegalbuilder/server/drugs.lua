@@ -248,6 +248,7 @@ ESX.RegisterServerCallback('illegalbuilder:drug:sell', function(src, cb, eid, pi
     reportGang(src, 'sell')
     if GetResourceState('pickax_carnet') == 'started' then pcall(function() exports.pickax_carnet:Report(src, 'sell', qty) end) end
     IB.stat(e, 'revenue', total - tax) IB.stat(e, 'sold', qty)
+    if GetResourceState('pickax_settings') == 'started' then pcall(function() exports.pickax_settings:Count('dealer_units', qty, 'Drogue vendue aux dealers (unités)') exports.pickax_settings:Count('dealer_money', total - tax, 'Argent gagné chez les dealers ($)') end) end
     IB.log(e, xPlayer, 'sell', ('%s ×%d à %d'):format(item, qty, unit), total - tax)
     cb({ ok = true, qty = qty, unit = unit, total = total - tax, tax = tax, purity = purity })
 end)

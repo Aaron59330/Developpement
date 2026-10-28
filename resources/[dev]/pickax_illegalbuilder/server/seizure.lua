@@ -105,6 +105,13 @@ ESX.RegisterServerCallback('illegalbuilder:seize:take', function(src, cb, target
     end
     pcall(function() MySQL.insert('INSERT INTO illegalbuilder_seizures (officer, officer_name, target, target_name, items, black_money, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
         { officer.identifier, IB.playerName(officer), t.identifier, IB.playerName(t), json.encode(taken), black, os.time() }) end)
+    if GetResourceState('pickax_settings') == 'started' then
+        pcall(function()
+            exports.pickax_settings:Count('seizures', 1, 'Saisies de police')
+            exports.pickax_settings:Count('seized_black', black, 'Argent sale saisi ($)')
+            exports.pickax_settings:Discord('police', 'Saisie', ('%s a fouillé %s : %d objet(s), %d $ d\'argent sale saisis.'):format(IB.playerName(officer), IB.playerName(t), #taken, black), 3447003)
+        end)
+    end
     IB.log(nil, officer, 'seizure', ('%s : %d objets, %d $ sale'):format(IB.playerName(t), #taken, black), black)
     TriggerClientEvent('illegalbuilder:client:notify', target, 'La police t\'a fouillé et a saisi ta marchandise illégale.', 'error')
     cb({ ok = true, items = taken, black = black })
