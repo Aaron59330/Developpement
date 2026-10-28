@@ -70,4 +70,40 @@ router.post('/:id/discord/send', async (req, res) => {
   } catch (e) { res.json({ ok: false, error: 'Impossible de joindre Discord : ' + (e.name === 'TimeoutError' ? 'délai dépassé' : 'erreur réseau') }); }
 });
 
+// ── événements avec inscriptions : un embed avec un lien d'inscription est publié dans le salon choisi ──
+const crypto = require('crypto');
+async function post(url, body) { try { const r = await fetch(url + '?wait=true', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(10000) }); return r.status === 429 ? { ok: false, error: 'Discord limite le débit : réessaie dans quelques secondes.' } : r.ok ? { ok: true } : { ok: false, error: r.status === 404 || r.status === 401 ? 'Webhook supprimé ou invalide.' : `Discord a refusé le message (${r.status}).` }; } catch (e) { return { ok: false, error: 'Impossible de joindre Discord.' }; } }
+router.get('/:id/discord/events', (req, res) => {
+  const l = own(req, res); if (!l) return;
+  res.json({ ok: true, events: db.prepare('SELECT e.id,e.title,e.starts_at,e.slots,e.token,e.created_at,(SELECT COUNT(*) FROM dc_signups s WHERE s.event_id=e.id) signed FROM dc_events e WHERE e.license_id=? ORDER BY e.id DESC LIMIT 30').all(l.id) });
+});
+router.post('/:id/discord/events', async (req, res) => {
+  const l = own(req, res); if (!l) return; if (!active(l)) return res.json({ ok: false, error: 'Licence inactive ou expirée' }); const b = req.body || {};
+  const title = String(b.title || '').trim().slice(0, 120), desc = String(b.description || '').trim().slice(0, 1500), slots = Math.max(0, Math.min(1000, Math.floor(+b.slots || 0)));
+  const starts = b.starts_at ? Math.floor(new Date(b.starts_at).getTime() / 1000) : null; if (b.starts_at && !starts) return res.json({ ok: false, error: 'Date invalide.' });
+  if (!title) return res.json({ ok: false, error: 'Donne un titre à l’événement.' });
+  if (db.prepare('SELECT COUNT(*) n FROM dc_events WHERE license_id=?').get(l.id).n >= 100) return res.json({ ok: false, error: 'Trop d’événements : supprime les anciens.' });
+  const ch = db.prepare('SELECT id,name,url FROM discord_channels WHERE id=? AND license_id=?').get(+b.channelId, l.id); if (!ch) return res.json({ ok: false, error: 'Choisis un salon.' });
+  const origin = req.headers.origin || (req.protocol + '://' + req.headers.host); const token = crypto.randomBytes(12).toString('hex'); const link = `${origin}/event.html?t=${token}`;
+  const fields = []; if (starts) fields.push({ name: '📅 Date', value: `<t:${starts}:F> (<t:${starts}:R>)`, inline: true }); fields.push({ name: '👥 Places', value: slots ? `${slots} places` : 'Illimité', inline: true }); fields.push({ name: '📝 Inscription', value: `[Clique ici pour t’inscrire](${link})`, inline: false });
+  const r = await post(ch.url, { username: b.username ? String(b.username).slice(0, 80) : undefined, embeds: [{ title: '🎉  ' + title, description: desc || undefined, color: 0xfdc27d, fields, footer: { text: 'Inscription en ligne' }, timestamp: new Date().toISOString() }], allowed_mentions: { parse: [] } });
+  if (!r.ok) return res.json(r);
+  const id = db.prepare('INSERT INTO dc_events(license_id,title,description,starts_at,slots,token,channel,created_at) VALUES(?,?,?,?,?,?,?,?)').run(l.id, title, desc, starts, slots, token, ch.name, now()).lastInsertRowid;
+  audit(req.user.id, l.id, 'discord:event', title, A.ip(req)); res.json({ ok: true, id, link });
+});
+router.get('/:id/discord/events/:eid', (req, res) => {
+  const l = own(req, res); if (!l) return; const e = db.prepare('SELECT id,title,starts_at,slots FROM dc_events WHERE id=? AND license_id=?').get(+req.params.eid, l.id); if (!e) return res.json({ ok: false, error: 'Événement introuvable' });
+  res.json({ ok: true, event: e, signups: db.prepare('SELECT name,discord,at FROM dc_signups WHERE event_id=? ORDER BY id').all(e.id) });
+});
+router.delete('/:id/discord/events/:eid', (req, res) => { const l = own(req, res); if (!l) return; db.prepare('DELETE FROM dc_events WHERE id=? AND license_id=?').run(+req.params.eid, l.id); res.json({ ok: true }); });
+
+// ── rappels de licence ──
+const putDoc = (lid, key, v) => db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(license_id,key) DO UPDATE SET value=excluded.value, version=docs.version+1, updated_at=excluded.updated_at').run(lid, key, JSON.stringify(v), 1, now());
+router.get('/:id/discord/reminders', (req, res) => { const l = own(req, res); if (!l) return; const d = db.prepare("SELECT value FROM docs WHERE license_id=? AND key='reminders'").get(l.id); res.json({ ok: true, config: d ? JSON.parse(d.value) : { enabled: false, channelId: null }, expires_at: l.expires_at }); });
+router.put('/:id/discord/reminders', (req, res) => {
+  const l = own(req, res); if (!l) return; const b = req.body || {}; const ch = b.channelId ? db.prepare('SELECT id FROM discord_channels WHERE id=? AND license_id=?').get(+b.channelId, l.id) : null;
+  if (b.enabled && !ch) return res.json({ ok: false, error: 'Choisis le salon qui recevra les rappels.' });
+  putDoc(l.id, 'reminders', { enabled: !!b.enabled, channelId: ch ? ch.id : null }); res.json({ ok: true });
+});
+
 module.exports = router;

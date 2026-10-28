@@ -142,7 +142,17 @@ PAGES.settings = async function () {
   drawRail(); drawMain();
   return el('div', {}, head('Réglages du serveur', search, el('button', { class: 'btn s', onclick: exportJson, title: 'Télécharge tes réglages modifiés (sauvegarde ou copie vers un autre serveur)' }, el('span', {}, 'Exporter')), el('button', { class: 'btn s', onclick: () => file.click() }, el('span', {}, 'Importer')), file),
     el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'Un réglage ne change rien tant que tu ne l’as pas modifié : les valeurs d’origine de ta base restent en vigueur. Les changements sont appliqués en direct sur le serveur, sans redémarrage.'),
-    modeCard(), el('div', { class: 'setlayout' }, rail, main), bar);
+    modeCard(), profileCard(), el('div', { class: 'setlayout' }, rail, main), bar);
+  // ── Profils de serveur : un clic règle des dizaines d'options ──
+  function profileCard() {
+    const box = el('div', { class: 'card' }, el('h2', {}, 'Profils de serveur'), el('p', { class: 'muted' }, 'Chargement…'));
+    api('GET', `/api/servers/${s.id}/settings/profiles`).then(p => {
+      if (!p.ok || !p.ready) return box.remove();
+      box.replaceChildren(el('h2', {}, 'Profils de serveur'), el('p', { class: 'muted', style: 'margin:-6px 0 12px' }, 'Applique un ensemble de réglages d’un coup (tes autres réglages sont conservés). Tout reste modifiable ensuite, et l’historique permet d’annuler.'),
+        el('div', { class: 'opts' }, p.profiles.map(x => el('button', { class: 'opt', onclick: () => confirmBox(`Appliquer « ${x.name} » ?`, `${x.count} réglages vont changer. Tu pourras annuler depuis « Historique des réglages ».`, async () => { const r = await api('POST', `/api/servers/${s.id}/settings/profile`, { name: x.name, values: x.values }); toast(r.ok ? `Profil « ${x.name} » appliqué (${r.changed} changement${r.changed > 1 ? 's' : ''})` : r.error, r.ok ? 'ok' : 'bad'); render(); }) }, el('div', { class: 'opt-t' }, el('b', {}, `${x.icon}  ${x.name}`)), el('small', { class: 'muted' }, x.desc)))));
+    });
+    return box;
+  }
   // ── Mode de jeu : facile / difficile en un clic ──
   function modeCard() {
     if (!by.game_mode) return null;

@@ -14,6 +14,7 @@ app.use(cookieParser());
 app.use(A.loadUser);
 app.use(A.csrf);
 app.use('/drive', require('./routes/drive-public'));
+app.use('/api/public', require('./routes/public-events'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/servers', require('./routes/servers'));
 app.use('/api/servers', require('./routes/server-extra'));
@@ -32,6 +33,6 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 app.use((err, req, res, next) => { console.error('[panel]', err.message); res.status(err.status || 500).json({ ok: false, error: err.status === 400 ? 'Requête invalide' : 'Erreur serveur' }); });
 // nettoyage périodique
 setInterval(() => { db.prepare('DELETE FROM sessions WHERE expires_at<?').run(now()); db.prepare("DELETE FROM commands WHERE created_at<? AND status IN ('done','failed')").run(now() - 30 * 86400); }, 3600 * 1000).unref();
-if (require.main === module) require('./lib/scheduler').start();
+if (require.main === module) { require('./lib/scheduler').start(); require('./lib/reminders').start(); }
 if (require.main === module) app.listen(cfg.port, () => console.log(`[panel] http://localhost:${cfg.port}`));
 module.exports = app;

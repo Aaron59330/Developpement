@@ -36,6 +36,7 @@ router.post('/sync', (req, res) => {
     const stats = b.stats && typeof b.stats === 'object' ? { uptime: +b.stats.uptime || 0, version: String(b.stats.version || '').slice(0, 40), hostname: String(b.stats.hostname || '').slice(0, 80), memory: +b.stats.memory || 0, activity: Array.isArray(b.stats.activity) ? b.stats.activity.slice(0, 40).filter(a => a && typeof a.key === 'string').map(a => ({ key: String(a.key).slice(0, 40), label: String(a.label || a.key).slice(0, 60), today: Math.round(+a.today || 0), week: Math.round(+a.week || 0) })) : [] } : {};
     db.prepare(`INSERT INTO server_state(license_id,players,max_players,resources,stats,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(license_id) DO UPDATE SET players=excluded.players,max_players=excluded.max_players,${resources ? 'resources=excluded.resources,' : ''}stats=excluded.stats,updated_at=excluded.updated_at`)
       .run(l.id, JSON.stringify(players), +b.maxPlayers || 0, JSON.stringify(resources || []), JSON.stringify(stats), now());
+    require('../lib/playerstats').track(l.id, players, now());
     const last = db.prepare('SELECT at FROM stats_hist WHERE license_id=? ORDER BY id DESC LIMIT 1').get(l.id);
     if (!last || now() - last.at >= 300) { db.prepare('INSERT INTO stats_hist(license_id,at,players) VALUES(?,?,?)').run(l.id, now(), players.length); db.prepare('DELETE FROM stats_hist WHERE license_id=? AND at<?').run(l.id, now() - 31 * 86400); }
     const newLogs = [];

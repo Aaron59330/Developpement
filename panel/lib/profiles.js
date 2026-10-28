@@ -1,0 +1,10 @@
+// Profils de serveur : ensembles de réglages (clés de pickax_settings) appliqués en un clic depuis le panel
+const PROFILES = [
+  { id: 'debutant', name: 'Débutant', icon: '🌱', desc: 'Pour un serveur qui démarre ou des joueurs qui découvrent : systèmes simplifiés (mode facile), pas de niveau de recherche, tir ami coupé, endurance infinie, bonus de départ et récompenses du carnet augmentées.',
+    values: { game_mode: 'facile', npc_enabled: true, npc_density: 0.5, traffic_density: 0.5, parked_density: 0.5, npc_police: false, wanted_enabled: false, friendly_fire: false, drive_by: false, stamina_infinite: true, health_regen: 1.5, carnet_reward_mult: 1.5, start_money: 5000, welcome_message: 'Bienvenue ! Appuie sur F5 pour ouvrir le menu.', announce_enabled: true, announce_interval: 10 } },
+  { id: 'rp', name: 'RP sérieux', icon: '🎭', desc: 'Un roleplay posé et réaliste : systèmes complets (mode difficile), monde vivant, police jouée par les joueurs (pas de PNJ de police), pas de tir en véhicule, pas de régénération de vie, météo dynamique.',
+    values: { game_mode: 'difficile', npc_enabled: true, npc_density: 0.6, traffic_density: 0.6, parked_density: 0.6, npc_police: false, wanted_enabled: false, friendly_fire: true, drive_by: false, critical_hits: true, health_regen: 0, stamina_infinite: false, idle_cam: false, weather_dynamic: true, announce_enabled: true, announce_interval: 20 } },
+  { id: 'gangs', name: 'Gangs / action', icon: '🔫', desc: 'Un serveur nerveux : systèmes complets, guerres de zone, affrontements et raids de QG, tributs toutes les 45 minutes, captures plus rapides, endurance infinie, dégâts d\'armes légèrement augmentés.',
+    values: { game_mode: 'difficile', npc_enabled: true, npc_density: 0.4, traffic_density: 0.4, parked_density: 0.4, npc_police: false, wanted_enabled: false, friendly_fire: true, drive_by: true, weapon_damage: 1.1, health_regen: 0.5, stamina_infinite: true, gb_capture_seconds: 90, gb_turf_enabled: true, gb_raid_enabled: true, gb_conf_enabled: true, gb_trib_enabled: true, gb_trib_interval: 45 } },
+];
+module.exports = { PROFILES };

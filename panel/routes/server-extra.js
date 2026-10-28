@@ -9,11 +9,72 @@ const queue = (l, uid, type, payload) => { const id = db.prepare('INSERT INTO co
 const SET = require('../lib/settings');
 const docOf = (lid, key) => { const d = db.prepare('SELECT value,version FROM docs WHERE license_id=? AND key=?').get(lid, key); return d ? { v: JSON.parse(d.value), version: d.version } : null; };
 router.get('/:id/settings', (req, res) => { const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'), ov = docOf(l.id, 'settings'); res.json({ ok: true, schema: sch ? sch.v : [], overrides: ov ? ov.v : {}, ready: !!sch }); });
+// Enregistre les réglages modifiés d'un serveur et garde l'historique (qui, quand, avant → après) pour pouvoir revenir en arrière
+function saveSettings(l, user, ip, overrides, source) {
+  const prev = (docOf(l.id, 'settings') || { v: {} }).v || {};
+  const changes = {};
+  for (const k of new Set([...Object.keys(prev), ...Object.keys(overrides)])) if (JSON.stringify(prev[k]) !== JSON.stringify(overrides[k])) changes[k] = { from: prev[k] === undefined ? null : prev[k], to: overrides[k] === undefined ? null : overrides[k] };
+  db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(license_id,key) DO UPDATE SET value=excluded.value, version=docs.version+1, updated_at=excluded.updated_at').run(l.id, 'settings', JSON.stringify(overrides), 1, now());
+  if (Object.keys(changes).length) {
+    db.prepare('INSERT INTO settings_history(license_id,user_id,at,source,changes,before) VALUES(?,?,?,?,?,?)').run(l.id, user.id, now(), source, JSON.stringify(changes), JSON.stringify(prev));
+    db.prepare('DELETE FROM settings_history WHERE license_id=? AND id NOT IN (SELECT id FROM settings_history WHERE license_id=? ORDER BY id DESC LIMIT 200)').run(l.id, l.id);
+  }
+  audit(user.id, l.id, 'doc:settings', Object.keys(changes).join(',').slice(0, 200), ip); bus.wake(l.id);
+  return Object.keys(changes).length;
+}
 router.put('/:id/settings', (req, res) => {
   const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); if (!sch) return res.json({ ok: false, error: 'Les réglages ne sont pas encore disponibles : la ressource pickax_settings doit tourner sur ton serveur.' });
   const { overrides, errors } = SET.validate(sch.v, (req.body || {}).values); if (errors.length) return res.json({ ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') });
-  db.prepare('INSERT INTO docs(license_id,key,value,version,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(license_id,key) DO UPDATE SET value=excluded.value, version=docs.version+1, updated_at=excluded.updated_at').run(l.id, 'settings', JSON.stringify(overrides), 1, now());
-  audit(req.user.id, l.id, 'doc:settings', Object.keys(overrides).join(','), A.ip(req)); bus.wake(l.id); res.json({ ok: true, count: Object.keys(overrides).length });
+  saveSettings(l, req.user, A.ip(req), overrides, 'panel'); res.json({ ok: true, count: Object.keys(overrides).length });
+});
+// Profil de serveur : applique un ensemble de réglages par-dessus les réglages actuels (les clés inconnues du serveur sont ignorées)
+router.post('/:id/settings/profile', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); if (!sch) return res.json({ ok: false, error: 'Les réglages ne sont pas encore disponibles : la ressource pickax_settings doit tourner sur ton serveur.' });
+  const b = req.body || {}; const values = b.values && typeof b.values === 'object' ? b.values : {}; const known = new Set(sch.v.map(d => d.key));
+  const merged = { ...((docOf(l.id, 'settings') || { v: {} }).v || {}) }; let skipped = 0;
+  for (const [k, v] of Object.entries(values)) { if (!known.has(k)) { skipped++; continue; } merged[k] = v; }
+  const { overrides, errors } = SET.validate(sch.v, merged); if (errors.length) return res.json({ ok: false, error: 'Valeur invalide : ' + errors.slice(0, 3).join(', ') });
+  const n = saveSettings(l, req.user, A.ip(req), overrides, 'profil : ' + String(b.name || 'sans nom').slice(0, 40)); res.json({ ok: true, changed: n, skipped });
+});
+router.get('/:id/settings/profiles', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); const known = new Set(sch ? sch.v.map(d => d.key) : []);
+  res.json({ ok: true, ready: !!sch, profiles: require('../lib/profiles').PROFILES.map(p => { const values = Object.fromEntries(Object.entries(p.values).filter(([k]) => known.has(k))); return { id: p.id, name: p.name, icon: p.icon, desc: p.desc, count: Object.keys(values).length, values }; }) });
+});
+router.get('/:id/diagnostic', (req, res) => {
+  const l = own(req, res); if (!l) return; const st = db.prepare('SELECT * FROM server_state WHERE license_id=?').get(l.id);
+  const logs = db.prepare("SELECT level,source,message,at FROM logs WHERE license_id=? AND level='error' AND at>? ORDER BY id DESC LIMIT 200").all(l.id, now() - 3600);
+  const sch = docOf(l.id, 'settings_schema'), ov = docOf(l.id, 'settings'), th = docOf(l.id, 'theme');
+  res.json(Object.assign({ ok: true }, require('../lib/diagnostic').run({ now: now(), license: l, lastSeen: l.last_seen, resources: st ? JSON.parse(st.resources || '[]') : [], players: st ? JSON.parse(st.players || '[]').length : 0, maxPlayers: st ? st.max_players : 0, stats: st ? JSON.parse(st.stats || '{}') : {}, settingsSchema: sch ? sch.v : [], overrides: ov ? ov.v : {}, logs, docs: { theme: th ? th.v : null } })));
+});
+// ───────── fiche joueur : recherche + statistiques + sanctions ─────────
+router.get('/:id/players-db', (req, res) => {
+  const l = own(req, res); if (!l) return; const q = String(req.query.q || '').trim().slice(0, 60).replace(/[%_]/g, '');
+  const rows = q ? db.prepare("SELECT identifier,name,minutes,sessions,last_seen,last_job,online FROM player_stats WHERE license_id=? AND (name LIKE ? OR identifier LIKE ?) ORDER BY online DESC, last_seen DESC LIMIT 40").all(l.id, `%${q}%`, `%${q}%`)
+    : db.prepare('SELECT identifier,name,minutes,sessions,last_seen,last_job,online FROM player_stats WHERE license_id=? ORDER BY online DESC, last_seen DESC LIMIT 40').all(l.id);
+  res.json({ ok: true, total: db.prepare('SELECT COUNT(*) n FROM player_stats WHERE license_id=?').get(l.id).n, rows: rows.map(r => ({ ...r, minutes: Math.round(r.minutes) })) });
+});
+router.get('/:id/players-db/:ident', (req, res) => {
+  const l = own(req, res); if (!l) return; const ident = String(req.params.ident).slice(0, 120);
+  const p = db.prepare('SELECT * FROM player_stats WHERE license_id=? AND identifier=?').get(l.id, ident); if (!p) return res.json({ ok: false, error: 'Joueur inconnu' });
+  const bans = (docOf(l.id, 'bans') || { v: [] }).v || [];
+  const sanctions = [];
+  for (const b of bans) if (b.identifier === ident) sanctions.push({ kind: 'ban', actif: true, reason: b.reason || '', at: b.at || b.created_at || null, by: b.by || '' });
+  for (const c of db.prepare("SELECT type,payload,created_at,by_user FROM commands WHERE license_id=? AND type IN ('ban','unban','kick') AND payload LIKE ? ORDER BY id DESC LIMIT 20").all(l.id, `%${ident.replace(/[%_\\]/g, '')}%`)) {
+    let pl = {}; try { pl = JSON.parse(c.payload); } catch (e) {}
+    if (pl.identifier === ident || pl.name === p.name) sanctions.push({ kind: c.type, actif: false, reason: pl.reason || '', at: c.created_at });
+  }
+  res.json({ ok: true, player: { identifier: p.identifier, name: p.name, minutes: Math.round(p.minutes), sessions: p.sessions, first_seen: p.first_seen, last_seen: p.last_seen, last_job: p.last_job, money: p.last_money, bank: p.last_bank, max_money: p.max_money, online: !!p.online }, sanctions });
+});
+router.get('/:id/settings/history', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = (docOf(l.id, 'settings_schema') || { v: [] }).v; const by = Object.fromEntries(sch.map(d => [d.key, d]));
+  const users = {}; const rows = db.prepare('SELECT h.id,h.at,h.source,h.changes,h.user_id,u.username FROM settings_history h LEFT JOIN users u ON u.id=h.user_id WHERE h.license_id=? ORDER BY h.id DESC LIMIT 60').all(l.id);
+  res.json({ ok: true, rows: rows.map(r => ({ id: r.id, at: r.at, source: r.source, user: r.username || '—', changes: Object.entries(JSON.parse(r.changes)).slice(0, 40).map(([k, c]) => ({ key: k, label: by[k] ? by[k].label : k, group: by[k] ? by[k].group : '', type: by[k] ? by[k].type : 'text', from: c.from, to: c.to })) })) });
+});
+router.post('/:id/settings/history/:hid/restore', (req, res) => {
+  const l = own(req, res); if (!l) return; const sch = docOf(l.id, 'settings_schema'); if (!sch) return res.json({ ok: false, error: 'Réglages indisponibles' });
+  const h = db.prepare('SELECT id,before FROM settings_history WHERE id=? AND license_id=?').get(+req.params.hid, l.id); if (!h) return res.json({ ok: false, error: 'Entrée introuvable' });
+  const { overrides } = SET.validate(sch.v, JSON.parse(h.before)); const n = saveSettings(l, req.user, A.ip(req), overrides, 'restauration #' + h.id);
+  res.json({ ok: true, changed: n });
 });
 
 // ───────── statistiques ─────────
