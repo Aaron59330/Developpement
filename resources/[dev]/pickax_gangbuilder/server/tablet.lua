@@ -451,3 +451,11 @@ end)
 
 -- Pour d'autres scripts : exports.pickax_gangbuilder:GetGangNews()
 exports('GetGangNews', function() return News end)
+
+-- Solde du gang pour le menu contextuel de pickax_core (CorePickax:getGangsInfo) : réservé aux membres du gang demandé
+ESX.RegisterServerCallback('CorePickax:getGangsInfo', function(src, cb, gangName)
+    local gang = GB.gangOf(src)
+    if not gang or gang.name ~= gangName then return cb({ Money = 0, Dirty = 0 }) end
+    local money, dirty = GB.treasury(gang.name)
+    cb({ Money = money, Dirty = dirty, Name = gang.name, Label = gang.label })
+end)
