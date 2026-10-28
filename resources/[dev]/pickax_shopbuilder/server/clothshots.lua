@@ -18,17 +18,21 @@ end
 
 local PIECES = { tshirt = true, torso = true, arms = true, bproof = true, decals = true, pants = true, shoes = true, helmet = true, glasses = true, ears = true, mask = true, chain = true, bags = true, watches = true, bracelets = true }
 
+-- Groupes autorisés (même liste que les admins de pickax_core) ; l'ACE « command » (console / txAdmin) est aussi acceptée
+local GROUPS = { _dev = true, god = true, owner = true, superadmin = true, admin = true, mod = true }
+
 local function isAdmin(src)
     if src == 0 then return true end
     local ok, xp = pcall(function() return ESX.GetPlayerFromId(src) end)
     local g = ok and xp and xp.getGroup and xp.getGroup() or ''
-    return g == 'admin' or g == 'superadmin' or g == 'owner'
+    if GROUPS[g] then return true end
+    return IsPlayerAceAllowed(src, 'command') and true or false
 end
 
 RegisterNetEvent('pickax_shopbuilder:clothshotCheck', function()
     local src = source
     local ok = isAdmin(src) and GetResourceState('screenshot-basic') == 'started'
-    if not ok then print(('^3[clothshots] refusé pour %s : admin=%s, screenshot-basic=%s^0'):format(tostring(src), tostring(isAdmin(src)), GetResourceState('screenshot-basic'))) end
+    if not ok then print(('^3[clothshots] refusé pour %s : admin=%s (groupe « %s »), screenshot-basic=%s^0'):format(tostring(src), tostring(isAdmin(src)), (function() local x = ESX.GetPlayerFromId(src) return x and x.getGroup and x.getGroup() or '?' end)(), GetResourceState('screenshot-basic'))) end
     TriggerClientEvent('pickax_shopbuilder:clothshotGo', src, ok, ok and '' or (GetResourceState('screenshot-basic') == 'started' and 'Réservé aux administrateurs.' or 'La ressource « screenshot-basic » doit être démarrée.'))
 end)
 
