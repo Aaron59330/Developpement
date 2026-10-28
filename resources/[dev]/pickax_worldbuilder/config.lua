@@ -70,6 +70,27 @@ Config.Vehicles = {
     type   = 'type',         -- 'car', 'boat', 'aircraft', 'bike'...
 }
 
+-- Assurance véhicule : /assurer <formule> dans son véhicule, /assurance pour la liste. Réduit les frais de fourrière pendant la durée choisie.
+Config.Insurance = {
+    Enabled = true,
+    MaxPerPlayer = 3,             -- véhicules assurés en même temps
+    Society = '',                 -- compte société qui reçoit les primes ('' = personne)
+    Plans = {
+        { id = 'basic', label = 'Basique', days = 7,  price = 2500, coverage = 50 },    -- 50 % de la fourrière remboursés
+        { id = 'full',  label = 'Tous risques', days = 7, price = 6000, coverage = 100 },
+    },
+}
+
+-- Fourrière → enchères : un véhicule non réclamé depuis `Days` jours est vendu aux enchères par l'État (ressource pickax_auction, Config.State pour le compte qui encaisse)
+Config.ImpoundAuction = {
+    Enabled = true,
+    Days = 14,                    -- ancienneté en fourrière avant la vente
+    WarnDays = 2,                 -- le propriétaire est prévenu (s'il est connecté) ce nombre de jours avant
+    StartPrice = 3000,            -- prix de départ ($)
+    Hours = 48,                   -- durée de l'enchère
+    CheckMinutes = 60,
+}
+
 -- Au (re)démarrage du serveur, les véhicules « sortis » (stored = 0) sont :
 --   'garage'  → remis au garage        'impound' → envoyés en fourrière        'none' → laissés tels quels (visibles en fourrière si introuvables)
 Config.OnRestart = 'impound'

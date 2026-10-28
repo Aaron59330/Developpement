@@ -30,8 +30,22 @@ local function notify(identifier, msg, kind)
 end
 
 -- Crédite un compte, même hors ligne
+-- Compte de l'État (ventes de véhicules de fourrière) : société définie dans Config.State
+local function stateCredit(amount)
+    local name = Config.State and Config.State.Society or ''
+    if name == '' or amount <= 0 then return end
+    for _, host in ipairs({ 'pickax_core', 'esx_addonaccount' }) do
+        if GetResourceState(host) == 'started' then
+            local ok, res = pcall(function() return exports[host]:AddSharedMoney(name, amount) end)
+            if ok and res then return end
+        end
+    end
+    MySQL.update.await('UPDATE addon_account_data SET money = money + ? WHERE account_name = ? AND owner IS NULL', { amount, name })
+end
+
 local function credit(identifier, account, amount)
     if amount <= 0 then return end
+    if identifier == 'state' then return stateCredit(amount) end
     account = (account == 'money' or account == 'cash') and 'money' or 'bank'
     local x = ESX.GetPlayerFromIdentifier(identifier)
     if x then x.addAccountMoney(account, amount, 'Hôtel des ventes') return end
@@ -50,7 +64,8 @@ local function nameOf(x) return ((x.get and x.get('firstName')) or '') .. ' ' ..
 -- ═════════════════ lecture ═════════════════
 local function rowOut(r, me)
     local inc = math.max(Config.MinIncrementFlat, math.floor(r.bid * Config.MinIncrementPct / 100))
-    return { id = r.id, kind = r.kind, item = r.item, count = r.count, plate = r.plate, label = r.label, start = r.start_price, buyout = r.buyout, bid = r.bid,
+    -- pour un véhicule de l'État, `item` contient l'ancien propriétaire : jamais envoyé au client
+    return { id = r.id, kind = r.kind, item = r.kind == 'item' and r.item or nil, count = r.count, plate = r.plate, label = r.label, start = r.start_price, buyout = r.buyout, bid = r.bid,
         minBid = r.bid > 0 and (r.bid + inc) or r.start_price, ends = r.ends_at, seller = r.seller_name, mine = r.seller == me, leading = r.bidder == me and r.status == 'active',
         bids = r.bidder ~= nil, status = r.status, final = r.final_price }
 end
@@ -152,6 +167,24 @@ lib.callback.register('pickax_auction:create', function(src, d)
     return { ok = true, id = id, fee = fee }
 end)
 
+-- ═════════════════ véhicules de fourrière mis aux enchères par l'État ═════════════════
+-- Appelé par pickax_worldbuilder : le véhicule doit être en fourrière (state = 2) chez `owner`. Il passe en dépôt (owner = auction:<id>) ; le produit va à l'État.
+exports('ListImpounded', function(plate, owner, startPrice, hours)
+    if not Config.AllowVehicles or not VT then return false end
+    plate, owner = tostring(plate or ''), tostring(owner or '')
+    local start = math.floor(tonumber(startPrice) or 0)
+    if plate == '' or owner == '' or start < 1 then return false end
+    hours = math.max(1, math.floor(tonumber(hours) or 48))
+    local id = MySQL.insert.await('INSERT INTO pickax_auctions (seller, seller_name, kind, item, plate, count, label, start_price, ends_at, created, status) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)',
+        { 'state', (Config.State and Config.State.Name) or 'Fourrière', 'vehicle', owner, plate, plate, start, now() + hours * 3600, now(), 'pending' })
+    if not id then return false end
+    local upd = MySQL.update.await(('UPDATE `%s` SET `%s` = ? WHERE `%s` = ? AND `%s` = ? AND `%s` = ?'):format(VT, VC.owner, VC.owner, VC.plate, VC.state), { 'auction:' .. id, owner, plate, 2 }) or 0
+    if upd ~= 1 then MySQL.update.await('DELETE FROM pickax_auctions WHERE id = ?', { id }) return false end
+    local nm = MySQL.scalar.await(('SELECT `%s` FROM `%s` WHERE `%s` = ? AND `%s` = ?'):format(VC.name or VC.plate, VT, VC.owner, VC.plate), { 'auction:' .. id, plate })
+    MySQL.update.await("UPDATE pickax_auctions SET label = ?, status = 'active' WHERE id = ?", { (nm and nm ~= '') and nm or plate, id })
+    return id
+end)
+
 -- ═════════════════ fin d'enchère ═════════════════
 local function giveClaim(identifier, item, count, label, reason)
     MySQL.insert.await('INSERT INTO pickax_auction_claims (identifier, item, count, label, reason, created) VALUES (?, ?, ?, ?, ?, ?)', { identifier, item, count, label, reason, now() })
@@ -172,10 +205,17 @@ local function finalize(id)
         notify(r.bidder, ('Tu as remporté « %s » pour %d $.%s'):format(r.label, r.bid, r.kind == 'item' and ' Récupère-le dans Réclamations.' or ' Il t\'attend dans ton garage.'), 'success')
         webhook('Enchère terminée', ('**%s** vendu **%d $** (%s → %s)'):format(r.label, r.bid, r.seller_name, r.bidder_name or '?'))
     else
-        if r.kind == 'item' then giveClaim(r.seller, r.item, r.count, r.label, 'unsold')
+        if r.seller == 'state' then
+            -- véhicule de fourrière invendu : rendu à son ancien propriétaire (toujours en fourrière) ou envoyé à la casse selon Config.State.Unsold
+            if (Config.State and Config.State.Unsold) == 'scrap' or not r.item then
+                MySQL.update.await(('DELETE FROM `%s` WHERE `%s` = ? AND `%s` = ?'):format(VT, VC.owner, VC.plate), { 'auction:' .. id, r.plate })
+            else
+                MySQL.update.await(('UPDATE `%s` SET `%s` = ? WHERE `%s` = ? AND `%s` = ?'):format(VT, VC.owner, VC.owner, VC.plate), { r.item, 'auction:' .. id, r.plate })
+            end
+        elseif r.kind == 'item' then giveClaim(r.seller, r.item, r.count, r.label, 'unsold')
         else MySQL.update.await(('UPDATE `%s` SET `%s` = ? WHERE `%s` = ? AND `%s` = ?'):format(VT, VC.owner, VC.owner, VC.plate), { r.seller, 'auction:' .. id, r.plate }) end
         MySQL.update.await("UPDATE pickax_auctions SET status = 'expired' WHERE id = ?", { id })
-        notify(r.seller, ('« %s » n\'a pas trouvé preneur : récupère-le (Réclamations / garage).'):format(r.label), 'inform')
+        if r.seller ~= 'state' then notify(r.seller, ('« %s » n\'a pas trouvé preneur : récupère-le (Réclamations / garage).'):format(r.label), 'inform') end
     end
 end
 

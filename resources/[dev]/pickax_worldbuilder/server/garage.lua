@@ -187,6 +187,9 @@ local function impoundFee(s, plate)
         if (s.perDay or 0) > 0 and days > 0 then fee = fee + s.perDay * days end
     end
     if (s.maxFee or 0) > 0 and fee > s.maxFee then fee = s.maxFee end
+    -- assurance : une part de la fourrière est prise en charge (voir insurance.lua)
+    local cov = WB.insuranceCoverage and WB.insuranceCoverage(plate) or 0
+    if cov > 0 and fee > 0 then fee = WB.insuranceApply(fee, cov) reason = (reason and reason .. ' · ' or '') .. ('assuré −%d %%'):format(cov) end
     return fee, reason, rec and rec.officer or nil
 end
 

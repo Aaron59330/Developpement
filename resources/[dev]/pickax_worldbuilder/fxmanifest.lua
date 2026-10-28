@@ -16,6 +16,8 @@ server_scripts {
     'server/core.lua',
     'server/builder.lua',
     'server/garage.lua',
+    'server/insurance.lua',
+    'server/autoauction.lua',
     'server/rental.lua',
     'server/bank.lua',
     'server/driving.lua',

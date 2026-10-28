@@ -23,4 +23,11 @@ Config.Vehicles = {
     StoredState = 1,                   -- valeur de la colonne state quand le véhicule est au garage (seuls ceux-là peuvent être mis en vente)
 }
 
+-- Véhicules de la fourrière vendus par l'État (voir pickax_worldbuilder : Config.ImpoundAuction)
+Config.State = {
+    Name = 'Fourrière',                -- nom du vendeur affiché
+    Society = 'society_police',        -- compte société qui reçoit le produit des ventes ('' = personne)
+    Unsold = 'owner',                  -- invendu : 'owner' = rendu à l'ancien propriétaire (toujours en fourrière) | 'scrap' = détruit
+}
+
 Config.Webhook = ''                    -- webhook Discord des ventes terminées (vide = désactivé)
