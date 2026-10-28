@@ -163,6 +163,55 @@ Config.Record = {
     MaxFine = 50000,
     Distance = 6.0,              -- distance maximale policier ↔ suspect pour /inculper
     Society = 'society_police',  -- compte société qui reçoit les amendes ('' = personne)
+    -- Récidive : chaque infraction récente aggrave les amendes et les peines de prison
+    Recidive = { Enabled = true, PercentPerPrior = 20, MaxPercent = 100, WindowDays = 30 },
+}
+
+-- Prison : /emprisonner <id> <minutes> <motif> (police), /liberer <id>. Le détenu peut travailler pour réduire sa peine.
+Config.Prison = {
+    Enabled = true,
+    Coords = { x = 1690.0, y = 2591.0, z = 45.6 },
+    ExitCoords = { x = 1848.0, y = 2586.0, z = 45.7 },
+    Radius = 60.0,               -- au-delà, le détenu est ramené
+    MaxMinutes = 60,
+    Work = {
+        Reduce = 30,             -- secondes retirées par travail effectué
+        Cooldown = 45,           -- secondes entre deux travaux
+        Spots = {
+            { label = 'Cuisine', coords = { x = 1699.0, y = 2576.0, z = 45.6 } },
+            { label = 'Atelier', coords = { x = 1706.0, y = 2606.0, z = 45.6 } },
+            { label = 'Buanderie', coords = { x = 1676.0, y = 2600.0, z = 45.6 } },
+        },
+    },
+    MaxReductionPercent = 50,    -- le travail ne peut retirer que cette part de la peine
+    ArrestBonus = { Enabled = true, PerPrior = 150, Max = 1500, Account = 'bank' },   -- prime au policier qui arrête un récidiviste
+}
+
+-- Informateurs : des PNJ qui vendent des tuyaux (/indic puis /info <sujet>)
+Config.Informants = {
+    Enabled = true,
+    Radius = 3.0,
+    Locations = {
+        { label = 'Ruelle de Davis',  coords = { x = 111.0, y = -1730.0, z = 30.1 } },
+        { label = 'Bar de Sandy',     coords = { x = 1982.0, y = 3053.0, z = 47.2 } },
+        { label = 'Port de Paleto',   coords = { x = -276.0, y = 6636.0, z = 7.5 } },
+    },
+    Offers = {
+        blackmarket = { label = 'Où est le marché noir ?', price = 2500 },
+        contract    = { label = 'Livraison suspecte en cours (police)', price = 1500, police = true },
+    },
+}
+
+-- Planques : /planque (créer / ouvrir), /fouillerplanque (police)
+Config.Stashes = {
+    Enabled = true,
+    Max = 2,                     -- planques par joueur
+    Slots = 20, Weight = 50000,
+    ExpireDays = 14,             -- une planque oubliée disparaît (0 = jamais)
+    SearchRadius = 5.0,          -- rayon de fouille de la police
+    FindChance = 35,             -- % de chance de base (diminue avec la distance)
+    SearchCooldown = 20,
+    MinCops = 0,
 }
 
 Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } }   -- couleur d'accentuation (modifiable en jeu : Paramètres → Apparence)

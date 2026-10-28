@@ -166,6 +166,13 @@ ESX.RegisterServerCallback('illegalbuilder:contract:done', function(src, cb)
     cb({ ok = true, reward = reward, fast = fast })
 end)
 
+-- Destinations des contrats en cours (tuyau d'indic pour la police)
+function IB.contractZones()
+    local out = {}
+    for _, c in pairs(contracts) do out[#out + 1] = c.to end
+    return out
+end
+
 RegisterNetEvent('illegalbuilder:server:contractCancel', function() contracts[source] = nil end)
 
 -- ═══════════════════════════ Casier judiciaire ═══════════════════════════
@@ -213,7 +220,9 @@ RegisterCommand('inculper', function(src, args)
     if not t or t.source == src or fine < 0 or reason == '' then return IB.notify(src, 'Usage : /inculper <id> <amende> <motif>', 'error') end
     local a, b = GetPlayerPed(src), GetPlayerPed(t.source)
     if not a or a == 0 or not b or b == 0 or dist(GetEntityCoords(a), GetEntityCoords(b)) > (tonumber(RC().Distance) or 6.0) then return IB.notify(src, 'Le suspect est trop loin.', 'error') end
-    fine = math.min(fine, math.floor(tonumber(RC().MaxFine) or 50000))
+    local priors = IB.priorCount and IB.priorCount(t.identifier) or 0
+    local mul = IB.recidiveMul and IB.recidiveMul(priors) or 1.0
+    fine = math.min(math.floor(fine * mul + 0.5), math.floor((tonumber(RC().MaxFine) or 50000) * mul))
     local paid = 0
     if fine > 0 then
         local acc = t.getAccount('bank')

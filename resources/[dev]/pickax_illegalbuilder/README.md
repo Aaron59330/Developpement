@@ -73,3 +73,16 @@ Tout se règle depuis le panel (Réglages → Drogues & labos) ou dans `config.l
 ## Gangs — tags de territoire (pickax_gangbuilder)
 
 `/tag` dans un territoire possédé par ton gang pose une marque visible au sol (couleur du gang) qui augmente le revenu du territoire (4 % par tag, plafonné, 5 tags max par défaut) et expire après 7 jours. `/effacer` près d'un tag rival le supprime. Réglages : `Config.Tags` ou panel → Gangs → Tags de gang.
+
+## Récidive, informateurs, prison et planques
+
+Réglages dans le panel (Drogues & labos) ou `Config.Record.Recidive`, `Config.Prison`, `Config.Informants`, `Config.Stashes`.
+
+- **Récidive** — chaque infraction des 30 derniers jours aggrave de 20 % (plafonné à +100 %) les amendes de `/inculper` et les peines de `/emprisonner`. Le policier qui arrête un récidiviste touche une prime.
+- **Prison** — `/emprisonner <id> <minutes> <motif>` (police) téléporte le détenu, `/liberer <id>` le libère. La peine continue hors ligne. Le détenu travaille aux postes (touche E) pour réduire sa peine, dans la limite de 50 %. S'il s'éloigne, il est ramené.
+- **Informateurs** — des PNJ aux coins de la ville : `/indic` puis `/info blackmarket` (position du marché noir) ou `/info contract` (police : zone approximative d'une livraison en cours), payés en liquide.
+- **Planques** — `/planque` crée une cachette (2 max) ou ouvre celle à proximité (coffre ox_inventory). La police peut la dénicher avec `/fouillerplanque` (chance décroissante avec la distance) : elle est alors ouverte pour elle, supprimée et notée au casier. Une planque oubliée expire après 14 jours.
+
+## Convois de gang (pickax_gangbuilder)
+
+`/convoi` (bureau du gang, en véhicule) lance un convoi : mène le véhicule à destination avant la fin du temps imparti pour toucher une prime dans la trésorerie. Les rivaux voient une zone approximative ; s'ils restent près du véhicule 30 secondes cumulées, ils le détournent et volent la moitié de la prime. Réglages : `Config.Convoy` ou panel → Gangs → Convois.

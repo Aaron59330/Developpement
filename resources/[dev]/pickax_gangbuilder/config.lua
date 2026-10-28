@@ -150,6 +150,28 @@ Config.Tags = {
     RepPlace = 1, RepErase = 2,   -- réputation de gang gagnée
 }
 
+-- Convois de gang : /convoi (bureau) — mener un véhicule à destination ; les rivaux peuvent le détourner en restant près de lui
+Config.Convoy = {
+    Enabled = true,
+    Account = 'dirty',          -- compte de la trésorerie crédité : 'dirty' | 'money'
+    BaseReward = 4000, PerKm = 2500,
+    StealPercent = 50,          -- % de la prime volé par les détourneurs
+    InterceptRadius = 25.0,     -- distance des rivaux au véhicule
+    InterceptSeconds = 30,      -- temps cumulé à rester près du véhicule
+    ArriveRadius = 20.0,
+    AvgSpeed = 16, TimeMargin = 1.5,
+    Cooldown = 1800,            -- secondes avant qu'un gang puisse relancer un convoi
+    MinMembers = 1,
+    ApproxRadius = 150.0,       -- précision de la zone vue par les rivaux
+    RepWin = 5, RepHijack = 8,
+    Routes = {
+        { label = 'Port de Los Santos', coords = { x = 1210.0, y = -2999.0, z = 5.9 } },
+        { label = 'Aéroport de Sandy',  coords = { x = 1745.0, y = 3295.0, z = 41.1 } },
+        { label = 'Paleto Bay',         coords = { x = -105.0, y = 6320.0, z = 31.5 } },
+        { label = 'Del Perro',          coords = { x = -1650.0, y = -1018.0, z = 13.1 } },
+    },
+}
+
 Config.HQ = {
     Enabled = true,
     UpgradeAccount = 'dirty',   -- compte de la trésorerie qui paie l'amélioration : 'dirty' | 'money'
