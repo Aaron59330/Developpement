@@ -40,7 +40,16 @@ RegisterCommand('clothshots', function(_, args)
     for v = from, to do
         TriggerEvent('skinchanger:change', key, v); if piece ~= 'arms' then TriggerEvent('skinchanger:change', piece .. '_2', 0) end
         Wait(350); acked = false
-        TriggerServerEvent('pickax_shopbuilder:clothshot', sex, piece, v)
+        -- capture locale (pas de connexion web vers le serveur) puis envoi par morceaux
+        local data
+        exports['screenshot-basic']:requestScreenshot({ encoding = 'webp', quality = 0.6 }, function(d) data = d end)
+        local t2 = GetGameTimer() + 6000; while not data and GetGameTimer() < t2 do Wait(10) end
+        if type(data) == 'string' and #data > 100 then
+            local size, n = 8000, math.ceil(#data / 8000)
+            for i = 1, n do TriggerServerEvent('pickax_shopbuilder:clothshotPart', sex, piece, v, i, n, data:sub((i - 1) * size + 1, i * size)) Wait(0) end
+        else
+            acked = true; say('capture impossible pour le n° ' .. v, true)
+        end
         local t1 = GetGameTimer() + 8000; while not acked and GetGameTimer() < t1 do Wait(20) end
         if not running then break end
     end

@@ -36,14 +36,24 @@ RegisterNetEvent('pickax_shopbuilder:clothshotCheck', function()
     TriggerClientEvent('pickax_shopbuilder:clothshotGo', src, ok, ok and '' or (GetResourceState('screenshot-basic') == 'started' and 'Réservé aux administrateurs.' or 'La ressource « screenshot-basic » doit être démarrée.'))
 end)
 
-RegisterNetEvent('pickax_shopbuilder:clothshot', function(sex, piece, value)
+-- L'image arrive en morceaux (capture faite côté joueur par screenshot-basic) : on la rassemble puis on l'enregistre
+local parts = {}   -- [source] = { key, n, got, list }
+
+RegisterNetEvent('pickax_shopbuilder:clothshotPart', function(sex, piece, value, i, n, chunk)
     local src = source
-    if not isAdmin(src) or (sex ~= 'm' and sex ~= 'f') or not PIECES[piece] or type(value) ~= 'number' then return end
-    exports['screenshot-basic']:requestClientScreenshot(src, { encoding = 'webp', quality = 0.6 }, function(err, data)
-        if not err and type(data) == 'string' then
-            local raw = b64decode(data:gsub('^data:image/%w+;base64,', ''))
-            SaveResourceFile(RES, ('html/clothes/%s/%s/%d.webp'):format(sex, piece, value), raw, #raw)
-        end
-        TriggerClientEvent('pickax_shopbuilder:clothshotAck', src, err == nil)
-    end)
+    if not isAdmin(src) or (sex ~= 'm' and sex ~= 'f') or not PIECES[piece] or type(value) ~= 'number' or value < 0 or value > 9999 then return end
+    if type(i) ~= 'number' or type(n) ~= 'number' or type(chunk) ~= 'string' or n < 1 or n > 60 or i < 1 or i > n or #chunk > 8200 then return end
+    local key = sex .. piece .. value
+    local p = parts[src]
+    if not p or p.key ~= key or i == 1 then p = { key = key, n = n, got = 0, list = {} } parts[src] = p end
+    if not p.list[i] then p.list[i] = chunk p.got = p.got + 1 end
+    if p.got < p.n then return end
+    parts[src] = nil
+    local data = table.concat(p.list):gsub('^data:image/%w+;base64,', '')
+    local raw = b64decode(data)
+    local ok = #raw > 100 and SaveResourceFile(RES, ('html/clothes/%s/%s/%d.webp'):format(sex, piece, value), raw, #raw)
+    if not ok then print(('^1[clothshots] impossible d\'écrire html/clothes/%s/%s/%d.webp^0'):format(sex, piece, value)) end
+    TriggerClientEvent('pickax_shopbuilder:clothshotAck', src, ok and true or false)
 end)
+
+AddEventHandler('playerDropped', function() parts[source] = nil end)
