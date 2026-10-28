@@ -274,6 +274,16 @@ Config.Police = {
     MaxCalls     = 100,      -- appels gardés par job
     ClosedKeepMinutes = 30,  -- un appel clôturé disparaît de la liste après ce délai
     MinFine = 1, MaxFine = 50000,
+    -- Bracelets électroniques : posés sur un joueur proche depuis la tablette, position suivie, alerte au dispatch s'il quitte sa zone
+    Bracelets = {
+        Enabled = true,
+        Distance = 4.0,           -- distance maximale agent ↔ porteur pour poser un bracelet
+        Interval = 10,            -- secondes entre deux relevés de position
+        MaxPerJob = 30,           -- bracelets actifs par service
+        ZoneMin = 20.0, ZoneMax = 2000.0,   -- rayon de la zone autorisée (m)
+        EscapeCooldown = 120,     -- secondes entre deux alertes « hors zone » d'un même porteur
+        Command = 'bracelet',     -- /bracelet <id> : poser un bracelet sans ouvrir la tablette
+    },
     CallCommand  = 'appel',  -- /appel <message> : appel citoyen vers les jobs police
     PanicCommand = 'panic',  -- /panic : appel à l'aide d'un policier à ses collègues
     -- Amendes proposées par défaut aux nouveaux jobs police (modifiables ensuite par job dans le builder)

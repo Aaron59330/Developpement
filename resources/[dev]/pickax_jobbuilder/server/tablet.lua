@@ -29,7 +29,7 @@ local function identity(x)
 end
 
 -- Contexte d'une requête : joueur, job, réglages, droits. `need` = 'records' | 'dispatch' | 'map' | 'admin' | 'fine' | 'pursuit'
-local function ctx(src, need)
+local function ctx(src, need)   -- need : …| 'bracelet'
     local x = ESX.GetPlayerFromId(src)
     if not x then return nil, nil, nil, 'Joueur introuvable' end
     local job = JB.Jobs[x.job.name]
@@ -41,6 +41,7 @@ local function ctx(src, need)
     if g < (s.tablet_grade or 0) then return nil, nil, nil, 'Ton grade ne permet pas d\'ouvrir la tablette' end
     local perms = {
         records = s.tablet_records ~= false, dispatch = s.tablet_dispatch ~= false, map = s.tablet_map ~= false,
+        bracelet = (P.Bracelets or {}).Enabled ~= false and s.tablet_bracelets ~= false and g >= (s.bracelet_grade or 0),
         admin = g >= (s.tablet_admin_grade or job.boss_grade), fine = g >= (s.fine_grade or 0), pursuit = g >= (s.pursuit_grade or 0),
     }
     if need and not perms[need] then return nil, nil, nil, 'Ton grade ne permet pas cette action' end
@@ -548,4 +549,192 @@ ESX.RegisterServerCallback('jobbuilder:pursuit:stop', function(src, cb)
     if not x then return cb(fail(err)) end
     endPursuit(job.name, 'arrêtée par ' .. JB.playerName(x))
     cb({ ok = true })
+end)
+
+-- ═══════════════════════════ Bracelets électroniques ═══════════════════════════
+-- Un agent pose un bracelet sur un joueur proche. Le serveur relève sa position toutes les quelques secondes ; si une zone est définie et que le porteur en sort,
+-- une alerte part au dispatch du service. Le bracelet ne se retire que par la tablette d'un agent habilité. Tout est décidé côté serveur (distance, grades, zone).
+local function BR() return P.Bracelets or {} end
+local braceletsLive = {}      -- [id] = { x, y, z, at, out, alertAt }
+
+CreateThread(function()
+    Wait(2500)
+    pcall(MySQL.query.await, [[CREATE TABLE IF NOT EXISTS jobbuilder_bracelets (id INT AUTO_INCREMENT PRIMARY KEY, job_name VARCHAR(60) NOT NULL, identifier VARCHAR(80) NOT NULL,
+        name VARCHAR(100) NOT NULL, placed_by VARCHAR(100) NULL, placed_at INT NOT NULL, zone_x DOUBLE NULL, zone_y DOUBLE NULL, zone_z DOUBLE NULL, zone_r DOUBLE NULL,
+        last_x DOUBLE NULL, last_y DOUBLE NULL, last_z DOUBLE NULL, last_at INT NULL, UNIQUE KEY uq_ident (identifier), INDEX (job_name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+
+local function bracelet(id, jobName)
+    return MySQL.single.await('SELECT * FROM jobbuilder_bracelets WHERE id = ? AND job_name = ?', { tonumber(id) or 0, jobName })
+end
+
+-- Joueur connecté portant ce bracelet (xPlayer) ou nil
+local function wearer(identifier)
+    return ESX.GetPlayerFromIdentifier and ESX.GetPlayerFromIdentifier(identifier) or nil
+end
+
+-- Distance au centre de la zone (nil si pas de zone)
+function JB.braceletOutside(b, x, y)
+    if not b.zone_r or not b.zone_x then return false end
+    local dx, dy = x - b.zone_x, y - b.zone_y
+    return dx * dx + dy * dy > b.zone_r * b.zone_r
+end
+
+local function braceletView(b)
+    local w = wearer(b.identifier)
+    local live = braceletsLive[b.id]
+    local x, y, z, at = b.last_x, b.last_y, b.last_z, b.last_at
+    if w then
+        local ped = GetPlayerPed(w.source)
+        if ped and ped ~= 0 then local c = GetEntityCoords(ped) x, y, z, at = c.x, c.y, c.z, os.time() end
+    end
+    return { id = b.id, name = b.name, by = b.placed_by, placedAt = b.placed_at, online = w ~= nil, x = x, y = y, z = z, seen = at,
+        zone = b.zone_r and { x = b.zone_x, y = b.zone_y, r = b.zone_r } or nil, out = (live and live.out) or false,
+        outNow = w ~= nil and x ~= nil and JB.braceletOutside(b, x, y) or false }
+end
+
+ESX.RegisterServerCallback('jobbuilder:bracelet:list', function(src, cb)
+    local x, job, s, err = ctx(src, 'bracelet')
+    if not x then return cb(fail(err)) end
+    local rows = MySQL.query.await('SELECT * FROM jobbuilder_bracelets WHERE job_name = ? ORDER BY id DESC', { job.name }) or {}
+    local list = {}
+    for _, b in ipairs(rows) do list[#list + 1] = braceletView(b) end
+    cb({ ok = true, list = list, max = BR().MaxPerJob or 30, zoneMin = BR().ZoneMin or 20, zoneMax = BR().ZoneMax or 2000 })
+end)
+
+-- Joueurs à portée pour poser un bracelet
+ESX.RegisterServerCallback('jobbuilder:bracelet:nearby', function(src, cb)
+    local x, job, s, err = ctx(src, 'bracelet')
+    if not x then return cb(fail(err)) end
+    local me = GetEntityCoords(GetPlayerPed(src))
+    local out = {}
+    for _, id in ipairs(GetPlayers()) do
+        id = tonumber(id)
+        local t = id ~= src and ESX.GetPlayerFromId(id)
+        local ped = t and GetPlayerPed(id)
+        if t and ped and ped ~= 0 then
+            local d = #(GetEntityCoords(ped) - me)
+            if d <= (BR().Distance or 4.0) + 1.0 then
+                local first, last = identity(t)
+                out[#out + 1] = { src = id, name = first .. ' ' .. last, dist = math.floor(d * 10) / 10 }
+            end
+        end
+    end
+    table.sort(out, function(a, b) return a.dist < b.dist end)
+    cb({ ok = true, list = out })
+end)
+
+local function placeBracelet(src, targetId)
+    local x, job, s, err = ctx(src, 'bracelet')
+    if not x then return false, err end
+    local t = ESX.GetPlayerFromId(tonumber(targetId))
+    if not t or t.source == src then return false, 'Aucune personne ciblée' end
+    local a, b = GetPlayerPed(src), GetPlayerPed(t.source)
+    if not a or a == 0 or not b or b == 0 or #(GetEntityCoords(a) - GetEntityCoords(b)) > (BR().Distance or 4.0) + 1.0 then return false, 'La personne est trop loin' end
+    if MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE identifier = ?', { t.identifier }) > 0 then return false, 'Cette personne porte déjà un bracelet' end
+    if MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE job_name = ?', { job.name }) >= (BR().MaxPerJob or 30) then return false, 'Nombre maximal de bracelets atteint' end
+    local first, last = identity(t)
+    local id = MySQL.insert.await('INSERT INTO jobbuilder_bracelets (job_name, identifier, name, placed_by, placed_at) VALUES (?, ?, ?, ?, ?)',
+        { job.name, t.identifier, first .. ' ' .. last, JB.playerName(x), os.time() })
+    local rid = ensureRecord(job.name, t, JB.playerName(x))
+    addEntry(rid, job.name, 'note', 'Bracelet électronique posé', 0, nil, JB.playerName(x))
+    JB.log(job.name, x, 'bracelet_placed', first .. ' ' .. last)
+    JBNotifyClient(t.source, '~r~Un bracelet électronique vient d\'être posé à ta cheville. Ta position est suivie par la police.')
+    return true, id
+end
+
+ESX.RegisterServerCallback('jobbuilder:bracelet:place', function(src, cb, targetId)
+    local ok, res = placeBracelet(src, targetId)
+    cb(ok and { ok = true, id = res } or fail(res))
+end)
+
+RegisterCommand(BR().Command or 'bracelet', function(src, args)
+    if src == 0 then return end
+    local ok, res = placeBracelet(src, args[1])
+    JBNotifyClient(src, ok and '~g~Bracelet posé.' or ('~r~' .. tostring(res)))
+end, false)
+
+ESX.RegisterServerCallback('jobbuilder:bracelet:remove', function(src, cb, id)
+    local x, job, s, err = ctx(src, 'bracelet')
+    if not x then return cb(fail(err)) end
+    local b = bracelet(id, job.name)
+    if not b then return cb(fail('Bracelet introuvable')) end
+    MySQL.update.await('DELETE FROM jobbuilder_bracelets WHERE id = ?', { b.id })
+    braceletsLive[b.id] = nil
+    JB.log(job.name, x, 'bracelet_removed', b.name)
+    local w = wearer(b.identifier)
+    if w then JBNotifyClient(w.source, '~g~Ton bracelet électronique a été retiré.') end
+    cb({ ok = true })
+end)
+
+-- Définit (ou retire avec rayon 0) la zone autorisée : centrée sur la position de l'agent
+ESX.RegisterServerCallback('jobbuilder:bracelet:zone', function(src, cb, id, radius)
+    local x, job, s, err = ctx(src, 'bracelet')
+    if not x then return cb(fail(err)) end
+    local b = bracelet(id, job.name)
+    if not b then return cb(fail('Bracelet introuvable')) end
+    radius = tonumber(radius) or 0
+    if radius <= 0 then
+        MySQL.update.await('UPDATE jobbuilder_bracelets SET zone_x = NULL, zone_y = NULL, zone_z = NULL, zone_r = NULL WHERE id = ?', { b.id })
+        if braceletsLive[b.id] then braceletsLive[b.id].out = false end
+        return cb({ ok = true, cleared = true })
+    end
+    radius = math.max(BR().ZoneMin or 20, math.min(BR().ZoneMax or 2000, radius))
+    local c = GetEntityCoords(GetPlayerPed(src))
+    MySQL.update.await('UPDATE jobbuilder_bracelets SET zone_x = ?, zone_y = ?, zone_z = ?, zone_r = ? WHERE id = ?', { c.x, c.y, c.z, radius, b.id })
+    if braceletsLive[b.id] then braceletsLive[b.id].out = false end
+    JB.log(job.name, x, 'bracelet_zone', ('%s : %d m'):format(b.name, math.floor(radius)))
+    cb({ ok = true, r = radius })
+end)
+
+-- Relevé des positions : alerte au dispatch quand un porteur quitte sa zone, mémorise la dernière position connue
+CreateThread(function()
+    while true do
+        Wait(math.max(3, tonumber(BR().Interval) or 10) * 1000)
+        if BR().Enabled ~= false then
+            local ok, rows = pcall(MySQL.query.await, 'SELECT * FROM jobbuilder_bracelets')
+            for _, b in ipairs(ok and rows or {}) do
+                local w = wearer(b.identifier)
+                local ped = w and GetPlayerPed(w.source)
+                if ped and ped ~= 0 then
+                    local c = GetEntityCoords(ped)
+                    local live = braceletsLive[b.id] or {}
+                    braceletsLive[b.id] = live
+                    live.x, live.y, live.z, live.at = c.x, c.y, c.z, os.time()
+                    local outside = JB.braceletOutside(b, c.x, c.y)
+                    if outside and (not live.out or os.time() - (live.alertAt or 0) >= (BR().EscapeCooldown or 120)) then
+                        live.out, live.alertAt = true, os.time()
+                        if JB.Jobs[b.job_name] then
+                            addCall(b.job_name, { title = 'Bracelet : hors zone', message = ('%s a quitté sa zone autorisée.'):format(b.name), kind = 'alert', x = c.x, y = c.y, z = c.z, by = 'Bracelet électronique' })
+                        end
+                    elseif not outside then live.out = false end
+                end
+            end
+        end
+    end
+end)
+
+-- Dernière position connue conservée quand le porteur se déconnecte
+AddEventHandler('playerDropped', function()
+    local src = source
+    local x = ESX.GetPlayerFromId(src)
+    if not x then return end
+    local ped = GetPlayerPed(src)
+    if ped and ped ~= 0 then
+        local c = GetEntityCoords(ped)
+        MySQL.update('UPDATE jobbuilder_bracelets SET last_x = ?, last_y = ?, last_z = ?, last_at = ? WHERE identifier = ?', { c.x, c.y, c.z, os.time(), x.identifier })
+    end
+end)
+
+AddEventHandler('esx:playerLoaded', function(src, xPlayer)
+    xPlayer = xPlayer or ESX.GetPlayerFromId(src)
+    if not xPlayer then return end
+    SetTimeout(8000, function()
+        local n = MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE identifier = ?', { xPlayer.identifier }) or 0
+        if n > 0 then JBNotifyClient(src, '~r~Tu portes un bracelet électronique : ta position est suivie par la police.') end
+    end)
+end)
+
+exports('HasBracelet', function(identifier)
+    return (MySQL.scalar.await('SELECT COUNT(*) FROM jobbuilder_bracelets WHERE identifier = ?', { identifier }) or 0) > 0
 end)

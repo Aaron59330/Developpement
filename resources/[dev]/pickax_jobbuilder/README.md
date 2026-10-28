@@ -313,3 +313,13 @@ La logique et le HUD restent dans `html/labexp.js` (qui publie l'état de l'éta
 - **Catalyseur** (`Experience.Catalyst`, item `lab_catalyst`, vendu chez le marchand « Illégal », 2 500 $) : ingrédient optionnel consommé à la fin ; **+12 % de qualité** et **risque d'accident ÷ 2**. Il apparaît dans l'inventaire de l'interface si le joueur en a.
 - **Niveaux de laborantin** (`Experience.Levels`) : chaque fabrication donne de l'XP (stockée en base, table `jobbuilder_lab_xp`). Niveau n+1 = 100 × n² XP (niveau 2 : 100, niveau 3 : 400…). Chaque niveau : **+1,5 % de qualité** et **−6 % de risque d'accident**. `minLevel` par recette verrouille les recettes (cocaïne et opium : niveau 2, méthamphétamine : niveau 3 ; cannabis libre). Le niveau et l'XP s'affichent en haut de l'interface. Export : `exports.pickax_jobbuilder:GetLabLevel(src)`.
 - Tout est réglable dans le panel : *Réglages du serveur → Drogues & labos* (Accidents de labo, Catalyseur, Niveaux de laborantin, y compris le niveau requis par recette). Tests : `ROOT=. lua tools/tests/labexp_test.lua` (32 vérifications).
+
+## Bracelets électroniques (tablette police)
+
+Onglet **Bracelets** de la tablette (F6 → Tablette) ou commande `/bracelet <id>` : l'agent pose un bracelet sur une personne à moins de 4 m. Le serveur relève la position du porteur toutes les 10 s.
+
+- **Zone autorisée** : « Zone ici » centre un cercle (20 à 2000 m) sur la position de l'agent — à faire au domicile du porteur. Si le porteur en sort, une alerte « Bracelet : hors zone » part au dispatch (une fois, puis toutes les 2 min s'il reste dehors).
+- **Suivi** : position en direct si le porteur est connecté, dernière position connue sinon ; bouton GPS vers cette position.
+- **Retrait** : uniquement depuis la tablette d'un agent habilité. Le porteur est prévenu à la pose, au retrait et à chaque connexion. La pose est notée au casier.
+- **Réglages** (builder, carte « Tablette ») : activer les bracelets, grade minimum. Valeurs globales dans `Config.Police.Bracelets` (distance, intervalle, maximum par service, rayon min/max, délai d'alerte).
+- Export pour d'autres ressources : `exports.pickax_jobbuilder:HasBracelet(identifier)`.

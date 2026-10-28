@@ -548,8 +548,8 @@ const Builder = {
     const chk = (k, l) => `<label class="chk"><input type="checkbox" data-path="job.settings.${k}" data-t="b" ${s[k] === false ? '' : 'checked'}> ${l}</label>`;
     return `<div class="card"><div class="card-h"><div class="t">${ic('tablet', 16)} Tablette (F6 → Tablette)</div>${chip(s.tablet_enabled === false ? 'Désactivée' : 'Activée', s.tablet_enabled === false ? 'mute' : 'ok')}</div>
       <p class="hint" style="margin-bottom:12px">Casiers, amendes, dispatch et carte en direct, <b>propres à ce job</b> : les données d'un autre service ne sont jamais visibles. Les citoyens appellent avec <b>/${(this.catalog.police || {}).CallCommand || 'appel'}</b>.</p>
-      <div class="row wrap" style="gap:22px;margin-bottom:14px">${chk('tablet_enabled', 'Tablette activée')}${chk('tablet_records', 'Casiers')}${chk('tablet_dispatch', 'Dispatch')}${chk('tablet_map', 'Carte en direct')}${chk('fine_custom', 'Amendes libres autorisées')}</div>
-      <div class="grid4">${gs('tablet_grade', 0, 'Grade min. pour ouvrir')}${gs('fine_grade', 0, 'Grade min. pour amender')}${gs('pursuit_grade', 0, 'Grade min. pour poursuivre')}${gs('tablet_admin_grade', last, 'Grade min. pour supprimer')}</div>
+      <div class="row wrap" style="gap:22px;margin-bottom:14px">${chk('tablet_enabled', 'Tablette activée')}${chk('tablet_records', 'Casiers')}${chk('tablet_dispatch', 'Dispatch')}${chk('tablet_map', 'Carte en direct')}${chk('tablet_bracelets', 'Bracelets électroniques')}${chk('fine_custom', 'Amendes libres autorisées')}</div>
+      <div class="grid4">${gs('tablet_grade', 0, 'Grade min. pour ouvrir')}${gs('fine_grade', 0, 'Grade min. pour amender')}${gs('pursuit_grade', 0, 'Grade min. pour poursuivre')}${gs('tablet_admin_grade', last, 'Grade min. pour supprimer')}${gs('bracelet_grade', 0, 'Grade min. pour les bracelets')}</div>
       <div class="lbl" style="margin:16px 0 8px">Catalogue d'amendes</div>
       ${s.fines.map((f, k) => `<div class="form-row" style="grid-template-columns:2fr 140px auto">${fld('Motif', `<input data-path="job.settings.fines.${k}.label" value="${esc(f.label)}" maxlength="60">`)}${fld('Montant ($)', `<input type="number" min="1" data-path="job.settings.fines.${k}.amount" data-t="n" value="${f.amount}">`)}<button class="icon danger" data-a="delRow" data-v="job.settings.fines" data-k="${k}">${ic('trash', 15)}</button></div>`).join('')}
       <div class="row"><button class="sm" data-a="addRow" data-v="job.settings.fines" data-tpl="fine">${ic('plus', 14)} Amende</button><button class="sm" data-a="fineDefaults">Charger le catalogue par défaut</button></div></div>`;
@@ -1723,6 +1723,7 @@ const Tablet = {
     if (p.fine) items.push({ id: 'fines', icon: 'dollar', text: 'Amendes' });
     if (p.dispatch) items.push({ id: 'dispatch', icon: 'siren', text: 'Dispatch' });
     if (p.map) items.push({ id: 'map', icon: 'map', text: 'Carte en direct' });
+    if (p.bracelet) items.push({ id: 'bracelets', icon: 'link', text: 'Bracelets' });
     return items;
   },
 
@@ -1732,7 +1733,7 @@ const Tablet = {
     $root.classList.remove('corner');
     $root.innerHTML = shellSide({ profile: { initials: initials(d.jobLabel), title: 'Tablette', sub: `${d.jobLabel} · ${d.gradeLabel || ''}` }, nav: [{ label: 'Tablette', items: this.nav() }], active: this.tab,
       foot: `<small>${d.perms.admin ? 'Accès direction : suppressions autorisées.' : 'Les données de cette tablette appartiennent à ton service uniquement.'}</small>`,
-      head: { icon: 'tablet', title: `Tablette — ${d.jobLabel}`, sub: ({ home: 'Vue d\'ensemble', records: 'Casiers judiciaires', fines: 'Amendes', dispatch: 'Dispatch', map: 'Carte en temps réel' })[this.tab] }, body: this['tab_' + this.tab]() });
+      head: { icon: 'tablet', title: `Tablette — ${d.jobLabel}`, sub: ({ home: 'Vue d\'ensemble', records: 'Casiers judiciaires', fines: 'Amendes', dispatch: 'Dispatch', map: 'Carte en temps réel', bracelets: 'Bracelets électroniques' })[this.tab] }, body: this['tab_' + this.tab]() });
     if (this.tab === 'map') this.mapStart();
   },
 
@@ -1748,6 +1749,31 @@ const Tablet = {
         <p class="hint mt">Amendes des 30 derniers jours : <b style="color:var(--text)">${money(s.fines)}</b></p></div>
       <div class="card"><div class="card-h"><div class="t">Activité récente</div></div>${d.recent.length ? d.recent.map(e => `<div class="logline"><b>${esc(e.firstname + ' ' + e.lastname)}</b> · ${esc((KIND_CHIP[e.kind] || [e.kind])[0])} : ${esc(e.label)}${e.amount ? ' · ' + money(e.amount) : ''}<br>${esc(e.officer || '')} · ${fmtDate(e.t)}</div>`).join('') : '<p class="hint">Rien pour le moment.</p>'}</div></div>`;
   },
+
+  /* ── Bracelets électroniques ── */
+  tab_bracelets() { return `<div id="t-br">${this.braceletsHtml()}</div>`; },
+  braceletsHtml() {
+    const B = this.br || { list: [], max: 30, zoneMin: 20, zoneMax: 2000 }, N = this.brNear;
+    const row = b => {
+      const state = !b.online ? chip('Hors ligne', 'mute') : b.outNow ? chip('Hors zone', 'bad') : chip('En ligne', 'ok');
+      const where = b.x != null ? `${b.online ? 'Position en direct' : 'Dernière position ' + ago(b.seen)}` : 'Position inconnue';
+      return `<div class="item" style="flex-wrap:wrap"><div class="grow" style="min-width:240px"><b>${esc(b.name)}</b> ${state}<small style="white-space:normal">${where} · posé par ${esc(b.by || '?')} ${ago(b.placedAt)}${b.zone ? ` · zone de ${Math.round(b.zone.r)} m` : ' · sans zone'}</small></div>
+        <div class="row wrap" style="gap:6px"><button class="sm" data-a="brGps" data-x="${b.x}" data-y="${b.y}" ${b.x == null ? 'disabled' : ''}>${ic('map', 13)} GPS</button>
+        <button class="sm" data-a="brZone" data-v="${b.id}">${ic('target', 13)} ${b.zone ? 'Redéfinir la zone ici' : 'Zone ici'}</button>
+        ${b.zone ? `<button class="sm" data-a="brZoneOff" data-v="${b.id}">Sans zone</button>` : ''}
+        <button class="sm danger" data-a="brRemove" data-v="${b.id}" data-n="${esc(b.name)}">Retirer</button></div></div>`;
+    };
+    return `<div style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start"><div class="card"><div class="card-h"><div class="t">${ic('link', 16)} Poser un bracelet</div></div>
+        <p class="hint" style="margin-bottom:10px">Le porteur doit être à côté de toi. Sa position est suivie ; s'il quitte la zone que tu définis, une alerte part au dispatch.</p>
+        <button data-a="brScan" style="width:100%;margin-bottom:10px">${ic('search', 14)} Chercher les personnes à proximité</button>
+        ${N ? (N.length ? N.map(n => `<div class="item"><div class="grow"><b>${esc(n.name)}</b><small>${n.dist} m</small></div><button class="sm primary" data-a="brPlace" data-v="${n.src}">Poser le bracelet</button></div>`).join('') : '<p class="hint">Personne à portée.</p>') : ''}
+        <div class="lbl" style="margin-top:14px">Rayon de la zone autorisée (m)</div>
+        <input type="number" id="t-brr" min="${B.zoneMin}" max="${B.zoneMax}" value="${this.brRadius || 150}" style="width:100%">
+        <p class="hint mt">« Zone ici » centre la zone sur ta position actuelle : place-toi au domicile du porteur.</p></div>
+      <div class="card"><div class="card-h"><div class="t">Porteurs</div>${chip(`${B.list.length} / ${B.max}`, 'info')}</div>${B.list.map(row).join('') || '<p class="hint">Aucun bracelet posé.</p>'}</div></div>`;
+  },
+  refreshBr() { const el = document.getElementById('t-br'); if (el) { const keep = (document.getElementById('t-brr') || {}).value; el.innerHTML = this.braceletsHtml(); if (keep) { this.brRadius = Number(keep); document.getElementById('t-brr').value = keep; } } },
+  async loadBr() { const r = await rpc('bracelet:list'); if (r && r.ok) this.br = r; },
 
   /* ── Casiers ── */
   tab_records() {
@@ -1858,6 +1884,7 @@ const Tablet = {
     const me = r.units.find(u => u.me);
     if (me && !M.loaded) { M.cx = me.x; M.cy = me.y; M.loaded = true; }
     if (M.follow && P) { M.cx += (P.x - M.cx) * 0.2; M.cy += (P.y - M.cy) * 0.2; }
+    if (this.tab === 'bracelets' && (Date.now() - (this.brAt || 0)) > 5000) { this.brAt = Date.now(); this.loadBr().then(() => this.refreshBr()); }
     if (this.tab === 'dispatch') { const el = document.getElementById('t-calls'); if (el) el.innerHTML = this.callsHtml(); }
     else if (this.tab === 'map') {
       const c = document.getElementById('t-chase'), u = document.getElementById('t-units'), n = document.getElementById('t-ucount');
@@ -1979,7 +2006,13 @@ const Tablet = {
     const a = el.dataset.a, v = el.dataset.v, d = this.d, ok = (r, m) => { if (!r || !r.ok) { toast((r && r.error) || 'Erreur', 'err'); return false; } if (m) toast(m, 'ok'); return true; };
     const val = id => (document.getElementById(id) || {}).value || '';
     switch (a) {
-      case 'nav': this.tab = v; this.callForm = false; if (v === 'records') await this.loadRecs(); if (v === 'dispatch' || v === 'home') await this.poll(true); if (v === 'map') this.nearby = null; return this.render();
+      case 'nav': this.tab = v; this.callForm = false; if (v === 'records') await this.loadRecs(); if (v === 'dispatch' || v === 'home') await this.poll(true); if (v === 'map') this.nearby = null; if (v === 'bracelets') { this.brNear = null; await this.loadBr(); } return this.render();
+      case 'brScan': { const r = await rpc('bracelet:nearby'); if (!ok(r)) return; this.brNear = r.list; return this.refreshBr(); }
+      case 'brPlace': { const r = await rpc('bracelet:place', Number(v)); if (!ok(r, 'Bracelet posé')) return; this.brNear = null; await this.loadBr(); return this.refreshBr(); }
+      case 'brRemove': { if (!await confirmBox('Retirer ce bracelet ?', el.dataset.n + ' ne sera plus suivi.', 'Retirer')) return; const r = await rpc('bracelet:remove', Number(v)); if (!ok(r, 'Bracelet retiré')) return; await this.loadBr(); return this.refreshBr(); }
+      case 'brZone': { this.brRadius = Number(val('t-brr')) || 150; const r = await rpc('bracelet:zone', Number(v), this.brRadius); if (!ok(r, 'Zone de ' + (r && r.r ? Math.round(r.r) : '') + ' m définie ici')) return; await this.loadBr(); return this.refreshBr(); }
+      case 'brZoneOff': { const r = await rpc('bracelet:zone', Number(v), 0); if (!ok(r, 'Zone supprimée')) return; await this.loadBr(); return this.refreshBr(); }
+      case 'brGps': rpc('waypoint', { x: Number(el.dataset.x), y: Number(el.dataset.y) }); return toast('GPS placé sur la dernière position', 'ok');
       case 'recSearch': this.q = val('t-q').trim(); await this.loadRecs(); return this.render();
       case 'wantedOnly': this.wantedOnly = el.checked; await this.loadRecs(); return this.render();
       case 'recOpen': await this.openRec(Number(v)); return this.render();

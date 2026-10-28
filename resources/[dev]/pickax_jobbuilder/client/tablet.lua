@@ -1,7 +1,7 @@
 -- ─────────────────────────────── Tablette police & annonces d'entreprise (client) ───────────────────────────────
 for _, n in ipairs({ 'tablet:open', 'tablet:live', 'records:search', 'records:get', 'records:save', 'records:delete', 'records:addEntry', 'records:delEntry', 'records:fromNearest',
     'fine:send', 'dispatch:create', 'dispatch:take', 'dispatch:close', 'dispatch:delete', 'pursuit:nearby', 'pursuit:start', 'pursuit:stop',
-    'announce:open', 'announce:send' }) do NuiRemote[n] = true end
+    'announce:open', 'announce:send', 'bracelet:list', 'bracelet:nearby', 'bracelet:place', 'bracelet:remove', 'bracelet:zone' }) do NuiRemote[n] = true end
 
 -- ── Alerte dispatch : notification, son, blip temporaire sur la carte du jeu ──
 RegisterNetEvent('jobbuilder:client:dispatchAlert', function(a)

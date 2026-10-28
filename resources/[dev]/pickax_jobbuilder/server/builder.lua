@@ -323,6 +323,8 @@ local function cleanJob(payload)
             tablet_dispatch = settings.tablet_dispatch ~= false,
             tablet_map = settings.tablet_map ~= false,
             fine_grade = math.floor(num(settings.fine_grade, 0, maxGrade, 0)),
+            tablet_bracelets = settings.tablet_bracelets ~= false,
+            bracelet_grade = math.floor(num(settings.bracelet_grade, 0, maxGrade, 0)),
             fine_custom = settings.fine_custom ~= false,
             pursuit_grade = math.floor(num(settings.pursuit_grade, 0, maxGrade, 0)),
             fines = (function()
@@ -602,6 +604,7 @@ ESX.RegisterServerCallback('jobbuilder:delete', function(src, cb, name)
     run('statistiques de missions', 'DELETE FROM jobbuilder_mission_stats WHERE job_name = ?', { name })
     run('casiers (entrées)', 'DELETE FROM jobbuilder_record_entries WHERE job_name = ?', { name })
     run('casiers', 'DELETE FROM jobbuilder_records WHERE job_name = ?', { name })
+    run('bracelets électroniques', 'DELETE FROM jobbuilder_bracelets WHERE job_name = ?', { name })
     run('annonces', 'DELETE FROM jobbuilder_announces WHERE job_name = ?', { name })
     run('banque : prêts', 'DELETE FROM jobbuilder_bank_loans WHERE job_name = ?', { name })
     run('banque : historique', 'DELETE FROM jobbuilder_bank_entries WHERE job_name = ?', { name })
@@ -700,7 +703,7 @@ local function runCheck()
     end
 
     local tables = { 'jobbuilder_jobs', 'jobbuilder_points', 'jobbuilder_logs', 'jobbuilder_settings', 'jobbuilder_properties', 'jobbuilder_property_points', 'jobbuilder_property_outfits',
-        'jobbuilder_property_history', 'jobbuilder_dealer_vehicles', 'jobbuilder_dealer_sales', 'jobbuilder_treasury_log', 'jobbuilder_mission_stats', 'jobbuilder_records', 'jobbuilder_record_entries', 'jobbuilder_announces', 'jobbuilder_patients', 'jobbuilder_patient_entries', 'jobbuilder_bank_clients', 'jobbuilder_bank_entries', 'jobbuilder_bank_loans', 'jobs', 'job_grades', 'addon_account', 'addon_account_data' }
+        'jobbuilder_property_history', 'jobbuilder_dealer_vehicles', 'jobbuilder_dealer_sales', 'jobbuilder_treasury_log', 'jobbuilder_mission_stats', 'jobbuilder_records', 'jobbuilder_record_entries', 'jobbuilder_bracelets', 'jobbuilder_announces', 'jobbuilder_patients', 'jobbuilder_patient_entries', 'jobbuilder_bank_clients', 'jobbuilder_bank_entries', 'jobbuilder_bank_loans', 'jobs', 'job_grades', 'addon_account', 'addon_account_data' }
     for _, t in ipairs(tables) do
         local exists = MySQL.scalar.await('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?', { t }) or 0
         if exists == 0 then err('table manquante : ' .. t) end
