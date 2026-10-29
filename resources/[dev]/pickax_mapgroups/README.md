@@ -1,20 +1,9 @@
-# pickax_mapgroups — blips groupés et fiche du lieu
+# pickax_mapgroups — fiche du lieu
 
-Des lieux portant **exactement le même nom** (deux garages « Garage ») ne forment **qu'un seul blip** sur la carte, avec le nom tel quel (rien n'est ajouté).
+**Blips de même nom :** chaque lieu garde son blip sur la carte, et tous les blips portant **exactement le même nom** reçoivent **le même style** (icône, couleur, taille, visibilité, nom) que le premier : ils ne sont plus « différents ». GTA les range alors dans **une seule ligne de la légende** de la carte (flèches ← → de la légende pour passer de l'un à l'autre).
 
-**Carte ouverte :** la fiche du blip groupé le plus proche s'affiche à l'ouverture avec « Lieu 1 / 2 ». Ensuite :
-- **← →** : le blip passe au lieu précédent / suivant (il clignote, une fiche s'affiche en haut à gauche : « Lieu 2 / 3 »).
-- **↑ ↓** : s'il y a plusieurs blips groupés, choisit celui que ← → font défiler (par défaut le plus proche de toi).
-- **Point de passage posé sur le blip** : affiche aussi la fiche du lieu où il se trouve.
-
-**La fiche** (image, type, nom, description, distance) se règle **dans le builder** (World Builder : Personnaliser → « Blip sur la carte » → Image + Description) ; chaque lieu peut avoir la sienne. Image = lien `https://…` ou nom d'un fichier du dossier `html/places/`. Sans description, la rue du lieu est affichée.
-
-- Le blip commence sur le lieu le plus proche de toi.
-- Un nom différent, même d'une majuscule, suffit à garder deux blips séparés.
-- Sans cette ressource, le blip groupé reste un seul blip (sur le premier lieu) sans navigation.
+**Fiche du lieu :** quand tu **sélectionnes un blip** (carte → blip → « Définir un point de passage »), une fiche s'affiche **en haut à gauche** : image, type, nom, description, distance, « Lieu 2 sur 2 de ce nom ».
+- L'image et la description se règlent **dans le builder** (World Builder : Personnaliser → « Blip sur la carte »), une fiche par lieu. Image = lien `https://…` ou nom d'un fichier de `html/places/`. Sans description, la rue du lieu est affichée.
+- Un nom différent, même d'une majuscule, garde son style propre.
+- Sans cette ressource, les blips s'affichent normalement, sans fiche.
 - Aucune dépendance. À démarrer avec les builders (déjà couvert par `ensure [dev]`).
-
-## Si les flèches ne changent rien sur ta carte
-Deux autres moyens, toujours disponibles :
-- **Touches configurables** : Paramètres FiveM → Touches → « Carte : lieu suivant / précédent du blip groupé » (par défaut → et ←, à changer si tu veux).
-- **Commande `/lieu`** (suivant) et `/lieu prec` (précédent), utilisable partout.
