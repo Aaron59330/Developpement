@@ -115,6 +115,13 @@ end
 -- Règles identiques partout : affichage 4, visible à proximité seulement par défaut, nom par défaut = nom du module.
 function BB.Blip(coords, b, opts)
     b, opts = b or {}, opts or {}
+    -- pendant un lot (BB.BlipsBegin … BB.BlipsEnd) : on mémorise ; les lieux de même nom seront regroupés en UN seul blip
+    if BB._batch and not opts.entity then BB._batch[#BB._batch + 1] = { coords = coords, b = b, opts = opts } return nil end
+    return BB.BlipNow(coords, b, opts)
+end
+
+function BB.BlipNow(coords, b, opts)
+    b, opts = b or {}, opts or {}
     local key = opts.category or ''
     local cat = BB.Categories[BB.Alias[key] or key] or BB.Categories.default
     local blip
@@ -135,3 +142,44 @@ function BB.Blip(coords, b, opts)
     EndTextCommandSetBlipName(blip)
     return blip
 end
+
+
+-- ─── Regroupement des blips de même nom ───
+-- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés. Des lieux portant EXACTEMENT le même nom donnent un seul blip « Nom (N) »
+-- placé sur le lieu le plus proche du joueur ; la liste des lieux est donnée à pickax_mapgroups (sélection sur la carte avec un point de passage).
+function BB.BlipsBegin() BB._batch = {} end
+
+function BB.BlipsEnd()
+    local list = BB._batch or {}
+    BB._batch = nil
+    local byName, order, handles, groups = {}, {}, {}, {}
+    for _, e in ipairs(list) do
+        local name = tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point')
+        local g = byName[name]
+        if not g then g = { name = name, items = {} } byName[name] = g order[#order + 1] = g end
+        g.items[#g.items + 1] = e
+    end
+    for _, g in ipairs(order) do
+        local first = g.items[1]
+        if #g.items == 1 then
+            handles[#handles + 1] = BB.BlipNow(first.coords, first.b, first.opts)
+        else
+            local b = {}
+            for k, v in pairs(first.b) do b[k] = v end
+            b.label = ('%s (%d)'):format(g.name, #g.items)
+            local h = BB.BlipNow(first.coords, b, first.opts)
+            handles[#handles + 1] = h
+            local members = {}
+            for _, e in ipairs(g.items) do members[#members + 1] = { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0 } end
+            groups[#groups + 1] = { blip = h, name = g.name, members = members }
+        end
+    end
+    BB._groups = groups
+    if GetResourceState('pickax_mapgroups') == 'started' then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), groups) end) end
+    return handles
+end
+
+-- pickax_mapgroups démarré après nous : on lui renvoie nos groupes
+AddEventHandler('pickax_mapgroups:ready', function()
+    if BB._groups then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), BB._groups) end) end
+end)

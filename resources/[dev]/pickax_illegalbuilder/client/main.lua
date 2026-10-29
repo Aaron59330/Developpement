@@ -182,6 +182,7 @@ local DEFAULT_REVEAL = { gfstart = { label = 'Contact Go Fast', sprite = 225, co
 local function rebuildBlips()
     for _, b in ipairs(blipHandles) do if DoesBlipExist(b) then RemoveBlip(b) end end
     blipHandles = {}
+    BB.BlipsBegin()
     for _, e in ipairs(State.entities) do
         local b = e.blip or {}
         for _, p in ipairs(e.points) do
@@ -201,6 +202,7 @@ local function rebuildBlips()
             end
         end
     end
+    for _, h in ipairs(BB.BlipsEnd()) do blipHandles[#blipHandles + 1] = h end
 end
 
 -- ─────────────────────────────── PNJ ───────────────────────────────
