@@ -1142,7 +1142,7 @@ const Builder = {
   },
 
   blipCard() {
-    return BBMap.blipCard({ base: 'settings.blip', b: this.v('settings.blip') || {}, hint: "Chaque point choisit lui-même s'il affiche un blip (onglet Points)." });
+    return BBMap.blipCard({ base: 'settings.blip', b: this.v('settings.blip') || {}, info: true, hint: "Chaque point choisit lui-même s'il affiche un blip (onglet Points)." });
   },
 
   /* ── Onglet Général ── */

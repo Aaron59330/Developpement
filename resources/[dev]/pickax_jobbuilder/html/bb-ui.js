@@ -222,7 +222,13 @@
       fld('Taille', num(p + '.scale', b.scale, 'step="0.1" min="0.1" max="3"', o.defScale || 0.8)) +
       fld('Nom du blip', '<input data-path="' + p + '.label" value="' + val(b.label) + '" maxlength="60" placeholder="' + esc(o.labelHint || 'Par défaut : nom du module') + '">') +
       '</div><div class="row mt-s" style="gap:22px;flex-wrap:wrap">' + chk(p + '.shortRange', 'Visible uniquement à proximité', b.shortRange !== false) +
-      (o.hint ? '<span class="hint">' + o.hint + '</span>' : '') + '</div>' + (o.extra || '') + '</div>';
+      (o.hint ? '<span class="hint">' + o.hint + '</span>' : '') + '</div>' +
+      /* Fiche du lieu (o.info) : petite carte en haut à gauche quand on sélectionne le blip sur la carte (voir pickax_mapgroups) */
+      (o.info ? '<div class="grid2 mt">' +
+        fld('Image du lieu (lien https:// ou nom de fichier)', '<input data-path="' + p + '.image" value="' + val(b.image) + '" maxlength="300" placeholder="https://… ou garage.webp (dossier pickax_mapgroups/html/places)">') +
+        fld('Description', '<input data-path="' + p + '.description" value="' + val(b.description) + '" maxlength="400" placeholder="Ex : Garage public, ouvert 24h/24. Frais de sortie : 150 $">') +
+        '</div><p class="hint mt-s">Sélectionne le blip sur la carte et pose un point de passage dessus : la fiche s\'affiche en haut à gauche.</p>' : '') +
+      (o.extra || '') + '</div>';
   }
 
   /* Carte « Marker au sol » : o = { base, m, typeKey ('type' | 'marker'), colorHtml, title, withEnabled, inherit } — champs vides = hérités du style commun */

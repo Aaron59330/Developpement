@@ -143,6 +143,13 @@ function BB.BlipNow(coords, b, opts)
 end
 
 
+-- Fiche du lieu d'un blip (image + description saisies dans le builder) ; nil si aucune
+function BB.BlipInfo(b)
+    local img, desc = tostring(b.image or ''):gsub('^%s+', ''):gsub('%s+$', ''), tostring(b.description or ''):gsub('^%s+', ''):gsub('%s+$', '')
+    if img == '' and desc == '' then return nil end
+    return { image = img, description = desc }
+end
+
 -- ─── Regroupement des blips de même nom ───
 -- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés. Des lieux portant EXACTEMENT le même nom donnent un seul blip « Nom (N) »
 -- placé sur le lieu le plus proche du joueur ; la liste des lieux est donnée à pickax_mapgroups (sélection sur la carte avec un point de passage).
@@ -160,8 +167,12 @@ function BB.BlipsEnd()
     end
     for _, g in ipairs(order) do
         local first = g.items[1]
+        local info = BB.BlipInfo(first.b)
         if #g.items == 1 then
-            handles[#handles + 1] = BB.BlipNow(first.coords, first.b, first.opts)
+            local h = BB.BlipNow(first.coords, first.b, first.opts)
+            handles[#handles + 1] = h
+            -- blip seul mais avec une fiche (image / description) : enregistré aussi pour s'afficher à la sélection
+            if info then groups[#groups + 1] = { blip = h, name = g.name, tag = first.opts.category, info = info, members = { { x = first.coords.x + 0.0, y = first.coords.y + 0.0, z = (first.coords.z or 0.0) + 0.0 } } } end
         else
             local b = {}
             for k, v in pairs(first.b) do b[k] = v end
@@ -170,7 +181,7 @@ function BB.BlipsEnd()
             handles[#handles + 1] = h
             local members = {}
             for _, e in ipairs(g.items) do members[#members + 1] = { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0 } end
-            groups[#groups + 1] = { blip = h, name = g.name, members = members }
+            groups[#groups + 1] = { blip = h, name = g.name, tag = first.opts.category, info = info, members = members }
         end
     end
     BB._groups = groups
