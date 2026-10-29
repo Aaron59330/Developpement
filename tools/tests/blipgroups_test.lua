@@ -58,6 +58,9 @@ function GetStreetNameAtCoord() return 1 end
 function GetStreetNameFromHashKey() return 'Rue Test' end
 function SendNUIMessage(m) nui[#nui + 1] = m end
 function TriggerEvent() end
+local cmds = {}
+function RegisterCommand(n, f) cmds[n] = f end
+function RegisterKeyMapping() end
 dofile(ROOT .. '/resources/[dev]/pickax_mapgroups/client.lua')
 local groups = { { blip = 77, name = 'Garage', tag = 'garage', members = { { x = 10.0, y = 0.0, z = 0.0, info = { image = 'g.webp', description = 'Nord' } }, { x = 500.0, y = 0.0, z = 0.0, info = { image = '', description = '' } }, { x = 900.0, y = 0.0, z = 0.0 } } } }
 mg.SetGroups('pickax_worldbuilder', groups)
@@ -70,4 +73,9 @@ step(174) ok(groups[1].idx == 3 and moved[#moved][2] == 900.0, '← : lieu préc
 ok(nui[#nui].action == 'show' and nui[#nui].index == 3 and nui[#nui].total == 3 and nui[#nui].title == 'Garage', 'la fiche indique « lieu 3 sur 3 »')
 step(174) ok(nui[#nui].index == 2 and nui[#nui].description == 'Rue Test' and flashed[#flashed - 0] ~= nil, 'sans description : la rue du lieu est affichée ; le blip clignote')
 step(175) step(175) ok(nui[#nui].description == 'Nord' and nui[#nui].image == 'g.webp', 'la fiche du lieu courant (image + description)')
+-- méthode 2 : touches configurables et /lieu (si les flèches ne passent pas sur la carte)
+local i0 = groups[1].idx
+cmds.pk_mapgroups_next() ok(groups[1].idx == i0 % 3 + 1, 'touche configurable « suivant » : lieu suivant')
+cmds.pk_mapgroups_prev() ok(groups[1].idx == i0, 'touche configurable « précédent » : lieu précédent')
+cmds.lieu(0, {}) ok(groups[1].idx == i0 % 3 + 1, '/lieu : lieu suivant') cmds.lieu(0, { 'prec' }) ok(groups[1].idx == i0, '/lieu prec : lieu précédent')
 print(('blipgroups_test : %d vérifications OK'):format(checks))

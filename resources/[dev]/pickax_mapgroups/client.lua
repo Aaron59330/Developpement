@@ -110,30 +110,57 @@ local function activeGroup(list)
     return best
 end
 
+-- Passe le blip du groupe actif au lieu suivant (+1) / précédent (-1) ; `other` : change de groupe à la place
+local function multiGroups()
+    local list = {}
+    for _, g in ipairs(allGroups()) do if #g.members > 1 then list[#list + 1] = g end end
+    return list
+end
+
+local function cycle(dir, other)
+    local multi = multiGroups()
+    local g = #multi > 0 and activeGroup(multi) or nil
+    if not g then return false end
+    if other then
+        for i, x in ipairs(multi) do if x == g then g = multi[(i - 1 + dir) % #multi + 1] break end end
+        activeKey = tostring(g.blip)
+    else
+        g.idx = (g.idx - 1 + dir) % #g.members + 1
+        place(g)
+    end
+    flash(g) showCard(g)
+    return true
+end
+
+-- Méthode 1 : les touches de la carte (flèches), lues image par image tant que la carte est ouverte
+local wasOpen = false
 CreateThread(function()
     while true do
-        if not IsPauseMenuActive() then Wait(500) else
+        if not IsPauseMenuActive() then wasOpen = false Wait(500) else
             Wait(0)
-            local list = allGroups()
-            local multi = {}
-            for _, g in ipairs(list) do if #g.members > 1 then multi[#multi + 1] = g end end
-            if #multi > 0 then
-                local g = activeGroup(multi)
-                if g then
-                    if pressed(0, 175, 2, 190) then g.idx = g.idx % #g.members + 1 place(g) flash(g) showCard(g) Wait(180)
-                    elseif pressed(0, 174, 2, 189) then g.idx = (g.idx - 2) % #g.members + 1 place(g) flash(g) showCard(g) Wait(180)
-                    elseif #multi > 1 and pressed(0, 172, 2, 188) then
-                        for i, x in ipairs(multi) do if x == g then g = multi[i % #multi + 1] break end end
-                        activeKey = tostring(g.blip) showCard(g) flash(g) Wait(220)
-                    elseif #multi > 1 and pressed(0, 173, 2, 187) then
-                        for i, x in ipairs(multi) do if x == g then g = multi[(i - 2) % #multi + 1] break end end
-                        activeKey = tostring(g.blip) showCard(g) flash(g) Wait(220)
-                    end
-                end
+            if not wasOpen then   -- à l'ouverture de la carte : la fiche du blip groupé le plus proche s'affiche avec l'indication des touches
+                wasOpen = true
+                local multi = multiGroups()
+                local g = #multi > 0 and activeGroup(multi) or nil
+                if g then showCard(g) end
             end
+            if pressed(0, 175, 2, 190) then if cycle(1) then Wait(180) end
+            elseif pressed(0, 174, 2, 189) then if cycle(-1) then Wait(180) end
+            elseif pressed(0, 172, 2, 188) then if cycle(1, true) then Wait(220) end
+            elseif pressed(0, 173, 2, 187) then if cycle(-1, true) then Wait(220) end end
         end
     end
 end)
+
+-- Méthode 2 : touches configurables (Paramètres FiveM → Touches → « Blip suivant / précédent ») et commande /lieu — au cas où les flèches ne passent pas sur ta carte
+RegisterCommand('pk_mapgroups_next', function() if IsPauseMenuActive() then cycle(1) end end, false)
+RegisterCommand('pk_mapgroups_prev', function() if IsPauseMenuActive() then cycle(-1) end end, false)
+RegisterKeyMapping('pk_mapgroups_next', 'Carte : lieu suivant du blip groupé', 'keyboard', 'RIGHT')
+RegisterKeyMapping('pk_mapgroups_prev', 'Carte : lieu précédent du blip groupé', 'keyboard', 'LEFT')
+RegisterCommand('lieu', function(_, args)
+    local dir = (args[1] == 'prec' or args[1] == 'prev' or args[1] == '-') and -1 or 1
+    if not cycle(dir) then print('[pickax_mapgroups] aucun blip groupé à parcourir') end
+end, false)
 
 -- ─── sélection d'un blip = point de passage posé dessus : la fiche s'affiche ───
 CreateThread(function()
