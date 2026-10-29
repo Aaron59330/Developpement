@@ -151,14 +151,15 @@ function BB.BlipInfo(b)
 end
 
 -- ─── Blips de même nom regroupés + fiches des lieux ───
--- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés. Des lieux portant EXACTEMENT le même nom ne forment qu'UN blip (même nom, rien d'ajouté) ;
--- la liste des lieux (et leur fiche : image / description saisies dans le builder) est donnée à pickax_mapgroups : ← → sur la carte passent d'un lieu à l'autre.
+-- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés (un par lieu, TOUS gardés). Des lieux portant EXACTEMENT le même nom forment un groupe ;
+-- le groupe (et la fiche de chaque lieu : image / description saisies dans le builder) est donné à pickax_mapgroups : ← → sur la carte sélectionnent les lieux l'un après l'autre.
 function BB.BlipsBegin() BB._batch = {} end
 
 function BB.BlipsEnd()
     local list = BB._batch or {}
     BB._batch = nil
     local byName, order, handles, groups = {}, {}, {}, {}
+    local scale = ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0
     for _, e in ipairs(list) do
         local name = tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point')
         local g = byName[name]
@@ -166,17 +167,16 @@ function BB.BlipsEnd()
         g.items[#g.items + 1] = e
     end
     for _, g in ipairs(order) do
-        local first = g.items[1]
-        -- UN seul blip, avec exactement le nom saisi (rien n'est ajouté) ; il passe d'un lieu à l'autre avec ← → sur la carte (pickax_mapgroups)
-        local h = BB.BlipNow(first.coords, first.b, first.opts)
-        handles[#handles + 1] = h
+        -- chaque lieu GARDE son blip sur la carte (aucun n'est supprimé) ; les lieux de même nom forment un groupe : ← → sur la carte sélectionnent l'un après l'autre (pickax_mapgroups)
         local members, anyInfo = {}, false
         for _, e in ipairs(g.items) do
+            local h = BB.BlipNow(e.coords, e.b, e.opts)
+            handles[#handles + 1] = h
             local info = BB.BlipInfo(e.b)
             if info then anyInfo = true end
-            members[#members + 1] = { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0, info = info }
+            members[#members + 1] = { blip = h, x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0, info = info, scale = scale }
         end
-        if h and (#members > 1 or anyInfo) then groups[#groups + 1] = { blip = h, name = g.name, tag = first.opts.category, members = members } end
+        if #members > 1 or anyInfo then groups[#groups + 1] = { name = g.name, tag = g.items[1].opts.category, members = members } end
     end
     BB._groups = groups
     if GetResourceState('pickax_mapgroups') == 'started' then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), groups) end) end
