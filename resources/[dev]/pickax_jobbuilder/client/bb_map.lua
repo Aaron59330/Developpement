@@ -150,27 +150,33 @@ function BB.BlipInfo(b)
     return { image = img, description = desc }
 end
 
--- ─── Fiches des lieux ───
--- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés (un par lieu, même nom). Les blips qui ont une fiche (image / description saisies dans le builder)
--- sont donnés à pickax_mapgroups : la fiche s'affiche quand on les sélectionne sur la carte ; les lieux de même nom partagent la même fiche.
+-- ─── Blips de même nom regroupés + fiches des lieux ───
+-- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés. Des lieux portant EXACTEMENT le même nom ne forment qu'UN blip (même nom, rien d'ajouté) ;
+-- la liste des lieux (et leur fiche : image / description saisies dans le builder) est donnée à pickax_mapgroups : ← → sur la carte passent d'un lieu à l'autre.
 function BB.BlipsBegin() BB._batch = {} end
 
 function BB.BlipsEnd()
     local list = BB._batch or {}
     BB._batch = nil
-    local handles, groups, count = {}, {}, {}
-    local function nameOf(e) return tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point') end
-    for _, e in ipairs(list) do local n = nameOf(e) count[n] = (count[n] or 0) + 1 end
+    local byName, order, handles, groups = {}, {}, {}, {}
     for _, e in ipairs(list) do
-        -- chaque lieu garde son propre blip, avec exactement le même nom (rien n'est ajouté au nom)
-        local h = BB.BlipNow(e.coords, e.b, e.opts)
+        local name = tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point')
+        local g = byName[name]
+        if not g then g = { name = name, items = {} } byName[name] = g order[#order + 1] = g end
+        g.items[#g.items + 1] = e
+    end
+    for _, g in ipairs(order) do
+        local first = g.items[1]
+        -- UN seul blip, avec exactement le nom saisi (rien n'est ajouté) ; il passe d'un lieu à l'autre avec ← → sur la carte (pickax_mapgroups)
+        local h = BB.BlipNow(first.coords, first.b, first.opts)
         handles[#handles + 1] = h
-        local info = BB.BlipInfo(e.b)
-        if info and h then
-            local n = nameOf(e)
-            groups[#groups + 1] = { blip = h, name = n, tag = e.opts.category, info = info, siblings = count[n] - 1,
-                members = { { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0 } } }
+        local members, anyInfo = {}, false
+        for _, e in ipairs(g.items) do
+            local info = BB.BlipInfo(e.b)
+            if info then anyInfo = true end
+            members[#members + 1] = { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0, info = info }
         end
+        if h and (#members > 1 or anyInfo) then groups[#groups + 1] = { blip = h, name = g.name, tag = first.opts.category, members = members } end
     end
     BB._groups = groups
     if GetResourceState('pickax_mapgroups') == 'started' then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), groups) end) end

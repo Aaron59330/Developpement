@@ -20,7 +20,7 @@ function show(d) {
   $('title').textContent = d.title || '';
   $('desc').textContent = d.description || '';
   $('tag').textContent = d.tag || 'Lieu';
-  $('more').textContent = d.siblings > 0 ? (d.siblings === 1 ? '1 autre lieu du même nom' : d.siblings + ' autres lieux du même nom') : 'Point de passage placé';
+  $('more').textContent = d.total > 1 ? `Lieu ${d.index} / ${d.total}  ·  ◄ ► pour changer` : '';
   $('dist').textContent = d.distance != null ? (d.distance >= 1000 ? (d.distance / 1000).toFixed(1) + ' km' : Math.round(d.distance) + ' m') : '';
   const c = $('card'); c.classList.remove('hidden', 'out'); void c.offsetWidth; c.style.animation = 'none'; void c.offsetWidth; c.style.animation = '';
 }

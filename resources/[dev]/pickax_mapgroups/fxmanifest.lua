@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_mapgroups'
-description 'Fiche d\'un lieu (image + description saisies dans le builder) affichée en haut à gauche quand on sélectionne son blip sur la carte ; les lieux de même nom partagent la même fiche'
+description 'Blips de même nom regroupés en un seul (← → sur la carte pour passer d\'un lieu à l\'autre) + fiche du lieu (image, description) affichée en haut à gauche'
 version '1.0.0'
 
 client_scripts { 'client.lua' }

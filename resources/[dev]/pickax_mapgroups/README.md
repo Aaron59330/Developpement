@@ -1,8 +1,15 @@
-# pickax_mapgroups — fiche du lieu
+# pickax_mapgroups — blips groupés et fiche du lieu
 
-Quand tu **sélectionnes un blip sur la carte** (carte → blip → « Définir un point de passage »), une petite fiche s'affiche **en haut à gauche** : image du lieu, type, nom, description et distance.
+Des lieux portant **exactement le même nom** (deux garages « Garage ») ne forment **qu'un seul blip** sur la carte, avec le nom tel quel (rien n'est ajouté).
 
-- L'image et la description se règlent **dans le builder** (World Builder : onglet Personnaliser → carte « Blip sur la carte »). Image = lien `https://…` ou nom d'un fichier du dossier `html/places/`.
-- **Deux lieux de même nom** (deux garages « Garage ») gardent **chacun leur blip**, avec exactement le même nom, et **partagent la même fiche** (la fiche indique « 1 autre lieu du même nom »).
-- La fiche reste tant que la carte est ouverte (puis 12 s) et disparaît si tu retires le point de passage.
+**Carte ouverte :**
+- **← →** : le blip passe au lieu précédent / suivant (il clignote, une fiche s'affiche en haut à gauche : « Lieu 2 / 3 »).
+- **↑ ↓** : s'il y a plusieurs blips groupés, choisit celui que ← → font défiler (par défaut le plus proche de toi).
+- **Point de passage posé sur le blip** : affiche aussi la fiche du lieu où il se trouve.
+
+**La fiche** (image, type, nom, description, distance) se règle **dans le builder** (World Builder : Personnaliser → « Blip sur la carte » → Image + Description) ; chaque lieu peut avoir la sienne. Image = lien `https://…` ou nom d'un fichier du dossier `html/places/`. Sans description, la rue du lieu est affichée.
+
+- Le blip commence sur le lieu le plus proche de toi.
+- Un nom différent, même d'une majuscule, suffit à garder deux blips séparés.
+- Sans cette ressource, le blip groupé reste un seul blip (sur le premier lieu) sans navigation.
 - Aucune dépendance. À démarrer avec les builders (déjà couvert par `ensure [dev]`).
