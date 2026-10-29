@@ -129,8 +129,13 @@ function BB.Blip(coords, b, opts)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, b.shortRange ~= false)
-    BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point'))
+    -- Nom : un texte PARTAGÉ par tous les blips de même nom (clé dérivée du nom, enregistrée une fois). Avec un texte propre à chaque blip, GTA affichait une ligne de légende par blip ;
+    -- avec le même texte, deux garages = deux blips sur la carte mais UN seul nom dans la légende.
+    local name = tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point')
+    local key = ('PKBLIP_%x'):format(GetHashKey(name))
+    if not BB._names then BB._names = {} end
+    if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
+    BeginTextCommandSetBlipName(key)
     EndTextCommandSetBlipName(blip)
     return blip
 end
