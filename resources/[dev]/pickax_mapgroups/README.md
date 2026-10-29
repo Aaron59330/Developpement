@@ -1,10 +1,8 @@
-# pickax_mapgroups
+# pickax_mapgroups — fiche du lieu
 
-Plusieurs lieux portant **exactement le même nom** (deux garages, trois banques…) apparaissent comme **un seul blip** sur la carte, nommé « Garage (2) », posé sur le lieu le plus proche de toi.
+Quand tu **sélectionnes un blip sur la carte** (carte → blip → « Définir un point de passage »), une petite fiche s'affiche **en haut à gauche** : image du lieu, type, nom, description et distance.
 
-Pour choisir un lieu : ouvre la carte, sélectionne le blip et « Définir un point de passage » dessus : une liste des lieux (avec la distance et la rue) s'ouvre ; ton choix déplace le point de passage sur ce lieu.
-
-- Les builders (jobs, gangs, boutiques, monde, drogues) regroupent leurs blips automatiquement (`client/bb_map.lua`, fonctions `BB.BlipsBegin` / `BB.BlipsEnd`).
-- Sans cette ressource, le blip regroupé reste affiché (« Garage (2) ») mais sans la liste.
-- Un seul nom différent (même d'une majuscule) suffit à garder deux blips séparés.
-- Dépendance : `ox_lib`. À démarrer avec les builders (déjà couvert par `ensure [dev]`).
+- L'image et la description se règlent **dans le builder** (World Builder : onglet Personnaliser → carte « Blip sur la carte »). Image = lien `https://…` ou nom d'un fichier du dossier `html/places/`.
+- **Deux lieux de même nom** (deux garages « Garage ») gardent **chacun leur blip**, avec exactement le même nom, et **partagent la même fiche** (la fiche indique « 1 autre lieu du même nom »).
+- La fiche reste tant que la carte est ouverte (puis 12 s) et disparaît si tu retires le point de passage.
+- Aucune dépendance. À démarrer avec les builders (déjà couvert par `ensure [dev]`).

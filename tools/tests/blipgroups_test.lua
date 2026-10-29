@@ -1,4 +1,4 @@
--- Blips de même nom regroupés en un seul (natives simulées) : lot, regroupement exact par nom, libellé « Nom (N) », liste des lieux transmise à pickax_mapgroups.
+-- Blips : chaque lieu garde son blip (même nom, rien ajouté) ; les fiches (image / description) sont transmises à pickax_mapgroups (natives simulées).
 local ROOT = os.getenv('ROOT') or '.'
 local checks = 0
 local function ok(c, m) checks = checks + 1 assert(c, m) end
@@ -16,30 +16,28 @@ exports = setmetatable({}, { __index = function() return { SetGroups = function(
 PickaxTheme = nil
 dofile(ROOT .. '/resources/[dev]/pickax_worldbuilder/client/bb_map.lua')
 
--- sans lot : comportement inchangé
 local h = BB.Blip({ x = 1, y = 2, z = 3 }, { label = 'Banque' }, { category = 'bank' })
 ok(h and names[h] == 'Banque', 'blip isolé : créé tout de suite, comme avant')
--- lot : deux garages de même nom + une banque
+-- lot : deux garages de même nom (avec fiche) + une banque sans fiche
 BB.BlipsBegin()
-ok(BB.Blip({ x = 10, y = 0, z = 0 }, { sprite = 357, label = 'Garage' }, {}) == nil, 'pendant un lot, rien n\'est créé tout de suite')
-BB.Blip({ x = 500, y = 0, z = 0 }, { sprite = 357, label = 'Garage' }, {})
+ok(BB.Blip({ x = 10, y = 0, z = 0 }, { sprite = 357, label = 'Garage', image = 'garage.webp', description = 'Garage public' }, { category = 'garage' }) == nil, 'pendant un lot, rien n\'est créé tout de suite')
+BB.Blip({ x = 500, y = 0, z = 0 }, { sprite = 357, label = 'Garage', image = 'garage.webp', description = 'Garage public' }, { category = 'garage' })
 BB.Blip({ x = 20, y = 20, z = 0 }, { label = 'Banque' }, { category = 'bank' })
-BB.Blip({ x = 30, y = 30, z = 0 }, {}, { label = 'Garage central' })   -- nom différent : séparé
 local hs = BB.BlipsEnd()
-ok(#hs == 3, '4 lieux → 3 blips (les deux « Garage » sont fusionnés)')
-local garage
-for _, id in ipairs(hs) do if names[id] == 'Garage (2)' then garage = id end end
-ok(garage, 'blip fusionné nommé « Garage (2) »')
-ok(registered and registered.owner == 'pickax_worldbuilder' and #registered.groups == 1 and #registered.groups[1].members == 2 and registered.groups[1].blip == garage and registered.groups[1].name == 'Garage', 'la liste des deux lieux est transmise à pickax_mapgroups')
-local single = 0 for _, id in ipairs(hs) do if names[id] == 'Banque' or names[id] == 'Garage central' then single = single + 1 end end
-ok(single == 2, 'les noms différents restent séparés')
--- noms presque identiques : pas de fusion
-BB.BlipsBegin() BB.Blip({ x = 1, y = 1, z = 0 }, { label = 'Garage' }, {}) BB.Blip({ x = 2, y = 2, z = 0 }, { label = 'garage' }, {})
-ok(#BB.BlipsEnd() == 2, 'seuls les noms EXACTEMENT identiques sont fusionnés (casse comprise)')
--- libellé par défaut du module
-BB.BlipsBegin() BB.Blip({ x = 1, y = 1, z = 0 }, {}, { label = 'Fourrière' }) BB.Blip({ x = 9, y = 9, z = 0 }, { label = '' }, { label = 'Fourrière' })
-local hh = BB.BlipsEnd() ok(#hh == 1 and names[hh[1]] == 'Fourrière (2)', 'le nom du module sert aussi au regroupement')
--- un blip lié à une entité n'est jamais regroupé
+ok(#hs == 3, '3 lieux → 3 blips : aucun blip n\'est fusionné')
+local garages = 0 for _, id in ipairs(hs) do if names[id] == 'Garage' then garages = garages + 1 end end
+ok(garages == 2, 'les deux garages gardent exactement le même nom, sans « (2) » ajouté')
+ok(registered and registered.owner == 'pickax_worldbuilder' and #registered.groups == 2, 'seuls les blips avec fiche sont transmis à pickax_mapgroups')
+local g = registered.groups[1]
+ok(g.name == 'Garage' and g.tag == 'garage' and g.info.image == 'garage.webp' and g.info.description == 'Garage public' and g.siblings == 1 and #g.members == 1, 'fiche : nom, type, image, description et nombre d\'autres lieux de même nom')
+ok(registered.groups[1].members[1].x == 10.0 and registered.groups[2].members[1].x == 500.0, 'chaque blip garde sa position')
+-- sans fiche : rien à enregistrer
+BB.BlipsBegin() BB.Blip({ x = 1, y = 1, z = 0 }, { label = 'Banque' }, {}) BB.Blip({ x = 2, y = 2, z = 0 }, { label = 'Banque' }, {})
+ok(#BB.BlipsEnd() == 2 and #registered.groups == 0, 'sans image ni description : deux blips, aucune fiche')
+-- fiche différente pour deux lieux de même nom : chacun la sienne
+BB.BlipsBegin() BB.Blip({ x = 1, y = 1, z = 0 }, { label = 'Garage', description = 'Nord' }, {}) BB.Blip({ x = 2, y = 2, z = 0 }, { label = 'Garage', description = 'Sud' }, {})
+BB.BlipsEnd() ok(registered.groups[1].info.description == 'Nord' and registered.groups[2].info.description == 'Sud', 'chaque lieu garde sa propre fiche')
+-- un blip lié à une entité n'est jamais mis en lot
 function AddBlipForEntity() nextId = nextId + 1 blips[nextId] = {} return nextId end
 BB.BlipsBegin() local e = BB.Blip(nil, { label = 'Véhicule' }, { entity = 5 }) ok(e ~= nil, 'blip d\'entité : jamais mis en lot')
 BB.BlipsEnd()
