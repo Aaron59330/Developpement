@@ -114,13 +114,6 @@ end
 -- Règles identiques partout : affichage 4, visible à proximité seulement par défaut, nom par défaut = nom du module.
 function BB.Blip(coords, b, opts)
     b, opts = b or {}, opts or {}
-    -- pendant un lot (BB.BlipsBegin … BB.BlipsEnd) : on mémorise ; les lieux de même nom seront regroupés en UN seul blip
-    if BB._batch and not opts.entity then BB._batch[#BB._batch + 1] = { coords = coords, b = b, opts = opts } return nil end
-    return BB.BlipNow(coords, b, opts)
-end
-
-function BB.BlipNow(coords, b, opts)
-    b, opts = b or {}, opts or {}
     local key = opts.category or ''
     local cat = BB.Categories[BB.Alias[key] or key] or BB.Categories.default
     local blip
@@ -141,50 +134,3 @@ function BB.BlipNow(coords, b, opts)
     EndTextCommandSetBlipName(blip)
     return blip
 end
-
-
--- Fiche du lieu d'un blip (image + description saisies dans le builder) ; nil si aucune
-function BB.BlipInfo(b)
-    local img, desc = tostring(b.image or ''):gsub('^%s+', ''):gsub('%s+$', ''), tostring(b.description or ''):gsub('^%s+', ''):gsub('%s+$', '')
-    if img == '' and desc == '' then return nil end
-    return { image = img, description = desc }
-end
-
--- ─── Blips de même nom identiques + fiches des lieux ───
--- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés (un par lieu, TOUS gardés). Les lieux de même nom reçoivent exactement le même style que le premier
--- (icône, couleur, taille…) : GTA les regroupe alors dans une seule ligne de la légende de la carte. Les fiches (image / description du builder) sont données à pickax_mapgroups.
-function BB.BlipsBegin() BB._batch = {} end
-
-function BB.BlipsEnd()
-    local list = BB._batch or {}
-    BB._batch = nil
-    local byName, order, handles, groups = {}, {}, {}, {}
-    for _, e in ipairs(list) do
-        local name = tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point')
-        local g = byName[name]
-        if not g then g = { name = name, items = {} } byName[name] = g order[#order + 1] = g end
-        g.items[#g.items + 1] = e
-    end
-    for _, g in ipairs(order) do
-        -- Lieux de même nom = blips STRICTEMENT identiques (même icône, couleur, taille, visibilité, catégorie, nom) : chaque lieu garde son blip, et GTA les range alors
-        -- dans une seule ligne de la légende de la carte (flèches ← → natives de la légende pour passer de l'un à l'autre)
-        local ref = g.items[1]
-        local members, anyInfo = {}, false
-        for _, e in ipairs(g.items) do
-            local h = BB.BlipNow(e.coords, ref.b, ref.opts)
-            handles[#handles + 1] = h
-            local info = BB.BlipInfo(e.b)
-            if info then anyInfo = true end
-            members[#members + 1] = { blip = h, x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0, info = info }
-        end
-        if anyInfo then groups[#groups + 1] = { name = g.name, tag = ref.opts.category, members = members } end
-    end
-    BB._groups = groups
-    if GetResourceState('pickax_mapgroups') == 'started' then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), groups) end) end
-    return handles
-end
-
--- pickax_mapgroups démarré après nous : on lui renvoie nos groupes
-AddEventHandler('pickax_mapgroups:ready', function()
-    if BB._groups then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), BB._groups) end) end
-end)

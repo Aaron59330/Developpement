@@ -73,14 +73,12 @@ end)
 local function rebuildBlips(list)
     for _, b in ipairs(blipHandles) do if DoesBlipExist(b) then RemoveBlip(b) end end
     blipHandles = {}
-    BB.BlipsBegin()
     for _, b in ipairs(list or {}) do
         -- un blip invalide ne doit jamais empêcher les suivants de s'afficher
         pcall(function()
             blipHandles[#blipHandles + 1] = BB.Blip(b.coords, b, { label = 'Gang', category = b.category })
         end)
     end
-    for _, h in ipairs(BB.BlipsEnd()) do blipHandles[#blipHandles + 1] = h end
 end
 
 RegisterNetEvent('gangbuilder:client:sync', function(data)
