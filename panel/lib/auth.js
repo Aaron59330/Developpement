@@ -28,10 +28,12 @@ function csrf(req, res, next) {
 }
 // préférences d'affichage du panel (design, thème, couleur principale), propres à chaque compte
 const DEFAULT_PREFS = { design: 'hub', theme: 'sombre', accent: null };
-function getPrefs(uid) { try { const r = db.prepare('SELECT value FROM settings WHERE key=?').get('uprefs:' + uid); return { ...DEFAULT_PREFS, ...(r ? JSON.parse(r.value) : {}) }; } catch (e) { return { ...DEFAULT_PREFS }; } }
+// Migration : les comptes restés sur l'ancien « v2 » par défaut (sans choix explicite) passent au design Hub
+function migratePrefs(p) { if (p.design === 'v2' && !p.designMig) p.design = 'hub'; return p; }
+function getPrefs(uid) { try { const r = db.prepare('SELECT value FROM settings WHERE key=?').get('uprefs:' + uid); return migratePrefs({ ...DEFAULT_PREFS, ...(r ? JSON.parse(r.value) : {}) }); } catch (e) { return { ...DEFAULT_PREFS }; } }
 function cleanPrefs(b) {
   b = b || {}; const out = {};
-  if (b.design !== undefined) { if (!['v1', 'v2', 'hub'].includes(b.design)) return null; out.design = b.design; }
+  if (b.design !== undefined) { if (!['v1', 'v2', 'hub'].includes(b.design)) return null; out.design = b.design; out.designMig = 1; }
   if (b.theme !== undefined) { if (!['sombre', 'clair'].includes(b.theme)) return null; out.theme = b.theme; }
   if (b.accent !== undefined) { if (b.accent !== null && !/^#[0-9a-fA-F]{6}$/.test(b.accent)) return null; out.accent = b.accent ? b.accent.toLowerCase() : null; }
   return out;
