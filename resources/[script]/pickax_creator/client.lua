@@ -25,14 +25,20 @@ local function startScene()
         origin = { c = GetEntityCoords(ped), h = GetEntityHeading(ped) }
         studioActive = true
         DoScreenFadeOut(300) while not IsScreenFadedOut() do Wait(10) end
+        -- le décor est entièrement chargé avant d'afficher quoi que ce soit (sinon on voit le vide à travers le menu)
+        SetFocusPosAndVel(st.x + 0.0, st.y + 0.0, st.z + 0.0, 0.0, 0.0, 0.0)
+        NewLoadSceneStartSphere(st.x + 0.0, st.y + 0.0, st.z + 0.0, 80.0, 0)
         RequestCollisionAtCoord(st.x + 0.0, st.y + 0.0, st.z + 0.0)
         SetEntityCoordsNoOffset(ped, st.x + 0.0, st.y + 0.0, st.z + 0.0, false, false, false) SetEntityHeading(ped, (st.w or 0.0) + 0.0)
         local t = GetGameTimer()
+        while not IsNewLoadSceneLoaded() and GetGameTimer() - t < 6000 do Wait(50) end
+        NewLoadSceneStop()
+        t = GetGameTimer()
         while not HasCollisionLoadedAroundEntity(ped) and GetGameTimer() - t < 5000 do Wait(50) end
         -- le sol est trouvé et le personnage posé dessus (jamais dans le vide)
         local ok, gz = GetGroundZFor_3dCoord(st.x + 0.0, st.y + 0.0, st.z + 1.0, false)
         if ok then SetEntityCoordsNoOffset(ped, st.x + 0.0, st.y + 0.0, gz + 0.0, false, false, false) end
-        Wait(300)
+        Wait(1200)
     end
     FreezeEntityPosition(ped, true)
     camDist = Config.Scene.CamDistance or 2.4
@@ -54,13 +60,14 @@ local function returnFromStudio()
     if origin then
         local ped = PlayerPedId()
         DoScreenFadeOut(300) while not IsScreenFadedOut() do Wait(10) end
+        ClearFocus()
         RequestCollisionAtCoord(origin.c.x, origin.c.y, origin.c.z)
         SetEntityCoordsNoOffset(ped, origin.c.x, origin.c.y, origin.c.z, false, false, false) SetEntityHeading(ped, origin.h)
         Wait(500) DoScreenFadeIn(500)
         origin = nil
     end
 end
-exports('EndStudio', function() studioActive = false origin = nil end)
+exports('EndStudio', function() studioActive = false origin = nil ClearFocus() end)
 AddEventHandler('CorePickax:Creator:finished', function() SetTimeout(5000, function() CreateThread(returnFromStudio) end) end)
 local function stopScene()
     if not scene then return end

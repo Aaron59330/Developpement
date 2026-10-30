@@ -15,9 +15,9 @@ Config.Music = {
 -- Position du studio : le joueur y est placé pendant l'apparence. coords = vector4(x, y, z, cap). nil = là où il se trouve déjà.
 Config.Scene = {
     -- Lieu de la scène : le joueur y est téléporté pendant TOUTE la création (identité + apparence), puis renvoyé à son point de départ
-    -- (ou conduit au point d'apparition choisi). Par défaut : intérieur d'un magasin de vêtements (Suburban, Hawick). Mets ton vestiaire / MLO ici.
+    -- (ou conduit au point d'apparition choisi). Par défaut : sommet du Mont Chiliad (extérieur, ciel dégagé, aucun passant). Mets ton vestiaire / MLO ici.
     -- nil = ne pas téléporter (le joueur reste là où il est).
-    Studio = vector4(127.4, -223.2, 54.56, 66.0),
+    Studio = vector4(501.0, 5604.0, 797.9, 180.0),
     CamDistance = 2.4,      -- distance de la caméra au personnage
     CamHeight = 0.45,       -- hauteur de visée (corps entier ≈ 0.0 ; visage ≈ 0.65)
 }
