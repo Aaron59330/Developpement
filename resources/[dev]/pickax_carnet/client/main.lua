@@ -6,6 +6,7 @@ local function close()
     open = false
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'close' })
+    TriggerServerEvent('pickax_carnet:watch', false)
 end
 
 local function toggle()
@@ -18,12 +19,16 @@ local function toggle()
         open = true
         SetNuiFocus(true, true)
         SendNUIMessage({ action = 'open', data = d })
+        TriggerServerEvent('pickax_carnet:watch', true)
     end)
 end
 
 RegisterCommand(Config.Command, toggle, false)
 RegisterKeyMapping(Config.Command, 'Ouvrir le carnet (objectifs et série)', 'keyboard', Config.Key)
 
+-- mise à jour en direct poussée par le serveur
+RegisterNetEvent('pickax_carnet:push', function(d) if open and type(d) == 'table' and d.ok then SendNUIMessage({ action = 'update', data = d }) end end)
+AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() and open then SetNuiFocus(false, false) end end)
 RegisterNUICallback('close', function(_, cb) close() cb('ok') end)
 RegisterNUICallback('refresh', function(_, cb)
     ESX.TriggerServerCallback('carnet:snapshot', function(d) cb(d or { ok = false }) end)

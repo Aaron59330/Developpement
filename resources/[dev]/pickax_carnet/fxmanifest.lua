@@ -17,7 +17,7 @@ client_scripts { 'client/main.lua' }
 
 ui_page 'html/index.html'
 
-files { 'html/index.html', 'html/style.css', 'html/script.js' }
+files { 'html/index.html', 'html/style.css', 'html/arcade.css', 'html/script.js' }
 
 server_exports { 'Report', 'Snapshot' }
 

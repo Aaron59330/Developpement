@@ -188,6 +188,11 @@ local function completeGoal(src, s, g, kind)
     tell(src, ('%s ~g~Objectif terminé~s~ : %s — ~g~+%d $~s~'):format(kind == 'week' and '★' or '✓', name, got))
 end
 
+-- Temps réel : les joueurs qui ont le carnet ouvert reçoivent l'état à jour dès qu'une progression change (regroupé toutes les 700 ms)
+local watch, pushQ = {}, {}
+local function markPush(src) if watch[src] then pushQ[src] = true end end
+local function markAllPush() for src in pairs(watch) do pushQ[src] = true end end
+
 local function advance(src, s, metric, amount)
     local d, changed = s.d, false
     for _, g in ipairs(d.goals) do
@@ -222,8 +227,9 @@ local function advance(src, s, metric, amount)
             end
             for other, so in pairs(P) do payCommunity(other, so) end
         end
+        markAllPush()   -- le défi de la ville avance pour tout le monde
     end
-    if changed then s.dirty = true end
+    if changed then s.dirty = true markPush(src) end
 end
 
 -- métrique rapportée par une autre ressource ; `who` = id serveur du joueur (ou identifiant)
@@ -364,6 +370,21 @@ local function snapshot(src)
     }
 end
 exports('Snapshot', snapshot)
+
+RegisterNetEvent('pickax_carnet:watch', function(on) local src = source if on then watch[src] = true pushQ[src] = true else watch[src], pushQ[src] = nil, nil end end)
+AddEventHandler('playerDropped', function() local src = source watch[src], pushQ[src] = nil, nil end)
+CreateThread(function()
+    while true do
+        Wait(700)
+        for src in pairs(pushQ) do
+            pushQ[src] = nil
+            if watch[src] and P[src] then
+                local d = snapshot(src)
+                if d then TriggerClientEvent('pickax_carnet:push', src, d) end
+            end
+        end
+    end
+end)
 
 ESX.RegisterServerCallback('carnet:snapshot', function(src, cb) cb(snapshot(src) or { ok = false, error = 'Le carnet est désactivé ou pas encore prêt' }) end)
 

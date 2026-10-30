@@ -196,3 +196,22 @@ html[data-design="pinata"] body.hx .shell::before, html[data-design="pinata"] bo
 html[data-design="pinata"] body.hx #root:not(.hidden), html[data-design="pinata"] body.lux #root:not(.hidden), html[data-design="pinata"] #root:not(.hidden) { background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html[data-design="pinata"] #dlgwrap, html[data-design="pinata"] #confirm, html[data-design="pinata"] #modal { background: rgba(0, 0, 0, .22) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html[data-design="pinata"] body::before, html[data-design="pinata"] body::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* ───────── Carnet du joueur (pickax_carnet) ───────── */
+html[data-design="pinata"][data-res="pickax_carnet"] { --a: var(--pi-acc); --ar: var(--pi-acc-rgb); --bg: var(--pi-bg); --panel: var(--pi-bg2); --line: var(--pi-line); --mut: var(--pi-mut); }
+html[data-design="pinata"][data-res="pickax_carnet"] #root { background: rgba(0, 0, 0, .5); }
+html[data-design="pinata"][data-res="pickax_carnet"] .cn { border-radius: 18px; border: 1px solid var(--pi-line2); box-shadow: var(--pi-shadow); background: var(--pi-bg); }
+html[data-design="pinata"][data-res="pickax_carnet"] .cn-head { background: transparent; }
+html[data-design="pinata"][data-res="pickax_carnet"] .cn-logo { border-radius: 12px; border: 1px solid var(--pi-line); background: var(--pi-soft); }
+html[data-design="pinata"][data-res="pickax_carnet"] .cn-head h1 { font-style: normal; text-transform: none; font-weight: 600; letter-spacing: -.01em; color: var(--pi-txt); }
+html[data-design="pinata"][data-res="pickax_carnet"] .cn-x { border-radius: 10px; border: 1px solid var(--pi-line); }
+html[data-design="pinata"][data-res="pickax_carnet"] .card { border-radius: 14px; border: 1px solid var(--pi-line); border-left: 1px solid var(--pi-line); background: var(--pi-bg2); }
+html[data-design="pinata"][data-res="pickax_carnet"] .card h2 { font-weight: 600; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--pi-txt); }
+html[data-design="pinata"][data-res="pickax_carnet"] .flame b { font-style: normal; font-weight: 600; color: var(--pi-acc); }
+html[data-design="pinata"][data-res="pickax_carnet"] .day, html[data-design="pinata"][data-res="pickax_carnet"] .goal, html[data-design="pinata"][data-res="pickax_carnet"] .bonus, html[data-design="pinata"][data-res="pickax_carnet"] .boost { border-radius: 12px; }
+html[data-design="pinata"][data-res="pickax_carnet"] .day.now { box-shadow: none; }
+html[data-design="pinata"][data-res="pickax_carnet"] .chip { border-radius: 999px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+html[data-design="pinata"][data-res="pickax_carnet"] .bar { border-radius: 99px; height: 6px; }
+html[data-design="pinata"][data-res="pickax_carnet"] .bar i { border-radius: 99px; background: var(--pi-acc); }
+html[data-design="pinata"][data-res="pickax_carnet"] .pl { border-radius: 999px; }
+html[data-design="pinata"][data-res="pickax_carnet"] .boost { border-left: 1px solid var(--pi-line); }
