@@ -7,6 +7,7 @@ local owners = {}      -- [ressource] = { { blip, name, tag, members = { { x, y,
 local activeKey = nil  -- blip actif (celui que ← → font défiler)
 local cardOn, cardUntil = false, 0
 local lastWp, ignoreWp = nil, nil
+local acceptAt = 0   -- dernier « valider » (Entrée / clic) sur la carte
 
 local TAGS = { garage = 'Garage', impound = 'Fourrière', rental = 'Location', dealer = 'Concessionnaire', fuel = 'Station-service', carwash = 'Lavage', bank = 'Banque', atm = 'Distributeur',
     shop = 'Boutique', pharmacy = 'Pharmacie', weapons = 'Armurerie', hardware = 'Bricolage', clothing = 'Vêtements', barber = 'Coiffeur', bar = 'Bar', electronics = 'Électronique',
@@ -154,6 +155,7 @@ CreateThread(function()
         if not IsPauseMenuActive() then wasOpen = false Wait(500) else
             Wait(0)
             wasOpen = true
+            if pressed(0, 201, 2, 201, 0, 191, 0, 176, 0, 237, 0, 24) then acceptAt = GetGameTimer() end   -- Entrée / clic sur la carte
             if pressed(0, 175, 2, 190) then if cycle(1) then Wait(180) end
             elseif pressed(0, 174, 2, 189) then if cycle(-1) then Wait(180) end
             elseif pressed(0, 172, 2, 188) then if cycle(1, true) then Wait(220) end
@@ -172,20 +174,23 @@ RegisterCommand('lieu', function(_, args)
     if not cycle(dir) then print('[pickax_mapgroups] aucun blip groupé à parcourir') end
 end, false)
 
+RegisterCommand('fiche', function() local multi = multiGroups() local g = #multi > 0 and activeGroup(multi) or nil if g then showCard(g) end end, false)   -- ouvre la fiche du blip groupé le plus proche
+
 -- ─── sélection d'un blip = point de passage posé dessus : la fiche s'affiche ───
 CreateThread(function()
     while true do
-        Wait(400)
+        Wait(IsPauseMenuActive() and 120 or 400)
         if IsWaypointActive() then
             local wb = GetFirstBlipInfoId(8)
             if DoesBlipExist(wb) then
                 local c = GetBlipInfoIdCoord(wb)
+                local clicked = GetGameTimer() - acceptAt < 900                     -- clic / Entrée tout juste donné sur la carte
                 local changed = not lastWp or dist2d(lastWp.x, lastWp.y, c.x, c.y) > 2.0
                 lastWp = { x = c.x, y = c.y }
-                if changed and not (ignoreWp and dist2d(ignoreWp.x, ignoreWp.y, c.x, c.y) < 3.0) then
+                if (changed or clicked) and not (ignoreWp and dist2d(ignoreWp.x, ignoreWp.y, c.x, c.y) < 3.0) then
                     for _, g in ipairs(allGroups()) do
                         local m = g.members[g.idx]
-                        if m and dist2d(m.x, m.y, c.x, c.y) <= 35.0 then activeKey = tostring(g.blip) showCard(g) break end
+                        if m and dist2d(m.x, m.y, c.x, c.y) <= 80.0 then activeKey = tostring(g.blip) acceptAt = 0 showCard(g) break end
                     end
                 end
             end
