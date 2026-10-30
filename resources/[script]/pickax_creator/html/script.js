@@ -120,7 +120,6 @@ function skin(d) {
       <div class="scroll" style="flex:1"><div class="herolist">${Array.from({ length: c.max - lo + 1 }, (_, i) => `<div class="hero ${c.value === lo + i ? 'on' : ''}" data-set="${n}:${lo + i}"><i>${(names[lo + i] || String(lo + i))[0]}</i>${esc(names[lo + i] || ('#' + (lo + i)))}</div>`).join('')}</div>${sep}${slider('face_md_weight')}${slider('skin_md_weight')}<div class="seg2" style="grid-template-columns:1fr;margin-top:8px"><button data-rand="${n}" style="background:rgba(255,255,255,.07)">Aléatoire</button></div></div></div>`; };
   const draw = () => { const sc = $('.scroll') ? $('.scroll').scrollTop : 0; show(`<div id="v-skin"><div class="tabs">${['apparence', 'coiffure'].concat(clothes ? ['vetements'] : []).map(t => `<button data-tab="${t}" class="${S.tab === t ? 'on' : ''}">${{ apparence: 'Apparence', coiffure: 'Coiffure', vetements: 'Vêtements' }[t]}</button>`).join('')}</div>
     <div class="panel left"><div class="ptitle">${ic('wand')}${{ apparence: 'Apparence', coiffure: 'Coiffure', vetements: 'Vêtements' }[S.tab]}</div><div class="scroll">${left()}</div></div>${right()}
-    <div class="hints"><div class="hint-k"><span class="mouse">◂ ▸</span>Rotation</div><div class="hint-k"><span class="mouse">▴ ▾</span>Zoom</div></div>
     ${Music.html()}<button class="finish" id="fin">${ic('check', 16)}Terminer</button></div>`);
     if ($('.scroll')) $('.scroll').scrollTop = sc; Music.start(); };
   draw();
@@ -153,7 +152,6 @@ function spawn(d) {
     const card = (s, i, on) => `<div class="card ${on ? 'on' : ''}" data-i="${i}"><div class="ph" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}"></div><div class="bd"><div class="ic">${ic('pin', 26)}</div><div><b>${esc(s.label)}</b><span class="loc">${ic('pin', 11)}${esc(s.place || s.desc || '')}</span></div>${on ? `<div class="tick">${ic('check', 16)}</div>` : ''}</div></div>`;
     show(`<div id="v-spawn"><div class="map" style="${d.mapImage ? `background-image:url('${esc(d.mapImage)}')` : ''}"></div>
       <div class="sp-t"><h1>${ic('pin')}Point d'apparition</h1><p>Choisissez votre point d'apparition sur la carte de Los Santos.</p></div>
-      <div class="hints" style="left:54px;top:170px;bottom:auto"><div class="hint-k"><span class="mouse">◂ ▸</span>Déplacer</div><div class="hint-k"><span class="mouse">▴ ▾</span>Zoom</div></div>
       ${spots.map((s, i) => { const [x, y] = xy(s); return `<div class="pin ${i === sel ? 'on' : ''}" data-i="${i}" style="left:${x}%;top:${y}%">${ic('pin')}</div>`; }).join('')}
       <div style="position:absolute;left:62px;bottom:128px;width:313px">${card(s0, sel, true)}</div><button class="go-here" id="go">${ic('check', 16)}Apparaître ici</button>
       <div class="cards" style="left:430px;gap:60px">${vis.map(([s, i]) => card(s, i, false)).join('')}</div>
