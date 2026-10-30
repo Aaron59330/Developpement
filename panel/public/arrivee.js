@@ -28,6 +28,37 @@ function arriveeTexts(groups, current) {
   return { node, get: () => Object.fromEntries(Object.entries(inputs).map(([k, i]) => [k, i.value.trim()]).filter(([, v]) => v)) };
 }
 
+
+// ───────── Champ image : lien https:// OU fichier .png / .jpg envoyé depuis l'ordinateur (rien d'autre) ─────────
+// Renvoie { node, input } : input.value = lien final (https://…) ou nom de fichier d'une image déjà dans la ressource.
+function imageField(value, placeholder) {
+  const sid = () => (curServer() || {}).id;
+  const input = el('input', { value: value || '', placeholder: placeholder || 'https://… lien d’image, ou envoie un fichier .png / .jpg' });
+  const prev = el('img', { style: 'display:none;max-height:54px;max-width:96px;border-radius:6px;margin-left:8px;object-fit:cover' });
+  const msg = el('div', { class: 'muted', style: 'font-size:11px;margin-top:2px;min-height:14px' });
+  const file = el('input', { type: 'file', accept: '.png,.jpg,.jpeg,image/png,image/jpeg', style: 'display:none' });
+  const show = () => {
+    const v = input.value.trim(); const ok = !v || /^https:\/\//i.test(v) || /^[\w\- .\/]+\.(png|jpe?g)$/i.test(v);
+    msg.textContent = ok ? '' : 'Lien invalide : il doit commencer par https:// (ou être un fichier .png / .jpg).'; msg.style.color = ok ? '' : '#e5484d';
+    if (/^https:\/\//i.test(v)) { prev.src = v; prev.style.display = ''; } else prev.style.display = 'none';
+  };
+  input.addEventListener('input', show); prev.onerror = () => { prev.style.display = 'none'; }; show();
+  file.onchange = async () => {
+    const f = file.files[0]; file.value = ''; if (!f) return;
+    if (!/\.(png|jpe?g)$/i.test(f.name) || !/^image\/(png|jpeg)$/.test(f.type)) { msg.textContent = 'Seuls les fichiers .png et .jpg sont acceptés.'; msg.style.color = '#e5484d'; return; }
+    if (f.size > 1500000) { msg.textContent = 'Fichier trop lourd (1,5 Mo maximum).'; msg.style.color = '#e5484d'; return; }
+    msg.textContent = 'Envoi…'; msg.style.color = '';
+    const data = await new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.readAsDataURL(f); });
+    const up = await api('POST', `/api/servers/${sid()}/drive`, { name: f.name, mime: f.type, data });
+    if (!up.ok) { msg.textContent = up.error || 'Envoi impossible'; msg.style.color = '#e5484d'; return; }
+    const list = (await api('GET', `/api/servers/${sid()}/drive`)).files || []; const hit = list.find(x => x.token === up.token);
+    if (!hit) { msg.textContent = 'Fichier envoyé mais lien introuvable : réessaie.'; msg.style.color = '#e5484d'; return; }
+    input.value = hit.url; input.dispatchEvent(new Event('input')); toast('Image envoyée', 'ok');
+  };
+  const btn = el('button', { class: 'btn s', type: 'button', onclick: () => file.click() }, el('span', {}, 'Envoyer un fichier'));
+  return { input, node: el('div', { style: 'margin-bottom:6px' }, el('div', { class: 'row', style: 'gap:6px;align-items:center' }, input, btn, prev), msg, file) };
+}
+
 const ARRIVEE_DEFAULT = {
   texts: {}, bg: { identity: '', skin: '', spawn: '', welcome: '', emotes: '', dim: 35 },
   music: { enabled: true, volume: 35, tracks: [] },
@@ -62,8 +93,8 @@ PAGES.creator = async function () {
   // fonds d'écran
   const bgIn = {}; const bgBox = el('div');
   for (const [k, l] of [['identity', 'Création d’identité'], ['skin', 'Apparence / vêtements'], ['spawn', 'Point d’apparition (fond de carte)'], ['welcome', 'Message de bienvenue'], ['emotes', 'Gestionnaire d’animations']]) {
-    bgIn[k] = inp(v.bg[k], 'https://… (vide = on voit le monde du jeu)');
-    bgBox.append(lab(l), bgIn[k], pick(images, bgIn[k], '— Choisir une image de mon Drive —'));
+    const f = imageField(v.bg[k], 'Lien d’image ou fichier (vide = on voit le monde du jeu)'); bgIn[k] = f.input;
+    bgBox.append(lab(l), f.node);
   }
   const dim = el('input', { type: 'range', min: 0, max: 100, value: v.bg.dim, style: 'padding:0' }), dimT = el('b', {}, v.bg.dim + ' %'); dim.oninput = () => { dimT.textContent = dim.value + ' %'; };
   // musique
@@ -71,7 +102,7 @@ PAGES.creator = async function () {
   const tracksBox = el('div');
   const drawTracks = () => tracksBox.replaceChildren(...v.music.tracks.map((t, i) => {
     const f = inp(t.file, 'https://…mp3 ou nom de fichier dans pickax_creator/html/music', { oninput: e => { t.file = e.target.value; } });
-    return el('div', { class: 'card', style: 'margin:0 0 8px' }, el('div', { class: 'row' }, inp(t.title, 'Titre', { oninput: e => { t.title = e.target.value; } }), inp(t.artist, 'Artiste', { oninput: e => { t.artist = e.target.value; } }), el('button', { class: 'btn s', onclick: () => { v.music.tracks.splice(i, 1); drawTracks(); } }, el('span', {}, 'Retirer'))), f, pick(audios, f, '— Choisir une musique de mon Drive —'), inp(t.cover, 'Pochette (https://…, facultatif)', { oninput: e => { t.cover = e.target.value; } }));
+    return el('div', { class: 'card', style: 'margin:0 0 8px' }, el('div', { class: 'row' }, inp(t.title, 'Titre', { oninput: e => { t.title = e.target.value; } }), inp(t.artist, 'Artiste', { oninput: e => { t.artist = e.target.value; } }), el('button', { class: 'btn s', onclick: () => { v.music.tracks.splice(i, 1); drawTracks(); } }, el('span', {}, 'Retirer'))), f, pick(audios, f, '— Choisir une musique de mon Drive —'), (() => { const cf = imageField(t.cover, 'Pochette (lien ou fichier .png / .jpg, facultatif)'); cf.input.addEventListener('input', () => { t.cover = cf.input.value; }); return cf.node; })());
   }));
   drawTracks();
   // studio
@@ -79,16 +110,16 @@ PAGES.creator = async function () {
   // lieux
   const spotsBox = el('div');
   const drawSpots = () => spotsBox.replaceChildren(...v.spots.map((p, i) => {
-    const im = inp(p.image, 'https://… ou nom de fichier (pickax_creator/html/places)', { oninput: e => { p.image = e.target.value; } });
+    const imf = imageField(p.image, 'Lien d’image ou fichier .png / .jpg'); const im = imf.input; im.addEventListener('input', () => { p.image = im.value; });
     const c = (k, ph) => num(p[k], ph, 'any'); const cs = ['x', 'y', 'z', 'h'].map(k => { const n = c(k, k.toUpperCase()); n.oninput = () => { p[k] = Number(n.value); }; return n; });
     return el('div', { class: 'card', style: 'margin:0 0 10px' }, el('div', { class: 'row' }, inp(p.label, 'Nom du lieu', { oninput: e => { p.label = e.target.value; } }), el('button', { class: 'btn s', onclick: () => { v.spots.splice(i, 1); drawSpots(); } }, el('span', {}, 'Retirer'))),
-      inp(p.description, 'Description courte', { oninput: e => { p.description = e.target.value; } }), lab('Image de la carte'), im, pick(images, im, '— Choisir une image de mon Drive —'),
+      inp(p.description, 'Description courte', { oninput: e => { p.description = e.target.value; } }), lab('Image de la carte'), imf.node,
       el('div', { class: 'row', style: 'gap:6px;margin-top:6px' }, ...cs), el('p', { class: 'muted', style: 'font-size:11px;margin:4px 0 0' }, 'Coordonnées X · Y · Z · cap (copie-les en jeu avec ton menu staff).'));
   }));
   drawSpots();
-  const map = { image: inp(v.map.image, 'https://… image de la carte de Los Santos (vide = fond sombre)'), minX: num(v.map.minX), maxX: num(v.map.maxX), minY: num(v.map.minY), maxY: num(v.map.maxY) };
+  const mapF = imageField(v.map.image, 'Image de la carte de Los Santos (vide = fond sombre)'); const map = { image: mapF.input, minX: num(v.map.minX), maxX: num(v.map.maxX), minY: num(v.map.minY), maxY: num(v.map.maxY) };
   // bienvenue
-  const w = { enabled: el('input', { type: 'checkbox', checked: v.welcome.enabled !== false, style: 'width:auto' }), title: inp(v.welcome.title, 'Bienvenue sur le'), highlight: inp(v.welcome.highlight, 'serveur'), text: el('textarea', { rows: 3, value: v.welcome.text || '' }), duration: num(v.welcome.duration, '9000', 500), logo: inp(v.welcome.logo, 'https://… (vide = logo du serveur)') };
+  const w = { enabled: el('input', { type: 'checkbox', checked: v.welcome.enabled !== false, style: 'width:auto' }), title: inp(v.welcome.title, 'Bienvenue sur le'), highlight: inp(v.welcome.highlight, 'serveur'), text: el('textarea', { rows: 3, value: v.welcome.text || '' }), duration: num(v.welcome.duration, '9000', 500), logo: null }; const wLogo = imageField(v.welcome.logo, 'Logo (vide = logo du serveur)'); w.logo = wLogo.input;
   const tx = arriveeTexts(ARRIVEE_TEXTS, v.texts);
 
   const collect = () => ({
@@ -110,8 +141,8 @@ PAGES.creator = async function () {
       el('div', {},
         sec('Images de fond', 'Une image par écran (lien https:// ou fichier de ton Drive). Vide = on voit le jeu derrière.', bgBox, el('label', {}, 'Assombrissement ', dimT), dim),
         sec('Points d’apparition', 'Les lieux proposés après la création du personnage (photo, nom, texte, coordonnées).', spotsBox, el('button', { class: 'btn', onclick: () => { v.spots.push({ label: '', description: '', icon: 'pin', image: '', x: 0, y: 0, z: 30, h: 0 }); drawSpots(); } }, el('span', {}, '+ Ajouter un lieu')),
-          el('h3', { style: 'margin:16px 0 6px;font-size:13px' }, 'Carte de fond'), map.image, el('div', { class: 'row', style: 'gap:6px;margin-top:6px' }, map.minX, map.maxX, map.minY, map.maxY), el('p', { class: 'muted', style: 'font-size:11px' }, 'Bornes du monde (X min · X max · Y min · Y max) : servent à placer les repères sur l’image.')),
-        sec('Message de bienvenue', 'Affiché une fois arrivé au point choisi.', swc(w.enabled, 'Afficher le message'), lab('Début du titre'), w.title, lab('Mot mis en couleur (suivi du nom du serveur)'), w.highlight, lab('Texte'), w.text, lab('Durée (ms, 0 = reste jusqu’au clic)'), w.duration, lab('Logo'), w.logo)),
+          el('h3', { style: 'margin:16px 0 6px;font-size:13px' }, 'Carte de fond'), mapF.node, el('div', { class: 'row', style: 'gap:6px;margin-top:6px' }, map.minX, map.maxX, map.minY, map.maxY), el('p', { class: 'muted', style: 'font-size:11px' }, 'Bornes du monde (X min · X max · Y min · Y max) : servent à placer les repères sur l’image.')),
+        sec('Message de bienvenue', 'Affiché une fois arrivé au point choisi.', swc(w.enabled, 'Afficher le message'), lab('Début du titre'), w.title, lab('Mot mis en couleur (suivi du nom du serveur)'), w.highlight, lab('Texte'), w.text, lab('Durée (ms, 0 = reste jusqu’au clic)'), w.duration, lab('Logo'), wLogo.node)),
       el('div', {},
         sec('Musique', 'Jouée pendant l’identité et l’apparence ; le joueur peut la couper.', swc(mEn, 'Musique activée'), el('label', {}, 'Volume ', mVolT), mVol, tracksBox, el('button', { class: 'btn', onclick: () => { v.music.tracks.push({ title: '', artist: '', file: '', cover: '' }); drawTracks(); } }, el('span', {}, '+ Ajouter une musique'))),
         sec('Décor de création (studio)', 'Là où le personnage est placé pendant l’identité et l’apparence, puis renvoyé à son point de départ.', swc(st.enabled, 'Téléporter le joueur au studio'), el('div', { class: 'row', style: 'gap:6px' }, st.x, st.y, st.z, st.h), el('div', { class: 'row', style: 'gap:6px;margin-top:6px' }, el('div', {}, lab('Distance caméra'), st.camDistance), el('div', {}, lab('Hauteur de visée'), st.camHeight))),
@@ -122,17 +153,17 @@ PAGES.creator = async function () {
 // Complète la page « Écran d’accueil » : voir PAGES.loading (config.js) qui appelle loadingAppearance().
 function loadingAppearance(v) {
   const images = [];
-  const bgImg = el('input', { value: (v.bg && v.bg.image) || '', placeholder: 'https://… (vide = image d’origine du serveur)' });
+  const bgF = imageField((v.bg && v.bg.image) || '', 'Image de fond (vide = image d’origine du serveur)'), bgImg = bgF.input;
   const dim = el('input', { type: 'range', min: 0, max: 100, value: (v.bg && v.bg.dim) || 0, style: 'padding:0' }), dimT = el('b', {}, ((v.bg && v.bg.dim) || 0) + ' %'); dim.oninput = () => { dimT.textContent = dim.value + ' %'; };
   const blur = el('input', { type: 'range', min: 0, max: 20, value: (v.bg && v.bg.blur) || 0, style: 'padding:0' }), blurT = el('b', {}, ((v.bg && v.bg.blur) || 0) + ' px'); blur.oninput = () => { blurT.textContent = blur.value + ' px'; };
-  const logo = el('input', { value: v.logo || '', placeholder: 'https://… (vide = logo du serveur)' });
+  const logoF = imageField(v.logo || '', 'Logo (vide = logo du serveur)'), logo = logoF.input;
   const H = { logo: 'Logo', name: 'Nom du serveur', links: 'Boutons Règlement / Discord / Boutique', ticker: 'Bandeau défilant', progress: 'Barre de progression' };
   const hide = {}; const hideBox = el('div');
   for (const [k, l] of Object.entries(H)) { hide[k] = el('input', { type: 'checkbox', checked: !!(v.hide && v.hide[k]), style: 'width:auto' }); hideBox.append(el('label', { style: 'display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin:6px 0' }, hide[k], 'Masquer : ' + l)); }
   const tx = arriveeTexts({ 'Libellés': LOADING_TEXTS }, v.texts || {});
   return {
     node: el('div', { class: 'card' }, el('h2', {}, 'Apparence'), el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, 'Fond, logo, libellés et éléments affichés. La couleur principale vient de « Général ».'),
-      el('label', {}, 'Image de fond'), bgImg, el('label', {}, 'Assombrissement ', dimT), dim, el('label', {}, 'Flou ', blurT), blur, el('label', {}, 'Logo'), logo, hideBox, tx.node),
+      el('label', {}, 'Image de fond'), bgF.node, el('label', {}, 'Assombrissement ', dimT), dim, el('label', {}, 'Flou ', blurT), blur, el('label', {}, 'Logo'), logoF.node, hideBox, tx.node),
     get: () => ({ bg: { image: bgImg.value.trim(), dim: +dim.value, blur: +blur.value }, logo: logo.value.trim(), texts: tx.get(), hide: Object.fromEntries(Object.entries(hide).map(([k, i]) => [k, i.checked])) }),
   };
 }

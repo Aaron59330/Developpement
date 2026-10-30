@@ -141,12 +141,12 @@ router.post('/:id/webhooks/test', async (req, res) => {
 });
 
 // ───────── Drive (images hébergées, utilisables comme logo) ─────────
-const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'audio/mpeg': 'mp3', 'audio/ogg': 'ogg', 'audio/wav': 'wav' };
+const MIME = { 'image/png': 'png', 'image/jpeg': 'jpg', 'audio/mpeg': 'mp3', 'audio/ogg': 'ogg', 'audio/wav': 'wav' };
 const isAudio = m => m.startsWith('audio/');
 const driveDir = () => { const d = path.join(cfg.dataDir, 'drive'); fs.mkdirSync(d, { recursive: true }); return d; };
 router.get('/:id/drive', (req, res) => { const l = own(req, res); if (!l) return; res.json({ ok: true, files: db.prepare('SELECT id,token,name,mime,size,at FROM drive WHERE license_id=? ORDER BY id DESC').all(l.id).map(f => ({ ...f, url: cfg.publicUrl ? `${cfg.publicUrl}/drive/${f.token}` : `${req.protocol}://${req.get('host')}/drive/${f.token}` })) }); });
 router.post('/:id/drive', (req, res) => {
-  const l = own(req, res); if (!l) return; const b = req.body || {}; const mime = String(b.mime || ''); if (!MIME[mime]) return res.json({ ok: false, error: 'Formats acceptés : PNG, JPG, WEBP, GIF, SVG (images) · MP3, OGG, WAV (musique)' });
+  const l = own(req, res); if (!l) return; const b = req.body || {}; const mime = String(b.mime || ''); if (!MIME[mime]) return res.json({ ok: false, error: 'Formats acceptés : PNG et JPG (images) · MP3, OGG, WAV (musique)' });
   const buf = Buffer.from(String(b.data || ''), 'base64'); const maxSize = isAudio(mime) ? 6000000 : 1500000; if (!buf.length || buf.length > maxSize) return res.json({ ok: false, error: isAudio(mime) ? 'Fichier vide ou supérieur à 6 Mo' : 'Fichier vide ou supérieur à 1,5 Mo' });
   const used = db.prepare('SELECT COALESCE(SUM(size),0) n FROM drive WHERE license_id=?').get(l.id).n; if (used + buf.length > 20 * 1024 * 1024) return res.json({ ok: false, error: 'Drive plein (20 Mo)' });
   if (mime === 'image/svg+xml' && /<script|onload=|onerror=|javascript:/i.test(buf.toString('utf8'))) return res.json({ ok: false, error: 'SVG refusé (contenu actif)' });
