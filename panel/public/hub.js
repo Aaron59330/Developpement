@@ -33,6 +33,7 @@
         group('base', 'Gestion Base', 'sliders', [link('theme', 'Couleurs & logos', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark'), ...settingsItems]),
         group('res', 'Outils & fichiers', 'puzzle', [link('modules', 'Ressources', 'puzzle'), link('editor', 'Éditeur de base', 'edit'), link('files', 'Fichiers', 'file'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('acc', 'Accès & sauvegardes', 'shield', [link('access', 'Bans & whitelist', 'shield'), link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),
+        sec('Explications'), link('expl', 'Les scripts', 'book'), link('cmds', 'Les commandes', 'term'),
         sec('Compte'), link('account', 'Compte', 'user'), isAdmin ? null : link('offers', 'Abonnements', 'tag'),
         isAdmin ? [sec('Administration'), link('a-overview', 'Vue d’ensemble', 'chart'), link('a-users', 'Clients', 'user'), link('a-licenses', 'Licences', 'key'), link('a-plans', 'Offres', 'tag'), link('a-orders', 'Commandes', 'cart'), link('a-modules', 'Modules', 'puzzle'), link('a-audit', 'Journal', 'list')] : null];
     const brand = el('div', { class: 'hub-brand' }, el('img', { src: 'img/logo.png', alt: '' }),

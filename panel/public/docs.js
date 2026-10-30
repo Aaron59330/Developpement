@@ -221,6 +221,10 @@ const DOCS = [
     ]],
     ['note', 'Ce que tu règles dans le panel est prioritaire sur les fichiers de config. Si tu supprimes un réglage du panel, la valeur du fichier s\'applique de nouveau.'],
   ] },
+  { id: 'explications', title: '13 bis. Explications (scripts et commandes)', blocks: [
+    ['p', 'Le menu « Explications » contient deux pages. « Les scripts » explique chaque script de la base (même les petits et les inutiles) : ce qu\'il fait, ce qui se passe si on le retire, où le régler et ses commandes, avec un niveau d\'importance (Obligatoire, Utile, Facultatif, Inutile / test, Désactivé). « Les commandes » liste toutes les commandes avec qui peut les utiliser.'],
+    ['note', 'Ces pages sont générées à partir du contenu réel de la base. Après avoir ajouté ou changé un script, lance dans le dossier panel : python3 tools/explications/extract_commands.py puis python3 tools/explications/build.py.'],
+  ] },
   { id: 'maintenance', title: '14. Maintenance et mises à jour', blocks: [
     ['ul', [
       'Mettre à jour le panel : remplace les fichiers de panel/ (garde .env et data/), npm install --omit=dev, pm2 restart aero-panel.',

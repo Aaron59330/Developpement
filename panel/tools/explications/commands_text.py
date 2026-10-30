@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+# Explication de chaque commande : nom → (qui peut l'utiliser, ce qu'elle fait)
+A='Tous les joueurs'; S='Staff'; D='Développeur'; K='Console serveur'
+CD={
+# ESX
+'clear':(A,'Vide ton chat.'),'clearall':(S,'Vide le chat de tous les joueurs.'),'coords':(S,'Affiche tes coordonnées X, Y, Z et ton cap pour placer des points.'),
+'group':(A,'Affiche ton groupe (user, admin, superadmin) dans la console.'),'info':(A,'Affiche ton ID, ton nom, ton groupe et ton métier dans la console.'),'job':(A,'Affiche ton métier et ton grade.'),'job2':(A,'Affiche ton deuxième métier (gang).'),
+'noclip':(S,'Active le vol à travers les murs.'),'players':(K,'Liste les joueurs connectés.'),'setcoords':(S,'Se téléporter à des coordonnées précises.'),'showinv':(A,'Ouvre l\'ancien affichage d\'inventaire.'),'water':(S,'Remplit la jauge de soif (test).'),
+# ox
+'additem':(S,'Donne un objet à un joueur.'),'removeitem':(S,'Retire un objet à un joueur.'),'setitem':(S,'Fixe la quantité exacte d\'un objet.'),'clearinv':(S,'Vide tout l\'inventaire d\'un joueur.'),'viewinv':(S,'Regarde l\'inventaire d\'un joueur sans le modifier.'),
+'takeinv':(S,'Confisque l\'inventaire d\'un joueur (restituable).'),'restoreinv':(S,'Rend l\'inventaire confisqué.'),'saveinv':(S,'Force la sauvegarde de tous les inventaires.'),'convertinventory':(S,'Convertit un inventaire depuis un autre système.'),
+'clearevidence':(S,'Vide un casier de preuves de la police.'),'clearActiveIdentifier':(S,'Réinitialise l\'identifiant actif d\'un inventaire (dépannage).'),
+'ox_lib':(D,'Outil de diagnostic d\'ox_lib.'),'zone':(D,'Affiche les zones d\'ox_lib pour les déboguer.'),'cancelprogress':(A,'Annule une barre de progression bloquée.'),
+'cycleproximity':(A,'Change la portée de la voix (chuchoter, normal, crier).'),'vol':(A,'Règle le volume des voix et de la radio.'),'setvoiceintent':(D,'Choisit le mode de voix (diagnostic).'),
+'setup':(D,'Outil pScripts pour placer un PNJ ou un point.'),'pedfix':(A,'Répare l\'apparence du personnage si elle bug.'),'register':(A,'Refaire son identité près du point d\'arrivée.'),'creatortest':(S,'Prévisualiser les écrans de création : identity, skin, spawn, welcome, emotes, close.'),
+# panel / ui
+'plainte':(A,'Envoyer une plainte au staff : /plainte <id joueur ou 0> <message>. Visible dans le panel.'),
+'testnotif':(D,'Teste une notification simple.'),'testadvancednotif':(D,'Teste une notification avec titre.'),'testhelpnotif':(D,'Teste le message d\'aide « Appuyez sur E ».'),
+'boussole':(A,'Masque ou affiche la boussole.'),'touches':(A,'Ouvre la liste de toutes les touches du serveur.'),'tutoriel':(A,'Rejoue le tutoriel d\'arrivée.'),'tutorielreset':(S,'Remet le tutoriel d\'un joueur à zéro : /tutorielreset <id>.'),
+'carnet':(A,'Ouvre le carnet (même chose que la touche F3).'),'carnetreset':(S,'Remet à zéro ta série et tes objectifs du jour (test).'),
+'carplay':(A,'Ouvre l\'autoradio du véhicule.'),'carplaydebug':(D,'Affiche l\'état des radios actives pour déboguer.'),
+'bourse':(A,'Ouvre la bourse.'),'encheres':(A,'Ouvre l\'hôtel des ventes.'),'builders':(S,'Ouvre le hub des builders.'),'aerotools':(S,'Ouvre les outils de la base (diagnostic, sauvegardes).'),'ac':(S,'Ouvre le panneau anti-triche.'),'anticheat':(S,'Même chose que /ac.'),
+'progress':(D,'Test d\'une barre de progression à l\'écran.'),'smsg':(S,'Envoie un message du staff à un joueur : /smsg <id> <texte>.'),'wctune':(D,'Règle à la main la position d\'une arme portée.'),
+# phone
+'phone':(A,'Ouvre le téléphone.'),'phone_give':(S,'Donne un téléphone à un joueur.'),'phone_number':(S,'Affiche ou change le numéro d\'un joueur.'),'phone_reset':(S,'Réinitialise le téléphone d\'un joueur.'),'phone_verify':(S,'Valide ou retire le badge « vérifié » d\'un compte réseau.'),
+'phone_lotodraw':(S,'Lance le tirage du loto tout de suite.'),'phone_dclog':(S,'Lit les messages d\'un salon de discussion interne.'),'phone_dcclose':(S,'Efface un salon de discussion interne.'),
+# jobs
+'jobbuilder':(S,'Ouvre le builder de métiers.'),'jobmenu':(A,'Ouvre le menu métier (touche F6 par défaut).'),'revive':(S,'Réanime et soigne un joueur (soi-même sans argument) ; les médecins l\'utilisent aussi.'),'appel':(A,'Appel citoyen vers la police : /appel <message>.'),'panic':(A,'Appel à l\'aide d\'un policier à ses collègues.'),
+'annonces':(A,'Masque ou réaffiche les annonces d\'entreprise.'),'finservice':(A,'Termine sa prise de service.'),'decorer':(A,'Décorer sa propriété (meubles).'),'jobmoney':(S,'Affiche les trésoreries des métiers dans la console.'),
+'jbcheck':(D,'Diagnostic du builder de métiers dans la console.'),'jbdebug':(D,'Affiche l\'état du joueur pour le builder de métiers.'),'jbreset':(D,'Débloque l\'interface du builder de métiers si elle reste coincée.'),'jbevent':(S,'Lance un événement de métier : /jbevent <clé>.'),'jbems_accept':(A,'EMS : prendre le dernier appel (touche Y).'),
+'ajfire':(S,'Déclenche un incendie pour les pompiers.'),'labprops':(D,'Liste les props de laboratoire trouvés (diagnostic).'),'missionstop':(S,'Arrête la mission en cours.'),
+# gangs
+'gangbuilder':(S,'Ouvre le builder de gangs.'),'gangmenu':(A,'Ouvre le menu de ton gang (touche F7).'),'gangtablet':(A,'Ouvre la tablette de gang.'),'convoi':(A,'Lance un convoi de ton gang.'),'tag':(A,'Pose le tag de ton gang pour marquer un territoire.'),'effacer':(A,'Efface un tag rival.'),
+'raidhq':(A,'Attaque le QG d\'un gang rival.'),'starttribute':(S,'Lance une zone de tribut.'),'stoptribute':(S,'Arrête la zone de tribut.'),'endseason':(S,'Termine la saison de gangs en cours.'),'gbcheck':(D,'Diagnostic du builder de gangs.'),'gbconflict':(S,'Teste un affrontement sur un territoire.'),
+'gbdebug':(D,'Affiche l\'état du gang du joueur.'),'gbobjective':(S,'Lance une mission colis.'),'gbobjstop':(S,'Arrête la mission colis.'),'gbreset':(D,'Débloque l\'interface du builder de gangs.'),'gbwho':(S,'Affiche le gang d\'un joueur.'),
+# illégal
+'illegalbuilder':(S,'Ouvre le builder illégal.'),'dealer':(A,'Vendre au dealer le plus proche.'),'contrat':(A,'Prendre un contrat de livraison.'),'annulercontrat':(A,'Abandonner le contrat en cours.'),'marchenoir':(A,'Voir le stock du marché noir à rotation.'),'acheter':(A,'Acheter au marché noir.'),
+'indic':(A,'Consulter un informateur.'),'tuyau':(A,'Acheter un tuyau à un informateur.'),'planque':(A,'Utiliser ou gérer ta planque.'),'fouillerplanque':(A,'Police : fouiller une planque.'),'emprisonner':(A,'Police : mettre un joueur en prison.'),'liberer':(A,'Police ou staff : libérer un joueur.'),
+'caution':(A,'Payer la caution d\'un joueur.'),'saisies':(A,'Police : voir les saisies.'),'preuves':(A,'Police : consulter les preuves.'),'defendre':(A,'Avocat : défendre un joueur.'),'gracier':(A,'Juge : gracier un joueur.'),'accepter':(A,'Accepter une offre faite par un autre joueur.'),'ibseed':(S,'Crée le point de blanchiment d\'exemple.'),'wbreset':(D,'Débloque l\'interface du builder du monde.'),
+# world / shop / minigames / event
+'worldbuilder':(S,'Ouvre le builder du monde.'),'assurance':(A,'Voir ou souscrire une assurance véhicule.'),'assurer':(A,'Assurer un véhicule.'),'wbdoor':(S,'Gère la porte la plus proche.'),'gazdepot':(S,'Place un dépôt de gaz à ta position.'),'annulerquete':(A,'Abandonne la quête en cours.'),'wbpvp':(D,'Diagnostic des scripts de combat compatibles.'),'wbseed':(S,'Crée les modules d\'exemple.'),'wbjobs':(S,'Recrée les métiers du pôle emploi à la main.'),
+'shopbuilder':(S,'Ouvre le builder de boutiques.'),'clothshots':(D,'Prend des photos de vêtements : /clothshots <pièce>.'),'clothshotsstop':(D,'Arrête les photos de vêtements.'),'sbseed':(S,'Crée les boutiques d\'exemple.'),'sbreset':(D,'Débloque l\'interface du builder de boutiques.'),
+'minigames':(S,'Ouvre le builder de mini-jeux.'),'minigames_leave':(A,'Quitter le mini-jeu en cours.'),'mgprofil':(A,'Voir ton profil de mini-jeux.'),'mgseed':(S,'Crée les mini-jeux d\'exemple.'),'eventbuilder':(S,'Ouvre le builder d\'événements.'),'eventstop':(S,'Arrête tous les événements en cours.'),
+# core
+'Wipe':(S,'Efface les données d\'un joueur (superadmin).'),'NewToken':(D,'Génère un jeton de sécurité.'),'MenuRadio':(A,'Ouvre la radio.'),'OpenCloseVehicle':(A,'Ouvre ou ferme son véhicule.'),'RemoveCoins':(S,'Retire des coins à un joueur.'),'giveboutiqueid':(S,'Donne un produit de la boutique à un joueur.'),'giveid':(S,'Donne des coins à un joueur.'),'menuboutique':(S,'Ouvre la boutique à coins (staff).'),
+'blackout':(S,'Panne de courant : coupe les lumières de la ville.'),'coffre':(A,'Ouvre le coffre du véhicule (touche L).'),'crawl':(A,'Ramper.'),'crouch':(A,'S\'accroupir.'),'createdoor':(S,'Crée une porte verrouillable.'),'deletedoor':(S,'Supprime une porte verrouillable.'),'lockdoor':(A,'Ferme ou ouvre la porte proche (touche E).'),
+'e':(A,'Joue une animation : /e <nom>.'),'emote':(A,'Même chose que /e.'),'emotebind':(A,'Associe une animation à une touche.'),'emotebinds':(A,'Liste les animations associées à des touches.'),'emotecancel':(A,'Arrête l\'animation en cours.'),'emoteextract':(K,'Extrait les props des animations (outil d\'import).'),'emotefav':(A,'Joue ton animation favorite (touche configurable).'),
+'emotemenu':(A,'Ouvre le menu d\'animations.'),'emotes':(A,'Liste les animations disponibles.'),'emoteui':(A,'Ouvre le menu d\'animations.'),'handsup':(A,'Lever les mains.'),'mood':(A,'Change l\'expression du visage : /mood <nom>.'),'moods':(A,'Liste les expressions du visage.'),'nearby':(A,'Joue une animation à deux avec le joueur le plus proche.'),
+'pointing':(A,'Pointer du doigt.'),'ragdoll':(A,'Te met à terre (touche espace ou E pour se relever).'),'walk':(A,'Change ta démarche : /walk <nom>.'),'walks':(A,'Liste les démarches.'),
+'evening':(S,'Met l\'heure du serveur en soirée.'),'morning':(S,'Met l\'heure du serveur au matin.'),'night':(S,'Met l\'heure du serveur à la nuit.'),'noon':(S,'Met l\'heure du serveur à midi.'),'time':(S,'Règle l\'heure précisément : /time <heure> <minute>.'),'realtime':(S,'Revient à l\'heure réelle.'),
+'freezetime':(S,'Fige ou relance l\'heure.'),'freezeweather':(S,'Fige ou relance la météo dynamique.'),'weather':(S,'Choisit la météo : /weather <type>.'),'meteoinfo':(D,'Affiche la météo actuelle dans la console.'),
+'heal':(S,'Soigne un joueur.'),'hidehud':(A,'Masque ou affiche le HUD d\'origine du jeu.'),'id':(A,'Affiche ton ID serveur.'),'kick':(S,'Expulse un joueur.'),'menuadmin_old':(S,'Ouvre l\'ancien menu staff.'),'me':(A,'Texte d\'action au-dessus de la tête : /me <texte>.'),
+'otage':(A,'Prendre un joueur en otage.'),'porter':(A,'Porter un joueur.'),'repair':(S,'Répare le véhicule dans lequel tu es.'),'sc':(S,'Écrire dans le chat privé du staff.'),'setadmin':(K,'Donner le groupe admin (console uniquement).'),'setgroup':(K,'Changer le groupe d\'un joueur (console uniquement).'),
+'skin':(S,'Ouvre le menu d\'apparence sur un joueur (superadmin).'),'spect':(S,'Observer un joueur : /spect <id>.'),'sqlban':(S,'Bannir un joueur connecté (superadmin).'),'sqlbanoffline':(S,'Bannir un joueur déconnecté.'),'sqlunban':(S,'Débannir un joueur.'),'tenueinfo':(D,'Affiche les pièces de la tenue portée.'),
+'givevip':(S,'Donner un VIP de niveau 1 à 3.'),'removevip':(S,'Retirer le VIP.'),
+}
