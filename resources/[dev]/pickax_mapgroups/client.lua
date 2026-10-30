@@ -44,6 +44,7 @@ exports('SetGroups', function(owner, groups)
     for _, g in ipairs(groups) do
         g.idx = nearestIndex(g, p.x, p.y)   -- on commence par le lieu le plus proche
         place(g)
+        HideNumberOnBlip(g.blip)            -- jamais de chiffre sur le blip
     end
     owners[tostring(owner or '?')] = groups
 end)
@@ -118,7 +119,12 @@ local function multiGroups()
     return list
 end
 
+local lastCycle = 0
 local function cycle(dir, other)
+    -- une flèche déclenche la lecture des touches ET la touche configurable : sans ce garde-fou, le blip avançait deux fois (retour au point de départ avec 2 lieux)
+    local now = GetGameTimer()
+    if now - lastCycle < 260 then return true end
+    lastCycle = now
     local multi = multiGroups()
     local g = #multi > 0 and activeGroup(multi) or nil
     if not g then return false end

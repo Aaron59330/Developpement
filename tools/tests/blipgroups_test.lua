@@ -50,11 +50,13 @@ function SetBlipFlashes(b, on) flashed[#flashed + 1] = on end
 function PlayerPedId() return 1 end
 function GetEntityCoords() return { x = 480.0, y = 0.0, z = 0.0 } end
 function IsPauseMenuActive() return true end
+function HideNumberOnBlip() end
 function IsNuiFocused() return false end
 function IsWaypointActive() return false end
 function IsDisabledControlJustPressed(g, c) return pressedNow == c end
 function IsControlJustPressed() return false end
-function GetGameTimer() return 0 end
+local clock = 0
+function GetGameTimer() return clock end
 function GetStreetNameAtCoord() return 1 end
 function GetStreetNameFromHashKey() return 'Rue Test' end
 function SendNUIMessage(m) nui[#nui + 1] = m end
@@ -67,7 +69,7 @@ local groups = { { blip = 77, name = 'Garage', tag = 'garage', members = { { x =
 mg.SetGroups('pickax_worldbuilder', groups)
 ok(groups[1].idx == 2 and moved[#moved][2] == 500.0, 'au départ, le blip est sur le lieu le plus proche du joueur')
 local cos = {} for _, f in ipairs(threads) do local c = coroutine.create(f) coroutine.resume(c) cos[#cos + 1] = c end
-local function step(key) pressedNow = key for _ = 1, 2 do for _, c in ipairs(cos) do if coroutine.status(c) == 'suspended' then coroutine.resume(c) end end end pressedNow = nil end   -- 2 passes : action puis temporisation
+local function step(key) clock = clock + 500 pressedNow = key for _ = 1, 2 do for _, c in ipairs(cos) do if coroutine.status(c) == 'suspended' then coroutine.resume(c) end end end pressedNow = nil end   -- 2 passes : action puis temporisation
 step(175) ok(groups[1].idx == 3 and moved[#moved][2] == 900.0, '→ : lieu suivant')
 step(175) ok(groups[1].idx == 1 and moved[#moved][2] == 10.0, '→ : retour au premier lieu (boucle)')
 step(174) ok(groups[1].idx == 3 and moved[#moved][2] == 900.0, '← : lieu précédent')
@@ -76,7 +78,10 @@ step(174) ok(nui[#nui].index == 2 and nui[#nui].description == 'Rue Test' and fl
 step(175) step(175) ok(nui[#nui].description == 'Nord' and nui[#nui].image == 'g.webp', 'la fiche du lieu courant (image + description)')
 -- méthode 2 : touches configurables et /lieu (si les flèches ne passent pas sur la carte)
 local i0 = groups[1].idx
-cmds.pk_mapgroups_next() ok(groups[1].idx == i0 % 3 + 1, 'touche configurable « suivant » : lieu suivant')
-cmds.pk_mapgroups_prev() ok(groups[1].idx == i0, 'touche configurable « précédent » : lieu précédent')
-cmds.lieu(0, {}) ok(groups[1].idx == i0 % 3 + 1, '/lieu : lieu suivant') cmds.lieu(0, { 'prec' }) ok(groups[1].idx == i0, '/lieu prec : lieu précédent')
+clock = clock + 500 cmds.pk_mapgroups_next() ok(groups[1].idx == i0 % 3 + 1, 'touche configurable « suivant » : lieu suivant')
+clock = clock + 500 cmds.pk_mapgroups_prev() ok(groups[1].idx == i0, 'touche configurable « précédent » : lieu précédent')
+clock = clock + 500 cmds.lieu(0, {}) ok(groups[1].idx == i0 % 3 + 1, '/lieu : lieu suivant') clock = clock + 500 cmds.lieu(0, { 'prec' }) ok(groups[1].idx == i0, '/lieu prec : lieu précédent')
+-- une flèche = touche lue + touche configurable : un seul pas
+clock = clock + 500 local j0 = groups[1].idx pressedNow = 175 cmds.pk_mapgroups_next() cmds.pk_mapgroups_next() pressedNow = nil
+ok(groups[1].idx == j0 % 3 + 1, 'double déclenchement (touche lue + touche configurable) : un seul pas')
 print(('blipgroups_test : %d vérifications OK'):format(checks))
