@@ -367,6 +367,11 @@ AddEventHandler('CorePickax:Creator:finished', function()
 
 	local D = Config.Destinations
 	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
+	-- les points d'apparition réglés depuis le panel web (s'il y en a) remplacent ceux de la config
+	if GetResourceState('pickax_creator') == 'started' then
+		local ok, spots = pcall(function() return exports['pickax_creator']:GetSpawnSpots(D.Spots) end)
+		if ok and type(spots) == 'table' and #spots > 0 then D = setmetatable({ Spots = spots }, { __index = D }) end
+	end
 
 	Citizen.Wait(600)
 	local index = 1

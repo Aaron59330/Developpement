@@ -8,6 +8,7 @@ version '1.0.0'
 
 shared_scripts { '@pickax_theme/theme.lua', 'config.lua' }
 client_script 'client.lua'
+server_script 'server.lua'
 
 ui_page 'html/index.html'
 

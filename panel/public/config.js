@@ -27,6 +27,7 @@ PAGES.loading = async function () {
   const links = {}; for (const k of ['reglement', 'discord', 'boutique']) links[k] = el('input', { value: v.links[k] || '', placeholder: 'https://… (vide = bouton masqué)' });
   const stages = v.stages.slice(0, 4).map(t => el('input', { value: t, maxlength: 40 }));
   const showTeam = el('input', { type: 'checkbox', checked: v.showTeam, style: 'width:auto' }), showUp = el('input', { type: 'checkbox', checked: v.showUpdates, style: 'width:auto' });
+  const ap = loadingAppearance(v);
   let team = v.team.map(x => ({ ...x })), ups = v.updates.map(x => ({ ...x, items: (x.items || []).slice() }));
   const teamBox = el('div'), upBox = el('div');
   const drawTeam = () => teamBox.replaceChildren(...team.map((m, i) => el('div', { class: 'row', style: 'margin-bottom:6px' }, el('input', { value: m.name, placeholder: 'Pseudo', style: 'max-width:200px', oninput: e => { m.name = e.target.value; draw(); } }), el('input', { value: m.role || '', placeholder: 'Rôle', class: 'grow', oninput: e => { m.role = e.target.value; draw(); } }), el('button', { class: 'btn s d', onclick: () => { team.splice(i, 1); drawTeam(); draw(); } }, el('span', {}, '×')))), el('button', { class: 'btn s', onclick: () => { if (team.length < 12) { team.push({ name: '', role: '' }); drawTeam(); } } }, el('span', {}, '+ Ajouter un membre')));
@@ -34,7 +35,7 @@ PAGES.loading = async function () {
   const collect = () => ({
     tips: tips.value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 12), links: Object.fromEntries(Object.entries(links).map(([k, i]) => [k, i.value.trim()])),
     team: team.filter(m => m.name.trim()).map(m => ({ name: m.name.trim(), role: (m.role || '').trim() })), updates: ups.filter(u => u.title.trim()).map(u => ({ date: (u.date || '').trim(), title: u.title.trim(), items: (u.items || []).map(x => x.trim()).filter(Boolean).slice(0, 6) })),
-    stages: stages.map(i => i.value.trim()), music: { enabled: mEn.checked, url: mUrl.value.trim(), volume: +mVol.value, autoplay: mAuto.checked }, showTeam: showTeam.checked, showUpdates: showUp.checked });
+    stages: stages.map(i => i.value.trim()), music: { enabled: mEn.checked, url: mUrl.value.trim(), volume: +mVol.value, autoplay: mAuto.checked }, showTeam: showTeam.checked, showUpdates: showUp.checked, ...ap.get() });
   function draw() {
     const c = collect(); tipsHint.textContent = `${c.tips.length} / 12 message(s)`; mVolT.textContent = mVol.value + ' %'; player.hidden = !c.music.url; if (c.music.url && player.getAttribute('src') !== c.music.url) player.setAttribute('src', c.music.url);
     const btn = k => c.links[k] ? `<span class="ldb">${{ reglement: 'Règlement', discord: 'Discord', boutique: 'Boutique' }[k]}</span>` : '';
@@ -64,6 +65,7 @@ PAGES.loading = async function () {
         sec('Textes de progression', 'Affichés sous la barre selon l’avancement du chargement.', ...['Début', 'Chargement de la carte', 'Démarrage', 'Connexion'].flatMap((l, i) => [el('label', {}, l), stages[i]]))),
       el('div', {},
         el('div', { class: 'card' }, el('h2', {}, 'Aperçu'), prev, el('p', { class: 'muted', style: 'margin-top:8px;font-size:12px' }, 'Aperçu simplifié : la mise en page réelle est celle de ton écran de chargement habituel.')),
+        ap.node,
         sec('Équipe', 'Présentée dans le panneau de gauche de l’écran.', sw(showTeam, 'Afficher l’équipe'), teamBox),
         sec('Mises à jour', 'Les dernières nouveautés du serveur (la plus récente en premier).', sw(showUp, 'Afficher les mises à jour'), upBox))));
 };

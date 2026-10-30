@@ -118,6 +118,24 @@ var BACKGROUND = 'background.jpg';
 		showInfo(sT ? 'team' : 'updates');
 		// boutons de liens : un bouton sans lien est masqué
 		Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (el) { if (c.links) el.style.display = LINKS[el.getAttribute('data-link')] ? '' : 'none'; });
+		// apparence : fond, logo, textes, éléments masqués
+		if (c.bg && typeof c.bg === 'object') {
+			var bgEl = document.getElementById('background'), d = Math.max(0, Math.min(100, +c.bg.dim || 0)) / 100;
+			if (typeof c.bg.image === 'string' && /^https:\/\//i.test(c.bg.image)) bgEl.style.background = 'linear-gradient(rgba(8,10,16,' + d + '), rgba(8,10,16,' + d + ')), url(' + c.bg.image + ') center / cover no-repeat';
+			else if (c.bg.dim) bgEl.style.background = 'linear-gradient(rgba(8,10,16,' + Math.max(.35, d) + '), rgba(8,10,16,' + Math.max(.5, d) + ')), url(' + BACKGROUND + ') center / cover no-repeat';
+			bgEl.style.filter = c.bg.blur ? 'blur(' + Math.min(20, +c.bg.blur) + 'px)' : '';
+		}
+		if (typeof c.logo === 'string' && /^https:\/\//i.test(c.logo)) { window.PICKAX_LOGO = c.logo; Array.prototype.forEach.call(document.querySelectorAll('[data-pk-logo]'), function (el) { el.setAttribute('src', c.logo); }); }
+		if (c.texts && typeof c.texts === 'object') {
+			var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), nd, all = [];
+			while ((nd = w.nextNode())) all.push(nd);
+			all.forEach(function (t) { var k = t.nodeValue.trim(); if (k && Object.prototype.hasOwnProperty.call(c.texts, k)) t.nodeValue = t.nodeValue.replace(k, c.texts[k]); });
+			Object.keys(c.texts).forEach(function (k) { var i = texts.indexOf(k); if (i >= 0) texts[i] = c.texts[k]; });
+		}
+		if (c.hide && typeof c.hide === 'object') {
+			var map = { logo: '#logo img, .logo, [data-pk-logo]', ticker: '.ticker-wrap', links: '.tabs', progress: '.loading-container', name: '.ldname, [data-pk=name], [data-pk=short]' };
+			Object.keys(map).forEach(function (k) { Array.prototype.forEach.call(document.querySelectorAll(map[k]), function (el) { el.style.display = c.hide[k] ? 'none' : ''; }); });
+		}
 		// musique
 		var m = c.music;
 		if (m && typeof m === 'object') {

@@ -4,13 +4,26 @@ local cam, scene, onSkinDone = nil, false, nil
 local camDist, camHeight = Config.Scene.CamDistance or 2.4, Config.Scene.CamHeight or 0.55
 local spawnP
 
+-- ───────────── réglages venus du panel web (document « creator ») ─────────────
+local live = {}
+RegisterNetEvent('pickax_creator:cfg', function(c) live = type(c) == 'table' and c or {} end)
+CreateThread(function() while true do TriggerServerEvent('pickax_creator:cfg') Wait(20000) end end)
+local function NuiCfg() local bg = {}
+    for k, v in pairs(live.bg or {}) do bg[k] = (type(v) == 'string' and v ~= '' and not v:find('^https?://') and not v:find('/')) and ('places/' .. v) or v end
+    return { texts = live.texts or {}, bg = bg } end
+
 local function musicCfg()
+    if type(live.music) == 'table' and live.music.tracks and #live.music.tracks > 0 then
+        local tr = {}
+        for _, t in ipairs(live.music.tracks) do if t.file and t.file ~= '' then tr[#tr + 1] = { title = t.title, artist = t.artist, file = t.file, cover = t.cover } end end
+        return { enabled = live.music.enabled ~= false, volume = (tonumber(live.music.volume) or 35) / 100, tracks = tr }
+    end
     local tracks = {}
     for _, t in ipairs((Config.Music and Config.Music.Tracks) or {}) do tracks[#tracks + 1] = { title = t.title, artist = t.artist, file = t.file, cover = t.cover } end
     return { enabled = Config.Music and Config.Music.Enabled ~= false, volume = Config.Music and Config.Music.Volume or .35, tracks = tracks }
 end
 local function serverName() return (Config.ServerName ~= '' and Config.ServerName) or (PickaxTheme and PickaxTheme.name) or 'serveur' end
-local function openView(msg) SetNuiFocus(true, true) SendNUIMessage(msg) end
+local function openView(msg) msg.cfg = NuiCfg() SetNuiFocus(true, true) SendNUIMessage(msg) end
 local function closeView() SetNuiFocus(false, false) SendNUIMessage({ a = 'close' }) end
 
 -- ───────────── scène : caméra face au personnage ─────────────
@@ -20,7 +33,8 @@ local function startScene()
     if scene then return end
     scene = true
     local ped = PlayerPedId()
-    local st = Config.Scene.Studio
+    local S = live.studio or {}
+    local st = (S.enabled ~= false and S.x) and vector4((S.x or 0) + 0.0, (S.y or 0) + 0.0, (S.z or 0) + 0.0, (S.h or 0) + 0.0) or Config.Scene.Studio
     if st and not studioActive then
         origin = { c = GetEntityCoords(ped), h = GetEntityHeading(ped) }
         studioActive = true
@@ -41,8 +55,8 @@ local function startScene()
         Wait(1200)
     end
     FreezeEntityPosition(ped, true)
-    camDist = Config.Scene.CamDistance or 2.4
-    camHeight = Config.Scene.CamHeight or 0.45
+    camDist = tonumber(S.camDistance) or Config.Scene.CamDistance or 2.4
+    camHeight = tonumber(S.camHeight) or Config.Scene.CamHeight or 0.45
     local p = GetEntityCoords(ped)
     camFwd = GetEntityForwardVector(ped)
     cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
@@ -134,12 +148,22 @@ RegisterNUICallback('camRotate', function(d, cb) cb({}) moveCam(d and d.dx, nil)
 RegisterNUICallback('camZoom', function(d, cb) cb({}) moveCam(nil, d and d.dy) end)
 
 -- ───────────── point d'apparition ─────────────
+-- points d'apparition : ceux du panel web s'ils existent, sinon ceux d'esx_identity (config)
+exports('GetSpawnSpots', function(default)
+    local out = {}
+    for _, s in ipairs(live.spots or {}) do
+        if s.label and s.x and s.y then out[#out + 1] = { label = s.label, description = s.description or '', icon = s.icon, image = s.image, coords = vector4(s.x + 0.0, s.y + 0.0, (s.z or 30.0) + 0.0, (s.h or 0.0) + 0.0) } end
+    end
+    return #out > 0 and out or default
+end)
 -- spots = { { label, description, coords = vector4, image? } } → renvoie l'index choisi (bloque jusqu'au choix)
 exports('ChooseSpawn', function(spots)
     local list = {}
-    for i, s in ipairs(spots or {}) do list[i] = { label = s.label, place = s.place or s.description, desc = s.description, x = s.coords.x + 0.0, y = s.coords.y + 0.0, image = s.image and ('places/' .. s.image) or nil } end
+    for i, s in ipairs(spots or {}) do list[i] = { label = s.label, place = s.place or s.description, desc = s.description, x = s.coords.x + 0.0, y = s.coords.y + 0.0, image = s.image and s.image ~= '' and (s.image:find('^https?://') and s.image or ('places/' .. s.image)) or nil } end
     spawnP = promise.new()
-    openView({ a = 'spawn', spots = list, map = Config.Map, mapImage = Config.Map and Config.Map.Image or nil })
+    local M = live.map or {}
+    local map = { minX = tonumber(M.minX) or Config.Map.MinX, maxX = tonumber(M.maxX) or Config.Map.MaxX, minY = tonumber(M.minY) or Config.Map.MinY, maxY = tonumber(M.maxY) or Config.Map.MaxY }
+    openView({ a = 'spawn', spots = list, map = map, mapImage = (M.image and M.image ~= '' and M.image) or (Config.Map and Config.Map.Image) or nil })
     local idx = Citizen.Await(spawnP)
     closeView()
     return idx
@@ -148,11 +172,14 @@ RegisterNUICallback('spawnPick', function(d, cb) cb({}) if spawnP then spawnP:re
 
 -- ───────────── bienvenue ─────────────
 exports('ShowWelcome', function()
-    local W = Config.Welcome or {}
+    local W = {}
+    for k, v in pairs(Config.Welcome or {}) do W[k] = v end
+    local L = live.welcome or {}
+    for _, k in ipairs({ 'Enabled', 'Title', 'Highlight', 'Text', 'Duration' }) do local lv = L[k:sub(1, 1):lower() .. k:sub(2)] if lv ~= nil and lv ~= '' then W[k] = lv end end
     if W.Enabled == false then return end
-    local logo = 'https://cfx-nui-pickax_theme/logo/logo.png'
+    local logo = (L.logo and L.logo ~= '' and L.logo) or 'https://cfx-nui-pickax_theme/logo/logo.png'
     SetNuiFocus(W.Duration == 0, W.Duration == 0)
-    SendNUIMessage({ a = 'welcome', title = W.Title, highlight = (W.Highlight and W.Highlight ~= '' and W.Highlight .. ' ' or '') .. serverName(), text = W.Text, duration = W.Duration or 9000, logo = logo })
+    SendNUIMessage({ cfg = NuiCfg(), a = 'welcome', title = W.Title, highlight = (W.Highlight and W.Highlight ~= '' and W.Highlight .. ' ' or '') .. serverName(), text = W.Text, duration = W.Duration or 9000, logo = logo })
 end)
 RegisterNUICallback('welcomeDone', function(_, cb) cb({}) SetNuiFocus(false, false) end)
 

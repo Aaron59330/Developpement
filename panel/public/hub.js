@@ -31,7 +31,7 @@
         sec('Gestion'), link('activity', 'Logs', 'list'), link('players', 'Joueurs', 'users'), link('playersheet', 'Fiches joueurs', 'user'), link('console', 'Console', 'term'), link('reports', 'Plaintes', 'shield'), link('map', 'Carte live', 'map'), link('actions', 'Actions rapides', 'bolt'), link('access', 'Bans & whitelist', 'shield'), link('planner', 'Événements programmés', 'cal'),
         group('stats', 'Statistiques', 'chart', [link('stats', 'Joueurs & activité', 'chart'), link('economy', 'Économie', 'chart'), link('retention', 'Rétention', 'chart'), link('diag', 'Diagnostic', 'shield')]),
         sec('Configuration'),
-        group('conf', 'Configuration', 'sliders', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('modules', 'Ressources', 'puzzle'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
+        group('conf', 'Configuration', 'sliders', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark'), link('modules', 'Ressources', 'puzzle'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('srv', 'Gestion Serveur', 'box', settingsItems),
         group('com', 'Communication', 'chat', [link('events', 'Événements & rappels', 'chat'), link('alerts', 'Alertes Discord', 'chat'), link('recruit', 'Candidatures', 'chat')]),
         group('bk', 'Backups', 'db', [link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),

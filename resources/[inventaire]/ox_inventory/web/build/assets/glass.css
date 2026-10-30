@@ -1,6 +1,6 @@
 /* Design « Verre » de l'inventaire : cases en verre sombre, poids en haut à gauche, nom en bas, survol doré, barre de poids en segments.
    Chargé après arcade.css (prioritaire). Retirer le <link> de glass.css dans index.html pour revenir à l'ancien rendu. Toutes les fonctions de l'inventaire sont inchangées. */
-:root { --r-slot: 9px; --gold: #ffcd5a; --gold-rgb: 255, 205, 90; }
+:root { --r-slot: 9px; --gold: var(--pk-accent, #ffcd5a); --gold-rgb: var(--pk-accent-rgb, 255, 205, 90); }
 
 /* panneaux : plus de cadre, seulement un léger voile de verre */
 .panel::before { display: none; }   /* plus de grand cadre arrondi autour des panneaux */

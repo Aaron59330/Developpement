@@ -16,7 +16,24 @@ const I = {
 const ic = (n, s) => `<svg viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${I[n] || ''}</svg>`;
 const sep = '<div class="sep"><i></i></div>';
 let view = null;
-const show = html => { const was = !root.classList.contains('hidden'); root.innerHTML = html; root.classList.remove('hidden'); root.classList.toggle('static', was); };   // 1re ouverture animée ; les redessins (Aléatoire, flèches…) ne rejouent pas l'animation
+/* Réglages venus du panel web (textes, images de fond, couleurs) : cfg = { texts: { 'texte d\'origine': 'nouveau texte' }, bg: { identity|skin|spawn|welcome|emotes: 'https://…', dim: 0-100 } } */
+let CFG = {};
+const applyCfg = () => {
+  const T = CFG.texts || {}, B = CFG.bg || {};
+  if (Object.keys(T).length) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n; const list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(t => { const k = t.nodeValue.trim(); if (k && Object.prototype.hasOwnProperty.call(T, k) && T[k] !== '') t.nodeValue = t.nodeValue.replace(k, T[k]); });
+    root.querySelectorAll('[placeholder]').forEach(i => { const k = i.getAttribute('placeholder'); if (Object.prototype.hasOwnProperty.call(T, k) && T[k] !== '') i.setAttribute('placeholder', T[k]); });
+  }
+  const img = B[view];
+  if (img && /^(https?:\/\/|nui:|places\/|bg\/)/.test(img)) {
+    const dim = Math.min(100, Math.max(0, +B.dim || 0)) / 100, css = `background-image:linear-gradient(rgba(0,0,0,${dim}),rgba(0,0,0,${dim})),url('${esc(img)}');background-size:cover;background-position:center`;
+    if (view === 'spawn') { const m = $('.map'); if (m) m.style.cssText += ';' + css; }
+    else root.insertAdjacentHTML('afterbegin', `<div class="cfgbg" style="${css}"></div>`);
+  }
+};
+const show = html => { const was = !root.classList.contains('hidden'); root.innerHTML = html; root.classList.remove('hidden'); root.classList.toggle('static', was); applyCfg(); };   // 1re ouverture animée ; les redessins (Aléatoire, flèches…) ne rejouent pas l'animation
 const close = () => { root.classList.add('hidden'); root.classList.remove('static'); root.innerHTML = ''; Music.stop(); view = null; };
 
 /* ─────────── lecteur de musique ─────────── */
@@ -81,7 +98,7 @@ function identity(d) {
   };
   draw();
 }
-function toast(m) { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;left:50%;top:40px;transform:translateX(-50%);padding:12px 22px;border-radius:10px;background:rgba(14,14,15,.92);border:1px solid rgba(243,213,138,.5);font-size:13px;z-index:9'; document.body.appendChild(t); } t.textContent = m; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3500); }
+function toast(m) { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;left:50%;top:40px;transform:translateX(-50%);padding:12px 22px;border-radius:10px;background:rgba(14,14,15,.92);border:1px solid rgba(var(--pk-accent-rgb,243,213,138),.5);font-size:13px;z-index:9'; document.body.appendChild(t); } t.textContent = m; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3500); }
 
 /* ─────────── APPARENCE ─────────── */
 const FATHERS = ['Benjamin', 'Daniel', 'Joshua', 'Noah', 'Andrew', 'Juan', 'Alex', 'Isaac', 'Evan', 'Ethan', 'Vincent', 'Angel', 'Diego', 'Adrian', 'Gabriel', 'Michael', 'Santiago', 'Kevin', 'Louis', 'Samuel', 'Anthony', 'Claude', 'Niko', 'John'];
@@ -190,6 +207,7 @@ function emotes(d) {
 
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.cfg && typeof d.cfg === 'object') CFG = d.cfg;
   switch (d.a) {
     case 'identity': return identity(d);
     case 'skin': return skin(d);

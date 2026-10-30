@@ -404,6 +404,15 @@ local function cleanLoading(v)
     if mu == nil then return nil, 'adresse de la musique invalide (https:// requis)' end
     o.music = { enabled = M.enabled ~= false, url = mu, volume = math.max(0, math.min(100, math.floor(tonumber(M.volume) or 10))), autoplay = M.autoplay ~= false }
     o.showTeam, o.showUpdates = v.showTeam ~= false, v.showUpdates ~= false
+    local B = type(v.bg) == 'table' and v.bg or {}
+    local bi = lurl(B.image) if bi == nil then return nil, 'image de fond invalide (https:// requis)' end
+    o.bg = { image = bi, dim = math.max(0, math.min(100, math.floor(tonumber(B.dim) or 0))), blur = math.max(0, math.min(20, math.floor(tonumber(B.blur) or 0))) }
+    local lg = lurl(v.logo) if lg == nil then return nil, 'logo invalide (https:// requis)' end
+    o.logo = lg
+    o.texts, o.hide = {}, {}
+    local n = 0
+    for k, t in pairs(type(v.texts) == 'table' and v.texts or {}) do local kk, tt = lstr(k, 80), lstr(t, 140) if kk ~= '' and tt ~= '' and n < 80 then o.texts[kk] = tt n = n + 1 end end
+    for _, k in ipairs({ 'logo', 'ticker', 'links', 'progress', 'name' }) do o.hide[k] = type(v.hide) == 'table' and v.hide[k] == true end
     return o
 end
 

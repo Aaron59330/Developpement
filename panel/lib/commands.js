@@ -31,7 +31,7 @@ const defs = {
   jobs_refresh: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
-const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1, loading: 1 };
+const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1, loading: 1, creator: 1 };
 const ECONOMY_PRESETS = ['equilibre', 'realiste', 'abuse'];
 function validateDoc(key, v) {
   if (!DOC_KEYS[key]) return { error: 'Document inconnu' };
@@ -65,6 +65,34 @@ function validateDoc(key, v) {
     const M = v.music && typeof v.music === 'object' ? v.music : {}; const mu = url(M.url); if (mu === null) return { error: 'Adresse de la musique invalide : elle doit commencer par https://' };
     const vol = Number(M.volume); o.music = { enabled: M.enabled !== false, url: mu, volume: Number.isFinite(vol) ? Math.min(100, Math.max(0, Math.round(vol))) : 10, autoplay: M.autoplay !== false };
     o.showTeam = v.showTeam !== false; o.showUpdates = v.showUpdates !== false;
+    // apparence : image de fond, logo, textes de l'interface, éléments masqués
+    const B = v.bg && typeof v.bg === 'object' ? v.bg : {}; const bi = url(B.image); if (bi === null) return { error: 'Image de fond invalide : elle doit commencer par https://' };
+    o.bg = { image: bi, dim: Math.min(100, Math.max(0, Math.round(Number(B.dim) || 0))), blur: Math.min(20, Math.max(0, Math.round(Number(B.blur) || 0))) };
+    const lg = url(v.logo); if (lg === null) return { error: 'Logo invalide : il doit commencer par https://' }; o.logo = lg;
+    o.texts = {}; for (const [k, t] of Object.entries(v.texts && typeof v.texts === 'object' ? v.texts : {}).slice(0, 80)) { const kk = clean(k, 80), tt = clean(t, 140); if (kk && tt) o.texts[kk] = tt; }
+    const H = v.hide && typeof v.hide === 'object' ? v.hide : {}; o.hide = {}; for (const k of ['logo', 'ticker', 'links', 'progress', 'name']) o.hide[k] = !!H[k];
+    return { value: o };
+  }
+  if (key === 'creator') {
+    // Parcours d'arrivée : identité, apparence, point d'apparition, bienvenue, animations
+    const clean = (x, max) => String(x == null ? '' : x).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
+    const url = x => { x = String(x == null ? '' : x).trim(); if (!x) return ''; return x.length <= 300 && /^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]+$/.test(x) ? x : null; };
+    const file = (x, re) => { x = String(x == null ? '' : x).trim(); if (!x) return ''; if (/^https:\/\//.test(x)) return url(x); return x.length <= 120 && re.test(x) && !x.includes('..') ? x : null; };
+    const IMG = /^[\w\- .\/]+\.(jpg|jpeg|png|webp)$/i, AUD = /^[\w\- .\/]+\.(mp3|ogg|wav)$/i;
+    const num = (x, lo, hi, d) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d; };
+    const o = { texts: {}, bg: {}, music: { enabled: true, volume: 35, tracks: [] }, studio: {}, spots: [], map: {}, welcome: {} };
+    for (const [k, t] of Object.entries(v.texts && typeof v.texts === 'object' ? v.texts : {}).slice(0, 150)) { const kk = clean(k, 100), tt = clean(t, 200); if (kk && tt) o.texts[kk] = tt; }
+    const B = v.bg && typeof v.bg === 'object' ? v.bg : {};
+    for (const k of ['identity', 'skin', 'spawn', 'welcome', 'emotes']) { const u = file(B[k], IMG); if (u === null) return { error: `Image de fond « ${k} » invalide : lien https:// ou nom de fichier .jpg/.png/.webp` }; o.bg[k] = u; }
+    o.bg.dim = Math.round(num(B.dim, 0, 100, 0));
+    const M = v.music && typeof v.music === 'object' ? v.music : {}; o.music.enabled = M.enabled !== false; o.music.volume = Math.round(num(M.volume, 0, 100, 35));
+    for (const t of (Array.isArray(M.tracks) ? M.tracks : []).slice(0, 12)) { const f = file(t && t.file, AUD); if (f === null) return { error: 'Fichier de musique invalide : lien https:// ou nom de fichier .mp3/.ogg' }; const cv = file(t && t.cover, IMG); if (cv === null) return { error: 'Pochette de musique invalide' }; if (f) o.music.tracks.push({ title: clean(t.title, 60), artist: clean(t.artist, 60), file: f.startsWith('http') ? f : (f.startsWith('music/') ? f : 'music/' + f), cover: cv }); }
+    const S = v.studio && typeof v.studio === 'object' ? v.studio : {}; if (S.x !== undefined && S.x !== '' && S.x !== null) o.studio = { enabled: S.enabled !== false, x: num(S.x, -8000, 8000, 0), y: num(S.y, -8000, 11000, 0), z: num(S.z, -500, 2000, 30), h: num(S.h, 0, 360, 0), camDistance: num(S.camDistance, 0.9, 6, 2.4), camHeight: num(S.camHeight, -0.5, 1.5, 0.45) };
+    for (const sp of (Array.isArray(v.spots) ? v.spots : []).slice(0, 12)) { const label = clean(sp && sp.label, 50); if (!label) continue; const im = file(sp.image, IMG); if (im === null) return { error: `Image du lieu « ${label} » invalide : lien https:// ou nom de fichier .jpg/.png/.webp` }; o.spots.push({ label, description: clean(sp.description, 90), icon: clean(sp.icon, 12), image: im, x: num(sp.x, -8000, 8000, 0), y: num(sp.y, -8000, 11000, 0), z: num(sp.z, -500, 2000, 30), h: num(sp.h, 0, 360, 0) }); }
+    const MP = v.map && typeof v.map === 'object' ? v.map : {}; const mi = file(MP.image, IMG); if (mi === null) return { error: 'Image de la carte invalide' };
+    o.map = { image: mi, minX: num(MP.minX, -20000, 20000, -4100), maxX: num(MP.maxX, -20000, 20000, 4500), minY: num(MP.minY, -20000, 20000, -4200), maxY: num(MP.maxY, -20000, 20000, 8000) };
+    const W = v.welcome && typeof v.welcome === 'object' ? v.welcome : {}; const wl = url(W.logo); if (wl === null) return { error: 'Logo de bienvenue invalide (https://)' };
+    o.welcome = { enabled: W.enabled !== false, title: clean(W.title, 80), highlight: clean(W.highlight, 40), text: clean(W.text, 400), duration: Math.round(num(W.duration, 0, 60000, 9000)), logo: wl };
     return { value: o };
   }
   if (key === 'bans') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: v.slice(0, 5000).map(b => ({ identifier: str(String(b.identifier || ''), 120, ID) || '', name: str(String(b.name || ''), 60) || '', reason: str(String(b.reason || ''), 120) || '', until: int(b.until || 0, 0, 4102444800) || 0, at: int(b.at || 0, 0, 4102444800) || 0 })).filter(b => b.identifier) }; }
