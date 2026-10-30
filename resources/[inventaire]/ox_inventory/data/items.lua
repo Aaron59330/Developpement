@@ -127,13 +127,13 @@ return {
         consume = 0,
     },
 
-    -- Tenue complete (creee par shopbuilder). Glisse-la sur la case "Tenue" du milieu pour equiper toutes les pieces.
+    -- Tenue complete (creee par shopbuilder). Glisse-la sur ton personnage (milieu de l'inventaire) pour equiper toutes les pieces.
     ['clothes_outfit'] = {
         label = 'Tenue',
         weight = 500,
         stack = false,
         close = false,
-        description = 'Une tenue complete. Glisse-la sur la case Tenue de ton inventaire pour la porter.',
+        description = 'Une tenue complete. Glisse-la sur ton personnage pour la porter.',
     },
 
     ['clothes_hat'] = {

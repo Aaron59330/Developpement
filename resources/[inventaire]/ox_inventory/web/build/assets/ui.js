@@ -188,6 +188,7 @@
         <div class="cloth-area">
           <div class="cloth-col l" data-role="cloth-l"></div>
           <div class="cloth-col r" data-role="cloth-r"></div>
+          <div id="outfit-drop"><span>Glisse ta tenue ici</span></div>
         </div>
       </section>
 
@@ -878,6 +879,8 @@
   }
 
   function cancelDrag() {
+    document.body.classList.remove('drag-outfit');
+    const z = document.getElementById('outfit-drop'); if (z) z.classList.remove('over');
     if (drag.srcEl) drag.srcEl.classList.remove('dragging');
     if (drag.overEl) drag.overEl.classList.remove('over');
     ui.ghost.style.display = 'none';
@@ -912,7 +915,14 @@
     if (!drag.active) return;
     moveGhost(e.clientX, e.clientY);
     const under = document.elementFromPoint(e.clientX, e.clientY);
-    const target = under && under.closest ? under.closest('.slot') : null;
+    let target = under && under.closest ? under.closest('.slot, #outfit-drop') : null;
+    // une tenue complète glissée sur le personnage s'équipe d'un coup (elle est déposée sur l'emplacement de tenue, désormais invisible)
+    const zone = document.getElementById('outfit-drop');
+    if (target && target.id === 'outfit-drop') {
+      const o = state.options, it = drag.info && drag.info.item;
+      target = (o.outfitslot && it && it.name === o.outfititem) ? (ui.clothSlots[o.outfitslot - 1] || null) : null;
+      if (zone) zone.classList.toggle('over', !!target);
+    } else if (zone) zone.classList.remove('over');
     if (target === drag.lastTarget) return;     // même case qu'à l'image précédente : rien à recalculer
     drag.lastTarget = target;
     const valid = target && target._side !== undefined && target !== drag.srcEl && !(target._side === 'right' && ['shop', 'crafting'].includes(state.right.type)) && !(target._outfit && (!drag.info.item || drag.info.item.name !== state.options.outfititem || drag.info.inventory !== 'player'));
@@ -931,6 +941,7 @@
       const info = slotInfo(drag.srcEl);
       drag.info = info;
       drag.srcEl.classList.add('dragging');
+      document.body.classList.toggle('drag-outfit', !!(info.item && info.item.name === state.options.outfititem));
       ui.ghost.querySelector('img').src = imageOf(info.item) || XMARK;
       ui.ghost.querySelector('span').textContent = info.item.count > 0 ? `x${info.item.count}` : '';
       ui.ghost.style.display = 'block';
@@ -1285,7 +1296,7 @@
   });
 
   // exposition pour les tests hors du jeu
-  window.__oxui = { state, ui, show, hide };
+  window.__oxui = { state, ui, show, hide, drag };
 
   nui('uiLoaded', {});
 })();
