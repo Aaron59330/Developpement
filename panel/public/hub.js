@@ -16,11 +16,12 @@
     const [page] = route(); const isAdmin = state.user.role === 'admin'; const srv = curServer(); const lonely = !isAdmin && !state.servers.length;
     const grpNow = curGroup();
     const link = (id, label, icon, cls) => el('a', { class: 'hub-nav' + (page === id && page !== 'settings' ? ' on' : '') + (cls ? ' ' + cls : ''), href: '#/' + id }, svg(ICON[icon]), el('span', {}, label));
+    const anyOn = false;
     const group = (key, label, icon, items) => {
-      const on = items.some(i => i.classList.contains('on')), open = on || store.get('hub_open_' + key) === '1';
-      const head = el('a', { class: 'hub-nav hub-gh' + (on ? ' on' : ''), href: '#', onclick: e => { e.preventDefault(); const w = e.currentTarget.parentElement; const o = !w.classList.contains('open'); w.classList.toggle('open', o); store.set('hub_open_' + key, o ? '1' : '0'); } }, svg(ICON[icon]), el('span', {}, label), svg(CHEV));
+      const on = items.some(i => i.classList.contains('on')), open = on || (!anyOn && store.get('hub_open_' + key) === '1');
+      const head = el('a', { class: 'hub-nav hub-gh' + (on ? ' on' : ''), href: '#', onclick: e => { e.preventDefault(); const w = e.currentTarget.parentElement; const o = !w.classList.contains('open'); document.querySelectorAll('.hub-grp').forEach(g => { if (g !== w) { g.classList.remove('open'); if (g.dataset.k) store.set('hub_open_' + g.dataset.k, '0'); } }); w.classList.toggle('open', o); store.set('hub_open_' + key, o ? '1' : '0'); } }, svg(ICON[icon]), el('span', {}, label), svg(CHEV));
       head.lastChild.setAttribute('class', 'chev');
-      return el('div', { class: 'hub-grp' + (open ? ' open' : '') }, head, el('div', { class: 'hub-sub' }, items));
+      return el('div', { class: 'hub-grp' + (open ? ' open' : ''), 'data-k': key }, head, el('div', { class: 'hub-sub' }, items));
     };
     const settingsItems = SET_ORDER.map(g => el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === g ? ' on' : ''), href: '#/settings/' + slug(g) }, svg(ICON[GROUP_ICON[g] || 'sliders']), el('span', {}, GROUP_LABEL[g] || g)));
     const sec = t => el('div', { class: 'hub-sec' }, t);
@@ -30,7 +31,7 @@
         sec('Gestion'), link('activity', 'Logs', 'list'), link('players', 'Joueurs', 'users'), link('playersheet', 'Fiches joueurs', 'user'), link('console', 'Console', 'term'), link('reports', 'Plaintes', 'shield'), link('map', 'Carte live', 'map'), link('actions', 'Actions rapides', 'bolt'), link('access', 'Bans & whitelist', 'shield'), link('planner', 'Événements programmés', 'cal'),
         group('stats', 'Statistiques', 'chart', [link('stats', 'Joueurs & activité', 'chart'), link('economy', 'Économie', 'chart'), link('retention', 'Rétention', 'chart'), link('diag', 'Diagnostic', 'shield')]),
         sec('Configuration'),
-        group('conf', 'Configuration', 'sliders', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Discord' ? ' on' : ''), href: '#/settings/' + slug('Discord') }, svg(ICON.chat), el('span', {}, 'Discord RPC')), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Monde & PNJ' ? ' on' : ''), href: '#/settings/' + slug('Monde & PNJ') }, svg(ICON.map), el('span', {}, 'Densité PNJ')), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Interface' ? ' on' : ''), href: '#/settings/' + slug('Interface') }, svg(ICON.brush), el('span', {}, 'HUD & interface')), link('modules', 'Ressources', 'puzzle'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
+        group('conf', 'Configuration', 'sliders', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('modules', 'Ressources', 'puzzle'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('srv', 'Gestion Serveur', 'box', settingsItems),
         group('com', 'Communication', 'chat', [link('events', 'Événements & rappels', 'chat'), link('alerts', 'Alertes Discord', 'chat'), link('recruit', 'Candidatures', 'chat')]),
         group('bk', 'Backups', 'db', [link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),
