@@ -2640,6 +2640,40 @@ const Runtime = {
   open(kind, data, pointId) { if (kind === 'menu') this.menuData = data; this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
   set(r) { this.data = { ...this.data, ...r }; this.render(); },
 
+  /* Menu F6 : carte du métier (statut de service, actions regroupées en tuiles) */
+  renderMenu(d) {
+    $root.classList.add('corner');
+    const GROUPS = [
+      ['Interactions', ['handcuff', 'escort', 'search', 'revive', 'heal', 'invoice', 'serve']],
+      ['Véhicule', ['repair', 'clean', 'vehctl', 'props']],
+      ['Outils & gestion', ['tablet', 'emstablet', 'banktablet', 'emscalls', 'properties', 'dealership', 'government', 'missions', 'smallquests', 'jobannounce']],
+    ];
+    const onDuty = d.actions.some(a => a.id === 'dutyoff');
+    const duty = d.actions.find(a => a.id === 'dutyon' || a.id === 'dutyoff');
+    const leave = d.actions.find(a => a.id === 'leavejob');
+    const rest = d.actions.filter(a => a !== duty && a !== leave);
+    const used = new Set();
+    const sections = GROUPS.map(([title, ids]) => {
+      const items = rest.filter(a => ids.includes(a.id)); items.forEach(a => used.add(a.id));
+      return items.length ? `<div class="jm-sec"><div class="jm-h">${title}</div><div class="jm-grid">${items.map(a => this.menuTile(a)).join('')}</div></div>` : '';
+    }).join('');
+    const others = rest.filter(a => !used.has(a.id));
+    const body = onDuty
+      ? (sections + (others.length ? `<div class="jm-sec"><div class="jm-h">Autres</div><div class="jm-grid">${others.map(a => this.menuTile(a)).join('')}</div></div>` : '') || '<p class="hint">Aucune action pour ton métier.</p>')
+      : `<div class="jm-lock">${ic('lock', 22)}<b>Hors service</b><small>Prends ton service pour accéder aux actions, aux points et aux véhicules du métier.</small></div>`;
+    $root.innerHTML = `<div class="jm">
+      <div class="jm-head"><div class="jm-disc">${ic(TYPE_ICON[d.type] || 'briefcase', 26)}</div>
+        <div class="jm-ttl"><small>Menu métier</small><h1>${esc(d.jobLabel)}</h1><div class="jm-meta"><span class="jm-grade">${esc(d.grade || 'Employé')}</span><span class="jm-st ${onDuty ? 'on' : ''}"><i></i>${onDuty ? 'En service' : 'Hors service'}</span></div></div>
+        <button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div>
+      ${duty ? `<button class="jm-duty ${onDuty ? 'off' : 'on'}" data-a="act" data-id="${duty.id}">${ic(onDuty ? 'logout' : 'check', 17)}<span>${esc(duty.label)}</span></button>` : ''}
+      <div class="jm-body">${body}</div>
+      ${leave ? `<div class="jm-foot"><button class="jm-leave" data-a="act" data-id="leavejob">${ic('logout', 14)} Quitter le métier</button><span>Échap pour fermer</span></div>` : '<div class="jm-foot"><span>Échap pour fermer</span></div>'}
+    </div>`;
+  },
+  menuTile(a) {
+    return `<button class="jm-tile" data-a="act" data-id="${a.id}"><span class="jm-ic">${ic(ACTION_ICON[a.id] || 'grid', 19)}</span><span class="jm-tx"><b>${esc(a.label)}</b>${a.target ? '<small>Joueur proche</small>' : ''}</span></button>`;
+  },
+
   render() {
     const d = this.data, k = this.kind;
     window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl', 'props'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
@@ -2655,8 +2689,7 @@ const Runtime = {
       case 'shop': return $root.innerHTML = panel({ icon: 'cart', title: d.label, sub: 'Boutique',
         body: list(d.items, it => row('box', it.label, '', `<span class="price">${money(it.price)}</span><input class="qty" type="number" min="1" max="100" value="1" id="q${it.idx}"><button class="primary" style="height:38px" data-a="buy" data-i="${it.idx}">Acheter</button>`), 'Boutique vide.') });
       case 'boss': return this.renderBoss();
-      case 'menu': $root.classList.add('corner'); return $root.innerHTML = panel({ icon: TYPE_ICON[d.type] || 'briefcase', title: d.jobLabel, sub: `Grade : ${d.grade}`, cls: 'corner',
-        body: list(d.actions, a => `<div class="item click" data-a="act" data-id="${a.id}">${tile(ACTION_ICON[a.id] || 'grid')}<div class="grow"><b>${esc(a.label)}</b></div><span class="chev">${ic('chevron', 16)}</span></div>`, 'Aucune action.') });
+      case 'menu': return this.renderMenu(d);
       case 'furniture': return this.renderFurniture();
       case 'props': {
         $root.classList.add('corner');
