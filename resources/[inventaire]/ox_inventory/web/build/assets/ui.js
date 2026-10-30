@@ -354,6 +354,9 @@
     const s = Math.min(window.innerWidth / 1590, window.innerHeight / 868);
     curScale = s;
     document.documentElement.style.setProperty('--scale', String(s));
+    // mise à l'échelle par « zoom » (texte et images nets) : la scène est centrée à la main, en unités de la scène
+    document.documentElement.style.setProperty('--sx', ((window.innerWidth / s - 1590) / 2) + 'px');
+    document.documentElement.style.setProperty('--sy', ((window.innerHeight / s - 868) / 2) + 'px');
     return s;
   }
   window.addEventListener('resize', rescale);

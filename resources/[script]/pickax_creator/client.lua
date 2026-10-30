@@ -143,3 +143,15 @@ RegisterNUICallback('escape', function(d, cb)
     elseif v == 'welcome' then SetNuiFocus(false, false) SendNUIMessage({ a = 'close' }) end
 end)
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then SetNuiFocus(false, false) stopScene() end end)
+
+-- Test (console F8 ou chat) : /creatortest identity | skin | spawn | welcome | emotes | close   — pour vérifier que les nouveaux écrans fonctionnent
+RegisterCommand('creatortest', function(_, args)
+    local v = args[1] or 'identity'
+    if v == 'identity' then exports['pickax_creator']:OpenIdentity()
+    elseif v == 'skin' then exports['pickax_creator']:OpenSkin({ hideClothes = true }, function() print('[pickax_creator] apparence terminée') end)
+    elseif v == 'spawn' then
+        CreateThread(function() local idx = exports['pickax_creator']:ChooseSpawn(GetResourceState('esx_identity') == 'started' and exports.esx_identity:GetSpots() or {}) print('[pickax_creator] point choisi : ' .. tostring(idx)) end)
+    elseif v == 'welcome' then exports['pickax_creator']:ShowWelcome()
+    elseif v == 'emotes' then TriggerEvent('pickax_creator:test:emotes')
+    else closeView() stopScene() end
+end, false)

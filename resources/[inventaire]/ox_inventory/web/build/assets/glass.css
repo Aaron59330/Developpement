@@ -159,3 +159,6 @@
 body.drag-outfit #outfit-drop { border-color: rgba(217, 172, 76, .55); background: rgba(217, 172, 76, .05); }
 body.drag-outfit #outfit-drop span { color: #e4b85a; }
 #outfit-drop.over { background: rgba(217, 172, 76, .16) !important; border-color: #e4b85a !important; box-shadow: 0 0 30px rgba(217, 172, 76, .25) inset; }
+
+/* netteté : échelle par zoom (et non par transformation, qui floute le texte dans le jeu) */
+#stage { left: var(--sx, 0px); top: var(--sy, 0px); transform: none; zoom: var(--scale); }

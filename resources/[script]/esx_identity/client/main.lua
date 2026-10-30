@@ -258,6 +258,7 @@ function SubmitIdentity(myIdentity)
 	return reason
 end
 exports('SubmitIdentity', SubmitIdentity)
+exports('GetSpots', function() return (Config.Destinations and Config.Destinations.Spots) or {} end)
 RegisterNUICallback('register', function(myIdentity, cb) SubmitIdentity(myIdentity) end)
 exports('CancelIdentity', function()
 	if hasIdentity then EnableGui(false) else ESX.ShowNotification('~r~Action Impossible~s~ : Vous devez créer votre premier personnage pour pouvoir jouer !') end
