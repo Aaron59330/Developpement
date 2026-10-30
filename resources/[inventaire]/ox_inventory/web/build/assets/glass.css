@@ -141,3 +141,13 @@
 #exit-btn { right: 25px; top: 21px; height: 30px; padding: 0 12px; font-size: 10px; } 
 .panel { top: 124px; } .tenue-row { top: 672px; } .amount-box { top: 735px; }
 .rail, #snd-btn, #help-btn { display: none !important; }   /* comme sur la maquette : ni filtres latéraux ni boutons son / aide (Échap et le bouton Exit ferment) */
+/* filtres latéraux et quantité d'origine (en bas à gauche) rétablis */
+.rail { display: flex !important; }
+.amount-box { left: 89px; top: 770px; flex-direction: row; gap: 12px; }
+.amount-label { display: block; }
+.amount { flex-direction: row; width: auto; height: auto; padding: 0; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .12); border-bottom: 1px solid rgba(255, 255, 255, .12); background: rgba(12, 12, 12, .6); }
+.amount button { width: 34px; height: 32px; font-size: 16px; position: static; }
+.amount button::before { display: none; }
+.amount [data-role=amount-plus] { order: 0; }
+.amount input { width: 56px; height: 32px; font-size: 14px; font-weight: 700; text-align: center; background: transparent; }
+.panel.right .rail { left: auto; right: -48px; }
