@@ -102,3 +102,42 @@
 #exit-btn { position: absolute; right: 30px; top: 26px; display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(14, 14, 14, .6); color: #fff; font: 600 11px 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
 #exit-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 #exit-btn:hover { border-color: rgba(var(--gold-rgb), .8); }
+
+/* ═════ Fidélité à la maquette : mesures reprises de la capture (scène 1590×868) ═════ */
+.panel { top: 137px; width: 450px; }
+.panel.left { left: 89px; } .panel.center { left: 574px; width: 442px; } .panel.right { left: 1052px; }
+.panel-head { height: 54px; grid-template-rows: 16px 9px 22px; row-gap: 3px; }
+.weight-text { font-size: 11px; font-weight: 600; letter-spacing: .01em; color: #f0f0f2; }
+.weight-text small { font-size: 11px; color: #f0f0f2; font-weight: 600; }
+.weight-bar { width: 118px; height: 9px; }
+.weight-bar i { background: #efdba4; }
+.panel-title h2 { font-size: 11px; letter-spacing: .08em; }
+.search { width: 267px; height: 24px; } .search input { height: 24px; font-size: 9.5px; border-radius: 2px; background: rgba(12, 12, 12, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07); }
+.search input::placeholder { font-size: 9.5px; color: rgba(255, 255, 255, .35); }
+.panel.left .grid-wrap, .panel.right .grid-wrap { height: 453px; }
+.grid { grid-template-columns: repeat(5, 85.5px); grid-auto-rows: 85.5px; column-gap: 5.5px; row-gap: 5.8px; }
+.slot { width: 85.5px; height: 85.5px; border-radius: 4px; background: rgba(18, 18, 18, .6); border: 1px solid rgba(255, 255, 255, .09); }
+.slot:not(.has) { background: rgba(16, 16, 16, .5); border-color: rgba(255, 255, 255, .07); }
+.slot.has img.pic, .slot img.pic { width: 40px; height: 40px; top: 44%; }
+.slot .label { font-size: 10px; bottom: 6px; font-weight: 500; }
+.slot .wt { font-size: 9px; left: 6px; top: 6px; } .slot .count { font-size: 9px; top: 5px; right: 5px; padding: 1px 6px; }
+.hotrow { grid-template-columns: repeat(5, 85.5px); column-gap: 5.5px; margin-top: 15px; } .hotrow .slot { height: 85.5px; }
+.hotrow .slot .num { right: 8px; top: 6px; font-size: 10px; }
+/* panneau de droite : ligne dorée à gauche et sous la grille, recherche en bas à droite */
+.panel.right .weight-text { text-align: right; } .panel.right .head-right { display: contents; }
+.panel.right .grid-wrap::before { content: ''; position: absolute; left: -10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(#e4b85a, #b88a2c); }
+.panel.right .grid-wrap::after { left: 0; right: 0; bottom: -7px; height: 2px; }
+.panel.right .search { display: block; position: absolute; right: 0; top: 523px; grid-column: auto; grid-row: auto; }
+/* colonne centrale : 8 emplacements de chaque côté, 63 px */
+.cloth-col { gap: 8px; } .cloth-col .slot, .slot.cloth { width: 63px; height: 63px; }
+.cloth-col .slot img.pic { width: 34px; height: 34px; } .cloth-col .slot img.ghost-icon { width: 30px; height: 30px; opacity: .35; }
+.cloth-area { height: 520px; }
+.panel.center .panel-title { margin-top: 0; justify-content: center; } .panel.center .panel-head { height: 54px; display: block; text-align: center; padding-top: 38px; }
+.tenue-row { left: 574px; width: 63px; top: 685px; justify-content: flex-start; gap: 0; }
+.tenue-row .slot.outfit { width: 63px; height: 63px; } .tenue-row .slot.outfit .label { display: none; } .tenue-slot { display: none !important; }
+/* quantité (sous le personnage) */
+.amount-box { left: 779px; top: 749px; } .amount { width: 31px; height: 42px; } .amount input { height: 18px; font-size: 11px; } .amount button { height: 12px; }
+/* bouton Exit */
+#exit-btn { right: 25px; top: 21px; height: 30px; padding: 0 12px; font-size: 10px; } 
+.panel { top: 124px; } .tenue-row { top: 672px; } .amount-box { top: 735px; }
+.rail, #snd-btn, #help-btn { display: none !important; }   /* comme sur la maquette : ni filtres latéraux ni boutons son / aide (Échap et le bouton Exit ferment) */

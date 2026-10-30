@@ -478,7 +478,7 @@
     const src = imageOf(it) || XMARK;
     if (el._src !== src) { el._src = src; el._pic.src = src; }
 
-    if (it.count > 0 && inv.type !== 'shop') {
+    if (it.count > 1 && inv.type !== 'shop') {
       el._count.textContent = `x${it.count.toLocaleString('en-us')}`;
       if (it.name === 'money') el._count.textContent = `${it.count.toLocaleString('en-us')}${state.locale.$ || '$'}`;
     } else el._count.textContent = '';
