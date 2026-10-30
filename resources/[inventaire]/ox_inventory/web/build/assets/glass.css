@@ -166,3 +166,4 @@ body.drag-outfit #outfit-drop span { color: #e4b85a; }
 .panel.left .panel-head, .panel.right .panel-head { margin-bottom: 10px; }
 .panel.left .search { align-self: center; margin-top: -4px; }
 .panel.right .search { top: 541px; }
+.panel.right .grid-wrap::before, .panel.right .grid-wrap::after, .panel.left .grid-wrap::before, .panel.left .grid-wrap::after { display: none !important; }
