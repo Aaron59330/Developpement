@@ -35,7 +35,14 @@ end
 
 local function place(g)
     local m = g.members[g.idx]
-    if m then SetBlipCoords(g.blip, m.x, m.y, m.z) end
+    if not m then return end
+    SetBlipCoords(g.blip, m.x, m.y, m.z)
+    -- plusieurs lieux : le nom indique celui où se trouve le blip → « Garage (1) », « Garage (2)… »
+    if #g.members > 1 then
+        BeginTextCommandSetBlipName('STRING')
+        AddTextComponentSubstringPlayerName(('%s (%d)'):format(g.name, g.idx))
+        EndTextCommandSetBlipName(g.blip)
+    end
 end
 
 exports('SetGroups', function(owner, groups)
@@ -135,7 +142,8 @@ local function cycle(dir, other)
         g.idx = (g.idx - 1 + dir) % #g.members + 1
         place(g)
     end
-    flash(g) showCard(g)
+    flash(g)
+    if cardOn then showCard(g) end   -- la fiche ne s'ouvre que sur un clic de blip ; si elle est ouverte, elle suit le lieu
     return true
 end
 
@@ -145,12 +153,7 @@ CreateThread(function()
     while true do
         if not IsPauseMenuActive() then wasOpen = false Wait(500) else
             Wait(0)
-            if not wasOpen then   -- à l'ouverture de la carte : la fiche du blip groupé le plus proche s'affiche avec l'indication des touches
-                wasOpen = true
-                local multi = multiGroups()
-                local g = #multi > 0 and activeGroup(multi) or nil
-                if g then showCard(g) end
-            end
+            wasOpen = true
             if pressed(0, 175, 2, 190) then if cycle(1) then Wait(180) end
             elseif pressed(0, 174, 2, 189) then if cycle(-1) then Wait(180) end
             elseif pressed(0, 172, 2, 188) then if cycle(1, true) then Wait(220) end

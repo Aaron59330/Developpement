@@ -17,3 +17,9 @@ p { margin-top: 8px; font-size: 13px; line-height: 1.5; color: #c9c9ce; max-heig
 p:empty { display: none; }
 .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(255, 255, 255, .08); font-size: 12px; color: #9a9aa6; }
 .foot #dist { color: var(--accent); font-weight: 600; }
+
+/* indicateur de lieu : pastilles + touches ◄ ► dessinées (plus de symboles de police) */
+#more { display: flex; align-items: center; gap: 12px; }
+#more .dots { display: inline-flex; gap: 5px; } #more .dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .28); } #more .dots i.on { background: var(--accent, #fdc27d); box-shadow: 0 0 8px var(--accent, #fdc27d); transform: scale(1.25); }
+#more .keys { display: inline-flex; align-items: center; gap: 4px; color: rgba(255, 255, 255, .6); font-size: 11px; } #more .keys kbd { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); border-bottom-width: 2px; }
+#more .keys kbd svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; } #more .keys kbd + kbd { margin-right: 6px; }

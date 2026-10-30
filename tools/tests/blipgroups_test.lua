@@ -51,8 +51,15 @@ function PlayerPedId() return 1 end
 function GetEntityCoords() return { x = 480.0, y = 0.0, z = 0.0 } end
 function IsPauseMenuActive() return true end
 function HideNumberOnBlip() end
+local names = {}
+function BeginTextCommandSetBlipName() end
+function AddTextComponentSubstringPlayerName(t) names[#names + 1] = t end
+function EndTextCommandSetBlipName() end
 function IsNuiFocused() return false end
-function IsWaypointActive() return false end
+local wp = nil
+function IsWaypointActive() return wp ~= nil end
+function GetFirstBlipInfoId() return 1 end
+function GetBlipInfoIdCoord() return { x = wp.x, y = wp.y, z = 0.0 } end
 function IsDisabledControlJustPressed(g, c) return pressedNow == c end
 function IsControlJustPressed() return false end
 local clock = 0
@@ -70,7 +77,12 @@ mg.SetGroups('pickax_worldbuilder', groups)
 ok(groups[1].idx == 2 and moved[#moved][2] == 500.0, 'au départ, le blip est sur le lieu le plus proche du joueur')
 local cos = {} for _, f in ipairs(threads) do local c = coroutine.create(f) coroutine.resume(c) cos[#cos + 1] = c end
 local function step(key) clock = clock + 500 pressedNow = key for _ = 1, 2 do for _, c in ipairs(cos) do if coroutine.status(c) == 'suspended' then coroutine.resume(c) end end end pressedNow = nil end   -- 2 passes : action puis temporisation
+local n0 = #nui
 step(175) ok(groups[1].idx == 3 and moved[#moved][2] == 900.0, '→ : lieu suivant')
+ok(#nui == n0, 'la fiche ne s\'ouvre pas toute seule en changeant de lieu')
+wp = { x = 900.0, y = 0.0 } clock = clock + 500 step(nil) wp = nil
+ok(nui[#nui].action == 'show', 'la fiche s\'ouvre quand on pose le point sur le blip')
+ok(names[#names] == 'Garage (3)', 'le nom du blip indique le lieu : « Garage (3) »')
 step(175) ok(groups[1].idx == 1 and moved[#moved][2] == 10.0, '→ : retour au premier lieu (boucle)')
 step(174) ok(groups[1].idx == 3 and moved[#moved][2] == 900.0, '← : lieu précédent')
 ok(nui[#nui].action == 'show' and nui[#nui].index == 3 and nui[#nui].total == 3 and nui[#nui].title == 'Garage', 'la fiche indique « lieu 3 sur 3 »')
