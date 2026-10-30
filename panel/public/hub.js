@@ -29,9 +29,9 @@
       ? [sec('Mon espace'), link('offers', 'Boutique', 'cart'), link('patchnotes', 'Patch notes', 'book'), sec('Paramètres'), link('account', 'Compte', 'user'), link('support', 'Aide et support', 'help'), link('custom', 'Personnalisation', 'brush')]
       : [sec('Vue d’ensemble'), link('overview', 'Dashboard', 'home'), link('docs', 'Documentation', 'book'), link('license', 'Clé AERO', 'key', 'violet'),
         sec('Configuration'),
-        group('conf', 'Identité & accueil', 'brush', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark')]),
-        group('srv', 'Gestion Serveur', 'box', settingsItems),
-        group('res', 'Ressources & base', 'puzzle', [link('modules', 'Ressources', 'puzzle'), link('editor', 'Éditeur de base', 'edit'), link('files', 'Fichiers', 'file'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
+        link('server', 'Gestion Serveur', 'box'),
+        group('base', 'Gestion Base', 'sliders', [link('theme', 'Couleurs & logos', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark'), ...settingsItems]),
+        group('res', 'Outils & fichiers', 'puzzle', [link('modules', 'Ressources', 'puzzle'), link('editor', 'Éditeur de base', 'edit'), link('files', 'Fichiers', 'file'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('acc', 'Accès & sauvegardes', 'shield', [link('access', 'Bans & whitelist', 'shield'), link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),
         sec('Compte'), link('account', 'Compte', 'user'), isAdmin ? null : link('offers', 'Abonnements', 'tag'),
         isAdmin ? [sec('Administration'), link('a-overview', 'Vue d’ensemble', 'chart'), link('a-users', 'Clients', 'user'), link('a-licenses', 'Licences', 'key'), link('a-plans', 'Offres', 'tag'), link('a-orders', 'Commandes', 'cart'), link('a-modules', 'Modules', 'puzzle'), link('a-audit', 'Journal', 'list')] : null];
@@ -54,7 +54,7 @@
     return layout;
   };
 
-  // Réglages : une page par catégorie (menu « Gestion Serveur »), titre « Gestion Serveur — Catégorie »
+  // Réglages : une page par catégorie (menu « Gestion Base »), titre « Gestion Base — Catégorie »
   const baseSettings = PAGES.settings;
   PAGES.settings = async function () {
     if (!isHub()) return baseSettings();
@@ -69,7 +69,7 @@
       node.querySelectorAll('.setrow').forEach(r => { const k = r.getAttribute('data-k'), lab = r.firstElementChild; if (k && lab && !lab.querySelector('.hub-key')) { const c = el('code', { class: 'hub-key' }, k); lab.append(c); } });
       node.querySelectorAll('.setsec').forEach(h => { if (!h.querySelector('svg')) h.prepend(svg('M4 6h16M4 12h16M4 18h10')); });
       const h1 = node.querySelector && node.querySelector('.top h1');
-      if (h1 && g) { h1.textContent = 'Gestion Serveur — ' + (GROUP_LABEL[g] || g); const sub = el('p', { class: 'hub-sub-title' }, 'Les changements sont appliqués en jeu en direct, sans redémarrage.'); h1.closest('.top').after(sub); }
+      if (h1 && g) { h1.textContent = 'Gestion Base — ' + (GROUP_LABEL[g] || g); const sub = el('p', { class: 'hub-sub-title' }, 'Les changements sont appliqués en jeu en direct, sans redémarrage.'); h1.closest('.top').after(sub); }
       const save = node.querySelector('.setbar .btn.p span'); if (save) save.textContent = 'Enregistrer les modifications';
     } catch (e) {}
     return node;

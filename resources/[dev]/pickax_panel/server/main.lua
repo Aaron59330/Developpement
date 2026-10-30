@@ -399,6 +399,11 @@ local function applyServerSettings()
     if ok(c.projectName) then ExecuteCommand('sets sv_projectName "' .. c.projectName .. '"') end
     if ok(c.projectDesc) then ExecuteCommand('sets sv_projectDesc "' .. c.projectDesc .. '"') end
     if ok(c.hostname) then ExecuteCommand('sv_hostname "' .. c.hostname .. '"') end
+    if ok(c.tags) then ExecuteCommand('sets tags "' .. c.tags .. '"') end
+    if ok(c.discord) then ExecuteCommand('sets discord "' .. c.discord .. '"') end
+    local function url(x) return type(x) == 'string' and x:match('^https://[%w%-%._~:/%?#@!%$&%(%)%*%+,;=%%]+$') and #x <= 300 and x or nil end
+    if url(c.bannerDetail) then ExecuteCommand('sets banner_detail "' .. c.bannerDetail .. '"') end
+    if url(c.bannerConnecting) then ExecuteCommand('sets banner_connecting "' .. c.bannerConnecting .. '"') end
     -- nombre de places : écrit dans server.cfg (FiveM ne le lit qu'au démarrage)
     local want = math.floor(tonumber(c.maxClients) or 0)
     if want >= 1 and want ~= lastMaxClients then

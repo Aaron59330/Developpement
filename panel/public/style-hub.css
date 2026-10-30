@@ -155,3 +155,33 @@ html[data-design="hub"] .setsec{display:flex;align-items:center;gap:10px}
 html[data-design="hub"] .setsec svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;color:var(--mut)}
 html[data-design="hub"] .setrow>:first-child b{font-size:13px;font-weight:600}
 html[data-design="hub"] .top h1{font-size:23px}
+
+/* ───────── Configuration expliquée : intro de page, champs avec aide, aperçu liste FiveM ───────── */
+.pg-intro{margin:0 0 16px;padding:14px 18px;border-radius:12px;background:rgba(var(--a,253,194,125),.08);border:1px solid rgba(var(--a,253,194,125),.25);font-size:14.5px;line-height:1.6;color:var(--txt)}
+.pg-intro b{font-weight:700}
+.cfgcard{padding:22px 24px}
+.cfg-t{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.cfg-t h2{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.cfg-n{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ac,#fdc27d);color:#16120a;font-weight:800;font-size:14px;flex:none}
+.cfg-i{margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--mut)}
+.hf{margin:0 0 18px}
+.hf-l{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--txt);letter-spacing:0;text-transform:none}
+.hf-h{font-size:12.5px;line-height:1.6;color:var(--mut);margin-top:6px}
+.hf-h code,.hf-e code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;font-size:12px;color:var(--txt)}
+.hf-e{font-size:12px;color:var(--mut);margin-top:4px}
+html[data-design="hub"] .sethead{display:block;margin:0 0 14px}
+html[data-design="hub"] .sethead h2{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
+.cat-help{font-size:14.5px;line-height:1.6;color:var(--mut);margin:0 0 10px;max-width:760px}
+.cat-help b{color:var(--txt);font-weight:700}
+.sec-help{margin:0;padding:10px 20px 12px;font-size:13px;line-height:1.55;color:var(--mut);border-bottom:1px solid var(--line)}
+.setrow .muted{font-size:12.5px!important;line-height:1.55}
+.fv-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#15161b}
+.fv-ban{height:110px;background:#23252d center/cover;display:grid;place-items:center;color:#777;font-size:12px}
+.fv-body{padding:14px 16px}
+.fv-name{font-weight:700;font-size:15px;margin-bottom:4px;word-break:break-word}
+.fv-desc{font-size:12.5px;color:#aab;margin-bottom:8px}
+.fv-meta{display:flex;gap:14px;font-size:12px;color:#aab;margin-bottom:8px}
+.fv-tags{display:flex;flex-wrap:wrap;gap:5px}
+.fv-tags i{font-style:normal;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);color:#ccd}
+.fv-conn{height:120px;border-radius:12px;margin-top:12px;background:#23252d center/cover;border:1px solid var(--line);display:grid;place-items:center;color:#777;font-size:12px}
+html[data-design="hub"] .sethead h2{display:none}

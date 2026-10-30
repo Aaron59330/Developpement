@@ -127,10 +127,10 @@ PAGES.settings = async function () {
     for (const g of groups) {
       const list = schema.filter(d => d.group === g && (!t || (d.label + ' ' + d.key + ' ' + (d.hint || '')).toLowerCase().includes(t))); if (!list.length) continue; any = true;
       const info = SET_INFO[g] || [''];
-      const head2 = el('div', { class: 'sethead' }, el('h2', {}, g), el('div', { class: 'row' }, el('span', { class: 'muted' }, info[0]), el('div', { class: 'grow' }), t ? null : el('button', { class: 'btn s', onclick: () => confirmBox('Réinitialiser « ' + g + ' »', 'Tous les réglages de cette catégorie reviennent à leur valeur par défaut (après avoir cliqué sur Enregistrer).', () => { schema.filter(d => d.group === g).forEach(d => { cur[d.key] = JSON.parse(JSON.stringify(d.default)); }); drawMain(); }) }, el('span', {}, 'Réinitialiser la catégorie'))));
+      const head2 = el('div', { class: 'sethead' }, el('h2', {}, g), el('div', { class: 'cat-help' }, el('b', {}, (SET_HELP[g] || [''])[0]), ' — ', (SET_HELP[g] || ['', info[0]])[1]), el('div', { class: 'row' }, el('div', { class: 'grow' }), t ? null : el('button', { class: 'btn s', onclick: () => confirmBox('Réinitialiser « ' + g + ' »', 'Tous les réglages de cette catégorie reviennent à leur valeur par défaut (après avoir cliqué sur Enregistrer).', () => { schema.filter(d => d.group === g).forEach(d => { cur[d.key] = JSON.parse(JSON.stringify(d.default)); }); drawMain(); }) }, el('span', {}, 'Réinitialiser la catégorie'))));
       main.append(head2);
       const secs = [...new Set(list.map(d => d.section || 'Général'))];
-      for (const sc of secs) main.append(el('div', { class: 'card' }, secs.length > 1 || t ? el('h3', { class: 'setsec' }, sc) : null, ...list.filter(d => (d.section || 'Général') === sc).map(row)));
+      for (const sc of secs) main.append(el('div', { class: 'card' }, secs.length > 1 || t ? el('h3', { class: 'setsec' }, sc) : null, SECTION_HELP[sc] ? el('p', { class: 'sec-help' }, SECTION_HELP[sc]) : null, ...list.filter(d => (d.section || 'Général') === sc).map(row)));
     }
     if (!any) main.append(el('div', { class: 'card empty' }, 'Aucun réglage ne correspond à « ' + query + ' »'));
     refresh();

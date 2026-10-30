@@ -93,8 +93,18 @@ const DOCS = [
     ]],
     ['p', 'Config.Enforce (pickax_panel/config.lua) : laisse false sur ton serveur ; mets true chez un client pour arrêter les ressources vendues si la licence expire.'],
   ] },
-  { id: 'config-general', title: '5. Configuration → Général', blocks: [
-    ['p', 'Identité visuelle de tout le serveur. Une modification enregistrée ici s\'applique à l\'écran de chargement, au menu pause, aux notifications, au créateur de personnage, à l\'inventaire, aux builders, au HUD, etc.'],
+  { id: 'gestion-serveur', title: '4 bis. Gestion Serveur (l\'extérieur du serveur)', blocks: [
+    ['p', 'Cette page règle ce que voient les joueurs AVANT d\'entrer dans le jeu : la fiche de ton serveur dans la liste FiveM et l\'écran de connexion. Un aperçu se met à jour pendant que tu tapes.'],
+    ['ul', [
+      'Nom du serveur dans la liste (avec codes couleur ^1 à ^7), nom complet (hostname), description courte, étiquettes (tags) et lien Discord : appliqués sur le serveur en quelques secondes.',
+      'Nombre de places (slots) : modifie sv_maxclients dans le server.cfg ; pris en compte au prochain redémarrage. Au-delà de 48 places, l\'abonnement Element Club est nécessaire.',
+      'Bannière de la liste (banner_detail) et bannière de connexion (banner_connecting) : lien https:// ou fichier .png / .jpg.',
+      'Logo du serveur (icône de la liste) : FiveM impose un fichier logo.png de 96 × 96 à la racine du serveur avec load_server_icon dans le server.cfg ; il ne peut pas être changé à distance.',
+    ]],
+    ['note', 'Tout ce qui se passe DANS le jeu (couleur, logo principal, menus, scripts) se règle dans « Gestion Base ».'],
+  ] },
+  { id: 'config-general', title: '5. Gestion Base → Couleurs & logos', blocks: [
+    ['p', 'Identité visuelle de tout le jeu (menu Gestion Base → Couleurs & logos), dans cet ordre : 1) couleur principale, 2) logo principal, 3) bannière du menu personnel F5, 4) couleur de l\'inventaire, 5) style, puis noms et Discord. Une modification enregistrée ici s\'applique à l\'écran de chargement, au menu pause, aux notifications, au créateur de personnage, à l\'inventaire, aux builders, au HUD, etc.'],
     ['ul', [
       'Couleur principale : une seule couleur pour toutes les interfaces. Tous les menus (y compris les nouveaux : créateur, notifications, menu Doré, inventaire) la suivent.',
       'Couleur de l\'inventaire : facultative (vide = couleur principale).',
@@ -114,7 +124,7 @@ const DOCS = [
     ['note', 'Les images envoyées sont servies par l\'adresse publique du panel : PUBLIC_URL doit être correcte (https:// en production) pour que les joueurs les voient en jeu.'],
     ['p', 'La musique (MP3 / OGG / WAV, 6 Mo) se règle de la même façon avec un lien https:// ou un envoi dans le Drive.'],
   ] },
-  { id: 'config-loading', title: '7. Configuration → Écran d\'accueil (chargement)', blocks: [
+  { id: 'config-loading', title: '7. Gestion Base → Écran d\'accueil (chargement)', blocks: [
     ['p', 'Tout ce que voit un joueur pendant la connexion :'],
     ['ul', [
       'Messages défilants du bandeau (12 maximum).',
@@ -125,7 +135,7 @@ const DOCS = [
     ]],
     ['p', 'Après « Enregistrer », utilise « Appliquer maintenant » (redémarre pickax_core) pour que les nouveaux joueurs voient le changement tout de suite ; sinon il apparaît au prochain redémarrage de pickax_core. Cela nécessite add_filesystem_permission pickax_basetools write pickax_core.'],
   ] },
-  { id: 'config-creator', title: '8. Configuration → Parcours d\'arrivée', blocks: [
+  { id: 'config-creator', title: '8. Gestion Base → Parcours d\'arrivée', blocks: [
     ['p', 'Ce que vit un nouveau joueur : création d\'identité, apparence, choix du point d\'apparition, message de bienvenue (et gestionnaire d\'animations). Tout est modifiable sans redémarrage — les joueurs reçoivent la nouvelle configuration en quelques secondes.'],
     ['ul', [
       'Images de fond : une par écran (identité, apparence/vêtements, point d\'apparition, bienvenue, animations) + assombrissement. Vide = on voit le jeu derrière.',
@@ -139,7 +149,7 @@ const DOCS = [
     ['p', 'Pour tester en jeu : /creatortest identity | skin | spawn | welcome | emotes | close (console F8 ou chat). Il faut que pickax_panel soit démarré pour que les réglages arrivent en jeu.'],
     ['note', 'Si le décor de création est transparent ou vide, change les coordonnées du studio pour un lieu dont la carte est chargée ; le jeu attend déjà le chargement complet du décor avant d\'afficher le menu.'],
   ] },
-  { id: 'config-settings', title: '9. Configuration → Gestion Serveur (réglages)', blocks: [
+  { id: 'config-settings', title: '9. Gestion Base → réglages des scripts', blocks: [
     ['p', 'Une soixantaine de réglages rangés par catégorie, générés d\'après la ressource pickax_settings (ajouter un réglage = une ligne dans pickax_settings/config.lua).'],
     ['table', ['Catégorie', 'Contenu'], [
       ['Serveur', 'Maintenance, annonces automatiques, redémarrages programmés.'],
@@ -205,7 +215,7 @@ const DOCS = [
       ['pickax_core/config.lua', 'Identité du serveur (couleur, noms, logo), permissions staff, salaires maximum, armes, heure réelle, neige…'],
       ['esx_identity/config.lua', 'Points d\'apparition par défaut (Config.Destinations).'],
       ['pickax_creator/config.lua', 'Valeurs par défaut du parcours d\'arrivée (musique, studio, carte, bienvenue) — le panel les remplace.'],
-      ['pickax_settings/config.lua', 'Liste des réglages visibles dans « Gestion Serveur ».'],
+      ['pickax_settings/config.lua', 'Liste des réglages visibles dans « Gestion Base ».'],
       ['pickax_panel/config.lua', 'Fréquence d\'échange avec le panel, licence, console autorisée, plaintes (/plainte), sauvegarde de la base.'],
       ['ox_inventory/data/items.lua', 'Objets du serveur (modifiable depuis « Éditeur de base »).'],
     ]],

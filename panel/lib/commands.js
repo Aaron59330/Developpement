@@ -100,6 +100,11 @@ function validateDoc(key, v) {
   if (key === 'server') {
     const t = (x, max) => { x = String(x == null ? '' : x).trim(); if (x.length > max || /["\\\r\n;]/.test(x)) return null; return x; };
     const o = { projectName: t(v.projectName, 200), projectDesc: t(v.projectDesc, 200), hostname: t(v.hostname, 200) };
+    // liste FiveM : étiquettes, Discord, bannières (liens https uniquement)
+    o.tags = t(v.tags, 600); o.discord = t(String(v.discord == null ? '' : v.discord).replace(/^https?:\/\//, ''), 80);
+    const bu = x => { x = String(x == null ? '' : x).trim(); if (!x) return ''; return x.length <= 300 && /^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]+$/.test(x) ? x : null; };
+    o.bannerDetail = bu(v.bannerDetail); o.bannerConnecting = bu(v.bannerConnecting);
+    if (o.bannerDetail === null || o.bannerConnecting === null) return { error: 'Une bannière est invalide : le lien doit commencer par https://' };
     const mc = v.maxClients === '' || v.maxClients == null ? 0 : Math.floor(Number(v.maxClients)); if (!Number.isFinite(mc) || mc < 0 || mc > 2048) return { error: 'Nombre de places invalide (1 à 2048, ou vide pour ne pas y toucher)' }; o.maxClients = mc;
     if (Object.values(o).includes(null)) return { error: 'Texte invalide : pas de guillemets, de point-virgule ni de retour à la ligne (200 caractères max)' };
     return { value: o };
