@@ -50,6 +50,7 @@ function SetBlipFlashes(b, on) flashed[#flashed + 1] = on end
 function PlayerPedId() return 1 end
 function GetEntityCoords() return { x = 480.0, y = 0.0, z = 0.0 } end
 function IsPauseMenuActive() return true end
+function IsNuiFocused() return false end
 function IsWaypointActive() return false end
 function IsDisabledControlJustPressed(g, c) return pressedNow == c end
 function IsControlJustPressed() return false end

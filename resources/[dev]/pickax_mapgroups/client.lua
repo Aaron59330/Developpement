@@ -57,6 +57,7 @@ end
 local function showCard(g)
     local m = g.members[g.idx]
     if not m then return end
+    if IsNuiFocused() and not IsPauseMenuActive() then return end   -- pas de fiche par-dessus une autre interface
     local info = m.info or {}
     local p = GetEntityCoords(PlayerPedId())
     SendNUIMessage({ action = 'show', title = g.name, image = info.image, description = (info.description and info.description ~= '') and info.description or streetOf(m),
@@ -77,10 +78,10 @@ end
 -- la fiche reste tant que la carte est ouverte (puis 12 s) ; elle disparaît quand la carte se ferme
 CreateThread(function()
     while true do
-        Wait(400)
+        Wait(cardOn and 120 or 400)
         if cardOn then
             if IsPauseMenuActive() then cardUntil = math.max(cardUntil, GetGameTimer() + 2500)
-            elseif GetGameTimer() > cardUntil then hideCard() end
+            elseif IsNuiFocused() or GetGameTimer() > cardUntil then hideCard() end   -- inventaire, téléphone, menus… : la fiche s'efface tout de suite
         end
     end
 end)
