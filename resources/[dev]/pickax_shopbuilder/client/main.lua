@@ -38,6 +38,7 @@ end)
 local function rebuildBlips()
     for _, b in ipairs(blipHandles) do if DoesBlipExist(b) then RemoveBlip(b) end end
     blipHandles = {}
+    BB.BlipsBegin()
     for _, shop in ipairs(State.shops) do
         local b = shop.blip
         if b and b.enabled then
@@ -48,6 +49,7 @@ local function rebuildBlips()
             end
         end
     end
+    for _, h in ipairs(BB.BlipsEnd()) do blipHandles[#blipHandles + 1] = h end
 end
 
 -- ─────────────────────────────── Vendeurs (PNJ) ───────────────────────────────

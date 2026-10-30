@@ -132,7 +132,8 @@ local TOOL = obj({ item = ITEM, consume = { 'b', false } })
 local STACK = { 'a', obj({ item = ITEM, count = { 'n', 1, 1000, 1 } }), 10, function(x) return x.item ~= '' end }
 
 local PED = obj({ enabled = { 'b', false }, model = MODEL, scenario = { 's', 60, '' }, pos = { 'c' }, dialog = obj({ enabled = { 'b', true }, text = { 's', 220, '' } }) })
-local BLIP = obj({ enabled = { 'b', false }, sprite = { 'n', 0, 900, 52 }, color = { 'n', 0, 85, 0 }, scale = { 'n', 0.1, 3, (PickaxTheme and PickaxTheme.blipScale or 0.8) }, label = { 's', 60, '' }, shortRange = { 'b', true } })
+local BLIP = obj({ enabled = { 'b', false }, sprite = { 'n', 0, 900, 52 }, color = { 'n', 0, 85, 0 }, scale = { 'n', 0.1, 3, (PickaxTheme and PickaxTheme.blipScale or 0.8) }, label = { 's', 60, '' }, shortRange = { 'b', true },
+    image = { 's', 300, '' }, description = { 's', 400, '' } })   -- fiche du lieu affichée à la sélection du blip (pickax_mapgroups)
 
 local COMMON = {
     blip = BLIP,

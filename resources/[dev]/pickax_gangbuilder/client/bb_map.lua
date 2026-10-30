@@ -114,6 +114,13 @@ end
 -- Règles identiques partout : affichage 4, visible à proximité seulement par défaut, nom par défaut = nom du module.
 function BB.Blip(coords, b, opts)
     b, opts = b or {}, opts or {}
+    -- pendant un lot (BB.BlipsBegin … BB.BlipsEnd) : on mémorise ; les lieux de même nom seront regroupés en UN seul blip
+    if BB._batch and not opts.entity then BB._batch[#BB._batch + 1] = { coords = coords, b = b, opts = opts } return nil end
+    return BB.BlipNow(coords, b, opts)
+end
+
+function BB.BlipNow(coords, b, opts)
+    b, opts = b or {}, opts or {}
     local key = opts.category or ''
     local cat = BB.Categories[BB.Alias[key] or key] or BB.Categories.default
     local blip
@@ -129,13 +136,54 @@ function BB.Blip(coords, b, opts)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, b.shortRange ~= false)
-    -- Nom : un texte PARTAGÉ par tous les blips de même nom (clé dérivée du nom, enregistrée une fois). Avec un texte propre à chaque blip, GTA affichait une ligne de légende par blip ;
-    -- avec le même texte, deux garages = deux blips sur la carte mais UN seul nom dans la légende.
-    local name = tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point')
-    local key = ('PKBLIP_%x'):format(GetHashKey(name))
-    if not BB._names then BB._names = {} end
-    if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
-    BeginTextCommandSetBlipName(key)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentSubstringPlayerName(tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point'))
     EndTextCommandSetBlipName(blip)
     return blip
 end
+
+
+-- Fiche du lieu d'un blip (image + description saisies dans le builder) ; nil si aucune
+function BB.BlipInfo(b)
+    local img, desc = tostring(b.image or ''):gsub('^%s+', ''):gsub('%s+$', ''), tostring(b.description or ''):gsub('^%s+', ''):gsub('%s+$', '')
+    if img == '' and desc == '' then return nil end
+    return { image = img, description = desc }
+end
+
+-- ─── Blips de même nom regroupés + fiches des lieux ───
+-- BB.BlipsBegin() puis des BB.Blip(...) puis BB.BlipsEnd() : renvoie les blips créés. Des lieux portant EXACTEMENT le même nom ne forment qu'UN blip (même nom, rien d'ajouté) ;
+-- la liste des lieux (et leur fiche : image / description saisies dans le builder) est donnée à pickax_mapgroups : ← → sur la carte passent d'un lieu à l'autre.
+function BB.BlipsBegin() BB._batch = {} end
+
+function BB.BlipsEnd()
+    local list = BB._batch or {}
+    BB._batch = nil
+    local byName, order, handles, groups = {}, {}, {}, {}
+    for _, e in ipairs(list) do
+        local name = tostring((e.b.label and e.b.label ~= '') and e.b.label or e.opts.label or 'Point')
+        local g = byName[name]
+        if not g then g = { name = name, items = {} } byName[name] = g order[#order + 1] = g end
+        g.items[#g.items + 1] = e
+    end
+    for _, g in ipairs(order) do
+        local first = g.items[1]
+        -- UN seul blip, avec exactement le nom saisi (rien n'est ajouté) ; il passe d'un lieu à l'autre avec ← → sur la carte (pickax_mapgroups)
+        local h = BB.BlipNow(first.coords, first.b, first.opts)
+        handles[#handles + 1] = h
+        local members, anyInfo = {}, false
+        for _, e in ipairs(g.items) do
+            local info = BB.BlipInfo(e.b)
+            if info then anyInfo = true end
+            members[#members + 1] = { x = e.coords.x + 0.0, y = e.coords.y + 0.0, z = (e.coords.z or 0.0) + 0.0, info = info }
+        end
+        if h and (#members > 1 or anyInfo) then groups[#groups + 1] = { blip = h, name = g.name, tag = first.opts.category, members = members } end
+    end
+    BB._groups = groups
+    if GetResourceState('pickax_mapgroups') == 'started' then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), groups) end) end
+    return handles
+end
+
+-- pickax_mapgroups démarré après nous : on lui renvoie nos groupes
+AddEventHandler('pickax_mapgroups:ready', function()
+    if BB._groups then pcall(function() exports.pickax_mapgroups:SetGroups(GetCurrentResourceName(), BB._groups) end) end
+end)
