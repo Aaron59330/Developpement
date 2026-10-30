@@ -1,7 +1,7 @@
 -- Affichage des menus (aucune prise de focus NUI) + fenêtre de saisie exports.pickax_ui:Input (seul moment où le focus est pris).
 local KVP = 'pickax_ui:settings2'
 local DEFAULTS = {
-    banner = true, style = 'noir', size = 'md',
+    banner = true, style = 'dore', size = 'md',
     accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '',
     btnRadius = 12, cardRadius = 18,
     uiBtn = -1, uiTab = -1, uiCard = -1, uiField = -1, uiFrame = -1, uiFill = 'def',   -- forme de TOUTES les interfaces (-1 = défaut du style)
@@ -47,6 +47,13 @@ if saved and saved ~= '' then
             if good then settings[k] = v end
         end
     end
+end
+
+-- une seule fois : le style « Doré » devient le style par défaut, même pour ceux qui avaient mémorisé l'ancien « noir »
+if GetResourceKvpString('pickax_ui:dore_default') ~= '1' then
+    if settings.style == 'noir' then settings.style = 'dore' end
+    SetResourceKvp('pickax_ui:dore_default', '1')
+    SetResourceKvp(KVP, json.encode(settings))
 end
 
 local shown, last = false, nil
