@@ -178,11 +178,12 @@
           <div class="rail" data-role="rail"></div>
           <div class="grid" data-role="grid"></div>
         </div>
+        <div class="hotrow" data-role="hotrow"></div>
       </section>
 
       <section class="panel center" id="panel-center">
         <div class="panel-head">
-          <div class="panel-title"><div class="hex">${ICON.hanger}</div><h2>${esc('Vêtements')}</h2></div>
+          <div class="panel-title"><div class="hex">${ICON.hanger}</div><h2>${esc('Tenue')}</h2></div>
         </div>
         <div class="cloth-area">
           <div class="cloth-col l" data-role="cloth-l"></div>
@@ -222,6 +223,7 @@
         <button type="button" class="tenue-slot" data-ui-btn="outfit"><img data-role="tenue-img" alt=""><span data-role="tenue-label">Tenue</span></button>
       </div>
 
+      <button id="exit-btn" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>Exit</button>
       <button id="help-btn" type="button" title="Contrôles utiles">${ICON.help}</button>
     </div>
     <div id="drag-ghost"><img alt=""><span></span></div>
@@ -238,7 +240,7 @@
     left: {
       panel: $('#panel-left'), grid: $('#panel-left [data-role=grid]'), title: $('#panel-left [data-role=title]'),
       weight: $('#panel-left [data-role=weight]'), bar: $('#panel-left .weight-bar i'), barWrap: $('#panel-left .weight-bar'),
-      search: $('#panel-left [data-role=search]'), rail: $('#panel-left [data-role=rail]'), slots: []
+      search: $('#panel-left [data-role=search]'), rail: $('#panel-left [data-role=rail]'), hotrow: $('#panel-left [data-role=hotrow]'), slots: []
     },
     right: {
       panel: $('#panel-right'), grid: $('#panel-right [data-role=grid]'), title: $('#panel-right [data-role=title]'),
@@ -511,6 +513,7 @@
     const inv = state[side];
     const u = ui[side];
     u.grid.textContent = '';
+    if (u.hotrow) u.hotrow.textContent = '';
     u.slots = [];
     const isPlayerClothing = side === 'left' && inv.type === 'player' && state.options.clothing;
     const extra = state.options.outfitslot && state.options.clothing ? 1 : 0;   // slot Tenue, affiché au milieu
@@ -526,7 +529,7 @@
         el.classList.add('cloth');
       }
       u.slots[i] = el;
-      frag.appendChild(el);
+      if (side === 'left' && inv.type === 'player' && i < 5 && u.hotrow) u.hotrow.appendChild(el); else frag.appendChild(el);
     }
     u.grid.appendChild(frag);
   }
@@ -587,7 +590,8 @@
     }
 
     if (inv.maxWeight) {
-      u.weight.innerHTML = `${(total / 1000).toFixed(1)}/${inv.maxWeight / 1000} <small>kg</small>`;
+      const p3 = n => String(Math.round(n)).padStart(3, '0');
+      u.weight.innerHTML = `${p3(total / 1000)} kg <small>/ ${p3(inv.maxWeight / 1000)} kg</small>`;
       u.barWrap.style.display = 'block';
       u.bar.style.width = `${Math.min(100, (total / inv.maxWeight) * 100)}%`;
     } else {
@@ -1246,6 +1250,7 @@
       nui('exit');
     }
   });
+  const exitBtn = document.getElementById('exit-btn'); if (exitBtn) exitBtn.addEventListener('click', () => { hide(); nui('exit'); });
   window.addEventListener('blur', () => { state.shift = false; });
   window.addEventListener('dragstart', e => e.preventDefault());
 
