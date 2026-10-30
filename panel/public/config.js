@@ -53,9 +53,8 @@ PAGES.loading = async function () {
   const sec = (title, hint, ...body) => el('div', { class: 'card' }, el('h2', {}, title), hint ? el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, hint) : null, ...body);
   const sw = (cb, text) => el('label', { style: 'display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin:8px 0' }, cb, text);
   return el('div', {}, head('Écran de chargement',
-    el('button', { class: 'btn', title: 'Redémarre pickax_core (coupe les menus ouverts quelques secondes) pour que les joueurs qui se connectent voient le changement tout de suite', onclick: () => confirmBox('Appliquer maintenant', 'pickax_core va redémarrer : les menus ouverts seront coupés quelques secondes. Les joueurs qui se connecteront ensuite verront le nouvel écran de chargement.', () => save(true)) }, el('span', {}, 'Enregistrer et appliquer maintenant')),
     el('button', { class: 'btn p', onclick: () => save(false) }, el('span', {}, 'Enregistrer'))),
-    el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Tout ce que voit un joueur pendant qu’il se connecte. L’image de fond, le logo et la couleur se règlent dans ', el('a', { href: '#/theme' }, 'Couleurs & logos'), '. Les changements sont servis aux joueurs après un redémarrage de pickax_core (bouton « appliquer maintenant »).'),
+    el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Tout ce que voit un joueur pendant qu’il se connecte. L’image de fond, le logo et la couleur se règlent dans ', el('a', { href: '#/theme' }, 'Couleurs & logos'), '. Un seul bouton « Enregistrer » enregistre toute la page et l’applique ; les nouveaux joueurs voient le changement dès que pickax_core redémarre (au prochain redémarrage du serveur).'),
     el('div', { class: 'grid g2', style: 'align-items:start' },
       el('div', {},
         sec('Messages défilants', 'Le bandeau qui défile en bas de l’écran.', tips, tipsHint),

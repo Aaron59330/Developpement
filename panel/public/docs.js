@@ -113,7 +113,7 @@ const DOCS = [
       'Bannière du menu F5 et image de l\'écran de chargement.',
       'Markers (type, taille, transparence, couleur) et blips (taille, couleur) de tout le serveur.',
     ]],
-    ['p', 'Deux boutons : « Enregistrer » (visible après reconnexion des joueurs) et « Enregistrer et appliquer partout » (redémarre pickax_core : les menus ouverts sont coupés quelques secondes).'],
+    ['p', 'Un seul bouton « Enregistrer » enregistre toute la page et l\'applique ; les joueurs voient le changement après reconnexion.'],
   ] },
   { id: 'config-images', title: '6. Images : lien ou fichier', blocks: [
     ['p', 'Partout où une image est demandée (fonds, logos, bannières, photos de lieux, pochettes…), tu as deux choix :'],
@@ -133,7 +133,7 @@ const DOCS = [
       'Textes de progression sous la barre, équipe et mises à jour affichées à gauche.',
       'Apparence : image de fond (assombrissement, flou), logo, libellés, et possibilité de masquer le logo, le nom, les boutons, le bandeau ou la barre.',
     ]],
-    ['p', 'Après « Enregistrer », utilise « Appliquer maintenant » (redémarre pickax_core) pour que les nouveaux joueurs voient le changement tout de suite ; sinon il apparaît au prochain redémarrage de pickax_core. Cela nécessite add_filesystem_permission pickax_basetools write pickax_core.'],
+    ['p', 'Un seul bouton « Enregistrer » enregistre toute la page. Les nouveaux joueurs voient le changement dès que pickax_core redémarre (au prochain redémarrage du serveur, ou avec restart pickax_core dans la console). Cela nécessite add_filesystem_permission pickax_basetools write pickax_core.'],
   ] },
   { id: 'config-creator', title: '8. Gestion Base → Parcours d\'arrivée', blocks: [
     ['p', 'Ce que vit un nouveau joueur : création d\'identité, apparence, choix du point d\'apparition, message de bienvenue (et gestionnaire d\'animations). Tout est modifiable sans redémarrage — les joueurs reçoivent la nouvelle configuration en quelques secondes.'],
