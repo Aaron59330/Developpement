@@ -84,7 +84,7 @@ const Tablet = {
     const nav = [['home', 'home', 'Accueil'], ['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['trib', 'coins', 'Tributs'], ['rank', 'trophy', 'Classement'], ['news', 'news', 'Actus'], ['log', 'log', 'Journal']];
     const badge = { quest: this.claimable(), war: d.wars.incoming ? 1 : 0 };
     const inner = `
-      <div class="tb-top"><div class="brand"><span class="dot"></span>${esc(me.label)}</div><span class="tb-chip inf">${esc(me.gradeLabel)}</span><div class="sp"></div>
+      <div class="tb-top"><div class="brand"><span class="dot"></span>${esc(me.label)}</div><span class="tb-chip inf">${esc(me.gradeLabel)}</span><span class="tb-sec"><i></i>RÉSEAU CHIFFRÉ</span><div class="sp"></div>
         ${me.money != null ? `<div class="tb-pill ok">${ti('coins', 14)} <b>${money(me.money)}</b></div><div class="tb-pill dirty">${ti('skull', 14)} <b>${money(me.dirty)}</b></div>` : ''}
         <div class="tb-pill">${ti('crown', 14)} <b>${me.rep}</b> rép.</div><div class="tb-clock" id="tb-clock">${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
         <button class="tb-x" data-a="close" title="Fermer">${ti('x', 16)}</button></div>
@@ -107,11 +107,14 @@ const Tablet = {
     else if (w && w.status === 'active') alerts.push(`<div class="tb-row"><span class="tb-chip bad">En guerre</span><div class="g"><b>${esc(w.aLabel)} ${w.killsA} – ${w.killsB} ${esc(w.bLabel)}</b><small>Objectif ${w.target} kills · reste ${this.cd(w.left)}</small></div><button class="tb-btn" data-a="tbnav" data-v="war">Détails</button></div>`);
     if (this.claimable()) alerts.push(`<div class="tb-row"><span class="tb-chip ok">${this.claimable()} quête(s) terminée(s)</span><div class="g"><small>Récupère les récompenses pour la trésorerie du gang.</small></div><button class="tb-btn pri" data-a="tbnav" data-v="quest">Voir</button></div>`);
     if (o && o.active) alerts.push(`<div class="tb-row"><span class="tb-chip warn">Colis</span><div class="g"><b>${esc(o.label)}</b><small>${o.carried ? `Porté par ${esc(o.carrierGang || '?')}` : 'Au sol, à prendre'} · récompense ${money(o.reward)}</small></div><button class="tb-btn" data-a="gps" data-x="${o.x}" data-y="${o.y}">${ti('gps', 14)} GPS</button></div>`);
-    return `<div class="tb-hero">${this.badge(me.label, null, me.logo)}<div style="flex:1"><h1>${esc(me.label)}</h1><p>Bienvenue ${esc(me.player)} · ${esc(me.gradeLabel)}${me.motd ? ` · « ${esc(me.motd)} »` : ''}</p></div></div>
-      <div class="tb-g4"><div class="tb-stat"><div class="l">Réputation</div><div class="v">${me.rep}</div><div class="s">${(d.ranking.findIndex(r => r.me) + 1) ? `#${d.ranking.findIndex(r => r.me) + 1} du classement` : ''}</div></div>
-        <div class="tb-stat"><div class="l">Membres</div><div class="v">${me.members}</div><div class="s">${me.online.length} en ligne</div></div>
-        <div class="tb-stat"><div class="l">Territoires</div><div class="v">${d.territoryCount}</div><div class="s">sur ${d.territories.length}</div></div>
-        <div class="tb-stat"><div class="l">Trésorerie</div><div class="v" style="font-size:21px">${me.money != null ? money(me.money) : '—'}</div><div class="s">${me.dirty != null ? money(me.dirty) + ' sale' : 'réservé au bureau'}</div></div></div>
+    const rk = d.ranking.findIndex(r => r.me) + 1;
+    return `<div class="tb-hero">${this.badge(me.label, null, me.logo)}<div style="flex:1;min-width:0"><div class="tb-eyebrow">Gang · ${esc(me.gradeLabel)}</div><h1>${esc(me.label)}</h1><p>Bienvenue ${esc(me.player)}${me.motd ? ` — <i>« ${esc(me.motd)} »</i>` : ''}</p></div>
+        ${rk ? `<div class="tb-rk"><small>Classement</small><b>#${rk}</b></div>` : ''}<div class="tb-glyph">${ti('skull', 120)}</div></div>
+      <div class="tb-quick">${[['terr', 'flag', 'Zones'], ['quest', 'quest', 'Quêtes'], ['war', 'war', 'Guerres'], ['rank', 'trophy', 'Classement']].map(([id, ic2, l]) => `<button data-a="tbnav" data-v="${id}">${ti(ic2, 17)}<span>${l}</span></button>`).join('')}</div>
+      <div class="tb-g4"><div class="tb-stat"><div class="ic">${ti('crown', 18)}</div><div class="l">Réputation</div><div class="v">${me.rep}</div><div class="s">${rk ? `#${rk} du classement` : ''}</div></div>
+        <div class="tb-stat"><div class="ic">${ti('users', 18)}</div><div class="l">Membres</div><div class="v">${me.members}</div><div class="s">${me.online.length} en ligne</div></div>
+        <div class="tb-stat"><div class="ic">${ti('flag', 18)}</div><div class="l">Territoires</div><div class="v">${d.territoryCount}<small>/${d.territories.length}</small></div><div class="s">contrôlés</div></div>
+        <div class="tb-stat"><div class="ic">${ti('coins', 18)}</div><div class="l">Trésorerie</div><div class="v" style="font-size:23px">${me.money != null ? money(me.money) : '—'}</div><div class="s">${me.dirty != null ? money(me.dirty) + ' sale' : 'réservé au bureau'}</div></div></div>
       <div class="tb-g2"><div class="tb-card"><h3>${ti('bolt', 15)} À surveiller</h3>${alerts.join('') || '<div class="tb-empty">Rien d\'urgent pour le moment.</div>'}</div>
         <div class="tb-card"><h3>${ti('users', 15)} En ligne (${me.online.length})</h3>${me.online.map(m => `<div class="tb-row"><div class="g"><b>${esc(m.name)}</b></div><span class="tb-chip">${esc(m.gradeLabel)}</span></div>`).join('') || '<div class="tb-empty">Personne.</div>'}</div></div>
       <div class="tb-card"><h3>${ti('news', 15)} Dernières actualités</h3>${this.newsList(d.news.slice(0, 4))}</div>
