@@ -27,7 +27,7 @@
     const sec = t => el('div', { class: 'hub-sec' }, t);
     const nav = lonely
       ? [sec('Mon espace'), link('offers', 'Boutique', 'cart'), link('patchnotes', 'Patch notes', 'book'), sec('Paramètres'), link('account', 'Compte', 'user'), link('support', 'Aide et support', 'help'), link('custom', 'Personnalisation', 'brush')]
-      : [sec('Vue d’ensemble'), link('overview', 'Dashboard', 'home'), link('docs', 'Documentation', 'book'), link('license', 'Clé de développement', 'key', 'violet'),
+      : [sec('Vue d’ensemble'), link('overview', 'Dashboard', 'home'), link('docs', 'Documentation', 'book'), link('license', 'Clé AERO', 'key', 'violet'),
         sec('Configuration'),
         group('conf', 'Identité & accueil', 'brush', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark')]),
         group('srv', 'Gestion Serveur', 'box', settingsItems),

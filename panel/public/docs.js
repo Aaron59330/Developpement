@@ -49,7 +49,7 @@ const DOCS = [
       'Administration → Licences → Nouveau client + licence : crée-toi une licence (offre « Licence à vie », durée 0).',
       'Copie la clé AERO-XXXXXX-XXXXXX-XXXXXX-XXXXXX : elle sert à relier le serveur FiveM.',
     ]],
-    ['p', 'Chez un client : il s\'inscrit (ALLOW_REGISTER=true) ou tu crées son compte, puis une licence lui est attribuée. La page « Clé de développement » lui affiche sa clé et les lignes à mettre dans son server.cfg. Une licence se lie à la première adresse IP qui l\'utilise ; elle peut être déliée depuis cette page (changement d\'hébergeur).'],
+    ['p', 'Chez un client : il s\'inscrit (ALLOW_REGISTER=true) ou tu crées son compte, puis une licence lui est attribuée. La page « Clé AERO » lui affiche sa clé et les lignes à mettre dans son server.cfg. Une licence se lie à la première adresse IP qui l\'utilise ; elle peut être déliée depuis cette page (changement d\'hébergeur). Pour développer et tester sans toucher au serveur en ligne, un bouton de cette page permet d\'acheter une 2ᵉ clé dédiée au développement.'],
   ] },
   { id: 'base-install', title: '3. Installer la base FiveM', blocks: [
     ['h', 'a) Copier les ressources'],
@@ -87,7 +87,7 @@ const DOCS = [
     ]],
     ['table', ['Symptôme', 'Cause / solution'], [
       ['« Clé de licence inconnue »', 'La clé est mal copiée dans server.cfg.'],
-      ['« Autre adresse IP »', 'Clé de développement → « Changer de machine » (délie l\'ancienne IP).'],
+      ['« Autre adresse IP »', 'Clé AERO → « Changer de machine » (délie l\'ancienne IP).'],
       ['Le panel reste « Hors ligne »', 'Vérifie PUBLIC_URL / le port 3000 ouvert, et que pickax_panel est bien démarré.'],
       ['« FiveM refuse d\'écrire dans … »', 'Ajoute la ligne add_filesystem_permission indiquée dans server.cfg puis redémarre.'],
     ]],

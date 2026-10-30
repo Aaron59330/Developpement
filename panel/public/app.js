@@ -96,7 +96,7 @@ function shell(content) {
     el('div', { class: 'sec' }, 'Serveur en direct'), item('players', 'Joueurs', 'users'), item('playersheet', 'Fiches joueurs', 'user'), item('reports', 'Plaintes', 'shield'), item('map', 'Carte live', 'map'), item('actions', 'Actions rapides', 'bolt'), item('access', 'Bans & whitelist', 'shield'), item('planner', 'Événements programmés', 'cal'), item('resources', 'Ressources', 'box'), item('assistant', 'Assistant IA', 'spark'),
     el('div', { class: 'sec' }, 'Communication'), item('discord', 'Message Discord', 'chat'), item('events', 'Événements & rappels', 'chat'), item('alerts', 'Alertes Discord', 'chat'), item('recruit', 'Candidatures', 'chat'),
     el('div', { class: 'sec' }, 'Développement'), item('editor', 'Éditeur de base', 'edit'), item('files', 'Fichiers', 'file'), item('backups', 'Sauvegardes', 'db'), item('dbbackups', 'Sauvegardes de la base', 'db'), item('console', 'Console', 'term'), item('webhooks', 'Webhooks', 'hook'),
-    el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Licence & installation', 'key'), isAdmin ? null : item('offers', 'Offres & renouvellement', 'tag'),
+    el('div', { class: 'sec' }, 'Informations'), item('patchnotes', 'Patch notes', 'book'), item('suggestions', 'Suggestions', 'bulb'), item('license', 'Clé AERO', 'key'), isAdmin ? null : item('offers', 'Offres & renouvellement', 'tag'),
     isAdmin ? [el('div', { class: 'sec' }, 'Administration'), item('a-overview', 'Vue d’ensemble', 'chart'), item('a-users', 'Clients', 'user'), item('a-licenses', 'Licences', 'key'), item('a-plans', 'Offres', 'tag'), item('a-orders', 'Commandes', 'cart'), item('a-modules', 'Modules', 'puzzle'), item('a-audit', 'Journal', 'list')] : null,
     bottom);
   const on = side.querySelector('.nav.on'); let sec = '', prev = on;
@@ -254,12 +254,13 @@ async function pResources() {
 }
 async function pLicense() {
   const s = curServer(); if (!s) return needServer(); const url = location.origin;
-  return el('div', {}, head('Licence & installation', statusPill(s)),
-    el('div', { class: 'card' }, el('h2', {}, 'Ma clé de licence'), el('div', { class: 'key' }, s.key), el('div', { class: 'row', style: 'margin-top:10px' },
+  return el('div', {}, head('Clé AERO', statusPill(s)),
+    el('div', { class: 'card' }, el('h2', {}, 'Ma clé AERO'), el('div', { class: 'key' }, s.key), el('div', { class: 'row', style: 'margin-top:10px' },
       el('button', { class: 'btn', onclick: () => copy(s.key) }, el('span', {}, 'Copier')), el('button', { class: 'btn', onclick: () => ask('Renommer', [{ name: 'server_name', label: 'Nom du serveur', value: s.server_name }], async v => { const r = await api('POST', `/api/servers/${s.id}/rename`, v); if (!r.ok) { toast(r.error, 'bad'); return false; } await loadServers(); render(); }) }, el('span', {}, 'Renommer')),
       el('button', { class: 'btn', onclick: () => confirmBox('Délier l’adresse IP', 'La licence pourra être utilisée depuis une nouvelle machine (à faire lors d’un changement d’hébergeur).', async () => { await api('POST', `/api/servers/${s.id}/unbind`, {}); await loadServers(); toast('Licence déliée', 'ok'); render(); }) }, el('span', {}, 'Changer de machine')),
       el('button', { class: 'btn d', onclick: () => confirmBox('Régénérer la clé', 'L’ancienne clé cessera de fonctionner immédiatement. Pense à mettre à jour ton serveur.', async () => { const r = await api('POST', `/api/servers/${s.id}/rotate-key`, {}); if (r.ok) { await loadServers(); toast('Nouvelle clé générée', 'ok'); render(); } }, true) }, el('span', {}, 'Régénérer'))),
       el('p', { class: 'muted', style: 'margin-top:10px' }, `Plan : ${s.plan || '—'} · Expiration : ${fmtDay(s.expires_at)} · Adresse liée : ${s.bound_ip || 'aucune (se lie à la première connexion)'} · Version de la ressource : ${s.version || '—'}`)),
+    el('div', { class: 'card' }, el('h2', {}, 'Clé de développement'), el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, 'Ta clé AERO sert à ton serveur en production. Pour tester et développer sans toucher à ton serveur en ligne, prends une 2ᵉ clé dédiée au développement.'), el('button', { class: 'btn p', onclick: () => go('offers') }, el('span', {}, 'Acheter une 2ᵉ clé pour le développement'))),
     el('div', { class: 'card' }, el('h2', {}, 'Installer la ressource sur ton serveur'), el('ol', { class: 'steps' },
       el('li', {}, 'Copie le dossier ', el('b', {}, 'pickax_panel'), ' dans ', el('span', { class: 'mono' }, 'resources/[dev]/'), '.'),
       el('li', {}, 'Ajoute ces deux lignes dans ton ', el('span', { class: 'mono' }, 'server.cfg'), ' (avant ', el('span', { class: 'mono' }, 'ensure pickax_panel'), ') :', el('pre', { class: 'code' }, `set aero_panel_url "${url}"\nset aero_panel_key "${s.key}"\nensure pickax_panel`)),
