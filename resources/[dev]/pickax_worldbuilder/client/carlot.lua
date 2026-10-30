@@ -19,8 +19,8 @@ RegisterNetEvent('worldbuilder:client:listingAdd', function(l) Listings[l.id] = 
 RegisterNetEvent('worldbuilder:client:listingRemove', function(id) Listings[id] = nil end)
 
 local function enrich(res)
-    for _, l in ipairs(res.listings or {}) do l.name = VehicleLabel(l.model) end
-    for _, v in ipairs(res.vehicles or {}) do v.name = VehicleLabel(v.model) end
+    WBEnrich(res.listings)
+    WBEnrich(res.vehicles)
 end
 
 -- ─────────────────────────────── Véhicules d'exposition ───────────────────────────────

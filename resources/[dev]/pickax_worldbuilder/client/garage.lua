@@ -46,7 +46,7 @@ end
 -- Note sur 100 (0 si le modèle est inconnu)
 local function score(v, max) return math.max(0, math.min(100, math.floor((tonumber(v) or 0) / max * 100 + 0.5))) end
 
-local function enrich(list)
+function WBEnrich(list)   -- nom, marque, image et performances d'une liste de véhicules (partagé : garage, fourrière, location, serrurier, occasion)
     for _, v in ipairs(list or {}) do
         v.name = VehicleLabel(v.model)
         local hash = type(v.model) == 'string' and joaat(v.model) or v.model
@@ -65,6 +65,8 @@ local function enrich(list)
         end
     end
 end
+
+local enrich = WBEnrich
 
 local function reportSpawned(veh, plate)
     local netId = NetworkGetNetworkIdFromEntity(veh)

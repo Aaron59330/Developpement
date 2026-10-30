@@ -40,3 +40,40 @@
 .gx-mute { color: var(--muted); font-size: 12.5px; padding: 18px 4px; }
 .gx-emptybox { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; border: 1px dashed var(--line-2); border-radius: 18px; }
 @media (max-width: 1000px) { .gx-main { grid-template-columns: 1fr; overflow-y: auto; } .gx-hero { min-height: 280px; } .gx-info h1 { font-size: 28px; } }
+
+/* ── Grands menus (fourrière, location, serrurier, occasion, essence, lavage, banque, auto-école, pôle emploi, PVP, course poursuite) : même gabarit que le garage ── */
+.gx-top .seg { margin: 0; } .gx-top .seg button { height: 30px; padding: 0 14px; }
+.gx-hero.plain { padding: 22px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.gx-ph small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.gx-ph h1 { font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; margin: 6px 0 4px; }
+.gx-ph p, .gx-info p { color: var(--text-2); margin-top: 10px; line-height: 1.5; max-width: 440px; font-size: 13.5px; }
+.gx-tag { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(var(--accent-rgb), .14); border: 1px solid rgba(var(--accent-rgb), .35); color: var(--text); vertical-align: middle; }
+.gx-tag.warn { background: rgba(251, 191, 36, .12); border-color: rgba(251, 191, 36, .4); color: var(--warn); } .gx-tag.ok { background: rgba(52, 211, 153, .12); border-color: rgba(52, 211, 153, .4); color: var(--ok); }
+.gx-facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.gx-price { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 6px; }
+.gx-kv > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; } .gx-kv > div:last-child { border: 0; padding-bottom: 0; } .gx-kv span { color: var(--muted); } .gx-kv b { font-weight: 600; text-align: right; }
+.gx-card.warn { border-color: rgba(251, 191, 36, .4); background: rgba(251, 191, 36, .06); } .gx-card.warn h3 { color: var(--warn); }
+.gx-card .f { margin-bottom: 10px; } .gx-card .f:last-child { margin-bottom: 0; } .gx-card .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.gx-card textarea { width: 100%; min-height: 56px; height: 56px; resize: vertical; }
+.gx-art { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 170px 30px 20px; }
+.gx-disc { width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); background: radial-gradient(circle at 50% 35%, rgba(var(--accent-rgb), .22), rgba(var(--accent-rgb), .06)); border: 1px solid rgba(var(--accent-rgb), .32); box-shadow: 0 0 80px -10px rgba(var(--accent-rgb), .35); animation: gxin .35s ease; }
+.gx-disc svg { width: 92px; height: 92px; stroke-width: 1.3; }
+.gx-ringbox { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-top: 110px; }
+.gx-ring { --a: 0; --b: 0; width: 250px; height: 250px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .2s;
+  background: conic-gradient(var(--accent) calc(var(--a) * 1%), rgba(var(--accent-rgb), .32) 0 calc(var(--b) * 1%), rgba(255, 255, 255, .08) 0); -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%); mask: radial-gradient(circle, transparent 60%, #000 61%); }
+.gx-ringwrap { position: relative; width: 250px; height: 250px; } .gx-ringwrap .gx-ring { position: absolute; inset: 0; }
+.gx-ringtxt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; } .gx-ringtxt b { font-size: 50px; font-weight: 800; letter-spacing: -.04em; line-height: 1; } .gx-ringtxt small { color: var(--muted); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; margin-top: 6px; }
+.gx-legend { color: var(--text-2); font-size: 13px; display: flex; gap: 18px; } .gx-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--accent); } .gx-legend i.b { background: rgba(var(--accent-rgb), .4); }
+.gx-bal { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 56px; }
+.gx-bal > div { border: 1px solid var(--line); border-radius: 18px; padding: 24px; background: rgba(255, 255, 255, .03); } .gx-bal > div:last-child { border-color: rgba(var(--accent-rgb), .35); background: rgba(var(--accent-rgb), .08); }
+.gx-bal small { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); } .gx-bal b { display: block; font-size: 40px; font-weight: 800; letter-spacing: -.03em; margin-top: 14px; }
+.gx-stats4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; } .gx-stats4 > div { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: rgba(255, 255, 255, .025); } .gx-stats4 small { display: block; color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; } .gx-stats4 b { font-size: 26px; font-weight: 800; }
+.gx-bigbtn { height: auto; min-height: 46px; padding: 11px 16px; white-space: normal; text-align: left; justify-content: flex-start; font-size: 14px; }
+.gx-q { font-size: 28px; font-weight: 700; line-height: 1.3; letter-spacing: -.02em; margin-top: 26px; max-width: 640px; }
+.gx-emptybox .gx-card { width: min(460px, 90%); }
+.gx-hero.plain .item { margin-bottom: 0; } .gx-hero.plain .veh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.gx-hero.plain .pickbanner { margin-bottom: 0; }
+.gx-card .paygrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .gx-card .paybtn { min-width: 0; }
+.gx-card input[type="range"] { accent-color: var(--accent); }
+.gx-card .lbl { margin-bottom: 6px; }
+.gx-plate + .gx-tag { margin-left: 8px; } .gx-card h3 { justify-content: flex-start; gap: 8px; } .gx-card h3 small { margin-left: auto; }

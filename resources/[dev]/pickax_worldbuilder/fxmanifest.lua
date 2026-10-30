@@ -62,6 +62,7 @@ files {
     'html/vehicles/**/*',     -- images des véhicules (html/vehicles/<modèle>.webp) ; à défaut : docs.fivem.net
     'html/atelier.js',
     'html/script.js',
+    'html/menus.js',
     'html/bb-ui.js',
 }
 

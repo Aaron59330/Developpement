@@ -3,7 +3,7 @@ Handlers.locksmith = function(node)
     if node.kind ~= 'shop' then return end
     ServerCall('worldbuilder:locksmith:info', function(res)
         if not res or not res.ok then return Notify((res and res.error) or 'Serrurier indisponible', 'error') end
-        for _, v in ipairs(res.vehicles) do v.name = VehicleLabel(v.model) end
+        WBEnrich(res.vehicles)
         res.eid, res.pi = node.eid, node.pi
         OpenPanel('locksmith', res, { type = 'locksmith', eid = node.eid, pi = node.pi })
     end, node.eid, node.pi)

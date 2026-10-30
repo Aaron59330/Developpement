@@ -22,7 +22,7 @@ Handlers.rental = function(node)
     end
     ESX.TriggerServerCallback('worldbuilder:rental:list', function(res)
         if not res or not res.ok then return Notify((res and res.error) or 'Location indisponible', 'error') end
-        for _, f in ipairs(res.fleet) do f.name = VehicleLabel(f.model) end
+        WBEnrich(res.fleet)
         res.eid, res.pi = node.eid, node.pi
         OpenPanel('rental', res, { type = 'rental', eid = node.eid, pi = node.pi })
     end, node.eid, node.pi)
