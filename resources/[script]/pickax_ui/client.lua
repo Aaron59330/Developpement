@@ -7,7 +7,7 @@ local DEFAULTS = {
     uiBtn = -1, uiTab = -1, uiCard = -1, uiField = -1, uiFrame = -1, uiFill = 'def',   -- forme de TOUTES les interfaces (-1 = défaut du style)
     sound = true, volume = 60,
 }
-local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true, pinata = true }
+local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true, pinata = true, dore = true }
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }
 local SHAPE_ROUND = { -1, 0, 6, 12, 18, 24, 999 }

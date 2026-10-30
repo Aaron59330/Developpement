@@ -27,7 +27,7 @@ local Action = {
 local Prefs = {
 	Styles = {
 		{ id = 'noir', name = 'Noir' }, { id = 'verre', name = 'Verre' }, { id = 'clair', name = 'Clair' },
-		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Couleur du serveur' }, { id = 'arcade', name = 'Arcade' }, { id = 'pinata', name = 'Piñata' },
+		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Couleur du serveur' }, { id = 'arcade', name = 'Arcade' }, { id = 'pinata', name = 'Piñata' }, { id = 'dore', name = 'Doré (bandeau)' },
 	},
 	Sizes = { { id = 'sm', name = 'Petit' }, { id = 'md', name = 'Moyen' }, { id = 'lg', name = 'Grand' } },
 	-- Couleurs : liste de préréglages + "Personnalisé" (Entrée = saisir un code #RRGGBB au clavier)

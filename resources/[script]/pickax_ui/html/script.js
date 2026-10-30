@@ -72,7 +72,7 @@ function hexRgb(h) {
   return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : (window.PICKAX_ACCENT_RGB || '253,194,125');
 }
 
-var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96, arcade: .96, pinata: .96 };
+var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96, arcade: .96, pinata: .96, dore: .86 };
 var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
 
 function applyCfg(c) {
