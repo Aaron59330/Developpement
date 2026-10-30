@@ -64,6 +64,11 @@
     const g = curGroup(); if (g) store.set('aero_setcat', g);
     const node = await baseSettings();
     try {
+      // Mode de jeu, profils et texte d'intro : une seule fois, sur la première page (« Serveur ») — pas répétés sur chaque catégorie
+      if (g && g !== SET_ORDER[0]) { [...node.children].forEach(c => { if (c.matches('.setlayout, .setbar, .top')) return; if (c.matches('.card, p.muted')) c.remove(); }); }
+      // catégorie absente du serveur : message clair plutôt que les réglages d'une autre catégorie
+      const rows0 = [...node.querySelectorAll('.setrow')];
+      if (g && rows0.length && !rows0.some(r => (r.getAttribute('data-t') || '').endsWith(' ' + g.toLowerCase()))) { const lay = node.querySelector('.setlayout'); if (lay) lay.replaceChildren(el('div', { class: 'card empty' }, el('h2', {}, 'Aucun réglage dans cette catégorie'), el('p', { class: 'muted' }, 'Ton serveur n’expose pas encore de réglages « ' + g + ' ». Mets à jour la ressource pickax_settings si tu viens d’ajouter des systèmes.'))); }
       node.querySelectorAll('.setrow').forEach(r => { const k = r.getAttribute('data-k'), lab = r.firstElementChild; if (k && lab && !lab.querySelector('.hub-key')) { const c = el('code', { class: 'hub-key' }, k); lab.append(c); } });
       node.querySelectorAll('.setsec').forEach(h => { if (!h.querySelector('svg')) h.prepend(svg('M4 6h16M4 12h16M4 18h10')); });
       const h1 = node.querySelector && node.querySelector('.top h1');
