@@ -3,7 +3,7 @@
 :root { --r-slot: 9px; --gold: #ffcd5a; --gold-rgb: 255, 205, 90; }
 
 /* panneaux : plus de cadre, seulement un léger voile de verre */
-.panel::before { border-radius: 16px; border: 1px solid rgba(255, 255, 255, .06); background: linear-gradient(180deg, rgba(10, 13, 20, .5), rgba(10, 13, 20, .28)); backdrop-filter: blur(10px); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+.panel::before { display: none; }   /* plus de grand cadre arrondi autour des panneaux */
 .panel.center::before { display: none; }
 .panel-title h2 { font-style: normal; text-transform: none; letter-spacing: .01em; color: #f1f3f8; font-weight: 700; font-size: 19px; text-shadow: 0 1px 10px rgba(0, 0, 0, .6); }
 .hex { clip-path: none; transform: none; border-radius: 10px; width: 36px; height: 36px; background: rgba(255, 255, 255, .09); color: #fff; border: 1px solid rgba(255, 255, 255, .12); box-shadow: none; }
