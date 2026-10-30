@@ -1,2 +1,2 @@
-try{document.documentElement.setAttribute("data-design",localStorage.getItem("aero_design")||"v2")}catch(e){document.documentElement.setAttribute("data-design","v2")}
+try{document.documentElement.setAttribute("data-design",localStorage.getItem("aero_design")||"hub")}catch(e){document.documentElement.setAttribute("data-design","hub")}
 try{var h=localStorage.getItem("aero_accent");if(/^#[0-9a-f]{6}$/i.test(h)){var R=parseInt(h.slice(1,3),16),G=parseInt(h.slice(3,5),16),B=parseInt(h.slice(5,7),16),s=document.documentElement.style;s.setProperty("--a",R+","+G+","+B);s.setProperty("--ink",(0.299*R+0.587*G+0.114*B)>150?"#15110a":"#ffffff")}}catch(e){}

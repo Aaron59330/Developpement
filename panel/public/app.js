@@ -3,7 +3,7 @@
 const $app = document.getElementById('app');
 // 2 thèmes du panel : « sombre » (d'origine) et « clair » ; choix mémorisé dans ce navigateur
 const getTheme = () => { try { return localStorage.getItem('aero_theme') === 'clair' ? 'clair' : 'sombre'; } catch (e) { return 'sombre'; } };
-const getDesign = () => document.documentElement.getAttribute('data-design') === 'v1' ? 'v1' : 'v2';
+const getDesign = () => { const d = document.documentElement.getAttribute('data-design'); return d === 'v1' || d === 'v2' ? d : 'hub'; };
 const setDesign = d => { document.documentElement.setAttribute('data-design', d); try { localStorage.setItem('aero_design', d); } catch (e) {} };
 const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const applyAccent = hex => {
@@ -13,7 +13,7 @@ const applyAccent = hex => {
 };
 const setTheme = t => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('aero_theme', t); } catch (e) {} };
 setTheme(getTheme());
-const applyPrefs = p => { if (!p) return; setDesign(p.design === 'v1' ? 'v1' : 'v2'); setTheme(p.theme === 'clair' ? 'clair' : 'sombre'); applyAccent(p.accent || null); };
+const applyPrefs = p => { if (!p) return; setDesign(p.design === 'v1' || p.design === 'v2' ? p.design : 'hub'); setTheme(p.theme === 'clair' ? 'clair' : 'sombre'); applyAccent(p.accent || null); };
 const savePrefs = async patch => { state.user.prefs = { ...(state.user.prefs || {}), ...patch }; applyPrefs(state.user.prefs); const r = await api('PUT', '/api/auth/prefs', patch); if (!r.ok) toast(r.error || 'Erreur', 'bad'); };
 function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
