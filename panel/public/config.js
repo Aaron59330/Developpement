@@ -18,7 +18,11 @@ PAGES.loading = async function () {
   while (v.stages.length < 4) v.stages.push(LOADING_DEFAULT.stages[v.stages.length]);
   const audios = (dr.files || []).filter(f => String(f.mime || '').startsWith('audio/'));
   const accent = theme.AccentColor || '#fdc27d';
-  const prev = el('div', { class: 'ldprev' });
+  const frame = el('iframe', { src: 'preview-loading/index.html', scrolling: 'no', tabindex: '-1', style: 'position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:none' });
+  const prev = el('div', { style: 'position:relative;width:100%;overflow:hidden;border-radius:10px;background:#0c1018;aspect-ratio:16/9' }, frame);
+  const fit = () => { const w = prev.clientWidth; if (w) frame.style.transform = `scale(${w / 1920})`; };
+  new ResizeObserver(fit).observe(prev);
+  let reloadT; const reloadPreview = c => { clearTimeout(reloadT); reloadT = setTimeout(() => { try { localStorage.setItem('pickax_loading_cfg_v1', JSON.stringify(c)); localStorage.setItem('pickax_preview_theme', JSON.stringify({ accent })); frame.contentWindow.location.reload(); } catch (e) {} }, 400); };
   const tips = el('textarea', { rows: 5, value: v.tips.join('\n'), placeholder: 'Un message par ligne (12 max)' }), tipsHint = el('span', { class: 'muted' });
   const mEn = el('input', { type: 'checkbox', checked: v.music.enabled, style: 'width:auto' }), mAuto = el('input', { type: 'checkbox', checked: v.music.autoplay, style: 'width:auto' });
   const mUrl = el('input', { value: v.music.url || '', placeholder: 'https://… (vide = musique d’origine du serveur)' }), mVol = el('input', { type: 'range', min: 0, max: 100, value: v.music.volume, style: 'padding:0' }), mVolT = el('b', {}, v.music.volume + ' %');
@@ -38,12 +42,7 @@ PAGES.loading = async function () {
     stages: stages.map(i => i.value.trim()), music: { enabled: mEn.checked, url: mUrl.value.trim(), volume: +mVol.value, autoplay: mAuto.checked }, showTeam: showTeam.checked, showUpdates: showUp.checked, ...ap.get() });
   function draw() {
     const c = collect(); tipsHint.textContent = `${c.tips.length} / 12 message(s)`; mVolT.textContent = mVol.value + ' %'; player.hidden = !c.music.url; if (c.music.url && player.getAttribute('src') !== c.music.url) player.setAttribute('src', c.music.url);
-    const btn = k => c.links[k] ? `<span class="ldb">${{ reglement: 'Règlement', discord: 'Discord', boutique: 'Boutique' }[k]}</span>` : '';
-    const esc = x => String(x).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-    prev.style.setProperty('--pa', accent);
-    prev.innerHTML = `<div class="ldtop"><span class="ldb">♪ ${c.music.enabled ? c.music.volume + ' %' : 'coupée'}</span><span>${['reglement', 'discord', 'boutique'].map(btn).join('')}</span></div>
-      <div class="ldmid"><div class="ldname">${esc(theme.ServerShortName || 'AERO')}</div>${(c.showTeam || c.showUpdates) ? `<div class="ldinfo"><b>${c.showTeam ? 'Équipe' : 'Mises à jour'}</b>${(c.showTeam ? c.team.slice(0, 3).map(m => esc(m.name) + ' · ' + esc(m.role)) : c.updates.slice(0, 2).map(u => esc(u.title))).map(x => `<small>${x}</small>`).join('')}</div>` : ''}</div>
-      <div class="ldbar"><span>${esc(c.stages[1] || '')}</span><b>62 %</b></div><div class="ldtrack"><i style="width:62%"></i></div><div class="ldtick">${esc(c.tips[0] || '—')}</div>`;
+    reloadPreview(c);
   }
   [tips, mEn, mAuto, mUrl, mVol, showTeam, showUp, ...Object.values(links), ...stages].forEach(i => { i.addEventListener('input', draw); i.addEventListener('change', draw); });
   drawTeam(); drawUps(); draw();
@@ -64,7 +63,7 @@ PAGES.loading = async function () {
         sec('Boutons de liens', 'Un bouton sans lien n’apparaît pas.', el('label', {}, 'Règlement'), links.reglement, el('label', {}, 'Discord'), links.discord, el('label', {}, 'Boutique'), links.boutique),
         sec('Textes de progression', 'Affichés sous la barre selon l’avancement du chargement.', ...['Début', 'Chargement de la carte', 'Démarrage', 'Connexion'].flatMap((l, i) => [el('label', {}, l), stages[i]]))),
       el('div', {},
-        el('div', { class: 'card' }, el('h2', {}, 'Aperçu'), prev, el('p', { class: 'muted', style: 'margin-top:8px;font-size:12px' }, 'Aperçu simplifié : la mise en page réelle est celle de ton écran de chargement habituel.')),
+        el('div', { class: 'card' }, el('h2', {}, 'Aperçu'), prev, el('p', { class: 'muted', style: 'margin-top:8px;font-size:12px' }, 'Aperçu réaliste : c’est le vrai écran de chargement tel que le voit un joueur (barre figée à 62 %). Il se met à jour quelques instants après chaque modification.')),
         ap.node,
         sec('Équipe', 'Présentée dans le panneau de gauche de l’écran.', sw(showTeam, 'Afficher l’équipe'), teamBox),
         sec('Mises à jour', 'Les dernières nouveautés du serveur (la plus récente en premier).', sw(showUp, 'Afficher les mises à jour'), upBox))));

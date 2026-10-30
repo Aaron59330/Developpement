@@ -5,7 +5,7 @@ if (cfg.trustProxy) app.set('trust proxy', 1);
 app.disable('x-powered-by');
 // En HTTP simple (test, accès par IP) il ne faut ni « upgrade-insecure-requests » ni HSTS, sinon le navigateur casse le site
 const secureSite = cfg.publicUrl.startsWith('https://');
-app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
+app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'self'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
 app.use('/api/agent', require('./routes/agent'));
 // corps JSON : 2 Mo, sauf l'envoi de fichiers au Drive (musique jusqu'à 6 Mo, en base64) réservé aux requêtes qui portent un cookie de session
 const smallJson = express.json({ limit: '2mb' }), bigJson = express.json({ limit: '9mb' });
