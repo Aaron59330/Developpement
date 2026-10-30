@@ -77,3 +77,33 @@
 .gx-card input[type="range"] { accent-color: var(--accent); }
 .gx-card .lbl { margin-bottom: 6px; }
 .gx-plate + .gx-tag { margin-left: 8px; } .gx-card h3 { justify-content: flex-start; gap: 8px; } .gx-card h3 small { margin-left: auto; }
+
+/* ═══ Style Arcade (néon) : mêmes grands menus, habillés comme le reste de l'interface Arcade (hx.css). Piñata et Classique gardent le rendu sombre épuré ci-dessus. ═══ */
+html[data-design="arcade"] .gx { --gx-r: 6px; border: 1.5px solid rgba(var(--accent-rgb), .55); box-shadow: 0 40px 120px rgba(0, 0, 0, .7), 0 0 26px rgba(var(--accent-rgb), .22);
+  background: radial-gradient(900px 380px at 0% 0%, rgba(var(--accent-rgb), .12), transparent 70%), rgba(22, 23, 28, .97); }
+html[data-design="arcade"] .gx-top { border-bottom: 1px solid rgba(var(--accent-rgb), .3); }
+html[data-design="arcade"] .gx-title b { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 26px; letter-spacing: .02em; text-shadow: 0 0 18px rgba(var(--accent-rgb), .4); }
+html[data-design="arcade"] .gx-title small { font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); transform: skewX(-8deg); }
+html[data-design="arcade"] .gx-hero { border-radius: 4px; border-color: rgba(var(--accent-rgb), .35);
+  background: radial-gradient(520px 300px at 55% 70%, rgba(var(--accent-rgb), .26), transparent 70%), repeating-linear-gradient(115deg, rgba(var(--accent-rgb), .05) 0 2px, transparent 2px 22px), linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01)); }
+html[data-design="arcade"] .gx-info small, html[data-design="arcade"] .gx-ph small { color: var(--accent); font-weight: 800; letter-spacing: .22em; }
+html[data-design="arcade"] .gx-info h1, html[data-design="arcade"] .gx-ph h1 { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 58px; letter-spacing: -.01em; text-shadow: 0 0 22px rgba(var(--accent-rgb), .45); }
+html[data-design="arcade"] .gx-ph h1 { font-size: 44px; }
+html[data-design="arcade"] .gx-car::after { content: ''; position: absolute; left: 14%; right: 14%; bottom: 7%; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--accent-rgb), .55), transparent); filter: blur(2px); z-index: -1; }
+html[data-design="arcade"] .gx-big { filter: drop-shadow(0 22px 24px rgba(0, 0, 0, .6)) drop-shadow(0 0 28px rgba(var(--accent-rgb), .25)); }
+html[data-design="arcade"] .gx-card, html[data-design="arcade"] .gx-tile, html[data-design="arcade"] .gx-stats4 > div, html[data-design="arcade"] .gx-bal > div { border-radius: 4px; }
+html[data-design="arcade"] .gx-card h3 { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; font-size: 19px; text-transform: uppercase; letter-spacing: .04em; }
+html[data-design="arcade"] .gx-card h3 svg { color: var(--accent); }
+html[data-design="arcade"] .gx-price, html[data-design="arcade"] .gx-ringtxt b, html[data-design="arcade"] .gx-bal b, html[data-design="arcade"] .gx-q { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; }
+html[data-design="arcade"] .gx-price { font-size: 44px; text-shadow: 0 0 16px rgba(var(--accent-rgb), .35); } html[data-design="arcade"] .gx-ringtxt b { font-size: 64px; text-shadow: 0 0 22px rgba(var(--accent-rgb), .5); }
+html[data-design="arcade"] .gx-tile.on { border-color: var(--accent); background: rgba(var(--accent-rgb), .14); box-shadow: 0 0 18px rgba(var(--accent-rgb), .4); }
+html[data-design="arcade"] .gx-tile:hover { border-color: var(--accent); box-shadow: 0 0 14px rgba(var(--accent-rgb), .3); }
+html[data-design="arcade"] .gx-tile b { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 14px; letter-spacing: .03em; }
+html[data-design="arcade"] .gx-plate, html[data-design="arcade"] .gx-tag { border-radius: 2px; transform: skewX(-8deg); font-weight: 800; letter-spacing: .08em; }
+html[data-design="arcade"] .gx-ring { -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%); mask: radial-gradient(circle, transparent 62%, #000 63%); filter: drop-shadow(0 0 14px rgba(var(--accent-rgb), .6)); }
+html[data-design="arcade"] .gx-disc { border-radius: 14px; transform: rotate(45deg); border: 2px solid rgba(var(--accent-rgb), .7); box-shadow: 0 0 40px rgba(var(--accent-rgb), .45), inset 0 0 40px rgba(var(--accent-rgb), .18); }
+html[data-design="arcade"] .gx-disc svg { transform: rotate(-45deg); filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .8)); }
+html[data-design="arcade"] .gx-stat u { box-shadow: 0 0 8px rgba(var(--accent-rgb), .7); } html[data-design="arcade"] .gx-stat b { font-style: italic; }
+html[data-design="arcade"] .gx-bottom { border-top-color: rgba(var(--accent-rgb), .3); }
+html[data-design="arcade"] .gx-kv span { text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; font-weight: 700; }
+html[data-design="arcade"] .gx-nav button { border-radius: 3px; }
