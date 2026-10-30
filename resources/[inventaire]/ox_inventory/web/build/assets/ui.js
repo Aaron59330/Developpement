@@ -405,9 +405,10 @@
   function createSlotEl() {
     const el = document.createElement('div');
     el.className = 'slot';
-    el.innerHTML = '<img class="ghost-icon" alt="" decoding="async"><img class="pic" alt="" decoding="async"><div class="count"></div><div class="num"></div><div class="price"></div><div class="label"></div><div class="rar"></div><div class="dur"><i></i></div>';
+    el.innerHTML = '<img class="ghost-icon" alt="" decoding="async"><img class="pic" alt="" decoding="async"><div class="wt"></div><div class="count"></div><div class="num"></div><div class="price"></div><div class="label"></div><div class="rar"></div><div class="dur"><i></i></div>';
     el._pic = el.querySelector('img.pic');
     el._ghost = el.querySelector('img.ghost-icon');
+    el._wt = el.querySelector('.wt');
     el._count = el.querySelector('.count');
     el._num = el.querySelector('.num');
     el._price = el.querySelector('.price');
@@ -464,6 +465,8 @@
     }
 
     if (!has) {
+      el._wt.textContent = '';
+      el.classList.remove('hasnum');
       el._pic.removeAttribute('src');
       el._src = null;
       if (el._outfit) el._label.textContent = ((window.INVENTORY_THEME || {}).tenue || {}).label || 'Tenue';
@@ -480,6 +483,9 @@
 
     el._num.style.display = (side === 'left' && inv.type === 'player' && it.slot <= 5 && !isCloth) ? 'block' : 'none';
     el._num.textContent = it.slot;
+    el.classList.toggle('hasnum', el._num.style.display === 'block');
+    // poids de la pile (kg) : petit badge en haut à gauche de la case
+    el._wt.textContent = inv.type === 'shop' ? '' : String(Math.round(((it.weight || 0) / 1000) * 10) / 10);
 
     if (inv.type === 'shop' && it.price !== undefined && it.price > 0) {
       el._price.style.display = 'block';

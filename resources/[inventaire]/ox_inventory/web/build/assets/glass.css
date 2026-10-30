@@ -1,0 +1,57 @@
+/* Design « Verre » de l'inventaire : cases en verre sombre, poids en haut à gauche, nom en bas, survol doré, barre de poids en segments.
+   Chargé après arcade.css (prioritaire). Retirer le <link> de glass.css dans index.html pour revenir à l'ancien rendu. Toutes les fonctions de l'inventaire sont inchangées. */
+:root { --r-slot: 9px; --gold: #ffcd5a; --gold-rgb: 255, 205, 90; }
+
+/* panneaux : plus de cadre, seulement un léger voile de verre */
+.panel::before { border-radius: 16px; border: 1px solid rgba(255, 255, 255, .06); background: linear-gradient(180deg, rgba(10, 13, 20, .5), rgba(10, 13, 20, .28)); backdrop-filter: blur(10px); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+.panel.center::before { display: none; }
+.panel-title h2 { font-style: normal; text-transform: none; letter-spacing: .01em; color: #f1f3f8; font-weight: 700; font-size: 19px; text-shadow: 0 1px 10px rgba(0, 0, 0, .6); }
+.hex { clip-path: none; transform: none; border-radius: 10px; width: 36px; height: 36px; background: rgba(255, 255, 255, .09); color: #fff; border: 1px solid rgba(255, 255, 255, .12); box-shadow: none; }
+.hex svg { transform: none; }
+
+/* poids : « kg » + barre en petits segments */
+.weight-text { font-style: normal; text-transform: none; letter-spacing: .02em; font-weight: 700; font-size: 12px; color: #d9dde8; text-shadow: none; }
+.weight-bar { display: block; height: 8px; margin-bottom: 1px; border: 0; transform: none; border-radius: 0; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 7px, transparent 7px 10px); overflow: hidden; }
+.weight-bar i { border-radius: 0; background: #eceef4; box-shadow: none; -webkit-mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); }
+.head-right.w-warn .weight-bar i { background: #fbbf24; } .head-right.w-full .weight-bar i { background: #f87171; }
+
+/* recherche */
+.search input { transform: none; text-transform: none; letter-spacing: 0; font-size: 12px; border-radius: 8px; background: rgba(8, 10, 16, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); backdrop-filter: blur(8px); }
+.search input:focus { background: rgba(8, 10, 16, .75); box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb), .7); }
+.search input::placeholder { text-transform: none; }
+
+/* cases */
+.slot { clip-path: none; border-radius: var(--r-slot); border: 1px solid rgba(255, 255, 255, .1); background: linear-gradient(160deg, rgba(26, 32, 46, .78), rgba(10, 13, 20, .78)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); backdrop-filter: blur(6px); }
+.slot:not(.has) { background: rgba(12, 15, 22, .5); border-color: rgba(255, 255, 255, .06); }
+.slot:hover, .slot.over { border-color: rgba(var(--gold-rgb), .9); background: linear-gradient(160deg, rgba(40, 46, 62, .85), rgba(14, 17, 26, .85)); box-shadow: 0 0 0 1px rgba(var(--gold-rgb), .45), 0 0 18px rgba(var(--gold-rgb), .22), inset 0 0 18px rgba(var(--gold-rgb), .08); }
+.slot.over { transform: scale(1.03); }
+.slot.has img.pic { top: 44%; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .6)); }
+.slot .label { font-size: 10px; font-weight: 600; color: #dfe3ec; bottom: 5px; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
+.slot .wt { display: none; position: absolute; left: 6px; top: 5px; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: #eceef2; text-shadow: 0 1px 3px #000; }
+.slot .wt::before { content: ''; width: 11px; height: 11px; background: #f2c230; -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; }
+.slot.has .wt { display: flex; }
+.slot.cloth .wt, .slot.outfit .wt { display: none !important; }
+.slot .count { left: auto; right: 5px; top: 4px; font-style: normal; font-weight: 800; font-size: 10px; background: rgba(0, 0, 0, .5); padding: 1px 6px; border-radius: 6px; }
+.slot .num { right: 7px; top: 4px; font-size: 11px; font-weight: 700; color: #aab2c0; }
+.slot.hasnum .count { top: auto; bottom: 18px; }
+.slot .dur { height: 3px; border-radius: 0 0 var(--r-slot) var(--r-slot); overflow: hidden; }
+.slot.locked { filter: none; background: linear-gradient(160deg, rgba(150, 32, 32, .65), rgba(70, 14, 14, .7)); border-color: rgba(255, 90, 90, .35); }
+.slot.outfit, .tenue-slot, #hotbar .slot { border-radius: var(--r-slot); }
+#drag-ghost { border-radius: var(--r-slot); }
+
+/* barre de défilement dorée */
+.grid::-webkit-scrollbar { width: 3px; } .grid::-webkit-scrollbar-thumb { background: linear-gradient(#ffd45a, #e8b100); box-shadow: 0 0 8px rgba(255, 200, 60, .6); border-radius: 3px; }
+
+/* filtres, quantité, boutons, infobulle, menu contextuel */
+.rail button { clip-path: none; border-radius: 10px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .08); }
+.rail button.active { background: rgba(var(--gold-rgb), .18); border-color: rgba(var(--gold-rgb), .7); filter: none; box-shadow: 0 0 12px rgba(var(--gold-rgb), .3); }
+#snd-btn { clip-path: none; border-radius: 10px; }
+.amount { background: rgba(8, 10, 16, .55); border: 1px solid rgba(255, 255, 255, .1); }
+.amount-label, .shop-pay button { text-transform: none; letter-spacing: 0; }
+.shop-pay button { border-radius: 8px; } .shop-pay button.active { background: rgba(var(--gold-rgb), .9); color: #1a1405; box-shadow: 0 0 14px rgba(var(--gold-rgb), .4); }
+#tooltip { border-radius: 12px; background: rgba(10, 13, 20, .94); border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 14px 40px rgba(0, 0, 0, .65); }
+.t-head, .t-name { font-style: normal !important; text-transform: none !important; }
+#tooltip .t-head p { border-radius: 6px; text-transform: none; letter-spacing: 0; }
+.ctx-list { background: rgba(10, 13, 20, .95); border: 1px solid rgba(255, 255, 255, .12); border-radius: 12px; }
+.ctx-item:hover { background: rgba(var(--gold-rgb), .16); }
+.tenue-slot { border-radius: var(--r-slot); }
