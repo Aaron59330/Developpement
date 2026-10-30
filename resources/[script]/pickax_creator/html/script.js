@@ -16,8 +16,8 @@ const I = {
 const ic = (n, s) => `<svg viewBox="0 0 24 24" ${s ? `style="width:${s}px;height:${s}px"` : ''}>${I[n] || ''}</svg>`;
 const sep = '<div class="sep"><i></i></div>';
 let view = null;
-const show = html => { root.innerHTML = html; root.classList.remove('hidden'); };
-const close = () => { root.classList.add('hidden'); root.innerHTML = ''; Music.stop(); view = null; };
+const show = html => { const was = !root.classList.contains('hidden'); root.innerHTML = html; root.classList.remove('hidden'); root.classList.toggle('static', was); };   // 1re ouverture animée ; les redessins (Aléatoire, flèches…) ne rejouent pas l'animation
+const close = () => { root.classList.add('hidden'); root.classList.remove('static'); root.innerHTML = ''; Music.stop(); view = null; };
 
 /* ─────────── lecteur de musique ─────────── */
 const Music = {

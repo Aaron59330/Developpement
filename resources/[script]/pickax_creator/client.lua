@@ -15,31 +15,53 @@ local function closeView() SetNuiFocus(false, false) SendNUIMessage({ a = 'close
 
 -- ───────────── scène : caméra face au personnage ─────────────
 local camFwd = vector3(0.0, 1.0, 0.0)
+local studioActive, origin = false, nil
 local function startScene()
     if scene then return end
     scene = true
     local ped = PlayerPedId()
     local st = Config.Scene.Studio
-    if st then
+    if st and not studioActive then
+        origin = { c = GetEntityCoords(ped), h = GetEntityHeading(ped) }
+        studioActive = true
         DoScreenFadeOut(300) while not IsScreenFadedOut() do Wait(10) end
+        RequestCollisionAtCoord(st.x + 0.0, st.y + 0.0, st.z + 0.0)
         SetEntityCoordsNoOffset(ped, st.x + 0.0, st.y + 0.0, st.z + 0.0, false, false, false) SetEntityHeading(ped, (st.w or 0.0) + 0.0)
-        RequestCollisionAtCoord(st.x + 0.0, st.y + 0.0, st.z + 0.0) Wait(400)
+        local t = GetGameTimer()
+        while not HasCollisionLoadedAroundEntity(ped) and GetGameTimer() - t < 5000 do Wait(50) end
+        -- le sol est trouvé et le personnage posé dessus (jamais dans le vide)
+        local ok, gz = GetGroundZFor_3dCoord(st.x + 0.0, st.y + 0.0, st.z + 1.0, false)
+        if ok then SetEntityCoordsNoOffset(ped, st.x + 0.0, st.y + 0.0, gz + 0.0, false, false, false) end
+        Wait(300)
     end
     FreezeEntityPosition(ped, true)
-    -- le personnage regarde la caméra : on se place devant lui
-    SetEntityHeading(ped, GetEntityHeading(ped))
-    cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
-    SetCamFov(cam, 45.0)
-    -- la caméra est placée à l'avant du personnage (cap + 180°)
     camDist = Config.Scene.CamDistance or 2.4
+    camHeight = Config.Scene.CamHeight or 0.45
     local p = GetEntityCoords(ped)
     camFwd = GetEntityForwardVector(ped)
+    cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+    SetCamFov(cam, 45.0)
     SetCamCoord(cam, p.x + camFwd.x * camDist, p.y + camFwd.y * camDist, p.z + camHeight + 0.35)
     PointCamAtCoord(cam, p.x, p.y, p.z + camHeight)
-    SetCamActive(cam, true) RenderScriptCams(true, true, 600, true, false)
-    if st then DoScreenFadeIn(500) end
+    SetCamActive(cam, true) RenderScriptCams(true, false, 0, true, false)
+    if IsScreenFadedOut() then DoScreenFadeIn(500) end
     DisplayRadar(false)
 end
+-- fin de la scène de création : retour au point de départ (sauf si le joueur est conduit ailleurs : exports.pickax_creator:EndStudio())
+local function returnFromStudio()
+    if not studioActive then return end
+    studioActive = false
+    if origin then
+        local ped = PlayerPedId()
+        DoScreenFadeOut(300) while not IsScreenFadedOut() do Wait(10) end
+        RequestCollisionAtCoord(origin.c.x, origin.c.y, origin.c.z)
+        SetEntityCoordsNoOffset(ped, origin.c.x, origin.c.y, origin.c.z, false, false, false) SetEntityHeading(ped, origin.h)
+        Wait(500) DoScreenFadeIn(500)
+        origin = nil
+    end
+end
+exports('EndStudio', function() studioActive = false origin = nil end)
+AddEventHandler('CorePickax:Creator:finished', function() SetTimeout(5000, function() CreateThread(returnFromStudio) end) end)
 local function stopScene()
     if not scene then return end
     scene = false

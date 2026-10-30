@@ -363,6 +363,7 @@ end
 AddEventHandler('CorePickax:Creator:finished', function()
 	if not awaitingDestination then return end
 	awaitingDestination = false
+	if GetResourceState('pickax_creator') == 'started' then exports['pickax_creator']:EndStudio() end   -- la scène de création est finie : on va au point choisi, pas au point de départ
 
 	local D = Config.Destinations
 	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
