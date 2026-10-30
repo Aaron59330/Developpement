@@ -8,13 +8,13 @@ const srv = http.createServer(app).listen(0, async () => {
   try {
     const a = mk(), b = mk();
     await a('POST', '/api/auth/register', { email: 'a@t.fr', username: 'Alice', password: 'ClientTest!1' }); await b('POST', '/api/auth/register', { email: 'b@t.fr', username: 'Bob', password: 'ClientTest!1' });
-    let me = await a('GET', '/api/auth/me'); ok(me.user.prefs.design === 'v2' && me.user.prefs.theme === 'sombre' && me.user.prefs.accent === null, 'préférences par défaut : nouveau design, sombre, jaune AERO');
+    let me = await a('GET', '/api/auth/me'); ok(me.user.prefs.design === 'hub' && me.user.prefs.theme === 'sombre' && me.user.prefs.accent === null, 'préférences par défaut : design Hub, sombre, jaune AERO');
     let r = await a('PUT', '/api/auth/prefs', { design: 'v1' }); ok(r.ok && r.prefs.design === 'v1' && r.prefs.theme === 'sombre', 'retour à l’ancien design enregistré sans toucher au reste');
     r = await a('PUT', '/api/auth/prefs', { accent: '#60A5FA', theme: 'clair' }); ok(r.ok && r.prefs.accent === '#60a5fa' && r.prefs.theme === 'clair' && r.prefs.design === 'v1', 'couleur (normalisée) et thème enregistrés ensemble');
     me = await a('GET', '/api/auth/me'); ok(me.user.prefs.accent === '#60a5fa', 'les préférences reviennent à la connexion suivante');
     r = await a('PUT', '/api/auth/prefs', { accent: null }); ok(r.ok && r.prefs.accent === null, 'rétablir le jaune AERO');
     for (const bad of [{ accent: 'rouge' }, { accent: '#12345' }, { accent: 'red;}</style>' }, { design: 'v3' }, { theme: 'x' }]) { r = await a('PUT', '/api/auth/prefs', bad); ok(r.ok === false, 'valeur refusée : ' + JSON.stringify(bad)); }
-    me = await b('GET', '/api/auth/me'); ok(me.user.prefs.design === 'v2' && me.user.prefs.accent === null, 'les préférences d’un client ne touchent pas celles des autres');
+    me = await b('GET', '/api/auth/me'); ok(me.user.prefs.design === 'hub' && me.user.prefs.accent === null, 'les préférences d’un client ne touchent pas celles des autres');
     const anon = mk(); r = await fetch(base + '/api/auth/prefs', { method: 'PUT', headers: { 'content-type': 'application/json', origin: base }, body: '{}' }); ok(r.status === 401 || r.status === 403, 'refusé sans connexion');
     const C = require('../lib/commands'); const th = { AccentColor: '#fdc27d', ServerName: 'AERO', ServerShortName: 'AERO', ServerTagline: 't', ServerDiscord: 'd', ServerLogo: 'logo.png', MenuBanner: '', LoadingBanner: '', MarkerType: 23, MarkerAlpha: 150, MarkerSize: 1, BlipScale: .5, BlipColor: -1, MarkerColor: '' };
     const des = d => { const x = C.validateDoc('theme', { ...th, Design: d }); return x.error ? x.error : (x.value || x.payload || x).Design; };
