@@ -163,3 +163,38 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
   poll();
   setInterval(poll, 8000);
 })();
+
+// ── Forme des interfaces choisie par le joueur (menu F5 → Préférences → Apparence → « Toutes les interfaces ») ──
+// pickax_ui répond à « getShape » : rayons des boutons, onglets, cartes, champs et du cadre (-1 = défaut du style) + remplissage des boutons principaux.
+(function () {
+  if (/pickax_ui$/.test(String(location.hostname || ''))) return;   // la fenêtre du menu F5 a ses propres réglages
+  var st = null, last = '';
+  var rule = function (sel, v, cap) { if (typeof v !== 'number' || v < 0) return ''; v = cap ? Math.min(v, cap) : v; return sel + '{border-radius:' + v + 'px!important}'; };
+  var build = function (s) {
+    var css = '';
+    css += rule('button,.btn,[role=button]', s.btn);
+    css += rule('.seg,.seg button,.seg button::before,.hx-tab,.hx-tab::before,.nav-item,.tabs button', s.tab);
+    css += rule('.card,.gx-card,.gx-tile,.gx-hero,.jm-tile,.jm-ic,.item,.stat,.cart,.tpl,.pt,.irow,.cline,.cat-row,.paybtn,.gx-stats4>div,.gx-bal>div,.tile,.vchip', s.card, 28);
+    css += rule('.shell,.panel,.gx,.jm,#confirm .box,.modal-box', s.frame, 28);
+    css += rule('input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea,.gx-search', s.field, 24);
+    if (s.fill === 'outline') css += 'button.primary,.jm-duty.on{background:transparent!important;color:var(--accent,#fff)!important;border:1.5px solid var(--accent,#fff)!important;box-shadow:none!important}';
+    if (s.fill === 'glow') css += 'button.primary,.jm-duty.on{box-shadow:0 0 22px rgba(var(--accent-rgb,255,255,255),.7),0 0 4px rgba(var(--accent-rgb,255,255,255),.9)!important}';
+    return css;
+  };
+  var apply = function (s) {
+    var css = s ? build(s) : '';
+    if (css === last) return;
+    last = css;
+    if (!css) { if (st && st.parentNode) st.parentNode.removeChild(st); return; }
+    if (!st) { st = document.createElement('style'); st.id = 'pk-shape'; }
+    st.textContent = css;
+    if (!st.parentNode) (document.head || document.documentElement).appendChild(st);
+  };
+  var poll = function () {
+    if (document.hidden) return;
+    fetch('https://pickax_ui/getShape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      .then(function (r) { return r.json(); }).then(apply).catch(function () {});
+  };
+  poll();
+  setInterval(poll, 4000);
+})();

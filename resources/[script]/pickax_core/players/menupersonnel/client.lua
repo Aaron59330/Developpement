@@ -108,6 +108,21 @@ local function HudSet(key, value)
 	if HudCall('SetSetting', key, value) then HudCfg[key] = value end
 end
 local PrefsBtnNames, PrefsCardNames = PrefsNames(Prefs.BtnRadius), PrefsNames(Prefs.CardRadius)
+-- Forme de TOUTES les interfaces du serveur (boutons, onglets, cartes, champs, cadre) : appliquée en direct par pickax_theme
+local ShapeRound = { { -1, 'Défaut du style' }, { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } }
+local ShapeBox = { { -1, 'Défaut du style' }, { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' } }
+local ShapeFill = { { 'def', 'Plein (défaut)' }, { 'outline', 'Contour seul' }, { 'glow', 'Plein lumineux' } }
+local ShapeRows = {
+	{ key = 'uiBtn', label = 'Boutons', desc = 'Bords de tous les boutons (Récupérer, Louer, Fermer, Acheter…)', list = ShapeRound },
+	{ key = 'uiTab', label = 'Onglets', desc = 'Bords des onglets et des entrées de navigation', list = ShapeRound },
+	{ key = 'uiCard', label = 'Cartes et vignettes', desc = 'Bords des cartes, lignes, vignettes et pastilles', list = ShapeBox },
+	{ key = 'uiField', label = 'Champs de saisie', desc = 'Bords des champs de texte, nombres et listes', list = ShapeBox },
+	{ key = 'uiFrame', label = 'Cadre des fenêtres', desc = 'Bords de la fenêtre principale des interfaces', list = ShapeBox },
+}
+for _, r in ipairs(ShapeRows) do r.names = PrefsNames(r.list) end
+local ShapeFillNames = PrefsNames(ShapeFill)
+local function ShapeIndex(list, v) for i = 1, #list do if list[i][1] == v then return i end end return 1 end
+local function ShapeAll(v) for _, r in ipairs(ShapeRows) do PrefsSet(r.key, v) end end
 
 local function PrefsStyleIndex(list, id)
 	for i = 1, #list do if list[i].id == id then return i end end
@@ -399,6 +414,24 @@ local function OpenMenu()
 			end)
 			RageUI.List("Bords du menu", PrefsCardNames, PrefsRadiusIndex(Prefs.CardRadius, PrefsCfg.cardRadius), "Arrondi du cadre des menus", {}, true, function() end, function(Index)
 				PrefsSet('cardRadius', Prefs.CardRadius[Index][1])
+			end)
+			RageUI.Separator("Toutes les interfaces (jobs, garages, boutiques…)")
+			for _, r in ipairs(ShapeRows) do
+				RageUI.List(r.label, r.names, ShapeIndex(r.list, PrefsCfg[r.key]), r.desc, {}, true, function() end, function(Index)
+					PrefsSet(r.key, r.list[Index][1])
+				end)
+			end
+			RageUI.List("Boutons principaux", ShapeFillNames, ShapeIndex(ShapeFill, PrefsCfg.uiFill), "Plein, contour seul ou plein lumineux", {}, true, function() end, function(Index)
+				PrefsSet('uiFill', ShapeFill[Index][1])
+			end)
+			RageUI.ButtonWithStyle("Tout en carré", "Bords carrés partout : boutons, onglets, cartes, champs et fenêtres", {}, true, function(_, _, s)
+				if s then ShapeAll(0) end
+			end)
+			RageUI.ButtonWithStyle("Tout en arrondi", "Bords très arrondis partout", {}, true, function(_, _, s)
+				if s then ShapeAll(18) end
+			end)
+			RageUI.ButtonWithStyle("Formes par défaut", "Reprend la forme du style choisi", {}, true, function(_, _, s)
+				if s then ShapeAll(-1) PrefsSet('uiFill', 'def') end
 			end)
 			RageUI.Line()
 			RageUI.ButtonWithStyle("Réinitialiser l'apparence", "Revient au style par défaut", {}, true, function(_, _, s)

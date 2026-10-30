@@ -4,12 +4,17 @@ local DEFAULTS = {
     banner = true, style = 'noir', size = 'md',
     accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '',
     btnRadius = 12, cardRadius = 18,
+    uiBtn = -1, uiTab = -1, uiCard = -1, uiField = -1, uiFrame = -1, uiFill = 'def',   -- forme de TOUTES les interfaces (-1 = défaut du style)
     sound = true, volume = 60,
 }
 local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true, pinata = true }
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }
-local RADIUS = { btnRadius = { 0, 6, 12, 18, 24, 999 }, cardRadius = { 0, 8, 14, 18, 24, 28 } }
+local SHAPE_ROUND = { -1, 0, 6, 12, 18, 24, 999 }
+local SHAPE_BOX = { -1, 0, 6, 12, 18, 24 }
+local RADIUS = { btnRadius = { 0, 6, 12, 18, 24, 999 }, cardRadius = { 0, 8, 14, 18, 24, 28 },
+    uiBtn = SHAPE_ROUND, uiTab = SHAPE_ROUND, uiCard = SHAPE_BOX, uiField = SHAPE_BOX, uiFrame = SHAPE_BOX }
+local FILLS = { def = true, outline = true, glow = true }
 
 local settings = {}
 for k, v in pairs(DEFAULTS) do settings[k] = v end
@@ -27,6 +32,7 @@ local function validate(key, value)
         if isHex(value) then return true, value:lower() end
         return false
     end
+    if key == 'uiFill' then return FILLS[value] == true, value end
     if RADIUS[key] then return inList(RADIUS[key], value), value end
     return false
 end
@@ -96,6 +102,11 @@ exports('ResetSettings', function()
     save()
     push()
     soundEvent()
+end)
+
+-- Forme des interfaces (boutons, onglets, cartes, champs, cadre) : lue par theme.js dans toutes les interfaces du serveur
+RegisterNUICallback('getShape', function(_, cb)
+    cb({ btn = settings.uiBtn, tab = settings.uiTab, card = settings.uiCard, field = settings.uiField, frame = settings.uiFrame, fill = settings.uiFill })
 end)
 
 -- Ouvre un lien (https uniquement) dans le navigateur du joueur
