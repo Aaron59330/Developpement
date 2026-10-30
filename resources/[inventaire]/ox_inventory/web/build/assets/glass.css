@@ -162,3 +162,7 @@ body.drag-outfit #outfit-drop span { color: #e4b85a; }
 
 /* netteté : échelle par zoom (et non par transformation, qui floute le texte dans le jeu) */
 #stage { left: var(--sx, 0px); top: var(--sy, 0px); transform: none; zoom: var(--scale); }
+/* la barre de recherche ne touche plus / ne mord plus sur la première ligne de cases */
+.panel.left .panel-head, .panel.right .panel-head { margin-bottom: 10px; }
+.panel.left .search { align-self: center; margin-top: -4px; }
+.panel.right .search { top: 541px; }
