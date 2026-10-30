@@ -57,7 +57,7 @@ async function boot() {
   if (state.user) await loadServers();
   render();
 }
-async function openAsAdmin(id, page) { const r = await api('GET', '/api/servers/' + id); if (!r.ok) return toast(r.error, 'bad'); state.extraId = id; if (!state.servers.find(x => x.id === id)) state.servers.push(r.server); state.sid = id; localStorage.setItem('aero_sid', id); go(page || 'overview'); }
+async function openAsAdmin(id, page) { const r = await api('GET', '/api/servers/' + id); if (!r.ok) return toast(r.error, 'bad'); state.extraId = id; if (!state.servers.find(x => x.id === id)) state.servers.push(r.server); state.sid = id; localStorage.setItem('aero_sid', id); if (location.hash === '#/' + (page || 'overview')) render(); else go(page || 'overview'); }
 async function loadServers() {
   const r = await api('GET', '/api/servers'); state.servers = r.ok ? r.servers : [];
   if (state.extraId && !state.servers.find(x => x.id === state.extraId)) { const e = await api('GET', '/api/servers/' + state.extraId); if (e.ok) state.servers.push(e.server); }
@@ -108,7 +108,16 @@ const needServer = () => {
   const box = el('div', { class: 'card empty' }, el('h2', {}, 'Ton compte est prêt'), el('p', {}, 'Il te manque encore ta licence : c’est elle qui relie ton serveur FiveM à ton panel personnel.'));
   if (state.user.role !== 'admin') box.append(el('p', { class: 'muted' }, 'L’équipe active ton serveur après ta demande. Tu recevras la réponse dans « Aide et support ».'),
     el('button', { class: 'btn p', onclick: async () => { const r = await api('POST', '/api/support/tickets', { subject: 'Activation de mon serveur', body: 'Bonjour, je viens de créer mon compte et je souhaite activer mon serveur (licence).' }); if (r.ok) { toast('Demande envoyée', 'ok'); go('support/' + r.id); } else toast(r.error, 'bad'); } }, el('span', {}, 'Demander l’activation de mon serveur')));
-  else box.append(el('p', { class: 'muted' }, 'En tant qu’admin, crée une licence pour toi dans Administration → Licences, ou ouvre le panel d’un client depuis cette page.'));
+  else {
+    // admin sans serveur sélectionné : liste des serveurs à ouvrir (chaque page serveur s'ouvre ensuite sur le serveur choisi)
+    box.replaceChildren(el('h2', {}, 'Choisis un serveur à gérer'), el('p', { class: 'muted' }, 'Cette page affiche les données d’un serveur : sélectionne celui d’un client ci-dessous (ou crée une licence dans Administration → Licences).'));
+    const list = el('div', { class: 'list' }, el('p', { class: 'muted' }, 'Chargement…')); box.append(list);
+    const page = route()[0] || 'overview';
+    api('GET', '/api/admin/licenses').then(r => {
+      const rows = (r.ok ? r.licenses : []).filter(l => l.status === 'active');
+      list.replaceChildren(...(rows.length ? rows.map(l => el('div', { class: 'qa', style: 'display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer', onclick: () => openAsAdmin(l.id, page) }, el('b', {}, l.server_name || ('Licence #' + l.id)), el('span', { class: 'muted' }, l.owner || ''), el('div', { class: 'grow' }), el('span', { class: 'pill ' + (l.online ? 'ok' : 'warn') }, l.online ? 'En ligne' : 'Hors ligne'), el('button', { class: 'btn s', onclick: e => { e.stopPropagation(); openAsAdmin(l.id, page); } }, el('span', {}, 'Ouvrir')))) : [el('p', { class: 'muted' }, 'Aucune licence active.')]));
+    });
+  }
   return box;
 };
 const statusPill = s => s.status !== 'active' ? el('span', { class: 'pill bad' }, s.status === 'suspended' ? 'Suspendue' : 'Révoquée') : s.expired ? el('span', { class: 'pill bad' }, 'Expirée') : s.online ? el('span', { class: 'pill ok' }, 'En ligne') : el('span', { class: 'pill warn' }, 'Hors ligne');
