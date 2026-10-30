@@ -149,3 +149,9 @@ html[data-design="hub"] .setrow>:first-child .grow{display:none}
 html[data-design="hub"] .setrow>:first-child .btn.s{position:absolute;right:20px;top:10px;padding:2px 9px;font-size:11px;opacity:0;transition:opacity .12s}
 html[data-design="hub"] .setrow:hover>:first-child .btn.s{opacity:1}
 html[data-design="hub"] .setrow>:last-child .muted{display:none}
+.hub-key { display: block; flex-basis: 100%; font: 400 10.5px ui-monospace, Menlo, Consolas, monospace; color: var(--mut); margin-top: 3px; letter-spacing: 0; }
+html[data-design="hub"] .setrow>:first-child{flex-wrap:wrap}
+html[data-design="hub"] .setsec{display:flex;align-items:center;gap:10px}
+html[data-design="hub"] .setsec svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;color:var(--mut)}
+html[data-design="hub"] .setrow>:first-child b{font-size:13px;font-weight:600}
+html[data-design="hub"] .top h1{font-size:23px}

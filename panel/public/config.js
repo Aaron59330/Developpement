@@ -108,7 +108,7 @@ PAGES.settings = async function () {
     else if (d.type === 'list') c = el('textarea', { rows: 3, value: (v || []).join('\n'), oninput: e => set(e.target.value.split('\n').map(x => x.trim()).filter(Boolean)) });
     else c = el('input', { value: v == null ? '' : v, oninput: e => set(e.target.value) });
     const body = d.type === 'bool' ? el('div', { class: 'row' }, c, el('span', { class: 'muted' }, 'Activé')) : hasRange ? el('div', { class: 'row' }, c._r, c) : c;
-    const w = el('div', { class: 'setrow', 'data-t': (d.label + ' ' + d.key + ' ' + (d.hint || '') + ' ' + d.group).toLowerCase() }, el('div', { class: 'row' }, el('b', {}, d.label), badge, el('div', { class: 'grow' }), reset), d.hint ? el('div', { class: 'muted', style: 'font-size:12px;margin:2px 0 6px' }, d.hint) : null, body);
+    const w = el('div', { class: 'setrow', 'data-k': d.key, 'data-t': (d.label + ' ' + d.key + ' ' + (d.hint || '') + ' ' + d.group).toLowerCase() }, el('div', { class: 'row' }, el('b', {}, d.label), badge, el('div', { class: 'grow' }), reset), d.hint ? el('div', { class: 'muted', style: 'font-size:12px;margin:2px 0 6px' }, d.hint) : null, body);
     ctl[d.key] = { c, badge, reset, w }; return w;
   };
   const paint = (d, c) => { const v = cur[d.key]; if (d.type === 'bool') c.checked = !!v; else if (d.type === 'list') c.value = (v || []).join('\n'); else { c.value = v == null ? '' : v; if (c._r) c._r.value = v; } };

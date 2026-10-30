@@ -30,12 +30,12 @@
         sec('Gestion'), link('activity', 'Logs', 'list'), link('players', 'Joueurs', 'users'), link('playersheet', 'Fiches joueurs', 'user'), link('console', 'Console', 'term'), link('reports', 'Plaintes', 'shield'), link('map', 'Carte live', 'map'), link('actions', 'Actions rapides', 'bolt'), link('access', 'Bans & whitelist', 'shield'), link('planner', 'Événements programmés', 'cal'),
         group('stats', 'Statistiques', 'chart', [link('stats', 'Joueurs & activité', 'chart'), link('economy', 'Économie', 'chart'), link('retention', 'Rétention', 'chart'), link('diag', 'Diagnostic', 'shield')]),
         sec('Configuration'),
-        group('conf', 'Configuration', 'sliders', [link('theme', 'Identité & thème', 'brush'), link('loading', 'Écran de chargement', 'film'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list'), link('modules', 'Gestion des modules', 'puzzle')]),
+        group('conf', 'Configuration', 'sliders', [link('theme', 'Général', 'brush'), link('loading', 'Écran d’accueil', 'film'), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Discord' ? ' on' : ''), href: '#/settings/' + slug('Discord') }, svg(ICON.chat), el('span', {}, 'Discord RPC')), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Monde & PNJ' ? ' on' : ''), href: '#/settings/' + slug('Monde & PNJ') }, svg(ICON.map), el('span', {}, 'Densité PNJ')), el('a', { class: 'hub-nav' + (page === 'settings' && grpNow === 'Interface' ? ' on' : ''), href: '#/settings/' + slug('Interface') }, svg(ICON.brush), el('span', {}, 'HUD & interface')), link('modules', 'Ressources', 'puzzle'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('srv', 'Gestion Serveur', 'box', settingsItems),
         group('com', 'Communication', 'chat', [link('events', 'Événements & rappels', 'chat'), link('alerts', 'Alertes Discord', 'chat'), link('recruit', 'Candidatures', 'chat')]),
         group('bk', 'Backups', 'db', [link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),
         sec('Développement'), link('editor', 'Éditeur de base', 'edit'), link('files', 'Fichiers', 'file'), link('webhooks', 'Webhooks', 'hook'),
-        sec('Paramètres'), link('custom', 'Personnalisation', 'brush'), link('account', 'Compte', 'user'), link('support', 'Aide et support', 'help'), link('patchnotes', 'Patch notes', 'book'), link('suggestions', 'Suggestions', 'bulb'), isAdmin ? null : link('offers', 'Offres & renouvellement', 'tag'),
+        sec('Paramètres'), link('account', 'Compte', 'user'), link('custom', 'Personnalisation', 'brush'), link('support', 'Team & support', 'users'), link('patchnotes', 'Guide', 'book'), link('suggestions', 'Suggestions', 'bulb'), isAdmin ? null : link('offers', 'Abonnements', 'tag'),
         isAdmin ? [sec('Administration'), link('a-overview', 'Vue d’ensemble', 'chart'), link('a-users', 'Clients', 'user'), link('a-licenses', 'Licences', 'key'), link('a-plans', 'Offres', 'tag'), link('a-orders', 'Commandes', 'cart'), link('a-modules', 'Modules', 'puzzle'), link('a-audit', 'Journal', 'list')] : null];
     const brand = el('div', { class: 'hub-brand' }, el('img', { src: 'img/logo.png', alt: '' }),
       state.servers.length > 1 ? el('select', { onchange: e => setSid(+e.target.value) }, state.servers.map(s => el('option', { value: s.id, selected: s.id === (srv && srv.id) }, s.server_name))) : el('div', {}, el('b', {}, (srv && srv.server_name) || 'AERO'), el('small', {}, 'AERO PANEL')));
@@ -63,6 +63,8 @@
     const g = curGroup(); if (g) store.set('aero_setcat', g);
     const node = await baseSettings();
     try {
+      node.querySelectorAll('.setrow').forEach(r => { const k = r.getAttribute('data-k'), lab = r.firstElementChild; if (k && lab && !lab.querySelector('.hub-key')) { const c = el('code', { class: 'hub-key' }, k); lab.append(c); } });
+      node.querySelectorAll('.setsec').forEach(h => { if (!h.querySelector('svg')) h.prepend(svg('M4 6h16M4 12h16M4 18h10')); });
       const h1 = node.querySelector && node.querySelector('.top h1');
       if (h1 && g) { h1.textContent = 'Gestion Serveur — ' + (GROUP_LABEL[g] || g); const sub = el('p', { class: 'hub-sub-title' }, 'Les changements sont appliqués en jeu en direct, sans redémarrage.'); h1.closest('.top').after(sub); }
       const save = node.querySelector('.setbar .btn.p span'); if (save) save.textContent = 'Enregistrer les modifications';
