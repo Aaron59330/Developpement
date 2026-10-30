@@ -1,0 +1,12 @@
+/* Design « Doré » des notifications : carte sombre arrondie, texte seul, barre de temps dorée en bas. Retirer le <link> de karat.css dans index.html pour revenir à l'ancien rendu. */
+.notification {
+    --notify-width: 330px; --radius: 12px;
+    clip-path: none; border: 1px solid rgba(255,255,255,.07); border-left: 1px solid rgba(255,255,255,.07); border-radius: 12px;
+    background: rgba(14,14,15,.82); padding: 14px 16px 18px; min-height: 0;
+    font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
+}
+.notification::after { height: 5px; width: 100%; border-radius: 0 3px 3px 0; opacity: 1; background: linear-gradient(90deg, #c8962e, #f3d58a); }
+.notification .notify-header { display: none; }
+.notification .notify-message { font-size: 13px; font-weight: 500; line-height: 1.5; color: #f4f4f6; }
+.notification .notify-message .key { border-radius: 5px; color: #f3d58a; border-color: rgba(243,213,138,.5); background: rgba(0,0,0,.5); font-weight: 700; }
+.notification.repeated .notify-repeat { top: 8px; right: 10px; border-radius: 999px; background: #d9ac4c; color: #14120a; border: 0; }

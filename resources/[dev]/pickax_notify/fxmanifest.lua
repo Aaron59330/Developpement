@@ -12,6 +12,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/arcade.css',
+    'html/karat.css',
     'html/app.js'
 }
 
