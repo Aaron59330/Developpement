@@ -146,6 +146,18 @@ InRegisterMenu = false
 local sexLocked = false      -- vrai pendant la création : le sexe choisi sur la carte d'identité ne peut plus être changé
 local skinFinished = false   -- vrai dès que le personnage est validé : tous les menus de création (imbriqués) se terminent d'un coup
 function SkinChanger()
+    -- Nouvel écran « Apparence » (pickax_creator) : visage, yeux, traits, coiffure ; la tenue se choisit ensuite comme avant
+    if GetResourceState('pickax_creator') == 'started' and not Config.DisableCreatorUI then
+        InRegisterMenu = true
+        skinFinished = false
+        local done = false
+        exports['pickax_creator']:OpenSkin({ hideClothes = true }, function() done = true end)
+        while not done do Citizen.Wait(100) end
+        InRegisterMenu = false
+        skinFinished = true
+        Citizen.CreateThread(CreationOutfitFlow)
+        return
+    end
     local face = RageUI.CreateMenu("Menu création", "Faite votre personnage")
     RageUI.Visible(face, not RageUI.Visible(face))
 	FreezeEntityPosition(GetPlayerPed(-1), true)

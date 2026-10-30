@@ -1161,7 +1161,64 @@ end
 lang = ConfigMenuEmote.MenuLanguage
 OpenMenu = false
 
+-- ─────────────── Nouvel écran « Gestionnaire d'animations » (pickax_creator) ───────────────
+local emoteScreenItems = nil
+local emoteFavs = {}
+local function buildEmoteScreenItems()
+    if emoteScreenItems then return emoteScreenItems end
+    local list = {}
+    local function add(tbl, ty, prefix, labelFrom)
+        for name, e in pairs(tbl or {}) do
+            local label = labelFrom == 3 and (e[3] or name) or labelFrom == 2 and (e[2] or name) or name
+            list[#list + 1] = { id = prefix .. ':' .. name, label = tostring(label), cmd = tostring(name):lower(), type = ty }
+        end
+    end
+    add(ESXCustomEmote.Emotes, 'emotes', 'emote', 3)
+    add(ESXCustomEmote.Dances, 'emotes', 'dance', 3)
+    add(ESXCustomEmote.PropEmotes, 'props', 'prop', 3)
+    add(ESXCustomEmote.Shared, 'shared', 'shared', 3)
+    add(ESXCustomEmote.Expressions, 'expr', 'expr', 2)
+    add(ESXCustomEmote.Walks, 'walks', 'walk', 0)
+    emoteScreenItems = list
+    return list
+end
+local function loadEmoteFavs()
+    local raw = GetResourceKvpString('pickax_emote_favs')
+    if raw and raw ~= '' then local ok, t = pcall(json.decode, raw) if ok and type(t) == 'table' then emoteFavs = t end end
+end
+AddEventHandler('pickax_creator:emotePlay', function(id)
+    local ty, name = tostring(id or ''):match('^(%a+):(.+)$')
+    if not ty then return end
+    if ty == 'emote' then EmoteMenuStart(name, 'emotes')
+    elseif ty == 'dance' then EmoteMenuStart(name, 'dances')
+    elseif ty == 'prop' then EmoteMenuStart(name, 'props')
+    elseif ty == 'expr' then EmoteMenuStart(name, 'expression')
+    elseif ty == 'walk' then if ESXCustomEmote.Walks[name] then WalkMenuStart(ESXCustomEmote.Walks[name][1]) end
+    elseif ty == 'shared' then
+        local target, distance = GetClosestPlayer()
+        if target and distance ~= -1 and distance < 3 then
+            TriggerServerEvent('ServerEmoteRequest', GetPlayerServerId(target), name)
+            ESX.ShowNotification(ConfigMenuEmoteLanguages[lang]['sentrequestto'] .. GetPlayerName(target))
+        else ESX.ShowNotification(ConfigMenuEmoteLanguages[lang]['nobodyclose']) end
+    end
+end)
+AddEventHandler('pickax_creator:emoteFav', function(d)
+    if type(d) ~= 'table' or type(d.favs) ~= 'table' then return end
+    emoteFavs = d.favs
+    SetResourceKvp('pickax_emote_favs', json.encode(emoteFavs))
+    -- touche « favori » : la dernière animation ajoutée (emote simple) devient l'emote préférée
+    if d.on and tostring(d.id):match('^emote:') then FavoriteEmote = tostring(d.id):match('^emote:(.+)$') end
+end)
+AddEventHandler('pickax_creator:closed', function(v) if v == 'emotes' then OpenMenu = false end end)
+
 function OpenEmoteMenu()
+    if GetResourceState('pickax_creator') == 'started' then
+        if OpenMenu then OpenMenu = false exports['pickax_creator']:Close() return end
+        OpenMenu = true
+        loadEmoteFavs()
+        exports['pickax_creator']:OpenEmotes(buildEmoteScreenItems(), emoteFavs, FavoriteEmote ~= '' and ('emote:' .. FavoriteEmote) or nil)
+        return
+    end
     ClothesGestion = 1
     if OpenMenu then
         RageUI.CloseAll()

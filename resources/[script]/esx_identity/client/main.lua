@@ -93,6 +93,12 @@ RegisterNUICallback('requestHead', function(data, cb)
 end)
 
 function EnableGui(state)
+	-- Nouvel écran « Enregistrement du Personnage » (pickax_creator) si la ressource est démarrée ; sinon l'ancien formulaire
+	if GetResourceState('pickax_creator') == 'started' then
+		guiEnabled = state
+		if state then exports['pickax_creator']:OpenIdentity() else exports['pickax_creator']:Close() end
+		return
+	end
 	SetNuiFocus(state, state)
 	guiEnabled = state
 
@@ -192,7 +198,8 @@ RegisterNUICallback('escape', function(data, cb)
 	end
 end)
 
-RegisterNUICallback('register', function(myIdentity, cb)
+-- Validation + création : renvoie le motif du refus (texte) ou nil si l'identité est acceptée
+function SubmitIdentity(myIdentity)
 	local reason
 
 	for k, v in pairs(myIdentity) do
@@ -248,6 +255,23 @@ RegisterNUICallback('register', function(myIdentity, cb)
 	else
 		ESX.ShowNotification(reason)
 	end
+	return reason
+end
+exports('SubmitIdentity', SubmitIdentity)
+RegisterNUICallback('register', function(myIdentity, cb) SubmitIdentity(myIdentity) end)
+exports('CancelIdentity', function()
+	if hasIdentity then EnableGui(false) else ESX.ShowNotification('~r~Action Impossible~s~ : Vous devez créer votre premier personnage pour pouvoir jouer !') end
+end)
+exports('SetSex', function(sex)
+	local wantFemale = sex == 'f' or sex == 'F'
+	local isFemale = GetEntityModel(PlayerPedId()) == `mp_f_freemode_01`
+	if wantFemale == isFemale then return end
+	Citizen.CreateThread(function()
+		local applied = false
+		TriggerEvent('skinchanger:loadSkin', { sex = wantFemale and 1 or 0 }, function() applied = true end)
+		local untilT = GetGameTimer() + 5000
+		while not applied and GetGameTimer() < untilT do Citizen.Wait(50) end
+	end)
 end)
 
 Citizen.CreateThread(function()
@@ -344,7 +368,10 @@ AddEventHandler('CorePickax:Creator:finished', function()
 
 	Citizen.Wait(600)
 	local index = 1
-	if GetResourceState('pickax_ui') == 'started' and #D.Spots > 1 then
+	local creator = GetResourceState('pickax_creator') == 'started'
+	if creator and #D.Spots > 1 then
+		index = exports['pickax_creator']:ChooseSpawn(D.Spots) or 1
+	elseif GetResourceState('pickax_ui') == 'started' and #D.Spots > 1 then
 		local options = {}
 		for i, spot in ipairs(D.Spots) do
 			options[i] = { label = spot.label, description = spot.description, icon = spot.icon }
@@ -355,4 +382,5 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	local spot = D.Spots[index] or D.Spots[1]
 	teleportTo(spot)
 	ESX.ShowNotification(('Bienvenue ! Tu arrives à ~b~%s~s~.'):format(spot.label))
+	if creator then Citizen.Wait(600) exports['pickax_creator']:ShowWelcome() end
 end)
