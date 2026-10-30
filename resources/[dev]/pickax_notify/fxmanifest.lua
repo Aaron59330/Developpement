@@ -13,6 +13,7 @@ files {
     'html/style.css',
     'html/arcade.css',
     'html/karat.css',
+    'html/fonts/*.woff2',
     'html/app.js'
 }
 
