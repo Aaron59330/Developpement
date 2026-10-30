@@ -136,7 +136,7 @@ PAGES.creator = async function () {
     toast('Parcours d’arrivée enregistré : pris en compte en jeu dans quelques secondes (sans redémarrage)', 'ok');
   };
   return el('div', {}, head('Parcours d’arrivée', el('button', { class: 'btn p', onclick: save }, el('span', {}, 'Enregistrer'))),
-    el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Création d’identité, apparence, point d’apparition, bienvenue et animations : textes, images, lieux, musique. La couleur principale se règle dans ', el('a', { href: '#/theme' }, 'Général'), ' et s’applique partout. Aucun redémarrage nécessaire.'),
+    el('p', { class: 'muted', style: 'margin-bottom:12px' }, 'Création d’identité, apparence, point d’apparition, bienvenue et animations : textes, images, lieux, musique. La couleur principale se règle dans ', el('a', { href: '#/theme' }, 'Couleurs & logos'), ' et s’applique partout. Aucun redémarrage nécessaire.'),
     el('div', { class: 'grid g2', style: 'align-items:start' },
       el('div', {},
         sec('Images de fond', 'Une image par écran (lien https:// ou fichier de ton Drive). Vide = on voit le jeu derrière.', bgBox, el('label', {}, 'Assombrissement ', dimT), dim),
@@ -162,7 +162,7 @@ function loadingAppearance(v) {
   for (const [k, l] of Object.entries(H)) { hide[k] = el('input', { type: 'checkbox', checked: !!(v.hide && v.hide[k]), style: 'width:auto' }); hideBox.append(el('label', { style: 'display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin:6px 0' }, hide[k], 'Masquer : ' + l)); }
   const tx = arriveeTexts({ 'Libellés': LOADING_TEXTS }, v.texts || {});
   return {
-    node: el('div', { class: 'card' }, el('h2', {}, 'Apparence'), el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, 'Fond, logo, libellés et éléments affichés. La couleur principale vient de « Général ».'),
+    node: el('div', { class: 'card' }, el('h2', {}, 'Apparence'), el('p', { class: 'muted', style: 'margin:-6px 0 10px' }, 'Fond, logo, libellés et éléments affichés. La couleur principale vient de « Couleurs & logos ».'),
       el('label', {}, 'Image de fond'), bgF.node, el('label', {}, 'Assombrissement ', dimT), dim, el('label', {}, 'Flou ', blurT), blur, el('label', {}, 'Logo'), logoF.node, hideBox, tx.node),
     get: () => ({ bg: { image: bgImg.value.trim(), dim: +dim.value, blur: +blur.value }, logo: logo.value.trim(), texts: tx.get(), hide: Object.fromEntries(Object.entries(hide).map(([k, i]) => [k, i.checked])) }),
   };
