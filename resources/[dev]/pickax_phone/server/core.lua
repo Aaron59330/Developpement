@@ -291,7 +291,7 @@ local DEFAULT_SETTINGS = {
     ringtone = 'Marimba', texttone = 'Cristal', volume = 70, dnd = false, airplane = false, wifi = true, bluetooth = false,
     pinEnabled = false, pin = '', brightness = 100, textSize = 100, phoneScale = 100, previews = true, hour24 = true, hideNumber = false,
     vibrate = true, autoLock = 30, notifOff = {}, badgeOff = {}, readReceipts = true, focusMode = 'none', bold = false,
-    reduceMotion = false, lang = 'fr',
+    reduceMotion = false, lang = 'fr', fold = false,
 }
 for k, v in pairs(Config.Defaults or {}) do if DEFAULT_SETTINGS[k] ~= nil and type(v) == type(DEFAULT_SETTINGS[k]) then DEFAULT_SETTINGS[k] = v end end
 

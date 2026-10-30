@@ -24,9 +24,28 @@ const OS = {
     sc.appendChild(h('div.nc#nc'));
     sc.appendChild(h('div.cc#cc'));
     sc.appendChild(h('div.lock#lock'));
+    sc.appendChild(h('div.pane2#pane2'));
+    const fb = $('#btn-fold'); if (fb) { fb.onclick = (e) => { e.stopPropagation(); OS.setFold(!OS.folded()); }; fb.classList.toggle('hidden', !!(S.config.ui && S.config.ui.fold === false)); }
     this.bindGestures();
     this.drawWallpaper(); this.drawHome(); this.drawLock(); this.drawStatus(); this.applyTheme();
     $('#home').classList.add('under');
+    this.setFold(!!S.settings.fold, true);
+  },
+
+  /* ───── mode dépliable : accueil à gauche, application à droite ───── */
+  folded() { return $('#stage').classList.contains('fold'); },
+  setFold(on, quiet) {
+    on = !!on && !(S.config.ui && S.config.ui.fold === false);
+    $('#stage').classList.toggle('fold', on);
+    if (!quiet) { S.settings.fold = on; rpc('settingsSet', { fold: on }); Sound.click(); }
+    this.drawPane2();
+  },
+  // volet de droite quand aucune application n'est ouverte : raccourcis vers les applications récentes
+  drawPane2() {
+    const el = $('#pane2'); if (!el) return; clear(el);
+    const ids = [...this.order, 'phone', 'messages', 'camera', 'maps', 'contacts', 'settings'].filter((id, i, a) => a.indexOf(id) === i && Apps.get(id)).slice(0, 6);
+    el.appendChild(h('div.p2t', h('span', { html: icon('grid', 26) }), h('b', 'Deuxième écran'), h('small', 'Ouvre une application depuis l\'accueil : elle s\'affiche ici, à côté.')));
+    el.appendChild(h('div.p2g', ids.map(id => { const d = Apps.get(id); return h('button', { onclick: () => OS.openApp(id) }, h('span.p2i', { style: `background:linear-gradient(160deg, ${d.grad[0]}, ${d.grad[1]})`, html: icon(d.icon, 24) }), h('em', d.name)); })));
   },
 
   // Couleur du téléphone : celle du serveur (pickax_core/config.lua → AccentColor) tant que le joueur n'en a pas choisi une autre
@@ -261,7 +280,7 @@ const OS = {
     const sc = Screen();
     if (from && from.getBoundingClientRect) {
       const b = from.getBoundingClientRect(), s = sc.getBoundingClientRect(), k = (parseFloat(getComputedStyle($('#stage')).getPropertyValue('--scale')) || 1);
-      sc.style.setProperty('--ox', ((b.left + b.width / 2 - s.left) / k) + 'px'); sc.style.setProperty('--oy', ((b.top + b.height / 2 - s.top) / k) + 'px');
+      sc.style.setProperty('--ox', ((b.left + b.width / 2 - s.left) / k - (this.folded() ? 390 : 0)) + 'px'); sc.style.setProperty('--oy', ((b.top + b.height / 2 - s.top) / k) + 'px');
     } else { sc.style.setProperty('--ox', '50%'); sc.style.setProperty('--oy', '50%'); }
     if (!r) {
       const el = h('div.appview' + (d.dark ? '.dark' : ''));
@@ -286,7 +305,7 @@ const OS = {
       setTimeout(() => { if (r.el.classList.contains('closing')) { r.el.remove(); r.ctx.top && r.ctx.top.opts.onHide && r.ctx.top.opts.onHide(r.ctx.top); } }, 300);
       this.current = null;
     }
-    $('#home').classList.remove('under'); this.editing = false; this.drawHome(); this.updateBars();
+    $('#home').classList.remove('under'); this.editing = false; this.drawHome(); this.updateBars(); this.drawPane2();
   },
   quit(id) {
     const r = this.running[id]; if (!r) return;
