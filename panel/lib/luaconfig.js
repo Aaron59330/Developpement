@@ -111,7 +111,11 @@ function rawFor(ent, value) {
 // edits : [{ start, end, old, value }] — chaque modification est vérifiée contre le texte actuel (refusée si le fichier a changé entre-temps)
 function apply(src, edits) {
   const ents = parse(src); const by = new Map(ents.map(e => [e.start + ':' + e.end, e])); const list = [];
-  for (const ed of edits) { const e = by.get(ed.start + ':' + ed.end); if (!e || e.raw !== ed.old) throw new Error('Le fichier a changé depuis son ouverture : recharge la page'); list.push({ e, raw: rawFor(e, ed.value) }); }
+  for (const ed of edits) {
+    const e = by.get(ed.start + ':' + ed.end); if (!e || e.raw !== ed.old) throw new Error('Le fichier a changé depuis son ouverture : recharge la page');
+    const raw = rawFor(e, ed.value); if (e.kind === 'number' ? Number(ed.value) === e.value : ed.value === e.value) continue;   // valeur inchangée : on garde l'écriture d'origine (1.0, 0x10…)
+    list.push({ e, raw });
+  }
   list.sort((a, b) => b.e.start - a.e.start); let out = src; for (const x of list) out = out.slice(0, x.e.start) + x.raw + out.slice(x.e.end);
   if (parse(out).length !== ents.length) throw new Error('Modification refusée : la structure du fichier serait altérée');
   return out;
