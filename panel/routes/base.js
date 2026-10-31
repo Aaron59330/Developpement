@@ -29,6 +29,28 @@ router.post('/:id/shops/:sid/duplicate', async (req, res) => { const l = guard(r
 router.post('/:id/shops/:sid/toggle', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); if (!n) return res.json({ ok: false, error: 'Boutique invalide' }); const r = await shopCall(l, req, 'toggle', [n, (req.body || {}).state === true]); if (r.ok) shopLog(req, l, 'toggle', `#${n} ${(req.body || {}).state ? 'activée' : 'désactivée'}`); res.json(r); });
 router.post('/:id/shops/:sid/restock', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); const b = req.body || {}; if (!n || !['full', 'all'].includes(b.mode)) return res.json({ ok: false, error: 'Requête invalide' }); const r = await shopCall(l, req, 'restock', [n, b.mode, Math.floor(Number(b.amount) || 0)]); if (r.ok) shopLog(req, l, 'restock', `#${n} ${b.mode}`); res.json(r); });
 
+// ── réglages avancés : toutes les valeurs simples (prix, durées, activations, textes) des fichiers config*.lua ──
+const LC = require('../lib/luaconfig'); const { enqueue } = require('../lib/enqueue');
+const CFG_RE = /^[A-Za-z0-9_\-\.\[\] \/]{1,200}config[A-Za-z0-9_\-\.]*\.lua$/i;
+const cfgPath = x => { const p = C.cleanPath(String(x || '')); return p && CFG_RE.test(p) ? p : null; };
+router.get('/:id/cfg/read', async (req, res) => {
+  const l = guard(req, res); if (!l) return; const path = cfgPath(req.query.path); if (!path) return res.json({ ok: false, error: 'Fichier de configuration invalide' });
+  const r = await bus.rpc(l.id, 'fs.read', { path }, req.user.id, 20000); if (!r.ok) return res.json(r);
+  const content = String((r.data && r.data.content) || ''); if (!files.lastOf(l.id, path)) files.addVersion(l.id, path, content, 'Version d’origine', null);
+  let entries; try { entries = LC.parse(content); } catch (e) { return res.json({ ok: false, error: 'Fichier illisible : ' + e.message }); }
+  res.json({ ok: true, path, size: Buffer.byteLength(content), entries: entries.slice(0, 25000).map(e => ({ p: e.path, k: e.kind, v: e.value, r: e.raw, s: e.start, e: e.end, c: e.comment || undefined, l: e.rowLabel ? e.rowLabel.text : undefined })), truncated: entries.length > 25000 });
+});
+router.post('/:id/cfg/save', async (req, res) => {
+  const l = guard(req, res); if (!l) return; const b = req.body || {}; const path = cfgPath(b.path); if (!path) return res.json({ ok: false, error: 'Fichier de configuration invalide' });
+  const edits = Array.isArray(b.edits) ? b.edits.slice(0, 2000).map(x => ({ start: +x.s, end: +x.e, old: String(x.r), value: x.v })) : []; if (!edits.length) return res.json({ ok: false, error: 'Aucune modification' });
+  const r = await bus.rpc(l.id, 'fs.read', { path }, req.user.id, 20000); if (!r.ok) return res.json(r);
+  let out; try { out = LC.apply(String((r.data && r.data.content) || ''), edits); } catch (e) { return res.json({ ok: false, error: e.message }); }
+  const w = await files.saveFile(req, l, path, out, `Réglages avancés : ${edits.length} modification(s)`, false); if (!w.ok) return res.json(w);
+  let restarted = false; const resName = (path.match(/^\[[^\]]+\]\/([^\/]+)\//) || path.match(/^([^\/]+)\//) || [])[1];
+  if (b.restart === true && resName) { const q = enqueue(l.id, 'restart_resource', { resource: resName }, req.user.id); restarted = !!q.ok; }
+  res.json({ ok: true, count: edits.length, restarted, resource: resName });
+});
+
 // ── objets : lecture / modification ciblée des lignes simples du fichier (le reste du fichier n'est jamais touché) ──
 const LINE = /^(\s*)\[(['"])([^'"]+)\2\]\s*=\s*\{(.*)\},?\s*(--.*)?$/;
 const strField = k => new RegExp(`(\\b${k}\\s*=\\s*)(?:'((?:[^'\\\\]|\\\\.)*)'|"((?:[^"\\\\]|\\\\.)*)")`);

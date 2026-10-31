@@ -186,6 +186,17 @@ const DOCS = [
     ['p', 'Toutes les boutiques créées avec /shopbuilder (supérettes, armureries, vêtements, pharmacies, marché noir…). Pour chacune : produits (objet, nom, prix, catégorie, stock, promo, actif), emplacements (coordonnées), horaires, moyens de paiement, réapprovisionnement automatique, vendeur (PNJ, animation, dialogue), icône sur la carte, remplissage des stocks, duplication et suppression.'],
     ['note', 'Il faut que le serveur soit en ligne et que pickax_shopbuilder soit démarré. Les modifications utilisent exactement les mêmes contrôles que le builder en jeu.'],
   ] },
+  { id: 'config-avance', title: '10 ter. Tous les réglages des scripts', blocks: [
+    ['p', 'Gestion Base → « Tous les réglages des scripts » ouvre le fichier de configuration de n\'importe quel script (plus de 80 fichiers) et affiche chacune de ses valeurs simples : prix et montants, durées et délais, activations (vrai / faux) et textes. Tu modifies la valeur, tu enregistres : seule cette valeur change dans le fichier.'],
+    ['ul', [
+      'Filtres : Prix et montants, Durées et délais, Activations, Textes ; recherche par mot (nom du produit, mot du commentaire).',
+      'Chaque ligne affiche le commentaire du fichier pour expliquer à quoi elle sert, et un bouton ↺ pour remettre la valeur d\'origine.',
+      'Les commentaires, la mise en forme et le reste du fichier ne sont jamais touchés ; chaque enregistrement crée une version restaurable (page Fichiers) et le fichier est refusé s\'il ne compile plus.',
+      'Pour que le changement s\'applique, la ressource doit redémarrer : la case « Redémarrer … après » le fait pour toi (pour pickax_core, elle coupe les menus quelques secondes).',
+    ]],
+    ['note', 'Les listes de produits complexes ont aussi une page dédiée : Boutique à coins, Boutiques en jeu, Éditeur de base (métiers, salaires, objets) et les réglages par catégorie. Les tableaux en base de données (métiers, boutiques) ne passent pas par les fichiers de config.'],
+    ['note', 'Après avoir ajouté ou modifié un script, mets la liste à jour avec : node tools/cfg/build-catalog.js (dans le dossier panel).'],
+  ] },
   { id: 'config-ressources', title: '10. Ressources & base', blocks: [
     ['ul', [
       'Ressources (modules) : liste de toutes les ressources du serveur, démarrer / arrêter / redémarrer.',
