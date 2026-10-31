@@ -473,6 +473,13 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
         for _, w in ipairs(whitelist) do if ids[w] then ok = true break end end
         if not ok then PanelLog('info', 'whitelist', ('Connexion refusée (hors whitelist) : %s'):format(name)) deferrals.done('Tu n’es pas sur la whitelist du serveur.') return end
     end
+    -- nombre de places du panel : sv_maxclients n'est lu qu'au démarrage, donc une valeur plus petite est appliquée tout de suite ici
+    local cap = math.floor(tonumber((serverCfg or {}).maxClients) or 0)
+    if cap >= 1 and cap < GetConvarInt('sv_maxclients', 48) and #GetPlayers() >= cap then
+        PanelLog('info', 'places', ('Connexion refusée (serveur plein %d/%d) : %s'):format(#GetPlayers(), cap, name))
+        deferrals.done(('Le serveur est plein (%d/%d).'):format(#GetPlayers(), cap))
+        return
+    end
     deferrals.done()
 end)
 
