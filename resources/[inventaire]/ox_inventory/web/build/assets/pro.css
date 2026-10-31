@@ -128,3 +128,8 @@
 #app #panel-left label.search, #app #panel-right label.search { height: 30px !important; margin-top: -2px !important; }
 #app #panel-left label.search input, #app #panel-right label.search input { height: 30px !important; line-height: 30px !important; font-size: 12px !important; }
 #app #panel-left label.search svg, #app #panel-right label.search svg { top: 15px !important; width: 14px !important; height: 14px !important; }
+
+/* retirer la tenue : glisser le personnage vers une case */
+#app #outfit-drop span::after { content: ''; }
+body.drag-outfit-off .panel.left .slot:not(.has), body.drag-outfit-off .panel.left .slot:not(.has):hover { border-color: rgba(var(--pk-accent-rgb, 253, 194, 125), .45) !important; border-style: dashed !important; }
+#app #outfit-drop.worn:hover span { color: #9a9eac !important; }
