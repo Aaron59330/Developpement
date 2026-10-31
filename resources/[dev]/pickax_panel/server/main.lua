@@ -418,17 +418,17 @@ local function setMaxClients(n)
     local file, f
     local lastErr
     for _, c in ipairs(cands) do local ff, er = io.open(c, 'rb') if ff then f, file = ff, c break end tried[#tried + 1] = c .. ' (' .. tostring(er) .. ')' end
-    if not f and io.popen then   -- (certains hébergeurs désactivent io.popen)
-        local ok, h = pcall(io.popen, ('find "%s" -maxdepth 4 -name server.cfg -not -path "*/resources/*" 2>/dev/null | head -5'):format(base))
-        if ok and h then
-            local out = h:read('*a') or '' h:close()
-            local found = {}
-            for line in out:gmatch('[^\r\n]+') do found[#found + 1] = line end
-            if #found == 1 then file = found[1] f = io.open(file, 'rb')
-            elseif #found > 1 then return nil, 'plusieurs server.cfg trouvés (' .. table.concat(found, ', ') .. ') : indique le bon avec  set aero_server_cfg "chemin"  dans server.cfg' end
+    local diag = ''
+    if not f and io.popen then   -- certains hébergeurs désactivent io.popen
+        local function sh(cmd) local ok, h = pcall(io.popen, cmd .. ' 2>&1') if not ok or not h then return '' end local o = h:read('*a') or '' h:close() return o end
+        local found = {}
+        for line in sh('find / -maxdepth 6 -name server.cfg -not -path "/proc/*" -not -path "*/resources/*" 2>/dev/null | head -8'):gmatch('[^\r\n]+') do
+            if line:sub(1, 1) == '/' and not line:find('find:', 1, true) then found[#found + 1] = line end
         end
+        if #found == 1 then file = found[1] f = io.open(file, 'rb')
+        else diag = ' | pwd=' .. sh('pwd'):gsub('%s+$', '') .. ' | ls ' .. base .. ' = ' .. sh('ls ' .. base .. ' | head -25'):gsub('%s+', ' ') .. ' | server.cfg trouvés = ' .. (#found > 0 and table.concat(found, ', ') or 'aucun') end
     end
-    if not f then return nil, 'server.cfg illisible (io=' .. type(io) .. ', popen=' .. type(io and io.popen) .. ', dossier=' .. tostring(base) .. ', essayé : ' .. table.concat(tried, ', ') .. ') : indique-le avec  set aero_server_cfg "/chemin/server.cfg"' end
+    if not f then return nil, 'server.cfg illisible (' .. table.concat(tried, ', ') .. ')' .. diag .. ' : indique-le avec  set aero_server_cfg "/chemin/réel/server.cfg"' end
     local raw = f:read('*a') f:close()
     local eol = raw:find('\r\n', 1, true) and '\r\n' or '\n'
     local lines, idx, previous = {}, nil, nil
