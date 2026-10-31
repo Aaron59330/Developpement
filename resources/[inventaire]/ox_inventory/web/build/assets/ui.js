@@ -1093,6 +1093,7 @@
     hideCtx();
     switch (a.action) {
       case 'use': useItem({ slot: item.slot }); break;
+      case 'openBag': nui('openBag', item.slot); break;
       case 'give': giveItem({ slot: item.slot }); break;
       case 'drop': if (hasItem(item)) moveItem({ inventory: 'player', item: { slot: item.slot } }); break;
       case 'remove': nui('removeComponent', { component: a.component, slot: a.slot }); break;
@@ -1129,7 +1130,9 @@
       b.addEventListener('mouseleave', () => b.classList.remove('open'));
       return b;
     };
-    list.appendChild(btn(item.metadata && item.metadata.container ? L('ui_open_bag', 'Ouvrir le sac') : L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' })));
+    const isBag = (item.metadata && item.metadata.container) || data.bag;
+    if (isBag) list.appendChild(btn(L('ui_open_bag', 'Ouvrir le sac'), () => ctxAction(item, { action: 'openBag' })));
+    if (!isBag || !/^sac_/.test(item.name)) list.appendChild(btn(isBag ? L('ui_wear', 'Porter') : L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' })));
     list.appendChild(btn(L('ui_give', 'Donner'), () => ctxAction(item, { action: 'give' })));
     list.appendChild(btn(L('ui_drop', 'Jeter'), () => ctxAction(item, { action: 'drop' })));
     if (state.options.throwing) list.appendChild(btn(L('ui_throw', 'Lancer'), () => ctxAction(item, { action: 'throw' })));

@@ -220,6 +220,14 @@ local function openInventory(source, invType, data, ignoreSecurityChecks)
 			left.containerSlot = data --[[@as number]]
 			data = left.items[data]
 
+			if data and not data.metadata.container and Items.containers[data.name] then   -- sac acheté avant l'installation des sacs : on lui crée son rangement
+				local md = data.metadata
+				md.container = string.char(math.random(65, 90), math.random(65, 90), math.random(65, 90))..os.time()
+				md.size = Items.containers[data.name].size
+				Inventory.SetMetadata(left, data.slot, md)
+				data = left.items[data.slot]
+			end
+
 			if data then
 				right = Inventory(data.metadata.container)
 

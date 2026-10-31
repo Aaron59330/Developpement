@@ -561,7 +561,7 @@ local function useSlot(slot, noAnim)
 
 		data.slot = slot
 
-		if item.metadata.container then
+		if item.metadata.container and not (data.server and data.server.export) then
 			return client.openInventory('container', item.slot)
 		elseif data.client then
 			if invOpen and data.close then 
@@ -1861,6 +1861,11 @@ end
 
 RegisterNUICallback('useItem', function(slot, cb)
 	useSlot(slot --[[@as number]])
+	cb(1)
+end)
+
+RegisterNUICallback('openBag', function(slot, cb)
+	client.openInventory('container', slot)
 	cb(1)
 end)
 

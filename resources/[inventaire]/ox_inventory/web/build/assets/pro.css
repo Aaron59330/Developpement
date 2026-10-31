@@ -85,3 +85,11 @@
 #app .search input { padding-left: 34px !important; }
 #app .panel .search, #app .panel.left .search, #app .panel.right .search { border: 0 !important; background: none !important; box-shadow: none !important; outline: 0 !important; }
 #app .panel .search::before, #app .panel .search::after { display: none !important; }
+
+/* alignements : « Tenue » sur la même ligne que Inventaire / Autour ; badges de quantité et de prix cohérents */
+#app .panel.center .panel-head { margin-top: -13px !important; }
+#app .panel.center .cloth-area { margin-top: 24px !important; }
+#app .slot .count { top: 6px !important; right: 6px !important; bottom: auto !important; left: auto !important; font-size: 9.5px !important; padding: 1px 6px !important; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#app .slot.hasnum .count { top: 6px !important; bottom: auto !important; }
+#app .slot .num { top: auto !important; bottom: 6px !important; left: 8px !important; right: auto !important; }
+#app .slot .label { font-size: 10.5px !important; letter-spacing: 0 !important; max-width: 94%; }

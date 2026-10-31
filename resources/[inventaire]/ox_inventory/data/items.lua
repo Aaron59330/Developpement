@@ -5,10 +5,10 @@
 -- Définitions seules : relier les utilisations et effets aux scripts du serveur.
 return {
     -- Sacs (voir data/config_sacs.lua) : clic droit → Ouvrir le sac ; le contenu suit le sac
-    ['sac_petit'] = { label = 'Sacoche', weight = 300, stack = false, close = false, consume = 0, description = 'Un petit sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
-    ['sac_moyen'] = { label = 'Sac bandoulière', weight = 500, stack = false, close = false, consume = 0, description = 'Un sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
-    ['sac_a_dos'] = { label = 'Sac à dos', weight = 800, stack = false, close = false, consume = 0, description = 'Un grand sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
-    ['sac_sport'] = { label = 'Sac de sport', weight = 1000, stack = false, close = false, consume = 0, description = 'Un très grand sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
+    ['sac_petit'] = { bag = true, label = 'Sacoche', weight = 300, stack = false, close = false, consume = 0, description = 'Un petit sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
+    ['sac_moyen'] = { bag = true, label = 'Sac bandoulière', weight = 500, stack = false, close = false, consume = 0, description = 'Un sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
+    ['sac_a_dos'] = { bag = true, label = 'Sac à dos', weight = 800, stack = false, close = false, consume = 0, description = 'Un grand sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
+    ['sac_sport'] = { bag = true, label = 'Sac de sport', weight = 1000, stack = false, close = false, consume = 0, description = 'Un très grand sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
 
     ['money'] = { label = 'Argent', weight = 0, stack = true, close = false },
     ['black_money'] = { label = 'Argent sale', weight = 0, stack = true, close = false },
@@ -275,6 +275,7 @@ return {
     },
 
     ['clothes_bag'] = {
+        bag = true,   -- sac porté (vêtement) : « Porter » l'équipe, « Ouvrir le sac » ouvre son rangement
         label = 'Bag',
         weight = 50,
         stack = false,
