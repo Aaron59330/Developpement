@@ -3,6 +3,8 @@
 Casino complet : **caisse** (achat / rachat de jetons), **machines à sous**, **blackjack**, **roulette européenne**.
 
 ## Mise en place
+Tout est déjà en place : au premier démarrage, le World Builder crée et active tout seul un module « Diamond Casino » (1 caisse, 3 machines, 2 blackjack, 2 roulettes) devant l'entrée du casino. Il n'y a qu'à jouer ; `/wbseed` le recrée s'il a été supprimé. Pour le personnaliser ou déplacer les postes :
+
 1. La ressource fait partie de `[dev]` (déjà lancée par `ensure [dev]`) et dépend de `pickax_worldbuilder`. Les tables SQL se créent seules.
 2. Ouvre le **World Builder** (`/worldbuilder`) → **Nouveau module → Casinos** → modèle « Casino complet » (1 caisse, 3 machines, 2 blackjack, 2 roulettes) ou « Caisse seule ».
 3. Onglet **Emplacements** : place chaque poste (position, PNJ, blip, repère au sol) et choisis sa gamme (Bronze / Argent / Or, Classique / VIP).

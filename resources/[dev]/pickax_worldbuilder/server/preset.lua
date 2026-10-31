@@ -51,18 +51,41 @@ local function seed(force)
     return made
 end
 
+-- Casino : créé une fois (drapeau « casino1 »), indépendamment de Preset.Auto ; force = recrée s'il manque
+local function seedCasino(force)
+    local C = P and P.Casino
+    if not P or not P.Enabled or not C or not C.Enabled then return 0 end
+    local row = MySQL.single.await("SELECT v FROM worldbuilder_seed WHERE k = 'casino1'")
+    if row and not force then return 0 end
+    if hasLabel(C.Label) then return 0 end
+    local pts = {}
+    for _, d in ipairs(C.Points or {}) do
+        local isCashier = d[1] == 'cashier'
+        pts[#pts + 1] = { kind = d[1], tier = d[2] ~= '' and d[2] or nil, label = d[3], blip = isCashier, coords = { x = d[4], y = d[5], z = d[6], h = d[7] },
+            ped = isCashier and { enabled = true, model = 'u_m_m_bankman', scenario = 'WORLD_HUMAN_CLIPBOARD' } or { enabled = false, model = '', scenario = '' } }
+    end
+    local e = WB.createFromTemplate('préréglage', 'casino', 'casino', C.Label, { points = pts })
+    MySQL.insert.await("INSERT INTO worldbuilder_seed (k, v) VALUES ('casino1', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)", { tostring(os.time()) })
+    if not e then return 0 end
+    activate(e)
+    WB.syncAll()
+    print('^2[worldbuilder] Pré-placement : casino créé et activé (caisse, machines, blackjack, roulette).^0')
+    return 1
+end
+
 local prevReady = WB.onReady
 WB.onReady = function()
     if prevReady then prevReady() end
     CreateThread(function()
         MySQL.query.await([[CREATE TABLE IF NOT EXISTS worldbuilder_seed (k VARCHAR(30) NOT NULL PRIMARY KEY, v VARCHAR(60) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
         seed(false)
+        seedCasino(false)
     end)
 end
 
 RegisterCommand('wbseed', function(src)
     if src ~= 0 and not WB.isAdmin(src) then return end
-    local n = seed(true)
+    local n = seed(true) + seedCasino(true)
     local msg = n > 0 and (n .. ' module(s) créé(s).') or 'Rien à créer : tout est déjà en place.'
     if src == 0 then print('[worldbuilder] ' .. msg) else WB.notify(src, msg, 'success') end
 end, false)

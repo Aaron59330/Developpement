@@ -671,6 +671,23 @@ Config.Gazoline = {
 Config.Preset = {
     Enabled = true,
     Auto    = false,            -- false = rien n'est créé tout seul au démarrage ; /wbseed (admin) crée stations essence et banques à la demande
+    -- Casino prêt à jouer : créé et activé une seule fois au premier démarrage (même avec Auto = false), puis /wbseed le recrée s'il a été supprimé.
+    -- Postes posés devant l'entrée du Diamond Casino ; déplace-les ensuite dans World Builder → Casinos → Emplacements (mode placement).
+    Casino = {
+        Enabled = true,
+        Label = 'Diamond Casino',
+        -- { type de poste, gamme, nom, x, y, z, cap }
+        Points = {
+            { 'cashier',   '',        'Caisse',               921.2, 49.6, 81.1, 150.0 },
+            { 'slots',     'bronze',  'Machine Bronze',       925.8, 53.4, 81.1, 330.0 },
+            { 'slots',     'silver',  'Machine Argent',       928.0, 54.7, 81.1, 330.0 },
+            { 'slots',     'gold',    'Machine Or',           930.2, 56.0, 81.1, 330.0 },
+            { 'blackjack', 'classic', 'Blackjack Classique',  917.0, 43.2, 81.1, 240.0 },
+            { 'blackjack', 'vip',     'Blackjack VIP',        914.8, 45.2, 81.1, 240.0 },
+            { 'roulette',  'classic', 'Roulette Classique',   935.0, 47.6, 81.1,  60.0 },
+            { 'roulette',  'vip',     'Roulette VIP',         936.4, 45.4, 81.1,  60.0 },
+        },
+    },
     FuelRestockMinutes = 45,    -- ravitaillement naturel des cuves (0 = seulement par le job Gazoline) ; la réserve de secours reste garantie
     FuelRestockLiters  = 150,
     -- { x, y, z } : position de la pompe (le joueur s'y place pour faire le plein)
