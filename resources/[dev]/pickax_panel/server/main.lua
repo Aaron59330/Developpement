@@ -416,8 +416,9 @@ local function setMaxClients(n)
     local function add(x) if type(x) == 'string' and x ~= '' then cands[#cands + 1] = x end end
     add(GetConvar('aero_server_cfg', '')) add(Config.ServerCfgPath) add(base .. '/server.cfg')
     local file, f
-    for _, c in ipairs(cands) do tried[#tried + 1] = c f = io.open(c, 'rb') if f then file = c break end end
-    if not f and io.popen then
+    local lastErr
+    for _, c in ipairs(cands) do local ff, er = io.open(c, 'rb') if ff then f, file = ff, c break end tried[#tried + 1] = c .. ' (' .. tostring(er) .. ')' end
+    if not f and io.popen then   -- (certains hébergeurs désactivent io.popen)
         local ok, h = pcall(io.popen, ('find "%s" -maxdepth 4 -name server.cfg -not -path "*/resources/*" 2>/dev/null | head -5'):format(base))
         if ok and h then
             local out = h:read('*a') or '' h:close()
@@ -427,7 +428,7 @@ local function setMaxClients(n)
             elseif #found > 1 then return nil, 'plusieurs server.cfg trouvés (' .. table.concat(found, ', ') .. ') : indique le bon avec  set aero_server_cfg "chemin"  dans server.cfg' end
         end
     end
-    if not f then return nil, 'server.cfg introuvable (essayé : ' .. table.concat(tried, ', ') .. ') : indique-le avec  set aero_server_cfg "/chemin/server.cfg"' end
+    if not f then return nil, 'server.cfg illisible (io=' .. type(io) .. ', popen=' .. type(io and io.popen) .. ', dossier=' .. tostring(base) .. ', essayé : ' .. table.concat(tried, ', ') .. ') : indique-le avec  set aero_server_cfg "/chemin/server.cfg"' end
     local raw = f:read('*a') f:close()
     local eol = raw:find('\r\n', 1, true) and '\r\n' or '\n'
     local lines, idx, previous = {}, nil, nil
