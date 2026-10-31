@@ -1129,7 +1129,7 @@
       b.addEventListener('mouseleave', () => b.classList.remove('open'));
       return b;
     };
-    list.appendChild(btn(L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' })));
+    list.appendChild(btn(item.metadata && item.metadata.container ? L('ui_open_bag', 'Ouvrir le sac') : L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' })));
     list.appendChild(btn(L('ui_give', 'Donner'), () => ctxAction(item, { action: 'give' })));
     list.appendChild(btn(L('ui_drop', 'Jeter'), () => ctxAction(item, { action: 'drop' })));
     if (state.options.throwing) list.appendChild(btn(L('ui_throw', 'Lancer'), () => ctxAction(item, { action: 'throw' })));

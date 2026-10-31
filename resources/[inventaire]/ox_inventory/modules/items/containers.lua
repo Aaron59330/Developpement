@@ -65,4 +65,11 @@ setContainerProperties('pizzabox', {
 	whitelist = { 'pizza' }
 })
 
+-- Sacs du serveur (tailles réglables dans data/config_sacs.lua, modifiables depuis le panel : Gestion Base → Tous les réglages des scripts)
+for name, c in pairs(lib.load('data.config_sacs') or {}) do
+	if type(c) == 'table' and tonumber(c.slots) and tonumber(c.maxWeight) then
+		setContainerProperties(name, { slots = math.floor(c.slots), maxWeight = math.floor(c.maxWeight), blacklist = c.blacklist, whitelist = c.whitelist })
+	end
+end
+
 return containers
