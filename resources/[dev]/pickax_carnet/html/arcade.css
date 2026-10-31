@@ -34,7 +34,7 @@ html, body { height: 100%; background: transparent; color: #eef0f4; font: 14px/1
 .goal .t { flex: 1; font-weight: 600; }
 .chip { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border: 1px solid; }
 .chip.t1 { color: #4ade80; border-color: rgba(74, 222, 128, .5); }
-.chip.t2 { color: #fbbf24; border-color: rgba(251, 191, 36, .5); }
+.chip.t2 { color: var(--pk-accent, #fdc27d); border-color: rgba(var(--pk-accent-rgb, 253, 194, 125), .5); }
 .chip.t3 { color: #f87171; border-color: rgba(248, 113, 113, .5); }
 .rw { color: var(--ok); font-weight: 700; white-space: nowrap; }
 .bar { height: 7px; background: rgba(255, 255, 255, .08); margin: 9px 0 4px; overflow: hidden; }

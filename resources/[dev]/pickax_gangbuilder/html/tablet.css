@@ -53,11 +53,11 @@
 .tb-row:last-child { border-bottom: 0; }
 .tb-row .g { flex: 1; min-width: 0; } .tb-row b { font-size: 13.5px; display: block; } .tb-row small { color: var(--muted); font-size: 12px; }
 .tb-btn { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 12.5px; }
-.tb-btn.pri { background: var(--pk-accent,#fdc27d); border-color: var(--pk-accent,#fdc27d); color: #fff; font-weight: 600; } .tb-btn.pri:hover { background: var(--pk-accent-light,#1fb2ff); }
+.tb-btn.pri { background: var(--pk-accent,#fdc27d); border-color: var(--pk-accent,#fdc27d); color: #fff; font-weight: 600; } .tb-btn.pri:hover { background: var(--pk-accent-light,#fdcb8f); }
 .tb-btn.dng { color: var(--danger); border-color: rgba(248, 113, 113, .35); }
 .tb-btn:disabled { opacity: .4; pointer-events: none; }
 
-.tb-bar { height: 8px; border-radius: 5px; background: rgba(255, 255, 255, .08); overflow: hidden; } .tb-bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--pk-accent-dark,#0088d4), var(--pk-accent,#fdc27d)); transition: width .4s; }
+.tb-bar { height: 8px; border-radius: 5px; background: rgba(255, 255, 255, .08); overflow: hidden; } .tb-bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--pk-accent-dark,#b68c5a), var(--pk-accent,#fdc27d)); transition: width .4s; }
 .tb-bar.ok i { background: linear-gradient(90deg, #22c55e, #4ade80); }
 
 /* quêtes */

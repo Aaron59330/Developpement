@@ -298,7 +298,7 @@
   }
   const themeColor = () => {
     const c = window.INVENTORY_THEME && window.INVENTORY_THEME.color;
-    return (!c || c === 'auto') ? (window.PICKAX_INV_COLOR || window.PICKAX_ACCENT || '#00a4ff') : c;
+    return (!c || c === 'auto') ? (window.PICKAX_INV_COLOR || window.PICKAX_ACCENT || '#fdc27d') : c;
   };
   applyTheme(themeColor());
   window.addEventListener('pickax-theme', () => applyTheme(themeColor()));     // la couleur du core est lue après le chargement

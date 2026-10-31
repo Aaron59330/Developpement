@@ -1541,7 +1541,7 @@ const Dealer = {
     const adjusted = this.draft.filter(v => v._o || v.src !== 'table').length;
     const gsel = (i, v) => `<select data-path="draft.${i}.min_grade" data-t="n" title="Grade min. pour vendre">${d.grades.map((g, k) => `<option value="${k}" ${Number(v) === k ? 'selected' : ''}>${k} · ${esc(g.label)}</option>`).join('')}</select>`;
     const cols = '1fr 1.4fr 110px 80px 1.2fr 80px 36px 118px';
-    const rowAdmin = i => { const v = this.draft[i]; return `<div class="cat-row ${v.enabled ? '' : 'off'}" style="grid-template-columns:${cols};${v._o || v.src !== 'table' ? 'border-color:rgba(251,191,36,.45)' : ''}">
+    const rowAdmin = i => { const v = this.draft[i]; return `<div class="cat-row ${v.enabled ? '' : 'off'}" style="grid-template-columns:${cols};${v._o || v.src !== 'table' ? 'border-color:rgba(var(--pk-accent-rgb,253,194,125),.45)' : ''}">
         <input placeholder="modèle" data-path="draft.${i}.model" value="${esc(v.model)}" ${v.src === 'custom' ? '' : 'disabled'}><input placeholder="Nom" data-path="draft.${i}.label" value="${esc(v.label)}">
         <input type="number" min="0" placeholder="Prix" data-path="draft.${i}.price" data-t="n" value="${v.price}"><input type="number" min="-1" title="-1 = illimité" data-path="draft.${i}.stock" data-t="n" value="${v.stock}">
         ${gsel(i, v.min_grade)}<select data-path="draft.${i}.vtype">${['car', 'bike', 'boat', 'aircraft'].map(t => `<option value="${t}" ${v.vtype === t ? 'selected' : ''}>${t}</option>`).join('')}</select>

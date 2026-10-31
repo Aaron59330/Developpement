@@ -1,6 +1,6 @@
 /* Design « Verre » de l'inventaire : cases en verre sombre, poids en haut à gauche, nom en bas, survol doré, barre de poids en segments.
    Chargé après arcade.css (prioritaire). Retirer le <link> de glass.css dans index.html pour revenir à l'ancien rendu. Toutes les fonctions de l'inventaire sont inchangées. */
-:root { --r-slot: 9px; --gold: var(--pk-accent, #ffcd5a); --gold-rgb: var(--pk-accent-rgb, 255, 205, 90); }
+:root { --r-slot: 9px; --gold: var(--pk-accent,#fdc27d); --gold-rgb: var(--pk-accent-rgb, 253,194,125); }
 
 /* panneaux : plus de cadre, seulement un léger voile de verre */
 .panel::before { display: none; }   /* plus de grand cadre arrondi autour des panneaux */
@@ -13,7 +13,7 @@
 .weight-text { font-style: normal; text-transform: none; letter-spacing: .02em; font-weight: 700; font-size: 12px; color: #d9dde8; text-shadow: none; }
 .weight-bar { display: block; height: 8px; margin-bottom: 1px; border: 0; transform: none; border-radius: 0; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 7px, transparent 7px 10px); overflow: hidden; }
 .weight-bar i { border-radius: 0; background: #eceef4; box-shadow: none; -webkit-mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); }
-.head-right.w-warn .weight-bar i { background: #fbbf24; } .head-right.w-full .weight-bar i { background: #f87171; }
+.head-right.w-warn .weight-bar i { background: #fb923c; } .head-right.w-full .weight-bar i { background: #f87171; }
 
 /* recherche */
 .search input { transform: none; text-transform: none; letter-spacing: 0; font-size: 12px; border-radius: 8px; background: rgba(8, 10, 16, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
@@ -28,7 +28,7 @@
 .slot.has img.pic { top: 44%; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .6)); }
 .slot .label { font-size: 10px; font-weight: 600; color: #dfe3ec; bottom: 5px; text-shadow: 0 1px 4px rgba(0, 0, 0, .9); }
 .slot .wt { display: none; position: absolute; left: 6px; top: 5px; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: #eceef2; text-shadow: 0 1px 3px #000; }
-.slot .wt::before { content: ''; width: 11px; height: 11px; background: #f2c230; -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; }
+.slot .wt::before { content: ''; width: 11px; height: 11px; background: var(--gold); -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 8h12l1.5 12h-15zM9 8a3 3 0 0 1 6 0'/></svg>") center/contain no-repeat; }
 .slot.has .wt { display: flex; }
 .slot.cloth .wt, .slot.outfit .wt { display: none !important; }
 .slot .count { left: auto; right: 5px; top: 4px; font-style: normal; font-weight: 800; font-size: 10px; background: rgba(0, 0, 0, .5); padding: 1px 6px; border-radius: 6px; }
@@ -40,7 +40,7 @@
 #drag-ghost { border-radius: var(--r-slot); }
 
 /* barre de défilement dorée */
-.grid::-webkit-scrollbar { width: 3px; } .grid::-webkit-scrollbar-thumb { background: linear-gradient(#ffd45a, #e8b100); box-shadow: 0 0 8px rgba(255, 200, 60, .6); border-radius: 3px; }
+.grid::-webkit-scrollbar { width: 3px; } .grid::-webkit-scrollbar-thumb { background: linear-gradient(var(--pk-accent-light, #fdcb8f), var(--gold)); box-shadow: 0 0 8px rgba(var(--gold-rgb), .6); border-radius: 3px; }
 
 /* filtres, quantité, boutons, infobulle, menu contextuel */
 .rail button { clip-path: none; border-radius: 10px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .08); }
@@ -71,7 +71,7 @@
 .search svg { display: none; } .search input { padding-left: 8px; }
 .panel.right .weight-text { text-align: right; } .panel.right .weight-bar { grid-column: 2; justify-self: end; }
 .panel.right .panel-head { grid-template-columns: 1fr 150px; } .panel.right .search { grid-column: 1; grid-row: 3; display: none; }
-.panel.right .grid-wrap::after { content: ''; position: absolute; left: 0; right: 6px; bottom: -3px; height: 2px; background: #d9ac4c; box-shadow: 0 0 8px rgba(217, 172, 76, .5); }
+.panel.right .grid-wrap::after { content: ''; position: absolute; left: 0; right: 6px; bottom: -3px; height: 2px; background: var(--gold); box-shadow: 0 0 8px rgba(var(--gold-rgb), .5); }
 .panel.left .grid-wrap { height: 560px; }
 .hotrow { display: grid; grid-template-columns: repeat(5, 73px); column-gap: 19.5px; margin-top: 18px; }
 .hotrow .slot { height: 73px; }
@@ -92,7 +92,7 @@
 .cloth-col .slot { background: rgba(14, 14, 15, .55); }
 .amount-box { left: 878px; top: 805px; flex-direction: column; gap: 0; }
 .amount-label { display: none; }
-.amount { flex-direction: column; width: 40px; height: 62px; padding: 0; border-radius: 4px; background: rgba(12, 12, 12, .6); border: 1px solid rgba(255, 255, 255, .1); border-bottom: 2px solid #d9ac4c; }
+.amount { flex-direction: column; width: 40px; height: 62px; padding: 0; border-radius: 4px; background: rgba(12, 12, 12, .6); border: 1px solid rgba(255, 255, 255, .1); border-bottom: 2px solid var(--gold); }
 .amount button { width: 100%; height: 16px; font-size: 0; position: relative; }
 .amount button::before { content: ''; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; border: solid #bbb; border-width: 0 1.5px 1.5px 0; transform: translate(-50%, -30%) rotate(45deg); }
 .amount [data-role=amount-plus] { order: -1; } .amount [data-role=amount-plus]::before { transform: translate(-50%, -30%) rotate(-135deg); }
@@ -125,7 +125,7 @@
 .hotrow .slot .num { right: 8px; top: 6px; font-size: 10px; }
 /* panneau de droite : ligne dorée à gauche et sous la grille, recherche en bas à droite */
 .panel.right .weight-text { text-align: right; } .panel.right .head-right { display: contents; }
-.panel.right .grid-wrap::before { content: ''; position: absolute; left: -10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(#e4b85a, #b88a2c); }
+.panel.right .grid-wrap::before { content: ''; position: absolute; left: -10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--pk-accent-light, #fdcb8f), var(--pk-accent-dark, #b68c5a)); }
 .panel.right .grid-wrap::after { left: 0; right: 0; bottom: -7px; height: 2px; }
 .panel.right .search { display: block; position: absolute; right: 0; top: 523px; grid-column: auto; grid-row: auto; }
 /* colonne centrale : 8 emplacements de chaque côté, 63 px */
@@ -156,9 +156,9 @@
 .tenue-row { display: none !important; }
 #outfit-drop { position: absolute; left: 80px; right: 80px; top: 0; bottom: 20px; border-radius: 10px; border: 1px dashed transparent; display: grid; place-items: end center; padding-bottom: 14px; transition: background .12s, border-color .12s; }
 #outfit-drop span { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: transparent; text-transform: uppercase; }
-body.drag-outfit #outfit-drop { border-color: rgba(217, 172, 76, .55); background: rgba(217, 172, 76, .05); }
-body.drag-outfit #outfit-drop span { color: #e4b85a; }
-#outfit-drop.over { background: rgba(217, 172, 76, .16) !important; border-color: #e4b85a !important; box-shadow: 0 0 30px rgba(217, 172, 76, .25) inset; }
+body.drag-outfit #outfit-drop { border-color: rgba(var(--gold-rgb), .55); background: rgba(var(--gold-rgb), .05); }
+body.drag-outfit #outfit-drop span { color: var(--pk-accent-light, #fdcb8f); }
+#outfit-drop.over { background: rgba(var(--gold-rgb), .16) !important; border-color: var(--pk-accent-light, #fdcb8f) !important; box-shadow: 0 0 30px rgba(var(--gold-rgb), .25) inset; }
 
 /* netteté : échelle par zoom (et non par transformation, qui floute le texte dans le jeu) */
 #stage { left: var(--sx, 0px); top: var(--sy, 0px); transform: none; zoom: var(--scale); }

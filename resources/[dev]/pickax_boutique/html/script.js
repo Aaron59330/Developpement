@@ -59,7 +59,7 @@ function srcsFor(cat, it) {
   return [];
 }
 function tierColor(name) {
-  return ['var(--pk-accent,#fdc27d)', 'var(--pk-accent-dark,#0076b8)'];
+  return ['var(--pk-accent,#fdc27d)', 'var(--pk-accent-dark,#b68c5a)'];
 }
 function art(cat, it) {
   const [a, b] = tierColor(it.name);
@@ -226,7 +226,7 @@ function wheelFace(prizes) {
 }
 function viewWheel() {
   const w = S.wheel;
-  const hero = heroBar('gift', 'Roulette du jour', 'Une roue gratuite chaque jour : de petits gains à gagner', '#e5a23c');
+  const hero = heroBar('gift', 'Roulette du jour', 'Une roue gratuite chaque jour : de petits gains à gagner', 'var(--pk-accent,#fdc27d)');
   if (!w) return hero + '<div class="scroll"><div class="empty">Chargement…</div></div>';
   if (!w.enabled) return hero + '<div class="scroll"><div class="empty">La roulette n\'est pas disponible pour le moment.</div></div>';
   const f = wheelFace(w.prizes), can = w.left > 0 && !S.spinning;
