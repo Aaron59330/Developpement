@@ -1,0 +1,87 @@
+/* Design « Pro » de l'inventaire : sombre, épuré, couleur du serveur (pickax_theme) pour tous les accents.
+   Chargé en dernier (après glass.css). Retirer le <link> de pro.css dans index.html pour revenir au rendu précédent. Aucune fonction de l'inventaire n'est touchée. */
+#app { --a: var(--pk-accent, #fdc27d); --ar: var(--pk-accent-rgb, 253, 194, 125); --al: var(--pk-accent-light, #fdcb8f); --ad: var(--pk-accent-dark, #b68c5a);
+  --line: rgba(255, 255, 255, .075); --card: rgba(255, 255, 255, .028); --card-h: rgba(var(--ar), .075); }
+
+/* fond : voile très sombre, légère lueur de la couleur du serveur en haut */
+#app #backdrop { background: radial-gradient(90% 70% at 50% 0%, rgba(var(--ar), .07), transparent 60%), radial-gradient(120% 100% at 50% 50%, rgba(6, 7, 10, .78), rgba(2, 3, 5, .94)) !important; }
+
+/* en-têtes */
+#app .panel-title h2 { font-size: 12px !important; font-weight: 700 !important; letter-spacing: .16em !important; text-transform: uppercase; color: #eceef3 !important; }
+#app .hex { width: 30px !important; height: 30px !important; border-radius: 9px !important; background: rgba(var(--ar), .12) !important; border: 1px solid rgba(var(--ar), .35) !important; clip-path: none !important; box-shadow: none !important; display: grid; place-items: center; }
+#app .hex svg { width: 16px !important; height: 16px !important; stroke: var(--a) !important; fill: none !important; }
+#app .panel-head::after { content: ''; display: block; height: 1px; margin-top: 12px; background: linear-gradient(90deg, var(--a) 0, var(--a) 46px, var(--line) 46px) !important; opacity: .9; }
+
+/* poids : texte discret + barre fine continue */
+#app .weight-text { font-size: 12px !important; font-weight: 600 !important; color: #c9ccd6 !important; letter-spacing: .02em; }
+#app .weight-text small { color: #7d8190 !important; }
+#app .weight-bar { height: 4px !important; border-radius: 99px !important; background: rgba(255, 255, 255, .09) !important; overflow: hidden; -webkit-mask: none !important; mask: none !important; }
+#app .weight-bar i { height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, var(--ad), var(--a)) !important; box-shadow: 0 0 10px rgba(var(--ar), .45) !important; }
+#app .head-right.w-warn .weight-bar i { background: linear-gradient(90deg, #c2410c, #fb923c) !important; box-shadow: 0 0 10px rgba(251, 146, 60, .45) !important; }
+#app .head-right.w-full .weight-bar i { background: linear-gradient(90deg, #b91c1c, #f87171) !important; box-shadow: 0 0 10px rgba(248, 113, 113, .45) !important; }
+
+/* recherche */
+#app .search input { background: rgba(255, 255, 255, .04) !important; border: 1px solid var(--line) !important; border-radius: 10px !important; color: #eceef3 !important; font-size: 12.5px !important; padding-left: 34px !important; height: 34px; transition: border-color .15s, box-shadow .15s; }
+#app .search input::placeholder { color: #747886 !important; }
+#app .search input:focus { border-color: rgba(var(--ar), .6) !important; box-shadow: 0 0 0 3px rgba(var(--ar), .12) !important; outline: 0; }
+#app .search svg { stroke: #8a8e9c !important; }
+
+/* cases */
+#app .slot { background: var(--card) !important; border: 1px solid var(--line) !important; border-radius: 12px !important; box-shadow: none !important; transition: background .14s, border-color .14s, transform .14s, box-shadow .14s; }
+#app .slot:not(.has) { background: rgba(255, 255, 255, .016) !important; border-color: rgba(255, 255, 255, .05) !important; }
+#app .slot.has { background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02)) !important; }
+#app .slot:hover, #app .slot.over { background: var(--card-h) !important; border-color: rgba(var(--ar), .6) !important; box-shadow: 0 0 0 1px rgba(var(--ar), .25), 0 8px 24px rgba(0, 0, 0, .35) !important; transform: translateY(-1px); }
+#app .slot .label { font-size: 11px !important; font-weight: 600 !important; color: #dfe1e8 !important; letter-spacing: .01em; text-shadow: none !important; }
+#app .slot .wt { font-size: 10px !important; font-weight: 600 !important; color: #9094a3 !important; }
+#app .slot .wt::before { background: rgba(var(--ar), .85) !important; }
+#app .slot .count { background: rgba(0, 0, 0, .55) !important; border: 1px solid rgba(var(--ar), .35) !important; color: var(--al) !important; border-radius: 99px !important; font-size: 10px !important; font-weight: 800 !important; padding: 1px 7px !important; }
+#app .slot .num { color: rgba(var(--ar), .9) !important; font-size: 10px !important; font-weight: 800 !important; }
+#app .slot .dur { height: 3px !important; border-radius: 99px !important; background: rgba(255, 255, 255, .1) !important; overflow: hidden; }
+#app .slot .dur i { background: var(--a) !important; }
+#app .slot.has img.pic { filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .45)); }
+
+/* barre rapide (1-5) */
+#app .hotrow { border-top: 1px solid var(--line) !important; padding-top: 14px !important; }
+#app .hotrow .slot .num { color: var(--a) !important; }
+
+/* filtres latéraux */
+#app .rail button { width: 38px !important; height: 38px !important; border-radius: 11px !important; background: rgba(255, 255, 255, .035) !important; border: 1px solid var(--line) !important; color: #9fa3b1 !important; box-shadow: none !important; transition: all .14s; }
+#app .rail button svg { stroke: currentColor !important; }
+#app .rail button:hover { color: #fff !important; border-color: rgba(var(--ar), .5) !important; }
+#app .rail button.active { background: rgba(var(--ar), .14) !important; border-color: rgba(var(--ar), .65) !important; color: var(--a) !important; box-shadow: 0 0 16px rgba(var(--ar), .18) !important; }
+
+/* quantité */
+#app .amount-label { color: #8a8e9c !important; font-size: 12px !important; font-weight: 600 !important; }
+#app .amount { background: rgba(255, 255, 255, .04) !important; border: 1px solid var(--line) !important; border-radius: 12px !important; }
+#app .amount input { color: #fff !important; font-weight: 700 !important; }
+#app .amount button { color: var(--a) !important; }
+#app .amount button:hover { background: rgba(var(--ar), .14) !important; }
+
+/* boutons haut droite */
+#app #exit-btn, #app #snd-btn { background: rgba(255, 255, 255, .045) !important; border: 1px solid var(--line) !important; color: #d6d9e2 !important; border-radius: 10px !important; box-shadow: none !important; }
+#app #exit-btn:hover, #app #snd-btn:hover { border-color: rgba(var(--ar), .55) !important; color: #fff !important; }
+
+/* tenue */
+#app #outfit-drop, #app .tenue-slot { border-radius: 12px !important; }
+#app .cloth-col .slot, #app .tenue-row .slot.outfit { border-radius: 12px !important; }
+
+/* info-bulle, menu contextuel */
+#app #tooltip, #tooltip { background: rgba(12, 13, 17, .96) !important; border: 1px solid var(--line) !important; border-radius: 12px !important; box-shadow: 0 16px 40px rgba(0, 0, 0, .55) !important; }
+.ctx-list { background: rgba(12, 13, 17, .97) !important; border: 1px solid var(--line) !important; border-radius: 12px !important; box-shadow: 0 16px 40px rgba(0, 0, 0, .55) !important; }
+.ctx-item:hover { background: rgba(var(--pk-accent-rgb, 253, 194, 125), .14) !important; color: var(--pk-accent, #fdc27d) !important; }
+
+/* défilement */
+#app .grid::-webkit-scrollbar { width: 4px !important; }
+#app .grid::-webkit-scrollbar-thumb { background: rgba(var(--ar), .55) !important; border-radius: 99px; box-shadow: none !important; }
+#app .grid::-webkit-scrollbar-track { background: transparent !important; }
+
+/* finitions */
+#app .search { position: relative; }
+#app .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px !important; height: 15px !important; fill: none !important; stroke: #8a8e9c !important; stroke-width: 2 !important; stroke-linecap: round; z-index: 2; pointer-events: none; }
+#app .search input { width: 100%; box-sizing: border-box; }
+#app .slot:not(.has) { background: rgba(255, 255, 255, .024) !important; border-color: rgba(255, 255, 255, .06) !important; }
+#app .search { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; display: block; }
+#app .search svg { display: block !important; opacity: 1 !important; visibility: visible !important; }
+#app .search input { padding-left: 34px !important; }
+#app .panel .search, #app .panel.left .search, #app .panel.right .search { border: 0 !important; background: none !important; box-shadow: none !important; outline: 0 !important; }
+#app .panel .search::before, #app .panel .search::after { display: none !important; }
