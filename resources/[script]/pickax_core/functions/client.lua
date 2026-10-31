@@ -324,52 +324,21 @@ end
 ]]--
 
 --Buttons
-function ESXCustom_Function_ClientSide:SetupInstructionalButtons(buttons)
-	local scaleform = RequestScaleformMovie("instructional_buttons")
-	while not HasScaleformMovieLoaded(scaleform) do
-		Citizen.Wait(0)
-	end
-
-    DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 0, 0)
-
-	PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-	PopScaleformMovieFunctionVoid()
-
-	PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-	PushScaleformMovieFunctionParameterInt(200)
-	PopScaleformMovieFunctionVoid()
-
-	local i = 0
-	for _, button in pairs(buttons) do
-		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-		PushScaleformMovieFunctionParameterInt(i)
-		PushScaleformMovieMethodParameterButtonName(GetControlInstructionalButton(2, button.key, true))
-		BeginTextCommandScaleformString("STRING")
-		AddTextComponentScaleform(button.label)
-		EndTextCommandScaleformString()
-		PopScaleformMovieFunctionVoid()
-		i = i + 1
-	end
-
-	PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-	PopScaleformMovieFunctionVoid()
-
-	PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(0)
-	PushScaleformMovieFunctionParameterInt(70)
-	PopScaleformMovieFunctionVoid()
-
-	return scaleform
-end
-
 --Freeze + Moov
 function ESXCustom_Function_ClientSide:MoovPlayer()
 	FreezePedCameraRotation(PlayerClass.pPed, true)
 
-	local Instructions = ESXCustom_Function_ClientSide:SetupInstructionalButtons({{key = 63,  label = "Pivoter à gauche"}, {key = 64,  label = "Pivoter à droite"}})
-	DrawScaleformMovieFullscreen(Instructions, 255, 255, 255, 255, 0)
+	-- barre d'aide pickax_ui : affichée tant que la fonction est appelée, masquée 400 ms après le dernier appel
+	if not MoovKeysShown then
+		MoovKeysShown = true
+		pcall(function() exports.pickax_ui:KeysShow('moov', { { key = { exports.pickax_ui:ControlKey(63, 0), exports.pickax_ui:ControlKey(64, 0) }, label = 'Pivoter à gauche / à droite' } }) end)
+		CreateThread(function()
+			while GetGameTimer() - (MoovKeysLast or 0) < 400 do Wait(100) end
+			MoovKeysShown = false
+			pcall(function() exports.pickax_ui:KeysHide('moov') end)
+		end)
+	end
+	MoovKeysLast = GetGameTimer()
 	DisableControlAction(0, 63, true)
 	DisableControlAction(0, 64, true)
 

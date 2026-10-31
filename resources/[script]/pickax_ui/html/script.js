@@ -282,3 +282,18 @@ window.addEventListener('message', function (e) {
   var m = e.data || {};
   if (m.a === 'choose') chOpenWith(m);
 });
+
+
+// Barre d'aide des touches (exports KeysShow / KeysHide)
+window.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.a !== 'keys') return;
+  var bar = document.getElementById('keys');
+  if (!d.items || !d.items.length) { bar.classList.add('hidden'); bar.innerHTML = ''; return; }
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  bar.innerHTML = d.items.map(function (it) {
+    var keys = Array.isArray(it.key) ? it.key : [it.key];
+    return '<span class="kb"><span class="kk">' + keys.map(function (k) { return '<kbd>' + esc(k) + '</kbd>'; }).join('') + '</span><span class="kl">' + esc(it.label) + '</span></span>';
+  }).join('');
+  bar.classList.remove('hidden');
+});

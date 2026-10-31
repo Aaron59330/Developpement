@@ -194,3 +194,37 @@ AddEventHandler('onResourceStop', function(res)
     if inputPromise then inputPromise:resolve(nil) end
     if choosePromise then choosePromise:resolve(nil) end
 end)
+
+
+-- ───────────── Barre d'aide des touches (remplace les « instructional buttons » natifs de GTA) ─────────────
+-- exports.pickax_ui:KeysShow('noclip', { { key = 'F2', label = 'Désactiver le Noclip' }, { key = { 'Q', 'D' }, label = 'Tourner' } })
+-- exports.pickax_ui:KeysHide('noclip')      plusieurs barres peuvent coexister : la dernière affichée est visible
+local KEYBARS, KEYORDER = {}, {}
+local function pushKeys()
+    local top
+    for i = #KEYORDER, 1, -1 do if KEYBARS[KEYORDER[i]] then top = KEYBARS[KEYORDER[i]] break end end
+    SendNUIMessage({ a = 'keys', items = top })
+end
+exports('KeysShow', function(id, items)
+    id = tostring(id or 'default')
+    if type(items) ~= 'table' then return end
+    if not KEYBARS[id] then KEYORDER[#KEYORDER + 1] = id end
+    KEYBARS[id] = items
+    pushKeys()
+end)
+exports('KeysHide', function(id)
+    id = tostring(id or 'default')
+    if not KEYBARS[id] then return end
+    KEYBARS[id] = nil
+    for i, v in ipairs(KEYORDER) do if v == id then table.remove(KEYORDER, i) break end end
+    pushKeys()
+end)
+
+-- Nom lisible d'une touche à partir d'un contrôle GTA (ex. 38 → « E »)
+local MOUSE = { [24] = 'Clic gauche', [25] = 'Clic droit', [14] = 'Molette ↓', [15] = 'Molette ↑', [16] = 'Molette ↓', [17] = 'Molette ↑', [348] = 'Clic molette' }
+exports('ControlKey', function(control, group)
+    local ok, s = pcall(GetControlInstructionalButton, group or 0, control, true)
+    if ok and type(s) == 'string' and s:sub(1, 2) == 't_' then return (s:sub(3):gsub('^%l', string.upper)) end
+    return MOUSE[control] or '?'
+end)
+AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then KEYBARS, KEYORDER = {}, {} end end)

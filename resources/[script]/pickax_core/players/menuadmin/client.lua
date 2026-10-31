@@ -2423,6 +2423,7 @@ end)
 
 function DisableNoclip(noclipEntity)
     noclipActive = false
+    pcall(function() exports.pickax_ui:KeysHide('noclip') end)
     SetEntityVisible(noclipEntity, true)
     ResetEntityAlpha(noclipEntity)
     SetEntityCollision(noclipEntity, not noclipActive, not noclipActive)
@@ -2432,6 +2433,7 @@ function DisableNoclip(noclipEntity)
 end
 
 function SetNoClip(noclipEntity, noclipActive)
+    if not noclipActive then pcall(function() exports.pickax_ui:KeysHide("noclip") end) end
     if NoClip == false then
         NoClip = true
     else
@@ -2456,7 +2458,7 @@ function SetNoClip(noclipEntity, noclipActive)
         SetEntityAlpha(noclipEntity, 60, false)
         SetEntityVisible(noclipEntity, false)
         Citizen.CreateThread(function()
-            buttons = setupScaleform("instructional_buttons")
+            buttons = NoclipKeysBar()
             currentSpeed = ConfigMenuAdminNoclip.Speeds[index].speed
             while true do
                 if noclipActive then
@@ -2466,7 +2468,6 @@ function SetNoClip(noclipEntity, noclipActive)
                         end
                     end
         
-                    DrawScaleformMovieFullscreen(buttons)
         
                     local yoff = 0.0
                     local zoff = 0.0
@@ -2479,7 +2480,7 @@ function SetNoClip(noclipEntity, noclipActive)
                             currentSpeed = ConfigMenuAdminNoclip.Speeds[1].speed
                             index = 1
                         end
-                        setupScaleform("instructional_buttons")
+                        NoclipKeysBar()
                     end
 
                     -- Réglage de la vitesse à la molette.
@@ -2490,11 +2491,11 @@ function SetNoClip(noclipEntity, noclipActive)
                     if wheelUp and index < #ConfigMenuAdminNoclip.Speeds then
                         index = index + 1
                         currentSpeed = ConfigMenuAdminNoclip.Speeds[index].speed
-                        buttons = setupScaleform("instructional_buttons")
+                        buttons = NoclipKeysBar()
                     elseif wheelDown and index > 1 then
                         index = index - 1
                         currentSpeed = ConfigMenuAdminNoclip.Speeds[index].speed
-                        buttons = setupScaleform("instructional_buttons")
+                        buttons = NoclipKeysBar()
                     end
 
                     if IsControlJustPressed(1, ConfigMenuAdminNoclip.Controls.noclipheading) then
@@ -2596,75 +2597,22 @@ function Button(ControlButton)
     N_0xe83a3e3557a56640(ControlButton)
 end
 
-function setupScaleform(scaleform)
-    local scaleform = RequestScaleformMovie(scaleform)
-
-    while not HasScaleformMovieLoaded(scaleform) do
-        Citizen.Wait(1)
-    end
-
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-    PopScaleformMovieFunctionVoid()
-    
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(6)
-    Button(GetControlInstructionalButton(2, ConfigMenuAdminNoclip.Commande.openKey, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["DisableNoclip"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(5)
-    Button(GetControlInstructionalButton(2, ConfigMenuAdminNoclip.Commande.noclipheading, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["HeadingC"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(4)
-    Button(GetControlInstructionalButton(2, ConfigMenuAdminNoclip.Controls.goUp, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["GoUp"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(3)
-    Button(GetControlInstructionalButton(2, ConfigMenuAdminNoclip.Controls.goDown, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["GoDown"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(2)
-    Button(GetControlInstructionalButton(1, ConfigMenuAdminNoclip.Controls.turnRight, true))
-    Button(GetControlInstructionalButton(1, ConfigMenuAdminNoclip.Controls.turnLeft, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["TurnLeft/Right"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(1)
-    Button(GetControlInstructionalButton(1, ConfigMenuAdminNoclip.Controls.goBackward, true))
-    Button(GetControlInstructionalButton(1, ConfigMenuAdminNoclip.Controls.goForward, true))
-    ButtonMessage(ConfigMenuAdminNoclip.Texte["Forwards/Backwards"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(0)
-    Button(GetControlInstructionalButton(2, ConfigMenuAdminNoclip.Controls.changeSpeed, true))
-    ButtonMessage((ConfigMenuAdminNoclip.Texte["ChangeSpeed"]):format(ConfigMenuAdminNoclip.Speeds[index].label))
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-    PushScaleformMovieFunctionParameterInt(ConfigMenuAdminNoclip.bgR)
-    PushScaleformMovieFunctionParameterInt(ConfigMenuAdminNoclip.bgG)
-    PushScaleformMovieFunctionParameterInt(ConfigMenuAdminNoclip.bgB)
-    PushScaleformMovieFunctionParameterInt(ConfigMenuAdminNoclip.bgA)
-    PopScaleformMovieFunctionVoid()
-
-    return scaleform
+-- Barre d'aide du noclip : affichée par pickax_ui (couleur du serveur), plus de bandeau GTA natif
+function NoclipKeysBar()
+    local C, T = ConfigMenuAdminNoclip, ConfigMenuAdminNoclip.Texte
+    local function k(control, group) local ok, v = pcall(function() return exports.pickax_ui:ControlKey(control, group) end) return ok and v or '?' end
+    pcall(function()
+        exports.pickax_ui:KeysShow('noclip', {
+            { key = k(C.Commande.openKey, 2), label = T["DisableNoclip"] },
+            { key = k(C.Commande.noclipheading, 2), label = T["HeadingC"] },
+            { key = k(C.Controls.goUp, 2), label = T["GoUp"] },
+            { key = k(C.Controls.goDown, 2), label = T["GoDown"] },
+            { key = { k(C.Controls.turnRight, 1), k(C.Controls.turnLeft, 1) }, label = T["TurnLeft/Right"] },
+            { key = { k(C.Controls.goBackward, 1), k(C.Controls.goForward, 1) }, label = T["Forwards/Backwards"] },
+            { key = k(C.Controls.changeSpeed, 2), label = (T["ChangeSpeed"]):format(C.Speeds[index].label) },
+        })
+    end)
+    return true
 end
 
 function DisableControls()

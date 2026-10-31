@@ -221,7 +221,7 @@ const dur = sec => { sec = Math.max(0, Math.floor(sec)); const h = Math.floor(se
 function wheelFace(prizes) {
   const n = prizes.length, a = 360 / n, bg = 'conic-gradient(from 0deg,' + prizes.map((p, i) => `${p.color} ${i * a}deg ${(i + 1) * a}deg`).join(',') + ')';
   const labels = prizes.map((p, i) => `<span class="wl" style="transform:rotate(${(i + 0.5) * a - 90}deg)"><b>${esc(p.label)}</b></span>`).join('');
-  const lines = prizes.map((p, i) => `<i class="wline" style="transform:rotate(${i * a}deg)"></i>`).join('');
+  const lines = prizes.map((p, i) => `<i class="wline" style="transform:rotate(${i * a - 90}deg)"></i>`).join('');
   return { bg, inner: lines + labels };
 }
 function viewWheel() {

@@ -1,72 +1,15 @@
-local instructionals = {}
-
-function SetInstructionalButton(text, control, toggle)
-    if toggle then
-        if not instructionals[text] then
-            instructionals[text] = true
-            SetInstructionalButton(text, control, toggle)
-        end
-    else
-        if instructionals[text] then
-            instructionals[text] = false
-            SetInstructionalButton(text, control, toggle)
-        end
-    end
-end
-
---Reste function
-local function ButtonMessage(text)
-    BeginTextCommandScaleformString(text)
-    EndTextCommandScaleformString()
-end
-
-local function Button(ControlButton)
-    N_0xe83a3e3557a56640(ControlButton)
-end
-
-local function setupScaleform(scaleform, data)
-    local scaleform = RequestScaleformMovie(scaleform)
-    while not HasScaleformMovieLoaded(scaleform) do
-        Citizen.Wait(0)
-    end
-    
-    DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 0, 0)
-    
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
-
-    for n, btn in next, data do
-        PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-        PushScaleformMovieFunctionParameterInt(n-1)
-        Button(GetControlInstructionalButton(2, btn.control, true))
-        ButtonMessage(btn.name)
-        PopScaleformMovieFunctionVoid()
-    end
-
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(80)
-    PopScaleformMovieFunctionVoid()
-
-    return scaleform
-end
-
-local form = nil
-local data = {}
-
+-- Barre d'aide des sirènes : affichée par pickax_ui (couleur du serveur), plus de bandeau GTA natif
 local entries = {}
+local LABELS = {}   -- « ESC_ENABLE » → texte affiché (rempli plus bas)
 
-function SetInstructions()
-    form = setupScaleform("instructional_buttons", entries)
+local function refreshKeys()
+    if #entries == 0 then pcall(function() exports.pickax_ui:KeysHide('sirenes') end) return end
+    local items = {}
+    for _, e in ipairs(entries) do
+        local ok, key = pcall(function() return exports.pickax_ui:ControlKey(e.control, 2) end)
+        items[#items + 1] = { key = ok and key or '?', label = LABELS[e.name] or e.name }
+    end
+    pcall(function() exports.pickax_ui:KeysShow('sirenes', items) end)
 end
 
 function SetInstructionalButton(name, control, enabled)
@@ -74,32 +17,15 @@ function SetInstructionalButton(name, control, enabled)
     for k, entry in next, entries do
         if entry.name == name and entry.control == control then
             found = true
-            if not enabled then
-                table.remove(entries, k)
-                SetInstructions()
-            end
+            if not enabled then table.remove(entries, k) refreshKeys() end
             break
         end
     end
-    if not found then
-        if enabled then
-            table.insert(entries, {name = name, control = control})
-            SetInstructions()
-        end
+    if not found and enabled then
+        table.insert(entries, { name = name, control = control })
+        refreshKeys()
     end
 end
-
-Citizen.CreateThread(function()
-    while true do
-        local timer = 200
-
-        if form then
-            timer = 0
-            DrawScaleformMovieFullscreen(form, 255, 255, 255, 255, 0)
-        end
-        Wait(timer)
-    end
-end)
 
 --Script général
 local CONTROLS = {
@@ -113,6 +39,7 @@ Citizen.CreateThread(function()
     AddTextEntry("ESC_ENABLE", CONTROLS['ENABLE'][1])
     AddTextEntry("ESC_DISABLE", CONTROLS['DISABLE'][1])
     AddTextEntry("ESC_LIGHTS", CONTROLS['LIGHTS'][1])
+    LABELS.ESC_ENABLE, LABELS.ESC_DISABLE, LABELS.ESC_LIGHTS = CONTROLS['ENABLE'][1], CONTROLS['DISABLE'][1], CONTROLS['LIGHTS'][1]
 
     DecorRegister("esc_siren_enabled", 2)
     DecorRegisterLock()

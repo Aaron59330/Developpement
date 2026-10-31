@@ -6,7 +6,6 @@ local frozen = false
 
 local camera = nil
 local scaleform = nil
-local instScaleform = nil
 
 local fov = ConfigTelescopes.Zoom.Max
 local relativeOffset = 0.0
@@ -178,54 +177,16 @@ local function UnfreezeTelescope(entity)
     end
 end
 
+-- Barre d'aide du télescope : affichée par pickax_ui (couleur du serveur), plus de bandeau GTA natif
 local function SetupInstructions()
-    instScaleform = RequestScaleformMovie("instructional_buttons")
-    while not HasScaleformMovieLoaded(instScaleform) do
-        Wait(10)
-    end
-
-    DrawScaleformMovieFullscreen(instScaleform, 255, 255, 255, 0, 0)
-
-    BeginScaleformMovieMethod(instScaleform, "CLEAR_ALL")
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "SET_CLEAR_SPACE")
-    ScaleformMovieMethodAddParamInt(200)
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "SET_DATA_SLOT")
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamPlayerNameString("~INPUT_PICKUP~")
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentSubstringPlayerName(ConfigTelescopes.Text.Leave)
-    EndTextCommandScaleformString()
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "SET_DATA_SLOT")
-    ScaleformMovieMethodAddParamInt(1)
-    ScaleformMovieMethodAddParamPlayerNameString("~INPUT_WEAPON_WHEEL_PREV~")
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentSubstringPlayerName(ConfigTelescopes.Text.Zoom)
-    EndTextCommandScaleformString()
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "SET_DATA_SLOT")
-    ScaleformMovieMethodAddParamInt(2)
-    ScaleformMovieMethodAddParamPlayerNameString("~INPUT_SELECT_NEXT_WEAPON~")
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentSubstringPlayerName(ConfigTelescopes.Text.Dezoom)
-    EndTextCommandScaleformString()
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(instScaleform, "SET_BACKGROUND_COLOUR")
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(80)
-    EndScaleformMovieMethod()
+    local function k(control) local ok, v = pcall(function() return exports.pickax_ui:ControlKey(control, 0) end) return ok and v or '?' end
+    pcall(function()
+        exports.pickax_ui:KeysShow('telescope', {
+            { key = k(38), label = ConfigTelescopes.Text.Leave },
+            { key = k(15), label = ConfigTelescopes.Text.Zoom },
+            { key = k(14), label = ConfigTelescopes.Text.Dezoom },
+        })
+    end)
 end
 
 local function UseTelescope(entity)
@@ -315,7 +276,6 @@ local function UseTelescope(entity)
             tick = 0
         end
         DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
-        DrawScaleformMovieFullscreen(instScaleform, 255, 255, 255, 255, 0)
         HideHudThisFrame()
 
         tick = tick + 1
@@ -334,7 +294,7 @@ local function UseTelescope(entity)
 
     ClearExtraTimecycleModifier()
     SetScaleformMovieAsNoLongerNeeded(scaleform)
-    SetScaleformMovieAsNoLongerNeeded(instScaleform)
+    pcall(function() exports.pickax_ui:KeysHide('telescope') end)
 
     SetGameplayCamRelativeHeading(gameplayCamera.heading)
     SetGameplayCamRelativePitch(gameplayCamera.pitch, 1.0)

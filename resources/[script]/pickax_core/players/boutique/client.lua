@@ -1330,7 +1330,7 @@ AddEventHandler("ESXCustomBoutique:CreateWeaponSpect", function(modelHash, Coord
 			end
 		end
 
-		buttons = setupScaleform("instructional_buttons")
+		BoutiqueKeys()
 		Wait(1)
 		local rot = 0.0
         if obj == nil then
@@ -1369,11 +1369,11 @@ AddEventHandler("ESXCustomBoutique:CreateWeaponSpect", function(modelHash, Coord
 		while true do
 			Wait(0)
 
-			DrawScaleformMovieFullscreen(buttons)
 			rot = rot + 0.10
 			SetEntityHeading(obj, rot)
             
 			if IsControlPressed(0, ConfigBoutique.Control.ControlPressedDelete) then
+				BoutiqueKeysHide()
 				DeleteEntity(obj)
 				RenderScriptCams(false, false, 0, 1, 0)
 				DestroyCam(CamOBJ, true)
@@ -1393,7 +1393,7 @@ CreateWeaponSpect2 = function(modelHash, Coords, CamCoords, headingCam, FOV)
 		-- 	end
 		-- end
 
-		buttons = setupScaleform("instructional_buttons")
+		BoutiqueKeys()
 		Wait(1)
         modelHash = GetHashKey(modelHash)
 
@@ -1441,11 +1441,11 @@ CreateWeaponSpect2 = function(modelHash, Coords, CamCoords, headingCam, FOV)
 		while true do
 			Wait(0)
 
-			DrawScaleformMovieFullscreen(buttons)
 			rot = rot + 0.10
 			SetEntityHeading(obj, rot)
             
 			if IsControlPressed(0, ConfigBoutique.Control.ControlPressedDelete) then
+				BoutiqueKeysHide()
 				DeleteEntity(obj)
 				RenderScriptCams(false, false, 0, 1, 0)
 				DestroyCam(CamWeapon, true)
@@ -1457,54 +1457,17 @@ CreateWeaponSpect2 = function(modelHash, Coords, CamCoords, headingCam, FOV)
 	end)
 end
 
-function ButtonMessage(text)
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentScaleform(text)
-    EndTextCommandScaleformString()
+-- Barre d'aide de l'aperçu boutique : affichée par pickax_ui (couleur du serveur), plus de bandeau GTA natif
+function BoutiqueKeys()
+    local function k(control) local ok, v = pcall(function() return exports.pickax_ui:ControlKey(control, 2) end) return ok and v or '?' end
+    pcall(function()
+        exports.pickax_ui:KeysShow('boutique', {
+            { key = k(ConfigBoutique.Control.ControlPressedRotation), label = ConfigBoutique.Message.Rotation },
+            { key = k(ConfigBoutique.Control.ControlPressedDelete), label = ConfigBoutique.Message.Delete },
+        })
+    end)
 end
-
-function Button(ControlButton)
-    N_0xe83a3e3557a56640(ControlButton)
-end
-
-function setupScaleform(scaleform)
-    local scaleform = RequestScaleformMovie(scaleform)
-
-    while not HasScaleformMovieLoaded(scaleform) do
-        Citizen.Wait(1)
-    end
-
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-    PopScaleformMovieFunctionVoid()
-    
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(1)
-    Button(GetControlInstructionalButton(2, ConfigBoutique.Control.ControlPressedRotation, true))
-    ButtonMessage(ConfigBoutique.Message.Rotation)
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(0)
-    Button(GetControlInstructionalButton(2, ConfigBoutique.Control.ControlPressedDelete, true))
-    ButtonMessage(ConfigBoutique.Message.Delete)
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(80)
-    PopScaleformMovieFunctionVoid()
-
-    return scaleform
-end
+function BoutiqueKeysHide() pcall(function() exports.pickax_ui:KeysHide('boutique') end) end
 
 function SpawnLocalVehicle(modelName, coords, heading, cb)
 	local model = (type(modelName) == 'number' and modelName or GetHashKey(modelName))

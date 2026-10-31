@@ -9,91 +9,18 @@ local whitelisted = nil
 local maxDistance = ConfigCamera.MaxDistanceForPlayer
 local maxDistanceStaff = ConfigCamera.MaxDistanceForStaff
 
-function ButtonMessage(text)
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentScaleform(text)
-    EndTextCommandScaleformString()
-end
-
-function Button(ControlButton)
-    N_0xe83a3e3557a56640(ControlButton)
-end
-
-function setupScaleform(scaleform)
-    local scaleform = RequestScaleformMovie(scaleform)
-
-    while not HasScaleformMovieLoaded(scaleform) do
-        Citizen.Wait(1)
-    end
-
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-    PopScaleformMovieFunctionVoid()
-    
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
-
-    --Liste
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(1)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Pivot1, true))
-    ButtonMessage(ConfigCamera.MenuName["Pivot1"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(2)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Pivot2, true))
-    ButtonMessage(ConfigCamera.MenuName["Pivot2"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(3)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Down, true))
-    ButtonMessage(ConfigCamera.MenuName["Down"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(4)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.UP, true))
-    ButtonMessage(ConfigCamera.MenuName["UP"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(5)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Left, true))
-    ButtonMessage(ConfigCamera.MenuName["Left"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(6)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Right, true))
-    ButtonMessage(ConfigCamera.MenuName["Right"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(7)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Back, true))
-    ButtonMessage(ConfigCamera.MenuName["Back"])
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(8)
-    Button(GetControlInstructionalButton(1, ConfigCamera.Bind.Front, true))
-    ButtonMessage(ConfigCamera.MenuName["Front"])
-    PopScaleformMovieFunctionVoid()
-    -------
-    
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(80)
-    PopScaleformMovieFunctionVoid()
-
-    return scaleform
+-- Barre d'aide de la caméra libre : affichée par pickax_ui (couleur du serveur), plus de bandeau GTA natif
+local function ShowCamKeys()
+    local B, N = ConfigCamera.Bind, ConfigCamera.MenuName
+    local function k(control) local ok, v = pcall(function() return exports.pickax_ui:ControlKey(control, 1) end) return ok and v or '?' end
+    pcall(function()
+        exports.pickax_ui:KeysShow('freecam', {
+            { key = k(B.Pivot1), label = N["Pivot1"] }, { key = k(B.Pivot2), label = N["Pivot2"] },
+            { key = k(B.Down), label = N["Down"] }, { key = k(B.UP), label = N["UP"] },
+            { key = k(B.Left), label = N["Left"] }, { key = k(B.Right), label = N["Right"] },
+            { key = k(B.Back), label = N["Back"] }, { key = k(B.Front), label = N["Front"] },
+        })
+    end)
 end
 
 function StartFreeCam(fov)
@@ -111,11 +38,10 @@ function StartFreeCam(fov)
         AttachCamToEntity(cam, playerPed, 0.0, 0.0, 0.0, true)
     end
 
+    ShowCamKeys()
     CreateThread(function()
         while true do
-            buttons = setupScaleform("instructional_buttons")
             Citizen.Wait(1)
-            DrawScaleformMovieFullscreen(buttons)
             if (IsDisabledControlPressed(1, ConfigCamera.Bind.SpeedBetter)) then
                 if ActualSpeed < ConfigCamera.Speed.MaxSpeed then
                     ActualSpeed = ActualSpeed + 0.2
@@ -139,6 +65,7 @@ end
 
 function EndFreeCam()
     ClearFocus()
+    pcall(function() exports.pickax_ui:KeysHide('freecam') end)
 
     RenderScriptCams(false, false, 0, true, false)
     DestroyCam(cam, false)
