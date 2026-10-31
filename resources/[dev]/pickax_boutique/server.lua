@@ -23,6 +23,9 @@ CreateThread(function()
         value INT NOT NULL DEFAULT 10, max_uses INT NOT NULL DEFAULT 0, per_player INT NOT NULL DEFAULT 1, uses INT NOT NULL DEFAULT 0,
         expires_at TIMESTAMP NULL, active TINYINT(1) NOT NULL DEFAULT 1, note VARCHAR(120) NULL, created_by VARCHAR(80) NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+    if (MySQL.scalar.await("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'boutique_codes' AND column_name = 'owner'") or 0) == 0 then
+        MySQL.query.await('ALTER TABLE boutique_codes ADD COLUMN owner VARCHAR(80) NULL')   -- bons personnels (roulette) : réservés à un joueur
+    end
     MySQL.query.await([[CREATE TABLE IF NOT EXISTS boutique_code_uses (
         id INT AUTO_INCREMENT PRIMARY KEY, code_id INT NOT NULL, identifier VARCHAR(80) NOT NULL, player_name VARCHAR(80) NULL,
         used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, INDEX idx_code (code_id), INDEX idx_player (identifier)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
@@ -56,6 +59,7 @@ local function refCodeOf(xPlayer) return xPlayer.boutique_id and ('REF-' .. tost
 local function checkCode(code, identifier)
     local row = MySQL.single.await('SELECT *, UNIX_TIMESTAMP(expires_at) AS exp FROM boutique_codes WHERE code = ?', { code })
     if not row or row.active ~= 1 then return nil, 'Code invalide' end
+    if row.owner and row.owner ~= '' and row.owner ~= identifier then return nil, 'Code invalide' end   -- bon personnel d'un autre joueur
     if row.exp and tonumber(row.exp) < os.time() then return nil, 'Ce code a expiré' end
     if row.max_uses > 0 and row.uses >= row.max_uses then return nil, 'Ce code a atteint sa limite d\'utilisations' end
     local mine = MySQL.scalar.await('SELECT COUNT(*) FROM boutique_code_uses WHERE code_id = ? AND identifier = ?', { row.id, identifier }) or 0
@@ -260,7 +264,7 @@ local function adminOnly(src, cb) if isAdmin(src) then return true end cb(fail('
 ESX.RegisterServerCallback('pickax_boutique:admin:data', function(src, cb)
     if not adminOnly(src, cb) then return end
     cb({ ok = true,
-        codes = MySQL.query.await('SELECT id, code, kind, value, max_uses, per_player, uses, active, note, UNIX_TIMESTAMP(expires_at) AS expires FROM boutique_codes ORDER BY id DESC LIMIT 200') or {},
+        codes = MySQL.query.await('SELECT id, code, kind, value, max_uses, per_player, uses, active, note, UNIX_TIMESTAMP(expires_at) AS expires FROM boutique_codes WHERE owner IS NULL ORDER BY id DESC LIMIT 200') or {},
         referral = Settings.referral,
         sales = MySQL.query.await('SELECT player_name, item_name, price, full_price, code, UNIX_TIMESTAMP(created_at) AS ts FROM boutique_history ORDER BY id DESC LIMIT 80') or {},
         referrals = MySQL.query.await('SELECT filleul_name, filleul_coins, parrain_coins, parrain, UNIX_TIMESTAMP(created_at) AS ts FROM boutique_referrals ORDER BY id DESC LIMIT 40') or {},
@@ -415,7 +419,7 @@ end)
 math.randomseed(os.time() + GetGameTimer())
 
 local WHEEL_COLORS = { '#3fb950', '#e5a23c', '#4aa8ff', '#c77dff', '#ff6b6b', '#2ec4b6', '#ffd166', '#8d99ae', '#ef476f', '#06d6a0', '#118ab2', '#f78c6b' }
-local KINDS = { coins = true, money = true, item = true, none = true }
+local KINDS = { coins = true, money = true, item = true, discount = true, none = true }
 local function wheelCfg()
     local W = {}
     for k, v in pairs(Config.Wheel or {}) do W[k] = v end
@@ -443,9 +447,9 @@ local function wheelPrizes(W)
         local wgt = tonumber(p.weight) or 0
         if type(p.label) == 'string' and p.label ~= '' and wgt > 0 then
             local amount = math.floor(tonumber(p.amount) or 0)
-            if kind == 'coins' then amount = math.max(0, math.min(amount, 100000)) elseif kind == 'money' then amount = math.max(0, math.min(amount, 5000000)) elseif kind == 'item' then amount = math.max(1, math.min(amount, 1000)) end
+            if kind == 'coins' then amount = math.max(0, math.min(amount, 100000)) elseif kind == 'money' then amount = math.max(0, math.min(amount, 5000000)) elseif kind == 'item' then amount = math.max(1, math.min(amount, 1000)) elseif kind == 'discount' then amount = math.max(1, math.min(amount, 90)) end
             local color = type(p.color) == 'string' and p.color:match('^#%x%x%x%x%x%x$') or WHEEL_COLORS[(#out % #WHEEL_COLORS) + 1]
-            out[#out + 1] = { label = esc(p.label, 40), kind = kind, amount = amount, item = type(p.item) == 'string' and p.item:match('^[%w_%-]+$') or nil, weight = wgt, color = color }
+            out[#out + 1] = { label = esc(p.label, 40), kind = kind, amount = amount, hours = math.max(1, math.min(720, math.floor(tonumber(p.hours) or 48))), item = type(p.item) == 'string' and p.item:match('^[%w_%-]+$') or nil, weight = wgt, color = color }
             total = total + wgt
         end
     end
@@ -466,7 +470,7 @@ local function wheelState(W, identifier)
 end
 local function wheelPublic(prizes)
     local o = {}
-    for i, p in ipairs(prizes) do o[i] = { label = p.label, kind = p.kind, amount = p.amount, color = p.color, pct = p.pct } end
+    for i, p in ipairs(prizes) do o[i] = { label = p.label, kind = p.kind, amount = p.amount, color = p.color, pct = p.pct, hours = p.kind == 'discount' and p.hours or nil } end
     return o
 end
 
@@ -476,18 +480,31 @@ ESX.RegisterServerCallback('pickax_boutique:wheel:info', function(src, cb)
     local prizes = wheelPrizes(W)
     if W.Enabled == false or #prizes < 2 then return cb({ ok = true, enabled = false }) end
     local st = wheelState(W, xPlayer.identifier)
-    cb({ ok = true, enabled = true, prizes = wheelPublic(prizes), spins = st.spins, left = st.left, next = wheelNext(W), last = st.last })
+    local coupons = MySQL.query.await("SELECT code, value, UNIX_TIMESTAMP(expires_at) - UNIX_TIMESTAMP() AS secs FROM boutique_codes WHERE owner = ? AND active = 1 AND kind = 'percent' AND uses < max_uses AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY value DESC LIMIT 10", { xPlayer.identifier }) or {}
+    cb({ ok = true, enabled = true, prizes = wheelPublic(prizes), spins = st.spins, left = st.left, next = wheelNext(W), last = st.last, coupons = coupons })
 end)
 
 local spinning = {}
 local function wheelAward(src, xPlayer, p, W)
-    if p.kind == 'none' or p.amount <= 0 and p.kind ~= 'item' then return true end
+    if p.kind == 'none' or p.amount <= 0 and p.kind ~= 'item' and p.kind ~= 'discount' then return true end
     if p.kind == 'coins' then
         if not exports['pickax_core']:BoutiqueGrantCoins(xPlayer.identifier, p.amount) then return false, 'Ton compte boutique n\'est pas encore prêt : réessaie dans un instant.' end
         return true
     elseif p.kind == 'money' then
         xPlayer.addAccountMoney(W.Account == 'bank' and 'bank' or 'money', p.amount, 'Roulette boutique')
         return true
+    elseif p.kind == 'discount' then
+        -- bon de réduction personnel : un code à usage unique, valable quelques heures, utilisable seulement par ce joueur
+        local alphabet, code = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', nil
+        for _ = 1, 8 do
+            local c = 'ROUE-'
+            for _ = 1, 6 do local k = math.random(1, #alphabet) c = c .. alphabet:sub(k, k) end
+            if not MySQL.scalar.await('SELECT 1 FROM boutique_codes WHERE code = ?', { c }) then code = c break end
+        end
+        if not code then return false, 'Impossible de créer ton bon pour le moment : réessaie.' end
+        MySQL.insert.await('INSERT INTO boutique_codes (code, kind, value, max_uses, per_player, expires_at, note, created_by, owner) VALUES (?, ?, ?, 1, 1, DATE_ADD(NOW(), INTERVAL ? HOUR), ?, ?, ?)',
+            { code, 'percent', p.amount, p.hours, 'Roulette du jour', 'roulette', xPlayer.identifier })
+        return true, nil, code
     elseif p.kind == 'item' and p.item then
         if GetResourceState('ox_inventory') == 'started' then
             if not exports.ox_inventory:CanCarryItem(src, p.item, p.amount) then return false, 'Ton inventaire est plein : fais de la place puis retente ta chance.' end
@@ -515,7 +532,7 @@ ESX.RegisterServerCallback('pickax_boutique:wheel:spin', function(src, cb)
         local r, idx = math.random() * total, #prizes
         for i, p in ipairs(prizes) do r = r - p.weight if r <= 0 then idx = i break end end
         local p = prizes[idx]
-        local given, why = wheelAward(src, xPlayer, p, W)
+        local given, why, code = wheelAward(src, xPlayer, p, W)
         if not given then return cb(fail(why or 'Gain impossible')) end
         MySQL.update.await([[INSERT INTO boutique_wheel (identifier, last_day, spins_today, total, last_prize, last_at) VALUES (?, ?, 1, 1, ?, NOW())
             ON DUPLICATE KEY UPDATE spins_today = IF(last_day = VALUES(last_day), spins_today + 1, 1), last_day = VALUES(last_day), total = total + 1, last_prize = VALUES(last_prize), last_at = NOW()]],
@@ -524,7 +541,7 @@ ESX.RegisterServerCallback('pickax_boutique:wheel:spin', function(src, cb)
             { xPlayer.identifier, esc(nameOf(xPlayer), 80), esc('Roulette : ' .. p.label, 100), 'roulette', '' })
         log(('%s a tourné la roulette : %s'):format(nameOf(xPlayer), p.label))
         done = true
-        cb({ ok = true, index = idx, prize = { label = p.label, kind = p.kind, amount = p.amount }, left = st.left - 1, next = wheelNext(W) })
+        cb({ ok = true, index = idx, prize = { label = p.label, kind = p.kind, amount = p.amount, hours = p.kind == 'discount' and p.hours or nil, code = code }, left = st.left - 1, next = wheelNext(W) })
     end)
     spinning[src] = nil
     if not ok and not done then print('^1[pickax_boutique] roulette : ' .. tostring(err) .. '^7') cb(fail('Erreur de la roulette : réessaie.')) end

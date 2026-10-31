@@ -240,11 +240,12 @@ function viewWheel() {
       <div class="panel"><h3>${ic('clock', 18)} Mes tours</h3>
         <p class="wbig">${w.left > 0 ? `<b>${w.left}</b> tour${w.left > 1 ? 's' : ''} disponible${w.left > 1 ? 's' : ''}` : '<b>0</b> tour disponible'}</p>
         <p class="sub">${w.left > 0 ? 'Gratuit : clique sur « Tourner ».' : `Prochain tour dans ${dur(w.next)}.`}${w.last ? ` Dernier gain : <b>${esc(w.last.label)}</b>.` : ''}</p></div>
+      ${(w.coupons && w.coupons.length) ? `<div class="panel"><h3>${ic('tag', 18)} Mes bons de réduction</h3><div class="wcoupons">${w.coupons.map(c => `<div class="wc"><div><b>-${c.value} % sur la boutique</b><small>Code ${esc(c.code)} · usage unique${c.secs > 0 ? ' · expire dans ' + dur(c.secs) : ''}</small></div><button class="pri" data-a="useCoupon" data-code="${esc(c.code)}">Utiliser</button></div>`).join('')}</div></div>` : ''}
       <div class="panel"><h3>${ic('gift', 18)} Lots à gagner</h3>
         <div class="wprizes">${w.prizes.map(p => `<div class="wp"><i style="background:${p.color}"></i><span>${esc(p.label)}</span><small>${p.pct}%</small></div>`).join('')}</div></div>
-    </div></div></div>` + (res ? `<div class="wheel-res"><div class="wr-card"><div class="wr-ico">${res.kind === 'none' ? '😕' : '🎉'}</div><h2>${res.kind === 'none' ? 'Pas de chance aujourd\'hui…' : 'Bravo !'}</h2>
-      <p>${res.kind === 'none' ? 'Reviens demain pour retenter ta chance.' : `Tu gagnes <b>${esc(res.label)}</b>${res.kind === 'coins' ? ' : ils sont déjà sur ton solde.' : res.kind === 'money' ? ' : l\'argent est dans ta poche.' : ' : regarde dans ton inventaire.'}`}</p>
-      <button class="pri" data-a="wheelOk">Super !</button></div></div>` : '');
+    </div></div></div>` + (res ? `<div class="wheel-res"><div class="wr-card"><div class="wr-ico">${res.kind === 'none' ? '😕' : res.kind === 'discount' ? '🎟️' : '🎉'}</div><h2>${res.kind === 'none' ? 'Pas de chance aujourd\'hui…' : 'Bravo !'}</h2>
+      <p>${res.kind === 'none' ? 'Reviens demain pour retenter ta chance.' : res.kind === 'discount' ? `Tu gagnes un bon de <b>-${res.amount} %</b> sur toute la boutique (un seul usage, valable ${res.hours || 48} h).<br><span class="wcode">${esc(res.code || '')}</span>` : `Tu gagnes <b>${esc(res.label)}</b>${res.kind === 'coins' ? ' : ils sont déjà sur ton solde.' : res.kind === 'money' ? ' : l\'argent est dans ta poche.' : ' : regarde dans ton inventaire.'}`}</p>
+      ${res.kind === 'discount' && res.code ? `<button class="pri" data-a="useCoupon" data-code="${esc(res.code)}">Utiliser maintenant</button> <button class="sec" data-a="wheelOk">Plus tard</button>` : '<button class="pri" data-a="wheelOk">Super !</button>'}</div></div>` : '');
 }
 
 function viewHistory() {
@@ -435,9 +436,16 @@ document.addEventListener('click', async e => {
       await new Promise(done => setTimeout(done, 5800));
       S.spinning = false; w.left = r.left; w.next = r.next; w.last = { label: r.prize.label }; if (S.data.wheel) S.data.wheel.left = r.left;
       if (S.pendingPoints != null) { S.points = S.pendingPoints; S.pendingPoints = null; }
+      if (r.prize.kind === 'discount' && r.prize.code) w.coupons = [{ code: r.prize.code, value: r.prize.amount, secs: (r.prize.hours || 48) * 3600 }].concat(w.coupons || []);
       S.wheelResult = r.prize; sfx(r.prize.kind === 'none' ? 'close' : 'success'); return render();
     }
     case 'wheelOk': S.wheelResult = null; return render();
+    case 'useCoupon': {
+      const code = el.dataset.code; S.wheelResult = null; const r = await rpc('previewCode', code);
+      if (r && r.ok) { S.code = r.code; S.pct = r.pct; S.promoMsg = `Bon roulette : -${r.pct} % appliqué`; S.view = 'cart'; toast(`Bon de -${r.pct} % appliqué à ton panier`, 'ok'); }
+      else toast((r && r.error) || 'Bon indisponible', 'bad');
+      return render();
+    }
     case 'redeem': {
       const code = (val('redeem') || '').trim(); if (!code) return;
       const r = await rpc('redeem', code);
