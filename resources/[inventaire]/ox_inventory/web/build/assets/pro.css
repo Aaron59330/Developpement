@@ -93,3 +93,10 @@
 #app .slot.hasnum .count { top: 6px !important; bottom: auto !important; }
 #app .slot .num { top: auto !important; bottom: 6px !important; left: 8px !important; right: auto !important; }
 #app .slot .label { font-size: 10.5px !important; letter-spacing: 0 !important; max-width: 94%; }
+
+/* corrections de centrage : loupe, barre de poids pleine largeur, bords de la 1re ligne de cases */
+#app .weight-bar { width: 100% !important; max-width: none !important; margin-top: 5px !important; }
+#app .search { height: 36px !important; margin-top: 1px; }
+#app .search input { height: 36px !important; line-height: 36px !important; }
+#app .search svg { top: 18px !important; transform: translateY(-50%) !important; }
+#app .grid { padding: 4px !important; margin: -4px !important; }
