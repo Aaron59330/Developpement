@@ -7,3 +7,4 @@ tools/discord-tarifs/tarifs.png
 # Fichiers générés ou outils : ne pas versionner
 *.whl
 *.zip
+__pycache__/

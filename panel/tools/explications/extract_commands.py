@@ -52,7 +52,7 @@ for top in sorted(os.listdir(R)):
                             c=re.search(r"--\s*(.+)$",l)
                             if c and not e['desc']: e['desc']=c.group(1).strip()[:140]
         out[top+'/'+res]=sorted(cmds.values(),key=lambda x:x['name'])
-json.dump(out,open('commands_raw.json','w'),ensure_ascii=False)
+json.dump(out,open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'commands_raw.json'),'w'),ensure_ascii=False)
 print(sum(len(v) for v in out.values()))
 for r,v in unres.items(): print('UNRES',r,sorted(v)[:6])
 for k,v in out.items(): 
