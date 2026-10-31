@@ -471,10 +471,14 @@ local function applyServerSettings()
         lastMaxClients = want
         if not Config.AllowMaxClients then PanelLog('warn', 'maxclients', 'Config.AllowMaxClients = false : sv_maxclients non modifié') return end
         local r, e = setMaxClients(want)
-        print(r and ('^2[pickax_panel]^7 places : sv_maxclients ' .. tostring(r.previous or '?') .. ' -> ' .. want .. (r.changed and ' écrit dans server.cfg' or ' (déjà à jour)')) or ('^1[pickax_panel]^7 places : server.cfg non modifié : ' .. tostring(e)))
-        if not r then lastMaxClients = nil PanelLog('error', 'maxclients', 'sv_maxclients non modifié : ' .. tostring(e))
-        elseif r.changed then PanelLog('staff', 'maxclients', ('sv_maxclients %s → %d dans server.cfg : pris en compte au prochain redémarrage du serveur'):format(tostring(r.previous or '?'), want))
-        else PanelLog('info', 'maxclients', 'sv_maxclients est déjà à ' .. want .. ' dans server.cfg') end
+        if r then
+            print('^2[pickax_panel]^7 places : sv_maxclients ' .. tostring(r.previous or '?') .. ' -> ' .. want .. (r.changed and ' écrit dans server.cfg (effectif au prochain redémarrage)' or ' (déjà à jour)'))
+            PanelLog(r.changed and 'staff' or 'info', 'maxclients', r.changed and ('sv_maxclients %s → %d dans server.cfg : pris en compte au prochain redémarrage du serveur'):format(tostring(r.previous or '?'), want) or ('sv_maxclients est déjà à ' .. want .. ' dans server.cfg'))
+        else
+            -- hébergeur qui cache le disque au serveur de jeu : la limite reste appliquée à chaque connexion ; seule la liste FiveM garde l'ancien nombre
+            print('^3[pickax_panel]^7 places : ' .. want .. ' joueurs maximum appliqués à la connexion. server.cfg non modifiable depuis le serveur de jeu (hébergeur) : mets sv_maxclients ' .. want .. ' à la main pour que la liste FiveM l\'affiche aussi.')
+            PanelLog('warn', 'maxclients', 'server.cfg non modifiable depuis le serveur de jeu : ' .. want .. ' joueurs max appliqués à la connexion ; mets sv_maxclients ' .. want .. ' à la main dans server.cfg')
+        end
     end
 end
 
