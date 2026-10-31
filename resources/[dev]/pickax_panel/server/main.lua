@@ -455,7 +455,8 @@ local function applyServerSettings()
         lastMaxClients = want
         if not Config.AllowMaxClients then PanelLog('warn', 'maxclients', 'Config.AllowMaxClients = false : sv_maxclients non modifié') return end
         local r, e = setMaxClients(want)
-        if not r then PanelLog('error', 'maxclients', 'sv_maxclients non modifié : ' .. tostring(e))
+        print(r and ('^2[pickax_panel]^7 places : sv_maxclients ' .. tostring(r.previous or '?') .. ' -> ' .. want .. (r.changed and ' écrit dans server.cfg' or ' (déjà à jour)')) or ('^1[pickax_panel]^7 places : server.cfg non modifié : ' .. tostring(e)))
+        if not r then lastMaxClients = nil PanelLog('error', 'maxclients', 'sv_maxclients non modifié : ' .. tostring(e))
         elseif r.changed then PanelLog('staff', 'maxclients', ('sv_maxclients %s → %d dans server.cfg : pris en compte au prochain redémarrage du serveur'):format(tostring(r.previous or '?'), want))
         else PanelLog('info', 'maxclients', 'sv_maxclients est déjà à ' .. want .. ' dans server.cfg') end
     end
