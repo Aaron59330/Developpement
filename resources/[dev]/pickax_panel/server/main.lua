@@ -565,6 +565,7 @@ end)
 AddEventHandler('playerDropped', function(reason) PanelLog('info', 'connexion', ('%s (ID %d) a quitté : %s'):format(GetPlayerName(source) or '?', source, reason or '')) end)
 
 -- ───────── boucle de synchronisation ─────────
+local connectedOnce = false
 local extra -- bans/whitelist modifiés en jeu, renvoyés au panel
 local interval = Config.Interval
 
@@ -581,6 +582,10 @@ end
 local function runCommands(list)
     for _, c in ipairs(list or {}) do
         local done, res, data = runCommand(c)
+        local pre = tostring(c.type):sub(1, 3)
+        if pre ~= 'fs.' and pre ~= 'db.' then   -- les actions du panel (appliquer l'écran de chargement, le thème, redémarrer…) sont visibles dans la console
+            print(('%s[pickax_panel]^7 action « %s » : %s%s'):format(done and '^2' or '^1', tostring(c.type), done and 'OK' or 'ÉCHEC — ', done and (res and (' (' .. tostring(res) .. ')') or '') or tostring(res)))
+        end
         results[#results + 1] = { id = c.id, ok = done, result = tostring(res), data = data }
     end
 end
@@ -646,6 +651,8 @@ local function sync()
             if r.error ~= lastErr then lastErr = r.error print('^1[pickax_panel]^7 ' .. tostring(r.error)) end
             license.valid = false enforce() return
         end
+        if lastErr or not connectedOnce then print('^2[pickax_panel]^7 connecté au panel : les réglages enregistrés dans le panel sont appliqués en jeu (toutes les ' .. tostring(tonumber(r.interval) or Config.Interval) .. ' s)') end
+        connectedOnce = true
         lastErr = nil; interval = tonumber(r.interval) or Config.Interval
         for k, d in pairs(r.docs or {}) do docVersions[k] = d.version onDoc(k, d.value) end
         runCommands(r.commands)
