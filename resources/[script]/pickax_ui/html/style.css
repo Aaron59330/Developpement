@@ -211,7 +211,7 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #wrap[data-style="dore"] .sep::after { display: none; }
 
 /* ===== Barre d'aide des touches (noclip, caméra, placement…) : couleur du serveur ===== */
-#keys { position: fixed; left: 14px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; max-width: calc(100vw - 28px); padding: 8px 14px; border-radius: 14px;
+#keys { position: fixed; right: 14px; bottom: 74px; justify-content: flex-end; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; max-width: calc(100vw - 28px); padding: 8px 14px; border-radius: 14px;
   background: rgba(14, 14, 15, .86); border: 1px solid rgba(255, 255, 255, .08); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); font: 600 13px/1 'Segoe UI', Arial, sans-serif; color: #e9eaee; z-index: 5; pointer-events: none; }
 #keys.hidden { display: none; }
 #keys .kb { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }

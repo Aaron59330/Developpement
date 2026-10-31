@@ -221,10 +221,14 @@ exports('KeysHide', function(id)
 end)
 
 -- Nom lisible d'une touche à partir d'un contrôle GTA (ex. 38 → « E »)
-local MOUSE = { [24] = 'Clic gauche', [25] = 'Clic droit', [14] = 'Molette ↓', [15] = 'Molette ↑', [16] = 'Molette ↓', [17] = 'Molette ↑', [348] = 'Clic molette' }
+-- touches que GTA dessine comme des icônes (pas du texte) : on donne leur nom nous-mêmes
+local NAMED = { [24] = 'Clic gauche', [25] = 'Clic droit', [14] = 'Molette ↓', [15] = 'Molette ↑', [16] = 'Molette ↓', [17] = 'Molette ↑', [348] = 'Clic molette',
+    [21] = 'Maj', [22] = 'Espace', [36] = 'Ctrl', [19] = 'Alt', [37] = 'Tab', [18] = 'Entrée', [191] = 'Entrée', [201] = 'Entrée', [177] = 'Retour', [200] = 'Échap', [202] = 'Retour',
+    [288] = 'F1', [289] = 'F2', [170] = 'F3', [166] = 'F5', [167] = 'F6', [168] = 'F7', [56] = 'F9', [57] = 'F10', [172] = '↑', [173] = '↓', [174] = '←', [175] = '→', [178] = 'Suppr',
+    [73] = 'X', [38] = 'E', [51] = 'E', [74] = 'H', [75] = 'F', [47] = 'G', [45] = 'R', [140] = 'R', [44] = 'Q', [26] = 'C', [29] = 'B', [244] = 'M', [246] = 'Y', [249] = 'N', [303] = 'U', [311] = 'K', [85] = 'A', [48] = 'W', [46] = 'E', [80] = 'R', [86] = 'E', [71] = 'W', [72] = 'S', [23] = 'F' }
 exports('ControlKey', function(control, group)
     local ok, s = pcall(GetControlInstructionalButton, group or 0, control, true)
-    if ok and type(s) == 'string' and s:sub(1, 2) == 't_' then return (s:sub(3):gsub('^%l', string.upper)) end
-    return MOUSE[control] or '?'
+    if ok and type(s) == 'string' and s:sub(1, 2) == 't_' and #s > 2 then return (s:sub(3):gsub('^%l', string.upper)) end
+    return NAMED[control] or 'Touche'
 end)
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then KEYBARS, KEYORDER = {}, {} end end)
