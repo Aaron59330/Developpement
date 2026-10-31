@@ -153,9 +153,10 @@ Config.Types = {
     driving = { label = 'Auto-écoles',         one = 'Auto-école',        icon = 'book',   sub = 'Permis : code de la route (QCM) et conduite (parcours)' },
     bank    = { label = 'Banques',             one = 'Banque',            icon = 'dollar', sub = 'Guichets et distributeurs : dépôt, retrait, virement' },
     fuel    = { label = 'Stations essence',    one = 'Station essence',   icon = 'fuel',   sub = 'Pompes, carburant, jerricans' },
+    casino  = { label = 'Casinos',             one = 'Casino',            icon = 'dollar', sub = 'Caisse de jetons, machines à sous, blackjack et roulette (ressource pickax_casino)' },
     jobcenter = { label = 'Pôles emploi',      one = 'Pôle emploi',       icon = 'users',  sub = 'Petits jobs en libre accès : un clic = embauché, puis des petites quêtes' },
 }
-Config.TypeOrder = { 'garage', 'impound', 'rental', 'pvp', 'chase', 'carlot', 'doorlock', 'fuel', 'carwash', 'locksmith', 'bank', 'driving', 'jobcenter' }
+Config.TypeOrder = { 'garage', 'impound', 'rental', 'pvp', 'chase', 'carlot', 'doorlock', 'fuel', 'carwash', 'locksmith', 'bank', 'driving', 'jobcenter', 'casino' }
 
 -- ─────────────────────────────── PNJ ───────────────────────────────
 Config.PedScenarios = {
@@ -421,6 +422,32 @@ Config.Templates.carwash = {
             blip = { enabled = true, sprite = 100, color = 3, scale = PK_BSF(0.8), label = 'Station de lavage', shortRange = true },
             programs = { { label = 'Lavage rapide', price = 8, seconds = 6 }, { label = 'Lavage complet', price = 15, seconds = 12 }, { label = 'Lavage premium', price = 30, seconds = 20 } } },
         points = { { kind = 'wash', label = 'Baie de lavage 1', blip = true, ped = noPed }, { kind = 'wash', label = 'Baie de lavage 2', blip = false, ped = noPed } },
+    },
+}
+
+-- ─────────────────────────────── Casinos ───────────────────────────────
+-- Les jeux (règles, rouleaux, gains) sont dans pickax_casino/config.lua ; ici : où sont les postes et les prix des jetons.
+Config.Templates.casino = {
+    casino = {
+        label = 'Casino complet', icon = 'dollar',
+        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000,
+            blip = { enabled = true, sprite = 679, color = 5, scale = PK_BSF(0.9), label = 'Casino', shortRange = true } },
+        points = {
+            { kind = 'cashier', label = 'Caisse', blip = true, ped = ped('u_m_m_bankman', 'WORLD_HUMAN_CLIPBOARD') },
+            { kind = 'slots', tier = 'bronze', label = 'Machine Bronze', blip = false, ped = noPed },
+            { kind = 'slots', tier = 'silver', label = 'Machine Argent', blip = false, ped = noPed },
+            { kind = 'slots', tier = 'gold', label = 'Machine Or', blip = false, ped = noPed },
+            { kind = 'blackjack', tier = 'classic', label = 'Blackjack Classique', blip = false, ped = noPed },
+            { kind = 'blackjack', tier = 'vip', label = 'Blackjack VIP', blip = false, ped = noPed },
+            { kind = 'roulette', tier = 'classic', label = 'Roulette Classique', blip = false, ped = noPed },
+            { kind = 'roulette', tier = 'vip', label = 'Roulette VIP', blip = false, ped = noPed },
+        },
+    },
+    cashier = {
+        label = 'Caisse seule', icon = 'dollar',
+        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000,
+            blip = { enabled = true, sprite = 679, color = 5, scale = PK_BSF(0.9), label = 'Casino', shortRange = true } },
+        points = { { kind = 'cashier', label = 'Caisse', blip = true, ped = ped('u_m_m_bankman', 'WORLD_HUMAN_CLIPBOARD') } },
     },
 }
 

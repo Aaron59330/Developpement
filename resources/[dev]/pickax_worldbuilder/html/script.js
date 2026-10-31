@@ -501,10 +501,12 @@ const KIND = {
   wash: { label: 'Baie de lavage', icon: 'drop' },
   desk: { label: 'Accueil (inscriptions)', icon: 'user' }, spawn: { label: 'Départ du véhicule d\'examen', icon: 'car' }, checkpoint: { label: 'Point de passage (parcours)', icon: 'pin' },
   counter: { label: 'Guichet (agent)', icon: 'user' }, atm: { label: 'Distributeur (ATM)', icon: 'card' },
+  cashier: { label: 'Caisse (jetons)', icon: 'dollar' }, slots: { label: 'Machine à sous', icon: 'card' }, blackjack: { label: 'Table de blackjack', icon: 'users' }, roulette: { label: 'Table de roulette', icon: 'target' },
 };
-const KIND_ORDER = { garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
-const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone' };
-const PED_KINDS = new Set(['main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby']);
+const KIND_ORDER = { garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'], casino: ['cashier', 'slots', 'blackjack', 'roulette'] };
+const POINT_WORD = { garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', casino: 'poste' };
+const PED_KINDS = new Set(['main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby', 'cashier']);
+const CASINO_TIERS = { slots: [['bronze', 'Bronze'], ['silver', 'Argent'], ['gold', 'Or']], blackjack: [['classic', 'Classique'], ['vip', 'VIP']], roulette: [['classic', 'Classique'], ['vip', 'VIP']] };
 const NO_BLIP = new Set(['map', 'slot', 'spawn', 'checkpoint']);
 const NO_MARKER = new Set(['zone', 'map', 'spawn', 'checkpoint']);
 
@@ -523,6 +525,10 @@ const NEWROW = {
   question: () => ({ q: '', answers: ['', '', '', ''], correct: 1 }),
 };
 const NEWP = {
+  cashier: () => ({ kind: 'cashier', label: 'Caisse', blip: true, ped: { enabled: true, model: 'u_m_m_bankman', scenario: 'WORLD_HUMAN_CLIPBOARD' } }),
+  slots: () => ({ kind: 'slots', tier: 'bronze', label: 'Machine à sous', blip: false, ped: PED0() }),
+  blackjack: () => ({ kind: 'blackjack', tier: 'classic', label: 'Table de blackjack', blip: false, ped: PED0() }),
+  roulette: () => ({ kind: 'roulette', tier: 'classic', label: 'Table de roulette', blip: false, ped: PED0() }),
   main: () => ({ kind: 'main', label: '', blip: true, ped: PED0(), spawns: [] }),
   lobby: () => ({ kind: 'lobby', label: 'Course poursuite', blip: true, ped: { enabled: true, model: 's_m_y_cop_01', scenario: 'WORLD_HUMAN_CLIPBOARD' } }),
   zone: () => ({ kind: 'zone', label: 'Nouvelle zone', blip: true, radius: 60, color: [239, 68, 68], reviveEnabled: true, reviveDelay: 5, giveWeapons: true, removeOnExit: true, infiniteAmmo: false, healOnKill: true, armorOnRespawn: true, killReward: 0, spawnProtection: 3, weapons: [{ name: 'WEAPON_PISTOL', ammo: 250 }], spawns: [] }),
@@ -661,6 +667,7 @@ const Builder = {
     if (t === 'rental') out.push(['fleet', 'Flotte', 'key']);
     if (t === 'fuel') out.push(['station', 'Station', 'fuel']);
     if (t === 'bank') out.push(['rules', 'Frais & limites', 'dollar']);
+    if (t === 'casino') out.push(['rules', 'Jetons & limites', 'dollar']);
     if (t === 'driving') out.push(['licenses', 'Permis', 'key']);
     if (t === 'carwash') out.push(['programs', 'Programmes', 'drop']);
     if (t === 'locksmith') out.push(['keys', 'Clés', 'key']);
@@ -816,6 +823,11 @@ const Builder = {
       <div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Mise & gains</div></div>
         <div class="grid3">${this.fSel('Compte débité / crédité', 'settings.rewardAccount', [['bank', 'Banque'], ['money', 'Espèces'], ['black_money', 'Argent sale']])}${this.fN(`Mise d'entrée par joueur (${CUR})`, 'settings.entryFee', { min: 0 })}${this.fN(`Bonus de victoire offert par le serveur (${CUR})`, 'settings.rewardWin', { min: 0 })}</div>
         <div class="hint mt-s">Chaque joueur paie la mise au lancement de la partie. Les gagnants se partagent toutes les mises (ils récupèrent la leur + celle des perdants), les perdants perdent leur mise. Course annulée (joueur sorti du véhicule) : tout le monde est remboursé. Mise à 0 = course gratuite.</div></div>`;
+    if (c.type === 'casino') return `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Jetons</div></div>
+        <div class="grid3">${this.fSel('Compte utilisé pour acheter / vendre', 'settings.currency', [['money', 'Espèces'], ['bank', 'Banque']])}${this.fN(`Prix d'un jeton à l'achat (${CUR})`, 'settings.chipBuyPrice', { min: 0.01, step: 0.01 })}${this.fN(`Rachat par jeton (${CUR}) — la caisse garde la différence`, 'settings.chipSellPrice', { min: 0, step: 0.01 })}
+        ${this.fN('Achat minimum (jetons)', 'settings.minBuy', { min: 1 })}${this.fN('Achat maximum par opération (jetons)', 'settings.maxBuy', { min: 1 })}${this.fN('Jetons maximum par joueur', 'settings.maxWallet', { min: 1 })}</div>
+        <div class="mt">${this.fN('Gros gain annoncé à partir de (jetons, 0 = jamais)', 'settings.bigWin', { min: 0 })}</div>
+        <div class="hint mt-s">Les jetons sont communs à tous les casinos du serveur. Les règles des jeux (rouleaux des machines, gains, limites de mise par gamme) se règlent dans <b>Gestion Base → Tous les réglages des scripts → pickax_casino</b>. Place ensuite une <b>caisse</b> et des postes de jeu dans l'onglet Emplacements : choisis la gamme (Bronze / Argent / Or, Classique / VIP) de chaque poste.</div></div>`;
     if (c.type === 'bank') return `<div class="card"><div class="card-h"><div class="t">${ic('dollar', 17)} Frais (en % du montant)</div></div>
         <div class="grid3">${this.fN('Frais de dépôt (%)', 'settings.depositFee', { min: 0, max: 100, step: 0.1 })}${this.fN('Frais de retrait (%)', 'settings.withdrawFee', { min: 0, max: 100, step: 0.1 })}${this.fN('Frais de virement (%)', 'settings.transferFee', { min: 0, max: 100, step: 0.1 })}</div>
         <div class="mt">${this.fItem('Compte société crédité des frais (esx_addonaccount)', 'settings.society')}</div></div>
@@ -986,6 +998,7 @@ const Builder = {
     if (k === 'map') h += `<div class="card"><div class="card-h"><div class="t">${ic('map', 17)} Carte</div></div>${this.fS('Description (affichée dans le menu)', `${base}.desc`, { max: 160 })}<div class="hint mt-s">La position ci-dessus identifie la carte. Sans réglage ci-dessous, le fugitif part de cette position (le cap compte) et les poursuivants sont placés automatiquement derrière lui.</div>
       ${this.optCoord('Départ du fugitif (position de la voiture)', `${base}.runner`, 'Place-toi à l\'endroit voulu, orienté dans le sens du départ')}
       ${this.spawnsEditor(base, 'Départs des poursuivants (1 par poursuivant, dans l\'ordre)', 'Aucun point : les poursuivants sont placés automatiquement derrière le fugitif. Sinon, ajoute autant de points que de poursuivants max (ils réutilisent les points s\'il y en a moins).')}</div>`;
+    if (c.type === 'casino' && CASINO_TIERS[k]) h += `<div class="card"><div class="card-h"><div class="t">${ic('card', 17)} Gamme du poste</div></div>${this.fSel('Gamme (limites de mise)', `${base}.tier`, CASINO_TIERS[k])}<div class="hint mt-s">Les mises minimum et maximum de chaque gamme se règlent dans pickax_casino/config.lua.</div></div>`;
     if (c.type === 'doorlock') h += this.doorCard(base, p);
     if (c.type === 'pvp' && k === 'zone') h += this.zoneCard(base, p);
     if (!NO_MARKER.has(k)) h += this.markerCard(base, p);

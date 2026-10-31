@@ -3,14 +3,11 @@
 Casino complet : **caisse** (achat / rachat de jetons), **machines à sous**, **blackjack**, **roulette européenne**.
 
 ## Mise en place
-1. Démarre la ressource (elle fait partie de `[dev]`, déjà lancée par `ensure [dev]`). Les tables SQL se créent seules.
-2. Place les postes en jeu (staff, là où tu te tiens) :
-   - `/casinoadd cashier`
-   - `/casinoadd slots bronze|silver|gold`
-   - `/casinoadd blackjack classic|vip`
-   - `/casinoadd roulette classic|vip`
-3. `/casinolist` liste les postes, `/casinodel <numéro>` en supprime un.
-4. `/casinortp` affiche le taux de retour théorique des machines, `/casinostats` le bénéfice de la maison.
+1. La ressource fait partie de `[dev]` (déjà lancée par `ensure [dev]`) et dépend de `pickax_worldbuilder`. Les tables SQL se créent seules.
+2. Ouvre le **World Builder** (`/worldbuilder`) → **Nouveau module → Casinos** → modèle « Casino complet » (1 caisse, 3 machines, 2 blackjack, 2 roulettes) ou « Caisse seule ».
+3. Onglet **Emplacements** : place chaque poste (position, PNJ, blip, repère au sol) et choisis sa gamme (Bronze / Argent / Or, Classique / VIP).
+4. Onglet **Jetons & limites** : compte utilisé, prix d'achat, rachat, limites. Active le module.
+5. `/casinortp` affiche le taux de retour théorique des machines, `/casinostats` le bénéfice de la maison (staff).
 
 ## Règles
 - 1 jeton = `Config.ChipBuyPrice` $ ; rachat à `Config.ChipSellPrice` (0.95 = la caisse garde 5 %).
@@ -22,4 +19,4 @@ Casino complet : **caisse** (achat / rachat de jetons), **machines à sous**, **
 Tirages, cartes et gains sont calculés côté serveur (`server/games.lua`). Le client n'envoie que sa mise. Vérification de la distance au poste, une action à la fois par joueur, débit atomique en base.
 
 ## Réglages
-Tout est dans `config.lua` (prix, limites, rouleaux, gains, tables) et modifiable depuis le panel : *Gestion Base → Tous les réglages des scripts*.
+Règles des jeux (rouleaux, gains, limites de mise par gamme) : `config.lua`, modifiable depuis le panel (*Gestion Base → Tous les réglages des scripts*). Prix des jetons et emplacements : World Builder. Les valeurs de `config.lua` servent de défaut.

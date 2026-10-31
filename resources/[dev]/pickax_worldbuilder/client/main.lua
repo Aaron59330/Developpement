@@ -256,6 +256,7 @@ local KIND_TEXT = {
     carwash = { wash = 'Laver le véhicule' },
     driving = { desk = 'Ouvrir l\'auto-école' },
     bank = { counter = 'Accéder au guichet', atm = 'Utiliser le distributeur' },
+    casino = { cashier = 'Acheter / vendre des jetons', slots = 'Jouer à la machine à sous', blackjack = 'Jouer au blackjack', roulette = 'Jouer à la roulette' },
 }
 local EXIT_COLOR = { 255, 140, 60 }
 

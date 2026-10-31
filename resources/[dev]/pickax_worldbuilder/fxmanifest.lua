@@ -31,6 +31,7 @@ server_scripts {
     'server/carlot.lua',
     'server/chase.lua',
     'server/pvp.lua',
+    'server/casino.lua',
 }
 
 client_scripts {
@@ -50,6 +51,7 @@ client_scripts {
     'client/carlot.lua',
     'client/chase.lua',
     'client/pvp.lua',
+    'client/casino.lua',
 }
 
 ui_page 'html/index.html'

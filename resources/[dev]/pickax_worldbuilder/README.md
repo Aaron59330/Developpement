@@ -88,3 +88,6 @@ Au premier démarrage, **27 stations essence** (une cuve par station) et **8 age
 
 - **Assurance** — `/assurer <formule>` dans son véhicule (formules dans `Config.Insurance` : « basic » 50 % et « full » 100 % des frais de fourrière pris en charge, 7 jours), `/assurance` pour la liste. La prime va à la société choisie (`Config.Insurance.Society`).
 - **Fourrière → enchères** — un véhicule resté en fourrière plus de 14 jours est mis aux enchères par l'État (`pickax_auction`) ; le propriétaire est prévenu 2 jours avant s'il est connecté. Produit versé à `Config.State.Society` de `pickax_auction` ; invendu : rendu à son propriétaire (ou détruit si `Config.State.Unsold = 'scrap'`). Réglages : `Config.ImpoundAuction`.
+
+## Casinos
+Type « Casinos » : caisse de jetons, machines à sous, blackjack et roulette. Le World Builder place les postes (position, PNJ, blip, repère au sol, gamme de chaque poste) et règle les prix des jetons ; les jeux sont dans `pickax_casino`. Fichiers : `server/casino.lua` (export `CasinoSpot`), `client/casino.lua`.

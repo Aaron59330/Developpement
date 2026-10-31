@@ -194,6 +194,10 @@ local SETTINGS = {
         payments = { 'p' }, society = ITEM,
         programs = { 'a', obj({ label = { 's', 60, 'Lavage' }, price = { 'n', 0, 1000000, 50 }, seconds = { 'n', 3, 120, 8 } }), 8 },
     }),
+    casino = merge(COMMON, {
+        currency = { 'e', { 'money', 'bank' }, 'money' }, chipBuyPrice = { 'n', 0.01, 100000, 1 }, chipSellPrice = { 'n', 0, 100000, 0.95 },
+        minBuy = { 'n', 1, 100000000, 10 }, maxBuy = { 'n', 1, 1000000000, 500000 }, maxWallet = { 'n', 1, 1000000000, 5000000 }, bigWin = { 'n', 0, 1000000000, 50000 },
+    }),
     bank = merge(COMMON, {
         depositFee = { 'n', 0, 100, 0 }, withdrawFee = { 'n', 0, 100, 0 }, transferFee = { 'n', 0, 100, 0 }, maxTransaction = { 'n', 0, 1000000000, 0 },
         dailyLimit = { 'n', 0, 1000000000, 0 }, atmDeposit = { 'b', false }, society = ITEM,
@@ -218,6 +222,7 @@ local POINTS = {
     rental  = { main = merge(PBASE, { spawns = { 'a', { 'c' }, 12 }, ret = { 'c' } }) },
     fuel    = { pump = PBASE },
     bank    = { counter = PBASE, atm = PBASE },
+    casino  = { cashier = PBASE, slots = merge(PBASE, { tier = { 's', 20, '' } }), blackjack = merge(PBASE, { tier = { 's', 20, '' } }), roulette = merge(PBASE, { tier = { 's', 20, '' } }) },
     carwash = { wash = PBASE },
     locksmith = { shop = PBASE },
     jobcenter = { desk = PBASE },
@@ -262,6 +267,14 @@ local function cleanPoints(tp, list)
             if sch then
                 local c = clean(obj(sch), p)
                 c.kind = kind
+                if tp == 'casino' then          -- gamme du poste : doit exister dans pickax_casino (sinon la première gamme)
+                    local tiers = WB.casinoTiers and WB.casinoTiers[kind]
+                    if tiers then
+                        local okTier = false
+                        for _, t in ipairs(tiers) do if t == c.tier then okTier = true end end
+                        if not okTier then c.tier = tiers[1] end
+                    else c.tier = nil end
+                end
                 -- min <= max pour les plages
                 for _, key in ipairs({ 'harvest', 'cash' }) do
                     if c[key] and c[key].min and c[key].max and c[key].max < c[key].min then c[key].max = c[key].min end

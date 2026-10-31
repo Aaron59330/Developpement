@@ -13,4 +13,4 @@ client_scripts { 'client/main.lua' }
 ui_page 'html/index.html'
 files { 'html/index.html', 'html/style.css', 'html/script.js' }
 
-dependencies { 'es_extended', 'oxmysql' }
+dependencies { 'es_extended', 'oxmysql', 'pickax_worldbuilder' }
