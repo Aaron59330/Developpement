@@ -5,6 +5,7 @@
 -- Définitions seules : relier les utilisations et effets aux scripts du serveur.
 return {
     -- Sacs (voir data/config_sacs.lua) : clic droit → Ouvrir le sac ; le contenu suit le sac
+    ['portefeuille'] = { bag = true, openLabel = 'Ouvrir le portefeuille', label = 'Portefeuille', weight = 100, stack = false, close = false, consume = 0, description = "Range tes papiers : carte d'identité, permis de conduire, permis de port d'arme. Si tu le donnes, ses papiers partent avec." },
     ['sac_petit'] = { bag = true, label = 'Sacoche', weight = 300, stack = false, close = false, consume = 0, description = 'Un petit sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
     ['sac_moyen'] = { bag = true, label = 'Sac bandoulière', weight = 500, stack = false, close = false, consume = 0, description = 'Un sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },
     ['sac_a_dos'] = { bag = true, label = 'Sac à dos', weight = 800, stack = false, close = false, consume = 0, description = 'Un grand sac avec son propre rangement. Si tu le donnes, son contenu part avec.' },

@@ -8,5 +8,7 @@ return {
     sac_moyen  = { slots = 12, maxWeight = 15000 },   -- Sac bandoulière
     sac_a_dos  = { slots = 20, maxWeight = 30000 },   -- Sac à dos
     sac_sport  = { slots = 30, maxWeight = 50000 },   -- Sac de sport
+    -- Portefeuille : ne reçoit QUE les papiers listés dans whitelist (identité, permis de conduire / moto / camion, permis de port d'arme, PPA)
+    portefeuille = { slots = 6, maxWeight = 300, whitelist = { 'id_card', 'driver_license', 'weapon_license', 'drive', 'drive_bike', 'drive_truck', 'weapon' } },
     clothes_bag = { slots = 12, maxWeight = 20000 },  -- « Bag » acheté en magasin de vêtements : « Porter » l'équipe, « Ouvrir le sac » ouvre son rangement
 }

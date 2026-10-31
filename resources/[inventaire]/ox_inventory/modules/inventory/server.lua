@@ -1791,6 +1791,7 @@ lib.callback.register('ox_inventory:swapItems', function(source, data)
 							local checkItem = toContainer and fromData.name or toData.name
 
 							if (whitelist and not whitelist[checkItem]) or (blacklist and blacklist[checkItem]) then
+								TriggerClientEvent('ox_lib:notify', playerInventory.id, { type = 'error', description = 'Ce rangement n\'accepte pas cet objet' })
 								return
 							end
 
