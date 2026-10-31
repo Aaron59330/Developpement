@@ -198,3 +198,25 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .panel { margin-bottom: 20px; } .two { margin-bottom: 20px; } .two > .panel, .panel:last-child, .two:last-child { margin-bottom: 0; }
 .panel .tbl { margin-top: 10px; } .panel .form { margin-top: 12px; } .panel .promo { margin-top: 12px; }
 .panel > .sub { margin-top: 10px; line-height: 1.5; }
+
+/* ───── roulette du jour ───── */
+.wheel-page{display:grid;grid-template-columns:minmax(380px,520px) 1fr;gap:32px;align-items:center;padding:12px 8px}
+.wheel-stage{position:relative;width:min(100%,500px);aspect-ratio:1;margin:0 auto}
+.wheel{position:absolute;inset:14px;border-radius:50%;border:8px solid #1b1c22;box-shadow:0 0 0 3px rgba(255,255,255,.14),0 18px 50px rgba(0,0,0,.55),inset 0 0 40px rgba(0,0,0,.35);overflow:hidden}
+.wline{position:absolute;left:50%;top:50%;width:50%;height:2px;margin-top:-1px;transform-origin:0 50%;background:rgba(0,0,0,.45)}
+.wl{position:absolute;left:50%;top:50%;width:50%;height:0;transform-origin:0 0}
+.wl b{position:absolute;left:34%;width:58%;top:-10px;line-height:20px;text-align:center;font-size:clamp(11px,1.35vw,15px);font-weight:800;color:#101114;text-shadow:0 1px 0 rgba(255,255,255,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wheel-pointer{position:absolute;left:50%;top:0;width:0;height:0;margin-left:-16px;border-left:16px solid transparent;border-right:16px solid transparent;border-top:34px solid #fff;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));z-index:3}
+.wheel-hub{position:absolute;left:50%;top:50%;width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:50%;border:6px solid #1b1c22;background:var(--pk-accent,#fdc27d);color:#17120a;font-weight:900;letter-spacing:.06em;font-size:13px;cursor:pointer;z-index:2;box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 0 3px rgba(255,255,255,.18);transition:transform .15s}
+.wheel-hub:hover:not(.off){transform:scale(1.06)}.wheel-hub.off{background:#4a4a52;color:#bbb;cursor:default}
+.wheel-side{display:flex;flex-direction:column;gap:16px}
+.wbig{font-size:22px;margin:6px 0}.wbig b{color:var(--pk-accent,#fdc27d);font-size:30px}
+.wprizes{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+.wp{display:flex;align-items:center;gap:10px;font-size:14px}.wp i{width:14px;height:14px;border-radius:4px;flex:none}.wp span{flex:1}.wp small{opacity:.6}
+.wheel-res{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;z-index:40;animation:fadein .2s}
+.wr-card{background:#17181d;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:34px 44px;text-align:center;max-width:420px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.wr-ico{font-size:54px}.wr-card h2{margin:10px 0 6px;font-size:26px}.wr-card p{opacity:.85;line-height:1.6;margin:0 0 20px}
+@media(max-width:1000px){.wheel-page{grid-template-columns:1fr}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+.wr-card .pri{height:46px;padding:0 34px;border-radius:12px;border:0;background:var(--pk-accent,#fdc27d);color:#17120a;font-weight:800;font-size:15px;cursor:pointer}

@@ -40,3 +40,24 @@ Config.Daily = {
         { cat = 'business', count = 0 },
     },
 }
+
+-- « Roulette du jour » : chaque joueur tourne la roue gratuitement (une fois par jour par défaut) et gagne un petit lot.
+-- Tout se règle aussi depuis le panel web (Gestion Base → Boutique à coins → Roulette) : le panel est alors prioritaire.
+--   kind : 'coins' (coins de la boutique) · 'money' (argent liquide du jeu) · 'item' (objet d'inventaire, champ item) · 'none' (perdu)
+--   weight : poids du tirage (plus il est grand, plus le lot sort souvent) ; color : couleur de la part (facultatif, #RRGGBB)
+Config.Wheel = {
+    Enabled    = true,
+    DailySpins = 1,              -- tours gratuits par jour et par joueur
+    ResetHour  = 0,              -- heure (serveur) à laquelle les tours sont rendus : 0 = minuit
+    Account    = 'money',        -- compte crédité pour les gains en argent : 'money' (liquide) ou 'bank'
+    Prizes = {
+        { label = '10 coins',     kind = 'coins', amount = 10,    weight = 28 },
+        { label = '2 500 $',      kind = 'money', amount = 2500,  weight = 16 },
+        { label = '25 coins',     kind = 'coins', amount = 25,    weight = 20 },
+        { label = '5 pains',      kind = 'item',  item = 'bread', amount = 5, weight = 14 },
+        { label = '50 coins',     kind = 'coins', amount = 50,    weight = 8 },
+        { label = '10 000 $',     kind = 'money', amount = 10000, weight = 6 },
+        { label = '100 coins',    kind = 'coins', amount = 100,   weight = 2 },
+        { label = 'Pas de chance', kind = 'none', weight = 6 },
+    },
+}

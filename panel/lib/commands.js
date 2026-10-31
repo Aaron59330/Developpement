@@ -101,6 +101,7 @@ function validateDoc(key, v) {
     const price = x => { x = Math.floor(Number(x)); return Number.isFinite(x) && x >= 0 && x <= 100000000 ? String(x) : null; };
     const ID = /^[A-Za-z0-9_]{1,50}$/;
     const list = (a, max) => Array.isArray(a) ? a.slice(0, max) : [];
+    const num = (x, lo, hi, d) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : d; };
     const o = {}; const bad = m => ({ error: m });
     const veh = (arr, label, withType) => { const out = []; for (const r of list(arr, 120)) { if (r && r.Separator) { if (withType) out.push({ Separator: true, name: txt(r.name, 60) }); continue; } const name = txt(r && r.name, 60), model = String((r && r.model) || '').trim(), p = price(r && r.price); if (!name) continue; if (!ID.test(model)) return bad(`${label} « ${name} » : nom de modèle invalide (lettres, chiffres, _)`); if (p === null) return bad(`${label} « ${name} » : prix invalide`); const e = { name, model, price: p }; if (withType && ['aircraft', 'boat'].includes(r.type)) e.type = r.type; out.push(e); } return out; };
     for (const [k, l, wt] of [['vehicle', 'Véhicule', false], ['Motos', 'Moto', false], ['Autres', 'Avion / bateau', true]]) { if (v[k] === undefined) continue; const r = veh(v[k], l, wt); if (r.error) return r; o[k] = r; }
@@ -116,6 +117,14 @@ function validateDoc(key, v) {
     }
     if (v.caisse !== undefined) { o.caisse = []; for (const r of list(v.caisse, 15)) { const name = txt(r && r.name, 60), p = price(r && r.price), model = String((r && r.model) || '').trim(); if (!name) continue; if (!ID.test(model)) return bad(`Caisse « ${name} » : identifiant invalide`); if (p === null) return bad(`Caisse « ${name} » : prix invalide`); o.caisse.push({ name, model, price: p, desc: txt(r.desc, 500) }); } }
     if (v.chance !== undefined) { o.chance = []; for (const r of list(v.chance, 5)) { const rate = Number(r && r.rate); if (!Number.isFinite(rate) || rate < 0 || rate > 100) return bad('Chances des caisses : pourcentage invalide (0 à 100)'); o.chance.push({ name: txt(r.name, 40), rate }); } }
+    if (v.wheel !== undefined) {   // roulette du jour
+      const w = v.wheel && typeof v.wheel === 'object' ? v.wheel : {}; const prizes = [];
+      for (const r of list(w.prizes, 12)) { const label = txt(r && r.label, 40); if (!label) continue; const kind = ['coins', 'money', 'item', 'none'].includes(r.kind) ? r.kind : 'none'; const wgt = Number(r.weight); if (!(wgt > 0 && wgt <= 1000)) return bad(`Roulette « ${label} » : le poids doit être entre 0,1 et 1000`);
+        const e = { label, kind, weight: Math.round(wgt * 100) / 100 }; if (kind === 'coins' || kind === 'money') { const n = Math.floor(Number(r.amount)); const max = kind === 'coins' ? 100000 : 5000000; if (!(n >= 1 && n <= max)) return bad(`Roulette « ${label} » : montant invalide (1 à ${max})`); e.amount = n; } else if (kind === 'item') { const it = String(r.item || '').trim(); const n = Math.floor(Number(r.amount)); if (!/^[A-Za-z0-9_\-]{1,50}$/.test(it) || !(n >= 1 && n <= 1000)) return bad(`Roulette « ${label} » : objet ou quantité invalide`); e.item = it; e.amount = n; }
+        if (/^#[0-9a-fA-F]{6}$/.test(String(r.color || ''))) e.color = String(r.color).toLowerCase(); prizes.push(e); }
+      if (prizes.length < 2) return bad('Roulette : il faut au moins 2 lots (maximum 12)');
+      o.wheel = { enabled: w.enabled !== false, spins: Math.round(num(w.spins, 1, 10, 1)), resetHour: Math.round(num(w.resetHour, 0, 23, 0)), account: w.account === 'bank' ? 'bank' : 'money', prizes };
+    }
     if (v.weaponCustom !== undefined) o.weaponCustom = !!v.weaponCustom;
     for (const k of ['weaponCustomPrice', 'WeaponAmmoInWeapon']) if (v[k] !== undefined && v[k] !== '') { const n = Math.floor(Number(v[k])); if (!(n >= 0 && n <= 1000000)) return bad('Valeur invalide : ' + k); o[k] = n; }
     if (v.LinkShop !== undefined) { const u = String(v.LinkShop || '').trim(); if (u && !/^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]{1,280}$/.test(u)) return bad('Lien de la boutique Tebex invalide (https://)'); o.LinkShop = u; }

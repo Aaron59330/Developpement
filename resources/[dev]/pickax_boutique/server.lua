@@ -404,11 +404,144 @@ local function boutiqueIdOf(xPlayer)
     return id > 0 and id or nil
 end
 
+-- ─────────────────────────────── Roulette du jour ───────────────────────────────
+-- Le tirage et les gains se font UNIQUEMENT ici (le client ne reçoit que le numéro de la part gagnante).
+CreateThread(function()
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS boutique_wheel (
+        identifier VARCHAR(80) NOT NULL PRIMARY KEY, last_day VARCHAR(10) NOT NULL DEFAULT '', spins_today INT NOT NULL DEFAULT 0,
+        total INT NOT NULL DEFAULT 0, last_prize VARCHAR(120) NULL, last_at TIMESTAMP NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+math.randomseed(os.time() + GetGameTimer())
+
+local WHEEL_COLORS = { '#3fb950', '#e5a23c', '#4aa8ff', '#c77dff', '#ff6b6b', '#2ec4b6', '#ffd166', '#8d99ae', '#ef476f', '#06d6a0', '#118ab2', '#f78c6b' }
+local KINDS = { coins = true, money = true, item = true, none = true }
+local function wheelCfg()
+    local W = {}
+    for k, v in pairs(Config.Wheel or {}) do W[k] = v end
+    if GetResourceState('pickax_panel') ~= 'missing' then
+        local raw = LoadResourceFile('pickax_panel', 'cache_boutique.json')
+        if raw and raw ~= '' then
+            local ok, d = pcall(json.decode, raw)
+            if ok and type(d) == 'table' and type(d.wheel) == 'table' then
+                local w = d.wheel
+                if w.enabled ~= nil then W.Enabled = w.enabled == true end
+                if tonumber(w.spins) then W.DailySpins = tonumber(w.spins) end
+                if tonumber(w.resetHour) then W.ResetHour = tonumber(w.resetHour) end
+                if w.account == 'bank' or w.account == 'money' then W.Account = w.account end
+                if type(w.prizes) == 'table' and #w.prizes >= 2 then W.Prizes = w.prizes end
+            end
+        end
+    end
+    return W
+end
+local function wheelPrizes(W)
+    local out, total = {}, 0
+    for i, p in ipairs(type(W.Prizes) == 'table' and W.Prizes or {}) do
+        if #out >= 12 then break end
+        local kind = KINDS[p.kind] and p.kind or 'none'
+        local wgt = tonumber(p.weight) or 0
+        if type(p.label) == 'string' and p.label ~= '' and wgt > 0 then
+            local amount = math.floor(tonumber(p.amount) or 0)
+            if kind == 'coins' then amount = math.max(0, math.min(amount, 100000)) elseif kind == 'money' then amount = math.max(0, math.min(amount, 5000000)) elseif kind == 'item' then amount = math.max(1, math.min(amount, 1000)) end
+            local color = type(p.color) == 'string' and p.color:match('^#%x%x%x%x%x%x$') or WHEEL_COLORS[(#out % #WHEEL_COLORS) + 1]
+            out[#out + 1] = { label = esc(p.label, 40), kind = kind, amount = amount, item = type(p.item) == 'string' and p.item:match('^[%w_%-]+$') or nil, weight = wgt, color = color }
+            total = total + wgt
+        end
+    end
+    for _, p in ipairs(out) do p.pct = math.floor(p.weight / total * 1000 + 0.5) / 10 end
+    return out, total
+end
+local function wheelDay(W) return os.date('%Y-%m-%d', os.time() - (tonumber(W.ResetHour) or 0) * 3600) end
+local function wheelNext(W)
+    local h = tonumber(W.ResetHour) or 0
+    local y = os.date('*t', os.time() - h * 3600)
+    return math.max(0, os.time({ year = y.year, month = y.month, day = y.day + 1, hour = h, min = 0, sec = 0 }) - os.time())
+end
+local function wheelState(W, identifier)
+    local row = MySQL.single.await('SELECT last_day, spins_today, last_prize, UNIX_TIMESTAMP(last_at) AS ts FROM boutique_wheel WHERE identifier = ?', { identifier })
+    local allowed = math.max(1, math.min(10, math.floor(tonumber(W.DailySpins) or 1)))
+    local used = (row and row.last_day == wheelDay(W)) and (tonumber(row.spins_today) or 0) or 0
+    return { spins = allowed, left = math.max(0, allowed - used), last = row and row.last_prize and { label = row.last_prize, ts = row.ts } or nil }
+end
+local function wheelPublic(prizes)
+    local o = {}
+    for i, p in ipairs(prizes) do o[i] = { label = p.label, kind = p.kind, amount = p.amount, color = p.color, pct = p.pct } end
+    return o
+end
+
+ESX.RegisterServerCallback('pickax_boutique:wheel:info', function(src, cb)
+    local W, xPlayer = wheelCfg(), playerOf(src)
+    if not xPlayer then return cb(fail('Joueur introuvable')) end
+    local prizes = wheelPrizes(W)
+    if W.Enabled == false or #prizes < 2 then return cb({ ok = true, enabled = false }) end
+    local st = wheelState(W, xPlayer.identifier)
+    cb({ ok = true, enabled = true, prizes = wheelPublic(prizes), spins = st.spins, left = st.left, next = wheelNext(W), last = st.last })
+end)
+
+local spinning = {}
+local function wheelAward(src, xPlayer, p, W)
+    if p.kind == 'none' or p.amount <= 0 and p.kind ~= 'item' then return true end
+    if p.kind == 'coins' then
+        if not exports['pickax_core']:BoutiqueGrantCoins(xPlayer.identifier, p.amount) then return false, 'Ton compte boutique n\'est pas encore prêt : réessaie dans un instant.' end
+        return true
+    elseif p.kind == 'money' then
+        xPlayer.addAccountMoney(W.Account == 'bank' and 'bank' or 'money', p.amount, 'Roulette boutique')
+        return true
+    elseif p.kind == 'item' and p.item then
+        if GetResourceState('ox_inventory') == 'started' then
+            if not exports.ox_inventory:CanCarryItem(src, p.item, p.amount) then return false, 'Ton inventaire est plein : fais de la place puis retente ta chance.' end
+            if not exports.ox_inventory:AddItem(src, p.item, p.amount) then return false, 'Objet indisponible : préviens le staff.' end
+        else
+            if xPlayer.canCarryItem and not xPlayer.canCarryItem(p.item, p.amount) then return false, 'Ton inventaire est plein : fais de la place puis retente ta chance.' end
+            xPlayer.addInventoryItem(p.item, p.amount)
+        end
+        return true
+    end
+    return true
+end
+
+ESX.RegisterServerCallback('pickax_boutique:wheel:spin', function(src, cb)
+    local xPlayer = playerOf(src)
+    if not xPlayer then return cb(fail('Joueur introuvable')) end
+    if spinning[src] then return cb(fail('Patiente un instant…')) end
+    spinning[src] = true
+    local done, ok, err = false, pcall(function()
+        local W = wheelCfg()
+        local prizes, total = wheelPrizes(W)
+        if W.Enabled == false or #prizes < 2 then return cb(fail('La roulette est désactivée.')) end
+        local st = wheelState(W, xPlayer.identifier)
+        if st.left <= 0 then return cb(fail('Tu as déjà tourné la roue aujourd\'hui : reviens demain !')) end
+        local r, idx = math.random() * total, #prizes
+        for i, p in ipairs(prizes) do r = r - p.weight if r <= 0 then idx = i break end end
+        local p = prizes[idx]
+        local given, why = wheelAward(src, xPlayer, p, W)
+        if not given then return cb(fail(why or 'Gain impossible')) end
+        MySQL.update.await([[INSERT INTO boutique_wheel (identifier, last_day, spins_today, total, last_prize, last_at) VALUES (?, ?, 1, 1, ?, NOW())
+            ON DUPLICATE KEY UPDATE spins_today = IF(last_day = VALUES(last_day), spins_today + 1, 1), last_day = VALUES(last_day), total = total + 1, last_prize = VALUES(last_prize), last_at = NOW()]],
+            { xPlayer.identifier, wheelDay(W), p.label })
+        MySQL.insert('INSERT INTO boutique_history (identifier, player_name, item_name, category, price, full_price, code) VALUES (?, ?, ?, ?, 0, 0, ?)',
+            { xPlayer.identifier, esc(nameOf(xPlayer), 80), esc('Roulette : ' .. p.label, 100), 'roulette', '' })
+        log(('%s a tourné la roulette : %s'):format(nameOf(xPlayer), p.label))
+        done = true
+        cb({ ok = true, index = idx, prize = { label = p.label, kind = p.kind, amount = p.amount }, left = st.left - 1, next = wheelNext(W) })
+    end)
+    spinning[src] = nil
+    if not ok and not done then print('^1[pickax_boutique] roulette : ' .. tostring(err) .. '^7') cb(fail('Erreur de la roulette : réessaie.')) end
+end)
+AddEventHandler('playerDropped', function() spinning[source] = nil end)
+
 ESX.RegisterServerCallback('pickax_boutique:descs', function(src, cb)
     local xPlayer = playerOf(src)
     local map = {}
     for _, r in ipairs(MySQL.query.await('SELECT cat, item_key, description FROM boutique_descriptions') or {}) do map[r.cat .. '|' .. r.item_key] = r.description end
-    cb({ ok = true, map = map, daily = dailyPayload(), dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil })
+    local wheel
+    if xPlayer then
+        local W = wheelCfg()
+        local prizes = wheelPrizes(W)
+        if W.Enabled ~= false and #prizes >= 2 then wheel = { left = wheelState(W, xPlayer.identifier).left } end
+    end
+    cb({ ok = true, map = map, daily = dailyPayload(), dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil, wheel = wheel })
 end)
 
 ESX.RegisterServerCallback('pickax_boutique:saveDesc', function(src, cb, d)

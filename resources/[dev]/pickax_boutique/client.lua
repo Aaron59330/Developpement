@@ -32,6 +32,7 @@ local function Open()
     if type(res) == 'table' and res.ok then
         cat.dev = res.dev == true
         cat.dailyInfo = res.daily
+        cat.wheel = res.wheel
         if res.boutiqueId then cat.boutiqueId = res.boutiqueId end
         for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, vip = 1, business = 1 }) do
             for _, it in ipairs(cat[c] or {}) do
@@ -63,7 +64,7 @@ end)
 RegisterNUICallback('close', function(_, cb) Close() cb({}) end)
 
 -- Appels serveur autorisés (historique, parrainage, codes, administration)
-local Remote = { saveDesc = true, history = true, overview = true, redeem = true, previewCode = true,
+local Remote = { ['wheel:info'] = true, ['wheel:spin'] = true, saveDesc = true, history = true, overview = true, redeem = true, previewCode = true,
     ['admin:data'] = true, ['admin:giveAll'] = true, ['admin:saveCode'] = true, ['admin:toggleCode'] = true, ['admin:deleteCode'] = true, ['admin:saveSettings'] = true }
 
 RegisterNUICallback('rpc', function(body, cb)

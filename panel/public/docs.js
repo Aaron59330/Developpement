@@ -179,6 +179,7 @@ const DOCS = [
     ['ul', [
       'Caisses mystère : le contenu de chaque caisse (véhicule, arme, coins, argent, objet) est réglé lot par lot, avec un niveau de rareté et les chances de chaque niveau.',
       'Packs et VIP : une liste de récompenses (objets, argent, armes, niveau VIP et durée).',
+      'Roulette du jour : une roue gratuite par joueur et par jour (réglable) avec de petits lots — coins, argent liquide ou objets — dont tu choisis le nom, la quantité, la couleur et la fréquence (poids). Le tirage se fait sur le serveur. Elle apparaît dans la boutique en jeu (menu « Roulette du jour »).',
       'Boutons ↑ ↓ pour changer l\'ordre, ✕ pour supprimer, « Remettre les valeurs d\'origine » pour revenir au fichier de configuration.',
       'L\'enregistrement s\'applique en quelques secondes, sans redémarrage ; les prix sont revérifiés côté serveur à chaque achat.',
     ]],

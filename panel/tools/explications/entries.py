@@ -97,7 +97,7 @@ E('[dev]/pickax_carplay','pickax_carplay',I,'facultatif','L\'autoradio de véhic
   'Écoute de YouTube, de liens directs ou de radios dans un véhicule, avec file d\'attente et son synchronisé pour les passagers. Commande /carplay ; /carplaydebug pour diagnostiquer.',
   'Plus d\'autoradio.','pickax_carplay/config.lua','','')
 E('[dev]/pickax_boutique','pickax_boutique',T,'utile','La boutique à coins (véhicules, armes, caisses, packs).',
-  'L\'interface moderne de la boutique en jeu : le joueur dépense ses coins (achetés via Tebex) pour des véhicules, motos, armes, caisses mystère, packs et entreprises. L\'achat lui-même est géré dans pickax_core (players/boutique).',
+  'L\'interface moderne de la boutique en jeu : le joueur dépense ses coins (achetés via Tebex) pour des véhicules, motos, armes, caisses mystère, packs et entreprises, utilise des codes promo et de parrainage, et tourne chaque jour la Roulette du jour (petits gains : coins, argent, objets). L\'achat lui-même est géré dans pickax_core (players/boutique).',
   'Plus de boutique à coins (les achats Tebex ne servent plus).','pickax_core/config.lua (TebexStore)','','pickax_core')
 
 # ───────── Staff ─────────

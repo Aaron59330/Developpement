@@ -42,7 +42,7 @@ const CATS = [
   { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#fdc27d)' },
   { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#fdc27d)' },
 ];
-const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null };
+const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
 const saveCart = () => { try { localStorage.setItem('pb_cart', JSON.stringify(S.cart)); } catch (e) { } };
 const rpc = (name, ...args) => post('rpc', { name, args });
@@ -143,6 +143,7 @@ function sidebar(cats) {
     <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb">${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
       <div class="cap" style="margin-top:14px">Mon compte</div>
       ${nav('cart', 'cart', 'Panier', `<span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`, 'var(--pk-accent,#fdc27d)')}
+      ${S.data.wheel ? nav('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="n bd">1</span>' : '', '#e5a23c') : ''}
       ${nav('history', 'hist', 'Historique', '', 'var(--pk-accent,#fdc27d)')}
       ${nav('codes', 'tag', 'Codes & parrainage', '', 'var(--pk-accent,#fdc27d)')}
       ${S.data.staff ? nav('admin', 'shield', 'Gestion', '', 'var(--pk-accent,#fdc27d)') : ''}</nav>
@@ -157,6 +158,7 @@ function render() {
   if (!cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
   let main;
   if (S.view === 'cart') main = viewCart();
+  else if (S.view === 'wheel' && S.data.wheel) main = viewWheel();
   else if (S.view === 'history') main = viewHistory();
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
@@ -213,6 +215,37 @@ function viewCart() {
 
 const when = ts => new Date(ts * 1000).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 const catLabel = c => (CATS.find(x => x.id === c) || {}).label || '';
+
+/* ───── roulette du jour ───── */
+const dur = sec => { sec = Math.max(0, Math.floor(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; };
+function wheelFace(prizes) {
+  const n = prizes.length, a = 360 / n, bg = 'conic-gradient(from 0deg,' + prizes.map((p, i) => `${p.color} ${i * a}deg ${(i + 1) * a}deg`).join(',') + ')';
+  const labels = prizes.map((p, i) => `<span class="wl" style="transform:rotate(${(i + 0.5) * a - 90}deg)"><b>${esc(p.label)}</b></span>`).join('');
+  const lines = prizes.map((p, i) => `<i class="wline" style="transform:rotate(${i * a}deg)"></i>`).join('');
+  return { bg, inner: lines + labels };
+}
+function viewWheel() {
+  const w = S.wheel;
+  const hero = heroBar('gift', 'Roulette du jour', 'Une roue gratuite chaque jour : de petits gains à gagner', '#e5a23c');
+  if (!w) return hero + '<div class="scroll"><div class="empty">Chargement…</div></div>';
+  if (!w.enabled) return hero + '<div class="scroll"><div class="empty">La roulette n\'est pas disponible pour le moment.</div></div>';
+  const f = wheelFace(w.prizes), can = w.left > 0 && !S.spinning;
+  const res = S.wheelResult;
+  const kindTxt = { coins: 'coins', money: '$', item: 'objet', none: '' };
+  return hero + `<div class="scroll"><div class="wheel-page">
+    <div class="wheel-stage"><div class="wheel-pointer"></div>
+      <div class="wheel" id="wheel" style="background:${f.bg};transform:rotate(${S.wheelAngle}deg)">${f.inner}</div>
+      <button class="wheel-hub ${can ? '' : 'off'}" data-a="spin" ${can ? '' : 'disabled'}>${S.spinning ? '…' : w.left > 0 ? 'TOURNER' : 'DEMAIN'}</button></div>
+    <div class="wheel-side">
+      <div class="panel"><h3>${ic('clock', 18)} Mes tours</h3>
+        <p class="wbig">${w.left > 0 ? `<b>${w.left}</b> tour${w.left > 1 ? 's' : ''} disponible${w.left > 1 ? 's' : ''}` : '<b>0</b> tour disponible'}</p>
+        <p class="sub">${w.left > 0 ? 'Gratuit : clique sur « Tourner ».' : `Prochain tour dans ${dur(w.next)}.`}${w.last ? ` Dernier gain : <b>${esc(w.last.label)}</b>.` : ''}</p></div>
+      <div class="panel"><h3>${ic('gift', 18)} Lots à gagner</h3>
+        <div class="wprizes">${w.prizes.map(p => `<div class="wp"><i style="background:${p.color}"></i><span>${esc(p.label)}</span><small>${p.pct}%</small></div>`).join('')}</div></div>
+    </div></div></div>` + (res ? `<div class="wheel-res"><div class="wr-card"><div class="wr-ico">${res.kind === 'none' ? '😕' : '🎉'}</div><h2>${res.kind === 'none' ? 'Pas de chance aujourd\'hui…' : 'Bravo !'}</h2>
+      <p>${res.kind === 'none' ? 'Reviens demain pour retenter ta chance.' : `Tu gagnes <b>${esc(res.label)}</b>${res.kind === 'coins' ? ' : ils sont déjà sur ton solde.' : res.kind === 'money' ? ' : l\'argent est dans ta poche.' : ' : regarde dans ton inventaire.'}`}</p>
+      <button class="pri" data-a="wheelOk">Super !</button></div></div>` : '');
+}
 
 function viewHistory() {
   const h = S.history;
@@ -323,6 +356,7 @@ function applyAccent(hex) {
 
 async function loadView(v) {
   if (v === 'history') { S.history = null; render(); const r = await rpc('history'); S.history = (r && r.list) || []; }
+  else if (v === 'wheel') { S.wheel = null; render(); const r = await rpc('wheel:info'); S.wheel = r && r.ok ? r : { enabled: false }; }
   else if (v === 'codes') { S.overview = null; render(); const r = await rpc('overview'); S.overview = r && r.ok ? r : { referral: { enabled: false } }; }
   else if (v === 'admin') { S.admin = null; render(); const r = await rpc('admin:data'); if (r && r.ok) S.admin = r; else { toast((r && r.error) || 'Accès refusé', 'bad'); S.view = 'shop'; } }
   render();
@@ -387,6 +421,23 @@ document.addEventListener('click', async e => {
       return render();
     }
     case 'payClose': { const single = S.paying && S.paying.single; S.paying = null; if (!single) { S.cart = []; saveCart(); S.code = ''; S.pct = 0; S.promoMsg = ''; } S.view = 'history'; return loadView('history'); }
+    case 'spin': {
+      const w = S.wheel; if (!w || S.spinning) return;
+      if (w.left <= 0) return toast('Tu as déjà tourné la roue aujourd\'hui : reviens demain !', 'bad');
+      S.spinning = true; const hub = document.querySelector('.wheel-hub'); if (hub) { hub.disabled = true; hub.classList.add('off'); hub.textContent = '…'; }
+      const r = await rpc('wheel:spin');
+      if (!r || !r.ok) { S.spinning = false; toast((r && r.error) || 'La roulette ne répond pas', 'bad'); return render(); }
+      sfx('open');
+      const n = w.prizes.length, seg = 360 / n, el2 = document.getElementById('wheel');
+      const target = S.wheelAngle - (S.wheelAngle % 360) + 360 * 6 + (360 - (r.index - 0.5) * seg);
+      S.wheelAngle = target;
+      if (el2) { el2.style.transition = 'transform 5.6s cubic-bezier(.12,.8,.15,1)'; el2.style.transform = `rotate(${target}deg)`; }
+      await new Promise(done => setTimeout(done, 5800));
+      S.spinning = false; w.left = r.left; w.next = r.next; w.last = { label: r.prize.label }; if (S.data.wheel) S.data.wheel.left = r.left;
+      if (S.pendingPoints != null) { S.points = S.pendingPoints; S.pendingPoints = null; }
+      S.wheelResult = r.prize; sfx(r.prize.kind === 'none' ? 'close' : 'success'); return render();
+    }
+    case 'wheelOk': S.wheelResult = null; return render();
     case 'redeem': {
       const code = (val('redeem') || '').trim(); if (!code) return;
       const r = await rpc('redeem', code);
@@ -446,6 +497,7 @@ window.addEventListener('message', e => {
     const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
     if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { sfx('close'); $root.classList.add('hidden'); closeSheet(); }
+  else if (d.action === 'points' && S.spinning) { S.pendingPoints = Number(d.points) || 0; }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }
   else if (d.action === 'checkoutDone') { sfx('success'); S.paying = Object.assign(S.paying || { n: 0 }, { done: true, failed: d.failed || 0 }); render(); }
