@@ -105,3 +105,10 @@
 #app .weight-bar i { -webkit-mask: none !important; mask: none !important; }
 #app .grid { height: calc(100% + 3px) !important; }
 #app .slot .num { bottom: 24px !important; left: 9px !important; }
+
+/* plus d'espace entre les éléments */
+#app .grid, #app .hotrow { grid-template-columns: repeat(5, 80px) !important; column-gap: 11px !important; }
+#app .grid { grid-auto-rows: 80px !important; row-gap: 11px !important; }
+#app .hotrow { padding-top: 18px !important; margin-top: 6px; }
+#app .cloth-col { gap: 11px !important; }
+#app .grid .slot, #app .hotrow .slot { width: 80px !important; height: 80px !important; }
