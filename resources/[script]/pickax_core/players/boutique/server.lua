@@ -43,7 +43,8 @@ Citizen.CreateThread(function()--Ajout des informations au cache
     end)
 end)
 
-Citizen.CreateThread(function()--Ajout des informations au cache Price
+-- Reconstruit le cache des prix vérifiés à l'achat (rappelé quand la boutique est modifiée depuis le panel web)
+function BoutiqueRebuildPrices()--Ajout des informations au cache Price
     PriceConfigBoutique.Vehicle = {}
     for k, v in pairs(ConfigBoutique.vehicle) do
         if PriceConfigBoutique.Vehicle[k] == nil then
@@ -132,7 +133,8 @@ Citizen.CreateThread(function()--Ajout des informations au cache Price
             PriceConfigBoutique.boost[k].price = v.price
         end
     end
-end)
+end
+Citizen.CreateThread(BoutiqueRebuildPrices)
 
 RegisterServerEvent("CorePickax:SendServerSideBoutique")
 AddEventHandler("CorePickax:SendServerSideBoutique", function()--Send to client side

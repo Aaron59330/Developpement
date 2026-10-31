@@ -15,6 +15,20 @@ router.post('/:id/base/jobs', async (req, res) => {
   res.json({ ok: true, message: (r.data && r.data.message) || 'enregistré' });
 });
 
+// ── boutiques créées en jeu (pickax_shopbuilder) : liste, produits, prix, stocks, emplacements ──
+const shopCall = async (l, req, fn, args, ms) => { const v = C.validateRpc('db.shop', { fn, args }); if (v.error) return { ok: false, error: 'Requête invalide' }; const r = await bus.rpc(l.id, 'db.shop', v.payload, req.user.id, ms || 20000); if (!r.ok) return r; return { ok: true, ...(r.data || {}) }; };
+const sid = req => { const n = Math.floor(Number(req.params.sid)); return Number.isFinite(n) && n > 0 ? n : null; };
+const shopLog = (req, l, what, detail) => { audit(req.user.id, l.id, 'shop:' + what, String(detail || '').slice(0, 120), A.ip(req)); db.prepare("INSERT INTO logs(license_id,level,source,message,at) VALUES(?,?,?,?,?)").run(l.id, 'staff', 'panel', `${req.user.username} : boutique en jeu (${what}) ${detail || ''}`.slice(0, 200), Math.floor(Date.now() / 1000)); };
+router.get('/:id/shops', async (req, res) => { const l = guard(req, res); if (!l) return; res.json(await shopCall(l, req, 'list', [])); });
+router.get('/:id/shops/catalog', async (req, res) => { const l = guard(req, res); if (!l) return; res.json(await shopCall(l, req, 'catalog', [])); });
+router.get('/:id/shops/:sid', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); if (!n) return res.json({ ok: false, error: 'Boutique invalide' }); res.json(await shopCall(l, req, 'get', [n])); });
+router.post('/:id/shops', async (req, res) => { const l = guard(req, res); if (!l) return; const b = req.body || {}; const type = String(b.type || '').slice(0, 40), label = String(b.label || '').slice(0, 100); if (!/^[\w\-]{1,40}$/.test(type)) return res.json({ ok: false, error: 'Type de boutique invalide' }); const r = await shopCall(l, req, 'create', [type, label]); if (r.ok) shopLog(req, l, 'create', label); res.json(r); });
+router.put('/:id/shops/:sid', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); const d = (req.body || {}).shop; if (!n || !d || typeof d !== 'object') return res.json({ ok: false, error: 'Données invalides' }); d.id = n; const r = await shopCall(l, req, 'save', [d], 25000); if (r.ok) shopLog(req, l, 'save', `#${n} ${String(d.label || '').slice(0, 60)}`); res.json(r); });
+router.delete('/:id/shops/:sid', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); if (!n) return res.json({ ok: false, error: 'Boutique invalide' }); const r = await shopCall(l, req, 'delete', [n]); if (r.ok) shopLog(req, l, 'delete', '#' + n); res.json(r); });
+router.post('/:id/shops/:sid/duplicate', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); if (!n) return res.json({ ok: false, error: 'Boutique invalide' }); const r = await shopCall(l, req, 'duplicate', [n]); if (r.ok) shopLog(req, l, 'duplicate', '#' + n); res.json(r); });
+router.post('/:id/shops/:sid/toggle', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); if (!n) return res.json({ ok: false, error: 'Boutique invalide' }); const r = await shopCall(l, req, 'toggle', [n, (req.body || {}).state === true]); if (r.ok) shopLog(req, l, 'toggle', `#${n} ${(req.body || {}).state ? 'activée' : 'désactivée'}`); res.json(r); });
+router.post('/:id/shops/:sid/restock', async (req, res) => { const l = guard(req, res); if (!l) return; const n = sid(req); const b = req.body || {}; if (!n || !['full', 'all'].includes(b.mode)) return res.json({ ok: false, error: 'Requête invalide' }); const r = await shopCall(l, req, 'restock', [n, b.mode, Math.floor(Number(b.amount) || 0)]); if (r.ok) shopLog(req, l, 'restock', `#${n} ${b.mode}`); res.json(r); });
+
 // ── objets : lecture / modification ciblée des lignes simples du fichier (le reste du fichier n'est jamais touché) ──
 const LINE = /^(\s*)\[(['"])([^'"]+)\2\]\s*=\s*\{(.*)\},?\s*(--.*)?$/;
 const strField = k => new RegExp(`(\\b${k}\\s*=\\s*)(?:'((?:[^'\\\\]|\\\\.)*)'|"((?:[^"\\\\]|\\\\.)*)")`);

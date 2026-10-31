@@ -30,7 +30,7 @@
       : [sec('Vue d’ensemble'), link('overview', 'Dashboard', 'home'), link('docs', 'Documentation', 'book'), link('license', 'Clé AERO', 'key', 'violet'),
         sec('Configuration'),
         link('server', 'Gestion Serveur', 'box'),
-        group('base', 'Gestion Base', 'sliders', [link('theme', 'Couleurs & logos', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark'), ...settingsItems]),
+        group('base', 'Gestion Base', 'sliders', [link('theme', 'Couleurs & logos', 'brush'), link('loading', 'Écran d’accueil', 'film'), link('creator', 'Parcours d’arrivée', 'spark'), link('boutique', 'Boutique à coins', 'cart'), link('shops', 'Boutiques en jeu', 'cart'), ...settingsItems]),
         group('res', 'Outils & fichiers', 'puzzle', [link('modules', 'Ressources', 'puzzle'), link('editor', 'Éditeur de base', 'edit'), link('files', 'Fichiers', 'file'), link('setup', 'Assistant d’installation', 'spark'), link('history', 'Historique des réglages', 'list')]),
         group('acc', 'Accès & sauvegardes', 'shield', [link('access', 'Bans & whitelist', 'shield'), link('backups', 'Sauvegardes', 'db'), link('dbbackups', 'Sauvegardes de la base', 'db')]),
         sec('Explications'), link('expl', 'Les scripts', 'book'), link('cmds', 'Les commandes', 'term'),

@@ -1,4 +1,7 @@
 -- ─────────────────────────────── Builder (admin) ───────────────────────────────
+-- Panel web : les callbacks du builder sont aussi appelables depuis le panel (export PanelCall, jamais depuis un joueur).
+local PanelFns, _registerCb = {}, ESX.RegisterServerCallback
+ESX.RegisterServerCallback = function(name, fn) PanelFns[name] = fn return _registerCb(name, fn) end
 local function fail(msg) return { ok = false, error = msg } end
 
 local function trim(s) return (tostring(s or ''):gsub('^%s+', ''):gsub('%s+$', '')) end
@@ -534,3 +537,17 @@ RegisterCommand('sbseed', function(src)
     local msg = #made > 0 and ('Créées : ' .. table.concat(made, ', ')) or 'Rien à créer : tout est déjà en place.'
     if src == 0 then print('[shopbuilder] ' .. msg) else TriggerClientEvent('esx:showNotification', src, msg) end
 end, false)
+
+-- ─────────────────────────────── Panel web (export serveur) ───────────────────────────────
+ESX.RegisterServerCallback = _registerCb
+local PANEL_ALLOWED = { catalog = true, list = true, get = true, create = true, save = true, delete = true, duplicate = true, toggle = true, restock = true, resetStats = true, logs = true }
+exports('PanelCall', function(name, ...)
+    if type(name) ~= 'string' or not PANEL_ALLOWED[name] then return { ok = false, error = 'Action inconnue' } end
+    local fn = PanelFns['shopbuilder:' .. name]
+    if not fn then return { ok = false, error = 'Action indisponible' } end
+    local p, done = promise.new(), false
+    local ok, err = pcall(fn, 0, function(r) if not done then done = true p:resolve(r) end end, ...)
+    if not ok then return { ok = false, error = tostring(err):sub(1, 200) } end
+    SetTimeout(8000, function() if not done then done = true p:resolve({ ok = false, error = 'Délai dépassé' }) end end)
+    return Citizen.Await(p)
+end)

@@ -173,6 +173,19 @@ const DOCS = [
       'Les valeurs enregistrées sont envoyées au serveur automatiquement (pas de redémarrage).',
     ]],
   ] },
+  { id: 'config-boutiques', title: '10 bis. Boutique à coins et boutiques en jeu', blocks: [
+    ['h', 'Gestion Base → Boutique à coins'],
+    ['p', 'La boutique premium (monnaie « coins » achetée sur Tebex) : onglets Véhicules, Motos, Avions et bateaux, Armes, Caisses, Packs, VIP, Entreprises et Réglages. Chaque produit a un nom, un prix, une description et, selon le type, un modèle, des munitions ou un contenu.'],
+    ['ul', [
+      'Caisses mystère : le contenu de chaque caisse (véhicule, arme, coins, argent, objet) est réglé lot par lot, avec un niveau de rareté et les chances de chaque niveau.',
+      'Packs et VIP : une liste de récompenses (objets, argent, armes, niveau VIP et durée).',
+      'Boutons ↑ ↓ pour changer l\'ordre, ✕ pour supprimer, « Remettre les valeurs d\'origine » pour revenir au fichier de configuration.',
+      'L\'enregistrement s\'applique en quelques secondes, sans redémarrage ; les prix sont revérifiés côté serveur à chaque achat.',
+    ]],
+    ['h', 'Gestion Base → Boutiques en jeu'],
+    ['p', 'Toutes les boutiques créées avec /shopbuilder (supérettes, armureries, vêtements, pharmacies, marché noir…). Pour chacune : produits (objet, nom, prix, catégorie, stock, promo, actif), emplacements (coordonnées), horaires, moyens de paiement, réapprovisionnement automatique, vendeur (PNJ, animation, dialogue), icône sur la carte, remplissage des stocks, duplication et suppression.'],
+    ['note', 'Il faut que le serveur soit en ligne et que pickax_shopbuilder soit démarré. Les modifications utilisent exactement les mêmes contrôles que le builder en jeu.'],
+  ] },
   { id: 'config-ressources', title: '10. Ressources & base', blocks: [
     ['ul', [
       'Ressources (modules) : liste de toutes les ressources du serveur, démarrer / arrêter / redémarrer.',

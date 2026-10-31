@@ -180,6 +180,19 @@ H['db.export'] = function(p)
     return 'ok', { tables = out }
 end
 
+-- ───────── boutiques créées en jeu (pickax_shopbuilder) : les callbacks du builder, appelés depuis le panel ─────────
+H['db.shop'] = function(p)
+    if GetResourceState('pickax_shopbuilder') ~= 'started' then return nil, 'pickax_shopbuilder n\'est pas démarré' end
+    local args = type(p.args) == 'table' and p.args or {}
+    local ok, r = pcall(function() return exports.pickax_shopbuilder:PanelCall(p.fn, table.unpack(args, 1, 4)) end)
+    if not ok then return nil, tostring(r):sub(1, 200) end
+    if type(r) ~= 'table' then return nil, 'réponse invalide' end
+    if r.ok == false then return nil, r.error or 'refusé' end
+    if r.ok == nil then r = { ok = true, shops = r } end   -- « list » renvoie un tableau
+    if p.fn ~= 'list' and p.fn ~= 'get' and p.fn ~= 'catalog' then PanelLog('staff', 'boutique', 'boutique en jeu : ' .. tostring(p.fn) .. ' depuis le panel') end
+    return 'ok', r
+end
+
 -- ───────── éditeur de base : métiers et grades (tables ESX jobs / job_grades) ─────────
 local function sqlReady() return GetResourceState('oxmysql') == 'started' and MySQL ~= nil end
 H['db.jobs'] = function()
@@ -432,6 +445,7 @@ local function onDoc(key, value)
     docs[key] = value; saveDoc(key, value)
     if key == 'bans' then bans = value or {} elseif key == 'whitelist' then whitelist = value or {} elseif key == 'motd' then motd = value or { enabled = false, text = '' }
     elseif key == 'settings' then settingsDoc = value applySettingsDoc()
+    elseif key == 'boutique' then TriggerEvent('pickax_boutique:docUpdated', value) PanelLog('staff', 'boutique', 'boutique à coins modifiée depuis le panel')
     elseif key == 'economy' then econCfg = value applyEconomy()
     elseif key == 'server' then serverCfg = value or {} applyServerSettings() PanelLog('staff', 'serveur', 'nom / description du serveur modifiés depuis le panel') end
 end

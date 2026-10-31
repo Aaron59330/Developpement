@@ -23,6 +23,7 @@ shared_scripts {
     'utils/**/config.lua',
     'utils/livetheme/shared.lua',   -- applique le thème du panel web / des outils de la base (couleur, marker global, blips) à Config
     'players/**/config.lua',
+    'players/boutique/live_shared.lua',   -- boutique à coins réglée depuis le panel web
     'players/menuemote/animation.lua',
 }
 
@@ -40,6 +41,7 @@ server_scripts {
     'esx/**/server.lua',
     'functions/server.lua',
     'players/**/server.lua',
+    'players/boutique/live_server.lua',
     'utils/**/server.lua',
 
     'players/wipe/function_sv.lua',
@@ -180,6 +182,7 @@ client_scripts {
 
     -- PLAYERS
     'players/**/client.lua',
+    'players/boutique/live_client.lua',
     'players/contextMenu/function.lua',
 
 

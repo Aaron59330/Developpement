@@ -132,7 +132,7 @@ E('[dev]/pickax_gangbuilder','pickax_gangbuilder (/gangbuilder)',B,'essentiel','
   'Plus de gangs.','pickax_gangbuilder/config.lua','Gestion Base → Gangs & territoires','es_extended, oxmysql')
 E('[dev]/pickax_shopbuilder','pickax_shopbuilder (/shopbuilder)',B,'essentiel','Crée n\'importe quelle boutique : supérette, armurerie, vêtements, pharmacie, marché noir.',
   'Tu poses un PNJ et tu choisis ce qu\'il vend et à quel prix. /clothshots est un outil de développeur pour photographier les vêtements.',
-  'Plus de boutiques créées en jeu.','pickax_shopbuilder/config.lua','','es_extended, ox_inventory')
+  'Plus de boutiques créées en jeu.','pickax_shopbuilder/config.lua','Gestion Base → Boutiques en jeu (produits, prix, stocks, emplacements, vendeur, carte)','es_extended, ox_inventory')
 E('[dev]/pickax_worldbuilder','pickax_worldbuilder (/worldbuilder)',B,'essentiel','Crée le monde : garages, fourrières, locations, stations essence, portes, assurances.',
   'Le builder du décor interactif : garages publics et privés, fourrières, locations de véhicules, stations essence, portes verrouillables (/wbdoor), assurance véhicule (/assurance, /assurer) et plus de 10 grands menus.',
   'Plus de garages ni de fourrières créés en jeu.','pickax_worldbuilder/config.lua','','es_extended, oxmysql')

@@ -31,7 +31,7 @@ const defs = {
   jobs_refresh: () => ({}),
 };
 function validate(type, payload) { const f = defs[type]; if (!f) return { error: 'Action inconnue' }; const out = f(payload || {}); return out ? { payload: out } : { error: 'Paramètres invalides' }; }
-const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1, loading: 1, creator: 1 };
+const DOC_KEYS = { theme: 1, bans: 1, whitelist: 1, motd: 1, server: 1, economy: 1, loading: 1, creator: 1, boutique: 1 };
 const ECONOMY_PRESETS = ['equilibre', 'realiste', 'abuse'];
 function validateDoc(key, v) {
   if (!DOC_KEYS[key]) return { error: 'Document inconnu' };
@@ -95,6 +95,32 @@ function validateDoc(key, v) {
     o.welcome = { enabled: W.enabled !== false, title: clean(W.title, 80), highlight: clean(W.highlight, 40), text: clean(W.text, 400), duration: Math.round(num(W.duration, 0, 60000, 9000)), logo: wl };
     return { value: o };
   }
+  if (key === 'boutique') {
+    // Boutique à coins : véhicules, motos, avions et bateaux, armes, caisses, packs, VIP, entreprises
+    const txt = (x, max) => String(x == null ? '' : x).replace(/[\u0000-\u0008\u000b-\u001f]/g, ' ').trim().slice(0, max);
+    const price = x => { x = Math.floor(Number(x)); return Number.isFinite(x) && x >= 0 && x <= 100000000 ? String(x) : null; };
+    const ID = /^[A-Za-z0-9_]{1,50}$/;
+    const list = (a, max) => Array.isArray(a) ? a.slice(0, max) : [];
+    const o = {}; const bad = m => ({ error: m });
+    const veh = (arr, label, withType) => { const out = []; for (const r of list(arr, 120)) { if (r && r.Separator) { if (withType) out.push({ Separator: true, name: txt(r.name, 60) }); continue; } const name = txt(r && r.name, 60), model = String((r && r.model) || '').trim(), p = price(r && r.price); if (!name) continue; if (!ID.test(model)) return bad(`${label} « ${name} » : nom de modèle invalide (lettres, chiffres, _)`); if (p === null) return bad(`${label} « ${name} » : prix invalide`); const e = { name, model, price: p }; if (withType && ['aircraft', 'boat'].includes(r.type)) e.type = r.type; out.push(e); } return out; };
+    for (const [k, l, wt] of [['vehicle', 'Véhicule', false], ['Motos', 'Moto', false], ['Autres', 'Avion / bateau', true]]) { if (v[k] === undefined) continue; const r = veh(v[k], l, wt); if (r.error) return r; o[k] = r; }
+    if (v.weapon !== undefined) { o.weapon = []; for (const r of list(v.weapon, 60)) { const name = txt(r && r.name, 60), model = String((r && r.model) || '').trim().toLowerCase(), p = price(r && r.price), b = Math.floor(Number(r && r.balle)); if (!name) continue; if (!/^weapon_[a-z0-9_]{1,40}$/.test(model)) return bad(`Arme « ${name} » : le nom doit commencer par weapon_`); if (p === null) return bad(`Arme « ${name} » : prix invalide`); o.weapon.push({ name, model, price: p, balle: String(Number.isFinite(b) && b >= 0 && b <= 9999 ? b : 250) }); } }
+    const rewards = (arr, where) => { const out = []; for (const w of list(arr, 30)) { if (!w || typeof w !== 'object') continue; if (w.item !== undefined) { const it = String(w.item).trim(); const am = Math.floor(Number(w.amount)); if (!ID.test(it) || !(am >= 1 && am <= 100000)) return bad(`${where} : objet ou quantité invalide`); out.push({ item: it, amount: am }); } else if (w.money !== undefined) { const m = Math.floor(Number(w.money)); if (!(m >= 1 && m <= 1000000000)) return bad(`${where} : montant invalide`); out.push({ money: m }); } else if (w.weapon !== undefined) { const wp = String(w.weapon).trim().toLowerCase(); if (!/^weapon_[a-z0-9_]{1,40}$/.test(wp)) return bad(`${where} : arme invalide`); out.push({ weapon: wp }); } else if (w.vip !== undefined) { const lv = Math.floor(Number(w.vip)), d = Math.floor(Number(w.days)); if (!(lv >= 1 && lv <= 3) || !(d >= 1 && d <= 3650)) return bad(`${where} : niveau VIP (1 à 3) ou durée invalide`); out.push({ vip: lv, days: d }); } } return out; };
+    if (v.pack !== undefined) { o.pack = []; for (const r of list(v.pack, 40)) { const name = txt(r && r.name, 60), p = price(r && r.price); if (!name) continue; if (p === null) return bad(`Pack « ${name} » : prix invalide`); const w = rewards(r.Win, `Pack « ${name} »`); if (w.error) return w; o.pack.push({ name, desc: txt(r.desc, 400), price: p, Win: w }); } }
+    if (v.vip !== undefined) { o.vip = []; for (const r of list(v.vip, 12)) { const name = txt(r && r.name, 60), p = price(r && r.price); if (!name) continue; if (p === null) return bad(`VIP « ${name} » : prix invalide`); const w = rewards(r.Win, `VIP « ${name} »`); if (w.error) return w; o.vip.push({ name, desc: txt(r.desc, 400), price: p, Win: w }); } }
+    if (v.Entreprise !== undefined) { o.Entreprise = []; for (const r of list(v.Entreprise, 30)) { const name = txt(r && r.name, 60), p = price(r && r.price); if (!name) continue; if (p === null) return bad(`Entreprise « ${name} » : prix invalide`); o.Entreprise.push({ name, desc: txt(r.desc, 400), price: p }); } }
+    if (v.boost !== undefined) { o.boost = []; for (const r of list(v.boost, 6)) { const p = price(r && r.price); if (p === null) return bad('Boost : prix invalide'); o.boost.push({ price: p }); } }
+    if (v.ESXCustom !== undefined) {
+      o.ESXCustom = {}; const src = v.ESXCustom && typeof v.ESXCustom === 'object' ? v.ESXCustom : {};
+      for (const [id, c] of Object.entries(src).slice(0, 15)) { if (!ID.test(id)) return bad('Identifiant de caisse invalide : ' + id); const name = txt(c && c.name, 60) || id; const items = []; for (const it of list(c && c.list, 60)) { const nm = txt(it && it.name, 60); if (!nm) continue; const tier = Math.floor(Number(it.tier)); const e = { name: nm, tier: tier >= 1 && tier <= 5 ? tier : 5 }; if (it.vehicle !== undefined && String(it.vehicle).trim()) { if (!ID.test(String(it.vehicle).trim())) return bad(`Caisse « ${name} » : modèle de véhicule invalide`); e.vehicle = String(it.vehicle).trim(); } else if (it.weapon !== undefined && String(it.weapon).trim()) { const wp = String(it.weapon).trim().toLowerCase(); if (!/^weapon_[a-z0-9_]{1,40}$/.test(wp)) return bad(`Caisse « ${name} » : arme invalide`); e.weapon = wp; e.amount = Math.max(1, Math.floor(Number(it.amount)) || 1); } else if (it.Coins !== undefined) { const n = Math.floor(Number(it.Coins)); if (!(n >= 1 && n <= 10000000)) return bad(`Caisse « ${name} » : coins invalides`); e.Coins = n; } else if (it.money !== undefined) { const n = Math.floor(Number(it.money)); if (!(n >= 1 && n <= 1000000000)) return bad(`Caisse « ${name} » : montant invalide`); e.money = n; } else if (it.item !== undefined && String(it.item).trim()) { if (!ID.test(String(it.item).trim())) return bad(`Caisse « ${name} » : objet invalide`); e.item = String(it.item).trim(); e.amount = Math.max(1, Math.floor(Number(it.amount)) || 1); } else continue; if (it.modelTexture && ID.test(String(it.modelTexture))) e.modelTexture = String(it.modelTexture); items.push(e); } o.ESXCustom[id] = { name, list: items }; }
+    }
+    if (v.caisse !== undefined) { o.caisse = []; for (const r of list(v.caisse, 15)) { const name = txt(r && r.name, 60), p = price(r && r.price), model = String((r && r.model) || '').trim(); if (!name) continue; if (!ID.test(model)) return bad(`Caisse « ${name} » : identifiant invalide`); if (p === null) return bad(`Caisse « ${name} » : prix invalide`); o.caisse.push({ name, model, price: p, desc: txt(r.desc, 500) }); } }
+    if (v.chance !== undefined) { o.chance = []; for (const r of list(v.chance, 5)) { const rate = Number(r && r.rate); if (!Number.isFinite(rate) || rate < 0 || rate > 100) return bad('Chances des caisses : pourcentage invalide (0 à 100)'); o.chance.push({ name: txt(r.name, 40), rate }); } }
+    if (v.weaponCustom !== undefined) o.weaponCustom = !!v.weaponCustom;
+    for (const k of ['weaponCustomPrice', 'WeaponAmmoInWeapon']) if (v[k] !== undefined && v[k] !== '') { const n = Math.floor(Number(v[k])); if (!(n >= 0 && n <= 1000000)) return bad('Valeur invalide : ' + k); o[k] = n; }
+    if (v.LinkShop !== undefined) { const u = String(v.LinkShop || '').trim(); if (u && !/^https:\/\/[\w\-._~:/?#@!$&()*+,;=%]{1,280}$/.test(u)) return bad('Lien de la boutique Tebex invalide (https://)'); o.LinkShop = u; }
+    return { value: o };
+  }
   if (key === 'bans') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: v.slice(0, 5000).map(b => ({ identifier: str(String(b.identifier || ''), 120, ID) || '', name: str(String(b.name || ''), 60) || '', reason: str(String(b.reason || ''), 120) || '', until: int(b.until || 0, 0, 4102444800) || 0, at: int(b.at || 0, 0, 4102444800) || 0 })).filter(b => b.identifier) }; }
   if (key === 'whitelist') { if (!Array.isArray(v)) return { error: 'Liste invalide' }; return { value: [...new Set(v.map(x => str(String(x), 120, ID)).filter(Boolean))].slice(0, 20000) }; }
   if (key === 'server') {
@@ -125,6 +151,12 @@ function cleanJob(j) {
 const rpcDefs = {
   'db.jobs':  () => ({}),
   'db.job_save': (p) => { const job = cleanJob(p.job); return job && { job }; },
+  'db.shop': (p) => {   // callbacks du builder de boutiques (pickax_shopbuilder) appelés depuis le panel
+    const ok = ['catalog', 'list', 'get', 'create', 'save', 'delete', 'duplicate', 'toggle', 'restock', 'resetStats', 'logs'];
+    if (!ok.includes(p.fn) || !Array.isArray(p.args) || p.args.length > 4) return null;
+    if (JSON.stringify(p.args).length > 400000) return null;
+    return { fn: p.fn, args: p.args };
+  },
   'db.tables': () => ({}),
   'db.export': (p) => { const t = Array.isArray(p.tables) ? p.tables.filter(x => typeof x === 'string' && /^[A-Za-z0-9_]{1,64}$/.test(x)) : []; return t.length && t.length <= 8 && t.length === p.tables.length && { tables: t }; },
   'fs.list':  (p) => { const path = cleanPath(p.path || ''); return path !== null && { path }; },
