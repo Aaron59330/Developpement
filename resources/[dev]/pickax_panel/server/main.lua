@@ -410,9 +410,24 @@ local function setMaxClients(n)
     local root = GetResourcePath(GetCurrentResourceName()):gsub('\\', '/')
     root = root:match('^(.*/resources)/') or root:match('^(.*/resources)$')
     if not root then return nil, 'dossier resources introuvable' end
-    local file = root:gsub('/resources$', '') .. '/server.cfg'
-    local f = io.open(file, 'rb')
-    if not f then return nil, 'server.cfg introuvable : ' .. file end
+    -- où est le server.cfg ? 1) convar aero_server_cfg  2) Config.ServerCfgPath  3) à côté de resources/  4) recherche dans le dossier parent (txAdmin : txData/<profil>/server.cfg)
+    local base = root:gsub('/resources$', '')
+    local cands, tried = {}, {}
+    local function add(x) if type(x) == 'string' and x ~= '' then cands[#cands + 1] = x end end
+    add(GetConvar('aero_server_cfg', '')) add(Config.ServerCfgPath) add(base .. '/server.cfg')
+    local file, f
+    for _, c in ipairs(cands) do tried[#tried + 1] = c f = io.open(c, 'rb') if f then file = c break end end
+    if not f and io.popen then
+        local ok, h = pcall(io.popen, ('find "%s" -maxdepth 4 -name server.cfg -not -path "*/resources/*" 2>/dev/null | head -5'):format(base))
+        if ok and h then
+            local out = h:read('*a') or '' h:close()
+            local found = {}
+            for line in out:gmatch('[^\r\n]+') do found[#found + 1] = line end
+            if #found == 1 then file = found[1] f = io.open(file, 'rb')
+            elseif #found > 1 then return nil, 'plusieurs server.cfg trouvés (' .. table.concat(found, ', ') .. ') : indique le bon avec  set aero_server_cfg "chemin"  dans server.cfg' end
+        end
+    end
+    if not f then return nil, 'server.cfg introuvable (essayé : ' .. table.concat(tried, ', ') .. ') : indique-le avec  set aero_server_cfg "/chemin/server.cfg"' end
     local raw = f:read('*a') f:close()
     local eol = raw:find('\r\n', 1, true) and '\r\n' or '\n'
     local lines, idx, previous = {}, nil, nil
