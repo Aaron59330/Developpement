@@ -405,6 +405,38 @@ H.apply_loading = function(p)
 end
 
 -- bans / whitelist / message de bienvenue (documents synchronisés)
+-- Nombre de places : écrit dans server.cfg (une seule ligne, copie .aero-backup avant). Fait en Lua (io) : le Node de FiveM refuse les fichiers hors resources/.
+local function setMaxClients(n)
+    local root = GetResourcePath(GetCurrentResourceName()):gsub('\\', '/')
+    root = root:match('^(.*/resources)/') or root:match('^(.*/resources)$')
+    if not root then return nil, 'dossier resources introuvable' end
+    local file = root:gsub('/resources$', '') .. '/server.cfg'
+    local f = io.open(file, 'rb')
+    if not f then return nil, 'server.cfg introuvable : ' .. file end
+    local raw = f:read('*a') f:close()
+    local eol = raw:find('\r\n', 1, true) and '\r\n' or '\n'
+    local lines, idx, previous = {}, nil, nil
+    for l in (raw .. '\n'):gmatch('(.-)\r?\n') do lines[#lines + 1] = l end
+    if lines[#lines] == '' then lines[#lines] = nil end
+    for i, l in ipairs(lines) do
+        if not l:match('^%s*#') then
+            local a, num, b = l:match('^(%s*s?e?t?%s*sv_maxclients%s+)["\']?(%d+)["\']?(.-)$')
+            if a and (a:match('^%s*sv_maxclients') or a:match('^%s*set%s+sv_maxclients')) then
+                idx, previous = i, tonumber(num)
+                if previous == n then return { ok = true, changed = false, previous = previous } end
+                lines[i] = a .. n .. b
+                break
+            end
+        end
+    end
+    if not idx then lines[#lines + 1] = 'sv_maxclients ' .. n end
+    local bk = io.open(file .. '.aero-backup', 'wb') if bk then bk:write(raw) bk:close() end
+    local w, err = io.open(file, 'wb')
+    if not w then return nil, 'écriture impossible : ' .. tostring(err) end
+    w:write(table.concat(lines, eol) .. eol) w:close()
+    return { ok = true, changed = true, previous = previous }
+end
+
 local lastMaxClients = nil
 local function applyServerSettings()
     local c = serverCfg or {}
@@ -422,7 +454,7 @@ local function applyServerSettings()
     if want >= 1 and want ~= lastMaxClients then
         lastMaxClients = want
         if not Config.AllowMaxClients then PanelLog('warn', 'maxclients', 'Config.AllowMaxClients = false : sv_maxclients non modifié') return end
-        local r, e = callNode('SetMaxClients', want)
+        local r, e = setMaxClients(want)
         if not r then PanelLog('error', 'maxclients', 'sv_maxclients non modifié : ' .. tostring(e))
         elseif r.changed then PanelLog('staff', 'maxclients', ('sv_maxclients %s → %d dans server.cfg : pris en compte au prochain redémarrage du serveur'):format(tostring(r.previous or '?'), want))
         else PanelLog('info', 'maxclients', 'sv_maxclients est déjà à ' .. want .. ' dans server.cfg') end
