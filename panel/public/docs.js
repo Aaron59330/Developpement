@@ -55,7 +55,7 @@ const DOCS = [
     ['h', 'a) Copier les ressources'],
     ['p', 'Copie le dossier resources/ de la base dans le dossier resources/ de ton serveur, avec la même arborescence :'],
     ['table', ['Dossier', 'Contenu'], [
-      ['[essential]', 'es_extended, oxmysql, ox_lib, async'],
+      ['[essential]', 'es_extended, oxmysql, ox_lib'],
       ['[inventaire]', 'ox_inventory, p_bridge, p_itemclothes, p_outfits'],
       ['[script]', 'pickax_theme, pickax_core, pickax_ui, pickax_creator, esx_identity, pma-voice'],
       ['[dev]', 'Toutes les ressources pickax_* : notify, panel, settings, builders (job, gang, shop, world, event, illegal), builderhub, basetools, phone, anticheat, économie, bourse, enchères, carnet, HUD, boussole, tutoriel, etc.'],
@@ -246,6 +246,23 @@ const DOCS = [
       ['Le parcours d\'arrivée n\'a pas les nouveaux écrans', 'La ressource pickax_creator doit être démarrée avant esx_identity et pickax_core (resources.cfg).'],
       ['Le décor de création est vide', 'Change les coordonnées du studio dans « Parcours d\'arrivée ».'],
       ['Un réglage du panel n\'est pas pris en compte', 'Vérifie que pickax_panel est démarré et que le Dashboard est EN LIGNE.'],
+    ]],
+  ] },
+  { id: 'audit', title: '17. État de la base (audit du 31/10/2026)', blocks: [
+    ['p', 'Tout le dépôt a été contrôlé : serveur, resources, SQL, outils et panel. Aucune erreur de syntaxe, aucune ressource manquante, aucun secret dans le dépôt. Le rapport détaillé est dans docs/AUDIT.md.'],
+    ['h', 'Corrigé'],
+    ['ul', [
+      'server.cfg remis au propre (sections, tags dédoublonnés, valeurs fictives du CDN et de l\'IP de listing mises en commentaire).',
+      'Touche F1 : la boutique et le téléphone s\'ouvraient en même temps → le téléphone passe sur F12.',
+      'Touche F9 : radio et « quitter un mini-jeu » → les mini-jeux passent sur FIN.',
+      'Touche F11 : menu staff et portée de la voix → la voix passe sur ORIGINE (HOME) via setr voice_defaultCycle.',
+      'Retirés : une archive Python de 29 Mo, une copie identique du thème Tebex et la ressource async inutilisée.',
+    ]],
+    ['h', 'À décider'],
+    ['ul', [
+      'Un ancien dump SQL avec des données réelles reste dans l\'historique git : change le mot de passe MySQL et rends le dépôt privé.',
+      'Installe screenshot-basic si tu utilises la capture d\'écran du menu staff ou /clothshots.',
+      'Deux systèmes de prison coexistent (ancien menu simple et nouveau système complet) : garde le nouveau.',
     ]],
   ] },
   { id: 'securite', title: '16. Sécurité et bonnes pratiques', blocks: [

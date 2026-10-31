@@ -25,9 +25,6 @@ E('[essential]/oxmysql','oxmysql',F,'essentiel','Le pont entre le serveur et ta 
 E('[essential]/ox_lib','ox_lib',F,'essentiel','Bibliothèque d\'outils partagée (menus, notifications, barres de progression, zones, callbacks).',
   'Fournit des fonctions que plusieurs scripts utilisent : lib.callback (appeler le serveur depuis le client), les zones, les menus contextuels, les barres de progression, les commandes (lib.addCommand).',
   'ox_inventory et plusieurs builders ne démarrent plus.','server.cfg → setr ox:locale "fr"','')
-E('[essential]/async','async',F,'utile','Petite bibliothèque Lua pour exécuter des tâches en parallèle (promesses).',
-  'Utilisée par quelques scripts anciens du serveur pour attendre plusieurs résultats à la fois. Elle n\'a ni interface ni commande.',
-  'Les scripts qui l\'appellent affichent une erreur « async introuvable ».','','')
 E('[inventaire]/ox_inventory','ox_inventory',F,'essentiel','L\'inventaire : objets, armes, coffres, sol, boutiques, tenue complète.',
   'Gère tout ce que le joueur porte : cases, poids, objets empilables, armes, coffres de véhicules, coffres de jobs, ramassage au sol. Son interface a été refaite dans le style de la base (cases, filtres, glisser la tenue sur le personnage). Commandes staff : /additem, /removeitem, /setitem, /clearinv, /viewinv…',
   'Plus d\'inventaire ni d\'objets : le serveur est injouable.','server.cfg (inventory:slots, inventory:weight, flou) · ox_inventory/data/items.lua','Gestion Base → réglages Interface (flou) · Éditeur de base (objets)','ox_lib, oxmysql, es_extended')
@@ -146,7 +143,7 @@ E('[dev]/pickax_eventbuilder','pickax_eventbuilder (/eventbuilder)',B,'utile','C
   'Tu configures un événement, tu le lances pour tous ou à heure fixe. /eventstop (staff) arrête tous les événements en cours.',
   'Plus d\'événements automatiques.','pickax_eventbuilder/config.lua','','')
 E('[dev]/pickax_minigames','pickax_minigames (/minigames)',B,'facultatif','Crée des mini-jeux : basket, football, tennis, boxe, paintball, courses.',
-  'Chaque mini-jeu a un lobby, des scores et des récompenses. /minigames_leave (touche configurable) pour quitter une partie ; /mgprofil montre ton profil ; /mgseed (staff) crée les mini-jeux d\'exemple.',
+  'Chaque mini-jeu a un lobby, des scores et des récompenses. /minigames_leave (touche END par défaut, modifiable) pour quitter une partie ; /mgprofil montre ton profil ; /mgseed (staff) crée les mini-jeux d\'exemple.',
   'Plus de mini-jeux.','pickax_minigames/config.lua','','')
 E('[dev]/pickax_auction','pickax_auction (/encheres)',T,'facultatif','L\'hôtel des ventes : enchères entre joueurs.',
   'Les joueurs mettent en vente objets et véhicules ; l\'argent et l\'objet sont mis en dépôt sécurisé jusqu\'à la fin, avec achat immédiat possible.',
@@ -156,7 +153,7 @@ E('[dev]/pickax_bourse','pickax_bourse (/bourse)',T,'facultatif','La bourse : de
   'Plus de bourse.','pickax_bourse/config.lua','','oxmysql')
 E('[dev]/pickax_phone','pickax_phone (téléphone Aero)',T,'utile','Le smartphone : appels, messages, réseaux, banque, crypto.',
   'Un téléphone complet avec appels vocaux, messages, réseaux sociaux, banque, crypto, loto, groupes de discussion. Commande /phone ; staff : /phone_give, /phone_number, /phone_reset, /phone_verify, /phone_lotodraw, /phone_dclog, /phone_dcclose. Peut se plier en grand écran.',
-  'Plus de téléphone (ne pas lancer avec LB Phone).','pickax_phone/config.lua','','oxmysql, es_extended')
+  'Plus de téléphone (ne pas lancer avec LB Phone).','pickax_phone/config.lua (touche par défaut : F12)','','oxmysql, es_extended')
 
 # ───────── Désactivés ─────────
 E('[disabled]/surge_puff','surge_puff (Puff Bar)',D,'desactive','Un objet « puff » (cigarette électronique) avec animations et fumée.',
