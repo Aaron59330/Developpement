@@ -123,3 +123,8 @@
 #app #panel-left label.search, #app #panel-right label.search { height: 36px !important; margin-top: 5px !important; }
 #app #panel-left label.search input, #app #panel-right label.search input { height: 36px !important; line-height: 36px !important; }
 #app #panel-left label.search svg, #app #panel-right label.search svg { top: 18px !important; }
+
+/* recherche plus fine : espace sous le champ avant la première ligne de cases */
+#app #panel-left label.search, #app #panel-right label.search { height: 30px !important; margin-top: -2px !important; }
+#app #panel-left label.search input, #app #panel-right label.search input { height: 30px !important; line-height: 30px !important; font-size: 12px !important; }
+#app #panel-left label.search svg, #app #panel-right label.search svg { top: 15px !important; width: 14px !important; height: 14px !important; }
