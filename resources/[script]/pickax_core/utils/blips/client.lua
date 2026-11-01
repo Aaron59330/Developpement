@@ -3,6 +3,7 @@ Citizen.CreateThread(function()
         local blip = AddBlipForCoord(v.Position) 
         SetBlipSprite(blip, v.id)
         SetBlipDisplay(blip, 6)
+        SetBlipCategory(blip, 7)   -- 7 : regroupement des blips de même nom dans la légende de la carte
         if v.scale ~= nil then
             SetBlipScale(blip, 0.5)
         else
