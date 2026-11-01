@@ -5,8 +5,6 @@ BB = BB or {}
 
 -- Style par défaut de chaque catégorie : une même catégorie a le même blip dans tous les builders.
 -- (utilisé uniquement quand le module / le point ne définit pas lui-même le champ)
--- Catégorie GTA des blips : 7 = les blips de même nom / icône / couleur se regroupent en UNE ligne de légende (« Garage 1/2 »). nil = comportement par défaut de GTA (« Divers | Garage », une ligne par blip).
-BB.LegendCategory = 7
 BB.Categories = {
     garage      = { sprite = 357, color = 3,  scale = 0.5 },
     impound     = { sprite = 68,  color = 47, scale = 0.5 },
@@ -130,7 +128,6 @@ function BB.Blip(coords, b, opts)
     -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
-    if BB.LegendCategory then SetBlipCategory(blip, BB.LegendCategory) end
     SetBlipAsShortRange(blip, b.shortRange ~= false)
     -- Nom : un texte PARTAGÉ par tous les blips de même nom (clé dérivée du nom, enregistrée une fois). Avec un texte propre à chaque blip, GTA affichait une ligne de légende par blip ;
     -- avec le même texte, deux garages = deux blips sur la carte mais UN seul nom dans la légende.
