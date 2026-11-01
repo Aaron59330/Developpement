@@ -129,8 +129,16 @@ function BB.Blip(coords, b, opts)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, b.shortRange ~= false)
-    BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point'))
+    local name = tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point')
+    -- les numéros de fin (« Station essence 03 », « Armurerie #2 ») sont retirés : tous les blips du même lieu se regroupent en une ligne de légende « Nom 1/9 »
+    do
+        local base = name:gsub('%s+[nN]°%s*%d+%s*$', ''):gsub('%s+#?%d+%s*$', '')
+        if base ~= '' then name = base end
+    end
+    local key = ('PKBLIP_%x'):format(GetHashKey(name))
+    BB._names = BB._names or {}
+    if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
+    BeginTextCommandSetBlipName(key)
     EndTextCommandSetBlipName(blip)
     return blip
 end

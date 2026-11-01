@@ -132,6 +132,11 @@ function BB.Blip(coords, b, opts)
     -- Nom : un texte PARTAGÉ par tous les blips de même nom (clé dérivée du nom, enregistrée une fois). Avec un texte propre à chaque blip, GTA affichait une ligne de légende par blip ;
     -- avec le même texte, deux garages = deux blips sur la carte mais UN seul nom dans la légende.
     local name = tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point')
+    -- les numéros de fin (« Station essence 03 », « Armurerie #2 ») sont retirés : tous les blips du même lieu se regroupent en une ligne de légende « Nom 1/9 »
+    do
+        local base = name:gsub('%s+[nN]°%s*%d+%s*$', ''):gsub('%s+#?%d+%s*$', '')
+        if base ~= '' then name = base end
+    end
     local key = ('PKBLIP_%x'):format(GetHashKey(name))
     if not BB._names then BB._names = {} end
     if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
