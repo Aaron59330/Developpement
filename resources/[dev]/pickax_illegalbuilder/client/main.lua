@@ -12,7 +12,7 @@ Ctx = nil              -- contexte du panneau ouvert { type, eid, pi, ... }
 
 -- ─────────────────────────────── Utilitaires ───────────────────────────────
 -- Logo selon le module ouvert (garage, fourrière, drogue, braquage…) ; sinon logo « monde »
-local WB_ICON = { drug = 'drug', robbery = 'robbery', gofast = 'robbery' }
+local WB_ICON = { drug = 'drug', robbery = 'robbery', gofast = 'robbery', weapon = 'robbery' }
 local LastType = nil   -- dernier module utilisé (logo des notifications hors panneau)
 function Notify(msg, kind)
     local t = (Ctx and Ctx.type) or LastType
@@ -257,6 +257,7 @@ end)
 -- ─────────────────────────────── Points d'interaction (nodes) ───────────────────────────────
 local KIND_TEXT = {
     gofast = { gfstart = 'Parler au contact Go Fast' },
+    weapon = { bench = 'Utiliser l\'établi d\'armes' },
     drug = { harvest = 'Récolter', process = 'Utiliser le poste de travail', sell = 'Parler au dealer', launder = 'Blanchir de l\'argent', door = 'Entrer', exit = 'Sortir' },
     robbery = { start = 'Commencer le braquage', register = 'Vider la caisse', safe = 'Forcer le coffre', vault = 'Percer le coffre-fort', loot = 'Ramasser le butin' },
 }

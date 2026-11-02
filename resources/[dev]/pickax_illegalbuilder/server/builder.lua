@@ -160,6 +160,13 @@ local SETTINGS = {
         alert = obj({ chance = { 'n', 0, 100, 60 }, delay = { 'n', 0, 600, 20 }, label = { 's', 80, 'Go Fast suspecté' } }),
         tablet = obj({ enabled = { 'b', false }, item = ITEM }),
     }),
+    weapon = merge(COMMON, {
+        copsRequired = { 'n', 0, 30, 0 }, alertChance = { 'n', 0, 100, 10 },
+        recipes = { 'a', obj({ label = { 's', 60, '' }, inputs = { 'a', obj({ item = ITEM, count = { 'n', 1, 1000, 1 } }), Config.Max.Items, function(x) return x.item ~= '' end },
+            outputs = { 'a', obj({ item = ITEM, count = { 'n', 1, 1000, 1 } }), Config.Max.Items, function(x) return x.item ~= '' end }, time = { 'n', 1, 600, 10 }, anim = ANIM,
+            failChance = { 'n', 0, 100, 0 }, tool = TOOL }), Config.Max.Recipes, function(x) return #x.outputs > 0 end },
+        customize = obj({ enabled = { 'b', true }, account = { 'e', { 'money', 'bank', 'black_money' }, 'money' }, attachPrice = { 'n', 0, 100000000, 0 }, tintPrice = { 'n', 0, 100000000, 0 } }),
+    }),
     drug = merge(COMMON, { copsRequired = { 'n', 0, 30, 0 } }),
     robbery = merge(COMMON, {
         trigger = { 'e', { 'aim', 'interact' }, 'aim' }, weapon = { 'b', true }, copsRequired = { 'n', 0, 30, 0 }, cooldown = { 'n', 0, 604800, 1800 },
@@ -179,6 +186,7 @@ local TARGET = merge(PBASE, {
 })
 
 local POINTS = {
+    weapon = { bench = merge(PBASE, { access = ACCESS }) },
     gofast = {
         gfstart = merge(PBASE, { access = obj({ jobs = { 'j' }, item = ITEM }) }),
         gfspawn = PBASE,

@@ -342,3 +342,9 @@ Settings.Overrides = {
 
 ## Photo de profil Discord (en-tête du menu contextuel)
 Pour afficher la photo Discord du joueur ciblé : crée un bot sur https://discord.com/developers, invite-le sur ton Discord, puis colle son token dans `resources/[script]/pickax_core/players/contextMenu/discord_token.lua` (fichier serveur uniquement) ou dans server.cfg : `set pickax_discord_bot_token "..."`. Sans token, l'en-tête affiche l'initiale du joueur. Ne mets jamais ce token dans un `config.lua` : ils sont envoyés aux joueurs.
+
+## Atelier d'armes (illégal builder)
+`/illegalbuilder` → Nouveau module → **Armes**. Le point « Établi d'armes » se place avec le mode placement. Deux usages à l'établi :
+- **Fabriquer** : recettes réglables en jeu (onglet Recettes : matériaux, durée, animation, chance de raté, outil, produits : arme, munitions ou accessoire). Policiers requis et alerte police dans l'onglet Réglages.
+- **Personnaliser** : le joueur choisit une arme de son inventaire, pose les accessoires qu'il possède (silencieux, lampe, viseur… compatibilité vérifiée avec l'arme), les retire (rendus dans l'inventaire) et change la teinte. Prix de pose et de teinte réglables (0 = gratuit).
+Les accessoires sont les items « component » d'ox_inventory (`at_suppressor_light`, `at_flashlight`…) : pour qu'un joueur en obtienne, mets-les dans une recette ou une boutique. Nécessite ox_inventory pour la personnalisation.

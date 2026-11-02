@@ -397,7 +397,71 @@ const LaunderPanel = new (class extends PanelBase {
   }
 })();
 
-const Panels = { lab: LabPanel, dealer: DealerPanel, launder: LaunderPanel, gofast: GoFastPanel };
+
+/* ── Atelier d'armes : fabrication + personnalisation ── */
+const TINT_NAMES = ['Noir', 'Vert', 'Or', 'Rose', 'Armée', 'LSPD', 'Orange', 'Platine'];
+const TINT_COL = ['#262626', '#3a7d44', '#d4af37', '#e75480', '#556b2f', '#2b4a9b', '#e67e22', '#c0c0c0'];
+const WeaponPanel = new (class extends PanelBase {
+  init(d) {
+    this.qty = {}; (d.recipes || []).forEach(r => { this.qty[r.i] = 1; });
+    this.tab = (d.recipes && d.recipes.length) || !d.custom ? 'craft' : 'custom';
+    this.sel = d.custom && d.custom.weapons[0] ? d.custom.weapons[0].slot : null;
+  }
+  craftHtml() {
+    const d = this.d, img = window.__img;
+    const rows = (d.recipes || []).map(r => {
+      const can = r.max >= 1, q = Math.min(this.qty[r.i] || 1, Math.max(1, r.max));
+      return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} ${esc(r.label)}</div>${r.failChance ? chip(`${r.failChance}% de raté`, 'warn') : ''}${chip(`${r.time}s / lot`, 'mute nodot')}</div>
+        <div class="recipe"><div>${r.inputs.map(i => `<div class="rrow">${itemImg(img, i.item)}<b>${esc(i.item)}</b><span class="${i.have >= i.count * q ? 'ok-t' : 'bad'}">${i.have} / ${i.count * q}</span></div>`).join('')}</div>
+        <div class="arrow">${ic('chevron', 22)}</div>
+        <div>${r.outputs.map(o => `<div class="rrow">${itemImg(img, o.item)}<b>${esc(o.item)}</b><span>×${o.count * q}</span></div>`).join('')}</div></div>
+        ${r.tool ? `<div class="hint mt-s">Outil requis : <b>${esc(r.tool)}</b></div>` : ''}
+        <div class="row mt-s"><div class="stepper"><button class="icon" data-a="dec" data-v="${r.i}">${ic('minus', 13)}</button><span>${q}</span><button class="icon" data-a="inc" data-v="${r.i}">${ic('plus', 13)}</button></div><span class="grow"></span>
+        <button class="primary" data-a="craft" data-v="${r.i}" ${can ? '' : 'disabled'}>${ic('check', 16)} Fabriquer${can ? '' : ' (matériaux manquants)'}</button></div></div>`;
+    }).join('');
+    return rows || emptyState('target', 'Aucune recette', 'Cet établi n\'a pas de recette configurée.');
+  }
+  customHtml() {
+    const d = this.d, cu = d.custom, w = cu.weapons.find(x => x.slot === this.sel) || cu.weapons[0];
+    if (!w) return emptyState('target', 'Aucune arme', 'Mets l\'arme à personnaliser dans ton inventaire.');
+    this.sel = w.slot;
+    const price = v => v > 0 ? ` (${money(v)})` : ' (gratuit)';
+    const list = cu.weapons.map(x => `<button class="${x.slot === w.slot ? 'active' : ''}" data-a="pick" data-v="${x.slot}">${esc(x.label)}</button>`).join('');
+    const installed = w.components.map((c, i) => `<div class="item"><div class="grow"><b>${esc(c.label)}</b></div><button class="sm" data-a="detach" data-v="${i + 1}">Retirer</button></div>`).join('') || '<div class="hint">Aucun accessoire posé.</div>';
+    const ok = new Set(w.compat || []);
+    const avail = cu.attachments.filter(a => ok.has(a.name)).map(a => `<div class="item">${itemImg(window.__img, a.name)}<div class="grow"><b>${esc(a.label)}</b><small>en stock : ${a.count}</small></div><button class="primary sm" data-a="attach" data-v="${esc(a.name)}">Poser${price(cu.attachPrice)}</button></div>`).join('')
+      || '<div class="hint">Aucun accessoire compatible dans ton inventaire.</div>';
+    let tints = '';
+    for (let i = 0; i < w.tints; i++) tints += `<button class="tint ${i === (w.tint || 0) ? 'on' : ''}" data-a="tint" data-v="${i}" title="${esc(TINT_NAMES[i] || ('Teinte ' + i))}" style="background:${TINT_COL[i] || 'linear-gradient(135deg,#555,#999)'}">${i >= 8 ? i : ''}</button>`;
+    return `<div class="seg wrap" style="margin-bottom:12px">${list}</div>
+      ${w.serial ? `<div class="hint">N° de série : <b>${esc(w.serial)}</b></div>` : ''}
+      <div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Accessoires posés</div></div>${installed}</div>
+      <div class="card"><div class="card-h"><div class="t">${ic('plus', 17)} Accessoires compatibles</div></div>${avail}</div>
+      <div class="card"><div class="card-h"><div class="t">${ic('drop', 17)} Teinte</div>${chip(cu.tintPrice > 0 ? money(cu.tintPrice) + ' / changement' : 'gratuit', 'mute nodot')}</div>
+        <div class="row wrap" style="gap:8px">${tints}</div></div>`;
+  }
+  render() {
+    const d = this.d, tabs = d.custom ? `<div class="seg" style="margin-bottom:12px"><button class="${this.tab === 'craft' ? 'active' : ''}" data-a="tab" data-v="craft">${ic('flask', 15)} Fabriquer</button><button class="${this.tab === 'custom' ? 'active' : ''}" data-a="tab" data-v="custom">${ic('sliders', 15)} Personnaliser</button></div>` : '';
+    $root.innerHTML = panel({ icon: 'target', title: d.label, sub: this.tab === 'custom' ? 'Accessoires et teintes' : 'Choisis une recette', cls: 'md', body: tabs + (this.tab === 'custom' && d.custom ? this.customHtml() : this.craftHtml()) });
+  }
+  async custom(name, ...args) {
+    const r = await this.act('weapon:' + name, ...args);
+    if (r && r.ok) { Object.assign(this.d, { recipes: r.recipes, custom: r.custom }); this.render(); }
+  }
+  async onA(el) {
+    const a = el.dataset.a, v = el.dataset.v, i = Number(v), r = (this.d.recipes || []).find(x => x.i === i);
+    if (a === 'tab') { this.tab = v; return this.render(); }
+    if (a === 'pick') { this.sel = i; return this.render(); }
+    if (a === 'inc' && r) { this.qty[i] = Math.min(10, Math.max(1, r.max), (this.qty[i] || 1) + 1); return this.render(); }
+    if (a === 'dec' && r) { this.qty[i] = Math.max(1, (this.qty[i] || 1) - 1); return this.render(); }
+    if (a === 'craft' && r) { const res = await this.act('weapon:craft', i, Math.min(this.qty[i] || 1, Math.max(1, r.max))); if (res && res.ok) $root.classList.add('hidden'); return; }
+    if (a === 'attach') return this.custom('attach', this.sel, v);
+    if (a === 'detach') return this.custom('detach', this.sel, i);
+    if (a === 'tint') return this.custom('tint', this.sel, i);
+  }
+})();
+
+const Panels = { lab: LabPanel, dealer: DealerPanel, launder: LaunderPanel, gofast: GoFastPanel, weapon: WeaponPanel };
 Object.values(Panels).forEach(p => { const open = p.open.bind(p); p.open = d => { window.__img = d.imagePath === undefined ? window.__img : d.imagePath; window.__cur = d.currency || window.__cur; open(d); }; });
 
 /* ════════════════════════════ BUILDER (admin) ════════════════════════════ */
@@ -405,11 +469,12 @@ const ACTION_LABEL = { create: 'Création', save: 'Modification', delete: 'Suppr
   rent: 'Location', return: 'Retour', fleet: 'Flotte', fuel: 'Plein', jerrycan: 'Jerricane', harvest: 'Récolte', process: 'Fabrication', sell: 'Vente', launder: 'Blanchiment',
   rob_start: 'Braquage lancé', rob_loot: 'Butin', rob_end: 'Braquage terminé', plant: 'Plantation', gf_start: 'Go Fast lancé', gf_deliver: 'Go Fast livré' };
 const STAT_LABEL = { planted: 'Graines plantées', kills: 'Kills', matches: 'Parties jouées', listed: 'Annonces déposées', sold: 'Véhicules vendus', uses: 'Utilisations', keys: 'Clés faites', washes: 'Lavages effectués', exams: 'Examens passés', passed: 'Permis délivrés', deposits: 'Total déposé', withdrawn: 'Total retiré', transfers: 'Total viré', revenue: 'Revenus générés', rentals: 'Locations', liters: 'Litres vendus', tank: 'Cuve (L)', released: 'Véhicules rendus', seized: 'Véhicules saisis', harvested: 'Unités récoltées',
-  crafted: 'Lots fabriqués', sold: 'Unités vendues', laundered: 'Argent blanchi', attempts: 'Tentatives de braquage', started: 'Go Fast lancés', delivered: 'Go Fast livrés', earned: 'Gains versés' };
+  crafted: 'Lots fabriqués', customized: 'Armes personnalisées', sold: 'Unités vendues', laundered: 'Argent blanchi', attempts: 'Tentatives de braquage', started: 'Go Fast lancés', delivered: 'Go Fast livrés', earned: 'Gains versés' };
 const SWATCHES = [[239, 68, 68], [249, 115, 22], [245, 158, 11], [34, 197, 94], [20, 184, 166], [59, 130, 246], [99, 102, 241], [168, 85, 247], [236, 72, 153], [244, 244, 245]];
 
 const KIND = {
   gfstart: { label: 'Contact Go Fast (ouvre le menu)', icon: 'user' }, gfspawn: { label: 'Sortie du véhicule (position + cap)', icon: 'car' }, gfdrop: { label: 'Point de livraison', icon: 'pin' },
+  bench: { label: 'Établi d\'armes (fabrication + personnalisation)', icon: 'target' },
   main: { label: 'Point', icon: 'pin' }, pump: { label: 'Pompe', icon: 'fuel' },
   lobby: { label: 'PNJ d\'accueil (ouvre le menu)', icon: 'user' }, zone: { label: 'Zone PVP (position = centre)', icon: 'target' }, map: { label: 'Carte (départs fugitif / poursuivants)', icon: 'map' },
   lot: { label: 'Bureau des annonces', icon: 'user' }, slot: { label: 'Place d\'exposition (véhicule en vente)', icon: 'car' },
@@ -423,9 +488,9 @@ const KIND = {
   clerk: { label: 'Vendeur (cible « en joue »)', icon: 'user' }, start: { label: 'Point de départ', icon: 'pin' }, register: { label: 'Caisse', icon: 'cart' },
   safe: { label: 'Coffre', icon: 'lock' }, vault: { label: 'Coffre-fort', icon: 'shield' }, loot: { label: 'Butin (vitrines…)', icon: 'gift' }, guard: { label: 'Garde armé', icon: 'target' },
 };
-const KIND_ORDER = { gofast: ['gfstart', 'gfspawn', 'gfdrop'], drug: ['harvest', 'sell', 'launder', 'door'], robbery: ['clerk', 'start', 'register', 'safe', 'vault', 'loot', 'guard'], garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
-const POINT_WORD = { gofast: 'point', garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', drug: 'point', robbery: 'cible' };
-const PED_KINDS = new Set(['gfstart', 'main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby', 'harvest', 'process', 'sell', 'launder', 'door', 'clerk']);
+const KIND_ORDER = { weapon: ['bench'], gofast: ['gfstart', 'gfspawn', 'gfdrop'], drug: ['harvest', 'sell', 'launder', 'door'], robbery: ['clerk', 'start', 'register', 'safe', 'vault', 'loot', 'guard'], garage: ['main'], impound: ['main'], rental: ['main'], fuel: ['pump'], bank: ['counter', 'atm'], driving: ['desk', 'spawn', 'checkpoint'], jobcenter: ['desk'], carwash: ['wash'], locksmith: ['shop'], doorlock: ['lock'], carlot: ['lot', 'slot'], chase: ['lobby', 'map'], pvp: ['lobby', 'zone'] };
+const POINT_WORD = { weapon: 'établi', gofast: 'point', garage: 'garage', impound: 'fourrière', rental: 'agence', fuel: 'pompe', bank: 'point', driving: 'point', carwash: 'baie', locksmith: 'atelier', jobcenter: 'guichet', doorlock: 'porte', carlot: 'point', chase: 'point', pvp: 'zone', drug: 'point', robbery: 'cible' };
+const PED_KINDS = new Set(['bench', 'gfstart', 'main', 'pump', 'counter', 'desk', 'wash', 'shop', 'lot', 'lobby', 'harvest', 'process', 'sell', 'launder', 'door', 'clerk']);
 const NO_BLIP = new Set(['gfspawn', 'map', 'slot', 'spawn', 'checkpoint', 'register', 'safe', 'vault', 'loot', 'guard']);
 const NO_MARKER = new Set(['gfspawn', 'zone', 'map', 'clerk', 'guard', 'spawn', 'checkpoint']);
 const TARGET_KINDS = new Set(['register', 'safe', 'vault', 'loot']);
@@ -595,6 +660,7 @@ const Builder = {
     const t = this.cur.type, out = [['general', 'Général', 'sliders']];
     if (t === 'robbery') out.push(['rules', 'Règles', 'target']);
     if (t === 'gofast') out.push(['rules', 'Réglages', 'dollar']);
+    if (t === 'weapon') out.push(['rules', 'Réglages', 'dollar'], ['recipes', 'Recettes', 'flask']);
     if (t === 'garage') out.push(['vehicles', 'Véhicules', 'car']);
     if (t === 'impound') out.push(['rules', 'Tarifs & droits', 'dollar']);
     if (t === 'rental') out.push(['fleet', 'Flotte', 'key']);
@@ -625,7 +691,7 @@ const Builder = {
     const tabs = this.tabs();
     if (!tabs.find(x => x[0] === this.tab)) this.tab = 'general';
     const warn = this.missing.length ? `<div class="hint warn" style="margin-bottom:14px">Items introuvables sur ton serveur : <b>${this.missing.map(esc).join(', ')}</b>. Corrige leur nom (ou crée-les dans ton inventaire) pour que ce module fonctionne.</div>` : '';
-    const fn = { general: 'tabGeneral', rules: 'tabRules', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', jobs: 'tabJobs', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', custom: 'tabCustom', access: 'tabAccess', stats: 'tabStats' }[this.tab];
+    const fn = { general: 'tabGeneral', rules: 'tabRules', recipes: 'tabRecipes', vehicles: 'tabVehicles', fleet: 'tabFleet', station: 'tabStation', licenses: 'tabLicenses', programs: 'tabPrograms', jobs: 'tabJobs', keys: 'tabKeys', sale: 'tabSale', cars: 'tabCars', points: 'tabPoints', custom: 'tabCustom', access: 'tabAccess', stats: 'tabStats' }[this.tab];
     return `${warn}<div class="seg wrap">${tabs.map(t => `<button class="${t[0] === this.tab ? 'active' : ''}" data-a="tab" data-v="${t[0]}">${ic(t[2], 15)} ${t[1]}</button>`).join('')}</div>${this[fn]()}`;
   },
 
@@ -742,8 +808,21 @@ const Builder = {
         <div class="hint mt-s">Prix = coût de la location ; caution = rendue au retour du véhicule au point de retour.</div></div>`;
   },
 
+  tabRecipes() {
+    const rs = this.v('settings.recipes') || [];
+    return `<div class="card"><div class="card-h"><div class="t">${ic('flask', 17)} Recettes (${rs.length})</div><button class="sm" data-a="rowAdd" data-v="settings.recipes|recipe">${ic('plus', 14)} Recette</button></div>
+      ${rs.map((r, j) => this.recipeEditor(`settings.recipes.${j}`, r, j)).join('') || '<div class="hint">Aucune recette.</div>'}
+      <div class="hint mt-s">Un produit peut être une arme (<code>WEAPON_PISTOL</code>…), des munitions ou un accessoire. Les accessoires (silencieux, lampe, viseur…) se posent ensuite à l'établi, onglet « Personnaliser ».</div></div>`;
+  },
+
   tabRules() {
     const c = this.cur;
+    if (c.type === 'weapon') return `<div class="card"><div class="card-h"><div class="t">${ic('lock', 17)} Conditions</div></div>
+        <div class="grid3">${this.fN('Policiers requis', 'settings.copsRequired', { min: 0, max: 30 })}${this.fN('Chance d\'alerter la police (%)', 'settings.alertChance', { min: 0, max: 100 })}</div>
+        <div class="hint mt-s">L'alerte est déclenchée à chaque fabrication terminée, à l'emplacement de l'établi. Les restrictions d'accès (métier / item) se règlent dans l'onglet Accès.</div></div>
+      <div class="card"><div class="card-h"><div class="t">${ic('sliders', 17)} Personnalisation des armes</div>${this.fC('Activée', 'settings.customize.enabled', { r: 1 })}</div>
+        ${this.v('settings.customize.enabled') ? `<div class="grid3">${this.fSel('Compte débité', 'settings.customize.account', [['money', 'Espèces'], ['bank', 'Banque'], ['black_money', 'Argent sale']])}${this.fN(`Prix de pose d'un accessoire (${CUR})`, 'settings.customize.attachPrice', { min: 0 })}${this.fN(`Prix d'un changement de teinte (${CUR})`, 'settings.customize.tintPrice', { min: 0 })}</div>
+        <div class="hint mt-s">Le joueur pose les accessoires qu'il a dans son inventaire (compatibilité vérifiée avec l'arme) et choisit une teinte. Retirer un accessoire est gratuit et le rend dans l'inventaire.</div>` : ''}</div>`;
     if (c.type === 'gofast') return `<div class="card"><div class="card-h"><div class="t">${ic('car', 17)} Véhicule</div></div>
         <div class="grid3">${this.fS('Modèle du véhicule', 'settings.model', { max: 60, ph: 'sultan' })}${this.fS('Plaque (8 caractères max)', 'settings.plate', { max: 8, ph: 'GOFAST' })}${this.fN('Temps limite (minutes)', 'settings.timeLimit', { min: 1, max: 240 })}</div>
         <div class="hint mt-s">Le véhicule apparaît au point « Sortie du véhicule » (place-toi dessus avec le bon cap en mode placement). Il est supprimé à la livraison, à l'abandon ou à la fin du temps.</div></div>

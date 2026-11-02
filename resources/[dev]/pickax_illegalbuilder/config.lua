@@ -271,9 +271,10 @@ Config.UI = { Accent = (PickaxTheme and PickaxTheme.rgb) or { 253, 194, 125 } } 
 Config.Types = {
     drug    = { label = 'Drogues',     one = 'Filière de drogue', icon = 'flask',  sub = 'Récolte, laboratoires, vente, blanchiment' },
     robbery = { label = 'Braquages',           one = 'Braquage',          icon = 'mask',   sub = 'Supérettes, banques, bijouteries...' },
+    weapon  = { label = 'Armes',               one = 'Atelier d\'armes',  icon = 'target', sub = 'Fabrication d\'armes et personnalisation (accessoires, teintes)' },
     gofast  = { label = 'Go Fast',             one = 'Go Fast',           icon = 'car',    sub = 'Livraison illégale en véhicule : départ, sortie du véhicule, points de livraison' },
 }
-Config.TypeOrder = { 'drug', 'robbery', 'gofast' }
+Config.TypeOrder = { 'drug', 'robbery', 'gofast', 'weapon' }
 
 -- ─────────────────────────────── PNJ ───────────────────────────────
 Config.PedScenarios = {
@@ -512,4 +513,21 @@ Config.VehicleTypes = {
     { id = 'bike',     label = 'Motos / vélos' },
     { id = 'boat',     label = 'Bateaux' },
     { id = 'aircraft', label = 'Aéronefs' },
+}
+
+
+-- ─────────────────────────────── Atelier d'armes ───────────────────────────────
+-- Les recettes se règlent ensuite en jeu (builder → Recettes). Items à adapter à ton serveur (un avertissement s'affiche pour ceux qui n'existent pas).
+Config.Templates.weapon = {
+    classic = {
+        label = 'Atelier d\'armes clandestin', icon = 'target',
+        settings = { note = '', copsRequired = 0, alertChance = 10,
+            recipes = {
+                { label = 'Pistolet', inputs = { { item = 'steel', count = 10 }, { item = 'plastic', count = 5 } }, outputs = { { item = 'WEAPON_PISTOL', count = 1 } }, time = 20, anim = 'weld', failChance = 10, tool = { item = '', consume = false } },
+                { label = 'Munitions 9 mm', inputs = { { item = 'steel', count = 2 }, { item = 'gunpowder', count = 2 } }, outputs = { { item = 'ammo-9', count = 30 } }, time = 8, anim = 'hammer', failChance = 0, tool = { item = '', consume = false } },
+            },
+            customize = { enabled = true, account = 'money', attachPrice = 250, tintPrice = 150 } },
+        points = { { kind = 'bench', label = 'Établi d\'armes', blip = false, ped = noPed } },
+    },
+    custom = { label = 'Atelier vide', icon = 'target', settings = { note = '', recipes = {}, customize = { enabled = true, account = 'money', attachPrice = 0, tintPrice = 0 } }, points = {} },
 }

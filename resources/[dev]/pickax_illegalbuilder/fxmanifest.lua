@@ -27,6 +27,7 @@ server_scripts {
     'server/robbery.lua',
     'server/plants.lua',
     'server/gofast.lua',
+    'server/weapons.lua',
     'server/seed.lua',
 }
 
@@ -38,6 +39,7 @@ client_scripts {
     'client/robbery.lua',
     'client/plants.lua',
     'client/gofast.lua',
+    'client/weapons.lua',
     'client/street.lua',
     'client/seizure.lua',
     'client/underworld.lua',
