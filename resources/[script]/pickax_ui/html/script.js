@@ -350,3 +350,50 @@ window.addEventListener('message', function (e) {
     host.classList.remove('hidden');
   });
 })();
+
+/* ── Légende de la carte ── */
+(function () {
+  var host = document.getElementById('leg'), list = document.getElementById('lgl'), q = document.getElementById('lgq');
+  var COL = { 0:'#e8e8e8',1:'#e03232',2:'#71cb71',3:'#5db6e5',4:'#fff',5:'#f1c40f',6:'#e03232',7:'#a45bd1',8:'#f06fb0',9:'#f0a050',10:'#2a6fc8',11:'#2f9d2f',17:'#f0a050',25:'#2f9d2f',29:'#2a6fc8',38:'#2a6fc8',46:'#f1c40f',47:'#f0a050',50:'#a45bd1',69:'#71cb71',70:'#f1c40f',73:'#f1c40f',81:'#f0a050' };
+  var G = [], sel = '', post = function (n, d) { fetch('https://pickax_ui/' + n, { method: 'POST', body: JSON.stringify(d || {}) }).then(function (r) { return r.json(); }).then(function (g) { if (Array.isArray(g)) { G = g; draw(); } }).catch(function () {}); };
+  var EYE = '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var PIN = '<svg viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function draw() {
+    var f = q.value.trim().toLowerCase(), h = '';
+    G.filter(function (g) { return !f || g.name.toLowerCase().indexOf(f) >= 0; }).forEach(function (g) {
+      var on = g.key === sel;
+      h += '<div class="lr' + (on ? ' sel' : '') + (g.hidden ? ' off' : '') + '" data-k="' + esc(g.key) + '"><span class="ic" style="background:' + (COL[g.color] || '#fdc27d') + '">' + esc(g.name.charAt(0).toUpperCase()) + '</span><span class="nm">' + esc(g.name) + '</span>' +
+        (on ? '<span class="ab" data-a="eye" title="Afficher / masquer">' + EYE + '</span><span class="ab" data-a="go" title="Placer un repère">' + PIN + '</span>' : '') +
+        '<span class="cn"><u data-a="p">‹</u>' + g.idx + '/' + g.n + '<u data-a="n">›</u></span></div>';
+    });
+    list.innerHTML = h || '<div class="lt">AUCUN RÉSULTAT</div>';
+  }
+  list.addEventListener('click', function (e) {
+    var r = e.target.closest('.lr'); if (!r) return; var k = r.getAttribute('data-k'), a = (e.target.closest('[data-a]') || {}).getAttribute ? e.target.closest('[data-a]').getAttribute('data-a') : '';
+    if (a === 'p') return post('legStep', { key: k, dir: -1 });
+    if (a === 'n') return post('legStep', { key: k, dir: 1 });
+    if (a === 'eye') return post('legToggle', { key: k });
+    if (a === 'go') return post('legGo', { key: k });
+    sel = k; draw();
+  });
+  q.addEventListener('input', draw);
+  document.getElementById('lgShow').onclick = function () { post('legAll', { hide: false }); };
+  document.getElementById('lgHide').onclick = function () { post('legAll', { hide: true }); };
+  document.addEventListener('keydown', function (e) {
+    if (host.classList.contains('hidden')) return;
+    var vis = Array.prototype.map.call(list.querySelectorAll('.lr'), function (n) { return n.getAttribute('data-k'); }), i = vis.indexOf(sel);
+    if (e.key === 'Escape') { post('legClose'); }
+    else if (e.key === 'ArrowDown') { sel = vis[Math.min(vis.length - 1, i + 1)] || sel; draw(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { sel = vis[Math.max(0, i - 1)] || sel; draw(); e.preventDefault(); }
+    else if (e.key === 'ArrowRight' && sel && document.activeElement !== q) post('legStep', { key: sel, dir: 1 });
+    else if (e.key === 'ArrowLeft' && sel && document.activeElement !== q) post('legStep', { key: sel, dir: -1 });
+    else if (e.key === 'Enter' && sel) post('legGo', { key: sel });
+  });
+  window.addEventListener('message', function (e) {
+    var d = e.data || {}; if (d.a !== 'leg') return;
+    if (!d.open) { host.classList.add('hidden'); return; }
+    G = d.groups || []; sel = G.length ? G[0].key : ''; q.value = ''; draw(); host.classList.remove('hidden');
+  });
+  window.__legTest = function (g) { G = g; sel = g[0].key; draw(); host.classList.remove('hidden'); };
+})();

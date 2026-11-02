@@ -243,3 +243,129 @@ AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName
 -- exports.pickax_ui:CtxShow({ { x, y, w, h, title, items = { { y, h, text, right, kind, enabled, hovered, open, checked, sep } } } })   exports.pickax_ui:CtxHide()
 exports('CtxShow', function(menus) SendNUIMessage({ a = 'ctx', menus = menus }) end)
 exports('CtxHide', function() SendNUIMessage({ a = 'ctx', menus = false }) end)
+
+
+-- ───────────── Légende de la carte (remplace la liste de blips de GTA) ─────────────
+-- Les ressources enregistrent leurs blips : exports.pickax_ui:LegendAdd(blip, nom, sprite, couleur). Les blips de même nom sont regroupés (« Garage 1/3 »).
+-- Ouverture : touche M (modifiable dans Paramètres FiveM → Raccourcis) ou /carte. La carte native s'ouvre et le panneau de légende s'affiche à droite.
+local LEG, LEGHIDDEN, LEGCUR, legOpen = {}, {}, {}, false
+do
+    local raw = GetResourceKvpString('pickax_ui:legend_hidden')
+    if raw and raw ~= '' then local ok, t = pcall(json.decode, raw) if ok and type(t) == 'table' then for _, k in ipairs(t) do LEGHIDDEN[k] = true end end end
+end
+local function legSave() local t = {} for k in pairs(LEGHIDDEN) do t[#t + 1] = k end SetResourceKvp('pickax_ui:legend_hidden', json.encode(t)) end
+local function legKey(name) return tostring(name or ''):lower() end
+
+local function legApply(rec, hidden)
+    if not DoesBlipExist(rec.blip) then return end
+    if hidden then SetBlipDisplay(rec.blip, 0) else SetBlipDisplay(rec.blip, rec.display or 4) end
+end
+
+exports('LegendAdd', function(blip, name, sprite, color)
+    if not blip or blip == 0 or type(name) ~= 'string' or name == '' then return end
+    local k = legKey(name)
+    local rec = { blip = blip, key = k, name = name, sprite = tonumber(sprite) or 1, color = tonumber(color) or 0, display = GetBlipInfoIdDisplay(blip) }
+    if rec.display == 0 then rec.display = 4 end
+    LEG[blip] = rec
+    if LEGHIDDEN[k] then legApply(rec, true) end
+end)
+exports('LegendRemove', function(blip) LEG[blip] = nil end)
+
+local function legGroups()
+    local groups, order = {}, {}
+    for blip, rec in pairs(LEG) do
+        if not DoesBlipExist(blip) then LEG[blip] = nil
+        else
+            local g = groups[rec.key]
+            if not g then g = { key = rec.key, name = rec.name, sprite = rec.sprite, color = rec.color, blips = {} } groups[rec.key] = g order[#order + 1] = g end
+            g.blips[#g.blips + 1] = blip
+        end
+    end
+    table.sort(order, function(a, b) return a.name:lower() < b.name:lower() end)
+    return order
+end
+
+local function legPayload()
+    local out = {}
+    for _, g in ipairs(legGroups()) do
+        table.sort(g.blips)
+        local cur = math.max(1, math.min(#g.blips, LEGCUR[g.key] or 1))
+        LEGCUR[g.key] = cur
+        local c = GetBlipInfoIdCoord(g.blips[cur])
+        local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(c.x, c.y, c.z))
+        out[#out + 1] = { key = g.key, name = g.name, sprite = g.sprite, color = g.color, n = #g.blips, idx = cur, hidden = LEGHIDDEN[g.key] == true, street = street }
+    end
+    return out
+end
+
+local function legGroup(key)
+    for _, g in ipairs(legGroups()) do if g.key == key then table.sort(g.blips) return g end end
+end
+
+local function legClose()
+    if not legOpen then return end
+    legOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ a = 'leg', open = false })
+end
+
+local function legOpenNow()
+    if legOpen then return end
+    legOpen = true
+    if not IsPauseMenuActive() then
+        ActivateFrontendMenu(`FE_MENU_VERSION_MP_PAUSE`, false, -1)
+        Wait(150)
+        PauseMenuceptionGoDeeper(0)
+    end
+    SetNuiFocus(true, true)
+    SetNuiFocusKeepInput(true)
+    SendNUIMessage({ a = 'leg', open = true, groups = legPayload() })
+    CreateThread(function()
+        Wait(600)
+        while legOpen do
+            if not IsPauseMenuActive() then legClose() break end
+            Wait(250)
+        end
+    end)
+end
+
+RegisterCommand('carte', function() if legOpen then legClose() else legOpenNow() end end, false)
+RegisterKeyMapping('carte', 'Carte avec légende des lieux', 'keyboard', 'M')
+
+RegisterNUICallback('legClose', function(_, cb) legClose() if IsPauseMenuActive() then SetFrontendActive(false) end cb(1) end)
+RegisterNUICallback('legToggle', function(d, cb)
+    local g = legGroup(d.key)
+    if g then
+        local hide = not LEGHIDDEN[g.key]
+        LEGHIDDEN[g.key] = hide or nil
+        for _, b in ipairs(g.blips) do if LEG[b] then legApply(LEG[b], hide) end end
+        legSave()
+    end
+    cb(legPayload())
+end)
+RegisterNUICallback('legAll', function(d, cb)
+    for _, g in ipairs(legGroups()) do
+        LEGHIDDEN[g.key] = d.hide and true or nil
+        for _, b in ipairs(g.blips) do if LEG[b] then legApply(LEG[b], d.hide) end end
+    end
+    legSave()
+    cb(legPayload())
+end)
+RegisterNUICallback('legStep', function(d, cb)
+    local g = legGroup(d.key)
+    if g then LEGCUR[g.key] = ((((LEGCUR[g.key] or 1) - 1 + (d.dir or 1)) % #g.blips) + 1) end
+    cb(legPayload())
+end)
+RegisterNUICallback('legGo', function(d, cb)
+    local g = legGroup(d.key)
+    if g then
+        local c = GetBlipInfoIdCoord(g.blips[math.max(1, math.min(#g.blips, LEGCUR[g.key] or 1))])
+        SetNewWaypoint(c.x + 0.0, c.y + 0.0)
+    end
+    cb(1)
+end)
+AddEventHandler('onResourceStop', function(res)
+    if res ~= GetCurrentResourceName() then return end
+    if legOpen then SetNuiFocus(false, false) end
+    for _, rec in pairs(LEG) do if LEGHIDDEN[rec.key] then legApply(rec, false) end end
+end)
