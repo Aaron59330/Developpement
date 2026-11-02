@@ -7,7 +7,7 @@ local DEFAULTS = {
     uiBtn = -1, uiTab = -1, uiCard = -1, uiField = -1, uiFrame = -1, uiFill = 'def',   -- forme de TOUTES les interfaces (-1 = défaut du style)
     sound = true, volume = 60,
 }
-local STYLES = { noir = true, verre = true, clair = true, neon = true, bleu = true, arcade = true, pinata = true, dore = true }
+local STYLES = { dore = true }   -- un seul style de menus
 local SIZES = { sm = true, md = true, lg = true }
 local COLOR_KEYS = { accent = true, bg = true, text = true, selbg = true, selborder = true }
 local SHAPE_ROUND = { -1, 0, 6, 12, 18, 24, 999 }
@@ -49,12 +49,17 @@ if saved and saved ~= '' then
     end
 end
 
--- une seule fois : le style « Doré » devient le style par défaut, même pour ceux qui avaient mémorisé l'ancien « noir »
-if GetResourceKvpString('pickax_ui:dore_default') ~= '1' then
-    if settings.style == 'noir' then settings.style = 'dore' end
-    SetResourceKvp('pickax_ui:dore_default', '1')
+-- Préférences simplifiées : seuls restent réglables la taille, la couleur principale, la couleur et les bords des boutons, et les sons.
+-- Les anciens choix mémorisés (style, fond, texte, bordure, formes, bannière) sont remis à zéro une seule fois.
+if GetResourceKvpString('pickax_ui:simple_prefs') ~= '1' then
+    for _, k in ipairs({ 'bg', 'text', 'selborder' }) do settings[k] = '' end
+    settings.cardRadius, settings.banner, settings.style = DEFAULTS.cardRadius, true, 'dore'
+    for _, k in ipairs({ 'uiBtn', 'uiTab', 'uiCard', 'uiField', 'uiFrame' }) do settings[k] = -1 end
+    settings.uiFill = 'def'
+    SetResourceKvp('pickax_ui:simple_prefs', '1')
     SetResourceKvp(KVP, json.encode(settings))
 end
+settings.style = 'dore'
 
 local shown, last = false, nil
 

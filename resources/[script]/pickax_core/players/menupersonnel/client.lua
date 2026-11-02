@@ -25,31 +25,19 @@ local Action = {
 }
 
 local Prefs = {
-	Styles = {
-		{ id = 'noir', name = 'Noir' }, { id = 'verre', name = 'Verre' }, { id = 'clair', name = 'Clair' },
-		{ id = 'neon', name = 'Néon' }, { id = 'bleu', name = 'Couleur du serveur' }, { id = 'arcade', name = 'Arcade' }, { id = 'pinata', name = 'Piñata' }, { id = 'dore', name = 'Doré (bandeau)' },
-	},
 	Sizes = { { id = 'sm', name = 'Petit' }, { id = 'md', name = 'Moyen' }, { id = 'lg', name = 'Grand' } },
 	-- Couleurs : liste de préréglages + "Personnalisé" (Entrée = saisir un code #RRGGBB au clavier)
 	Colors = {
 		{ key = 'accent', label = 'Couleur principale', desc = 'Barre, détails et accents des menus', noDefault = true, presets = {
 			{ (PickaxTheme and PickaxTheme.hex) or '#fdc27d', 'Couleur du serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
 			{ '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
-		{ key = 'bg', label = 'Fond du menu', desc = 'Couleur de fond des menus', presets = {
-			{ '#0b0b0c', 'Noir' }, { '#1c1f26', 'Anthracite' }, { '#0a1a3a', 'Bleu nuit' }, { '#1a1030', 'Violet foncé' },
-			{ '#0d1f17', 'Vert foncé' }, { '#2a0f14', 'Bordeaux' }, { '#f7f7f5', 'Blanc' } } },
-		{ key = 'text', label = 'Texte', desc = 'Couleur du texte des menus', presets = {
-			{ '#f4f4f5', 'Blanc' }, { '#c9c9ce', 'Gris clair' }, { '#111114', 'Noir' }, { '#cfe6ff', 'Bleu clair' }, { '#fde68a', 'Doré' } } },
-		{ key = 'selbg', label = 'Bouton sélectionné (fond)', desc = 'Fond du bouton survolé', presets = {
+		{ key = 'selbg', label = 'Couleur des boutons', desc = 'Couleur du bouton sélectionné', presets = {
 			{ '#fdc27d', 'Bleu' }, { '#ffffff', 'Blanc' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
-		{ key = 'selborder', label = 'Bouton sélectionné (bordure)', desc = 'Bordure du bouton survolé', presets = {
-			{ '#ffffff', 'Blanc' }, { '#fdc27d', 'Bleu' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
 	},
 	BtnRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } },
-	CardRadius = { { 0, 'Carré' }, { 8, 'Léger' }, { 14, 'Arrondi' }, { 18, 'Standard' }, { 24, 'Très arrondi' }, { 28, 'Fort arrondi' } },
 }
 
-local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'noir', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
+local PrefsCfg = { sound = true, volume = 60, banner = true, style = 'dore', size = 'md', accent = (PickaxTheme and PickaxTheme.hex) or '#fdc27d', bg = '', text = '', selbg = '', selborder = '', btnRadius = 12, cardRadius = 18 }
 
 local function PrefsCall(name, ...)
 	if GetResourceState('pickax_ui') ~= 'started' then return nil end
@@ -71,8 +59,7 @@ local function PrefsNames(list, nameIdx)
 	return t
 end
 
-local PrefsStyleNames, PrefsSizeNames = {}, {}
-for i, v in ipairs(Prefs.Styles) do PrefsStyleNames[i] = v.name end
+local PrefsSizeNames = {}
 for i, v in ipairs(Prefs.Sizes) do PrefsSizeNames[i] = v.name end
 local PrefsVolumeNames = {}
 for i = 1, 10 do PrefsVolumeNames[i] = (i * 10) .. ' %' end
@@ -107,22 +94,7 @@ end
 local function HudSet(key, value)
 	if HudCall('SetSetting', key, value) then HudCfg[key] = value end
 end
-local PrefsBtnNames, PrefsCardNames = PrefsNames(Prefs.BtnRadius), PrefsNames(Prefs.CardRadius)
--- Forme de TOUTES les interfaces du serveur (boutons, onglets, cartes, champs, cadre) : appliquée en direct par pickax_theme
-local ShapeRound = { { -1, 'Défaut du style' }, { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } }
-local ShapeBox = { { -1, 'Défaut du style' }, { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' } }
-local ShapeFill = { { 'def', 'Plein (défaut)' }, { 'outline', 'Contour seul' }, { 'glow', 'Plein lumineux' } }
-local ShapeRows = {
-	{ key = 'uiBtn', label = 'Boutons', desc = 'Bords de tous les boutons (Récupérer, Louer, Fermer, Acheter…)', list = ShapeRound },
-	{ key = 'uiTab', label = 'Onglets', desc = 'Bords des onglets et des entrées de navigation', list = ShapeRound },
-	{ key = 'uiCard', label = 'Cartes et vignettes', desc = 'Bords des cartes, lignes, vignettes et pastilles', list = ShapeBox },
-	{ key = 'uiField', label = 'Champs de saisie', desc = 'Bords des champs de texte, nombres et listes', list = ShapeBox },
-	{ key = 'uiFrame', label = 'Cadre des fenêtres', desc = 'Bords de la fenêtre principale des interfaces', list = ShapeBox },
-}
-for _, r in ipairs(ShapeRows) do r.names = PrefsNames(r.list) end
-local ShapeFillNames = PrefsNames(ShapeFill)
-local function ShapeIndex(list, v) for i = 1, #list do if list[i][1] == v then return i end end return 1 end
-local function ShapeAll(v) for _, r in ipairs(ShapeRows) do PrefsSet(r.key, v) end end
+local PrefsBtnNames = PrefsNames(Prefs.BtnRadius)
 
 local function PrefsStyleIndex(list, id)
 	for i = 1, #list do if list[i].id == id then return i end end
@@ -321,7 +293,7 @@ local function OpenMenu()
 	local editorMenu = RageUI.CreateSubMenu(Parametres, "Rockstar editor", "Que voulez-vous faire ?")
 	local Facture = RageUI.CreateSubMenu(Informations, "Vos facture", "Que voulez-vous faire ?")
 	local MenuVehicle = RageUI.CreateSubMenu(mainmenu, "Vehicule", "Que voulez-vous faire ?")
-	local PrefsMenu = RageUI.CreateSubMenu(Parametres, "Apparence des menus", "Apparence de tous les menus :")
+	local PrefsMenu = RageUI.CreateSubMenu(Parametres, "Préférences", "Taille, couleur des boutons et sons :")
 	local HudMenu = RageUI.CreateSubMenu(Parametres, "Affichage du HUD", "Choisissez ce qui s'affiche en haut à droite :")
 	HudRefresh()
 	PrefsRefresh()
@@ -367,16 +339,7 @@ local function OpenMenu()
 		end)
 		RageUI.IsVisible(PrefsMenu, true, true, true, function()
 			RageUI.Separator("Apparence")
-			RageUI.Checkbox("Afficher la bannière", "Affiche ou masque la bannière en haut des menus", PrefsCfg.banner, { Style = RageUI.CheckboxStyle.Tick }, function(Hovered, Selected, Active, Checked)
-			end, function()
-				PrefsSet('banner', true)
-			end, function()
-				PrefsSet('banner', false)
-			end)
-			RageUI.List("Style", PrefsStyleNames, PrefsStyleIndex(Prefs.Styles, PrefsCfg.style), "Change le design de tous les menus", {}, true, function() end, function(Index)
-				PrefsSet('style', Prefs.Styles[Index].id)
-			end)
-			RageUI.List("Taille", PrefsSizeNames, PrefsStyleIndex(Prefs.Sizes, PrefsCfg.size), "Change la taille de tous les menus", {}, true, function() end, function(Index)
+			RageUI.List("Taille des menus", PrefsSizeNames, PrefsStyleIndex(Prefs.Sizes, PrefsCfg.size), "Petit, moyen ou grand", {}, true, function() end, function(Index)
 				PrefsSet('size', Prefs.Sizes[Index].id)
 			end)
 			RageUI.Separator("Sons")
@@ -405,33 +368,9 @@ local function OpenMenu()
 					end
 				end)
 			end
-			RageUI.Separator("Forme")
+			RageUI.Separator("Boutons")
 			RageUI.List("Bords des boutons", PrefsBtnNames, PrefsRadiusIndex(Prefs.BtnRadius, PrefsCfg.btnRadius), "Carré, arrondi ou rond", {}, true, function() end, function(Index)
 				PrefsSet('btnRadius', Prefs.BtnRadius[Index][1])
-			end)
-			RageUI.List("Bords des notifications", NotifyRadiusNames, PrefsRadiusIndex(NotifyRadius, NotifyGetRadius()), "Carré, arrondi ou très arrondi (s'applique à toutes vos notifications)", {}, true, function() end, function(Index)
-				NotifySetRadius(NotifyRadius[Index][1])
-			end)
-			RageUI.List("Bords du menu", PrefsCardNames, PrefsRadiusIndex(Prefs.CardRadius, PrefsCfg.cardRadius), "Arrondi du cadre des menus", {}, true, function() end, function(Index)
-				PrefsSet('cardRadius', Prefs.CardRadius[Index][1])
-			end)
-			RageUI.Separator("Toutes les interfaces (jobs, garages, boutiques…)")
-			for _, r in ipairs(ShapeRows) do
-				RageUI.List(r.label, r.names, ShapeIndex(r.list, PrefsCfg[r.key]), r.desc, {}, true, function() end, function(Index)
-					PrefsSet(r.key, r.list[Index][1])
-				end)
-			end
-			RageUI.List("Boutons principaux", ShapeFillNames, ShapeIndex(ShapeFill, PrefsCfg.uiFill), "Plein, contour seul ou plein lumineux", {}, true, function() end, function(Index)
-				PrefsSet('uiFill', ShapeFill[Index][1])
-			end)
-			RageUI.ButtonWithStyle("Tout en carré", "Bords carrés partout : boutons, onglets, cartes, champs et fenêtres", {}, true, function(_, _, s)
-				if s then ShapeAll(0) end
-			end)
-			RageUI.ButtonWithStyle("Tout en arrondi", "Bords très arrondis partout", {}, true, function(_, _, s)
-				if s then ShapeAll(18) end
-			end)
-			RageUI.ButtonWithStyle("Formes par défaut", "Reprend la forme du style choisi", {}, true, function(_, _, s)
-				if s then ShapeAll(-1) PrefsSet('uiFill', 'def') end
 			end)
 			RageUI.Line()
 			RageUI.ButtonWithStyle("Réinitialiser l'apparence", "Revient au style par défaut", {}, true, function(_, _, s)

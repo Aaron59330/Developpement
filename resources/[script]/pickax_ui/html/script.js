@@ -72,7 +72,7 @@ function hexRgb(h) {
   return m ? parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) : (window.PICKAX_ACCENT_RGB || '253,194,125');
 }
 
-var STYLE_ALPHA = { noir: .94, verre: .62, clair: .97, neon: .95, bleu: .96, arcade: .96, pinata: .96, dore: .86 };
+var STYLE_ALPHA = { dore: .86 };
 var OVERRIDES = ['--card-bg', '--text', '--text-2', '--muted', '--act-bg', '--act-border', '--act-text', '--r-btn', '--r-card'];
 
 function applyCfg(c) {
@@ -81,19 +81,12 @@ function applyCfg(c) {
   $('banner').classList.toggle('hidden', c.banner === false);
 }
 
-// Style des menus : le thème « Arcade » (réglé depuis le panel / Personnalisation) donne le style Arcade aux menus qui sont restés sur le style par défaut « Noir » ;
-// en thème « ancien », le style Arcade redevient « Noir ». Les autres choix du joueur (Verre, Clair, Néon, Couleur du serveur) sont respectés.
-function effStyle(c) {
-  var s = c.style || 'noir', d = window.PICKAX_DESIGN || 'arcade';
-  if (d === 'pinata' && (s === 'noir' || s === 'arcade')) return 'pinata';
-  if (d === 'arcade' && s === 'noir') return 'arcade';
-  if ((d === 'ancien' || d === 'pinata') && s === 'arcade') return d === 'pinata' ? 'pinata' : 'noir';
-  return s;
-}
+// Un seul style de menus : « Doré » (bandeau, lignes sombres arrondies, ligne active à la couleur du serveur)
+function effStyle() { return 'dore'; }
 
 function applyCfgTo(w, c) {
   var st = w.style;
-  var es = effStyle(c);
+  var es = effStyle();
   w.setAttribute('data-style', es);
   w.setAttribute('data-size', c.size || 'md');
   st.setProperty('--accent', c.accent || (window.PICKAX_ACCENT || '#fdc27d'));
