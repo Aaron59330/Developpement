@@ -841,6 +841,17 @@ end
 -- ───────────── Pont vers pickax_ui : envoie l'état des menus visibles (positions natives, donc mêmes zones de clic) ─────────────
 local ctxLast = ''
 local function ctxRound(v) return math.floor(v * 10000 + 0.5) / 10000 end
+local ctxAva, ctxAvaWait = {}, {}
+local function ctxAvatar(sid)
+    local v = ctxAva[sid]
+    if v ~= nil then return v or nil end
+    if not ctxAvaWait[sid] then
+        ctxAvaWait[sid] = true
+        ESX.TriggerServerCallback('ContextMenu:DiscordAvatar', function(url) ctxAva[sid] = url or false ctxAvaWait[sid] = nil ctxLast = '' end, sid)
+    end
+    return nil
+end
+
 -- En-tête du menu : cible sous le curseur (joueur, véhicule, passant, objet) + distance
 local function ctxHead()
     local e = LastEntityHit
@@ -848,10 +859,10 @@ local function ctxHead()
     local me = PlayerPedId()
     local d = #(GetEntityCoords(me) - GetEntityCoords(e))
     local h = { d = math.floor(d + 0.5) }
-    if e == me then h.kind, h.name, h.sub, h.d = 'self', 'Moi-même', 'Vous', nil
+    if e == me then h.kind, h.name, h.sub, h.d = 'self', 'Moi-même', 'Vous', nil h.img = ctxAvatar(GetPlayerServerId(PlayerId()))
     elseif IsEntityAPed(e) then
         local pl = IsPedAPlayer(e) and NetworkGetPlayerIndexFromPed(e) or -1
-        if pl ~= -1 then h.kind, h.name, h.sub = 'player', GetPlayerName(pl) or 'Joueur', 'Joueur'
+        if pl ~= -1 then h.kind, h.name, h.sub = 'player', GetPlayerName(pl) or 'Joueur', 'Joueur' h.img = ctxAvatar(GetPlayerServerId(pl))
         else h.kind, h.name, h.sub = 'ped', 'Passant', 'PNJ' end
     elseif IsEntityAVehicle(e) then
         local lbl = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(e)))

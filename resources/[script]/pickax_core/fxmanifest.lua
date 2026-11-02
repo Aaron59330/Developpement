@@ -28,6 +28,7 @@ shared_scripts {
 }
 
 server_scripts {
+    'players/contextMenu/discord_token.lua',   -- token du bot Discord (serveur uniquement)
     '@oxmysql/lib/MySQL.lua',
 
     'config_sv.lua',

@@ -561,3 +561,29 @@ ESX.RegisterServerCallback('ContextMenu:getAnimation', function(source, cb, targ
 		RequestPlayer[source] = nil
 	end
 end)
+
+-- Photo de profil Discord (en-tête du menu contextuel) : identifiant discord du joueur → API Discord (bot) → URL du CDN, gardée 1 h en cache
+local AVA, AVATTL = {}, 3600
+ESX.RegisterServerCallback('ContextMenu:DiscordAvatar', function(source, cb, target)
+	local tok = GetConvar('pickax_discord_bot_token', '')
+	if tok == '' then tok = PickaxDiscordBotToken or '' end
+	target = tonumber(target)
+	if tok == '' or not target or not GetPlayerName(target) then return cb(nil) end
+	local did
+	for _, id in ipairs(GetPlayerIdentifiers(target)) do if id:sub(1, 8) == 'discord:' then did = id:sub(9) break end end
+	if not did then return cb(nil) end
+	local hit = AVA[did]
+	if hit and os.time() - hit.t < AVATTL then return cb(hit.url) end
+	PerformHttpRequest('https://discord.com/api/v10/users/' .. did, function(code, body)
+		local url
+		if code == 200 and body then
+			local ok, d = pcall(json.decode, body)
+			if ok and d then
+				if d.avatar then url = ('https://cdn.discordapp.com/avatars/%s/%s.png?size=128'):format(did, d.avatar)
+				else url = ('https://cdn.discordapp.com/embed/avatars/%d.png'):format(tonumber(did) and ((tonumber(did) // 4194304) % 6) or 0) end
+			end
+		end
+		AVA[did] = { url = url, t = os.time() }
+		cb(url)
+	end, 'GET', '', { ['Authorization'] = 'Bot ' .. tok })
+end)

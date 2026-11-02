@@ -221,3 +221,5 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #ctx .ch b{font-size:1.5vh;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #ctx .ch small{font-size:1.2vh;color:#b4b7c2;font-weight:600}
 #ctx .ch .ds{font-size:1.25vh;font-weight:700;color:rgb(var(--pk-accent-rgb,253,194,125));background:rgba(var(--pk-accent-rgb,253,194,125),.14);border-radius:8px;padding:.5vh .9vh}
+#ctx .ch .av{position:relative;overflow:hidden}
+#ctx .ch .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}

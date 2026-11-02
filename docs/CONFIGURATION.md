@@ -339,3 +339,6 @@ Settings.Overrides = {
 | Discord | Résumé quotidien | `discord_digest_hour` | Heure du résumé (heure du serveur) | number | `20` |
 | Serveur | Mode de jeu | `game_mode` | Mode de jeu du serveur | select | `difficile` |
 | Drogues & labos | Tablettes | `ib_tablets_required` | Tablettes obligatoires (blanchiment, Go Fast, dealers) | bool | `true` |
+
+## Photo de profil Discord (en-tête du menu contextuel)
+Pour afficher la photo Discord du joueur ciblé : crée un bot sur https://discord.com/developers, invite-le sur ton Discord, puis colle son token dans `resources/[script]/pickax_core/players/contextMenu/discord_token.lua` (fichier serveur uniquement) ou dans server.cfg : `set pickax_discord_bot_token "..."`. Sans token, l'en-tête affiche l'initiale du joueur. Ne mets jamais ce token dans un `config.lua` : ils sont envoyés aux joueurs.
