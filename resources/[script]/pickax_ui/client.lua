@@ -302,10 +302,13 @@ local function legGroup(key)
     for _, g in ipairs(legGroups()) do if g.key == key then table.sort(g.blips) return g end end
 end
 
+local legFlash
 local function legClose()
     if not legOpen then return end
     legOpen = false
     SetNuiFocus(false, false)
+    if legFlash and DoesBlipExist(legFlash) then SetBlipFlashes(legFlash, false) end
+    legFlash = nil
     SendNUIMessage({ a = 'leg', open = false })
 end
 
@@ -351,11 +354,29 @@ RegisterNUICallback('legAll', function(d, cb)
     legSave()
     cb(legPayload())
 end)
+-- met en évidence le blip courant d'un groupe (clignote + repère sur la carte) ; les autres du groupe redeviennent normaux
+local function legFocus(g, place)
+    if legFlash and DoesBlipExist(legFlash) then SetBlipFlashes(legFlash, false) end
+    legFlash = nil
+    if not g then return end
+    local cur = math.max(1, math.min(#g.blips, LEGCUR[g.key] or 1))
+    local b = g.blips[cur]
+    if not DoesBlipExist(b) then return end
+    SetBlipFlashes(b, true)
+    legFlash = b
+    local c = GetBlipInfoIdCoord(b)
+    if place ~= false then SetNewWaypoint(c.x + 0.0, c.y + 0.0) end
+    pcall(function() SetRadarZoomToBlip(b, 0.0) end)
+end
 RegisterNUICallback('legStep', function(d, cb)
     local g = legGroup(d.key)
-    if g then LEGCUR[g.key] = ((((LEGCUR[g.key] or 1) - 1 + (d.dir or 1)) % #g.blips) + 1) end
+    if g then
+        LEGCUR[g.key] = ((((LEGCUR[g.key] or 1) - 1 + (d.dir or 1)) % #g.blips) + 1)
+        legFocus(g, true)
+    end
     cb(legPayload())
 end)
+RegisterNUICallback('legSelect', function(d, cb) legFocus(legGroup(d.key), true) cb(1) end)
 RegisterNUICallback('legGo', function(d, cb)
     local g = legGroup(d.key)
     if g then

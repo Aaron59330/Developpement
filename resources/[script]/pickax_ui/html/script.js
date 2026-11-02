@@ -408,7 +408,7 @@ window.addEventListener('message', function (e) {
     if (a === 'n') return post('legStep', { key: k, dir: 1 });
     if (a === 'eye') return post('legToggle', { key: k });
     if (a === 'go') return post('legGo', { key: k });
-    sel = k; draw();
+    sel = k; draw(); post('legSelect', { key: k });
   });
   q.addEventListener('input', draw);
   document.getElementById('lgShow').onclick = function () { post('legAll', { hide: false }); };
