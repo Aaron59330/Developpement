@@ -56,6 +56,8 @@ return {
     ['jus_raisin'] = { label = 'Jus de raisin', weight = 500, stack = true, close = true },
     ['jusfruit'] = { label = 'Jus de fruits', weight = 500, stack = true, close = true },
     ['limonade'] = { label = 'Limonade', weight = 500, stack = true, close = true },
+    ['evidence_casing'] = { label = 'Douille (scellé)', weight = 10, stack = false, close = true, description = 'Pièce à conviction : à analyser au laboratoire de police.' },
+    ['evidence_bag'] = { label = 'Sachet de scellé', weight = 20, stack = true, close = true, description = 'Sachet pour recueillir une pièce à conviction.' },
     ['lockpick'] = { label = 'Pied de Biche', weight = 1000, stack = true, close = true },
     ['malbora'] = { label = 'Malboro', weight = 100, stack = true, close = true },
     ['martini'] = { label = 'Martini blanc', weight = 1000, stack = true, close = true },

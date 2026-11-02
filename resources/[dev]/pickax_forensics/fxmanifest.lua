@@ -1,0 +1,13 @@
+fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+name 'pickax_forensics'
+description 'Police scientifique : douilles laissées par les tirs, empreinte balistique, analyse au laboratoire (arme, n° de série, propriétaire enregistré, correspondances entre scènes)'
+version '1.0.0'
+
+shared_scripts { '@ox_lib/init.lua', 'config.lua' }
+server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
+client_scripts { 'client/main.lua' }
+
+dependencies { 'es_extended', 'oxmysql', 'ox_lib', 'ox_inventory' }

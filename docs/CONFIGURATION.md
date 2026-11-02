@@ -348,3 +348,11 @@ Pour afficher la photo Discord du joueur ciblé : crée un bot sur https://disco
 - **Fabriquer** : recettes réglables en jeu (onglet Recettes : matériaux, durée, animation, chance de raté, outil, produits : arme, munitions ou accessoire). Policiers requis et alerte police dans l'onglet Réglages.
 - **Personnaliser** : le joueur choisit une arme de son inventaire, pose les accessoires qu'il possède (silencieux, lampe, viseur… compatibilité vérifiée avec l'arme), les retire (rendus dans l'inventaire) et change la teinte. Prix de pose et de teinte réglables (0 = gratuit).
 Les accessoires sont les items « component » d'ox_inventory (`at_suppressor_light`, `at_flashlight`…) : pour qu'un joueur en obtienne, mets-les dans une recette ou une boutique. Nécessite ox_inventory pour la personnalisation.
+
+## Police scientifique : douilles et balistique (`pickax_forensics`)
+Réglages dans `resources/[dev]/pickax_forensics/config.lua` : métiers police, durée de vie des douilles, armes sans douille, calibres, positions du laboratoire (`/laboici` en admin donne les coordonnées à copier).
+- **Tir** : chaque tir laisse une douille au sol (le serveur lit l'arme équipée, son n° de série et son propriétaire enregistré ; rafales limitées). Seule la police voit les repères.
+- **Ramassage** : E sur la douille → item `evidence_casing` (scellé). `Config.Casings.BagItem = 'evidence_bag'` exige un sachet.
+- **Analyse** : au laboratoire (E) → rapport : arme, calibre, signature balistique, n° de série, propriétaire enregistré, correspondances avec d'autres douilles déjà analysées (même arme).
+- **Fichier** : `/balistique` (dernières analyses) ou `/balistique <n° de série | BAL-xxxxxx>`.
+Un propriétaire « enregistré » est celui noté par ox_inventory à la création de l'arme ; une arme sans n° de série (limée) reste non traçable.
