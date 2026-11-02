@@ -191,3 +191,24 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #keys kbd { min-width: 24px; height: 24px; padding: 0 7px; display: inline-grid; place-items: center; border-radius: 7px; font: 800 12px/1 'Segoe UI', Arial, sans-serif;
   color: var(--pk-accent-light, #fdcb8f); background: rgba(var(--pk-accent-rgb, 253, 194, 125), .14); border: 1px solid rgba(var(--pk-accent-rgb, 253, 194, 125), .55); box-shadow: 0 2px 0 rgba(var(--pk-accent-rgb, 253, 194, 125), .25); }
 #keys .kl { color: #cfd1d8; font-weight: 600; }
+
+/* ===== Menu contextuel (main levée sur un joueur / véhicule / objet) : couleur du serveur ===== */
+#ctx { position: fixed; inset: 0; pointer-events: none; z-index: 4; font: 600 13.5px/1 'Inter', 'Segoe UI', system-ui, sans-serif; color: #f4f4f5; }
+#ctx.hidden { display: none; }
+#ctx .cm { position: absolute; background: rgba(14, 14, 15, .92); border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; box-shadow: 0 18px 50px rgba(0, 0, 0, .55); overflow: hidden; animation: cxin .12s ease-out; }
+@keyframes cxin { from { opacity: 0; transform: translateX(-4px); } }
+#ctx .cm-t { position: absolute; left: 0; right: 0; top: 0; padding: 9px 14px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8b8f9b; }
+#ctx .cr { position: absolute; left: 5px; right: 5px; display: flex; align-items: center; gap: 11px; padding: 0 11px; border-radius: 10px; border: 1px solid transparent; white-space: nowrap; overflow: hidden; }
+#ctx .cr svg { width: 15px; height: 15px; flex: none; stroke: #b4b7c2; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#ctx .cr .l { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+#ctx .cr .rt { color: #b4b7c2; font-size: 12px; font-weight: 600; }
+#ctx .cr .ch { width: 14px; height: 14px; stroke: #8b8f9b; }
+#ctx .cr.hov, #ctx .cr.open { border-color: var(--pk-accent, #fdc27d); background: rgba(var(--pk-accent-rgb, 253, 194, 125), .09); }
+#ctx .cr.hov svg:first-child, #ctx .cr.open svg:first-child { stroke: var(--pk-accent, #fdc27d); }
+#ctx .cr.off { color: #6d707b; }
+#ctx .cr.off svg { stroke: #55585f; }
+#ctx .cr.txt { color: #b4b7c2; font-weight: 500; }
+#ctx .cr .bx { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid #6d707b; flex: none; display: grid; place-items: center; }
+#ctx .cr .bx.on { background: var(--pk-accent, #fdc27d); border-color: var(--pk-accent, #fdc27d); }
+#ctx .cr .bx.on::after { content: ''; width: 8px; height: 4px; border-left: 2px solid #17120a; border-bottom: 2px solid #17120a; transform: rotate(-45deg) translate(1px, -1px); }
+#ctx .sp { position: absolute; left: 14px; right: 14px; height: 1px; background: rgba(255, 255, 255, .08); }

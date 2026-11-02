@@ -237,3 +237,9 @@ exports('ControlKey', function(control, group)
     return NAMED[control] or 'Touche'
 end)
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then KEYBARS, KEYORDER = {}, {} end end)
+
+
+-- ───────────── Menu contextuel (clic droit / main levée) : dessiné ici, la logique reste dans pickax_core/players/contextMenu ─────────────
+-- exports.pickax_ui:CtxShow({ { x, y, w, h, title, items = { { y, h, text, right, kind, enabled, hovered, open, checked, sep } } } })   exports.pickax_ui:CtxHide()
+exports('CtxShow', function(menus) SendNUIMessage({ a = 'ctx', menus = menus }) end)
+exports('CtxHide', function() SendNUIMessage({ a = 'ctx', menus = false }) end)

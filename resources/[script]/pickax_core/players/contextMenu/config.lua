@@ -136,7 +136,8 @@ ConfigContextMenu = {
     ItemCrocheter = "lockpick",
 
     Menu = {
-        RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut
+        UseNUI = true, -- true = menu dessiné par pickax_ui (icônes, couleur du serveur) ; false = ancien dessin natif
+        RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut (ancien dessin natif)
         CornerRadius = 10, -- Rayon des coins en pixels (si RoundedCorners = true)
         OpenMenu = 25,--Touche pour accéder au entité
         OpenMenuBind = 19,--ALT (ouvrir le menu principale)

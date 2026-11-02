@@ -290,3 +290,63 @@ window.addEventListener('message', function (e) {
   }).join('');
   bar.classList.remove('hidden');
 });
+
+
+// ───────────── Menu contextuel ─────────────
+(function () {
+  var host = document.getElementById('ctx');
+  var P = function (d) { return '<svg viewBox="0 0 24 24">' + d + '</svg>'; };
+  var IC = {
+    user: P('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),
+    card: P('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h4M7 14h6M15 10h2"/>'),
+    job: P('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 13h18"/>'),
+    team: P('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c3 0 5 2 5 5"/>'),
+    car: P('<path d="M5 16V11l2-5h10l2 5v5M3 16h18M7 16v2M17 16v2"/><circle cx="8" cy="13" r="1"/><circle cx="16" cy="13" r="1"/>'),
+    money: P('<circle cx="12" cy="12" r="9"/><path d="M14.5 9c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1.100 0-2.100-.6-2.500-1.500M12 6v1.500M12 16.500V18"/>'),
+    shield: P('<path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6z"/>'),
+    search: P('<circle cx="11" cy="11" r="6.500"/><path d="m16 16 5 5"/>'),
+    lock: P('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
+    walk: P('<circle cx="13" cy="4.500" r="2"/><path d="M8 21l3-7-2-3 3-3 3 3 3 1M11 14l3 3v4"/>'),
+    shirt: P('<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3c-.5 1.500-2 2.500-4 2.500S8.500 4.500 8 3Z"/>'),
+    phone: P('<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>'),
+    heal: P('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>'),
+    key: P('<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 7l3 3"/>'),
+    list: P('<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>'),
+    music: P('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>'),
+    box: P('<path d="m12 3 8 4v10l-8 4-8-4V7z"/><path d="m4 7 8 4 8-4M12 11v10"/>'),
+    gun: P('<path d="M3 8h15l3 2v3h-8l-1 4H7l1-4H3Z"/>'),
+    dot: P('<circle cx="12" cy="12" r="3.500"/>')
+  };
+  var MAP = [
+    [/arme|weapon|munition/, 'gun'], [/amende|facture|bill/, 'list'], [/fouill|cherch|recherche|poudre|test/, 'search'], [/menott|cuff|attach|corde|ligot/, 'lock'], [/escort|porter|traîn|suivre|marche/, 'walk'],
+    [/identit|carte|papier|permis|licen/, 'card'], [/v[eê]tement|tenue|habit|masque|chapeau|lunette/, 'shirt'], [/argent|money|banque|payer|vendre|achat|prix|\$/, 'money'], [/v[eé]hicule|voiture|moto|garage|plaque|coffre|moteur|capot/, 'car'],
+    [/police|fdo|lspd|justice|alerte|appel/, 'shield'], [/soin|r[eé]anim|heal|m[eé]decin|ems|sant[eé]|soigner|blessure/, 'heal'], [/t[eé]l[eé]phone|appeler|sms/, 'phone'], [/cl[eé]|verrou|serrure|ouvrir|fermer/, 'key'],
+    [/entreprise|soci[eé]t[eé]|gang|organisation|recrut|promouvoir|r[eé]trograd|virer|patron/, 'team'], [/m[eé]tier|travail|job/, 'job'], [/interaction|emote|danse|animation|musique|son/, 'music'], [/inventaire|objet|item|give|donner/, 'box'], [/joueur|citoyen|personne|invit/, 'user']
+  ];
+  var strip = function (s) { return String(s == null ? '' : s).replace(/~[a-z]~/gi, '').replace(/\s+/g, ' ').trim(); };
+  var icon = function (t) { var l = strip(t).toLowerCase(); for (var i = 0; i < MAP.length; i++) if (MAP[i][0].test(l)) return IC[MAP[i][1]]; return IC.dot; };
+  var CHEV = '<svg class="ch" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>';
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var last = '';
+  window.addEventListener('message', function (e) {
+    var d = e.data || {};
+    if (d.a !== 'ctx') return;
+    if (!d.menus || !d.menus.length) { host.classList.add('hidden'); host.innerHTML = ''; last = ''; return; }
+    var sig = JSON.stringify(d.menus);
+    if (sig === last) return;
+    var fresh = host.classList.contains('hidden');
+    last = sig;
+    host.innerHTML = d.menus.map(function (m) {
+      var rows = m.items.map(function (it) {
+        var top = ((it.y - m.y) * 100) / 1 * (1) / (m.h || 1);
+        var cls = 'cr' + (it.hovered && it.enabled ? ' hov' : '') + (it.open ? ' open' : '') + (it.enabled === false ? ' off' : '') + (it.kind === 'text' ? ' txt' : '');
+        var lead = it.kind === 'check' ? '<span class="bx' + (it.checked ? ' on' : '') + '"></span>' : (it.kind === 'text' ? '' : icon(it.text));
+        var html = '<div class="' + cls + '" style="top:calc(' + ((it.y - m.y) * 100) + 'vh + 0px);height:' + (it.h * 100) + 'vh">' + lead + '<span class="l">' + gta(it.text) + '</span>' + (it.right ? '<span class="rt">' + gta(it.right) + '</span>' : '') + (it.kind === 'sub' ? CHEV : '') + '</div>';
+        if (it.sep) html += '<div class="sp" style="top:calc(' + ((it.y - m.y + it.h + 0.0055) * 100) + 'vh)"></div>';
+        return html;
+      }).join('');
+      return '<div class="cm" style="left:' + (m.x * 100) + 'vw;top:' + (m.y * 100) + 'vh;width:' + (m.w * 100) + 'vw;height:' + (m.h * 100) + 'vh">' + (m.title ? '<div class="cm-t">' + esc(strip(m.title)) + '</div>' : '') + rows + '</div>';
+    }).join('');
+    host.classList.remove('hidden');
+  });
+})();

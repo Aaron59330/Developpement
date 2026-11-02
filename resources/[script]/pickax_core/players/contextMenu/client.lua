@@ -1,3 +1,6 @@
+-- Rendu : les menus sont dessinés par pickax_ui (NUI) ; la logique (survol, clic, sous-menus) reste ici. ConfigContextMenu.Menu.UseNUI = false → ancien dessin natif.
+CTXNUI = false
+CTXQUIET = false
 --Screentoworld.lua
 function GetCursorScreenPosition()
     if (not IsControlEnabled(0, 239)) then
@@ -143,6 +146,7 @@ local function RoundedMenuBands(height, radius, draw)
     end
 end
 function Rect:Draw(color, menu)
+    if CTXQUIET then return end
     if menu and ConfigContextMenu.Menu.RoundedCorners == true then
         local size = menu.lowerRight - menu.position
         local radius, screenWidth, screenHeight = RoundedMenuGeometry(menu.position, size)
@@ -206,6 +210,7 @@ function Text:SetMoneySegments(title)
     end
 end
 function Text:Draw()
+    if CTXQUIET then return end
     if self.segments then
         local x = self.position.x
         for _, seg in ipairs(self.segments) do
@@ -255,6 +260,7 @@ function Sprite.CreateNew(dict, name, position, size, heading, color)
     return self
 end
 function Sprite:Draw()
+    if CTXQUIET then return end
     if not HasStreamedTextureDictLoaded(self.dict) then
         RequestStreamedTextureDict(self.dict, true)
     end
@@ -313,7 +319,7 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.position = vector2(0, 0)
     
-    self.height = 0.032
+    self.height = CTXNUI and 0.036 or 0.032
     self.text = Text(title)
     self.text:SetMoneySegments(title)
     self.rightText = nil
@@ -640,6 +646,7 @@ function Border:SetPositionAndSize(position, size)
     }
 end
 function Border:Draw()
+    if CTXQUIET then return end
     if ConfigContextMenu.Menu.RoundedCorners == true then
         local radius, screenWidth, screenHeight = RoundedMenuGeometry(self.position, self.size)
         if radius > 0 then
@@ -682,7 +689,7 @@ function Menu.CreateNew(pool)
     self.parent = nil
     self.position = vector2(0, 0)
     self.lowerRight = vector2(0, 0)
-    self.width = 0.15
+    self.width = CTXNUI and 0.165 or 0.15
     self.hoverTimeout = 250
     self.colors = {
         -- background = Colors.DarkGrey,
@@ -745,6 +752,7 @@ function Menu:Released(cursorPosition)
     end
 end
 function Menu:Process(cursorPosition)
+    CTXQUIET = CTXNUI
     for i = 1, #self.items, 1 do
         self.items[i]:Process(cursorPosition)
         for j = 1, #self.separators, 1 do
@@ -757,6 +765,7 @@ function Menu:Process(cursorPosition)
     if ConfigContextMenu.Color.ColorBorder ~= nil then
         self.border:Draw()
     end
+    CTXQUIET = false
 end
 function Menu:SetPosition(position)
     self:RecalculatePosition(position)
@@ -792,7 +801,8 @@ function Menu:IsOverlapped()
     return false
 end
 function Menu:RecalculatePosition(position)
-    local totalHeight = 0.012 * #self.separators
+    local headerH = (CTXNUI and self.parent ~= nil) and 0.03 or 0   -- titre du sous-menu (ex : « Action FDO »)
+    local totalHeight = 0.012 * #self.separators + headerH
     for k, item in pairs(self.items) do
         totalHeight = totalHeight + item.height
     end
@@ -812,7 +822,7 @@ function Menu:RecalculatePosition(position)
         self.lowerRight = vector2(self.lowerRight.x, 1.0)
     end
     self.border:SetPositionAndSize(self.position, self.lowerRight - self.position)
-    local currPos = self.position
+    local currPos = self.position + vector2(0.0, headerH)
     for i = 1, #self.items, 1 do
         self.items[i]:SetPosition(currPos)
         currPos = currPos + vector2(0.0, self.items[i].height)
@@ -827,6 +837,39 @@ function Menu:RecalculatePosition(position)
     end
 end
 --Menupool.lua
+
+-- ───────────── Pont vers pickax_ui : envoie l'état des menus visibles (positions natives, donc mêmes zones de clic) ─────────────
+local ctxLast = ''
+local function ctxRound(v) return math.floor(v * 10000 + 0.5) / 10000 end
+function CtxPush(pool)
+    local menus = {}
+    for i = 1, #pool.menus do
+        local m = pool.menus[i]
+        if m:Visible() then
+            local items = {}
+            for k, it in ipairs(m.items) do
+                local kind = it.submenu and 'sub' or (it.checked ~= nil and 'check') or (getmetatable(it) == TextItem and 'text') or 'item'
+                local sep = false
+                for _, sp in ipairs(m.separators) do if sp.index == k then sep = true break end end
+                items[#items + 1] = { y = ctxRound(it.position.y), h = ctxRound(it.height), text = it.text and it.text.title or '', right = it.rightText and it.rightText.title or nil,
+                    kind = kind, enabled = it.enabled ~= false, hovered = it.hovered == true, open = (it.submenu and it.submenu:Visible()) or false, checked = it.checked == true, sep = sep }
+            end
+            local title
+            if m.parent then
+                for _, pit in ipairs(m.parent.items) do if pit.submenu == m then title = pit.text and pit.text.title break end end
+            end
+            menus[#menus + 1] = { x = ctxRound(m.position.x), y = ctxRound(m.position.y), w = ctxRound(m.width), h = ctxRound(m.lowerRight.y - m.position.y), title = title, items = items }
+        end
+    end
+    local sig = json.encode(menus)
+    if sig ~= ctxLast then
+        ctxLast = sig
+        if #menus > 0 then exports.pickax_ui:CtxShow(menus) else exports.pickax_ui:CtxHide() end
+    end
+end
+function CtxPop()
+    if ctxLast ~= '' then ctxLast = '' pcall(function() exports.pickax_ui:CtxHide() end) end
+end
 MenuPool = {}
 MenuPool.__index = MenuPool
 setmetatable(MenuPool, {
@@ -878,6 +921,7 @@ end
 
 function MenuPool:Process()
     if (IsControlJustPressed(0, self.keys.keyboard.holdForCursor) or IsDisabledControlJustPressed(0, self.keys.keyboard.holdForCursor)) then
+        CTXNUI = ConfigContextMenu.Menu.UseNUI ~= false and GetResourceState('pickax_ui') == 'started'
         SetCursorLocation(0.5, 0.5)
         local resX, resY = GetActiveScreenResolution()
         self.resolution = vector2(resX, resY)
@@ -923,6 +967,7 @@ function MenuPool:Process()
                 self.menus[i]:Process(cursorPos)
             end
         end
+        if CTXNUI then CtxPush(self) end
         DisableControlAction(0, 1, true)
         DisableControlAction(0, 2, true)
         DisableControlAction(0, self.keys.keyboard.activateItem, true)
@@ -1023,6 +1068,7 @@ function MenuPool:CloseAllMenus()
     for i = 1, #self.menus, 1 do
         self.menus[i]:Visible(false)
     end
+    CtxPop()
     collectgarbage()
 end
 
