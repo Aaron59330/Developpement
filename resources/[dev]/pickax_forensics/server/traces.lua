@@ -197,10 +197,12 @@ function FX.analyseTrace(src, x, slot, kind, eid, score)
     if row.status ~= 'analysed' then MySQL.update.await("UPDATE forensics_traces SET status = 'analysed', analysed_at = ? WHERE id = ?", { os.time(), eid }) end
     local m = {}
     for _, o in ipairs(others) do m[#m + 1] = { id = o.id, x = o.x, y = o.y, at = FX.fmtDate(o.created) } end
+    local bg
+    if kind == 'blood' and GetResourceState('pickax_medical') == 'started' then local okb, g = pcall(function() return exports.pickax_medical:BloodGroupOf(row.subject) end) if okb then bg = g end end
     md.analysed, md.signature = true, c
     md.description = ('Analysé : profil %s — %s.'):format(c, prof and ('identifié : ' .. prof.name) or 'individu inconnu')
     exports.ox_inventory:SetMetadata(src, slot.slot, md)
-    return { ok = true, report = { kind = kind, id = eid, code = c, identified = prof and prof.name or nil, profiled = prof and FX.fmtDate(prof.sampled_at) or nil,
+    return { ok = true, report = { kind = kind, id = eid, code = c, bloodGroup = bg, identified = prof and prof.name or nil, profiled = prof and FX.fmtDate(prof.sampled_at) or nil,
         quality = row.quality, plate = row.plate, at = FX.fmtDate(row.created), matches = m } }
 end
 

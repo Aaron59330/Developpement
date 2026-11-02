@@ -37,7 +37,7 @@ function reportHtml(r) {
   if (r.kind === 'casing') return `<div class="rep"><h4>Rapport de balistique</h4>${row('Arme', esc(String(r.weapon).replace('WEAPON_', '').toLowerCase()))}${row('Calibre', esc(r.caliber))}${row('Signature', `<span class="chip">${esc(r.signature)}</span>`)}${row('Tir enregistré', esc(r.shotAt))}
     ${row('N° de série', r.serial ? esc(r.serial) : '<span class="bad">absent ou limé (non traçable)</span>')}${row('Propriétaire enregistré', r.owner ? esc(r.owner) : 'arme non enregistrée')}${matches}</div>`;
   const id = r.identified ? `<span class="ok">${esc(r.identified)}</span>` : '<span class="warn">individu inconnu — prélève des suspects (/prelever) pour comparer</span>';
-  if (r.kind === 'blood') return `<div class="rep"><h4>Analyse ADN</h4>${row('Profil ADN', `<span class="chip">${esc(r.code)}</span>`)}${row('Identification', id)}${r.profiled ? row('Profil enregistré le', esc(r.profiled)) : ''}${row('Prélèvement', '#' + r.id)}${matches}</div>`;
+  if (r.kind === 'blood') return `<div class="rep"><h4>Analyse ADN</h4>${row('Profil ADN', `<span class="chip">${esc(r.code)}</span>`)}${r.bloodGroup ? row('Groupe sanguin', `<span class="chip">${esc(r.bloodGroup)}</span>`) : ''}${row('Identification', id)}${r.profiled ? row('Profil enregistré le', esc(r.profiled)) : ''}${row('Prélèvement', '#' + r.id)}${matches}</div>`;
   return `<div class="rep"><h4>Analyse d'empreinte</h4>${row('Empreinte', `<span class="chip">${esc(r.code)}</span>`)}${row('Identification', id)}${row('Véhicule', esc(r.plate || '—'))}${row('Qualité du relevé', (r.quality || 0) + ' %')}${matches}</div>`;
 }
 
