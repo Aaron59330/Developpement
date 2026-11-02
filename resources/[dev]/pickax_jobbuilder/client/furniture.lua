@@ -4,7 +4,7 @@ local F = Config.Real.Furniture
 local objs = {}        -- [id] = { ent, model }
 local placing = false
 
-for _, n in ipairs({ 'furn:list', 'furn:remove', 'furn:removeAll' }) do NuiRemote[n] = true end
+for _, n in ipairs({ 'furn:list', 'furn:remove', 'furn:removeAll', 'decor:set' }) do NuiRemote[n] = true end
 
 local function entry(id) for _, c in ipairs(F.Catalog) do if c.id == id then return c end end end
 
@@ -54,6 +54,23 @@ function FurnSpawn(list)
 end
 
 RegisterNetEvent('jobbuilder:client:furniture', function(list) FurnSpawn(list) end)
+
+-- ─────────────────────────────── Style d'intérieur (entity sets + teinte) ───────────────────────────────
+-- sets = { all = tous les sets gérés par cet intérieur, on = ceux du style choisi, tint = ceux qui prennent la teinte, color = indice de palette }
+local lastExit
+function DecorApply(sets, exit)
+    if exit then lastExit = exit end
+    if not sets or not lastExit then return end
+    local t = GetGameTimer() + 5000
+    local int = GetInteriorAtCoords(lastExit.x + 0.0, lastExit.y + 0.0, lastExit.z + 0.0)
+    while (int == 0 or not IsInteriorReady(int)) and GetGameTimer() < t do Wait(100) int = GetInteriorAtCoords(lastExit.x + 0.0, lastExit.y + 0.0, lastExit.z + 0.0) end
+    if int == 0 then return end
+    for _, n in ipairs(sets.all or {}) do if IsInteriorEntitySetActive(int, n) then DeactivateInteriorEntitySet(int, n) end end
+    for _, n in ipairs(sets.on or {}) do ActivateInteriorEntitySet(int, n) end
+    for _, n in ipairs(sets.tint or {}) do SetInteriorEntitySetColor(int, n, tonumber(sets.color) or 0) end
+    RefreshInterior(int)
+end
+RegisterNetEvent('jobbuilder:client:decor', function(sets) CreateThread(function() DecorApply(sets) end) end)
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then FurnClear() end end)
 
 -- ─────────────────────────────── Menu ───────────────────────────────
@@ -61,6 +78,12 @@ function OpenFurnitureMenu()
     if not JBInside() then return JBNotify('~r~Tu dois être dans ta propriété.') end
     ESX.TriggerServerCallback('jobbuilder:furn:list', function(res)
         if not res or not res.ok then return JBNotify('~r~' .. ((res and res.error) or 'Indisponible')) end
+        local ok = {}
+        for _, c in ipairs(res.catalog or {}) do
+            local e = entry(c.id)
+            if e and IsModelInCdimage(joaat(e.model)) then ok[#ok + 1] = c end   -- un modèle absent de ce serveur n'est pas proposé
+        end
+        res.catalog = ok
         OpenUI({ action = 'open', kind = 'furniture', data = res })
     end)
 end
@@ -85,13 +108,13 @@ local function aimPoint(dist)
     local dir = vector3(-math.sin(z) * num, math.cos(z) * num, math.sin(x))
     local to = from + dir * dist
     local handle = StartExpensiveSynchronousShapeTestLosProbe(from.x, from.y, from.z, to.x, to.y, to.z, 1, PlayerPedId(), 4)
-    local _, hit, coords = GetShapeTestResult(handle)
-    if hit == 1 then return coords end
+    local _, hit, coords, normal = GetShapeTestResult(handle)
+    if hit == 1 then return coords, normal end
 end
 
 -- Fantôme de placement (aussi utilisé par l'équipement des laboratoires) : flèches ←/→ ou molette = tourner, ↑/↓ = hauteur, ENTRÉE = valider, RETOUR = annuler.
 -- Retourne { x, y, z, h } ou nil si annulé. `radius` : affiche un cercle (zones).
-function GhostPlace(model, label, startAt, radius)
+function GhostPlace(model, label, startAt, radius, wall, flip)
     if placing then return nil end
     local hash = loadModel(model)
     if not hash then JBNotify('~r~Modèle introuvable sur ce serveur : ' .. model) return nil end
@@ -110,20 +133,26 @@ function GhostPlace(model, label, startAt, radius)
         ped = PlayerPedId()
         for _, k in ipairs({ 24, 25, 257, 37, 140, 141, 142, 172, 173 }) do DisableControlAction(0, k, true) end
         local pc = GetEntityCoords(ped)
-        local pos = aimPoint(maxDist)
+        local pos, nrm = aimPoint(maxDist)
         if not pos then
             local f = GetOffsetFromEntityInWorldCoords(ped, 0.0, 2.0, 0.0)
             pos = vector3(f.x, f.y, pc.z)
         end
-        SetEntityCoordsNoOffset(ghost, pos.x, pos.y, pos.z + 0.5, false, false, false)
-        PlaceObjectOnGroundProperly(ghost)
+        if wall and nrm and math.abs(nrm.z) < 0.5 then
+            -- tableau : collé au mur visé, tourné face à la pièce (la hauteur se règle avec ↑ ↓)
+            heading = (math.deg(math.atan(-nrm.x, nrm.y)) + (flip and 180.0 or 0.0)) % 360.0
+            SetEntityCoordsNoOffset(ghost, pos.x + nrm.x * 0.03, pos.y + nrm.y * 0.03, pos.z, false, false, false)
+        else
+            SetEntityCoordsNoOffset(ghost, pos.x, pos.y, pos.z + 0.5, false, false, false)
+            if not wall then PlaceObjectOnGroundProperly(ghost) end
+        end
         local step = IsControlPressed(0, 21) and 3.0 or 1.2
-        if IsControlPressed(0, 174) then heading = heading - step end
-        if IsControlPressed(0, 175) then heading = heading + step end
+        if IsControlPressed(0, 174) and not wall then heading = heading - step end
+        if IsControlPressed(0, 175) and not wall then heading = heading + step end
         if IsDisabledControlPressed(0, 172) then lift = math.min(3.0, lift + 0.01) end
         if IsDisabledControlPressed(0, 173) then lift = math.max(-0.5, lift - 0.01) end
-        if IsControlJustPressed(0, 15) then heading = heading + 8.0 end
-        if IsControlJustPressed(0, 14) then heading = heading - 8.0 end
+        if not wall and IsControlJustPressed(0, 15) then heading = heading + 8.0 end
+        if not wall and IsControlJustPressed(0, 14) then heading = heading - 8.0 end
         local g = GetEntityCoords(ghost)
         SetEntityCoordsNoOffset(ghost, g.x, g.y, g.z + lift, false, false, false)
         SetEntityHeading(ghost, heading % 360.0)
@@ -146,7 +175,7 @@ end
 
 -- Pose (ou déplace si `moveId`) un meuble
 local function placeFurniture(e, moveId, startAt)
-    local result = GhostPlace(e.model, e.label, startAt)
+    local result = GhostPlace(e.model, e.label, startAt, nil, e.wall, e.flip)
     if not result then return OpenFurnitureMenu() end
     local function done(res)
         if res and res.ok then JBNotify(moveId and 'Meuble déplacé.' or ('Meuble posé (%d / %d)'):format(res.count, res.limit))

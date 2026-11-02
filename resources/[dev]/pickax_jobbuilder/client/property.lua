@@ -73,8 +73,10 @@ local function enterProperty(id, cb)
             CreateThread(function()
                 teleportTo(res.exit)
                 FurnSpawn(res.furniture)
+                if DecorApply then DecorApply(res.decorSets, res.exit) end
                 if LabSet then LabSet(res.lab) end
                 if res.role == 'owner' then JBNotify('Tu peux décorer ta propriété : touche ~g~F10~s~ (ou /decorer).') end
+                if res.role == 'agent' then JBNotify('Bien disponible : tu peux le décorer (meubles, tableaux, style) avec ~g~F10~s~ (ou /decorer).') end
             end)
         end
         if cb then cb(res or { ok = false, error = 'Erreur' }) end

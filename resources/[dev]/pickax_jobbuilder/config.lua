@@ -642,6 +642,24 @@ Config.Real = {
         },
     },
     -- Meubles : le propriétaire décore son intérieur (touche F10 ou /decorer dans la propriété). Limite PAR PROPRIÉTÉ, plus haute avec le VIP du propriétaire.
+    -- Décor par l'agent immobilier : l'agent de l'agence qui gère un bien DISPONIBLE (à vendre / à louer) peut le décorer (meubles, tableaux) et choisir son style.
+    -- Styles d'intérieur : GTA ne permet de changer l'apparence que des intérieurs qui proposent des « entity sets » (et, pour certains, une teinte).
+    -- Ajoute-les dans Interiors[...].styles (voir plus bas) ou, pour un MLO / shell personnalisé, dans Decor.CustomStyles.
+    Decor = {
+        Enabled        = true,
+        AgentLimit     = 40,      -- meubles / tableaux maximum posés par l'agent dans un bien disponible (le propriétaire garde sa limite habituelle)
+        AgentOnAvailable = true,  -- true = l'agent ne décore que les biens disponibles ; false = aussi les biens déjà occupés
+        OwnerCanStyle  = true,    -- le propriétaire peut-il changer le style de son intérieur ?
+        -- Styles pour les intérieurs personnalisés : { id = 'moderne', label = 'Moderne', sets = { 'nom_entity_set' }, tintSets = { 'set_teintable' } }
+        CustomStyles   = {},
+        -- Teintes proposées (palette d'intérieur GTA, indices 0-63) pour les sets listés dans `tintSets`
+        Colors = {
+            { id = 0, label = 'Blanc', css = '#f2f2f2' },  { id = 1, label = 'Gris clair', css = '#bdbdbd' }, { id = 2, label = 'Anthracite', css = '#4a4a4a' },
+            { id = 3, label = 'Noir', css = '#161616' },    { id = 4, label = 'Rouge', css = '#c0392b' },      { id = 5, label = 'Orange', css = '#e67e22' },
+            { id = 6, label = 'Jaune', css = '#f1c40f' },   { id = 7, label = 'Vert', css = '#27ae60' },      { id = 8, label = 'Turquoise', css = '#1abc9c' },
+            { id = 9, label = 'Bleu', css = '#2980b9' },    { id = 10, label = 'Violet', css = '#8e44ad' },   { id = 11, label = 'Rose', css = '#e84393' },
+        },
+    },
     Furniture = {
         Enabled       = true,
         BaseLimit     = 10,
@@ -650,6 +668,15 @@ Config.Real = {
         Cooldown      = 700,                                -- ms entre deux poses
         Key           = 'F10',                              -- touche par défaut (F6 métier, F7 gang : modifiable par le joueur dans les paramètres FiveM)
         Catalog = {
+            -- Tableaux & déco murale (posés SUR un mur : place le fantôme face au mur ; `flip = true` retourne le tableau si l'image est à l'envers)
+            { id = 'art_l1', label = 'Grand tableau 1',  model = 'apa_p_h_acc_artwalll_01', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_l2', label = 'Grand tableau 2',  model = 'apa_p_h_acc_artwalll_02', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_l3', label = 'Grand tableau 3',  model = 'apa_p_h_acc_artwalll_03', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_l4', label = 'Grand tableau 4',  model = 'apa_p_h_acc_artwalll_04', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_m1', label = 'Tableau moyen 1',  model = 'apa_p_h_acc_artwallm_01', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_m2', label = 'Tableau moyen 2',  model = 'apa_p_h_acc_artwallm_02', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_m3', label = 'Tableau moyen 3',  model = 'apa_p_h_acc_artwallm_03', cat = 'Tableaux & déco murale', wall = true },
+            { id = 'art_m4', label = 'Tableau moyen 4',  model = 'apa_p_h_acc_artwallm_04', cat = 'Tableaux & déco murale', wall = true },
             { id = 'sofa1',   label = 'Canapé moderne',        model = 'prop_t_sofa',            cat = 'Canapés & fauteuils' },
             { id = 'sofa2',   label = 'Canapé 2 places',       model = 'prop_t_sofa_02',         cat = 'Canapés & fauteuils' },
             { id = 'sofa3',   label = 'Canapé de salon',       model = 'v_res_tre_sofa',         cat = 'Canapés & fauteuils' },

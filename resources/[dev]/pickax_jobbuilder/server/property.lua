@@ -127,6 +127,7 @@ local function migrate()
         { 'category', "varchar(20) NOT NULL DEFAULT 'house'" },
         { 'description', "varchar(300) NOT NULL DEFAULT ''" },
         { 'ipl', "varchar(300) NOT NULL DEFAULT ''" },
+        { 'decor', "varchar(200) NOT NULL DEFAULT ''" },   -- style d'intérieur choisi { style, color }
     }
     for _, c in ipairs(cols) do
         local has = MySQL.scalar.await("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'jobbuilder_properties' AND COLUMN_NAME = ?", { c[1] }) or 0
@@ -144,6 +145,7 @@ function JB.loadProps()
         r.entrance = JB.decode(r.entrance, { x = 0, y = 0, z = 0, h = 0 })
         r.exit = JB.decode(r.exit_coords, nil)
         r.key_holders = JB.decode(r.key_holders, {})
+        r.decor = JB.decode(r.decor, {})
         r.points = {}
         Props[r.id] = r
     end
@@ -283,7 +285,7 @@ ESX.RegisterServerCallback('jobbuilder:prop:enter', function(src, cb, id)
     SetPlayerRoutingBucket(src, R.BucketBase + p.id)
     local pts = {}
     for _, pt in ipairs(p.points) do pts[#pts + 1] = { id = pt.id, type = pt.type, label = pt.label, coords = pt.coords } end
-    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts, ipl = interiorIpl(p), furniture = JB.furnList and JB.furnList(p.id) or {}, lab = JB.labList and JB.labList(p.id) or nil })
+    cb({ ok = true, id = p.id, label = p.label, role = role, exit = exit, entrance = p.entrance, points = pts, ipl = interiorIpl(p), furniture = JB.furnList and JB.furnList(p.id) or {}, decor = p.decor, decorSets = JB.decorSets and JB.decorSets(p) or nil, lab = JB.labList and JB.labList(p.id) or nil })
 end)
 
 ESX.RegisterServerCallback('jobbuilder:prop:leave', function(src, cb)

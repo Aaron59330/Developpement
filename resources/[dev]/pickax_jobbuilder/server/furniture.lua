@@ -47,21 +47,81 @@ local function vipLevel(src)
     return ok and tonumber(l) or 0
 end
 
-local function limitFor(src)
+local function limitFor(src, role)
+    if role == 'agent' then return (Config.Real.Decor or {}).AgentLimit or F.BaseLimit, 0 end
     local l, lim = vipLevel(src), F.BaseLimit
     if l > 0 and F.VipLimits and F.VipLimits[l] then lim = math.max(lim, F.VipLimits[l]) end
     return lim, l
 end
 
--- Le joueur doit être DANS la propriété et en être le propriétaire
+-- Le joueur doit être DANS la propriété et en être le propriétaire (ou l'agent de l'agence qui gère un bien disponible : Config.Real.Decor)
+local D = Config.Real.Decor or {}
+local function agentCan(x, p)
+    if not D.Enabled then return false end
+    if x.job.name ~= p.job_name then return false end
+    local j = JB.Jobs[p.job_name]
+    if not j or j.type ~= 'realestate' then return false end
+    if D.AgentOnAvailable ~= false and p.status ~= 'available' then return false end
+    return true
+end
+
 local function ctx(src)
     if not F.Enabled then return nil, nil, 'Les meubles sont désactivés' end
     local x = ESX.GetPlayerFromId(src)
     local p = x and JB.Props[JB.Inside[src] or 0]
-    if not p then return nil, nil, 'Tu dois être dans ta propriété' end
-    if p.owner ~= x.identifier then return nil, nil, 'Seul le propriétaire peut décorer' end
-    return x, p
+    if not p then return nil, nil, 'Tu dois être dans la propriété' end
+    if p.owner == x.identifier then return x, p, nil, 'owner' end
+    if agentCan(x, p) then return x, p, nil, 'agent' end
+    return nil, nil, 'Seul le propriétaire (ou l\'agent du bien disponible) peut décorer'
 end
+
+-- ───────────── Styles d'intérieur ─────────────
+local function stylesOf(p)
+    if p.interior == 'custom' then return D.CustomStyles or {} end
+    local i = Config.Real.Interiors[p.interior]
+    return (i and i.styles) or {}
+end
+
+local function styleById(p, id)
+    for _, st in ipairs(stylesOf(p)) do if st.id == id then return st end end
+end
+
+-- Données d'application côté client : tous les sets gérés par cet intérieur + ceux du style choisi
+function JB.decorSets(p)
+    local all, on, tint = {}, {}, {}
+    for _, st in ipairs(stylesOf(p)) do
+        for _, n in ipairs(st.sets or {}) do all[#all + 1] = n end
+        for _, n in ipairs(st.tintSets or {}) do all[#all + 1] = n end
+    end
+    local cur = p.decor and styleById(p, p.decor.style)
+    if cur then
+        for _, n in ipairs(cur.sets or {}) do on[#on + 1] = n end
+        for _, n in ipairs(cur.tintSets or {}) do on[#on + 1] = n tint[#tint + 1] = n end
+    end
+    return { all = all, on = on, tint = tint, color = p.decor and p.decor.color or 0 }
+end
+
+local function pushDecor(p)
+    for src, pid in pairs(JB.Inside) do
+        if pid == p.id then TriggerClientEvent('jobbuilder:client:decor', src, JB.decorSets(p)) end
+    end
+end
+
+ESX.RegisterServerCallback('jobbuilder:decor:set', function(src, cb, styleId, color)
+    local x, p, err, role = ctx(src)
+    if not x then return cb(fail(err)) end
+    if role == 'owner' and D.OwnerCanStyle == false then return cb(fail('Le style ne peut être changé que par l\'agent')) end
+    local st = styleById(p, tostring(styleId or ''))
+    if not st then return cb(fail('Style inconnu')) end
+    local col = math.floor(tonumber(color) or 0)
+    local okc = false
+    for _, c in ipairs(D.Colors or {}) do if c.id == col then okc = true break end end
+    if not okc then col = 0 end
+    p.decor = { style = st.id, color = col }
+    MySQL.update('UPDATE jobbuilder_properties SET decor = ? WHERE id = ?', { json.encode(p.decor), p.id })
+    pushDecor(p)
+    cb({ ok = true, decor = p.decor })
+end)
 
 local function pubList(list)
     local out = {}
@@ -73,13 +133,17 @@ local function pubList(list)
 end
 
 ESX.RegisterServerCallback('jobbuilder:furn:list', function(src, cb)
-    local x, p, err = ctx(src)
+    local x, p, err, role = ctx(src)
     if not x then return cb(fail(err)) end
-    local limit, vip = limitFor(src)
+    local limit, vip = limitFor(src, role)
     local list = load(p.id)
     local cat = {}
-    for _, c in ipairs(F.Catalog) do cat[#cat + 1] = { id = c.id, label = c.label, cat = c.cat } end
-    cb({ ok = true, lab = Config.Real.Lab.Enabled and p.category == Config.Real.Lab.Category or false, label = p.label, limit = limit, vip = vip, base = F.BaseLimit, vipLimits = F.VipLimits, count = #list, catalog = cat, mine = pubList(list) })
+    for _, c in ipairs(F.Catalog) do cat[#cat + 1] = { id = c.id, label = c.label, cat = c.cat, wall = c.wall or nil } end
+    local styles = {}
+    if role ~= 'owner' or D.OwnerCanStyle ~= false then
+        for _, st in ipairs(stylesOf(p)) do styles[#styles + 1] = { id = st.id, label = st.label, tint = (st.tintSets and #st.tintSets > 0) or nil } end
+    end
+    cb({ ok = true, lab = Config.Real.Lab.Enabled and p.category == Config.Real.Lab.Category or false, label = p.label, limit = limit, vip = vip, base = F.BaseLimit, vipLimits = F.VipLimits, count = #list, catalog = cat, mine = pubList(list), role = role, decor = { styles = styles, current = p.decor or {}, colors = D.Colors or {}, canStyle = role ~= 'owner' or D.OwnerCanStyle ~= false } })
 end)
 
 local function validPos(src, c)
@@ -100,7 +164,7 @@ local function throttled(src)
 end
 
 ESX.RegisterServerCallback('jobbuilder:furn:place', function(src, cb, id, c)
-    local x, p, err = ctx(src)
+    local x, p, err, role = ctx(src)
     if not x then return cb(fail(err)) end
     local e = entry(tostring(id))
     if not e then return cb(fail('Meuble inconnu')) end
@@ -108,7 +172,7 @@ ESX.RegisterServerCallback('jobbuilder:furn:place', function(src, cb, id, c)
     if not px then return cb(fail('Position invalide ou trop loin')) end
     if throttled(src) then return cb(fail('Doucement…')) end
     local list = load(p.id)
-    local limit = limitFor(src)
+    local limit = limitFor(src, role)
     if #list >= limit then return cb(fail(('Limite atteinte : %d meubles maximum dans cette propriété'):format(limit))) end
     local rid = MySQL.insert.await('INSERT INTO jobbuilder_furniture (property_id, model, x, y, z, h, placed_by) VALUES (?, ?, ?, ?, ?, ?, ?)', { p.id, e.id, px, py, pz, ph, x.identifier })
     list[#list + 1] = { id = rid, model = e.id, x = px, y = py, z = pz, h = ph }

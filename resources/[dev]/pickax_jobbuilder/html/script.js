@@ -2764,16 +2764,27 @@ const Runtime = {
     $root.innerHTML = panel({ icon: 'home', title: 'Décoration', sub: d.label, cls: 'md', body: `
       <div class="card"><div class="card-h"><div class="t">${ic('box', 16)} ${d.count} / ${d.limit} meubles</div>${full ? chip('Limite atteinte', 'warn') : chip((d.limit - d.count) + ' restants', 'ok')}</div>
         <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--accent)"></i></div>
-        <div class="vchips" style="margin-top:12px">${tiers.map(([n, v, lv]) => `<span class="vchip ${(d.vip || 0) === lv ? 'on' : ''}" style="cursor:default">${n} · ${v}</span>`).join('')}</div>
-        <p class="hint mt-s">Plus ton niveau VIP est élevé, plus tu peux poser de meubles dans cette propriété.</p></div>
-      <div class="vchips" style="margin:2px 0 4px">${tab('catalog', `${ic('grid', 14)} Catalogue`)}${tab('mine', `${ic('list', 14)} Mes meubles (${(d.mine || []).length})`)}${d.lab ? tab('lab', `${ic('droplet', 14)} Laboratoire`) : ''}</div>
-      ${this.furnTab === 'lab' ? this.renderLab() : this.furnTab === 'catalog' ? `
+        ${d.role === 'agent' ? '<p class="hint mt-s">Tu décores ce bien en tant qu\'agent : meubles, tableaux et style sont visibles par le futur occupant.</p>' : `<div class="vchips" style="margin-top:12px">${tiers.map(([n, v, lv]) => `<span class="vchip ${(d.vip || 0) === lv ? 'on' : ''}" style="cursor:default">${n} · ${v}</span>`).join('')}</div>
+        <p class="hint mt-s">Plus ton niveau VIP est élevé, plus tu peux poser de meubles dans cette propriété.</p>`}</div>
+      <div class="vchips" style="margin:2px 0 4px">${tab('catalog', `${ic('grid', 14)} Catalogue`)}${tab('mine', `${ic('list', 14)} Mes meubles (${(d.mine || []).length})`)}${d.lab ? tab('lab', `${ic('droplet', 14)} Laboratoire`) : ''}${d.decor && d.decor.canStyle ? tab('style', `${ic('droplet', 14)} Style`) : ''}</div>
+      ${this.furnTab === 'style' ? this.renderStyle() : this.furnTab === 'lab' ? this.renderLab() : this.furnTab === 'catalog' ? `
         <div class="vchips"><button class="vchip ${this.furnCat === 'all' ? 'on' : ''}" data-a="furnCat" data-v="all">Tout</button>${cats.map(c => `<button class="vchip ${this.furnCat === c ? 'on' : ''}" data-a="furnCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
         <input id="fq" placeholder="Rechercher un meuble…" value="${esc(this.furnQ)}" style="margin-top:4px">
         <div id="furn-list">${this.furnList()}</div>
         <p class="hint">Mode placement : <b>flèches ← →</b> ou molette pour tourner, <b>↑ ↓</b> pour la hauteur, <b>Entrée</b> pour poser, <b>Retour</b> pour annuler.</p>`
       : `${(d.mine || []).map(m => `<div class="item">${tile('box')}<div class="grow"><b>${esc(m.label)}</b><small>${esc(m.cat)}</small></div><button class="sm" data-a="furnMove" data-v="${m.id}" data-m="${esc(m.model)}">Déplacer</button><button class="sm danger" data-a="furnDel" data-v="${m.id}">Retirer</button></div>`).join('') || '<p class="hint">Aucun meuble posé pour le moment. Choisis-en un dans le catalogue.</p>'}
         ${(d.mine || []).length ? `<button class="danger vall" data-a="furnDelAll">Tout retirer</button>` : ''}`}` });
+  },
+  // ── Style de l'intérieur (agent immobilier / propriétaire) ──
+  renderStyle() {
+    const dc = this.data.decor || {}, cur = this.decorSel || (this.decorSel = { style: (dc.current || {}).style || '', color: (dc.current || {}).color || 0 });
+    const styles = dc.styles || [];
+    if (!styles.length) return `<div class="card"><div class="hint">Aucun style n'est défini pour cet intérieur : GTA ne permet de repeindre que les intérieurs qui proposent des « entity sets ». Ajoute-les dans <code>Config.Real.Interiors[...].styles</code> (ou <code>Decor.CustomStyles</code> pour un MLO / shell). En attendant, pose des <b>tableaux</b> et des meubles depuis le catalogue.</div></div>`;
+    const st = styles.find(x => x.id === cur.style);
+    return `<div class="card"><div class="card-h"><div class="t">${ic('droplet', 16)} Style de l'intérieur</div></div>
+        ${styles.map(x => `<div class="item"><div class="grow"><b>${esc(x.label)}</b>${x.tint ? '<small>teinte réglable</small>' : ''}</div><button class="sm ${cur.style === x.id ? 'primary' : ''}" data-a="decorStyle" data-v="${esc(x.id)}">${cur.style === x.id ? 'Appliqué' : 'Appliquer'}</button></div>`).join('')}</div>
+      ${st && st.tint ? `<div class="card"><div class="card-h"><div class="t">${ic('droplet', 16)} Couleur</div></div>
+        <div class="row wrap" style="gap:8px">${(dc.colors || []).map(c => `<button class="tint ${cur.color === c.id ? 'on' : ''}" title="${esc(c.label)}" data-a="decorColor" data-v="${c.id}" style="width:34px;height:34px;border-radius:50%;border:2px solid ${cur.color === c.id ? 'var(--accent)' : 'rgba(255,255,255,.2)'};background:${esc(c.css || '#888')}"></button>`).join('')}</div></div>` : ''}`;
   },
   // ── Équipement du laboratoire (propriété de catégorie « Laboratoire ») ──
   renderLab() {
@@ -2986,6 +2997,13 @@ const Runtime = {
       case 'labPlace': { const r = document.getElementById('lab-r'); return rpc('lab:place', el.dataset.k, el.dataset.d, r ? Number(r.value) : 0); }
       case 'labDel': { const r = await rpc('lab:remove', Number(el.dataset.v)); if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err'); const n = await rpc('lab:list'); if (n && n.ok) { this.labData = n; this.render(); } return toast('Équipement retiré', 'ok'); }
       case 'labOutfit': { const r = await rpc('lab:outfit', Number(el.dataset.v)); if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err'); const n = await rpc('lab:list'); if (n && n.ok) { this.labData = n; this.render(); } return toast('Tenue de la zone mise à jour', 'ok'); }
+      case 'decorStyle': case 'decorColor': {
+        const sel = this.decorSel || (this.decorSel = { style: '', color: 0 });
+        if (a === 'decorStyle') sel.style = el.dataset.v; else sel.color = Number(el.dataset.v);
+        const r = await rpc('decor:set', sel.style, sel.color);
+        if (!r || !r.ok) return toast((r && r.error) || 'Erreur', 'err');
+        this.render(); return toast('Style appliqué', 'ok');
+      }
       case 'furnCat': this.furnCat = el.dataset.v; return this.render();
       case 'furnPlace': return rpc('furn:place', el.dataset.v);
       case 'furnMove': return rpc('furn:move', Number(el.dataset.v), el.dataset.m);

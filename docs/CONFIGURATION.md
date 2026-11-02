@@ -356,3 +356,8 @@ Réglages dans `resources/[dev]/pickax_forensics/config.lua` : métiers police, 
 - **Analyse** : au laboratoire (E) → rapport : arme, calibre, signature balistique, n° de série, propriétaire enregistré, correspondances avec d'autres douilles déjà analysées (même arme).
 - **Fichier** : `/balistique` (dernières analyses) ou `/balistique <n° de série | BAL-xxxxxx>`.
 Un propriétaire « enregistré » est celui noté par ox_inventory à la création de l'arme ; une arme sans n° de série (limée) reste non traçable.
+
+## Décor des propriétés par l'agent immobilier (`pickax_jobbuilder`)
+Dans une propriété **disponible** gérée par son agence, l'agent (touche F10 ou `/decorer`) peut poser meubles et **tableaux** (onglet Catalogue → « Tableaux & déco murale » : le tableau se colle au mur visé), et choisir le **style** de l'intérieur (onglet Style). Réglages : `Config.Real.Decor` (limite de l'agent, biens occupés ou non, propriétaire autorisé à changer le style, teintes).
+**Couleur des murs / styles** : GTA ne repeint que les intérieurs qui exposent des « entity sets ». Ajoute-les dans `Config.Real.Interiors.<intérieur>.styles` ou, pour un MLO/shell, dans `Config.Real.Decor.CustomStyles` :
+`{ id = 'moderne', label = 'Moderne', sets = { 'nom_entity_set' }, tintSets = { 'set_teintable' } }` (`tintSets` = sets qui prennent la couleur choisie). Les noms de sets se trouvent dans la documentation de l'intérieur (MLO) ou les listes d'IPL GTA. Les modèles de tableaux absents de ton serveur ne sont pas proposés.
