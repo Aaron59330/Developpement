@@ -195,7 +195,8 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 /* ===== Menu contextuel (main levée sur un joueur / véhicule / objet) : couleur du serveur ===== */
 #ctx { position: fixed; inset: 0; pointer-events: none; z-index: 4; font: 600 13.5px/1 'Inter', 'Segoe UI', system-ui, sans-serif; color: #f4f4f5; }
 #ctx.hidden { display: none; }
-#ctx .cm { position: absolute; background: rgba(14, 14, 15, .92); border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; box-shadow: 0 18px 50px rgba(0, 0, 0, .55); overflow: hidden; animation: cxin .12s ease-out; }
+#ctx .cm { position: absolute; background: rgba(14, 14, 15, .92); border: 1px solid rgba(255, 255, 255, .08); border-radius: 14px; box-shadow: 0 18px 50px rgba(0, 0, 0, .55); overflow: hidden; }
+#ctx.fresh .cm { animation: cxin .12s ease-out; }
 @keyframes cxin { from { opacity: 0; transform: translateX(-4px); } }
 #ctx .cm-t { position: absolute; left: 0; right: 0; top: 0; padding: 9px 14px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8b8f9b; }
 #ctx .cr { position: absolute; left: 5px; right: 5px; display: flex; align-items: center; gap: 11px; padding: 0 11px; border-radius: 10px; border: 1px solid transparent; white-space: nowrap; overflow: hidden; }

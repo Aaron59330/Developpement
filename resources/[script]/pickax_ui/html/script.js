@@ -347,6 +347,7 @@ window.addEventListener('message', function (e) {
       }).join('');
       return '<div class="cm" style="left:' + (m.x * 100) + 'vw;top:' + (m.y * 100) + 'vh;width:' + (m.w * 100) + 'vw;height:' + (m.h * 100) + 'vh">' + (m.title ? '<div class="cm-t">' + esc(strip(m.title)) + '</div>' : '') + rows + '</div>';
     }).join('');
+    host.classList.toggle('fresh', fresh);
     host.classList.remove('hidden');
   });
 })();
