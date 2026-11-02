@@ -4,6 +4,7 @@
 local ESX = exports['es_extended']:getSharedObject()
 local C, A = Config.Casings, Config.Analysis
 
+FX = { lastShot = {}, wiped = {} }   -- partagé avec server/traces.lua
 local Ground = {}        -- [id] = { id, x, y, z, shooter, at } : douilles au sol (police)
 local LastShot = {}      -- [src] = GetGameTimer() du dernier enregistrement
 local ignored = {}
@@ -12,6 +13,7 @@ for _, w in ipairs(C.Ignored) do ignored[w] = true end
 local policeJobs = {}
 for _, j in ipairs(Config.PoliceJobs) do policeJobs[j] = true end
 local function isPolice(x) return x and x.job and policeJobs[x.job.name] == true end
+FX.isPolice, FX.ESX = isPolice, ESX
 
 CreateThread(function()
     Wait(800)
@@ -40,7 +42,8 @@ end
 -- ═══════════════ Synchronisation vers la police ═══════════════
 local function publicList()
     local out = {}
-    for id, e in pairs(Ground) do out[#out + 1] = { id = id, x = e.x, y = e.y, z = e.z } end
+    for id, e in pairs(Ground) do out[#out + 1] = { id = id, x = e.x, y = e.y, z = e.z, kind = 'casing' } end
+    if FX.publicTraces then for _, t in ipairs(FX.publicTraces()) do out[#out + 1] = t end end
     return out
 end
 
@@ -50,6 +53,8 @@ local function toPolice(event, ...)
         if isPolice(x) then TriggerClientEvent(event, tonumber(src), ...) end
     end
 end
+
+FX.toPolice = function(...) return toPolice(...) end
 
 RegisterNetEvent('pickax_forensics:requestSync', function()
     local src = source
@@ -61,8 +66,14 @@ local function removeGround(id, status, who)
     if not e then return nil end
     Ground[id] = nil
     MySQL.update('UPDATE forensics_casings SET status = ?, collected_by = ? WHERE id = ?', { status, who, id })
-    toPolice('pickax_forensics:remove', id)
+    toPolice('pickax_forensics:remove', id, 'casing')
     return e
+end
+
+FX.removeCasingsNear = function(c, r)
+    local n = 0
+    for id, e in pairs(Ground) do if #(vector3(e.x, e.y, e.z) - c) <= r then removeGround(id, 'lost') n = n + 1 end end
+    return n
 end
 
 -- ═══════════════ Un tir = une douille ═══════════════
@@ -74,9 +85,11 @@ RegisterNetEvent('pickax_forensics:shot', function()
     local x = ESX.GetPlayerFromId(src)
     if not x then return end
     local w = exports.ox_inventory:GetCurrentWeapon(src)
-    if not w or not w.name or ignored[w.name] then return end
+    if not w or not w.name then return end
     local def = item(w.name)
     if not def or not def.weapon or def.throwable then return end
+    if w.name ~= 'WEAPON_STUNGUN' and w.name ~= 'WEAPON_STUNGUN_MP' then FX.lastShot[x.identifier] = os.time() end   -- résidus de tir (GSR)
+    if ignored[w.name] then return end
     LastShot[src] = now
     local md = w.metadata or {}
     local serial = (type(md.serial) == 'string' and md.serial ~= '') and md.serial or nil
@@ -108,7 +121,7 @@ RegisterNetEvent('pickax_forensics:shot', function()
         { cx, cy, cz, w.name, caliber, sig, serial, owner, ident, os.time() })
     if not id then return end
     Ground[id] = { id = id, x = cx, y = cy, z = cz, shooter = ident, at = os.time() }
-    toPolice('pickax_forensics:add', { id = id, x = cx, y = cy, z = cz })
+    toPolice('pickax_forensics:add', { id = id, x = cx, y = cy, z = cz, kind = 'casing' })
 end)
 
 AddEventHandler('playerDropped', function() LastShot[source] = nil end)
@@ -142,55 +155,82 @@ ESX.RegisterServerCallback('pickax_forensics:collect', function(src, cb, id)
     cb({ ok = true, id = id })
 end)
 
--- ═══════════════ Analyse au laboratoire ═══════════════
+-- ═══════════════ Laboratoire (interface NUI) ═══════════════
 local function atLab(src)
     local p = GetEntityCoords(GetPlayerPed(src))
     for _, l in ipairs(Config.Labs) do if #(p - l.coords) <= A.InteractDistance + 3.0 then return true end end
     return false
 end
+FX.atLab = atLab
 
 local function fmtDate(t) return os.date('%d/%m/%Y %H:%M', t) end
+FX.fmtDate = fmtDate
 
-local function report(row)
+local function kindOfItem(name)
+    if name == C.Item then return 'casing' end
+    if name == Config.Blood.Item then return 'blood' end
+    if name == Config.Prints.Item then return 'print' end
+end
+
+local function casingReport(row)
     local matches = MySQL.query.await("SELECT id, x, y, shot_at FROM forensics_casings WHERE signature = ? AND id <> ? AND status = 'analysed' ORDER BY id DESC LIMIT 8", { row.signature, row.id }) or {}
     local m = {}
     for _, r in ipairs(matches) do m[#m + 1] = { id = r.id, x = r.x, y = r.y, at = fmtDate(r.shot_at) } end
-    return {
-        id = row.id, weapon = row.weapon, caliber = row.caliber, signature = row.signature, serial = row.serial, owner = row.owner,
-        shotAt = fmtDate(row.shot_at), matches = m,
-    }
+    return { kind = 'casing', id = row.id, weapon = row.weapon, caliber = row.caliber, signature = row.signature, serial = row.serial, owner = row.owner, shotAt = fmtDate(row.shot_at), matches = m }
 end
 
-ESX.RegisterServerCallback('pickax_forensics:labInfo', function(src, cb)
+local Pending = {}   -- [src] = { slot, kind, eid, at }
+
+ESX.RegisterServerCallback('pickax_forensics:labOpen', function(src, cb)
     local x = ESX.GetPlayerFromId(src)
     if not isPolice(x) or not atLab(src) then return cb({ ok = false, error = 'Réservé à la police, au laboratoire' }) end
     local list = {}
     for _, s in pairs(exports.ox_inventory:GetInventoryItems(src) or {}) do
-        if s.name == C.Item and s.metadata and s.metadata.eid then
-            list[#list + 1] = { slot = s.slot, eid = s.metadata.eid, label = s.metadata.label or ('Douille #' .. s.metadata.eid), analysed = s.metadata.analysed == true, signature = s.metadata.signature }
-        end
+        local k = s.metadata and s.metadata.eid and kindOfItem(s.name)
+        if k then list[#list + 1] = { slot = s.slot, kind = k, eid = s.metadata.eid, label = s.metadata.label or (k .. ' #' .. s.metadata.eid), analysed = s.metadata.analysed == true, tries = s.metadata.tries or 0 } end
     end
-    table.sort(list, function(a, b) return a.eid < b.eid end)
-    cb({ ok = true, items = list, seconds = A.Seconds })
+    table.sort(list, function(a, b) return a.kind == b.kind and a.eid < b.eid or a.kind < b.kind end)
+    cb({ ok = true, items = list, lab = { dnaBases = Config.Lab.DnaBases, dnaSeconds = Config.Lab.DnaSeconds, printRounds = Config.Lab.PrintRounds, printSeconds = Config.Lab.PrintSeconds, retries = Config.Lab.MaxRetries } })
 end)
 
-ESX.RegisterServerCallback('pickax_forensics:analyse', function(src, cb, slot)
+ESX.RegisterServerCallback('pickax_forensics:labBegin', function(src, cb, slot)
     local x = ESX.GetPlayerFromId(src)
     if not isPolice(x) or not atLab(src) then return cb({ ok = false, error = 'Réservé à la police, au laboratoire' }) end
     local s = exports.ox_inventory:GetSlot(src, tonumber(slot) or 0)
-    if not s or s.name ~= C.Item or not s.metadata or not s.metadata.eid then return cb({ ok = false, error = 'Scellé introuvable' }) end
-    local row = MySQL.single.await('SELECT * FROM forensics_casings WHERE id = ?', { s.metadata.eid })
-    if not row then return cb({ ok = false, error = 'Scellé inexploitable' }) end
-    local md = s.metadata
-    if row.status ~= 'analysed' then
-        MySQL.update.await("UPDATE forensics_casings SET status = 'analysed', analysed_by = ?, analysed_at = ? WHERE id = ?", { x.identifier, os.time(), row.id })
-        row.status = 'analysed'
-    end
-    md.analysed, md.signature = true, row.signature
-    md.description = ('Analysée : %s, %s, signature %s.'):format(row.caliber, row.owner and ('arme enregistrée au nom de ' .. row.owner) or 'arme non enregistrée', row.signature)
-    exports.ox_inventory:SetMetadata(src, s.slot, md)
-    cb({ ok = true, report = report(row) })
+    local k = s and s.metadata and s.metadata.eid and kindOfItem(s.name)
+    if not k then return cb({ ok = false, error = 'Scellé introuvable' }) end
+    if s.metadata.analysed then return cb({ ok = false, error = 'Déjà analysé' }) end
+    Pending[src] = { slot = s.slot, kind = k, eid = s.metadata.eid, at = GetGameTimer() }
+    cb({ ok = true, kind = k, seed = math.random(1, 2147483000) })
 end)
+
+ESX.RegisterServerCallback('pickax_forensics:labEnd', function(src, cb, score)
+    local x = ESX.GetPlayerFromId(src)
+    local p = Pending[src]
+    Pending[src] = nil
+    if not isPolice(x) or not atLab(src) or not p then return cb({ ok = false, error = 'Aucune analyse en cours' }) end
+    if GetGameTimer() - p.at < Config.Lab.MinSeconds * 1000 then return cb({ ok = false, error = 'Analyse trop rapide : résultat refusé' }) end
+    score = math.max(0, math.min(100, math.floor(tonumber(score) or 0)))
+    local s = exports.ox_inventory:GetSlot(src, p.slot)
+    if not s or s.metadata.eid ~= p.eid or kindOfItem(s.name) ~= p.kind then return cb({ ok = false, error = 'Scellé introuvable' }) end
+    local md = s.metadata
+    if p.kind == 'casing' then
+        local row = MySQL.single.await('SELECT * FROM forensics_casings WHERE id = ?', { p.eid })
+        if not row then return cb({ ok = false, error = 'Scellé inexploitable' }) end
+        if row.status ~= 'analysed' then
+            MySQL.update.await("UPDATE forensics_casings SET status = 'analysed', analysed_by = ?, analysed_at = ? WHERE id = ?", { x.identifier, os.time(), row.id })
+            row.status = 'analysed'
+        end
+        md.analysed, md.signature = true, row.signature
+        md.description = ('Analysée : %s, %s, signature %s.'):format(row.caliber, row.owner and ('arme enregistrée au nom de ' .. row.owner) or 'arme non enregistrée', row.signature)
+        exports.ox_inventory:SetMetadata(src, s.slot, md)
+        return cb({ ok = true, report = casingReport(row) })
+    end
+    local res = FX.analyseTrace(src, x, s, p.kind, p.eid, score)
+    cb(res)
+end)
+
+AddEventHandler('playerDropped', function() Pending[source] = nil end)
 
 -- ═══════════════ Fichier balistique : /balistique [n° de série | BAL-xxxxxx] et tablette de police ═══════════════
 local function doLookup(q)

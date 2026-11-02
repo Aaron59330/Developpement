@@ -52,3 +52,63 @@ Config.Calibers = {
     WEAPON_BULLPUPSHOTGUN = 'Calibre 12', WEAPON_HEAVYSHOTGUN = 'Calibre 12', WEAPON_DBSHOTGUN = 'Calibre 12', WEAPON_AUTOSHOTGUN = 'Calibre 12',
     WEAPON_SNIPERRIFLE = '.308 Win', WEAPON_HEAVYSNIPER = '.50 BMG', WEAPON_HEAVYSNIPER_MK2 = '.50 BMG', WEAPON_MARKSMANRIFLE = '7.62 mm', WEAPON_MARKSMANRIFLE_MK2 = '7.62 mm',
 }
+
+
+-- ═════════════════════════════ PROFILS ADN / EMPREINTES ═════════════════════════════
+-- Un profil identifie une personne SEULEMENT si la police l'a prélevée avant (/prelever) : sans profil, une trace reste « individu inconnu ».
+Config.Salt = 'change-moi'            -- graine secrète des codes ADN / empreintes : change-la (les codes deviennent imprévisibles hors du serveur)
+Config.Profile = {
+    Command  = 'prelever',            -- /prelever [id] : prélèvement ADN (salive) + empreintes d'un suspect proche
+    Distance = 3.0,
+    Seconds  = 6,
+}
+
+-- ═════════════════════════════ SANG (ADN) ═════════════════════════════
+Config.Blood = {
+    Enabled         = true,
+    MinInterval     = 8,             -- secondes minimum entre deux traces d'un même blessé
+    MaxPerPlayer    = 6,
+    LifetimeMinutes = 60,
+    PickupSeconds   = 4,
+    Item            = 'evidence_blood',   -- prélèvement scellé
+}
+
+-- ═════════════════════════════ EMPREINTES ═════════════════════════════
+-- Toute personne qui monte dans un véhicule sans gants y laisse ses empreintes. La police les relève au « poudrage » (mini-jeu).
+Config.Prints = {
+    Enabled         = true,
+    GloveItem       = 'latex_gloves',     -- avec cet item dans l'inventaire : aucune empreinte (vide = pas de gants possibles)
+    PerVehicleInterval = 600,             -- secondes minimum avant de re-laisser une empreinte sur le même véhicule
+    MaxPerVehicle   = 5,
+    LifetimeMinutes = 180,
+    DustDistance    = 3.0,
+    Item            = 'evidence_print',
+    MinQuality      = 60,                 -- % de réussite du mini-jeu de poudrage sous lequel l'empreinte est inexploitable
+}
+
+-- ═════════════════════════════ RÉSIDUS DE TIR (GSR) ═════════════════════════════
+Config.Gsr = {
+    Enabled  = true,
+    Command  = 'gsr',                -- /gsr [id] : test d'un suspect proche
+    Minutes  = 30,                   -- durée pendant laquelle les résidus restent détectables
+    WipeItem = 'gsr_wipes',          -- lingettes : effacent les résidus (consommées)
+    Distance = 3.0,
+    Seconds  = 5,
+}
+
+-- ═════════════════════════════ NETTOYAGE DE SCÈNE ═════════════════════════════
+Config.Cleaning = {
+    Enabled  = true,
+    Item     = 'cleaning_kit',       -- efface sang, douilles et empreintes proches (consommé) après un mini-jeu de frottage
+    Radius   = 4.0,
+}
+
+-- ═════════════════════════════ LABORATOIRE : mini-jeux ═════════════════════════════
+Config.Lab = {
+    MinSeconds  = 6,                 -- durée minimale d'une analyse (anti-triche : un résultat « instantané » est refusé)
+    MaxRetries  = 2,                 -- échecs autorisés sur un même prélèvement avant qu'il soit dégradé
+    DnaBases    = 10,                -- longueur du brin ADN du mini-jeu
+    DnaSeconds  = 30,
+    PrintRounds = 3,
+    PrintSeconds = 20,
+}

@@ -361,3 +361,13 @@ Un propriétaire « enregistré » est celui noté par ox_inventory à la créat
 Dans une propriété **disponible** gérée par son agence, l'agent (touche F10 ou `/decorer`) peut poser meubles et **tableaux** (onglet Catalogue → « Tableaux & déco murale » : le tableau se colle au mur visé), et choisir le **style** de l'intérieur (onglet Style). Réglages : `Config.Real.Decor` (limite de l'agent, biens occupés ou non, propriétaire autorisé à changer le style, teintes).
 **Couleur des murs / styles** : GTA ne repeint que les intérieurs qui exposent des « entity sets ». Ajoute-les dans `Config.Real.Interiors.<intérieur>.styles` ou, pour un MLO/shell, dans `Config.Real.Decor.CustomStyles` :
 `{ id = 'moderne', label = 'Moderne', sets = { 'nom_entity_set' }, tintSets = { 'set_teintable' } }` (`tintSets` = sets qui prennent la couleur choisie). Les noms de sets se trouvent dans la documentation de l'intérieur (MLO) ou les listes d'IPL GTA. Les modèles de tableaux absents de ton serveur ne sont pas proposés.
+
+### Police scientifique v2 : sang/ADN, empreintes, GSR, nettoyage (`pickax_forensics`)
+Tout se règle dans `pickax_forensics/config.lua` (sections Blood, Prints, Gsr, Cleaning, Lab, Profile ; **change `Config.Salt`**).
+- **Sang / ADN** : un joueur blessé laisse des traces (rouge sur la scène, visibles de la police). E → prélèvement scellé `evidence_blood`.
+- **Empreintes** : monter dans un véhicule sans l'item `latex_gloves` laisse une empreinte. À côté du véhicule, E → **mini-jeu de poudrage** (il faut brosser uniquement l'empreinte) → scellé `evidence_print`.
+- **Laboratoire** (E au labo, ou `/balistique` pour le fichier) : interface dédiée ; analyse = mini-jeu (**séquençage ADN** pour le sang, **comparaison d'empreintes** pour les empreintes, automatique pour les douilles). Un échec laisse 2 nouvelles chances, puis l'échantillon est dégradé.
+- **Identifier quelqu'un** : seulement s'il a été prélevé avant → `/prelever [id]` (ADN + empreintes, sur un suspect proche). Sinon la trace reste « individu inconnu ».
+- **Résidus de tir** : `/gsr [id]` → positif si la personne a tiré depuis moins de 30 min et ne s'est pas nettoyée (`gsr_wipes`).
+- **Effacer ses traces** : `cleaning_kit` (mini-jeu de frottage ; efface sang, douilles et empreintes proches), `gsr_wipes` (mains), `latex_gloves` (aucune empreinte).
+Items à ajouter dans les boutiques (ox_inventory/data/items.lua les définit) : `latex_gloves`, `cleaning_kit`, `gsr_wipes`, `evidence_bag`.

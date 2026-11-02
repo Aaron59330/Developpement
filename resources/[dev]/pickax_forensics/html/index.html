@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Police scientifique</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"></head>
+<body>
+<div id="lab" class="win hidden">
+  <header><div class="ttl"><span class="logo">⌬</span><div><b>Laboratoire de police scientifique</b><small id="labsub">Prélèvements scellés</small></div></div><button class="x" id="closeLab">✕</button></header>
+  <nav><button class="tab on" data-tab="items">Prélèvements</button><button class="tab" data-tab="file">Fichier balistique</button></nav>
+  <section id="tab-items"><div class="cols"><div id="items" class="list"></div><div id="detail" class="detail"><div class="empty">Sélectionne un scellé à gauche.</div></div></div></section>
+  <section id="tab-file" class="hidden"><div class="bar"><input id="q" placeholder="N° de série, signature BAL-xxxxxx ou propriétaire…"><button class="btn" id="go">Rechercher</button></div><div id="fileOut" class="filewrap"></div></section>
+</div>
+<div id="mg" class="hidden"><div class="mgbox"><div class="mghead"><b id="mgt"></b><span id="mgs"></span></div><div class="tbar"><i id="tb"></i></div><div id="mgbody"></div><div class="mgfoot"><button class="btn ghost" id="mgx">Annuler</button><button class="btn" id="mgok">Terminer</button></div></div></div>
+<script src="script.js"></script>
+</body></html>
