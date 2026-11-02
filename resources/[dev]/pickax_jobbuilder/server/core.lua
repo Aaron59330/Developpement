@@ -314,3 +314,6 @@ CreateThread(function()
         print('^3[jobbuilder] réglage global des blips introuvable (pickax_theme absent ou pickax_core/config.lua illisible) : tailles par défaut du builder^0')
     end
 end)
+
+-- Type d'un job du Job Builder (utilisé par pickax_mechanic : « mecano »)
+exports('GetJobType', function(name) local j = JB.Jobs and JB.Jobs[tostring(name or '')] return j and j.type or nil end)

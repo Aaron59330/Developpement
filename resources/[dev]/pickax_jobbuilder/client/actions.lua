@@ -81,6 +81,9 @@ function RunAction(id, label, amount)
         return OpenAgencyPanel()
     end
 
+    if id == 'repair' and GetResourceState('pickax_mechanic') == 'started' then
+        return exports['pickax_mechanic']:OpenDiagnostic()   -- réparation réaliste : diagnostic, pièces du magasin et mini-jeux
+    end
     if id == 'repair' then
         return vehicleWork('PROP_HUMAN_BUM_BIN', Config.ActionDuration.repair, function(veh)
             SetVehicleFixed(veh)

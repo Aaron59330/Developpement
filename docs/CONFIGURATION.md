@@ -377,3 +377,11 @@ Items à ajouter dans les boutiques (ox_inventory/data/items.lua les définit) :
 - `Config.Scene.Camera` : `Distance`, `Height`, `Rise`, `Fov`, `Angle` (0 face, 90 côté, 180 dos), `Side`, limites de zoom et vitesses de rotation / zoom.
 - `Config.Destinations` : **les lieux d'arrivée proposés après la création** (un seul = arrivée directe). `esx_identity` les lit depuis ce fichier.
 - Le tout premier point d'apparition technique du nouveau personnage (avant la scène) est `Config.DefaultSpawns` dans `es_extended/config.lua` ; il n'est visible qu'une fraction de seconde car la scène de création téléporte aussitôt au Studio.
+
+## Mécanicien réaliste (`pickax_mechanic`)
+Réglages dans `resources/[dev]/pickax_mechanic/config.lua` (qui est mécanicien : `Jobs` / `JobTypes`, outil, atelier obligatoire ou non, magasins, pièces, usure, effets, réparations).
+- **Magasin de pièces** (`Config.Shops`, E sur le repère) : les mécaniciens y achètent leurs pièces. **Le stock est limité, partagé par tous les mécaniciens et se reconstitue lentement** (`every` / `amount` par pièce) : sans pièces, aucune réparation. Placer les magasins avec leurs coordonnées dans `Config.Shops`.
+- **Diagnostic** : `/meca` (ou l'action « Réparer le véhicule » du Job Builder) près d'un véhicule : état de 7 composants (moteur, huile, boîte, freins, pneus, suspension, carrosserie) enregistré par plaque.
+- **Usure** : rapportée par le conducteur et plausibilisée par le serveur (distance, vitesse élevée, freinages brusques, chocs). Un mauvais état a des effets : puissance réduite, calages, freins faibles, adhérence en baisse, pneus qui éclatent.
+- **Réparation** : consomme les pièces de `Config.Repairs` + un mini-jeu (boulons, timing, gonflage, débosselage). Score trop bas = réparation ratée et pièces perdues ; abandonner ne coûte rien.
+Items à ajouter (ox_inventory/data/items.lua les définit) : engine_block, spark_plugs, engine_oil, oil_filter, gearbox_kit, brake_pads, brake_fluid, tyre_set, suspension_kit, body_panel, welding_wire, toolbox.
