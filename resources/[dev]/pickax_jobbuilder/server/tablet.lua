@@ -42,6 +42,7 @@ local function ctx(src, need)   -- need : …| 'bracelet'
     local perms = {
         records = s.tablet_records ~= false, dispatch = s.tablet_dispatch ~= false, map = s.tablet_map ~= false,
         bracelet = (P.Bracelets or {}).Enabled ~= false and s.tablet_bracelets ~= false and g >= (s.bracelet_grade or 0),
+        ballistics = GetResourceState('pickax_forensics') == 'started' and s.tablet_ballistics ~= false,
         admin = g >= (s.tablet_admin_grade or job.boss_grade), fine = g >= (s.fine_grade or 0), pursuit = g >= (s.pursuit_grade or 0),
     }
     if need and not perms[need] then return nil, nil, nil, 'Ton grade ne permet pas cette action' end
@@ -289,6 +290,15 @@ ESX.RegisterServerCallback('jobbuilder:tablet:live', function(src, cb)
 end)
 
 -- ── Casiers ──
+-- Fichier balistique (pickax_forensics) : douilles analysées, recherche par n° de série, signature ou propriétaire
+ESX.RegisterServerCallback('jobbuilder:ballistics:search', function(src, cb, q)
+    local x, _, _, err = ctx(src, 'ballistics')
+    if not x then return cb(fail(err)) end
+    local ok, rows, qq = pcall(function() return exports.pickax_forensics:Lookup(tostring(q or ''):sub(1, 60)) end)
+    if not ok then return cb(fail('Police scientifique indisponible')) end
+    cb({ ok = true, rows = rows or {}, q = qq or '' })
+end)
+
 ESX.RegisterServerCallback('jobbuilder:records:search', function(src, cb, q, wantedOnly)
     local x, job, s, err = ctx(src, 'records')
     if not x then return cb(fail(err)) end

@@ -324,6 +324,7 @@ local function cleanJob(payload)
             tablet_map = settings.tablet_map ~= false,
             fine_grade = math.floor(num(settings.fine_grade, 0, maxGrade, 0)),
             tablet_bracelets = settings.tablet_bracelets ~= false,
+            tablet_ballistics = settings.tablet_ballistics ~= false,
             bracelet_grade = math.floor(num(settings.bracelet_grade, 0, maxGrade, 0)),
             fine_custom = settings.fine_custom ~= false,
             pursuit_grade = math.floor(num(settings.pursuit_grade, 0, maxGrade, 0)),

@@ -59,3 +59,16 @@ end, false)
 TriggerEvent('chat:addSuggestion', '/' .. Config.Police.CallCommand, 'Appeler les forces de l\'ordre', { { name = 'message', help = 'Décris la situation' } })
 TriggerEvent('chat:addSuggestion', '/' .. Config.Police.PanicCommand, 'Appel à l\'aide (policiers)')
 TriggerEvent('chat:addSuggestion', '/' .. Config.Announce.ToggleCommand, 'Masquer / afficher les annonces d\'entreprise')
+
+-- ── Fichier balistique (pickax_forensics) : ajoute le nom de rue de chaque douille ──
+NuiLocal['ballistics:search'] = function(args, cb)
+    ESX.TriggerServerCallback('jobbuilder:ballistics:search', function(res)
+        if res and res.ok then
+            for _, r in ipairs(res.rows or {}) do
+                local s = GetStreetNameFromHashKey((GetStreetNameAtCoord((r.x or 0.0) + 0.0, (r.y or 0.0) + 0.0, 0.0)))
+                r.street = s ~= '' and s or 'lieu inconnu'
+            end
+        end
+        cb(res or { ok = false, error = 'Aucune réponse' })
+    end, args[1] or '')
+end

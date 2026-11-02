@@ -192,20 +192,28 @@ ESX.RegisterServerCallback('pickax_forensics:analyse', function(src, cb, slot)
     cb({ ok = true, report = report(row) })
 end)
 
--- ═══════════════ Fichier balistique : /balistique [n° de série | BAL-xxxxxx] ═══════════════
-ESX.RegisterServerCallback('pickax_forensics:lookup', function(src, cb, q)
-    local x = ESX.GetPlayerFromId(src)
-    if not isPolice(x) then return cb({ ok = false, error = 'Réservé à la police' }) end
+-- ═══════════════ Fichier balistique : /balistique [n° de série | BAL-xxxxxx] et tablette de police ═══════════════
+local function doLookup(q)
     q = tostring(q or ''):sub(1, 60)
     local rows
     if q == '' then
-        rows = MySQL.query.await("SELECT * FROM forensics_casings WHERE status = 'analysed' ORDER BY analysed_at DESC LIMIT 10")
+        rows = MySQL.query.await("SELECT * FROM forensics_casings WHERE status = 'analysed' ORDER BY analysed_at DESC LIMIT 30")
     else
-        rows = MySQL.query.await("SELECT * FROM forensics_casings WHERE status = 'analysed' AND (signature = ? OR serial = ?) ORDER BY id DESC LIMIT 15", { q:upper(), q })
+        rows = MySQL.query.await("SELECT * FROM forensics_casings WHERE status = 'analysed' AND (signature = ? OR serial = ? OR owner LIKE ?) ORDER BY id DESC LIMIT 40", { q:upper(), q, '%' .. q:gsub('[%%_]', '') .. '%' })
     end
     local out = {}
     for _, r in ipairs(rows or {}) do out[#out + 1] = { id = r.id, weapon = r.weapon, caliber = r.caliber, signature = r.signature, serial = r.serial, owner = r.owner, shotAt = fmtDate(r.shot_at), x = r.x, y = r.y } end
-    cb({ ok = true, rows = out, q = q })
+    return out, q
+end
+
+-- Utilisé par la tablette de police (pickax_jobbuilder) : le contrôle d'accès y est déjà fait
+exports('Lookup', doLookup)
+
+ESX.RegisterServerCallback('pickax_forensics:lookup', function(src, cb, q)
+    local x = ESX.GetPlayerFromId(src)
+    if not isPolice(x) then return cb({ ok = false, error = 'Réservé à la police' }) end
+    local rows, qq = doLookup(q)
+    cb({ ok = true, rows = rows, q = qq })
 end)
 
 -- Aide admin : position à copier dans Config.Labs

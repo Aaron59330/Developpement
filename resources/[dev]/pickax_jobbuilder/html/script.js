@@ -548,7 +548,7 @@ const Builder = {
     const chk = (k, l) => `<label class="chk"><input type="checkbox" data-path="job.settings.${k}" data-t="b" ${s[k] === false ? '' : 'checked'}> ${l}</label>`;
     return `<div class="card"><div class="card-h"><div class="t">${ic('tablet', 16)} Tablette (F6 → Tablette)</div>${chip(s.tablet_enabled === false ? 'Désactivée' : 'Activée', s.tablet_enabled === false ? 'mute' : 'ok')}</div>
       <p class="hint" style="margin-bottom:12px">Casiers, amendes, dispatch et carte en direct, <b>propres à ce job</b> : les données d'un autre service ne sont jamais visibles. Les citoyens appellent avec <b>/${(this.catalog.police || {}).CallCommand || 'appel'}</b>.</p>
-      <div class="row wrap" style="gap:22px;margin-bottom:14px">${chk('tablet_enabled', 'Tablette activée')}${chk('tablet_records', 'Casiers')}${chk('tablet_dispatch', 'Dispatch')}${chk('tablet_map', 'Carte en direct')}${chk('tablet_bracelets', 'Bracelets électroniques')}${chk('fine_custom', 'Amendes libres autorisées')}</div>
+      <div class="row wrap" style="gap:22px;margin-bottom:14px">${chk('tablet_enabled', 'Tablette activée')}${chk('tablet_records', 'Casiers')}${chk('tablet_dispatch', 'Dispatch')}${chk('tablet_map', 'Carte en direct')}${chk('tablet_bracelets', 'Bracelets électroniques')}${chk('tablet_ballistics', 'Fichier balistique')}${chk('fine_custom', 'Amendes libres autorisées')}</div>
       <div class="grid4">${gs('tablet_grade', 0, 'Grade min. pour ouvrir')}${gs('fine_grade', 0, 'Grade min. pour amender')}${gs('pursuit_grade', 0, 'Grade min. pour poursuivre')}${gs('tablet_admin_grade', last, 'Grade min. pour supprimer')}${gs('bracelet_grade', 0, 'Grade min. pour les bracelets')}</div>
       <div class="lbl" style="margin:16px 0 8px">Catalogue d'amendes</div>
       ${s.fines.map((f, k) => `<div class="form-row" style="grid-template-columns:2fr 140px auto">${fld('Motif', `<input data-path="job.settings.fines.${k}.label" value="${esc(f.label)}" maxlength="60">`)}${fld('Montant ($)', `<input type="number" min="1" data-path="job.settings.fines.${k}.amount" data-t="n" value="${f.amount}">`)}<button class="icon danger" data-a="delRow" data-v="job.settings.fines" data-k="${k}">${ic('trash', 15)}</button></div>`).join('')}
@@ -1724,6 +1724,7 @@ const Tablet = {
     if (p.dispatch) items.push({ id: 'dispatch', icon: 'siren', text: 'Dispatch' });
     if (p.map) items.push({ id: 'map', icon: 'map', text: 'Carte en direct' });
     if (p.bracelet) items.push({ id: 'bracelets', icon: 'link', text: 'Bracelets' });
+    if (p.ballistics) items.push({ id: 'ballistics', icon: 'target', text: 'Balistique' });
     return items;
   },
 
@@ -1733,7 +1734,7 @@ const Tablet = {
     $root.classList.remove('corner');
     $root.innerHTML = shellSide({ profile: { initials: initials(d.jobLabel), title: 'Tablette', sub: `${d.jobLabel} · ${d.gradeLabel || ''}` }, nav: [{ label: 'Tablette', items: this.nav() }], active: this.tab,
       foot: `<small>${d.perms.admin ? 'Accès direction : suppressions autorisées.' : 'Les données de cette tablette appartiennent à ton service uniquement.'}</small>`,
-      head: { icon: 'tablet', title: `Tablette — ${d.jobLabel}`, sub: ({ home: 'Vue d\'ensemble', records: 'Casiers judiciaires', fines: 'Amendes', dispatch: 'Dispatch', map: 'Carte en temps réel', bracelets: 'Bracelets électroniques' })[this.tab] }, body: this['tab_' + this.tab]() });
+      head: { icon: 'tablet', title: `Tablette — ${d.jobLabel}`, sub: ({ home: 'Vue d\'ensemble', records: 'Casiers judiciaires', fines: 'Amendes', dispatch: 'Dispatch', map: 'Carte en temps réel', bracelets: 'Bracelets électroniques', ballistics: 'Fichier balistique' })[this.tab] }, body: this['tab_' + this.tab]() });
     if (this.tab === 'map') this.mapStart();
   },
 
@@ -1751,6 +1752,16 @@ const Tablet = {
   },
 
   /* ── Bracelets électroniques ── */
+  /* ── Fichier balistique (douilles analysées au laboratoire) ── */
+  tab_ballistics() {
+    const B = this.ba || { q: '', rows: null };
+    const rows = B.rows;
+    return `<div class="card"><div class="card-h"><div class="t">${ic('target', 17)} Fichier balistique</div>${rows ? chip(`${rows.length} résultat${rows.length > 1 ? 's' : ''}`, 'info') : ''}</div>
+      <div class="row" style="gap:10px"><input id="ba-q" placeholder="N° de série, signature BAL-xxxxxx ou propriétaire…" value="${esc(B.q || '')}" style="flex:1"><button class="primary" data-a="baSearch">${ic('search', 15)} Rechercher</button></div>
+      <p class="hint mt-s">Seules les douilles <b>analysées</b> au laboratoire figurent dans le fichier. Plusieurs douilles de même signature = même arme.</p>
+      ${rows === null ? '<p class="hint">Chargement…</p>' : rows.length ? `<div class="mt" style="overflow:auto"><table class="tbl" style="width:100%"><thead><tr><th>#</th><th>Arme</th><th>Calibre</th><th>Signature</th><th>N° de série</th><th>Propriétaire</th><th>Lieu</th><th>Date</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.id}</td><td>${esc(String(r.weapon).replace('WEAPON_', '').toLowerCase())}</td><td>${esc(r.caliber)}</td><td><button class="sm" data-a="baSig" data-v="${esc(r.signature)}">${esc(r.signature)}</button></td><td>${r.serial ? esc(r.serial) : '<span class="bad">limé / absent</span>'}</td><td>${r.owner ? esc(r.owner) : '<span class="hint">non enregistrée</span>'}</td><td>${esc(r.street || '')}</td><td>${esc(r.shotAt)}</td></tr>`).join('')}</tbody></table></div>` : emptyState('target', 'Aucune douille', 'Aucune douille analysée ne correspond.')}</div>`;
+  },
+  async baLoad(q) { const r = await rpc('ballistics:search', q || ''); this.ba = { q: q || '', rows: (r && r.ok) ? r.rows : [] }; if (!r || !r.ok) toast((r && r.error) || 'Indisponible', 'err'); },
   tab_bracelets() { return `<div id="t-br">${this.braceletsHtml()}</div>`; },
   braceletsHtml() {
     const B = this.br || { list: [], max: 30, zoneMin: 20, zoneMax: 2000 }, N = this.brNear;
@@ -2006,7 +2017,9 @@ const Tablet = {
     const a = el.dataset.a, v = el.dataset.v, d = this.d, ok = (r, m) => { if (!r || !r.ok) { toast((r && r.error) || 'Erreur', 'err'); return false; } if (m) toast(m, 'ok'); return true; };
     const val = id => (document.getElementById(id) || {}).value || '';
     switch (a) {
-      case 'nav': this.tab = v; this.callForm = false; if (v === 'records') await this.loadRecs(); if (v === 'dispatch' || v === 'home') await this.poll(true); if (v === 'map') this.nearby = null; if (v === 'bracelets') { this.brNear = null; await this.loadBr(); } return this.render();
+      case 'baSearch': { const q = (document.getElementById('ba-q') || {}).value || ''; this.ba = { q, rows: null }; this.render(); await this.baLoad(q); return this.render(); }
+      case 'baSig': { this.ba = { q: v, rows: null }; this.render(); await this.baLoad(v); return this.render(); }
+      case 'nav': this.tab = v; this.callForm = false; if (v === 'ballistics') { this.ba = { q: '', rows: null }; this.render(); await this.baLoad(''); return this.render(); } if (v === 'records') await this.loadRecs(); if (v === 'dispatch' || v === 'home') await this.poll(true); if (v === 'map') this.nearby = null; if (v === 'bracelets') { this.brNear = null; await this.loadBr(); } return this.render();
       case 'brScan': { const r = await rpc('bracelet:nearby'); if (!ok(r)) return; this.brNear = r.list; return this.refreshBr(); }
       case 'brPlace': { const r = await rpc('bracelet:place', Number(v)); if (!ok(r, 'Bracelet posé')) return; this.brNear = null; await this.loadBr(); return this.refreshBr(); }
       case 'brRemove': { if (!await confirmBox('Retirer ce bracelet ?', el.dataset.n + ' ne sera plus suivi.', 'Retirer')) return; const r = await rpc('bracelet:remove', Number(v)); if (!ok(r, 'Bracelet retiré')) return; await this.loadBr(); return this.refreshBr(); }

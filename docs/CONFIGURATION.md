@@ -354,7 +354,7 @@ Réglages dans `resources/[dev]/pickax_forensics/config.lua` : métiers police, 
 - **Tir** : chaque tir laisse une douille au sol (le serveur lit l'arme équipée, son n° de série et son propriétaire enregistré ; rafales limitées). Seule la police voit les repères.
 - **Ramassage** : E sur la douille → item `evidence_casing` (scellé). `Config.Casings.BagItem = 'evidence_bag'` exige un sachet.
 - **Analyse** : au laboratoire (E) → rapport : arme, calibre, signature balistique, n° de série, propriétaire enregistré, correspondances avec d'autres douilles déjà analysées (même arme).
-- **Fichier** : `/balistique` (dernières analyses) ou `/balistique <n° de série | BAL-xxxxxx>`.
+- **Fichier** : onglet **Balistique** de la tablette de police (F6 → Tablette ; case « Fichier balistique » dans les réglages du job pour l’activer/désactiver) ou `/balistique` (dernières analyses) ou `/balistique <n° de série | BAL-xxxxxx>`.
 Un propriétaire « enregistré » est celui noté par ox_inventory à la création de l'arme ; une arme sans n° de série (limée) reste non traçable.
 
 ## Décor des propriétés par l'agent immobilier (`pickax_jobbuilder`)
