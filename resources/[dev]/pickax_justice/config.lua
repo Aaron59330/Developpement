@@ -1,8 +1,9 @@
 Config = {}
 Config.Enabled = true
+Config.UseCommands = false   -- true = active aussi /mandat, /mandats, /saisie, /saisies, /alcootest, /papiers (par défaut : menu contextuel sur la personne contrôlée et menu F6 du job)
 
 -- Rôles : noms de jobs ESX ET / OU types de job du Job Builder
-Config.Judges  = { Jobs = { 'judge', 'justice' }, Types = { 'justice', 'gov' } }
+Config.Judges  = { Jobs = { 'judge', 'justice' }, Types = { 'government' } }   -- type « government » du Job Builder = juges / gouvernement
 Config.Police  = { Jobs = { 'police', 'sheriff' }, Types = { 'police' } }
 
 -- ═════════════════════════════ MANDATS ═════════════════════════════

@@ -2,6 +2,7 @@ Config = {}
 
 -- ═════════════════════════════ EMS AVANCÉ ═════════════════════════════
 Config.Enabled  = true
+Config.UseCommands = false   -- true = active aussi /ems et /triage (par défaut : menu contextuel sur le patient et menu F6 du job EMS)
 Config.Jobs     = { 'ambulance', 'ems' }       -- métiers médicaux (noms ESX) ET / OU types du Job Builder
 Config.JobTypes = { 'ems' }
 Config.Command  = 'ems'                         -- /ems [id] : examen du patient le plus proche (ou de l'ID donné)

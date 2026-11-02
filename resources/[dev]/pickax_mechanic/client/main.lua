@@ -1,6 +1,18 @@
 local ESX = exports['es_extended']:getSharedObject()
 local C = Config
 local nuiOpen, mgPromise, ctx = false, nil, nil   -- ctx = { netId, veh, plate }
+-- ───────────── Rôle du joueur (noms de jobs ESX ou type du Job Builder) ─────────────
+local function hasRole(names, types)
+    local d = ESX.GetPlayerData()
+    local job = d and d.job and d.job.name
+    for _, n in ipairs(names or {}) do if job == n then return true end end
+    if types and #types > 0 and GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, t = pcall(function() return exports.pickax_jobbuilder:GetJobType() end)
+        if ok and t then for _, x in ipairs(types) do if t == x then return true end end end
+    end
+    return false
+end
+
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
 local function nui(m) SendNUIMessage(m) end
@@ -29,9 +41,9 @@ local function closestVehicle()
     if v ~= 0 and NetworkGetEntityIsNetworked(v) then return v end
 end
 
-local function openDiag()
+local function openDiag(target)
     if nuiOpen then return end
-    local veh = closestVehicle()
+    local veh = (type(target) == 'number' and DoesEntityExist(target)) and target or closestVehicle()
     if not veh then return notify('error', 'Aucun véhicule à proximité.') end
     if IsPedInAnyVehicle(PlayerPedId(), false) then return notify('error', 'Descends du véhicule.') end
     local netId = NetworkGetNetworkIdFromEntity(veh)
@@ -45,8 +57,16 @@ local function openDiag()
         nui({ action = 'diag', data = r, name = (name ~= 'NULL' and name) or 'Véhicule' })
     end, netId, GetVehicleEngineHealth(veh), GetVehicleBodyHealth(veh))
 end
-RegisterCommand(C.Command, openDiag, false)
+if C.UseCommands then RegisterCommand(C.Command, function() openDiag() end, false) end
 exports('OpenDiagnostic', openDiag)
+
+-- Menu contextuel : clic droit sur un véhicule (mécanicien)
+local CTX_ACTIONS = { { id = 'diag', label = 'Diagnostic du véhicule', target = 'vehicle' } }
+exports('ContextCan', function(id, ent) return hasRole(C.Jobs, C.JobTypes) and not IsPedInAnyVehicle(PlayerPedId(), false) and #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(ent)) <= C.MaxDistance + 1.5 end)
+exports('ContextDo', function(id, ent) openDiag(ent) end)
+local function registerContext() exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), CTX_ACTIONS) end
+CreateThread(function() Wait(2500) registerContext() end)
+AddEventHandler('onResourceStart', function(r) if r == 'pickax_core' then SetTimeout(2500, registerContext) end end)
 
 local function refreshDiag()
     if not ctx or not DoesEntityExist(ctx.veh) then return end

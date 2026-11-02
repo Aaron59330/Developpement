@@ -1389,6 +1389,28 @@ function CPSitOnObject(obj)
     end)
 end
 
+-- ───────────── Actions ajoutées par d'autres ressources (EMS, police, mécano, justice…) ─────────────
+-- exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), { { id = 'x', label = 'Texte', target = 'player' | 'vehicle' | 'ped' | 'self' } })
+-- La ressource répond avec exports('ContextCan', function(id, entity) → bool) (l'action est-elle proposée ?) et exports('ContextDo', function(id, entity)) (clic).
+local CtxExtra = {}
+exports('RegisterContextActions', function(res, list) CtxExtra[tostring(res)] = type(list) == 'table' and list or nil end)
+local function CtxAddExtras(contextMenu, kind, ent)
+    for res, list in pairs(CtxExtra) do
+        if GetResourceState(res) == 'started' then
+            for _, a in ipairs(list) do
+                if a.target == kind then
+                    local ok, can = pcall(function() return exports[res]:ContextCan(a.id, ent) end)
+                    if ok and can then
+                        local item = contextMenu:AddItem(a.label)
+                        item.OnRelease = function() pcall(function() exports[res]:ContextDo(a.id, ent) end) end
+                        item.closeMenuOnRelease = true
+                    end
+                end
+            end
+        end
+    end
+end
+
 function CreateMenu(screenPosition, worldPosition, hitEntity)
     ESX.PlayerData = ESX.GetPlayerData()
     LastEntityHit = hitEntity
@@ -1549,6 +1571,7 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
             end
         else
             if (PlayerPedId() == hitEntity) then
+                CtxAddExtras(contextMenu, 'self', hitEntity)
                 _Moi()
                 for k,v in pairs(Action_Config.My) do 
                     if not v.Blocked then 
@@ -1731,6 +1754,7 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                     :: pass ::
                 end
             elseif (IsEntityAVehicle(hitEntity)) then
+                CtxAddExtras(contextMenu, 'vehicle', hitEntity)
                 stateofcar = GetVehicleDoorLockStatus(hitEntity)
                 if stateofcar == 1 then
                     stateofcartext = "~g~Ouvert~s~"
@@ -2021,6 +2045,7 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                     :: pass ::
                 end
             elseif (IsPedAPlayer(hitEntity)) then
+                CtxAddExtras(contextMenu, 'player', hitEntity)
                 _Player()
                 for k,v in pairs(Action_Config.Joueur) do
                     if not v.Blocked then 
@@ -2306,6 +2331,7 @@ function CreateMenu(screenPosition, worldPosition, hitEntity)
                     :: pass ::
                 end
             elseif not (IsPedAPlayer(hitEntity)) and IsEntityAPed(hitEntity) then
+                CtxAddExtras(contextMenu, 'ped', hitEntity)
                 _Peds()
                 for k,v in pairs(Action_Config.Peds) do
                     if not v.Blocked then 

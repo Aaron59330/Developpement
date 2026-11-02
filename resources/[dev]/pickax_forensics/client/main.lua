@@ -244,14 +244,16 @@ CreateThread(function()
     end
 end)
 
--- /balistique : ouvre le laboratoire sur l'onglet Fichier (depuis n'importe où : consultation seule)
-RegisterCommand(Config.Analysis.Command, function(_, args)
+-- Fichier balistique : onglet « Balistique » de la tablette de police, laboratoire, ou /balistique si Config.UseCommands
+local function openFile(q)
     if not isPolice then return notify('error', 'Réservé à la police.') end
     if nuiOpen then return end
     nuiOpen = true
     SetNuiFocus(true, true)
-    nui({ action = 'file', q = args[1] or '' })
-end, false)
+    nui({ action = 'file', q = q or '' })
+end
+if Config.UseCommands then RegisterCommand(Config.Analysis.Command, function(_, args) openFile(args[1]) end, false) end
+exports('OpenFile', openFile)
 
 -- ───────────── Prélèvement d'un suspect + test GSR ─────────────
 local function nearestPlayer(maxDist)
@@ -268,19 +270,21 @@ local function nearestPlayer(maxDist)
 end
 
 local function onTarget(cmd, seconds, label, cbName, dist)
-    RegisterCommand(cmd, function(_, args)
+    local function run(forced, args)
         if not isPolice then return notify('error', 'Réservé à la police.') end
-        local target = tonumber(args[1]) or nearestPlayer(dist)
+        local target = forced or tonumber(args and args[1]) or nearestPlayer(dist)
         if not target then return notify('error', 'Personne à proximité.') end
         local ok = lib.progressBar({ duration = seconds * 1000, label = label, canCancel = true, disable = { move = true, combat = true }, anim = { dict = 'amb@medic@standing@kneel@base', clip = 'base', flag = 1 } })
         if not ok then return end
         ESX.TriggerServerCallback(cbName, function(r)
             if r and r.ok then notify(r.positive and 'warning' or 'success', r.msg) else notify('error', (r and r.error) or 'Impossible') end
         end, target)
-    end, false)
+    end
+    if Config.UseCommands then RegisterCommand(cmd, function(_, args) run(nil, args) end, false) end
+    return run
 end
-onTarget(Config.Profile.Command, Config.Profile.Seconds, 'Prélèvement ADN et empreintes…', 'pickax_forensics:sample', Config.Profile.Distance)
-onTarget(Config.Gsr.Command, Config.Gsr.Seconds, 'Test de résidus de tir…', 'pickax_forensics:gsr', Config.Gsr.Distance)
+local doSample = onTarget(Config.Profile.Command, Config.Profile.Seconds, 'Prélèvement ADN et empreintes…', 'pickax_forensics:sample', Config.Profile.Distance)
+local doGsr = onTarget(Config.Gsr.Command, Config.Gsr.Seconds, 'Test de résidus de tir…', 'pickax_forensics:gsr', Config.Gsr.Distance)
 
 -- ───────────── Objets : kit de nettoyage et lingettes ─────────────
 RegisterNetEvent('pickax_forensics:useCleaning', function()
@@ -300,3 +304,18 @@ RegisterNetEvent('pickax_forensics:useWipes', function()
     local ok = lib.progressBar({ duration = 4000, label = 'Nettoyage des mains…', canCancel = true, disable = { move = true, combat = true }, anim = { dict = 'mp_arresting', clip = 'a_uncuff' } })
     if ok then TriggerServerEvent('pickax_forensics:wipe') end
 end)
+
+-- ───────────── Menu contextuel : clic droit sur un joueur (police) ─────────────
+local CTX_ACTIONS = {
+    { id = 'sample', label = 'Prélèvement ADN', target = 'player' },
+    { id = 'gsr',    label = 'Test de résidus', target = 'player' },
+}
+exports('ContextCan', function(id, ent) return isPolice and ent ~= PlayerPedId() end)
+exports('ContextDo', function(id, ent)
+    local sid = GetPlayerServerId(NetworkGetPlayerIndexFromPed(ent))
+    if not sid or sid <= 0 then return end
+    if id == 'sample' then doSample(sid) elseif id == 'gsr' then doGsr(sid) end
+end)
+local function registerContext() exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), CTX_ACTIONS) end
+CreateThread(function() Wait(2500) registerContext() end)
+AddEventHandler('onResourceStart', function(r) if r == 'pickax_core' then SetTimeout(2500, registerContext) end end)

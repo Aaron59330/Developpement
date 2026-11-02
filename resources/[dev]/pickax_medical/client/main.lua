@@ -1,6 +1,18 @@
 local ESX = exports['es_extended']:getSharedObject()
 local C = Config
 local nuiOpen, cur = false, nil   -- cur = id du patient examiné
+-- ───────────── Rôle du joueur (noms de jobs ESX ou type du Job Builder) ─────────────
+local function hasRole(names, types)
+    local d = ESX.GetPlayerData()
+    local job = d and d.job and d.job.name
+    for _, n in ipairs(names or {}) do if job == n then return true end end
+    if types and #types > 0 and GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, t = pcall(function() return exports.pickax_jobbuilder:GetJobType() end)
+        if ok and t then for _, x in ipairs(types) do if t == x then return true end end end
+    end
+    return false
+end
+
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
 local function nui(m) SendNUIMessage(m) end
@@ -127,12 +139,16 @@ local function openExam(id)
         nui({ action = 'exam', data = r, first = true })
     end, id)
 end
-RegisterCommand(C.Command, function(_, args)
+if C.UseCommands then RegisterCommand(C.Command, function(_, args)
     local id = tonumber(args[1]) or nearestPlayer(C.Distance)
     if not id then return notify('error', 'Aucun patient à proximité.') end
     openExam(id)
-end, false)
-exports('OpenExam', openExam)
+end, false) end
+exports('OpenExam', function(id)   -- menu F6 : patient le plus proche si aucun ID
+    local t = tonumber(id) or nearestPlayer(C.Distance)
+    if not t then return notify('error', 'Aucun patient à proximité.') end
+    openExam(t)
+end)
 
 -- Joue un mini-jeu : le focus passe à skillgames puis revient au panneau
 local function play(game, cfg)
@@ -200,8 +216,8 @@ RegisterNUICallback('triageTag', function(d, cb)
 end)
 RegisterNUICallback('openPatient', function(d, cb) cb(1) cur = tonumber(d.id) refresh() end)
 
--- /triage : ouvre directement la liste des blessés autour
-RegisterCommand('triage', function()
+-- Triage : menu F6 du job EMS (ou /triage si Config.UseCommands)
+local function openTriage()
     if nuiOpen then return end
     ESX.TriggerServerCallback('pickax_medical:triageList', function(r)
         if not r or not r.ok then return notify('error', (r and r.error) or 'Réservé aux EMS') end
@@ -209,6 +225,19 @@ RegisterCommand('triage', function()
         SetNuiFocus(true, true)
         nui({ action = 'triage', data = r })
     end)
-end, false)
+end
+if C.UseCommands then RegisterCommand('triage', openTriage, false) end
+exports('OpenTriage', openTriage)
+
+-- Menu contextuel : clic droit sur un joueur (EMS)
+local CTX_ACTIONS = { { id = 'exam', label = 'Examiner le patient', target = 'player' } }
+exports('ContextCan', function(id, ent) return ent ~= PlayerPedId() and hasRole(C.Jobs, C.JobTypes) end)
+exports('ContextDo', function(id, ent)
+    local sid = GetPlayerServerId(NetworkGetPlayerIndexFromPed(ent))
+    if sid and sid > 0 then openExam(sid) end
+end)
+local function registerContext() exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), CTX_ACTIONS) end
+CreateThread(function() Wait(2500) registerContext() end)
+AddEventHandler('onResourceStart', function(r) if r == 'pickax_core' then SetTimeout(2500, registerContext) end end)
 
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then if nuiOpen then SetNuiFocus(false, false) end SetPedMoveRateOverride(PlayerPedId(), 1.0) ClearTimecycleModifier() end end)

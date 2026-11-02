@@ -20,9 +20,9 @@ RegisterNUICallback('done', function(d, cb) if prom then prom:resolve(d and tonu
 
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() and active then SetNuiFocus(false, false) end end)
 
-RegisterCommand('skillgame', function(_, args)
+if Config.Debug then RegisterCommand('skillgame', function(_, args)
     local ESX = exports['es_extended']:getSharedObject()
     local g = ESX.GetPlayerData().group
     if not Config.AllowTest[g] then return end
     CreateThread(function() local s = Play(args[1] or 'pins', {}) print('[skillgames] score', s) end)
-end, false)
+end, false) end

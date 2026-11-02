@@ -1,5 +1,6 @@
 Config = {}
 Config.Enabled = true
+Config.UseCommands = false   -- true = active aussi /crocheter et /desosser (par défaut : menu contextuel sur le véhicule, ou l'objet « crochet » utilisé près d'un véhicule)
 
 -- Alerte police : utilise le dispatch de la tablette de police du Job Builder (target « police » = tous les jobs police)
 Config.Alert = { Enabled = true, Target = 'police' }

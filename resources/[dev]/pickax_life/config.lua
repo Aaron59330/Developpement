@@ -1,5 +1,6 @@
 Config = {}
 Config.Enabled = true
+Config.UseCommands = false   -- true = active aussi /pecher, /depecer, /course (par défaut : objets (canne, couteau), menu contextuel sur la dépouille, menu F6 du job pour les courses)
 
 -- ═════════════════════════════ PERMIS (pêche, chasse) ═════════════════════════════
 -- Achetés au bureau : item remis au joueur. Sans permis, une activité est refusée.
@@ -71,6 +72,7 @@ Config.Cooking = {
 Config.Runs = {
     Command = 'course',
     Jobs = { taxi = { 'taxi' }, delivery = { 'delivery', 'livreur', 'trucker' } },     -- noms de jobs ESX autorisés par type de course
+    JobTypes = { taxi = { 'taxi' }, delivery = { 'trucker' } },                         -- types de job du Job Builder autorisés
     Rate = { taxi = 2.2, delivery = 1.8 },                                              -- $ par 100 m (hors pourboire)
     Base = { taxi = 60, delivery = 80 },
     TipMax = 0.4,                                                                       -- pourboire maximal (% du tarif) pour une conduite parfaite

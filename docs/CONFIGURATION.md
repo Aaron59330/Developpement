@@ -394,3 +394,11 @@ Toutes ces ressources sont dans `resources/[dev]` (démarrées avec `ensure [dev
 - **`pickax_life`** : permis (pêche / chasse), **pêche** `/pecher`, **chasse** `/depecer`, **cuisine** (postes + recettes, qualité), acheteurs aux prix du jour, **taxi / livraison** `/course` (tarif au km + pourboire selon la conduite).
 - **`pickax_justice`** : **mandats** (`/mandat` juge, `/mandats`), **saisies** `/saisie` (journal, « contestable » sans mandat de perquisition, `/saisies`), **alcootest** `/alcootest` (alcoolémie suivie via `ox_inventory:usedItem`), **contrôle des papiers** `/papiers` (le contrôlé choisit vrai/faux ; un faux est détecté selon sa qualité).
 Exports utiles : `pickax_justice:HasSearchWarrant(nom)`, `pickax_justice:LogSeizure(agent, cible, note)` (à appeler depuis les saisies de `pickax_illegalbuilder` si tu veux les journaliser).
+
+### Où trouver chaque action (plus de commandes à retenir)
+Les commandes sont **désactivées par défaut** (`Config.UseCommands = false` dans chaque ressource ; `true` pour les réactiver).
+- **Menu contextuel (clic droit sur la cible)** — personne : *Contrôler les papiers, Alcootest, Enregistrer une saisie, Prélèvement ADN, Test de résidus* (police) · *Examiner le patient* (EMS). Véhicule : *Diagnostic du véhicule* (mécanicien) · *Crocheter la serrure* (avec un crochet) · *Désosser le véhicule* (dans la zone, avec les outils). Animal mort : *Dépecer l'animal*.
+- **Menu F6 du job** — EMS : *Examiner un patient, Triage* · Police / gouvernement : *Mandats, Journal des saisies* · Gouvernement : *Délivrer un mandat* · Taxi / transporteur : *Service de courses* · Mécano : *Réparer le véhicule* (diagnostic) · Police : tablette → onglet *Balistique*.
+- **Objets** — canne à pêche (pêcher), couteau de chasse (dépecer), crochet, kit de nettoyage, lingettes.
+- **Repères au sol (E)** — magasin de pièces, laboratoire, terminaux, atelier de faux papiers, receleur, acheteurs, postes de cuisine, bureau des permis.
+Une ressource ajoute ses propres entrées au menu contextuel avec `exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), { { id, label, target = 'player' | 'vehicle' | 'ped' | 'self' } })` et répond avec les exports `ContextCan(id, entité)` / `ContextDo(id, entité)`.

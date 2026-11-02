@@ -81,6 +81,15 @@ function RunAction(id, label, amount)
         return OpenAgencyPanel()
     end
 
+    -- Pack gameplay (F6) : chaque action ouvre l'interface de sa ressource
+    local PACK = { medexam = { 'pickax_medical', 'OpenExam' }, medtriage = { 'pickax_medical', 'OpenTriage' }, warrants = { 'pickax_justice', 'ShowWarrants' },
+        warrantnew = { 'pickax_justice', 'NewWarrant' }, seizures = { 'pickax_justice', 'ShowSeizures' }, runs = { 'pickax_life', 'ToggleRun' } }
+    if PACK[id] then
+        local res, fn = PACK[id][1], PACK[id][2]
+        if GetResourceState(res) ~= 'started' then return JBNotify('~r~' .. res .. ' n\'est pas démarré.') end
+        CloseUI()
+        return SetTimeout(150, function() exports[res][fn](exports[res]) end)
+    end
     if id == 'repair' and GetResourceState('pickax_mechanic') == 'started' then
         return exports['pickax_mechanic']:OpenDiagnostic()   -- réparation réaliste : diagnostic, pièces du magasin et mini-jeux
     end

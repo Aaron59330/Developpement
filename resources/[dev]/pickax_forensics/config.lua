@@ -2,6 +2,7 @@ Config = {}
 
 -- ═════════════════════════════ POLICE SCIENTIFIQUE ═════════════════════════════
 Config.Enabled    = true
+Config.UseCommands = false   -- true = active aussi /prelever, /gsr, /balistique (par défaut : menu contextuel, tablette de police et laboratoire)
 Config.PoliceJobs = { 'police', 'sheriff' }          -- métiers qui voient les douilles, les ramassent et les analysent
 Config.AdminGroups = { _dev = true, superadmin = true, admin = true }   -- /laboici : affiche la position à copier dans Config.Labs
 

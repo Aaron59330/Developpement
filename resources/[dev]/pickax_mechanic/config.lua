@@ -2,6 +2,7 @@ Config = {}
 
 -- ═════════════════════════════ MÉCANICIEN RÉALISTE ═════════════════════════════
 Config.Enabled = true
+Config.UseCommands = false  -- true = active aussi /meca (par défaut : menu contextuel sur le véhicule et action « Réparer le véhicule » du menu F6)
 
 -- Qui est mécanicien : noms de jobs ESX ET / OU type de job du Job Builder (« mecano »)
 Config.Jobs     = { 'mechanic', 'mecano' }

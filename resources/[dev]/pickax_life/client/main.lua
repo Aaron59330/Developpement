@@ -1,6 +1,17 @@
 local ESX = exports['es_extended']:getSharedObject()
 local C = Config
 local busy = false
+-- ───────────── Rôle du joueur (noms de jobs ESX ou type du Job Builder) ─────────────
+local function hasRole(names, types)
+    local d = ESX.GetPlayerData()
+    local job = d and d.job and d.job.name
+    for _, n in ipairs(names or {}) do if job == n then return true end end
+    if types and #types > 0 and GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, t = pcall(function() return exports.pickax_jobbuilder:GetJobType() end)
+        if ok and t then for _, x in ipairs(types) do if t == x then return true end end end
+    end
+    return false
+end
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
 local function help(txt) BeginTextCommandDisplayHelp('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayHelp(0, false, true, -1) end
@@ -9,7 +20,7 @@ local function anim(dict, clip, flag) RequestAnimDict(dict) local t = GetGameTim
 local function res(r) if r and r.ok then notify(r.failed and 'error' or 'success', r.msg or 'OK') else notify('error', (r and r.error) or 'Impossible') end end
 
 -- ───────────── Pêche ─────────────
-RegisterCommand(C.Fishing.Command, function()
+local function fish()
     if busy then return end
     busy = true
     ESX.TriggerServerCallback('pickax_life:fishBegin', function(b)
@@ -22,7 +33,9 @@ RegisterCommand(C.Fishing.Command, function()
         if not score then busy = false return notify('error', 'Tu as lâché la canne.') end
         ESX.TriggerServerCallback('pickax_life:fishEnd', function(r) busy = false res(r) end, score)
     end)
-end, false)
+end
+if C.UseCommands then RegisterCommand(C.Fishing.Command, function() fish() end, false) end
+RegisterNetEvent('pickax_life:useRod', function() fish() end)   -- objet « canne à pêche »
 
 -- ───────────── Chasse : dépeçage ─────────────
 local function nearestCarcass()
@@ -41,9 +54,9 @@ local function nearestCarcass()
     return best
 end
 
-RegisterCommand(C.Hunting.Command, function()
+local function skin(target)
     if busy then return end
-    local ped = nearestCarcass()
+    local ped = (target and DoesEntityExist(target)) and target or nearestCarcass()
     if not ped then return notify('error', 'Aucune dépouille à proximité.') end
     busy = true
     ESX.TriggerServerCallback('pickax_life:huntBegin', function(b)
@@ -54,7 +67,17 @@ RegisterCommand(C.Hunting.Command, function()
         if not score then busy = false return notify('error', 'Dépeçage abandonné.') end
         ESX.TriggerServerCallback('pickax_life:huntEnd', function(r) busy = false res(r) end, score)
     end, NetworkGetNetworkIdFromEntity(ped), GetEntityModel(ped))
-end, false)
+end
+if C.UseCommands then RegisterCommand(C.Hunting.Command, function() skin() end, false) end
+RegisterNetEvent('pickax_life:useKnife', function() skin() end)   -- objet « couteau de chasse »
+
+-- Menu contextuel : clic droit sur une dépouille
+local CTX_ACTIONS = { { id = 'skin', label = 'Dépecer l\'animal', target = 'ped' } }
+exports('ContextCan', function(id, ent) return IsEntityDead(ent) and C.Hunting.Animals[GetEntityModel(ent)] ~= nil and #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(ent)) <= 4.0 end)
+exports('ContextDo', function(id, ent) skin(ent) end)
+local function registerContext() exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), CTX_ACTIONS) end
+CreateThread(function() Wait(2500) registerContext() end)
+AddEventHandler('onResourceStart', function(r) if r == 'pickax_core' then SetTimeout(2500, registerContext) end end)
 
 -- ───────────── Points : permis, acheteurs, cuisine ─────────────
 local peds = {}
@@ -159,7 +182,7 @@ local function setTarget(t)
     run.target = t
 end
 
-RegisterCommand(C.Runs.Command, function()
+local function toggleRun()
     ESX.TriggerServerCallback('pickax_life:runToggle', function(r)
         if not r or not r.ok then return notify('error', (r and r.error) or 'Impossible') end
         if r.stopped then run = nil setTarget(nil) return notify('inform', r.msg) end
@@ -168,7 +191,9 @@ RegisterCommand(C.Runs.Command, function()
         stats = { damage = 0.0, hard = 0, lastBody = nil, lastSpeed = 0.0 }
         notify('success', r.run.kind == 'taxi' and 'Service taxi : rends-toi chez le client (GPS).' or 'Service de livraison : va charger les colis (GPS).')
     end)
-end, false)
+end
+if C.UseCommands then RegisterCommand(C.Runs.Command, function() toggleRun() end, false) end
+exports('ToggleRun', toggleRun)   -- menu F6 du job (taxi / livraison)
 
 CreateThread(function()
     while true do

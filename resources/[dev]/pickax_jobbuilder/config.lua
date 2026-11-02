@@ -148,6 +148,12 @@ Config.Actions = {
     tablet     = { label = 'Tablette',            icon = 'fa-tablet',       target = false, auto = true }, -- auto pour les jobs de type police (casiers, amendes, dispatch, carte)
     smallquests = { label = 'Mes quêtes',         icon = 'fa-clipboard-list', target = false, auto = true }, -- auto pour les petits jobs du Pôle emploi (worldbuilder)
     vehctl     = { label = 'Gyrophares & sirènes', icon = 'fa-siren-on', target = false, auto = true }, -- auto pour les jobs police / ems (ou réglage « vehctl » du job) : sirène, phares, clignotants, extras
+    medexam    = { label = 'Examiner un patient', icon = 'fa-stethoscope', target = false, auto = true }, -- auto pour les jobs ems (pickax_medical : examen, soins, RCR, transfusion)
+    medtriage  = { label = 'Triage',              icon = 'fa-list-check',   target = false, auto = true }, -- auto pour les jobs ems (pickax_medical)
+    warrants   = { label = 'Mandats',             icon = 'fa-gavel',        target = false, auto = true }, -- auto police / gouvernement (pickax_justice)
+    warrantnew = { label = 'Délivrer un mandat',  icon = 'fa-file-signature', target = false, auto = true }, -- auto gouvernement (juges)
+    seizures   = { label = 'Journal des saisies', icon = 'fa-box-archive',  target = false, auto = true }, -- auto police / gouvernement (pickax_justice)
+    runs       = { label = 'Service de courses',  icon = 'fa-taxi',         target = false, auto = true }, -- auto taxi / transporteur (pickax_life) : démarrer / arrêter les courses
     jobannounce = { label = 'Annonce entreprise', icon = 'fa-bullhorn',     target = false, auto = true }, -- auto (réglage « Annonces » du job)
 }
 

@@ -186,6 +186,10 @@ end)
 -- ═══════════════ Taxi et livraison ═══════════════
 local function jobKind(x)
     for kind, names in pairs(C.Runs.Jobs) do for _, n in ipairs(names) do if x.job.name == n then return kind end end end
+    if GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, t = pcall(function() return exports.pickax_jobbuilder:GetJobType(x.job.name) end)
+        if ok and t then for kind, types in pairs(C.Runs.JobTypes or {}) do for _, ty in ipairs(types) do if t == ty then return kind end end end end
+    end
 end
 
 local function pickPoint(from, minD)

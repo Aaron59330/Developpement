@@ -1,6 +1,17 @@
 local ESX = exports['es_extended']:getSharedObject()
 local C = Config
 local busy = false
+-- ───────────── Rôle du joueur (noms de jobs ESX ou type du Job Builder) ─────────────
+local function hasRole(names, types)
+    local d = ESX.GetPlayerData()
+    local job = d and d.job and d.job.name
+    for _, n in ipairs(names or {}) do if job == n then return true end end
+    if types and #types > 0 and GetResourceState('pickax_jobbuilder') == 'started' then
+        local ok, t = pcall(function() return exports.pickax_jobbuilder:GetJobType() end)
+        if ok and t then for _, x in ipairs(types) do if t == x then return true end end end
+    end
+    return false
+end
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
 local function help(txt) BeginTextCommandDisplayHelp('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayHelp(0, false, true, -1) end
@@ -31,7 +42,8 @@ local function lockpick()
         end, score)
     end, NetworkGetNetworkIdFromEntity(veh), GetVehicleClass(veh))
 end
-RegisterCommand(C.Lockpick.Command, lockpick, false)
+if C.UseCommands then RegisterCommand(C.Lockpick.Command, function() lockpick() end, false) end
+RegisterNetEvent('pickax_crime:useLockpick', function() lockpick() end)   -- objet « crochet » utilisé près d'un véhicule
 exports('Lockpick', function(difficulty) return (play('pins', { pins = 4, difficulty = difficulty or 3 }) or 0) >= C.Lockpick.Min end)   -- pour d'autres scripts (portes, coffres) : le résultat n'est PAS validé par le serveur
 
 -- ───────────── Points : terminaux, atelier de faux papiers, receleur ─────────────
@@ -121,7 +133,7 @@ CreateThread(function()
 end)
 
 -- ───────────── Désossage ─────────────
-RegisterCommand(C.Chop.Command, function()
+local function chop()
     if busy then return end
     local veh = closestVehicle(8.0)
     if not veh then return notify('error', 'Aucun véhicule à proximité.') end
@@ -148,6 +160,26 @@ RegisterCommand(C.Chop.Command, function()
         lib.registerContext({ id = 'pk_chop', title = 'Désossage — ' .. r.plate, options = opts })
         lib.showContext('pk_chop')
     end, NetworkGetNetworkIdFromEntity(veh))
-end, false)
+end
+if C.UseCommands then RegisterCommand(C.Chop.Command, function() chop() end, false) end
+
+-- Menu contextuel : clic droit sur un véhicule
+local CTX_ACTIONS = {
+    { id = 'lockpick', label = 'Crocheter la serrure', target = 'vehicle' },
+    { id = 'chop',     label = 'Désosser le véhicule', target = 'vehicle' },
+}
+local function haveItem(name) local ok, n = pcall(function() return exports.ox_inventory:Search('count', name) end) return ok and (tonumber(n) or 0) > 0 end
+local function inChopZone() local pc = GetEntityCoords(PlayerPedId()) for _, z in ipairs(C.Chop.Zones) do if #(pc - z.coords) <= z.radius then return true end end return false end
+exports('ContextCan', function(id, ent)
+    if IsPedInAnyVehicle(PlayerPedId(), false) then return false end
+    if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(ent)) > 6.0 then return false end
+    if id == 'lockpick' then return GetVehicleDoorLockStatus(ent) > 1 and haveItem(C.Lockpick.Item) end
+    if id == 'chop' then return inChopZone() and (C.Chop.Tool == '' or haveItem(C.Chop.Tool)) end
+    return false
+end)
+exports('ContextDo', function(id, ent) if id == 'lockpick' then lockpick() else chop() end end)
+local function registerContext() exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), CTX_ACTIONS) end
+CreateThread(function() Wait(2500) registerContext() end)
+AddEventHandler('onResourceStart', function(r) if r == 'pickax_core' then SetTimeout(2500, registerContext) end end)
 
 AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName() then for _, p in pairs(peds) do DeleteEntity(p) end end end)

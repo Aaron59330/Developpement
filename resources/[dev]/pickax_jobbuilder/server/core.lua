@@ -242,6 +242,11 @@ function JB.menuActions(job)
     if job.type == 'ems' and job.settings.ems_receive ~= false then list[#list + 1] = 'emscalls' end
     if job.type == 'ems' and job.settings.ems_tablet_enabled ~= false then list[#list + 1] = 'emstablet' end
     if job.type == 'bank' and job.settings.bank_tablet_enabled ~= false then list[#list + 1] = 'banktablet' end
+    -- Pack gameplay : actions proposées seulement si la ressource correspondante est démarrée
+    if job.type == 'ems' and GetResourceState('pickax_medical') == 'started' then list[#list + 1] = 'medexam' list[#list + 1] = 'medtriage' end
+    if (job.type == 'police' or job.type == 'government') and GetResourceState('pickax_justice') == 'started' then list[#list + 1] = 'warrants' list[#list + 1] = 'seizures' end
+    if job.type == 'government' and GetResourceState('pickax_justice') == 'started' then list[#list + 1] = 'warrantnew' end
+    if (job.type == 'taxi' or job.type == 'trucker') and GetResourceState('pickax_life') == 'started' then list[#list + 1] = 'runs' end
     if job.settings.smalljob then list[#list + 1] = 'smallquests' end
     if Config.Announce.Enabled and job.settings.announce_enabled ~= false then list[#list + 1] = 'jobannounce' end
     local seen = {}
