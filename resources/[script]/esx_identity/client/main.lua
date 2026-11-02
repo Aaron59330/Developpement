@@ -6,6 +6,15 @@ local isDead = false
 local awaitingDestination = false   -- vrai entre la validation de l'identité et le choix de la destination
 
 ESX = exports[Config.Framework]:getSharedObject()
+
+-- Destinations : pickax_creator/config.lua (Config.Destinations) est la référence ; le repli local ne sert que sans pickax_creator
+local function Dest()
+	if GetResourceState('pickax_creator') == 'started' then
+		local ok, d = pcall(function() return exports['pickax_creator']:GetDestinations() end)
+		if ok and type(d) == 'table' then return d end
+	end
+	return Config.Destinations
+end
 Citizen.CreateThread(function()
 	while ESX == nil do
 		Citizen.Wait(100)
@@ -246,7 +255,7 @@ function SubmitIdentity(myIdentity)
 		local untilT = GetGameTimer() + 6000
 		while not applied and GetGameTimer() < untilT do Citizen.Wait(50) end
 
-		awaitingDestination = Config.Destinations and Config.Destinations.Enabled == true
+		awaitingDestination = Dest() and Dest().Enabled == true
 		if Config.CustomTrigger then
 			CustomEvent(myIdentifiers.id)
 		else
@@ -258,7 +267,7 @@ function SubmitIdentity(myIdentity)
 	return reason
 end
 exports('SubmitIdentity', SubmitIdentity)
-exports('GetSpots', function() return (Config.Destinations and Config.Destinations.Spots) or {} end)
+exports('GetSpots', function() return (Dest() and Dest().Spots) or {} end)
 RegisterNUICallback('register', function(myIdentity, cb) SubmitIdentity(myIdentity) end)
 exports('CancelIdentity', function()
 	if hasIdentity then EnableGui(false) else ESX.ShowNotification('~r~Action Impossible~s~ : Vous devez créer votre premier personnage pour pouvoir jouer !') end
@@ -365,7 +374,7 @@ AddEventHandler('CorePickax:Creator:finished', function()
 	awaitingDestination = false
 	if GetResourceState('pickax_creator') == 'started' then exports['pickax_creator']:EndStudio() end   -- la scène de création est finie : on va au point choisi, pas au point de départ
 
-	local D = Config.Destinations
+	local D = Dest()
 	if not D or not D.Enabled or not D.Spots or #D.Spots == 0 then return end
 	-- les points d'apparition réglés depuis le panel web (s'il y en a) remplacent ceux de la config
 	if GetResourceState('pickax_creator') == 'started' then

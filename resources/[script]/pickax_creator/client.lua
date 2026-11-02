@@ -1,7 +1,9 @@
 -- pickax_creator : écrans plein format (identité · apparence · apparition · bienvenue · animations)
 -- Les écrans sont ouverts par esx_identity (identité, apparition, bienvenue), pickax_core/skinchanger (apparence) et menuemote (animations).
 local cam, scene, onSkinDone = nil, false, nil
-local camDist, camHeight = Config.Scene.CamDistance or 2.4, Config.Scene.CamHeight or 0.55
+local CAM = Config.Scene.Camera or {}
+local SC = Config.Scene
+local camDist, camHeight = CAM.Distance or Config.Scene.CamDistance or 2.4, CAM.Height or Config.Scene.CamHeight or 0.45
 local spawnP
 
 -- ───────────── réglages venus du panel web (document « creator ») ─────────────
@@ -29,6 +31,14 @@ local function closeView() SetNuiFocus(false, false) SendNUIMessage({ a = 'close
 -- ───────────── scène : caméra face au personnage ─────────────
 local camFwd = vector3(0.0, 1.0, 0.0)
 local studioActive, origin = false, nil
+-- position de la caméra autour du personnage : Distance, Angle (0 = face), Side (décalage latéral), Rise (hauteur au-dessus de la cible)
+local function camPos(p)
+    local a = math.rad(CAM.Angle or 0.0)
+    local fx = camFwd.x * math.cos(a) - camFwd.y * math.sin(a)
+    local fy = camFwd.x * math.sin(a) + camFwd.y * math.cos(a)
+    local side = CAM.Side or 0.0
+    return p.x + fx * camDist + fy * side, p.y + fy * camDist - fx * side, p.z + camHeight + (CAM.Rise or 0.35)
+end
 local function startScene()
     if scene then return end
     scene = true
@@ -38,10 +48,10 @@ local function startScene()
     if st and not studioActive then
         origin = { c = GetEntityCoords(ped), h = GetEntityHeading(ped) }
         studioActive = true
-        DoScreenFadeOut(300) while not IsScreenFadedOut() do Wait(10) end
+        DoScreenFadeOut(SC.FadeOut or 300) while not IsScreenFadedOut() do Wait(10) end
         -- le décor est entièrement chargé avant d'afficher quoi que ce soit (sinon on voit le vide à travers le menu)
         SetFocusPosAndVel(st.x + 0.0, st.y + 0.0, st.z + 0.0, 0.0, 0.0, 0.0)
-        NewLoadSceneStartSphere(st.x + 0.0, st.y + 0.0, st.z + 0.0, 80.0, 0)
+        NewLoadSceneStartSphere(st.x + 0.0, st.y + 0.0, st.z + 0.0, (SC.LoadRadius or 80.0) + 0.0, 0)
         RequestCollisionAtCoord(st.x + 0.0, st.y + 0.0, st.z + 0.0)
         SetEntityCoordsNoOffset(ped, st.x + 0.0, st.y + 0.0, st.z + 0.0, false, false, false) SetEntityHeading(ped, (st.w or 0.0) + 0.0)
         local t = GetGameTimer()
@@ -55,17 +65,17 @@ local function startScene()
         Wait(1200)
     end
     FreezeEntityPosition(ped, true)
-    camDist = tonumber(S.camDistance) or Config.Scene.CamDistance or 2.4
-    camHeight = tonumber(S.camHeight) or Config.Scene.CamHeight or 0.45
+    camDist = tonumber(S.camDistance) or CAM.Distance or Config.Scene.CamDistance or 2.4
+    camHeight = tonumber(S.camHeight) or CAM.Height or Config.Scene.CamHeight or 0.45
     local p = GetEntityCoords(ped)
     camFwd = GetEntityForwardVector(ped)
     cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
-    SetCamFov(cam, 45.0)
-    SetCamCoord(cam, p.x + camFwd.x * camDist, p.y + camFwd.y * camDist, p.z + camHeight + 0.35)
+    SetCamFov(cam, (CAM.Fov or 45.0) + 0.0)
+    SetCamCoord(cam, camPos(p))
     PointCamAtCoord(cam, p.x, p.y, p.z + camHeight)
     SetCamActive(cam, true) RenderScriptCams(true, false, 0, true, false)
-    if IsScreenFadedOut() then DoScreenFadeIn(500) end
-    DisplayRadar(false)
+    if IsScreenFadedOut() then DoScreenFadeIn(SC.FadeIn or 500) end
+    if SC.HideRadar ~= false then DisplayRadar(false) end
 end
 -- fin de la scène de création : retour au point de départ (sauf si le joueur est conduit ailleurs : exports.pickax_creator:EndStudio())
 local function returnFromStudio()
@@ -94,14 +104,16 @@ end
 local function moveCam(dx, dy)
     if not cam then return end
     local ped = PlayerPedId()
-    if dx then SetEntityHeading(ped, GetEntityHeading(ped) + dx * 0.55) end
+    if dx then SetEntityHeading(ped, GetEntityHeading(ped) + dx * (CAM.RotateSpeed or 0.55)) end
     if dy then
-        camDist = math.max(0.9, math.min(3.6, camDist + dy * 0.0025))
+        camDist = math.max(CAM.ZoomMin or 0.9, math.min(CAM.ZoomMax or 3.6, camDist + dy * (CAM.ZoomSpeed or 0.0025)))
         local p = GetEntityCoords(ped)
-        SetCamCoord(cam, p.x + camFwd.x * camDist, p.y + camFwd.y * camDist, p.z + camHeight + 0.35)
+        SetCamCoord(cam, camPos(p))
         PointCamAtCoord(cam, p.x, p.y, p.z + camHeight)
     end
 end
+
+exports('GetDestinations', function() return Config.Destinations end)   -- lieux d'arrivée (lus par esx_identity)
 
 -- ───────────── identité ─────────────
 exports('OpenIdentity', function()

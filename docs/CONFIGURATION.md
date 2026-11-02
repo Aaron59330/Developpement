@@ -371,3 +371,9 @@ Tout se règle dans `pickax_forensics/config.lua` (sections Blood, Prints, Gsr, 
 - **Résidus de tir** : `/gsr [id]` → positif si la personne a tiré depuis moins de 30 min et ne s'est pas nettoyée (`gsr_wipes`).
 - **Effacer ses traces** : `cleaning_kit` (mini-jeu de frottage ; efface sang, douilles et empreintes proches), `gsr_wipes` (mains), `latex_gloves` (aucune empreinte).
 Items à ajouter dans les boutiques (ox_inventory/data/items.lua les définit) : `latex_gloves`, `cleaning_kit`, `gsr_wipes`, `evidence_bag`.
+
+## Création de personnage : scène, caméra et lieux d'arrivée (`pickax_creator/config.lua`)
+- `Config.Scene.Studio` : **où s'ouvrent les premiers menus** (identité puis apparence) — `vector4(x, y, z, cap)`. `LoadRadius`, `FadeOut`, `FadeIn`, `HideRadar` règlent le chargement et les fondus.
+- `Config.Scene.Camera` : `Distance`, `Height`, `Rise`, `Fov`, `Angle` (0 face, 90 côté, 180 dos), `Side`, limites de zoom et vitesses de rotation / zoom.
+- `Config.Destinations` : **les lieux d'arrivée proposés après la création** (un seul = arrivée directe). `esx_identity` les lit depuis ce fichier.
+- Le tout premier point d'apparition technique du nouveau personnage (avant la scène) est `Config.DefaultSpawns` dans `es_extended/config.lua` ; il n'est visible qu'une fraction de seconde car la scène de création téléporte aussitôt au Studio.
