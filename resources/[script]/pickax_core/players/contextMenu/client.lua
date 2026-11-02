@@ -841,8 +841,28 @@ end
 -- ───────────── Pont vers pickax_ui : envoie l'état des menus visibles (positions natives, donc mêmes zones de clic) ─────────────
 local ctxLast = ''
 local function ctxRound(v) return math.floor(v * 10000 + 0.5) / 10000 end
+-- En-tête du menu : cible sous le curseur (joueur, véhicule, passant, objet) + distance
+local function ctxHead()
+    local e = LastEntityHit
+    if not e or e == 0 or not DoesEntityExist(e) then return nil end
+    local me = PlayerPedId()
+    local d = #(GetEntityCoords(me) - GetEntityCoords(e))
+    local h = { d = math.floor(d + 0.5) }
+    if e == me then h.kind, h.name, h.sub, h.d = 'self', 'Moi-même', 'Vous', nil
+    elseif IsEntityAPed(e) then
+        local pl = IsPedAPlayer(e) and NetworkGetPlayerIndexFromPed(e) or -1
+        if pl ~= -1 then h.kind, h.name, h.sub = 'player', GetPlayerName(pl) or 'Joueur', 'Joueur'
+        else h.kind, h.name, h.sub = 'ped', 'Passant', 'PNJ' end
+    elseif IsEntityAVehicle(e) then
+        local lbl = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(e)))
+        h.kind, h.name, h.sub = 'vehicle', (lbl and lbl ~= 'NULL') and lbl or 'Véhicule', 'Plaque ' .. (GetVehicleNumberPlateText(e) or ''):gsub('%s+$', '')
+    else h.kind, h.name, h.sub = 'object', 'Objet', nil end
+    return h
+end
+
 function CtxPush(pool)
     local menus = {}
+    local head = ctxHead()
     for i = 1, #pool.menus do
         local m = pool.menus[i]
         if m:Visible() then
@@ -858,7 +878,7 @@ function CtxPush(pool)
             if m.parent then
                 for _, pit in ipairs(m.parent.items) do if pit.submenu == m then title = pit.text and pit.text.title break end end
             end
-            menus[#menus + 1] = { x = ctxRound(m.position.x), y = ctxRound(m.position.y), w = ctxRound(m.width), h = ctxRound(m.lowerRight.y - m.position.y), title = title, items = items }
+            menus[#menus + 1] = { x = ctxRound(m.position.x), y = ctxRound(m.position.y), w = ctxRound(m.width), h = ctxRound(m.lowerRight.y - m.position.y), title = title, items = items, head = (not m.parent) and head or nil }
         end
     end
     local sig = json.encode(menus)
