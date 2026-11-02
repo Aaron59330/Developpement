@@ -6,7 +6,7 @@ Rien n'est perdu :
 
 - `panel/` : le site (Node/Express/SQLite : comptes, licences, clients, configuration, éditeur de fichiers, journal…).
 - `pickax_panel/` : la ressource FiveM qui relie le serveur de jeu au site (synchronisation, licence, applications des réglages).
-- Le dépôt Git garde l'historique complet : `git checkout panel-v1` (étiquette posée juste avant le retrait) donne la base exactement comme elle était avec le panel.
+- Le dépôt Git garde l'historique complet : `git checkout 1ec433c` (dernier commit avec le panel ; l'étiquette locale `panel-v1` pointe dessus) donne la base exactement comme elle était avec le panel.
 
 ## Pour remettre le panel (demande-le simplement à Claude : « remets le panel »)
 
