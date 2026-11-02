@@ -430,5 +430,5 @@ window.addEventListener('message', function (e) {
     bar.classList.remove('hidden');
     G = d.groups || []; sel = G.length ? G[0].key : ''; q.value = ''; draw(); host.classList.remove('hidden');
   });
-  window.__legTest = function (g) { G = g; sel = g[0].key; draw(); host.classList.remove('hidden'); };
+  window.__legTest = function (g) { G = g; sel = g[0].key; draw(); host.classList.remove('hidden'); document.getElementById('legbar').classList.remove('hidden'); };
 })();
