@@ -52,7 +52,6 @@ client_scripts {
     'client/chase.lua',
     'client/pvp.lua',
     'client/casino.lua',
-    'client/blipgroup.lua',
 }
 
 ui_page 'html/index.html'
