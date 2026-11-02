@@ -213,36 +213,3 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #ctx .cr .bx.on { background: var(--pk-accent, #fdc27d); border-color: var(--pk-accent, #fdc27d); }
 #ctx .cr .bx.on::after { content: ''; width: 8px; height: 4px; border-left: 2px solid #17120a; border-bottom: 2px solid #17120a; transform: rotate(-45deg) translate(1px, -1px); }
 #ctx .sp { position: absolute; left: 14px; right: 14px; height: 1px; background: rgba(255, 255, 255, .08); }
-
-/* ── Légende de la carte ── */
-#leg{position:fixed;top:3vh;right:0;bottom:22vh;width:18.5vw;min-width:320px;max-width:370px;background:rgba(14,14,16,.98);border:1px solid rgba(var(--pk-accent-rgb,253,194,125),.35);border-radius:10px;display:flex;flex-direction:column;padding:11px 12px;gap:8px;color:#e8e8ea;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.6)}
-#leg.hidden{display:none}
-#leg .lg-h small{display:block;font-size:11px;letter-spacing:.2em;color:rgb(var(--pk-accent-rgb,253,194,125));opacity:.8}
-#leg .lg-h b{font-size:18px;font-weight:700}
-#leg .lg-s{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:0 10px;height:30px}
-#leg .lg-s svg{width:16px;height:16px;fill:none;stroke:rgb(var(--pk-accent-rgb,253,194,125));stroke-width:2;flex:none}
-#leg .lg-s input{flex:1;background:none;border:0;outline:0;color:#fff;font-size:14px}
-#leg .lg-b{display:flex;gap:8px}
-#leg .lg-b button{flex:1;height:27px;border-radius:8px;border:1px solid rgba(var(--pk-accent-rgb,253,194,125),.4);background:rgba(var(--pk-accent-rgb,253,194,125),.1);color:rgb(var(--pk-accent-rgb,253,194,125));font-size:12px;cursor:pointer}
-#leg .lg-b button:hover{background:rgba(var(--pk-accent-rgb,253,194,125),.22)}
-#lgl{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding-right:4px}
-#lgl::-webkit-scrollbar{width:4px}#lgl::-webkit-scrollbar-thumb{background:rgba(var(--pk-accent-rgb,253,194,125),.4);border-radius:4px}
-#lgl .lt{font-size:11px;letter-spacing:.18em;color:rgba(255,255,255,.4);margin:10px 4px 4px}
-#lgl .lr{display:flex;align-items:center;gap:10px;height:28px;padding:0 6px;border-radius:6px;cursor:pointer;flex:none;border:1px solid transparent}
-#lgl .lr:hover{background:rgba(255,255,255,.06)}
-#lgl .lr.sel{background:rgba(var(--pk-accent-rgb,253,194,125),.14);border-color:rgba(var(--pk-accent-rgb,253,194,125),.55)}
-#lgl .lr.off .nm,#lgl .lr.off .ic{opacity:.35}
-#lgl .ic{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center}
-#lgl .bi{width:17px;height:17px;fill:currentColor;stroke:#0b0b0c;stroke-width:1.4;paint-order:stroke;filter:drop-shadow(0 0 1px rgba(0,0,0,.9))}
-#lgl .nm{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#lgl .cn{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.75)}
-#lgl .cn u{text-decoration:none;cursor:pointer;color:rgb(var(--pk-accent-rgb,253,194,125));padding:0 3px;font-size:15px}
-#lgl .ab{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);flex:none}
-#lgl .ab svg{width:15px;height:15px;fill:none;stroke:rgb(var(--pk-accent-rgb,253,194,125));stroke-width:2}
-#lgl .ab:hover{background:rgba(var(--pk-accent-rgb,253,194,125),.25)}
-#leg .lg-k{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:rgba(255,255,255,.55);border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
-#leg .lg-k i{font-style:normal;background:rgba(var(--pk-accent-rgb,253,194,125),.18);color:rgb(var(--pk-accent-rgb,253,194,125));border-radius:4px;padding:1px 6px;margin-right:5px}
-
-#legbar{position:fixed;right:0;bottom:0;height:7.5vh;min-width:56vw;display:flex;align-items:center;justify-content:flex-end;gap:18px;padding:0 1.2vw;background:linear-gradient(90deg,rgba(14,14,16,0),rgba(14,14,16,.97) 14%);font-size:13px;color:rgba(255,255,255,.75)}
-#legbar.hidden{display:none}
-#legbar i{font-style:normal;background:rgba(var(--pk-accent-rgb,253,194,125),.18);border:1px solid rgba(var(--pk-accent-rgb,253,194,125),.4);color:rgb(var(--pk-accent-rgb,253,194,125));border-radius:6px;padding:3px 8px;margin-right:7px;font-weight:600}

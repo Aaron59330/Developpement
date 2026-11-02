@@ -143,6 +143,5 @@ function BB.Blip(coords, b, opts)
     if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
     BeginTextCommandSetBlipName(key)
     EndTextCommandSetBlipName(blip)
-    if GetResourceState('pickax_ui') == 'started' then pcall(function() exports.pickax_ui:LegendAdd(blip, name, tonumber(b.sprite) or cat.sprite, tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color) end) end
     return blip
 end
