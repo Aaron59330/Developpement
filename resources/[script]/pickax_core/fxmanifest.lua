@@ -42,6 +42,7 @@ server_scripts {
     'functions/server.lua',
     'players/**/server.lua',
     'players/boutique/live_server.lua',
+    'players/loadingcfg/server.lua',
     'utils/**/server.lua',
 
     'players/wipe/function_sv.lua',

@@ -1,6 +1,7 @@
 local PresetName = 'equilibre'
 do
-    local saved = GetResourceKvpString('economy:preset')
+    -- sans panel web, Config.Preset (config.lua) fait foi ; avec le panel réinstallé, le type choisi dans le panel est mémorisé
+    local saved = GetResourceState('pickax_panel') ~= 'missing' and GetResourceKvpString('economy:preset') or nil
     local want = (saved and saved ~= '') and saved or Config.Preset
     PresetName = (Config.Presets[want] and want) or 'equilibre'
 end

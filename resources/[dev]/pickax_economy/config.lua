@@ -23,11 +23,11 @@ Config.Events = {
     Max      = 3,             -- événements simultanés
 }
 
--- Types d'économie de TOUT le serveur (changés d'un clic depuis le panel web > Personnalisation, ou export SetPreset)
+-- Types d'économie de TOUT le serveur (choisis ci-dessous avec Config.Preset : 'equilibre', 'realiste' ou 'abuse' ; après modification : restart pickax_economy)
 --   income      : multiplicateur des GAINS des joueurs (missions, activités des jobs, récoltes, rewards illégaux, minigames…)
 --   prices      : multiplicateur des PRIX des boutiques (Shop Builder) et des achats
 --   sensitivity : amplitude des variations offre / demande (remplace Config.Sensitivity)
-Config.Preset  = 'equilibre'   -- type par défaut (mémorisé ensuite par le serveur)
+Config.Preset  = 'equilibre'   -- TYPE D'ÉCONOMIE DU SERVEUR : 'equilibre' · 'realiste' · 'abuse'
 Config.Presets = {
     equilibre = { label = 'Équilibré',  income = 1.00, prices = 1.00, sensitivity = 0.35, desc = 'Valeurs de base de la configuration.' },
     realiste  = { label = 'Réaliste',   income = 0.55, prices = 1.20, sensitivity = 0.45, desc = 'Gains réduits, prix plus élevés : il faut travailler pour progresser.' },

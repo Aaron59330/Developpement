@@ -42,7 +42,7 @@ Config.Daily = {
 }
 
 -- « Roulette du jour » : chaque joueur tourne la roue gratuitement (une fois par jour par défaut) et gagne un petit lot.
--- Tout se règle aussi depuis le panel web (Gestion Base → Boutique à coins → Roulette) : le panel est alors prioritaire.
+-- Tout se règle ici (après modification : restart pickax_boutique).
 --   kind : 'coins' (coins de la boutique) · 'money' (argent liquide du jeu) · 'item' (objet d'inventaire, champ item)
 --          · 'discount' (bon de réduction personnel : amount = % de remise sur la boutique, hours = durée de validité, usage unique) · 'none' (perdu)
 --   weight : poids du tirage (plus il est grand, plus le lot sort souvent) ; color : couleur de la part (facultatif, #RRGGBB)

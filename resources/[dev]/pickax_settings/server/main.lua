@@ -118,6 +118,14 @@ local function setMany(tbl, replace)
     if #touched > 0 then persist() changed(touched) end
     return #touched
 end
+-- Réglages écrits dans config.lua (Settings.Overrides) : la config est la source ; si le panel web est réinstallé, c'est lui qui prend la main.
+CreateThread(function()
+    Wait(1500)
+    if GetResourceState('pickax_panel') ~= 'missing' then return end
+    local o = Settings.Overrides
+    if type(o) == 'table' then setMany(o, true) end
+end)
+
 exports('Set', function(key, value) return setMany({ [key] = value }) end)
 exports('SetMany', function(tbl) return type(tbl) == 'table' and setMany(tbl) or 0 end)
 exports('ApplyRemote', function(tbl) if type(tbl) ~= 'table' then return 0 end return setMany(tbl, true) end)   -- le panel envoie l'ensemble des surcharges

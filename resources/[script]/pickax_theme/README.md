@@ -1,5 +1,8 @@
 # pickax_theme — identité commune du serveur
 
+> **Panel web retiré** : les réglages décrits ici « dans le panel » se font maintenant dans le `config.lua` de la ressource, ou dans `Settings.Overrides` de `pickax_settings` (liste de toutes les clés : `docs/CONFIGURATION.md`). Le panel est archivé dans `_archive_panel/`.
+
+
 Tout se règle en haut de `pickax_core/config.lua` :
 
 ```lua

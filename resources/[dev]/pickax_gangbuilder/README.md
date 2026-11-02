@@ -1,5 +1,8 @@
 # gangbuilder — Gang Builder ESX complet basé sur **job2** (UI + oxmysql)
 
+> **Panel web retiré** : les réglages décrits ici « dans le panel » se font maintenant dans le `config.lua` de la ressource, ou dans `Settings.Overrides` de `pickax_settings` (liste de toutes les clés : `docs/CONFIGURATION.md`). Le panel est archivé dans `_archive_panel/`.
+
+
 Même esprit et même style que `pickax_jobbuilder`, mais pour les **gangs** : tu crées un gang en jeu (`/gangbuilder`) avec ses grades, garages, vestiaires, armureries, coffres, marché noir, **récolte → traitement → vente → blanchiment**, **trésorerie propre + sale**, **territoires à capturer** et gestion par le chef. Réservé au groupe ESX `_dev` (modifiable).
 
 > Un gang = **une ligne dans `jobs2`** + ses grades dans **`job2_grades`**. Les membres sont rattachés par **`users.job2` / `users.job2_grade`**. Le builder n'écrit jamais dans `jobs` / `job_grades`.

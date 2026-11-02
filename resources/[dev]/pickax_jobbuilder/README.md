@@ -1,5 +1,8 @@
 # jobbuilder — Job Builder ESX complet (UI + oxmysql)
 
+> **Panel web retiré** : les réglages décrits ici « dans le panel » se font maintenant dans le `config.lua` de la ressource, ou dans `Settings.Overrides` de `pickax_settings` (liste de toutes les clés : `docs/CONFIGURATION.md`). Le panel est archivé dans `_archive_panel/`.
+
+
 Crée des jobs **police, EMS, mécano, taxi, agence immobilière, bar, personnalisé** directement en jeu, avec garages, vestiaires, armureries, coffres, boutiques et gestion boss. Réservé au groupe ESX `_dev` (modifiable dans `config.lua`).
 
 ## Installation

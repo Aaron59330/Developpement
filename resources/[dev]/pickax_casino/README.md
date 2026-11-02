@@ -1,5 +1,8 @@
 # pickax_casino
 
+> **Panel web retiré** : les réglages décrits ici « dans le panel » se font maintenant dans le `config.lua` de la ressource, ou dans `Settings.Overrides` de `pickax_settings` (liste de toutes les clés : `docs/CONFIGURATION.md`). Le panel est archivé dans `_archive_panel/`.
+
+
 Casino complet : **caisse** (achat / rachat de jetons), **machines à sous**, **blackjack**, **roulette européenne**.
 
 ## Mise en place
@@ -21,4 +24,4 @@ Tout est déjà en place : au premier démarrage, le World Builder crée et acti
 Tirages, cartes et gains sont calculés côté serveur (`server/games.lua`). Le client n'envoie que sa mise. Vérification de la distance au poste, une action à la fois par joueur, débit atomique en base.
 
 ## Réglages
-Règles des jeux (rouleaux, gains, limites de mise par gamme) : `config.lua`, modifiable depuis le panel (*Gestion Base → Tous les réglages des scripts*). Prix des jetons et emplacements : World Builder. Les valeurs de `config.lua` servent de défaut.
+Règles des jeux (rouleaux, gains, limites de mise par gamme) : `config.lua`, à modifier directement dans ce fichier. Prix des jetons et emplacements : World Builder. Les valeurs de `config.lua` servent de défaut.

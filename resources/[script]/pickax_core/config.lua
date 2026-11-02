@@ -8,10 +8,37 @@ Config = {
 	ServerTagline = 'RP sérieux · Free-Access',--Slogan affiché sous le nom
 	ServerDiscord = 'discord.gg/bluebayrp',--Invitation Discord (sans https://)
 	ServerLogo = 'logo.png',--Logo principal : fichier placé dans pickax_theme/logo/ (HUD, inventaire, pause, identité…) ou lien https://...
-	ServerMenuBanner = '',--Bannière du menu F5 (lien https://… d'une image) ; vide = bannière d'origine. Réglable depuis le panel web > Personnalisation
-	ServerLoadingBanner = '',--Image de fond de l'écran de chargement (lien https://…) ; vide = fond d'origine. Réglable depuis le panel web > Personnalisation
+	ServerMenuBanner = '',--Bannière du menu F5 (lien https://… d'une image) ; vide = bannière d'origine
+	ServerLoadingBanner = '',--Image de fond de l'écran de chargement (lien https://…) ; vide = fond d'origine (le fond de l'écran de chargement se règle aussi dans Config.Loading.Background)
 	TebexStore = '',--Adresse de ta boutique Tebex (ex : 'https://bluebay.tebex.io'). Le bouton « Acheter des coins » de la boutique en jeu ouvre ce lien. Vide = lien de players/boutique/config.lua
 	-- ═════════════════════════════════════════════════════════════════════════
+
+	-- ══════════ ÉCRAN DE CHARGEMENT ══════════
+	-- Écrit au démarrage de pickax_core dans loading/loading.json (lu par l'écran de chargement). Chaque champ est facultatif.
+	-- Après modification : restart pickax_core. Les joueurs voient le changement à leur prochaine connexion.
+	Loading = {
+		Enabled = true,--false = ne touche pas à loading/loading.json (l'écran garde les valeurs écrites en haut de loading/ui.js)
+		Music = { enabled = true, url = '', volume = 10, autoplay = true },--url : lien https://… d'un .mp3 ; vide = la musique du dossier loading/music/ ; volume de 0 à 100
+		Links = { reglement = '', discord = 'https://discord.gg/JGxkBuckU', boutique = 'https://bluebayrp.tebex.io/' },--liens https:// des boutons ; un lien vide = bouton masqué
+		Team = {--Équipe affichée (créateurs, développeurs…)
+			{ name = 'Pickax', role = 'Fondateur · Développeur' },
+			{ name = 'Pseudo', role = 'Co-fondateur' },
+			{ name = 'Pseudo', role = 'Développeur' },
+			{ name = 'Pseudo', role = 'Responsable staff' },
+		},
+		Updates = {--Dernières mises à jour (la plus récente en premier)
+			{ date = '20/10/2026', title = 'Boutique & Tebex', items = { 'Nouvelle boutique avec panier et codes promo', 'Achat de coins via Tebex', 'Give de coins à tous les joueurs' } },
+			{ date = '19/10/2026', title = 'Interface', items = { 'Couleur et logo du serveur configurables', 'Nouveau menu pause', 'Builder d\'événements' } },
+		},
+		Tips = {},--Messages du bandeau défilant (vide = ceux d'origine)
+		Stages = { 'Initialisation…', 'Chargement de la carte…', 'Démarrage…', 'Connexion à la session…' },--Les 4 textes de progression
+		ShowTeam = true,--Onglet « Équipe »
+		ShowUpdates = true,--Onglet « Mises à jour »
+		Background = { image = '', dim = 0, blur = 0 },--image : lien https://… (vide = fond d'origine) ; dim 0-100 = assombrissement ; blur 0-20 = flou
+		Logo = '',--Lien https://… du logo (vide = logo du serveur)
+		Texts = {},--Remplacer un texte de la page : ['Texte d'origine'] = 'Nouveau texte'
+		Hide = { logo = false, ticker = false, links = false, progress = false, name = false },--true = masquer cet élément
+	},
 
 	DisableTitle = true,--Si vous utilisez une bannière alors mettez true pour enlever le title des menu en RageUI si nécessaire
 	DisableMenuskin = false,--Mettre true si vous utiliser un autre skinMenu

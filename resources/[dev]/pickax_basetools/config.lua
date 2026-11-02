@@ -38,3 +38,21 @@ Config.RestartAfterRestore = { 'pickax_jobbuilder', 'pickax_gangbuilder', 'picka
 
 -- Thème en direct : ressources relancées après un changement de couleur / nom / logo (les interfaces se mettent à jour pour tous les joueurs)
 Config.ThemeRestart = { 'pickax_theme', 'pickax_basetools' }   -- pickax_basetools : le thème modifié est dans theme_live.json de cette ressource, les joueurs le récupèrent au redémarrage
+
+-- ═════════════════════════════ ACCÈS AU SERVEUR ═════════════════════════════
+-- Whitelist : quand elle est activée, seuls les identifiants listés peuvent se connecter.
+-- Identifiant FiveM : txAdmin → Joueurs, ou F8 en jeu → « license:… » (on peut aussi mettre discord:…, steam:…). Après modification : restart pickax_basetools.
+Config.Whitelist = {
+    Enabled = false,
+    Message = "Tu n'es pas sur la whitelist du serveur.",
+    Identifiers = {
+        -- 'license:0123456789abcdef0123456789abcdef01234567',
+    },
+}
+
+-- Message de bienvenue : une notification envoyée à chaque joueur peu après sa connexion.
+Config.Motd = {
+    Enabled = false,
+    Text = 'Bienvenue sur le serveur ! Discord : discord.gg/bluebayrp',
+    Delay = 8,   -- secondes après l'arrivée du joueur
+}

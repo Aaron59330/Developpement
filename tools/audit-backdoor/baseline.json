@@ -1,6 +1,6 @@
 {
  "note": "Résultats relus et jugés normaux. Ne regénère ce fichier (--update-baseline) qu'après avoir relu les nouveaux résultats.",
- "at": "2026-10-31T00:07:12.462Z",
+ "at": "2026-11-02T16:14:53.729Z",
  "reviewed": {
   "[dev]/pickax_anticheat/server/detect.lua|dyn-event|RegisterNetEvent(name)": "medium",
   "[dev]/pickax_basetools/server/main.lua|secret-read|local lic = GetConvar('sv_licenseKey', '')": "high",
@@ -23,9 +23,6 @@
   "[dev]/pickax_carplay/server.lua|unknown-host|t.title, t.author, t.thumb = 'Chargement…', 'YouTube', 'https://i.ytimg.com/vi/' .. ref .. '/hqdefault.jpg'": "low",
   "[dev]/pickax_carplay/server.lua|unknown-host|out[#out + 1] = { kind = 'yt', ref = id, title = clip(sn.title, 160), author = clip(sn.channelTitle, 120), thumb = 'https://i.ytimg.com/vi/' .. id .. '/hqdefaul": "low",
   "[dev]/pickax_gangbuilder/client/main.lua|dyn-event|RegisterNetEvent(ev, function() SetTimeout(800, function() TriggerServerEvent('gangbuilder:server:requestSync') end) end)": "medium",
-  "[dev]/pickax_panel/server/main.lua|remote-exec|local f, err = load(content, '=' .. path)": "high",
-  "[dev]/pickax_panel/server/main.lua|save-res|if not SaveResourceFile(res, rel, content, -1) then": "medium",
-  "[dev]/pickax_panel/server/main.lua|save-res|local function saveDoc(key, value) SaveResourceFile(GetCurrentResourceName(), 'cache_' .. key .. '.json', json.encode(value), -1) end": "medium",
   "[dev]/pickax_phone/config.lua|unknown-host|{ name = 'Aero FM',      url = 'https://icecast.radiofrance.fr/fip-midfi.mp3',  color = '#ef4444' },": "low",
   "[dev]/pickax_phone/config.lua|unknown-host|{ name = 'Lofi Beats',   url = 'https://streams.ilovemusic.de/iloveradio17.mp3', color = '#8b5cf6' },": "low",
   "[dev]/pickax_phone/config.lua|unknown-host|{ name = 'Hits',         url = 'https://streams.ilovemusic.de/iloveradio1.mp3',  color = '#f97316' },": "low",
@@ -141,6 +138,7 @@
   "[inventaire]/p_bridge/client/progress/qb.lua|obf-names|local name = tostring(math.random(1111111111, 99999999999))": "medium",
   "[inventaire]/p_bridge/client/target/core_focus.lua|obf-names|local targetName = ('%s_%s_%s'):format(invoker, 'sphere', tostring(math.random(11111111, 99999999)))": "medium",
   "[inventaire]/p_bridge/client/target/qb-target.lua|obf-names|local targetName = ('%s_%s_%s'):format(invoker, 'sphere', tostring(math.random(11111111, 99999999)))": "medium",
+  "[script]/pickax_core/config.lua|unknown-host|Links = { reglement = '', discord = 'https://discord.gg/JGxkBuckU', boutique = 'https://bluebayrp.tebex.io/' },--liens https:// des boutons ; un lien vide = bou": "low",
   "[script]/pickax_core/esx/basicneeds/client.lua|dyn-event|RegisterNetEvent(ev)": "medium",
   "[script]/pickax_core/init/shared/init.lua|dyn-event|RegisterNetEvent(event)": "medium",
   "[script]/pickax_core/loading/ui.js|unknown-host|discord: 'https://discord.gg/JGxkBuckU',": "low",
@@ -151,6 +149,7 @@
   "[script]/pickax_core/players/boutique/html/BoutiqueIG.js|obf-names|function _0x49f5(_0x33f006,_0xc8068f){var _0x2d1613=_0x2d16();return _0x49f5=function(_0x49f548,_0x21cecf){_0x49f548=_0x49f548-0x18d;var _0x364e6e=_0x2d1613[_0x": "medium",
   "[script]/pickax_core/players/doorsbuilders/server.lua|save-res|SaveResourceFile(GetCurrentResourceName(), \"players/doorsbuilders/doors.json\", \"[]\", -1)": "medium",
   "[script]/pickax_core/players/doorsbuilders/server.lua|save-res|SaveResourceFile(GetCurrentResourceName(), \"players/doorsbuilders/doors.json\", json['encode'](doors, { indent = true }), -1)": "medium",
+  "[script]/pickax_core/players/loadingcfg/server.lua|save-res|if SaveResourceFile(res, 'loading/loading.json', raw, -1) then print('^2[pickax_core] Écran de chargement mis à jour depuis Config.Loading^7')": "medium",
   "[script]/pickax_core/players/loteries/client.lua|obf-names|local table = {anticheat = true, code = math.random(111111111111111, 999999999999999), id = k}": "medium",
   "[script]/pickax_core/players/menuadmin/server.lua|save-res|SaveResourceFile(GetCurrentResourceName(), gradeStyleFile, json.encode(adminGradeStyles), -1)": "medium",
   "[script]/pickax_core/players/menuadmin/server.lua|save-res|SaveResourceFile(GetCurrentResourceName(), customGradeFile, json.encode(customAdminGrades), -1)": "medium",

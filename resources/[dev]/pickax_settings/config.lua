@@ -1,8 +1,22 @@
 Settings = {}
 
+-- ═══════════════ TES RÉGLAGES ═══════════════
+-- Ajoute ici les réglages que tu veux changer : clé = valeur (la clé est dans la liste ci-dessous, ou dans docs/CONFIGURATION.md). Après modification : restart pickax_settings.
+-- Ce qui n'est pas listé garde sa valeur par défaut. Retirer une ligne remet la valeur par défaut au prochain redémarrage.
+Settings.Overrides = {
+    -- game_mode = 'facile',                 -- 'facile' (systèmes simplifiés) ou 'difficile' (systèmes complets) : règle des dizaines de systèmes d'un coup
+    -- maintenance_enabled = true,           -- refuse les nouveaux joueurs (staff exempté)
+    -- announce_enabled = true,              -- annonces automatiques toutes les announce_interval minutes
+    -- announce_messages = { 'Pense à lire le règlement.', 'Rejoins notre Discord !' },
+    -- restart_enabled = true,  restart_times = '05:00,17:00',
+    -- carnet_enabled = false,               -- coupe le carnet du joueur
+    -- discord_alerts = true,  discord_webhook = 'https://discord.com/api/webhooks/…',
+}
+
 -- Chaque réglage : key, group, label, type ('bool' | 'number' | 'select' | 'text' | 'list'), default, hint
 --   number : min, max, step    select : options = { { 'valeur', 'Libellé' } }    list : une ligne par élément (max 20)
--- Un réglage ne change RIEN tant qu'il n'est pas modifié depuis le panel web (« Réglages ») : les valeurs d'origine des ressources restent en vigueur.
+-- Un réglage ne change RIEN tant qu'il n'est pas modifié dans Settings.Overrides (plus bas) : les valeurs d'origine des ressources restent en vigueur.
+-- La liste de tous les réglages (clé, libellé, valeur par défaut) est dans docs/CONFIGURATION.md.
 Settings.Schema = {
     -- ── Serveur ──────────────────────────────────────────────────────────────
     { key = 'maintenance_enabled', group = 'Serveur', section = 'Maintenance', label = 'Mode maintenance', type = 'bool', default = false, hint = 'Refuse les nouveaux joueurs (sauf staff / identifiants autorisés) et prévient ceux en ligne.' },

@@ -1,5 +1,8 @@
 # pickax_illegalbuilder — Builder Illégal
 
+> **Panel web retiré** : les réglages décrits ici « dans le panel » se font maintenant dans le `config.lua` de la ressource, ou dans `Settings.Overrides` de `pickax_settings` (liste de toutes les clés : `docs/CONFIGURATION.md`). Le panel est archivé dans `_archive_panel/`.
+
+
 Un seul builder pour toutes les activités illégales du serveur (`/illegalbuilder`, ou via `/builders`).
 
 | Module | Contenu |

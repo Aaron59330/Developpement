@@ -10,9 +10,9 @@ Config = {}
 
 Config.Command  = 'carnet'
 Config.Key      = 'F3'
-Config.Enabled  = true             -- modifiable depuis le panel web (Réglages → Carnet)
+Config.Enabled  = true             -- false = carnet coupé
 Config.Account  = 'bank'           -- compte crédité : 'bank' | 'money'
-Config.RewardMultiplier = 1.0      -- multiplicateur de TOUTES les récompenses (aussi réglable depuis le panel web) ; l'économie du serveur (presets) s'applique en plus
+Config.RewardMultiplier = 1.0      -- multiplicateur de TOUTES les récompenses ; l'économie du serveur (presets) s'applique en plus
 
 -- Le jour change à ResetHour (heure du serveur = UTC + UtcOffset) ; la semaine commence le lundi à cette heure
 Config.UtcOffset = 1

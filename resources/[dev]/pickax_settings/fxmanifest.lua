@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_settings'
-description 'Réglages du serveur modifiables depuis le panel web : maintenance, annonces, redémarrages, monde et PNJ, météo et heure, combat, nouveaux joueurs, interface, voix, économie, carnet. Aucun coût tant que rien n\'est réglé.'
+description 'Réglages du serveur modifiables dans config.lua (Settings.Overrides) : maintenance, annonces, redémarrages, monde et PNJ, météo et heure, combat, nouveaux joueurs, interface, voix, économie, carnet. Aucun coût tant que rien n\'est réglé.'
 version '1.0.0'
 
 shared_script 'config.lua'
