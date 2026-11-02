@@ -13,6 +13,7 @@ Config.MaxWallet   = 5000000                -- jetons maximum qu'un joueur peut 
 Config.InteractDistance = 2.0               -- tolérance de distance vérifiée par le serveur (mètres, +2,5 de marge)
 Config.AdminGroups = { _dev = true, superadmin = true, admin = true }   -- qui peut utiliser /casinortp et /casinostats
 Config.Webhook     = ''                     -- (facultatif) webhook Discord : gros gains, achats importants
+Config.DailyNetCap = 2000000                -- gain NET maximum (jetons) qu'un joueur peut encaisser sur 24 h glissantes ; au-delà, il ne peut plus miser jusqu'à ce que ça redescende. 0 = pas de limite
 Config.BigWin      = 50000                  -- gain (jetons) à partir duquel un message est envoyé au webhook et en notification
 
 

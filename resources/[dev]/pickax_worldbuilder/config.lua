@@ -430,7 +430,7 @@ Config.Templates.carwash = {
 Config.Templates.casino = {
     casino = {
         label = 'Casino complet', icon = 'dollar',
-        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000,
+        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000, dailyNetCap = 2000000,
             blip = { enabled = true, sprite = 679, color = 5, scale = PK_BSF(0.9), label = 'Casino', shortRange = true } },
         points = {
             { kind = 'cashier', label = 'Caisse', blip = true, ped = ped('u_m_m_bankman', 'WORLD_HUMAN_CLIPBOARD') },
@@ -445,7 +445,7 @@ Config.Templates.casino = {
     },
     cashier = {
         label = 'Caisse seule', icon = 'dollar',
-        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000,
+        settings = { currency = 'money', chipBuyPrice = 1, chipSellPrice = 0.95, minBuy = 10, maxBuy = 500000, maxWallet = 5000000, bigWin = 50000, dailyNetCap = 2000000,
             blip = { enabled = true, sprite = 679, color = 5, scale = PK_BSF(0.9), label = 'Casino', shortRange = true } },
         points = { { kind = 'cashier', label = 'Caisse', blip = true, ped = ped('u_m_m_bankman', 'WORLD_HUMAN_CLIPBOARD') } },
     },

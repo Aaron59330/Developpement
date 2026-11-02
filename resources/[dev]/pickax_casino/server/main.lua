@@ -24,7 +24,7 @@ local function cfgOf(sp)
     local s = sp and sp.settings or {}
     local c = setmetatable({}, { __index = Config })
     if s.currency == 'money' or s.currency == 'bank' then c.Currency = s.currency end
-    local map = { chipBuyPrice = 'ChipBuyPrice', chipSellPrice = 'ChipSellPrice', minBuy = 'MinBuy', maxBuy = 'MaxBuy', maxWallet = 'MaxWallet', bigWin = 'BigWin' }
+    local map = { chipBuyPrice = 'ChipBuyPrice', chipSellPrice = 'ChipSellPrice', minBuy = 'MinBuy', maxBuy = 'MaxBuy', maxWallet = 'MaxWallet', bigWin = 'BigWin', dailyNetCap = 'DailyNetCap' }
     for k, v in pairs(map) do if tonumber(s[k]) then c[v] = tonumber(s[k]) end end
     return c
 end
@@ -59,6 +59,15 @@ local function settle(src, id, game, bet, payout, cfg)
         hook(('🎰 **%s** gagne **%d** jetons au %s (mise %d).'):format(x and x.getName() or id, payout, game, bet))
     end
 end
+
+-- Plafond de gain net sur 24 h : renvoie true si le joueur l'a atteint (il ne peut plus miser)
+local function capped(id, cfg)
+    local cap = tonumber(cfg.DailyNetCap) or 0
+    if cap <= 0 then return false end
+    local r = MySQL.single.await('SELECT COALESCE(SUM(payout - bet),0) n FROM casino_history WHERE identifier = ? AND at > (NOW() - INTERVAL 1 DAY)', { id })
+    return (r and tonumber(r.n) or 0) >= cap
+end
+local CAPMSG = 'Limite de gains atteinte : reviens plus tard'
 
 -- Un seul coup à la fois par joueur
 local busy = {}
@@ -121,6 +130,7 @@ ESX.RegisterServerCallback('pickax_casino:slots', function(src, cb, eid, pi, bet
     bet = math.floor(tonumber(bet) or 0)
     if not id or not m then return cb({ ok = false, msg = 'Approche-toi d\'une machine' }) end
     if bet < m.min or bet > m.max then return cb({ ok = false, msg = 'Mise hors limites' }) end
+    if capped(id, cfgOf(sp)) then return cb({ ok = false, msg = CAPMSG }) end
     if locked(src) then return cb({ ok = false, msg = 'Patiente' }) end
     if not debit(id, bet) then busy[src] = nil return cb({ ok = false, msg = 'Pas assez de jetons' }) end
     local r = Games.slotsSpin(Config.Slots, bet)
@@ -145,6 +155,7 @@ ESX.RegisterServerCallback('pickax_casino:bj:deal', function(src, cb, eid, pi, b
     bet = math.floor(tonumber(bet) or 0)
     if not id or not t then return cb({ ok = false, msg = 'Approche-toi d\'une table' }) end
     if bet < t.min or bet > t.max then return cb({ ok = false, msg = 'Mise hors limites' }) end
+    if capped(id, cfgOf(sp)) then return cb({ ok = false, msg = CAPMSG }) end
     if locked(src) then return cb({ ok = false, msg = 'Patiente' }) end
     Bj[src] = Bj[src] or {}
     if not debit(id, bet) then busy[src] = nil return cb({ ok = false, msg = 'Pas assez de jetons' }) end
@@ -184,6 +195,7 @@ ESX.RegisterServerCallback('pickax_casino:roulette', function(src, cb, eid, pi, 
     for i, b in ipairs(type(bets) == 'table' and bets or {}) do if type(b) == 'table' then clean[i] = { t = b.t, n = tonumber(b.n), a = tonumber(b.a) } end end
     local total, err = Games.rouletteCheck(clean, t.min, t.max, t.total)
     if not total then return cb({ ok = false, msg = err }) end
+    if capped(id, cfgOf(sp)) then return cb({ ok = false, msg = CAPMSG }) end
     if locked(src) then return cb({ ok = false, msg = 'Patiente' }) end
     if not debit(id, total) then busy[src] = nil return cb({ ok = false, msg = 'Pas assez de jetons' }) end
     local r = Games.rouletteSpin(clean)

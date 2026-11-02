@@ -196,7 +196,7 @@ local SETTINGS = {
     }),
     casino = merge(COMMON, {
         currency = { 'e', { 'money', 'bank' }, 'money' }, chipBuyPrice = { 'n', 0.01, 100000, 1 }, chipSellPrice = { 'n', 0, 100000, 0.95 },
-        minBuy = { 'n', 1, 100000000, 10 }, maxBuy = { 'n', 1, 1000000000, 500000 }, maxWallet = { 'n', 1, 1000000000, 5000000 }, bigWin = { 'n', 0, 1000000000, 50000 },
+        minBuy = { 'n', 1, 100000000, 10 }, maxBuy = { 'n', 1, 1000000000, 500000 }, maxWallet = { 'n', 1, 1000000000, 5000000 }, bigWin = { 'n', 0, 1000000000, 50000 }, dailyNetCap = { 'n', 0, 1000000000, 2000000 },
     }),
     bank = merge(COMMON, {
         depositFee = { 'n', 0, 100, 0 }, withdrawFee = { 'n', 0, 100, 0 }, transferFee = { 'n', 0, 100, 0 }, maxTransaction = { 'n', 0, 1000000000, 0 },
