@@ -398,7 +398,7 @@ CreateThread(function()
     while true do
         Wait(0)
         if not legOpen and not IsPauseMenuActive() then
-            if IsDisabledControlJustReleased(0, 199) or IsControlJustReleased(0, 199) then armed = true end
+            if IsDisabledControlJustReleased(0, 199) or IsControlJustReleased(0, 199) or IsDisabledControlJustReleased(0, 200) or IsControlJustReleased(0, 200) then armed = true end
         end
         if armed then
             armed = false

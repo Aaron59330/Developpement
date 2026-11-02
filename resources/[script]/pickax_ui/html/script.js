@@ -425,7 +425,9 @@ window.addEventListener('message', function (e) {
   });
   window.addEventListener('message', function (e) {
     var d = e.data || {}; if (d.a !== 'leg') return;
-    if (!d.open) { host.classList.add('hidden'); return; }
+    var bar = document.getElementById('legbar');
+    if (!d.open) { host.classList.add('hidden'); bar.classList.add('hidden'); return; }
+    bar.classList.remove('hidden');
     G = d.groups || []; sel = G.length ? G[0].key : ''; q.value = ''; draw(); host.classList.remove('hidden');
   });
   window.__legTest = function (g) { G = g; sel = g[0].key; draw(); host.classList.remove('hidden'); };
