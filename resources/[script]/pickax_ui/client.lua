@@ -267,6 +267,8 @@ exports('LegendAdd', function(blip, name, sprite, color)
     local rec = { blip = blip, key = k, name = name, sprite = tonumber(sprite) or 1, color = tonumber(color) or 0, display = GetBlipInfoIdDisplay(blip) }
     if rec.display == 0 then rec.display = 4 end
     LEG[blip] = rec
+    -- retire ce blip de la liste native de GTA (la nôtre la remplace)
+    pcall(SetBlipHiddenOnLegend, blip, true)
     if LEGHIDDEN[k] then legApply(rec, true) end
 end)
 exports('LegendRemove', function(blip) LEG[blip] = nil end)
@@ -388,7 +390,7 @@ end)
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     if legOpen then SetNuiFocus(false, false) end
-    for _, rec in pairs(LEG) do if LEGHIDDEN[rec.key] then legApply(rec, false) end end
+    for _, rec in pairs(LEG) do pcall(SetBlipHiddenOnLegend, rec.blip, false) if LEGHIDDEN[rec.key] then legApply(rec, false) end end
 end)
 
 
