@@ -24,4 +24,4 @@ Après modification : `restart pickax_theme`, puis relance les ressources voulue
 - `server.cfg` (`sv_projectName`, `sets discord`…) reste à modifier à la main : ce fichier n'est pas lisible par les scripts.
 - Les choix faits en jeu par les joueurs (menu personnel) ou enregistrés dans un builder priment sur la couleur par défaut.
 
-- Un seul thème : le style Arcade pour les interfaces et le style « Doré » (bandeau) pour tous les menus. Les anciens thèmes (ancien, piñata) et les anciens styles de menus ont été retirés. Le joueur règle seulement la taille, la couleur principale, la couleur et les bords des boutons, et les sons (Menu personnel → Paramètres → Préférences).
+- Un seul thème : le style « ancien » (d'origine) pour tous les HUD, interfaces, builders, inventaire et voix ; les menus du menu personnel / admin gardent le style « Doré » (bandeau). Les thèmes Arcade et Piñata ont été supprimés (plus de arcade.css, hx.css ni pinata.css). Le joueur règle seulement la taille, la couleur principale, la couleur et les bords des boutons, et les sons (Menu personnel → Paramètres → Préférences).

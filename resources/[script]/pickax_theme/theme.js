@@ -58,13 +58,9 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fill); else fill();
   };
 
-  // ── Style des interfaces : un seul thème (arcade). Les anciens thèmes « ancien » et « piñata » ont été retirés.
-  window.PICKAX_DESIGN = 'arcade';
-  var goDesign = function () {
-    document.documentElement.setAttribute('data-design', 'arcade');
-    [].forEach.call(document.querySelectorAll('link[data-arcade-href]'), function (l) { l.setAttribute('href', l.getAttribute('data-arcade-href')); });   // pages qui chargent deux feuilles de style selon le thème
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', goDesign); else goDesign();
+  // ── Style des interfaces : un seul thème, le style « ancien » (d'origine) pour tous les HUD, menus, builders et inventaire.
+  // Les anciens thèmes « arcade » et « piñata » ont été retirés (plus de arcade.css, hx.css ni pinata.css).
+  window.PICKAX_DESIGN = 'ancien';
 
   var cached = null;
   try { cached = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}

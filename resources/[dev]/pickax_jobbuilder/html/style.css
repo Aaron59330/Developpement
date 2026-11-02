@@ -560,9 +560,3 @@ body.neon .n-sp { flex: 1; }
 .jm-lock { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 28px 14px; border: 1px dashed var(--line-2); border-radius: 16px; color: var(--muted); } .jm-lock svg { color: var(--accent); } .jm-lock b { color: var(--text); font-size: 15px; } .jm-lock small { line-height: 1.5; }
 .jm-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 16px; color: var(--muted); font-size: 11.5px; }
 .jm-leave { height: 30px; padding: 0 10px; font-size: 12px; color: var(--danger, #f87171); border-color: rgba(248, 113, 113, .3); }
-html[data-design="arcade"] .jm { border: 1.5px solid rgba(var(--accent-rgb), .55); border-radius: 6px; box-shadow: 0 30px 90px rgba(0, 0, 0, .65), 0 0 26px rgba(var(--accent-rgb), .22); }
-html[data-design="arcade"] .jm-ttl h1 { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 22px; text-shadow: 0 0 18px rgba(var(--accent-rgb), .4); }
-html[data-design="arcade"] .jm-disc { border-radius: 10px; transform: rotate(45deg); } html[data-design="arcade"] .jm-disc svg { transform: rotate(-45deg); }
-html[data-design="arcade"] .jm-tile, html[data-design="arcade"] .jm-grade { border-radius: 3px; } html[data-design="arcade"] .jm-ic { border-radius: 3px; }
-html[data-design="arcade"] .jm-tile b { font-family: var(--hx-font, 'Barlow Condensed', 'Oswald', system-ui, sans-serif); font-style: italic; font-weight: 800; text-transform: uppercase; font-size: 14px; letter-spacing: .03em; }
-html[data-design="arcade"] .jm-tile:hover { box-shadow: 0 0 16px rgba(var(--accent-rgb), .35); } html[data-design="arcade"] .jm-h { color: var(--accent); font-weight: 800; }
