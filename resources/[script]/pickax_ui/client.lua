@@ -369,3 +369,21 @@ AddEventHandler('onResourceStop', function(res)
     if legOpen then SetNuiFocus(false, false) end
     for _, rec in pairs(LEG) do if LEGHIDDEN[rec.key] then legApply(rec, false) end end
 end)
+
+
+-- La touche P (carte native) ouvre aussi la légende : on la détecte quand la carte s'affiche
+CreateThread(function()
+    local armed = false
+    while true do
+        Wait(0)
+        if not legOpen and not IsPauseMenuActive() then
+            if IsDisabledControlJustReleased(0, 199) or IsControlJustReleased(0, 199) then armed = true end
+        end
+        if armed then
+            armed = false
+            local t = 0
+            while not IsPauseMenuActive() and t < 20 do Wait(50) t = t + 1 end
+            if IsPauseMenuActive() and not legOpen then Wait(300) legOpenNow() end
+        end
+    end
+end)

@@ -215,7 +215,7 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #ctx .sp { position: absolute; left: 14px; right: 14px; height: 1px; background: rgba(255, 255, 255, .08); }
 
 /* ── Légende de la carte ── */
-#leg{position:fixed;top:5vh;right:2vw;bottom:5vh;width:23vw;min-width:300px;max-width:400px;background:rgba(14,14,16,.94);border:1px solid rgba(var(--pk-accent-rgb,253,194,125),.35);border-radius:10px;display:flex;flex-direction:column;padding:14px;gap:10px;color:#e8e8ea;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#leg{position:fixed;top:0;right:0;bottom:8vh;width:24vw;min-width:320px;max-width:430px;background:rgba(14,14,16,.98);border:1px solid rgba(var(--pk-accent-rgb,253,194,125),.35);border-radius:10px;display:flex;flex-direction:column;padding:14px;gap:10px;color:#e8e8ea;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.6)}
 #leg.hidden{display:none}
 #leg .lg-h small{display:block;font-size:11px;letter-spacing:.2em;color:rgb(var(--pk-accent-rgb,253,194,125));opacity:.8}
 #leg .lg-h b{font-size:22px;font-weight:700}
