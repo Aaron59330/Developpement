@@ -232,7 +232,8 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 #lgl .lr:hover{background:rgba(255,255,255,.06)}
 #lgl .lr.sel{background:rgba(var(--pk-accent-rgb,253,194,125),.14);border-color:rgba(var(--pk-accent-rgb,253,194,125),.55)}
 #lgl .lr.off .nm,#lgl .lr.off .ic{opacity:.35}
-#lgl .ic{width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#111}
+#lgl .ic{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center}
+#lgl .bi{width:20px;height:20px;fill:currentColor;stroke:#0b0b0c;stroke-width:1.4;paint-order:stroke;filter:drop-shadow(0 0 1px rgba(0,0,0,.9))}
 #lgl .nm{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #lgl .cn{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.75)}
 #lgl .cn u{text-decoration:none;cursor:pointer;color:rgb(var(--pk-accent-rgb,253,194,125));padding:0 3px;font-size:15px}
