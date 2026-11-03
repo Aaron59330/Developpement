@@ -109,11 +109,20 @@ local function refreshCards()
         if player.ready and not player.finished and player.sig ~= sig then
             player.sig = sig
             local activePlayer = player
-            activePlayer.deferrals.presentCard(card, function(data)
-                if data and data.action == Config.Buttons.play.action then
-                    activePlayer.finish()
-                end
+            local ok, err = pcall(function()
+                activePlayer.deferrals.presentCard(card, function(data)
+                    if data and data.action == Config.Buttons.play.action then
+                        activePlayer.finish()
+                    end
+                end)
             end)
+            if ok then
+                activePlayer.presented = (activePlayer.presented or 0) + 1
+                print(('[connect_ui] carte affichée pour %s (n°%d)'):format(activePlayer.name, activePlayer.presented))
+            else
+                print(('[connect_ui] ERREUR presentCard pour %s : %s'):format(activePlayer.name, tostring(err)))
+                player.sig = nil
+            end
         end
     end
 end
@@ -174,6 +183,14 @@ AddEventHandler('playerConnecting', function(name, setReason, deferrals)
     player.ready = true
     refreshCards()
     startRefreshLoop()
+
+    -- Filet de sécurité : une autre ressource (ban, whitelist…) peut écrire un message de statut juste après notre carte et la masquer.
+    -- On la ré-affiche une fois, 2 s plus tard, puis seulement quand son contenu change.
+    Wait(2000)
+    if not player.finished and connectingPlayers[src] == player then
+        player.sig = nil
+        refreshCards()
+    end
 
     local elapsed = 0
     while not player.finished and elapsed < (Config.WaitSeconds or 120) * 1000 do
