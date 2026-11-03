@@ -7,7 +7,7 @@ local Chopped = {}   -- [plate] = { done = { partId = true } }
 
 local function clamp(v, a, b) return math.max(a, math.min(b, v)) end
 local function trim(s) return (tostring(s or ''):gsub('^%s+', ''):gsub('%s+$', '')) end
-local function near(src, c, d) return #(GetEntityCoords(GetPlayerPed(src)) - c) <= d end
+local function near(src, c, d) if not c then return false end return #(GetEntityCoords(GetPlayerPed(src)) - c) <= d end
 local function have(src, item) return (exports.ox_inventory:GetItemCount(src, item) or 0) end
 
 local function alert(src, title, msg)

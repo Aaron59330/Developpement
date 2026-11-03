@@ -21,7 +21,8 @@ Config.Workshops = {
 -- Les mécaniciens DOIVENT venir acheter leurs pièces ici : sans pièce en inventaire, aucune réparation. Le stock est partagé par tous les mécaniciens
 -- du serveur et se reconstitue lentement (livraisons) : s'il est vide, il faut attendre ou aller plus loin.
 Config.Shops = {
-    { label = 'Pièces détachées Los Santos', coords = vector3(-1171.2, -1767.9, 3.9), blip = true, ped = 's_m_y_garbage', pedHeading = 120.0 },
+    -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+    -- { label = 'Pièces détachées', coords = vector3(0.0, 0.0, 0.0), blip = true, ped = 's_m_y_garbage', pedHeading = 0.0 },
 }
 Config.Shop = {
     Account       = 'bank',           -- compte débité : 'bank' | 'money'

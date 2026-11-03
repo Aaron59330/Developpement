@@ -531,3 +531,6 @@ Config.Templates.weapon = {
     },
     custom = { label = 'Atelier vide', icon = 'target', settings = { note = '', recipes = {}, customize = { enabled = true, account = 'money', attachPrice = 0, tintPrice = 0 } }, points = {} },
 }
+
+-- Point de blanchiment par défaut : false = rien n'est créé tout seul au démarrage (commande admin /ibseed pour le créer à la demande)
+Config.Seed = { Auto = false }

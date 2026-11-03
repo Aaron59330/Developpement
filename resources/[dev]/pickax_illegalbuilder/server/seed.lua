@@ -29,6 +29,7 @@ local function seed()
 end
 
 CreateThread(function()
+    if not (Config.Seed and Config.Seed.Auto) then return end   -- rien n'est créé tout seul : /ibseed (admin) crée le point à la demande
     while not IB.ready do Wait(500) end
     Wait(1500)
     local done = MySQL.scalar.await("SELECT v FROM illegalbuilder_settings WHERE k = 'seed_launder_v1'")

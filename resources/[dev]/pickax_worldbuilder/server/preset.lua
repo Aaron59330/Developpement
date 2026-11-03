@@ -55,6 +55,7 @@ end
 local function seedCasino(force)
     local C = P and P.Casino
     if not P or not P.Enabled or not C or not C.Enabled then return 0 end
+    if not force and not C.Auto then return 0 end   -- rien n'est créé tout seul : seulement via /wbseed (ou Casino.Auto = true)
     local row = MySQL.single.await("SELECT v FROM worldbuilder_seed WHERE k = 'casino1'")
     if row and not force then return 0 end
     if hasLabel(C.Label) then return 0 end

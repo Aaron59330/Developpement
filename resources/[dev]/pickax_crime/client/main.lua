@@ -123,7 +123,7 @@ CreateThread(function()
                 if d < 12.0 then sleep = 0 DrawMarker(1, w.coords.x, w.coords.y, w.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
                     if d < C.Forgery.Distance then help('Appuie sur ~INPUT_CONTEXT~ : fabriquer un faux document') if IsControlJustPressed(0, 38) then forge(i) end end end
             end
-            local df = #(pc - F.coords)
+            local df = F.coords and #(pc - F.coords) or 99999.0
             if df < 45.0 then pedAt('fence', F.ped, F.coords, F.pedHeading) end
             if df < 12.0 then sleep = 0 DrawMarker(1, F.coords.x, F.coords.y, F.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
                 if df < F.Distance then help('Appuie sur ~INPUT_CONTEXT~ : vendre des pièces') if IsControlJustPressed(0, 38) then fence() Wait(500) end end end

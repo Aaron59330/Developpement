@@ -10,7 +10,8 @@ Config.Distance = 3.5
 
 -- Hôpitaux : le bloc opératoire (chirurgie) et l'imagerie (radio) ne sont utilisables qu'ici. Vide = partout.
 Config.Hospitals = {
-    { label = 'Pillbox Hill', coords = vector3(311.2, -582.9, 43.3), radius = 40.0 },
+    -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+    -- { label = 'Hôpital', coords = vector3(0.0, 0.0, 0.0), radius = 40.0 },
 }
 Config.RequireHospitalFor = { xray = true, surgery = true }
 

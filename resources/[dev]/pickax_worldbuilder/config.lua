@@ -675,6 +675,7 @@ Config.Preset = {
     -- Postes posés devant l'entrée du Diamond Casino ; déplace-les ensuite dans World Builder → Casinos → Emplacements (mode placement).
     Casino = {
         Enabled = true,
+        Auto = false,               -- false = le casino n'est jamais créé tout seul ; /wbseed (admin) le crée à la demande
         Label = 'Diamond Casino',
         -- { type de poste, gamme, nom, x, y, z, cap }
         Points = {

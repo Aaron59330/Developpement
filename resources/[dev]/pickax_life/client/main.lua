@@ -209,7 +209,7 @@ CreateThread(function()
         local pc = GetEntityCoords(PlayerPedId())
         if not busy then
             local O = C.Licenses.Office
-            local d = #(pc - O.coords)
+            local d = O.coords and #(pc - O.coords) or 99999.0
             if d < 45.0 then pedAt('lic', O.ped, O.coords, O.pedHeading) end
             if d < 12.0 then sleep = 0 DrawMarker(1, O.coords.x, O.coords.y, O.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
                 if d < O.Distance then help('Appuie sur ~INPUT_CONTEXT~ : bureau des permis') if IsControlJustPressed(0, 38) then openLicenses() Wait(400) end end end
@@ -221,7 +221,7 @@ CreateThread(function()
             end
             do
                 local M = C.Cooking.Market
-                local dm = #(pc - M.coords)
+                local dm = M.coords and #(pc - M.coords) or 99999.0
                 if dm < 45.0 then pedAt('market', M.ped, M.coords, M.pedHeading) end
                 if dm < 12.0 then sleep = 0 DrawMarker(1, M.coords.x, M.coords.y, M.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
                     if dm < M.Distance then help('Appuie sur ~INPUT_CONTEXT~ : acheter des ingrédients') if IsControlJustPressed(0, 38) then openMarket() Wait(400) end end end

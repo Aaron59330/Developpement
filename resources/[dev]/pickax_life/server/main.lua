@@ -5,7 +5,7 @@ local Pending, Quota, Skinned, Runs = {}, {}, {}, {}
 
 local function clamp(v, a, b) return math.max(a, math.min(b, v)) end
 local function have(src, item) return exports.ox_inventory:GetItemCount(src, item) or 0 end
-local function near(src, c, d) return #(GetEntityCoords(GetPlayerPed(src)) - c) <= d end
+local function near(src, c, d) if not c then return false end return #(GetEntityCoords(GetPlayerPed(src)) - c) <= d end
 local function notify(src, kind, txt) TriggerClientEvent('pickax_notify:notify', src, { type = kind, description = txt }) end
 
 -- Quota glissant par heure et par activité
@@ -384,6 +384,7 @@ ESX.RegisterServerCallback('pickax_life:runToggle', function(src, cb)
     local kind = jobKind(x)
     if not kind then return cb({ ok = false, error = 'Ton métier ne permet pas les courses' }) end
     local R = C.Runs
+    if #R.Locations == 0 or (kind == 'delivery' and not R.DepotDelivery) then return cb({ ok = false, error = 'Courses non configurées (Config.Runs : points manquants)' }) end
     local start = kind == 'delivery' and R.DepotDelivery or GetEntityCoords(GetPlayerPed(src))
     local pickup = kind == 'delivery' and R.DepotDelivery or pickPoint(start, 150.0)
     local drop = pickPoint(pickup, R.Min[kind])

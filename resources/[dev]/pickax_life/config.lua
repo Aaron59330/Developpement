@@ -5,7 +5,7 @@ Config.UseCommands = false   -- true = active aussi /pecher, /depecer, /course (
 -- ═════════════════════════════ PERMIS (pêche, chasse) ═════════════════════════════
 -- Achetés au bureau : item remis au joueur. Sans permis, une activité est refusée.
 Config.Licenses = {
-    Office = { label = 'Bureau des permis', coords = vector3(-266.8, -963.6, 31.2), ped = 'a_f_y_business_01', pedHeading = 205.0, Distance = 2.0 },
+    Office = { label = 'Bureau des permis', coords = nil, ped = 'a_f_y_business_01', pedHeading = 205.0, Distance = 2.0 },
     List = { { item = 'fishing_license', label = 'Permis de pêche', price = 250 }, { item = 'hunting_license', label = 'Permis de chasse', price = 600 } },
     Account = 'bank',
 }
@@ -17,7 +17,7 @@ Config.Fishing = {
     Rod = 'fishing_rod', License = 'fishing_license', Bait = 'fishing_bait',     -- appât facultatif (consommé) : augmente la chance de belles prises. Bait = '' pour désactiver
     QuotaPerHour = 25,
     Min = 60,
-    Spots = { { label = 'Jetée de Del Perro', coords = vector3(-1850.0, -1250.0, 8.6), radius = 40.0 }, { label = 'Lac d\'Alamo', coords = vector3(1310.0, 4220.0, 33.9), radius = 60.0 } },
+    Spots = {},   -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
     -- weight = chance relative ; difficulty : 1 facile … 4 très dur ; price = revente
     Fish = {
         { item = 'fish_sardine', label = 'Sardine', weight = 40, difficulty = 1, price = 18 },
@@ -36,7 +36,7 @@ Config.Hunting = {
     Knife = 'hunting_knife', License = 'hunting_license',
     QuotaPerHour = 12,
     Min = 55,
-    Zones = { { label = 'Forêt de Chiliad', coords = vector3(-1200.0, 4750.0, 220.0), radius = 700.0 } },
+    Zones = {},   -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
     Animals = {
         [`a_c_deer`] = { label = 'Cerf', meat = 'meat_deer', skin = 'leather_deer', meatMax = 4, difficulty = 2 },
         [`a_c_boar`] = { label = 'Sanglier', meat = 'meat_boar', skin = 'leather_boar', meatMax = 3, difficulty = 2 },
@@ -47,10 +47,8 @@ Config.Hunting = {
 -- ═════════════════════════════ ACHETEURS (pêche / chasse / cuisine) ═════════════════════════════
 -- Les prix varient chaque jour (±Fluctuation %). Les acheteurs paient en espèces.
 Config.Buyers = {
-    { label = 'Poissonnerie du port', coords = vector3(-1037.5, -1396.0, 5.5), ped = 's_m_m_chemsec_01', pedHeading = 80.0, Account = 'money', Distance = 2.0, Fluctuation = 15,
-      Items = { fish_sardine = 18, fish_carp = 45, fish_bass = 90, fish_tuna = 210, fish_sword = 480 } },
-    { label = 'Boucherie / tannerie', coords = vector3(-1304.0, -1220.0, 4.6), ped = 's_m_m_chemsec_01', pedHeading = 270.0, Account = 'money', Distance = 2.0, Fluctuation = 15,
-      Items = { meat_deer = 60, meat_boar = 45, meat_rabbit = 22, leather_deer = 85, leather_boar = 70 } },
+    -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+    -- { label = 'Poissonnerie', coords = vector3(0.0, 0.0, 0.0), ped = 's_m_m_chemsec_01', pedHeading = 0.0, Account = 'money', Distance = 2.0, Fluctuation = 15, Items = { fish_sardine = 18, fish_carp = 45 } },
 }
 
 -- ═════════════════════════════ CUISINE ═════════════════════════════
@@ -62,10 +60,8 @@ Config.Cooking = {
     Burnt = 'burnt_food',
     -- Postes : type = 'prep' (plan de travail), 'stove' (cuisinière / friteuse), 'grill' (grill / barbecue), 'oven' (four)
     Stations = {
-        { label = 'Cuisine du Burger Shot : plan de travail', type = 'prep',  coords = vector3(-1196.0, -896.0, 13.9) },
-        { label = 'Cuisine du Burger Shot : grill',            type = 'grill', coords = vector3(-1198.4, -895.2, 13.9) },
-        { label = 'Cuisine du Burger Shot : cuisinière',       type = 'stove', coords = vector3(-1194.0, -897.5, 13.9) },
-        { label = 'Cuisine du bar de plage : tout-en-un',      type = 'all',   coords = vector3(-1393.0, -604.0, 30.3) },
+        -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+        -- { label = 'Cuisine : grill', type = 'grill', coords = vector3(0.0, 0.0, 0.0) },     -- type : prep | stove | grill | oven | all
     },
     StationLabel = { prep = 'Plan de travail', stove = 'Cuisinière', grill = 'Grill', oven = 'Four', all = 'Poste complet' },
     -- Niveau de cuisinier : XP cumulée nécessaire pour chaque niveau (le 1er commence à 0)
@@ -74,7 +70,7 @@ Config.Cooking = {
     QualityBonusPerLevel = 2,                  -- points de qualité ajoutés par niveau de cuisinier
     -- Marché aux ingrédients (E)
     Market = {
-        label = 'Marché aux ingrédients', coords = vector3(-1180.0, -887.0, 13.8), ped = 's_m_m_chemsec_01', pedHeading = 120.0, Distance = 2.0, Account = 'money',
+        label = 'Marché aux ingrédients', coords = nil, ped = 's_m_m_chemsec_01', pedHeading = 120.0, Distance = 2.0, Account = 'money',
         Items = { flour = 6, egg = 4, butter = 8, tomato = 5, lettuce = 5, cheese = 9, potato = 4, rice = 6, onion = 3, sugar = 5, pasta = 7, meat_beef = 22, chicken_raw = 18, cooking_oil = 10, bread = 4 },
     },
     -- Commandes de clients : une carte de commandes se renouvelle ; livre le plat demandé (qualité minimale) pour être payé
@@ -120,9 +116,8 @@ Config.Runs = {
     StopRadius = 14.0, MaxArriveSpeed = 8.0,
     Min = { taxi = 350.0, delivery = 300.0 },                                           -- distance minimale (m) entre deux points
     Account = 'money',
-    DepotDelivery = vector3(1197.0, -3253.0, 5.5),                                      -- point de départ des livraisons (entrepôt)
+    DepotDelivery = nil,                                      -- point de départ des livraisons (entrepôt)
     Locations = {
-        vector3(-47.0, -1757.0, 29.4), vector3(-1037.0, -2733.0, 20.1), vector3(317.0, -1076.0, 29.4), vector3(-621.0, -231.0, 37.9), vector3(1135.0, -982.0, 46.2),
-        vector3(-1305.0, -394.0, 36.7), vector3(-709.0, -153.0, 37.4), vector3(374.0, 2634.0, 44.5), vector3(1693.0, 3760.0, 34.7), vector3(-1693.0, -1043.0, 13.0),
+        -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
     },
 }

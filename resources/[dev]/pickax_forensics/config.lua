@@ -29,7 +29,8 @@ Config.Casings = {
 -- ═════════════════════════════ LABORATOIRE ═════════════════════════════
 -- Positions où un policier analyse ses scellés. Place-toi à l'endroit voulu et tape /laboici (admin) pour obtenir les coordonnées.
 Config.Labs = {
-    { label = 'Laboratoire de police scientifique', coords = vector3(442.0, -991.5, 30.69), blip = true },
+    -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+    -- { label = 'Laboratoire', coords = vector3(0.0, 0.0, 0.0), blip = true },
 }
 Config.Analysis = {
     Seconds       = 20,          -- durée d'une analyse

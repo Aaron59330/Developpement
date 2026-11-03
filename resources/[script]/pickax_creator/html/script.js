@@ -160,22 +160,23 @@ function skin(d) {
 
 /* ─────────── POINT D'APPARITION ─────────── */
 function spawn(d) {
-  view = 'spawn'; const spots = d.spots; let sel = 0, page = 0;
+  view = 'spawn'; const spots = d.spots; let sel = 0, q = '';
   const m = d.map || { minX: -4100, maxX: 4500, minY: -4200, maxY: 8000 };
   const xy = s => [((s.x - m.minX) / (m.maxX - m.minX)) * 100, ((m.maxY - s.y) / (m.maxY - m.minY)) * 100];
-  const draw = () => {
-    const others = spots.map((s, i) => [s, i]).filter(([, i]) => i !== sel), per = 4, pages = Math.max(1, Math.ceil(others.length / per)); if (page >= pages) page = 0;
-    const s0 = spots[sel], vis = others.slice(page * per, page * per + per);
-    const card = (s, i, on) => `<div class="card ${on ? 'on' : ''}" data-i="${i}"><div class="ph" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}"></div><div class="bd"><div class="ic">${ic('pin', 26)}</div><div><b>${esc(s.label)}</b><span class="loc">${ic('pin', 11)}${esc(s.place || s.desc || '')}</span></div>${on ? `<div class="tick">${ic('check', 16)}</div>` : ''}</div></div>`;
-    show(`<div id="v-spawn"><div class="map" style="${d.mapImage ? `background-image:url('${esc(d.mapImage)}')` : ''}"></div>
-      <div class="sp-t"><h1>${ic('pin')}Point d'apparition</h1><p>Choisissez votre point d'apparition sur la carte de Los Santos.</p></div>
-      ${spots.map((s, i) => { const [x, y] = xy(s); return `<div class="pin ${i === sel ? 'on' : ''}" data-i="${i}" style="left:${x}%;top:${y}%">${ic('pin')}</div>`; }).join('')}
-      <div style="position:absolute;left:62px;bottom:128px;width:313px">${card(s0, sel, true)}</div><button class="go-here" id="go">${ic('check', 16)}Apparaître ici</button>
-      <div class="cards" style="left:430px;gap:60px">${vis.map(([s, i]) => card(s, i, false)).join('')}</div>
-      ${pages > 1 ? `<button style="position:absolute;right:62px;bottom:420px;font-size:12px;display:flex;gap:10px;align-items:center" id="pg">Page ${page + 1}/${pages}${ic('right', 18)}</button>` : ''}</div>`);
-  };
-  draw();
-  root.onclick = e => { const t = e.target.closest('[data-i],#go,#pg'); if (!t) return; if (t.id === 'go') return post('spawnPick', { index: sel + 1 }); if (t.id === 'pg') { page++; return draw(); } sel = +t.dataset.i; draw(); };
+  const row = (s, i) => `<div class="sp-row ${i === sel ? 'on' : ''}" data-i="${i}"><div class="sp-th" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}">${s.image ? '' : ic('pin', 18)}</div><div class="sp-tx"><b>${esc(s.label)}</b><small>${esc(s.place || s.desc || '')}</small></div><span class="sp-n">${String(i + 1).padStart(2, '0')}</span></div>`;
+  const list = () => spots.map((s, i) => [s, i]).filter(([s]) => !q || (s.label + ' ' + (s.place || '') + ' ' + (s.desc || '')).toLowerCase().includes(q)).map(([s, i]) => row(s, i)).join('') || '<div class="sp-none">Aucun lieu trouvé</div>';
+  const detail = () => { const s = spots[sel]; return `<div class="sp-ph" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}"></div><div class="sp-bd"><b>${esc(s.label)}</b><span>${ic('pin', 12)}${esc(s.place || '')}</span>${s.desc ? `<p>${esc(s.desc)}</p>` : ''}</div>`; };
+  show(`<div id="v-spawn"><div class="map" style="${d.mapImage ? `background-image:url('${esc(d.mapImage)}')` : ''}"></div>
+    ${spots.map((s, i) => { const [x, y] = xy(s); return `<div class="pin ${i === sel ? 'on' : ''}" data-i="${i}" style="left:${x}%;top:${y}%"><i></i><em>${esc(s.label)}</em></div>`; }).join('')}
+    <aside class="sp-side"><div class="sp-top"></div>
+      <div class="sp-head"><div class="sp-ic">${ic('pin', 22)}</div><div><h1>Point d'apparition</h1><p>Choisis où tu arrives sur Los Santos</p></div></div>
+      <input class="sp-search" id="sps" placeholder="Rechercher un lieu…" autocomplete="off">
+      <div class="sp-list" id="spl">${list()}</div>
+      <div class="sp-foot"><button class="sp-go" id="go">${ic('check', 16)}Apparaître ici</button></div></aside>
+    <div class="sp-card" id="spc">${detail()}</div></div>`);
+  const redraw = () => { $('#spl').innerHTML = list(); $('#spc').innerHTML = detail(); root.querySelectorAll('.pin').forEach(p => p.classList.toggle('on', +p.dataset.i === sel)); };
+  $('#sps').oninput = e => { q = e.target.value.toLowerCase(); $('#spl').innerHTML = list(); };
+  root.onclick = e => { const t = e.target.closest('[data-i],#go'); if (!t) return; if (t.id === 'go') return post('spawnPick', { index: sel + 1 }); sel = +t.dataset.i; redraw(); const on = root.querySelector('.sp-row.on'); if (on) on.scrollIntoView({ block: 'nearest' }); };
 }
 
 /* ─────────── BIENVENUE ─────────── */

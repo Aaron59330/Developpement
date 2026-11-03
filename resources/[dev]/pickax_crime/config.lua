@@ -26,8 +26,8 @@ Config.Hack = {
     Item = 'hacking_laptop',     -- ordinateur de piratage exigé (non consommé) ; vide = aucun
     Min = 65,
     Terminals = {
-        { label = 'Terminal bancaire', coords = vector3(147.6, -1035.8, 29.3), game = 'code',  length = 6, cooldown = 45, reward = { money = { 1500, 4000 } }, alert = 'Piratage d\'un terminal bancaire' },
-        { label = 'Serveur d\'entreprise', coords = vector3(-1054.7, -230.8, 44.0), game = 'wires', wires = 6, cooldown = 60, reward = { money = { 2500, 6000 }, items = { { 'usb_stick', 1, 1 } } }, alert = 'Intrusion informatique' },
+        -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+        -- { label = 'Terminal bancaire', coords = vector3(0.0, 0.0, 0.0), game = 'code', length = 6, cooldown = 45, reward = { money = { 1500, 4000 } }, alert = 'Piratage d\'un terminal' },
     },
     Distance = 1.6,
 }
@@ -38,7 +38,7 @@ Config.Forgery = {
     Item = 'fake_id',
     Needs = { { 'blank_card', 1 }, { 'forgery_ink', 1 } },
     Seconds = 30,
-    Workshops = { { label = 'Atelier clandestin', coords = vector3(707.5, -966.9, 30.4) } },
+    Workshops = {},   -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
     Distance = 1.6,
 }
 
@@ -47,7 +47,7 @@ Config.Forgery = {
 Config.Chop = {
     Command = 'desosser',
     Tool = 'chop_tools',          -- outils exigés (non consommés) ; vide = aucun
-    Zones = { { label = 'Casse sauvage', coords = vector3(2340.0, 3126.0, 48.2), radius = 12.0 } },
+    Zones = {},   -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
     AllowOwned = false,           -- false = un véhicule appartenant à un joueur (table owned_vehicles) ne peut pas être désossé
     AlertChance = 15,             -- % d'alerte police à chaque pièce
     Min = 50,
@@ -59,6 +59,7 @@ Config.Chop = {
         { id = 'engine', label = 'Moteur',          item = 'stolen_engine', game = { rounds = 4, difficulty = 3 }, seconds = 26 },
     },
     -- Receleur : rachète les pièces en argent sale ; les prix varient chaque jour (±Fluctuation %)
-    Fence = { label = 'Receleur', coords = vector3(2352.0, 3132.0, 48.2), ped = 'a_m_m_hillbilly_01', pedHeading = 90.0, Fluctuation = 20, Account = 'black_money', Distance = 2.0,
+    Fence = { label = 'Receleur', coords = nil,   -- (aucun point créé automatiquement : renseigne tes coordonnées ici, ex. vector3(x, y, z))
+       ped = 'a_m_m_hillbilly_01', pedHeading = 90.0, Fluctuation = 20, Account = 'black_money', Distance = 2.0,
         Prices = { stolen_door = 350, stolen_wheel = 280, stolen_hood = 420, stolen_trunk = 380, stolen_engine = 1500 } },
 }
