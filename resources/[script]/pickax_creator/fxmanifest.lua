@@ -7,7 +7,7 @@ description 'Écrans plein format : création d\'identité, apparence (skin), po
 version '1.0.0'
 
 shared_scripts { '@pickax_theme/theme.lua', 'config.lua' }
-client_script 'client.lua'
+client_scripts { 'client.lua', 'capture.lua' }
 server_script 'server.lua'
 
 ui_page 'html/index.html'

@@ -156,3 +156,9 @@ input[type=range] { height: 4px; }
 .days button.on, .seg2 button.on, .face-big.on .im, .hero.on i, .tabs button.on { background: linear-gradient(180deg, #4a4a4d, #313134 55%, #28282a); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--pk-accent, #00a4ff), 0 0 14px rgba(var(--pk-accent-rgb, 0, 164, 255), .4); }
 .actions .go, .finish { background: linear-gradient(180deg, #2fd470, #17a653); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35); border: 0; color: #fff; }
 .actions .go svg, .finish svg { color: #fff; }
+
+/* Têtes réelles des visages (images faces/<id>.png générées par /capturefaces) : par-dessus la lettre de secours */
+.hero i, .face-big .im { position: relative; overflow: hidden; }
+.fimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; }
+.face-big .im { height: 150px; } .faces2.one .face-big .im { height: 150px; }
+.hero i { width: 92px; height: 92px; }
