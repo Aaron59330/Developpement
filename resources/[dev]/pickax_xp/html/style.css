@@ -1,0 +1,32 @@
+:root { --a: var(--pk-accent, #00a4ff); --ar: var(--pk-accent-rgb, 0, 164, 255); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: transparent; color: #f2f2f3; font: 600 13px/1.4 Inter, 'Segoe UI', system-ui, sans-serif; overflow: hidden; user-select: none; }
+.hidden { display: none !important; }
+#root { position: fixed; inset: 0; display: grid; place-items: center; }
+.win { width: min(1040px, 96vw); max-height: 92vh; display: flex; flex-direction: column; background: radial-gradient(ellipse 100% 60% at 50% 10%, #2d2d2f 0%, #1e1e20 62%, #151516 100%); border: 1px solid #3b3b3d; border-radius: 6px; box-shadow: inset 0 0 70px rgba(0, 0, 0, .5), 0 18px 50px rgba(0, 0, 0, .6); animation: in .18s ease-out; overflow: hidden; }
+@keyframes in { from { opacity: 0; transform: scale(.985); } }
+.top { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid #343436; }
+.top img { height: 36px; width: auto; max-width: 140px; object-fit: contain; }
+.top h1 { font-size: 20px; font-weight: 800; letter-spacing: .02em; } .top h1 em { font-style: normal; color: var(--a); }
+.top small { display: block; color: #a9a9ae; font-weight: 600; font-size: 11px; }
+.top .sp { flex: 1; }
+.x { width: 34px; height: 34px; border: 0; border-radius: 4px; color: #fff; font-size: 16px; cursor: pointer; background: linear-gradient(180deg, #3b3b3d, #232325); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043; } .x:hover { box-shadow: inset 0 0 0 1px var(--a); }
+.body { display: grid; grid-template-columns: 330px 1fr 290px; gap: 14px; padding: 16px 20px 20px; overflow: auto; }
+.col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card { border-radius: 4px; padding: 14px 16px; background: linear-gradient(180deg, #313133 0%, #212123 60%, #19191b 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px #3d3d40, 0 3px 8px rgba(0, 0, 0, .45); }
+.card h2 { font-size: 14px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; } .card h2 span { color: #a9a9ae; font-size: 11.5px; font-weight: 600; }
+.lvl { display: flex; align-items: center; gap: 16px; }
+.badge { width: 86px; height: 86px; border-radius: 50%; flex: none; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #3c3c3f, #202022 70%, #151516); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), inset 0 0 0 3px #444447, 0 0 18px rgba(var(--ar), .35); position: relative; }
+.badge b { font-size: 34px; font-weight: 800; line-height: 1; } .badge small { position: absolute; bottom: 12px; font-size: 8.5px; letter-spacing: .16em; color: #a9a9ae; }
+.lvl .t b { font-size: 22px; font-weight: 800; display: block; } .lvl .t span { color: #a9a9ae; font-size: 12px; }
+.bar { height: 10px; border-radius: 5px; background: #17171a; margin: 14px 0 6px; overflow: hidden; box-shadow: inset 0 0 0 1px #2c2c2f; } .bar i { display: block; height: 100%; border-radius: 5px; background: var(--a); box-shadow: 0 0 10px rgba(var(--ar), .7); transition: width .5s; }
+.xpl { display: flex; justify-content: space-between; color: #a9a9ae; font-size: 11.5px; }
+.rw { display: flex; gap: 12px; align-items: center; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px; background: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043; }
+.rw.got { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px rgba(74, 222, 128, .55); }
+.rw.next { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--a), 0 0 12px rgba(var(--ar), .35); }
+.rw .n { width: 42px; height: 42px; border-radius: 4px; flex: none; display: grid; place-items: center; font-size: 17px; font-weight: 800; background: #18181a; box-shadow: inset 0 0 0 1px #3a3a3d; } .rw.got .n { color: #4ade80; } .rw.next .n { color: var(--a); }
+.rw .d { flex: 1; min-width: 0; } .rw .d small { display: block; color: #a9a9ae; font-size: 10.5px; font-weight: 600; margin-bottom: 2px; } .rw .d div { font-size: 12.5px; }
+.rw .st { font-size: 10.5px; color: #a9a9ae; white-space: nowrap; } .rw.got .st { color: #4ade80; }
+.row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #2e2e30; font-size: 12.5px; } .row:first-of-type { border-top: 0; } .row span:last-child { color: var(--a); font-weight: 800; text-align: right; }
+.log .row span:last-child { color: #4ade80; }
+.mut { color: #8d8d92; font-size: 11.5px; padding: 6px 0; }

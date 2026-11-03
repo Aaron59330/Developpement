@@ -1,6 +1,7 @@
 -- ─────────────────────────────── Illégal : crochetage, piratage, faux papiers, désossage, recel ───────────────────────────────
 -- Le client joue les mini-jeux ; le serveur valide matériel, distance, durée minimale, cooldowns, récompenses et alertes.
 local ESX = exports['es_extended']:getSharedObject()
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local C = Config
 local Pending, Last, Cooldown = {}, {}, {}
 local Chopped = {}   -- [plate] = { done = { partId = true } }
@@ -93,6 +94,7 @@ ESX.RegisterServerCallback('pickax_crime:hackEnd', function(src, cb, score)
     local msgs = {}
     if t.reward.money then local m = roll(t.reward.money[1], t.reward.money[2]) x.addAccountMoney('black_money', m) msgs[#msgs + 1] = ('%d $ (argent sale)'):format(m) end
     for _, it in ipairs(t.reward.items or {}) do local n = roll(it[2], it[3]) if exports.ox_inventory:CanCarryItem(src, it[1], n) then exports.ox_inventory:AddItem(src, it[1], n) msgs[#msgs + 1] = ('%d × %s'):format(n, it[1]) end end
+    xp(src, 'illegal')
     cb({ ok = true, msg = 'Piratage réussi : ' .. table.concat(msgs, ', ') })
 end)
 

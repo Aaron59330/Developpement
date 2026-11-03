@@ -415,3 +415,7 @@ Pour une nouvelle ressource : copie `pickax_skillgames/ui.lua` dans son dossier 
 ### Aucun point créé automatiquement
 
 Les ressources `pickax_crime`, `pickax_life`, `pickax_forensics`, `pickax_medical`, `pickax_mechanic` n'ont plus aucune coordonnée par défaut : terminaux de piratage, ateliers, receleur, bureau des permis, postes de cuisine, marché, labo, hôpitaux, magasin de pièces, zones de pêche / chasse et points de course sont à renseigner dans leur `config.lua`. Le World Builder (`Preset.Auto`, `Preset.Casino.Auto`) et l'Illegal Builder (`Config.Seed.Auto`) ne créent plus rien au démarrage : `/wbseed` et `/ibseed` (admin) créent les points d'exemple à la demande.
+
+### Niveaux et XP des joueurs (pickax_xp)
+
+Chaque action rapporte de l'XP (achats en magasin selon le prix ou l'objet, véhicule, cuisine, pêche, chasse, courses, réparations, soins, analyses, tâches de métier, mini-jeux, activités illégales, temps de jeu, connexion quotidienne). Tout se règle dans `pickax_xp/config.lua` : courbe des niveaux (`Curve`), XP par action (`Actions`, avec `cooldown` et `dailyCap` anti-abus) et **récompenses par niveau** (`Rewards` : argent liquide, banque, objets, ou simple mention). Écran « Niveau et récompenses » : touche `F4` (`Config.Key`). D'autres scripts peuvent donner de l'XP avec `exports['pickax_xp']:AddXP(src, 'action', { price = 100 })`. Commande admin : `/givexp [id] [quantité]`. Les achats ox_inventory sont captés automatiquement (hook `buyItem`).

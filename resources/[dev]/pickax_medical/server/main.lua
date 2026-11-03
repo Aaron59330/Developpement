@@ -1,6 +1,7 @@
 -- ─────────────────────────────── EMS avancé : blessures, saignements, soins, RCR, dossier, transfusion, triage ───────────────────────────────
 -- Le client signale seulement « je suis touché à la zone X » ; le serveur valide (la vie a réellement baissé), décide de la gravité, du saignement et des effets.
 local ESX = exports['es_extended']:getSharedObject()
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local C = Config
 
 local S = {}            -- [src] = { zones = { [zone] = { lvl, bleed, kind, hidden } }, blood = 100, lastHurt = {} }
@@ -228,6 +229,7 @@ ESX.RegisterServerCallback('pickax_medical:treatEnd', function(src, cb, score)
     publish(p.t)
     local xt = ESX.GetPlayerFromId(p.t)
     if xt then MySQL.insert('INSERT INTO medical_records (patient, kind, text, medic, at) VALUES (?,?,?,?,?)', { xt.identifier, 'soin', ('%s — %s'):format(tr.label, C.Zones[p.zone]), x.getName and x.getName() or '', now() }) end
+    xp(src, 'treat')
     cb({ ok = true, msg = ('%s réussi (%d %%).'):format(tr.label, score) })
 end)
 

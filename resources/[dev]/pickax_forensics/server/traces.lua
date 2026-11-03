@@ -2,6 +2,7 @@
 -- Même principe que les douilles : le client signale un événement, le SERVEUR valide et décide. Les codes ADN / empreinte d'une personne ne quittent jamais le serveur
 -- avant une analyse, et ne désignent une identité que si la personne a été prélevée par la police (profil).
 local ESX, FX = FX.ESX, FX
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local isPolice = FX.isPolice
 local B, P, G, CL, LB = Config.Blood, Config.Prints, Config.Gsr, Config.Cleaning, Config.Lab
 
@@ -168,6 +169,7 @@ ESX.RegisterServerCallback('pickax_forensics:traceEnd', function(src, cb, score)
     dropPrint(p.id, 'collected', x.identifier)
     MySQL.update('UPDATE forensics_traces SET quality = ? WHERE id = ?', { score, p.id })
     exports.ox_inventory:AddItem(src, P.Item, 1, { eid = p.id, kind = 'print', quality = score, label = ('Empreinte #%d (scellé)'):format(p.id), description = ('Relevée le %s — qualité %d %%.'):format(FX.fmtDate(os.time()), score) })
+    xp(src, 'forensics')
     cb({ ok = true, msg = ('Empreinte #%d relevée (qualité %d %%).'):format(p.id, score) })
 end)
 

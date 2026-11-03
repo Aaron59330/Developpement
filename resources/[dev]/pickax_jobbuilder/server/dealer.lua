@@ -295,6 +295,7 @@ local function completeSale(job, v, buyer, seller, method)
         return false, method == 'cash' and 'Pas assez de liquide' or method == 'bank' and 'Pas assez d\'argent en banque' or 'Pas assez d\'argent'
     end
 
+    if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(buyer.source, 'buy_vehicle', { price = v.price }) if seller and seller.source then exports['pickax_xp']:AddXP(seller.source, 'sell_vehicle', { price = v.price }) end end) end
     local tax = JB.applyTax and JB.applyTax('dealer', v.price, job.name) or 0
     local net = v.price - tax
     local pct = s.dealer_commission or D.DefaultCommission

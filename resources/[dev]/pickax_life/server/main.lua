@@ -1,5 +1,6 @@
 -- ─────────────────────────────── Vie quotidienne : permis, pêche, chasse, cuisine, taxi / livraison ───────────────────────────────
 local ESX = exports['es_extended']:getSharedObject()
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local C = Config
 local Pending, Quota, Skinned, Runs = {}, {}, {}, {}
 
@@ -82,6 +83,7 @@ ESX.RegisterServerCallback('pickax_life:fishEnd', function(src, cb, score)
     if score < C.Fishing.Min then return cb({ ok = true, failed = true, msg = 'Le poisson s\'est échappé…' }) end
     if not exports.ox_inventory:CanCarryItem(src, p.fish.item, 1) then return cb({ ok = false, error = 'Tu ne peux pas porter plus' }) end
     exports.ox_inventory:AddItem(src, p.fish.item, 1, { quality = score })
+    xp(src, 'fish')
     cb({ ok = true, msg = ('Prise : %s !'):format(p.fish.label) })
 end)
 
@@ -120,6 +122,7 @@ ESX.RegisterServerCallback('pickax_life:huntEnd', function(src, cb, score)
     local got = {}
     if exports.ox_inventory:CanCarryItem(src, p.an.meat, meat) then exports.ox_inventory:AddItem(src, p.an.meat, meat, { quality = score }) got[#got + 1] = meat .. ' × ' .. p.an.meat end
     if p.an.skin and score >= 70 and exports.ox_inventory:CanCarryItem(src, p.an.skin, 1) then exports.ox_inventory:AddItem(src, p.an.skin, 1) got[#got + 1] = '1 × ' .. p.an.skin end
+    xp(src, 'hunt')
     cb({ ok = true, msg = 'Dépeçage réussi : ' .. table.concat(got, ', ') })
 end)
 
@@ -270,6 +273,7 @@ ESX.RegisterServerCallback('pickax_life:cookStep', function(src, cb, score)
         return cb({ ok = true, done = true, failed = true, msg = 'Plat brûlé…' })
     end
     exports.ox_inventory:AddItem(src, rec.out, 1, { quality = q, label = ('%s (%d %%)'):format(rec.label, q) })
+    xp(src, 'cook')
     local gain = K.XP.Dish + (q >= 90 and K.XP.Perfect or 0)
     local before = levelOf(getXP(src))
     addXP(src, gain)
@@ -422,6 +426,7 @@ ESX.RegisterServerCallback('pickax_life:runArrive', function(src, cb, stats)
     run.pickup, run.drop = run.kind == 'delivery' and R.DepotDelivery or run.drop, nextDrop
     run.stage = run.kind == 'delivery' and 'load' or 'pickup'
     if run.kind == 'taxi' then run.pickup = pickPoint(GetEntityCoords(ped), 150.0) run.drop = pickPoint(run.pickup, R.Min.taxi) end
+    xp(src, 'run')
     cb({ ok = true, pay = pay, tip = tip, comfort = math.floor(comfort * 100), next = { stage = run.stage, target = run.stage == 'load' and R.DepotDelivery or run.pickup },
         msg = ('Course terminée : %d $ (dont %d $ de pourboire, conduite %d %%).'):format(pay, tip, math.floor(comfort * 100)) })
 end)

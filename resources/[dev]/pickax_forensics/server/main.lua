@@ -2,6 +2,7 @@
 -- Tout est décidé ici : le client signale seulement « je tire » ; le serveur lit l'arme réellement équipée (ox_inventory), sa position, son n° de série
 -- et son propriétaire enregistré. La police reçoit uniquement la position des douilles ; le détail n'est jamais envoyé avant l'analyse au labo.
 local ESX = exports['es_extended']:getSharedObject()
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local C, A = Config.Casings, Config.Analysis
 
 FX = { lastShot = {}, wiped = {} }   -- partagé avec server/traces.lua
@@ -224,6 +225,7 @@ ESX.RegisterServerCallback('pickax_forensics:labEnd', function(src, cb, score)
         md.analysed, md.signature = true, row.signature
         md.description = ('Analysée : %s, %s, signature %s.'):format(row.caliber, row.owner and ('arme enregistrée au nom de ' .. row.owner) or 'arme non enregistrée', row.signature)
         exports.ox_inventory:SetMetadata(src, s.slot, md)
+        xp(src, 'forensics')
         return cb({ ok = true, report = casingReport(row) })
     end
     local res = FX.analyseTrace(src, x, s, p.kind, p.eid, score)

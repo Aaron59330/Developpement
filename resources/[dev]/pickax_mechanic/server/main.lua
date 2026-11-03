@@ -1,6 +1,7 @@
 -- ─────────────────────────────── Mécanicien réaliste : état des véhicules, pièces en stock, réparations ───────────────────────────────
 -- Le serveur décide de tout : usure (rapports du conducteur plausibilisés), stock du magasin, pièces consommées, réussite d'une réparation.
 local ESX = exports['es_extended']:getSharedObject()
+local function xp(src, a, o) if GetResourceState('pickax_xp') == 'started' then pcall(function() exports['pickax_xp']:AddXP(src, a, o) end) end end
 local C = Config
 
 local Veh = {}         -- [plate] = { cond = { engine=.. }, km = n, dirty = bool }
@@ -270,6 +271,7 @@ ESX.RegisterServerCallback('pickax_mechanic:repairEnd', function(src, cb, score)
     v.dirty = true
     Entity(veh).state:set('mech', v.cond, true)
     save(p.plate)
+    xp(src, 'repair')
     cb({ ok = true, score = score, gain = gain, apply = new, comp = p.comp, msg = ('%s : +%d %%.'):format(C.Components[p.comp].label, gain) })
 end)
 
