@@ -281,3 +281,5 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 .keys { border-top-color: #343436; color: #8d8d92; } .keys b { color: #cfcfd4; }
 .info h2 { border-bottom-color: #343436; } .irow { border-top-color: #2e2e30; } .irow .k { color: #9a9aa0; }
 #dlg, #dlgwrap .card { background: var(--card-bg); }
+#keys .kb { padding: 6px 12px; border-radius: 4px; background: linear-gradient(180deg, #363638 0%, #222224 60%, #1a1a1c 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px #404043, 0 3px 8px rgba(0, 0, 0, .45); }
+#keys kbd { border-radius: 3px; background: #17171a; box-shadow: inset 0 0 0 1px #4a4a4d; color: #fff; }
