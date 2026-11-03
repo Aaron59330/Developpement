@@ -337,3 +337,29 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .nav button.on, .sort button.on, .sort button.active { background: radial-gradient(ellipse 120% 150% at 50% 50%, color-mix(in srgb, var(--acc) 100%, #fff 14%) 0%, var(--acc) 55%, color-mix(in srgb, var(--acc) 100%, #000 40%) 100%) !important; box-shadow: inset 0 0 14px rgba(0, 0, 0, .3) !important; }
 .btn.pri, .coins .c { background: radial-gradient(ellipse 120% 150% at 50% 50%, color-mix(in srgb, var(--acc) 100%, #fff 14%) 0%, var(--acc) 55%, color-mix(in srgb, var(--acc) 100%, #000 40%) 100%) !important; }
 .sheet { background: radial-gradient(ellipse 90% 80% at 50% 40%, rgba(104, 104, 107, .95), rgba(52, 52, 54, .95)); box-shadow: inset 0 0 70px rgba(0, 0, 0, .35); }
+
+/* ═══ Style « boutique vitre » (référence Spinhub) : grand panneau verre clair translucide, tuiles vitrées, sélection pleine bleue avec lueur ═══ */
+#root { width: min(1500px, 97vw); height: min(840px, 95vh); background: rgba(150, 152, 158, .26); -webkit-backdrop-filter: blur(11px) saturate(1.1); backdrop-filter: blur(11px) saturate(1.1); border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), inset 0 0 120px rgba(0, 0, 0, .22), 0 18px 50px rgba(0, 0, 0, .4); grid-template-columns: 300px 1fr; }
+.side { padding: 22px 16px 16px 22px; }
+.brand .mark { width: 150px; height: 60px; }
+.nav { gap: 10px; }
+.nav button, .foot button, .idcard { background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .04)) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), inset 0 0 22px rgba(0, 0, 0, .18) !important; border-radius: 3px; padding: 11px 14px; }
+.nav button:hover, .foot button:hover { background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, .08)) !important; }
+.nav button.on { background: var(--acc) !important; box-shadow: 0 0 18px color-mix(in srgb, var(--acc) 55%, transparent), inset 0 0 14px rgba(255, 255, 255, .18) !important; }
+.nav .lb b { text-transform: uppercase; font-size: 14px; letter-spacing: .01em; } .nav .lb small { text-transform: none; opacity: .6; font-size: 10px; }
+.hero { padding: 26px 30px 10px 8px; } .hero h1 { font-size: 32px; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.hero h1 .hcode { margin-left: 18px; padding-left: 18px; border-left: 1px solid rgba(255, 255, 255, .35); font-size: 20px; font-weight: 700; } .hero h1 .hcode small { font-size: 11px; opacity: .7; letter-spacing: .1em; margin-right: 4px; }
+.hero p { font-size: 11px; opacity: .8; }
+.coins { background: linear-gradient(180deg, #f6a21a, #e8830c) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25) !important; border-radius: 3px; } .coins small, .coins b { color: #fff; } .coins .c { background: rgba(255, 255, 255, .25) !important; }
+.tools { padding: 4px 30px 12px 8px; }
+.search, .sort button { background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .06)) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; }
+.sort button.on, .sort button.active { background: var(--acc) !important; box-shadow: 0 0 14px color-mix(in srgb, var(--acc) 50%, transparent) !important; }
+.scroll { margin: 0 30px 24px 8px; padding: 16px; border-radius: 3px; background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.card { background: rgba(0, 0, 0, .18) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; border-radius: 3px; } .card:hover { background: rgba(255, 255, 255, .12) !important; box-shadow: 0 0 0 2px var(--acc), 0 0 18px color-mix(in srgb, var(--acc) 50%, transparent) !important; }
+.pic { background: transparent; }
+.sheet { background: rgba(70, 72, 78, .78); -webkit-backdrop-filter: blur(11px); backdrop-filter: blur(11px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+.btn { background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .07)) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12) !important; }
+.btn.pri { background: var(--acc) !important; box-shadow: 0 0 16px color-mix(in srgb, var(--acc) 50%, transparent) !important; }
+.idcard { display: none !important; }
+.nav { gap: 8px; } .nav button { padding: 9px 14px; }
+.card .go { background: rgba(255, 255, 255, .14) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2) !important; } .card .go svg { color: #fff !important; }

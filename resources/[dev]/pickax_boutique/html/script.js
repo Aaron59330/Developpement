@@ -150,7 +150,7 @@ function sidebar(cats) {
     <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
-const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>MENU</span> <em>${esc(String(title).toUpperCase())}</em></h1><p>${esc(String(sub).toUpperCase())}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
+const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>BOUTIQUE</span> <em>${esc(String(title).toUpperCase())}</em>${S.data && S.data.boutiqueId ? `<b class="hcode"><small>CODE</small> #${esc(S.data.boutiqueId)}</b>` : ''}</h1><p>${esc(String(sub).toUpperCase())}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
 
 function render() {
   if (!S.data) return;
