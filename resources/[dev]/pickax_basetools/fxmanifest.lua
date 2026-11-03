@@ -6,7 +6,7 @@ name 'pickax_basetools'
 description 'Outils de la base : audit de santé (ressources, SQL, items, données), sauvegardes / restauration de la configuration des builders, nouveautés et guide'
 version '1.0.0'
 
-shared_scripts { '@ox_lib/init.lua', '@pickax_skillgames/ui.lua', 'config.lua', 'changelog.lua' }
+shared_scripts { '@ox_lib/init.lua', 'ui.lua', 'config.lua', 'changelog.lua' }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',

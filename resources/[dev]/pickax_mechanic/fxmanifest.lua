@@ -6,7 +6,7 @@ name 'pickax_mechanic'
 description 'Mécanicien réaliste : usure des véhicules, diagnostic, réparations avec mini-jeux et pièces à acheter en magasin (stock limité qui se reconstitue)'
 version '1.0.0'
 
-shared_scripts { '@pickax_skillgames/ui.lua', 'config.lua' }
+shared_scripts { 'ui.lua', 'config.lua' }
 server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
 client_scripts { 'client/main.lua' }
 

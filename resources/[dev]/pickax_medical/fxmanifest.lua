@@ -6,7 +6,7 @@ name 'pickax_medical'
 description 'EMS avancé : blessures par zone, saignements, soins (bandage, suture, attelle, chirurgie), RCR, dossier médical, groupe sanguin / transfusion, triage'
 version '1.0.0'
 
-shared_scripts { '@pickax_skillgames/ui.lua', 'config.lua' }
+shared_scripts { 'ui.lua', 'config.lua' }
 server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
 client_scripts { 'client/main.lua' }
 

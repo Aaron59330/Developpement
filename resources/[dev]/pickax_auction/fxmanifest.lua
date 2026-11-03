@@ -6,7 +6,7 @@ name 'pickax_auction'
 description 'Hôtel des ventes : enchères entre joueurs (objets ox_inventory et véhicules), achat immédiat, mise en dépôt sécurisée, remboursement des surenchères, réclamations'
 version '1.0.0'
 
-shared_scripts { '@ox_lib/init.lua', '@pickax_skillgames/ui.lua', 'config.lua' }
+shared_scripts { '@ox_lib/init.lua', 'ui.lua', 'config.lua' }
 server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua' }
 client_scripts { 'client/main.lua' }
 

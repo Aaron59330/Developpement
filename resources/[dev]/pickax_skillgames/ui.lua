@@ -1,5 +1,5 @@
 -- Remplace les interfaces d'ox_lib (notifications, menus, formulaires, confirmations, barres de progression) par celles du serveur.
--- À charger APRÈS ox_lib s'il est présent : shared_scripts { '@ox_lib/init.lua', '@pickax_skillgames/ui.lua', 'config.lua' }
+-- Copie de ce fichier dans chaque ressource (shared_scripts { '@ox_lib/init.lua', 'ui.lua', ... }) : plus d'interface ox_lib, même syntaxe lib.*
 -- Les appels lib.notify / lib.progressBar / lib.registerContext + lib.showContext / lib.inputDialog / lib.alertDialog gardent la même syntaxe.
 if IsDuplicityVersion() then return end
 
