@@ -124,3 +124,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* logo du serveur (centre de l'écran, grand) */
 .ld-logo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -58%); height: auto; width: min(560px, 44vw); max-height: 40vh; object-fit: contain; filter: drop-shadow(0 8px 28px rgba(0, 0, 0, .65)) drop-shadow(0 0 28px rgba(var(--pk-accent-rgb, 0, 164, 255), .4)); pointer-events: none; }
+
+/* Menu Équipe / Mises à jour : version compacte */
+.info { width: 236px; max-height: 44vh; right: 18px; border-radius: 12px; }
+.info-tabs { padding: 7px; gap: 4px; }
+.itab { height: 28px; font-size: 9.5px; border-radius: 8px; gap: 6px; } .itab svg { width: 12px; height: 12px; }
+.info-body { padding: 2px 8px 10px; gap: 5px; }
+.mb { gap: 9px; padding: 6px 8px; border-radius: 9px; } .av { width: 28px; height: 28px; border-radius: 8px; font-size: 12px; }
+.mb b { font-size: 12px; } .mb small { font-size: 10px; }
+.up { padding: 8px 10px; border-radius: 9px; } .uh b { font-size: 12px; } .uh span { font-size: 9.5px; } .up li { font-size: 11px; }
