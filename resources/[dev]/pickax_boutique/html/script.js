@@ -140,7 +140,7 @@ function sidebar(cats) {
   const nav = (id, icon, label, extra, color) => `<button class="${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}" style="--cc:${color || 'var(--pk-accent,#fdc27d)'}"><span class="ico">${ic(icon, 19)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
   return `<aside class="side">${brand()}
     <div class="cap">Catégories</div>
-    <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb">${esc(x.label)}</span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
+    <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb"><b>${esc(x.label)}</b><small>${(S.data[x.id] || []).length} article${(S.data[x.id] || []).length > 1 ? 's' : ''}</small></span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
       <div class="cap" style="margin-top:14px">Mon compte</div>
       ${nav('cart', 'cart', 'Panier', `<span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`, 'var(--pk-accent,#fdc27d)')}
       ${S.data.wheel ? nav('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="n bd">1</span>' : '', '#e5a23c') : ''}
@@ -150,7 +150,7 @@ function sidebar(cats) {
     <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
-const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
+const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>MENU</span> <em>${esc(String(title).toUpperCase())}</em></h1><p>${esc(String(sub).toUpperCase())}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
 
 function render() {
   if (!S.data) return;
