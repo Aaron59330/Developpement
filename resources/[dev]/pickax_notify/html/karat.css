@@ -5,7 +5,7 @@
 /* Design « Doré » des notifications : carte sombre arrondie, texte seul, barre de temps dorée en bas. Retirer le <link> de karat.css dans index.html pour revenir à l'ancien rendu. */
 .notification {
         clip-path: none; border: 1px solid rgba(255,255,255,.07); border-left: 1px solid rgba(255,255,255,.07); border-radius: 12px;
-    background: rgba(14,14,15,.82);
+    background: rgba(58,62,74,.78); backdrop-filter: blur(6px);
     font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
 }
 .notification::after { height: 3px; width: 100%; border-radius: 0 3px 3px 0; opacity: 1; background: linear-gradient(90deg, var(--g2), var(--g1)); }
