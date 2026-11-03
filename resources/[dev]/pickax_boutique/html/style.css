@@ -401,3 +401,14 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .mini::after { content: 'ACHETER'; } .mini svg { color: #fff !important; width: 18px; height: 18px; }
 .mini:hover { filter: brightness(1.12); }
 .addq { margin-left: auto; }
+
+/* ── Ligne prix / achat : boutons alignés, même hauteur, chiffres lisibles ── */
+.price { gap: 8px; align-items: stretch; }
+.price .pill { flex: 1 1 auto; min-width: 0; height: 36px; padding: 0 12px; justify-content: flex-start; gap: 8px; font-size: 15px; line-height: 1; white-space: nowrap; overflow: hidden; }
+.price .pill i { flex: none; width: 18px; height: 18px; }
+.pill s.old, .price .pill s.old { display: inline !important; margin-left: 4px; font-size: 11.5px; font-weight: 600; color: rgba(255, 255, 255, .6) !important; text-decoration: line-through; text-shadow: none; }
+.pill.short { color: #fff !important; background: linear-gradient(180deg, #8a3a3a, #5e2424) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 0 0 1px #a04848 !important; }
+.pill.short i { background: #ffb4a8; box-shadow: 0 0 6px #ff8a7a; }
+.price .addq { flex: none; display: flex; }
+.price .mini, .price .card .mini { width: 108px; min-width: 108px; height: 36px; padding: 0 10px; justify-content: center; gap: 7px; white-space: nowrap; font-size: 12px; letter-spacing: .05em; }
+.mini svg { flex: none; }
