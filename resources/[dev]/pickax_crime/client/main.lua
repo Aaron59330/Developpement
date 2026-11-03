@@ -14,7 +14,7 @@ local function hasRole(names, types)
 end
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
-local function help(txt) BeginTextCommandDisplayHelp('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayHelp(0, false, true, -1) end
+local function help(txt) PickaxTheme.Help(txt) end
 local function play(game, cfg) return exports.pickax_skillgames:Play(game, cfg) end
 local function closestVehicle(dist)
     local pc = GetEntityCoords(PlayerPedId())
@@ -115,17 +115,17 @@ CreateThread(function()
         if not busy then
             for i, t in ipairs(C.Hack.Terminals) do
                 local d = #(pc - t.coords)
-                if d < 12.0 then sleep = 0 DrawMarker(1, t.coords.x, t.coords.y, t.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                if d < 12.0 then sleep = 0 PickaxTheme.Marker(t.coords.x, t.coords.y, t.coords.z - 1.0)
                     if d < C.Hack.Distance then help('Appuie sur ~INPUT_CONTEXT~ : pirater le terminal') if IsControlJustPressed(0, 38) then hack(i) end end end
             end
             for i, w in ipairs(C.Forgery.Workshops) do
                 local d = #(pc - w.coords)
-                if d < 12.0 then sleep = 0 DrawMarker(1, w.coords.x, w.coords.y, w.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                if d < 12.0 then sleep = 0 PickaxTheme.Marker(w.coords.x, w.coords.y, w.coords.z - 1.0)
                     if d < C.Forgery.Distance then help('Appuie sur ~INPUT_CONTEXT~ : fabriquer un faux document') if IsControlJustPressed(0, 38) then forge(i) end end end
             end
             local df = F.coords and #(pc - F.coords) or 99999.0
             if df < 45.0 then pedAt('fence', F.ped, F.coords, F.pedHeading) end
-            if df < 12.0 then sleep = 0 DrawMarker(1, F.coords.x, F.coords.y, F.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+            if df < 12.0 then sleep = 0 PickaxTheme.Marker(F.coords.x, F.coords.y, F.coords.z - 1.0)
                 if df < F.Distance then help('Appuie sur ~INPUT_CONTEXT~ : vendre des pièces') if IsControlJustPressed(0, 38) then fence() Wait(500) end end end
         end
         Wait(sleep)

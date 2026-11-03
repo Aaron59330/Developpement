@@ -53,3 +53,24 @@ do
     end
     PickaxTheme.invHex = inv:match('^#%x%x%x%x%x%x$') and inv:lower() or PickaxTheme.hex
 end
+
+-- ─────────────── Aides communes à tout le serveur (client) : même aide « Appuie sur E… » et même marker partout ───────────────
+--   PickaxTheme.Help('~INPUT_CONTEXT~ Ouvrir')           → aide pickax_notify (à appeler à chaque frame tant qu'elle doit rester visible)
+--   PickaxTheme.Marker(x, y, z [, sx, sy, sz])             → marker au style du serveur (Config.GlobalMarker de pickax_core) ; taille optionnelle
+if not IsDuplicityVersion() then
+    function PickaxTheme.Help(msg)
+        msg = tostring(msg or '')
+        if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification(msg) return end
+        BeginTextCommandDisplayHelp('STRING')
+        AddTextComponentSubstringPlayerName(msg)
+        EndTextCommandDisplayHelp(0, false, false, -1)
+    end
+
+    function PickaxTheme.Marker(x, y, z, sx, sy, sz)
+        local m = PickaxTheme.marker or {}
+        local sc = m.scale or { x = 1.0, y = 1.0, z = 0.5 }
+        local col = m.color or PickaxTheme.rgb
+        DrawMarker(m.type or 1, x + 0.0, y + 0.0, z + 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            (sx or sc.x) + 0.0, (sy or sc.y) + 0.0, (sz or sc.z) + 0.0, col[1], col[2], col[3], m.alpha or 150, false, true, 2, false, nil, nil, false)
+    end
+end

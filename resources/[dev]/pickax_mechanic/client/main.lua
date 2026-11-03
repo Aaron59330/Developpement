@@ -123,7 +123,7 @@ local function openShop(i)
 end
 
 local blips, peds = {}, {}
-local function help(txt) BeginTextCommandDisplayHelp('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayHelp(0, false, true, -1) end
+local function help(txt) PickaxTheme.Help(txt) end
 
 CreateThread(function()
     for i, s in ipairs(C.Shops) do
@@ -156,7 +156,7 @@ CreateThread(function()
             end
             if d < 15.0 and not nuiOpen then
                 sleep = 0
-                DrawMarker(1, s.coords.x, s.coords.y, s.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 0.5, 253, 194, 125, 140, false, false, 2, false, nil, nil, false)
+                PickaxTheme.Marker(s.coords.x, s.coords.y, s.coords.z - 1.0)
                 if d < C.Shop.Distance then
                     help('Appuie sur ~INPUT_CONTEXT~ : magasin de pièces')
                     if IsControlJustPressed(0, 38) then openShop(i) Wait(400) end

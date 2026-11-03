@@ -30,11 +30,7 @@ RegisterNetEvent('pickax_forensics:remove', function(id, kind) Ev[(kind or 'casi
 RegisterNetEvent('pickax_forensics:plate', function(plate, n) Plates[plate] = (n and n > 0) and n or nil end)
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
-local function help(txt)
-    BeginTextCommandDisplayHelp('STRING')
-    AddTextComponentSubstringPlayerName(txt)
-    EndTextCommandDisplayHelp(0, false, true, -1)
-end
+local function help(txt) PickaxTheme.Help(txt) end
 local function plateOf(veh) return (GetVehicleNumberPlateText(veh) or ''):gsub('^%s+', ''):gsub('%s+$', '') end
 
 -- ───────────── Événements locaux : tir, blessure, montée dans un véhicule (le serveur valide tout) ─────────────
@@ -232,7 +228,7 @@ CreateThread(function()
                 local d = #(pc - l.coords)
                 if d < Config.Analysis.DrawDistance then
                     sleep = 0
-                    DrawMarker(1, l.coords.x, l.coords.y, l.coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 253, 194, 125, 150, false, false, 2, false, nil, nil, false)
+                    PickaxTheme.Marker(l.coords.x, l.coords.y, l.coords.z)
                     if d <= Config.Analysis.InteractDistance then
                         help('Appuie sur ~INPUT_CONTEXT~ : ouvrir le laboratoire')
                         if IsControlJustPressed(0, 38) then openLab() Wait(500) end

@@ -14,7 +14,7 @@ local function hasRole(names, types)
 end
 
 local function notify(kind, txt) lib.notify({ type = kind, description = txt }) end
-local function help(txt) BeginTextCommandDisplayHelp('STRING') AddTextComponentSubstringPlayerName(txt) EndTextCommandDisplayHelp(0, false, true, -1) end
+local function help(txt) PickaxTheme.Help(txt) end
 local function play(game, cfg) return exports.pickax_skillgames:Play(game, cfg) end
 local function anim(dict, clip, flag) RequestAnimDict(dict) local t = GetGameTimer() + 1500 while not HasAnimDictLoaded(dict) and GetGameTimer() < t do Wait(10) end TaskPlayAnim(PlayerPedId(), dict, clip, 2.0, 2.0, -1, flag or 49, 0, false, false, false) end
 local function res(r) if r and r.ok then notify(r.failed and 'error' or 'success', r.msg or 'OK') else notify('error', (r and r.error) or 'Impossible') end end
@@ -211,24 +211,24 @@ CreateThread(function()
             local O = C.Licenses.Office
             local d = O.coords and #(pc - O.coords) or 99999.0
             if d < 45.0 then pedAt('lic', O.ped, O.coords, O.pedHeading) end
-            if d < 12.0 then sleep = 0 DrawMarker(1, O.coords.x, O.coords.y, O.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+            if d < 12.0 then sleep = 0 PickaxTheme.Marker(O.coords.x, O.coords.y, O.coords.z - 1.0)
                 if d < O.Distance then help('Appuie sur ~INPUT_CONTEXT~ : bureau des permis') if IsControlJustPressed(0, 38) then openLicenses() Wait(400) end end end
             for i, b in ipairs(C.Buyers) do
                 local db = #(pc - b.coords)
                 if db < 45.0 then pedAt('buy' .. i, b.ped, b.coords, b.pedHeading) end
-                if db < 12.0 then sleep = 0 DrawMarker(1, b.coords.x, b.coords.y, b.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                if db < 12.0 then sleep = 0 PickaxTheme.Marker(b.coords.x, b.coords.y, b.coords.z - 1.0)
                     if db < b.Distance then help('Appuie sur ~INPUT_CONTEXT~ : vendre') if IsControlJustPressed(0, 38) then openBuyer(i) Wait(400) end end end
             end
             do
                 local M = C.Cooking.Market
                 local dm = M.coords and #(pc - M.coords) or 99999.0
                 if dm < 45.0 then pedAt('market', M.ped, M.coords, M.pedHeading) end
-                if dm < 12.0 then sleep = 0 DrawMarker(1, M.coords.x, M.coords.y, M.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                if dm < 12.0 then sleep = 0 PickaxTheme.Marker(M.coords.x, M.coords.y, M.coords.z - 1.0)
                     if dm < M.Distance then help('Appuie sur ~INPUT_CONTEXT~ : acheter des ingrédients') if IsControlJustPressed(0, 38) then openMarket() Wait(400) end end end
             end
             for i, s in ipairs(C.Cooking.Stations) do
                 local dc = #(pc - s.coords)
-                if dc < 10.0 then sleep = 0 DrawMarker(1, s.coords.x, s.coords.y, s.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                if dc < 10.0 then sleep = 0 PickaxTheme.Marker(s.coords.x, s.coords.y, s.coords.z - 1.0)
                     if dc < C.Cooking.Distance then help('Appuie sur ~INPUT_CONTEXT~ : cuisiner') if IsControlJustPressed(0, 38) then openCooking(i) Wait(400) end end end
             end
         end
@@ -279,7 +279,7 @@ CreateThread(function()
                 local d = #(GetEntityCoords(ped) - run.target)
                 if d < 60.0 then
                     sleep = 0
-                    DrawMarker(1, run.target.x, run.target.y, run.target.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, C.Runs.StopRadius * 2.0, C.Runs.StopRadius * 2.0, 1.0, 253, 194, 125, 90, false, false, 2, false, nil, nil, false)
+                    PickaxTheme.Marker(run.target.x, run.target.y, run.target.z - 1.0, C.Runs.StopRadius * 2.0, C.Runs.StopRadius * 2.0, 1.0)
                     if d < C.Runs.StopRadius and spd < C.Runs.MaxArriveSpeed then
                         help('Arrête-toi ~INPUT_CONTEXT~ : valider l\'étape')
                         if IsControlJustPressed(0, 38) then

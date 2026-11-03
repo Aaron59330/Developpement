@@ -12,9 +12,14 @@ Bridge.TextUI.show = function(text)
     running = true
     Citizen.CreateThread(function()
         while current do
-            BeginTextCommandDisplayHelp('STRING')
-            AddTextComponentSubstringPlayerName((tostring(current):gsub('%[E%]', '~INPUT_CONTEXT~')))
-            EndTextCommandDisplayHelp(0, false, false, -1)
+            local msg = (tostring(current):gsub('%[E%]', '~INPUT_CONTEXT~'))
+            if GetResourceState('pickax_notify') == 'started' then
+                exports['pickax_notify']:ShowHelpNotification(msg)   -- même aide que partout sur le serveur
+            else
+                BeginTextCommandDisplayHelp('STRING')
+                AddTextComponentSubstringPlayerName(msg)
+                EndTextCommandDisplayHelp(0, false, false, -1)
+            end
             Citizen.Wait(0)
         end
         running = false

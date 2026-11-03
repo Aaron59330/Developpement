@@ -65,7 +65,7 @@ CreateThread(function()
                 if d < 25.0 then
                     DrawMarker(1, c.x + 0.0, c.y + 0.0, c.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 0.8, 253, 194, 125, 140, false, false, 2, false, nil, nil, false)
                     if d < 3.0 then
-                        BeginTextCommandDisplayHelp('STRING'); AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ Collecter le tribut'); EndTextCommandDisplayHelp(0, false, false, -1)
+                        if GetResourceState('pickax_notify') == 'started' then exports['pickax_notify']:ShowHelpNotification('~INPUT_CONTEXT~ Collecter le tribut') else BeginTextCommandDisplayHelp('STRING'); AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ Collecter le tribut'); EndTextCommandDisplayHelp(0, false, false, -1) end
                         if IsControlJustPressed(0, 38) and GetGameTimer() - lastCollect > 1500 then
                             lastCollect = GetGameTimer()
                             TriggerServerEvent('gangbuilder:tribute:collect')
