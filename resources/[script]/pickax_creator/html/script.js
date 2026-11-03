@@ -33,7 +33,8 @@ const applyCfg = () => {
     else root.insertAdjacentHTML('afterbegin', `<div class="cfgbg" style="${css}"></div>`);
   }
 };
-const show = html => { const was = !root.classList.contains('hidden'); root.innerHTML = html; root.classList.remove('hidden'); root.classList.toggle('static', was); applyCfg(); };   // 1re ouverture animée ; les redessins (Aléatoire, flèches…) ne rejouent pas l'animation
+const logos = () => { const u = window.PICKAX_LOGO || 'https://cfx-nui-pickax_theme/logo/logo_bluebay.png'; root.querySelectorAll('[data-pk-logo]').forEach(i => { if (i.getAttribute('src') !== u) i.setAttribute('src', u); i.onerror = () => { i.onerror = null; i.style.display = 'none'; }; }); };   // le thème ne remplit les logos qu'au chargement : on les renseigne à chaque affichage
+const show = html => { const was = !root.classList.contains('hidden'); root.innerHTML = html; root.classList.remove('hidden'); root.classList.toggle('static', was); applyCfg(); logos(); };   // 1re ouverture animée ; les redessins (Aléatoire, flèches…) ne rejouent pas l'animation
 const close = () => { root.classList.add('hidden'); root.classList.remove('static'); root.innerHTML = ''; Music.stop(); view = null; };
 
 /* ─────────── lecteur de musique ─────────── */
