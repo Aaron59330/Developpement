@@ -121,26 +121,86 @@ local function openBuyer(idx)
     end, idx)
 end
 
-local function openCooking(idx)
-    local opts = {}
-    for _, rc in ipairs(C.Cooking.Recipes) do
-        local need = {}
-        for _, n in ipairs(rc.needs) do need[#need + 1] = n[2] .. '× ' .. n[1] end
-        opts[#opts + 1] = { title = rc.label, description = table.concat(need, ', '), icon = 'utensils',
-            onSelect = function()
-                busy = true
-                ESX.TriggerServerCallback('pickax_life:cookBegin', function(b)
-                    if not b or not b.ok then busy = false return notify('error', (b and b.error) or 'Impossible') end
-                    TaskStartScenarioInPlace(PlayerPedId(), 'PROP_HUMAN_BBQ', 0, true)
-                    local score = play('hold', b.cfg)
-                    ClearPedTasks(PlayerPedId())
-                    if not score then busy = false return notify('error', 'Cuisson abandonnée : ingrédients conservés.') end
-                    ESX.TriggerServerCallback('pickax_life:cookEnd', function(r) busy = false res(r) end, score)
-                end, idx, rc.id)
-            end }
-    end
-    lib.registerContext({ id = 'pk_cook', title = C.Cooking.Stations[idx].label, options = opts })
-    lib.showContext('pk_cook')
+local ANIM = { prep = 'PROP_HUMAN_PARKING_METER', stove = 'PROP_HUMAN_BBQ', grill = 'PROP_HUMAN_BBQ', oven = 'PROP_HUMAN_BBQ', all = 'PROP_HUMAN_BBQ' }
+
+local function cookRun(idx, rid)
+    busy = true
+    ESX.TriggerServerCallback('pickax_life:cookBegin', function(b)
+        if not b or not b.ok then busy = false return notify('error', (b and b.error) or 'Impossible') end
+        TaskStartScenarioInPlace(PlayerPedId(), ANIM[b.anim] or 'PROP_HUMAN_BBQ', 0, true)
+        local function step(s)
+            local score = play(s.game, s.cfg)
+            if not score then
+                ClearPedTasks(PlayerPedId())
+                ESX.TriggerServerCallback('pickax_life:cookCancel', function() end)
+                busy = false
+                return notify('error', 'Préparation abandonnée : ingrédients conservés.')
+            end
+            ESX.TriggerServerCallback('pickax_life:cookStep', function(r)
+                if not r or not r.ok then ClearPedTasks(PlayerPedId()) busy = false return notify('error', (r and r.error) or 'Impossible') end
+                if r.done then ClearPedTasks(PlayerPedId()) busy = false return res(r) end
+                notify('inform', ('Étape %d / %d'):format(r.n, r.total))
+                step(r)
+            end, score)
+        end
+        notify('inform', ('Étape 1 / %d'):format(b.total))
+        step(b)
+    end, idx, rid)
+end
+
+local openCooking
+local function openOrders(idx)
+    ESX.TriggerServerCallback('pickax_life:ordersList', function(r)
+        if not r or not r.ok then return notify('error', (r and r.error) or 'Indisponible') end
+        local opts = {}
+        for _, o in ipairs(r.list) do
+            local ok = o.have and o.have >= o.min and o.left > 0
+            opts[#opts + 1] = { title = ('%s ×%d'):format(o.label, o.left), icon = 'receipt', disabled = not ok,
+                description = o.left <= 0 and 'Déjà servie' or (o.have and ('Ton plat : %d %% · paiement ≈ %d $ (min. %d %%)'):format(o.have, o.pay, o.min) or ('Tu n\'as pas ce plat · ≈ %d $ (min. %d %%)'):format(o.pay, o.min)),
+                onSelect = function() ESX.TriggerServerCallback('pickax_life:orderDeliver', function(d) res(d) end, idx, o.id) end }
+        end
+        opts[#opts + 1] = { title = 'Retour', icon = 'arrow-left', onSelect = function() openCooking(idx) end }
+        lib.registerContext({ id = 'pk_orders', title = 'Commandes des clients', menu = 'pk_cook', options = opts })
+        lib.showContext('pk_orders')
+    end, idx)
+end
+
+openCooking = function(idx)
+    ESX.TriggerServerCallback('pickax_life:cookInfo', function(r)
+        if not r or not r.ok then return notify('error', (r and r.error) or 'Indisponible') end
+        local opts = {}
+        opts[#opts + 1] = { title = ('Cuisinier niveau %d'):format(r.level), icon = 'chef-hat', disabled = true,
+            description = r.nextXp and ('%d / %d XP · %s'):format(r.xp, r.nextXp, r.typeLabel or '') or ('%d XP · niveau maximal · %s'):format(r.xp, r.typeLabel or '') }
+        for _, rc in ipairs(r.list) do
+            local need = {}
+            for _, n in ipairs(rc.needs) do need[#need + 1] = ('%s %d/%d'):format(n.label or n.item, math.min(n.have, n.count), n.count) end
+            opts[#opts + 1] = { title = rc.label, icon = 'utensils', disabled = rc.locked or not rc.can,
+                description = rc.locked and ('Niveau %d requis'):format(rc.level) or table.concat(need, ' · '),
+                metadata = { { label = 'Étapes', value = rc.steps }, { label = 'Niveau', value = rc.level } },
+                onSelect = function() cookRun(idx, rc.id) end }
+        end
+        if C.Cooking.Orders and C.Cooking.Orders.Enabled then
+            opts[#opts + 1] = { title = 'Commandes des clients', icon = 'receipt', description = 'Livre des plats contre paiement', onSelect = function() openOrders(idx) end }
+        end
+        lib.registerContext({ id = 'pk_cook', title = r.label, options = opts })
+        lib.showContext('pk_cook')
+    end, idx)
+end
+
+local function openMarket()
+    ESX.TriggerServerCallback('pickax_life:marketList', function(r)
+        if not r or not r.ok then return notify('error', (r and r.error) or 'Indisponible') end
+        local opts = {}
+        for _, it in ipairs(r.list) do
+            opts[#opts + 1] = { title = it.label or it.item, icon = 'basket-shopping', description = ('%d $ l\'unité · tu en as %d'):format(it.price, it.have),
+                onSelect = function()
+                    local inp = lib.inputDialog(it.label or it.item, { { type = 'number', label = 'Quantité', default = 1, min = 1, max = 50 } })
+                    if inp and inp[1] then ESX.TriggerServerCallback('pickax_life:marketBuy', function(b) res(b) openMarket() end, it.item, inp[1]) end
+                end }
+        end
+        lib.registerContext({ id = 'pk_market', title = r.label, options = opts })
+        lib.showContext('pk_market')
+    end)
 end
 
 CreateThread(function()
@@ -158,6 +218,13 @@ CreateThread(function()
                 if db < 45.0 then pedAt('buy' .. i, b.ped, b.coords, b.pedHeading) end
                 if db < 12.0 then sleep = 0 DrawMarker(1, b.coords.x, b.coords.y, b.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
                     if db < b.Distance then help('Appuie sur ~INPUT_CONTEXT~ : vendre') if IsControlJustPressed(0, 38) then openBuyer(i) Wait(400) end end end
+            end
+            do
+                local M = C.Cooking.Market
+                local dm = #(pc - M.coords)
+                if dm < 45.0 then pedAt('market', M.ped, M.coords, M.pedHeading) end
+                if dm < 12.0 then sleep = 0 DrawMarker(1, M.coords.x, M.coords.y, M.coords.z - 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9, 0.9, 0.4, 253, 194, 125, 120, false, false, 2, false, nil, nil, false)
+                    if dm < M.Distance then help('Appuie sur ~INPUT_CONTEXT~ : acheter des ingrédients') if IsControlJustPressed(0, 38) then openMarket() Wait(400) end end end
             end
             for i, s in ipairs(C.Cooking.Stations) do
                 local dc = #(pc - s.coords)

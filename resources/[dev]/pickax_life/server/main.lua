@@ -157,30 +157,207 @@ ESX.RegisterServerCallback('pickax_life:buyerSell', function(src, cb, idx, item,
 end)
 
 -- ═══════════════ Cuisine ═══════════════
-ESX.RegisterServerCallback('pickax_life:cookBegin', function(src, cb, idx, rid)
-    local K = C.Cooking
-    local st = K.Stations[tonumber(idx) or 0]
-    if not ESX.GetPlayerFromId(src) or not st or not near(src, st.coords, K.Distance + 3.0) then return cb({ ok = false, error = 'Trop loin' }) end
-    local rec
-    for _, r in ipairs(K.Recipes) do if r.id == rid then rec = r end end
-    if not rec then return cb({ ok = false, error = 'Recette inconnue' }) end
-    for _, n in ipairs(rec.needs) do if have(src, n[1]) < n[2] then return cb({ ok = false, error = ('Il te manque : %s ×%d'):format(n[1], n[2]) }) end end
-    if not exports.ox_inventory:CanCarryItem(src, rec.out, 1) then return cb({ ok = false, error = 'Tu ne peux pas porter plus' }) end
-    Pending[src] = { kind = 'cook', rec = rec, at = GetGameTimer() }
-    cb({ ok = true, cfg = { title = 'Cuisson : ' .. rec.label, sub = 'Garde la bonne température', seconds = rec.seconds, size = 0.26, speed = rec.speed, seed = math.random(1, 2147483000) } })
+local K = C.Cooking
+local function lbl(n) local ok, it = pcall(function() return exports.ox_inventory:Items(n) end) return (ok and it and it.label) or n end
+local CookXP = {}   -- identifiant -> XP de cuisinier
+
+MySQL.ready(function()
+    MySQL.query.await('CREATE TABLE IF NOT EXISTS pickax_cooking (identifier VARCHAR(60) NOT NULL PRIMARY KEY, xp INT NOT NULL DEFAULT 0)')
 end)
 
-ESX.RegisterServerCallback('pickax_life:cookEnd', function(src, cb, score)
+local function cookId(src) local x = ESX.GetPlayerFromId(src) return x and x.identifier end
+local function getXP(src)
+    local id = cookId(src)
+    if not id then return 0 end
+    if CookXP[id] == nil then
+        local r = MySQL.scalar.await('SELECT xp FROM pickax_cooking WHERE identifier = ?', { id })
+        CookXP[id] = tonumber(r) or 0
+    end
+    return CookXP[id]
+end
+local function addXP(src, n)
+    local id = cookId(src)
+    if not id then return end
+    CookXP[id] = getXP(src) + n
+    MySQL.update('INSERT INTO pickax_cooking (identifier, xp) VALUES (?, ?) ON DUPLICATE KEY UPDATE xp = ?', { id, CookXP[id], CookXP[id] })
+end
+local function levelOf(xp)
+    local lv = 1
+    for i, need in ipairs(K.Levels) do if xp >= need then lv = i end end
+    return lv, K.Levels[lv + 1]
+end
+local function recipeById(id) for _, r in ipairs(K.Recipes) do if r.id == id then return r end end end
+local function stationOk(st, rec) return st.type == 'all' or st.type == rec.station end
+local function stationAt(src, idx)
+    local st = K.Stations[tonumber(idx) or 0]
+    if not st or not ESX.GetPlayerFromId(src) or not near(src, st.coords, K.Distance + 3.0) then return nil end
+    return st
+end
+local function stepCfg(rec, i)
+    local st = rec.steps[i]
+    local cfg = { title = st.title, sub = st.sub, seconds = st.seconds or 20, rounds = st.rounds, size = st.size, speed = st.speed, difficulty = st.difficulty, seed = math.random(1, 2147483000) }
+    return { game = st.game, cfg = cfg, n = i, total = #rec.steps }
+end
+
+-- Liste des recettes d'un poste (niveau, ingrédients possédés)
+ESX.RegisterServerCallback('pickax_life:cookInfo', function(src, cb, idx)
+    local st = stationAt(src, idx)
+    if not st then return cb({ ok = false, error = 'Trop loin' }) end
+    local xp = getXP(src)
+    local lv, nextXp = levelOf(xp)
+    local list = {}
+    for _, r in ipairs(K.Recipes) do
+        if stationOk(st, r) then
+            local needs, ok = {}, true
+            for _, n in ipairs(r.needs) do
+                local h = have(src, n[1])
+                if h < n[2] then ok = false end
+                needs[#needs + 1] = { item = n[1], label = lbl(n[1]), count = n[2], have = h }
+            end
+            list[#list + 1] = { id = r.id, label = r.label, level = r.level, locked = r.level > lv, can = ok, needs = needs, steps = #r.steps }
+        end
+    end
+    cb({ ok = true, label = st.label, type = st.type, typeLabel = K.StationLabel[st.type], level = lv, xp = xp, nextXp = nextXp, list = list })
+end)
+
+ESX.RegisterServerCallback('pickax_life:cookBegin', function(src, cb, idx, rid)
+    local st = stationAt(src, idx)
+    if not st then return cb({ ok = false, error = 'Trop loin' }) end
+    local rec = recipeById(rid)
+    if not rec or not stationOk(st, rec) then return cb({ ok = false, error = 'Recette impossible ici' }) end
+    local lv = levelOf(getXP(src))
+    if rec.level > lv then return cb({ ok = false, error = ('Niveau de cuisinier %d requis'):format(rec.level) }) end
+    for _, n in ipairs(rec.needs) do if have(src, n[1]) < n[2] then return cb({ ok = false, error = ('Il te manque : %s ×%d'):format(lbl(n[1]), n[2]) }) end end
+    if not exports.ox_inventory:CanCarryItem(src, rec.out, 1) then return cb({ ok = false, error = 'Tu ne peux pas porter plus' }) end
+    Pending[src] = { kind = 'cook', rec = rec, step = 1, scores = {}, at = GetGameTimer(), stAt = GetGameTimer() }
+    local s = stepCfg(rec, 1)
+    s.ok = true
+    s.anim = st.type
+    cb(s)
+end)
+
+-- Résultat d'une étape : passe à la suivante ou termine le plat
+ESX.RegisterServerCallback('pickax_life:cookStep', function(src, cb, score)
     local p = Pending[src]
+    if not p or p.kind ~= 'cook' then return cb({ ok = false, error = 'Aucune préparation en cours' }) end
+    local rec = p.rec
+    local stp = rec.steps[p.step]
+    local minMs = (stp.game == 'hold' and (stp.seconds or 20) * 600) or 2500
+    if GetGameTimer() - p.stAt < minMs then Pending[src] = nil return cb({ ok = false, error = 'Trop rapide' }) end
+    p.scores[#p.scores + 1] = clamp(math.floor(tonumber(score) or 0), 0, 100)
+    if p.step < #rec.steps then
+        p.step = p.step + 1
+        p.stAt = GetGameTimer()
+        local s = stepCfg(rec, p.step)
+        s.ok = true
+        return cb(s)
+    end
     Pending[src] = nil
-    if not p or p.kind ~= 'cook' then return cb({ ok = false, error = 'Aucune cuisson en cours' }) end
-    if GetGameTimer() - p.at < 6000 then return cb({ ok = false, error = 'Trop rapide' }) end
-    for _, n in ipairs(p.rec.needs) do if have(src, n[1]) < n[2] then return cb({ ok = false, error = 'Ingrédients manquants' }) end end
-    for _, n in ipairs(p.rec.needs) do exports.ox_inventory:RemoveItem(src, n[1], n[2]) end
-    score = clamp(math.floor(tonumber(score) or 0), 0, 100)
-    if score < C.Cooking.Min then exports.ox_inventory:AddItem(src, C.Cooking.Burnt, 1) return cb({ ok = true, failed = true, msg = 'Plat brûlé…' }) end
-    exports.ox_inventory:AddItem(src, p.rec.out, 1, { quality = score, label = ('%s (%d %%)'):format(p.rec.label, score) })
-    cb({ ok = true, msg = ('%s prêt (qualité %d %%).'):format(p.rec.label, score) })
+    for _, n in ipairs(rec.needs) do if have(src, n[1]) < n[2] then return cb({ ok = false, error = 'Ingrédients manquants' }) end end
+    for _, n in ipairs(rec.needs) do exports.ox_inventory:RemoveItem(src, n[1], n[2]) end
+    -- Qualité = moyenne des étapes ; une cuisson (hold) sous le seuil brûle le plat
+    local sum, burnt = 0, false
+    for i, sc in ipairs(p.scores) do
+        sum = sum + sc
+        if rec.steps[i].game == 'hold' and sc < K.Min then burnt = true end
+    end
+    local q = sum / #p.scores
+    local lv = levelOf(getXP(src))
+    q = clamp(math.floor(q + (lv - 1) * (K.QualityBonusPerLevel or 0)), 0, 100)
+    if burnt or q < K.Min then
+        exports.ox_inventory:AddItem(src, K.Burnt, 1)
+        addXP(src, K.XP.Burnt)
+        return cb({ ok = true, done = true, failed = true, msg = 'Plat brûlé…' })
+    end
+    exports.ox_inventory:AddItem(src, rec.out, 1, { quality = q, label = ('%s (%d %%)'):format(rec.label, q) })
+    local gain = K.XP.Dish + (q >= 90 and K.XP.Perfect or 0)
+    local before = levelOf(getXP(src))
+    addXP(src, gain)
+    local after = levelOf(getXP(src))
+    cb({ ok = true, done = true, msg = ('%s prêt (qualité %d %%). +%d XP%s'):format(rec.label, q, gain, after > before and (' · niveau %d !'):format(after) or '') })
+end)
+
+ESX.RegisterServerCallback('pickax_life:cookCancel', function(src, cb) Pending[src] = nil cb(true) end)
+
+-- Marché aux ingrédients
+ESX.RegisterServerCallback('pickax_life:marketList', function(src, cb)
+    local M = K.Market
+    if not ESX.GetPlayerFromId(src) or not near(src, M.coords, M.Distance + 3.0) then return cb({ ok = false, error = 'Trop loin' }) end
+    local list = {}
+    for item, price in pairs(M.Items) do list[#list + 1] = { item = item, label = lbl(item), price = price, have = have(src, item) } end
+    table.sort(list, function(a, b) return a.item < b.item end)
+    cb({ ok = true, label = M.label, list = list })
+end)
+ESX.RegisterServerCallback('pickax_life:marketBuy', function(src, cb, item, qty)
+    local M = K.Market
+    local x = ESX.GetPlayerFromId(src)
+    if not x or not near(src, M.coords, M.Distance + 3.0) then return cb({ ok = false, error = 'Trop loin' }) end
+    item = tostring(item or '')
+    qty = clamp(math.floor(tonumber(qty) or 0), 1, 50)
+    local price = M.Items[item]
+    if not price then return cb({ ok = false, error = 'Article inconnu' }) end
+    local total = price * qty
+    if x.getAccount(M.Account).money < total then return cb({ ok = false, error = ('Il te faut %d $'):format(total) }) end
+    if not exports.ox_inventory:CanCarryItem(src, item, qty) then return cb({ ok = false, error = 'Tu ne peux pas porter plus' }) end
+    x.removeAccountMoney(M.Account, total)
+    exports.ox_inventory:AddItem(src, item, qty)
+    cb({ ok = true, msg = ('%d × %s acheté(s) : %d $'):format(qty, lbl(item), total) })
+end)
+
+-- Commandes de clients (renouvelées régulièrement, partagées entre les cuisiniers)
+local Orders, OrdersAt = {}, 0
+local function refreshOrders()
+    Orders = {}
+    OrdersAt = os.time()
+    if not (K.Orders and K.Orders.Enabled) then return end
+    local pool = {}
+    for _, r in ipairs(K.Recipes) do pool[#pool + 1] = r end
+    for i = 1, math.min(K.Orders.Count, #pool) do
+        local k = math.random(#pool)
+        local r = table.remove(pool, k)
+        Orders[#Orders + 1] = { id = i, rid = r.id, label = r.label, out = r.out, left = math.random(1, 3), value = r.value or 60, min = K.Orders.MinQuality }
+    end
+end
+local function ensureOrders()
+    if os.time() - OrdersAt > (K.Orders.RefreshMinutes or 40) * 60 or #Orders == 0 then refreshOrders() end
+end
+
+local function dishSlot(src, name)
+    local slots = exports.ox_inventory:Search(src, 'slots', name) or {}
+    local best
+    for _, sl in ipairs(slots) do
+        local q = sl.metadata and tonumber(sl.metadata.quality) or 0
+        if not best or q > best.q then best = { slot = sl.slot, q = q } end
+    end
+    return best
+end
+
+ESX.RegisterServerCallback('pickax_life:ordersList', function(src, cb, idx)
+    if not stationAt(src, idx) then return cb({ ok = false, error = 'Trop loin' }) end
+    ensureOrders()
+    local out = {}
+    for _, o in ipairs(Orders) do
+        local d = dishSlot(src, o.out)
+        out[#out + 1] = { id = o.id, label = o.label, left = o.left, min = o.min, pay = math.floor(o.value * K.Orders.PayMult), have = d and d.q or nil }
+    end
+    cb({ ok = true, list = out, minutes = math.max(0, math.floor(((K.Orders.RefreshMinutes or 40) * 60 - (os.time() - OrdersAt)) / 60)) })
+end)
+
+ESX.RegisterServerCallback('pickax_life:orderDeliver', function(src, cb, idx, oid)
+    local x = ESX.GetPlayerFromId(src)
+    if not x or not stationAt(src, idx) then return cb({ ok = false, error = 'Trop loin' }) end
+    local o
+    for _, v in ipairs(Orders) do if v.id == tonumber(oid) then o = v end end
+    if not o or o.left <= 0 then return cb({ ok = false, error = 'Commande déjà servie' }) end
+    local d = dishSlot(src, o.out)
+    if not d then return cb({ ok = false, error = 'Tu n\'as pas ce plat' }) end
+    if d.q < o.min then return cb({ ok = false, error = ('Qualité insuffisante (%d %% requis)'):format(o.min) }) end
+    if not exports.ox_inventory:RemoveItem(src, o.out, 1, nil, d.slot) then return cb({ ok = false, error = 'Impossible' }) end
+    o.left = o.left - 1
+    local pay = math.floor(o.value * K.Orders.PayMult * (1 + (d.q - o.min) / 100 * K.Orders.QualityBonus))
+    x.addAccountMoney(K.Orders.Account, pay)
+    addXP(src, K.XP.Order)
+    cb({ ok = true, msg = ('%s livré (qualité %d %%) : %d $ · +%d XP'):format(o.label, d.q, pay, K.XP.Order) })
 end)
 
 -- ═══════════════ Taxi et livraison ═══════════════

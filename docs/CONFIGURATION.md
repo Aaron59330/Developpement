@@ -400,6 +400,11 @@ Les commandes sont **désactivées par défaut** (`Config.UseCommands = false` d
 - **Menu contextuel (clic droit sur la cible)** — personne : *Contrôler les papiers, Alcootest, Enregistrer une saisie, Prélèvement ADN, Test de résidus* (police) · *Examiner le patient* (EMS). Véhicule : *Diagnostic du véhicule* (mécanicien) · *Crocheter la serrure* (avec un crochet) · *Désosser le véhicule* (dans la zone, avec les outils). Animal mort : *Dépecer l'animal*.
 - **Menu F6 du job** — EMS : *Examiner un patient, Triage* · Police / gouvernement : *Mandats, Journal des saisies* · Gouvernement : *Délivrer un mandat* · Taxi / transporteur : *Service de courses* · Mécano : *Réparer le véhicule* (diagnostic) · Police : tablette → onglet *Balistique*.
 - **Objets** — canne à pêche (pêcher), couteau de chasse (dépecer), crochet, kit de nettoyage, lingettes.
+### Cuisine (pickax_life) et items en base
+
+- **Cuisine** (`Config.Cooking` dans `pickax_life/config.lua`) : marché aux ingrédients (`Market`), postes par type (`Stations` : plan de travail, cuisinière, grill, four, poste complet), **12 recettes en plusieurs étapes** (découpe, cuisson, finition avec mini-jeux), **niveau de cuisinier** (`Levels`, `XP`, recettes débloquées par niveau, bonus de qualité par niveau), qualité du plat en métadonnée, plat brûlé si la cuisson est ratée, **commandes de clients** (`Orders` : livrer un plat de qualité minimale contre paiement + bonus). L'XP est enregistrée dans la table `pickax_cooking` (créée automatiquement).
+- **Items en base** : au démarrage, `pickax_core` (`players/itemsync/server.lua`) crée dans la table `items` tout item défini dans `ox_inventory/data/items.lua` qui manque (sans toucher aux lignes existantes ; `Config.ItemSync = false` dans `config_sv.lua` pour désactiver). Le fichier `sql_items.sql` fait la même chose à la main.
+
 - **Repères au sol (E)** — magasin de pièces, laboratoire, terminaux, atelier de faux papiers, receleur, acheteurs, postes de cuisine, bureau des permis.
 Une ressource ajoute ses propres entrées au menu contextuel avec `exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), { { id, label, target = 'player' | 'vehicle' | 'ped' | 'self' } })` et répond avec les exports `ContextCan(id, entité)` / `ContextDo(id, entité)`.
 

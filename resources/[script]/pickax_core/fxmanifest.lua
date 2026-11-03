@@ -34,6 +34,7 @@ server_scripts {
     'config_sv.lua',
 
     'init/server/sv_initESX.lua',
+    'players/itemsync/server.lua',
     'init/server/sv_init.lua',
 
     'maintenance.lua',
