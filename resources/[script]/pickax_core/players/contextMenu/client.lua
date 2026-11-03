@@ -858,7 +858,17 @@ local function ctxHead()
     if not e or e == 0 or not DoesEntityExist(e) then return nil end
     local me = PlayerPedId()
     local d = #(GetEntityCoords(me) - GetEntityCoords(e))
-    local h = { d = math.floor(d + 0.5) }
+    local h = { d = math.floor(d * 10 + 0.5) / 10 }
+    do   -- direction relative à soi : devant / derrière / à gauche / à droite
+        local to = GetEntityCoords(e) - GetEntityCoords(me)
+        local fwd = GetEntityForwardVector(me)
+        local len = math.sqrt(to.x * to.x + to.y * to.y)
+        if len > 0.05 then
+            local dot = (fwd.x * to.x + fwd.y * to.y) / len
+            local cross = fwd.x * to.y - fwd.y * to.x
+            h.dir = dot > 0.7 and 'devant toi' or dot < -0.7 and 'derrière toi' or (cross > 0 and 'à ta gauche' or 'à ta droite')
+        end
+    end
     if e == me then h.kind, h.name, h.sub, h.d = 'self', 'Moi-même', 'Vous', nil h.img = ctxAvatar(GetPlayerServerId(PlayerId()))
     elseif IsEntityAPed(e) then
         local pl = IsPedAPlayer(e) and NetworkGetPlayerIndexFromPed(e) or -1

@@ -345,13 +345,19 @@ window.addEventListener('message', function (e) {
         if (it.sep) html += '<div class="sp" style="top:calc(' + ((it.y - m.y + it.h + 0.0055) * 100) + 'vh)"></div>';
         return html;
       }).join('');
-      var hd = '';
+      var hd = '', inCard = '';
       if (m.head) {
         var HI = { self: IC.user || '', player: IC.user || '', vehicle: IC.car || '', ped: IC.user || '', object: IC.dot };
         var ini = esc(strip(m.head.name || '?').charAt(0).toUpperCase());
-        hd = '<div class="ch" style="left:' + (m.x * 100) + 'vw;top:calc(' + (m.y * 100) + 'vh - 7.2vh);width:' + (m.w * 100) + 'vw"><span class="av">' + (m.head.img ? '<img src="' + esc(m.head.img) + '" onerror="this.remove()">' : '') + ((m.head.kind === 'player' || m.head.kind === 'self') ? ini : (HI[m.head.kind] || ini)) + '</span><span class="tx"><b>' + esc(strip(m.head.name || '')) + '</b><small>' + esc(m.head.sub || '') + '</small></span>' + (m.head.d != null ? '<span class="ds">' + m.head.d + ' m</span>' : '') + '</div>';
+        var dist = m.head.d != null ? String(m.head.d).replace('.', ',') + ' m' : '';
+        var sub = [dist, m.head.dir, (m.head.kind === 'vehicle' || !m.head.dir) ? m.head.sub : null].filter(Boolean).join(' · ');
+        // une seule carte : fond derrière l'en-tête ET la liste
+        hd = '<div class="cw" style="left:' + (m.x * 100) + 'vw;top:calc(' + (m.y * 100) + 'vh - 7.4vh);width:' + (m.w * 100) + 'vw;height:calc(' + (m.h * 100) + 'vh + 7.4vh)"></div>' +
+          '<div class="chd" style="left:' + (m.x * 100) + 'vw;top:calc(' + (m.y * 100) + 'vh - 7.4vh);width:' + (m.w * 100) + 'vw"><span class="av">' + (m.head.img ? '<img src="' + esc(m.head.img) + '" onerror="this.remove()">' : '') +
+          ((m.head.kind === 'player' || m.head.kind === 'self') ? ini : (HI[m.head.kind] || ini)) + '</span><span class="tx"><b>' + esc(strip(m.head.name || '')) + '</b><small>' + esc(sub) + '</small></span></div>';
+        inCard = ' in';
       }
-      return hd + '<div class="cm" style="left:' + (m.x * 100) + 'vw;top:' + (m.y * 100) + 'vh;width:' + (m.w * 100) + 'vw;height:' + (m.h * 100) + 'vh">' + (m.title ? '<div class="cm-t">' + esc(strip(m.title)) + '</div>' : '') + rows + '</div>';
+      return hd + '<div class="cm' + inCard + '" style="left:' + (m.x * 100) + 'vw;top:' + (m.y * 100) + 'vh;width:' + (m.w * 100) + 'vw;height:' + (m.h * 100) + 'vh">' + (m.title ? '<div class="cm-t">' + esc(strip(m.title)) + '</div>' : '') + rows + '</div>';
     }).join('');
     host.classList.toggle('fresh', fresh);
     host.classList.remove('hidden');
