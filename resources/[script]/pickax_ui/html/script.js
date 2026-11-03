@@ -340,8 +340,7 @@ window.addEventListener('message', function (e) {
       var rows = m.items.map(function (it) {
         var top = ((it.y - m.y) * 100) / 1 * (1) / (m.h || 1);
         var cls = 'cr' + (it.hovered && it.enabled ? ' hov' : '') + (it.open ? ' open' : '') + (it.enabled === false ? ' off' : '') + (it.kind === 'text' ? ' txt' : '');
-        if (/(supprim|jeter|tuer|vir[eé]r|exclu|bannir|retirer|d[eé]truire|fermer le compte)/i.test(strip(it.text))) cls += ' dg';
-        var lead = it.kind === 'check' ? '<span class="bx' + (it.checked ? ' on' : '') + '"></span>' : (it.kind === 'text' ? '' : '<span class="ib">' + icon(it.text) + '</span>');
+        var lead = it.kind === 'check' ? '<span class="bx' + (it.checked ? ' on' : '') + '"></span>' : (it.kind === 'text' ? '' : icon(it.text));
         var html = '<div class="' + cls + '" style="top:calc(' + ((it.y - m.y) * 100) + 'vh + 0px);height:' + (it.h * 100) + 'vh">' + lead + '<span class="l">' + gta(it.text) + '</span>' + (it.right ? '<span class="rt">' + gta(it.right) + '</span>' : '') + (it.kind === 'sub' ? CHEV : '') + '</div>';
         if (it.sep) html += '<div class="sp" style="top:calc(' + ((it.y - m.y + it.h + 0.0055) * 100) + 'vh)"></div>';
         return html;
