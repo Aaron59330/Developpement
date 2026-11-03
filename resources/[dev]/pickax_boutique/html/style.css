@@ -367,3 +367,37 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .card { background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .06)) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), inset 0 0 22px rgba(0, 0, 0, .18) !important; }
 .card:hover { background: linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .1)) !important; }
 .scroll { background: transparent; box-shadow: none; }
+
+/* ═══ Style « Redside » : panneau charbon sombre, tuiles grises en dégradé avec liseré clair, icônes colorées par catégorie, prix doré + bouton d'achat vert ═══ */
+#root { width: min(1400px, 97vw); height: min(820px, 95vh); background: radial-gradient(ellipse 90% 80% at 50% 35%, #2c2c2d 0%, #1d1d1e 62%, #131314 100%); -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #3b3b3d; border-radius: 6px; box-shadow: inset 0 0 70px rgba(0, 0, 0, .55), 0 18px 50px rgba(0, 0, 0, .6); }
+.cap { color: #8d8d92; } .cap::after { background: #343436; }
+.nav button, .foot button { background: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .45) !important; border-radius: 4px; color: #f2f2f3; }
+.nav button:hover, .foot button:hover { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%) !important; }
+.nav button.on { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--acc), 0 0 14px color-mix(in srgb, var(--acc) 40%, transparent) !important; }
+.nav .lb b { font-size: 13px; font-weight: 800; } .nav .lb small { color: #a9a9ae; opacity: 1; }
+.nav .ico svg, .foot .ico svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px currentColor); }
+.nav button[data-id="vehicle"] .ico { color: #3f9bff; } .nav button[data-id="moto"] .ico { color: #38d0e8; } .nav button[data-id="weapon"] .ico { color: #ff9d1c; }
+.nav button[data-id="crate"] .ico { color: #e7c04a; } .nav button[data-id="pack"] .ico { color: #3fd470; } .nav button[data-id="vip"] .ico { color: #c15bff; }
+.nav button[data-id="business"] .ico { color: #19c8b4; } .nav button[data-a="view"] .ico { color: #ff5a4d; } .nav button[data-v="wheel"] .ico { color: #ffb02e; } .nav button[data-v="history"] .ico { color: #8f9bb3; } .nav button[data-v="codes"] .ico { color: #ff7ab8; }
+.hero h1 span { color: #fff; } .hero p { color: #d0d0d4; }
+.hero h1 .hcode { border-left-color: #55555a; } .hero h1 .hcode small { color: #9a9aa0; }
+.coins { background: linear-gradient(180deg, #e0a028, #b97a10) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 0 0 1px #8a5a08 !important; border-radius: 4px; }
+.xbtn { background: linear-gradient(180deg, #3b3b3d, #232325) !important; box-shadow: inset 0 0 0 1px #404043 !important; }
+.search, .sort button { background: linear-gradient(180deg, #2f2f31, #202022) !important; box-shadow: inset 0 0 0 1px #3d3d40, inset 0 0 10px rgba(0, 0, 0, .35) !important; border-radius: 4px; }
+.sort button.on, .sort button.active { background: linear-gradient(180deg, #4a4a4d, #313134) !important; box-shadow: inset 0 0 0 1px var(--acc) !important; }
+.scroll { margin: 0 26px 22px 8px; padding: 14px; background: rgba(0, 0, 0, .22); border-radius: 4px; box-shadow: inset 0 0 0 1px #2e2e30; }
+.card { background: linear-gradient(180deg, #343436 0%, #232325 60%, #1b1b1d 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px #3d3d40, 0 3px 8px rgba(0, 0, 0, .5) !important; border-radius: 4px; }
+.card:hover { background: linear-gradient(180deg, #424245 0%, #2c2c2f 60%, #222225 100%) !important; box-shadow: inset 0 0 0 1px var(--acc), 0 0 16px color-mix(in srgb, var(--acc) 40%, transparent) !important; }
+.info h3 { color: #fff; font-weight: 800; } .info .meta { color: #9a9aa0; opacity: 1; }
+.pill { background: linear-gradient(180deg, #d9a02a, #b47b12); color: #fff; padding: 5px 12px; border-radius: 3px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); text-shadow: 0 1px 2px rgba(0, 0, 0, .4); } .pill i { background: #ffe08a; box-shadow: 0 0 6px #ffcc4d; }
+.card .go { width: auto; min-width: 74px; height: 34px; border-radius: 3px; background: linear-gradient(180deg, #2fd470, #17a653) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 2px 6px rgba(0, 0, 0, .4) !important; color: #fff !important; } .card .go svg { color: #fff !important; width: 20px; height: 20px; }
+.card:hover .go { filter: brightness(1.12); }
+.btn { background: linear-gradient(180deg, #3b3b3d, #262628) !important; box-shadow: inset 0 0 0 1px #404043 !important; border-radius: 4px; }
+.btn.pri { background: linear-gradient(180deg, #2fd470, #17a653) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35) !important; }
+.chip { background: linear-gradient(180deg, #3b3b3d, #262628) !important; box-shadow: inset 0 0 0 1px #404043 !important; }
+.sheet { background: radial-gradient(ellipse 90% 80% at 50% 35%, #2c2c2d, #17171a); -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #3b3b3d; box-shadow: inset 0 0 50px rgba(0, 0, 0, .5), 0 20px 50px rgba(0, 0, 0, .6); }
+.foot button[data-a="link"] { background: linear-gradient(180deg, #2fd470, #17a653) !important; }
+.mini, .card .mini { min-width: 74px; width: auto; height: 34px; border-radius: 3px !important; background: linear-gradient(180deg, #2fd470, #17a653) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 2px 6px rgba(0, 0, 0, .4) !important; color: #fff !important; border: 0 !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 12px; letter-spacing: .04em; }
+.mini::after { content: 'ACHETER'; } .mini svg { color: #fff !important; width: 18px; height: 18px; }
+.mini:hover { filter: brightness(1.12); }
+.addq { margin-left: auto; }
