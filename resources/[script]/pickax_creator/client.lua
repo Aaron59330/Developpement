@@ -28,6 +28,26 @@ local function serverName() return (Config.ServerName ~= '' and Config.ServerNam
 local function openView(msg) msg.cfg = NuiCfg() SetNuiFocus(true, true) SendNUIMessage(msg) end
 local function closeView() SetNuiFocus(false, false) SendNUIMessage({ a = 'close' }) end
 
+-- Palettes réelles du jeu (cheveux / maquillage) : les pastilles de couleur de l'apparence reflètent exactement l'indice appliqué au personnage
+local FALLBACK_HAIR = { '#1c1f21', '#272a2c', '#312e2c', '#35261c', '#4b321f', '#5c3b24', '#6d4c35', '#6b503b', '#765c45', '#7f684e', '#99815d', '#a79369', '#af9c6f', '#bba063', '#d6b97b', '#dac38e',
+    '#9f7f59', '#845039', '#682b1f', '#61120c', '#640f0a', '#7c140f', '#a02e19', '#b64b28', '#a2502f', '#aa4e2b', '#626262', '#808080', '#aaaaaa', '#c5c5c5', '#463955', '#5a3f6b',
+    '#763c76', '#ed74e3', '#eb4b93', '#f299bc', '#04959e', '#025f86', '#023974', '#3fa16a', '#217c61', '#185c55', '#b6c034', '#70a90b', '#439d13', '#dcb857', '#e5b103', '#e69102',
+    '#f28831', '#fb8057', '#e28b58', '#d1593c', '#f80000', '#b20000', '#7b0000', '#261e1a', '#3b2b1e', '#5a4231', '#7a5c40', '#977850', '#b79a67', '#d3b98a', '#8a8a8a', '#e8e8e8' }
+local function nativePalette(hash, count)
+    local out, any = {}, false
+    for i = 0, count - 1 do
+        local ok, r, g, b = pcall(function() return Citizen.InvokeNative(hash, i, Citizen.PointerValueInt(), Citizen.PointerValueInt(), Citizen.PointerValueInt()) end)
+        if ok and r and (r ~= 0 or g ~= 0 or b ~= 0) then any = true end
+        out[#out + 1] = (ok and r) and ('rgb(%d,%d,%d)'):format(r, g or 0, b or 0) or '#888888'
+    end
+    return any and out or nil
+end
+local function palettes()
+    local hair = nativePalette(0x4852FC386E2E1BB5, GetNumHairColors())     -- GET_PED_HAIR_RGB_COLOR
+    local makeup = nativePalette(0x013E5CFC38CD5387, GetNumMakeupColors())  -- GET_PED_MAKEUP_RGB_COLOR
+    return { hair = hair or FALLBACK_HAIR, makeup = makeup or hair or FALLBACK_HAIR }
+end
+
 -- ───────────── scène : caméra face au personnage ─────────────
 local camFwd = vector3(0.0, 1.0, 0.0)
 local studioActive, origin = false, nil
@@ -144,7 +164,7 @@ exports('OpenSkin', function(opts, cb)
             end
         end
         startScene()
-        openView({ a = 'skin', comps = list, opts = { hideClothes = opts.hideClothes == true }, music = musicCfg() })
+        openView({ a = 'skin', comps = list, opts = { hideClothes = opts.hideClothes == true }, music = musicCfg(), palette = palettes() })
     end)
 end)
 RegisterNUICallback('skinChange', function(d, cb)

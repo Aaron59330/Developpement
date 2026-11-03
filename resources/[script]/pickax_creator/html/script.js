@@ -127,7 +127,7 @@ function skin(d) {
     if (S.tab === 'coiffure') {
       const names = d.comps.filter(c => HAIRTAB.test(c.name) && c.max > 0).map(c => c.name);
       const col = names.filter(n => /color|_[34]$|hair_color/.test(n) || /^(hair_color|beard_[34]|eyebrows_[34]|makeup_[34]|lipstick_[34]|chest_3)/.test(n)), sel = names.filter(n => !col.includes(n));
-      return `<div class="sec">${head('Cheveux & pilosité', 'hair')}<p class="hint">Style, couleur, barbe, sourcils et maquillage.</p>${sel.map(selr).join('')}</div>${sep}<div class="sec"><div class="sec-h">Couleurs</div>${col.map(n => `<p class="hint" style="margin:8px 0 0">${esc(C[n].label)}</p>${sw(n, HAIR)}`).join('')}</div>`;
+      return `<div class="sec">${head('Cheveux & pilosité', 'hair')}<p class="hint">Style, couleur, barbe, sourcils et maquillage.</p>${sel.map(selr).join('')}</div>${sep}<div class="sec"><div class="sec-h">Couleurs</div>${col.map(n => `<p class="hint" style="margin:8px 0 0">${esc(C[n].label)}</p>${sw(n, /^(makeup|lipstick|blush)_/.test(n) ? ((d.palette && d.palette.makeup) || HAIR) : ((d.palette && d.palette.hair) || HAIR))}`).join('')}</div>`;
     }
     const cl = d.comps.filter(c => CLOTH.test(c.name) && c.max >= 0 && (c.max > 0 || (c.min != null && c.min < 0)));
     return `<div class="sec">${head('Vêtements', 'cloth')}<p class="hint">Haut, bas, chaussures et accessoires.</p>${cl.map(c => selr(c.name)).join('') || '<p class="hint">Aucune pièce disponible.</p>'}</div>`;
