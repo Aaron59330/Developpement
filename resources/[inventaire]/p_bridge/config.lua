@@ -210,7 +210,7 @@ Config.Fuel = 'lc_fuel'
 ]]
 
 --@param Config.TextUI: string [set which TextUI system you are using]
-Config.TextUI = 'ox_lib'
+Config.TextUI = 'pickax'   -- texte d'aide du serveur (aucun TextUI ox_lib)
 --[[
     auto - will try to detect TextUI system automatically
     ox_lib - ox_lib TextUI

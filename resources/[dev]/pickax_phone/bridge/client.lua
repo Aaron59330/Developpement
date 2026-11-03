@@ -27,6 +27,7 @@ function Bridge.Notify(msg)
     if m == 'esx' and ESX then return ESX.ShowNotification(msg) end
     if m == 'qb' and QBCore then return QBCore.Functions.Notify(msg) end
     if m == 'qbox' and started('qbx_core') then return exports.qbx_core:Notify(msg) end
+    if m == 'ox_lib' and started('pickax_notify') then return exports.pickax_notify:Notify({ title = Config.Brand, description = msg, type = 'inform' }) end
     if m == 'native' or not started('ox_lib') then
         BeginTextCommandThefeedPost('STRING'); AddTextComponentSubstringPlayerName(msg); EndTextCommandThefeedPostTicker(false, false)
         return

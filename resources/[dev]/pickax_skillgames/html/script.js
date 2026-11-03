@@ -139,13 +139,51 @@ function gameAlign(c) {
   nr(); draw(); return p;
 }
 
+
+/* ═════════════════ Interface commune (menus, formulaires, confirmations, progression) ═════════════════ */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = t => { const lines = String(t == null ? '' : t).split('\n'); let out = '', list = false; lines.forEach(l => { let x = esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>'); if (/^\s*[-•]\s+/.test(l)) { if (!list) { out += '<ul>'; list = true; } out += '<li>' + x.replace(/^\s*[-•]\s+/, '') + '</li>'; } else { if (list) { out += '</ul>'; list = false; } out += x + '<br>'; } }); return out + (list ? '</ul>' : ''); };
+const kitSend = v => { $('kit').classList.add('hidden'); post('kitResult', { value: v }); };
+function kitOpen(title, sub, body, foot) { $('kit').classList.remove('hidden'); $('kt').textContent = title || ''; $('ks').textContent = sub || ''; $('kb').innerHTML = body; $('kf').innerHTML = foot || ''; }
+
+function kitMenu(c) {
+  const letter = o => (o.icon && /^[a-z0-9-]+$/i.test(o.icon) ? '' : '') + (o.title || '?').charAt(0).toUpperCase();
+  kitOpen(c.title, c.subtitle, (c.options || []).map((o, i) => `<div class="kopt ${o.disabled ? 'off' : ''}" data-i="${i + 1}"><div class="kic">${esc(letter(o))}</div><div><b>${esc(o.title)}</b>${o.description ? `<small>${esc(o.description)}</small>` : ''}</div>${(o.metadata || []).length ? `<div class="kmeta">${o.metadata.map(m => `${esc(m.label)} : <b>${esc(m.value)}</b>`).join('<br>')}</div>` : ''}</div>`).join('') || '<div class="hint">Rien à afficher.</div>', '<button class="btn ghost" id="kc">Fermer</button>');
+  $('kb').querySelectorAll('.kopt').forEach(e => e.onclick = () => kitSend(Number(e.dataset.i))); $('kc').onclick = () => kitSend(null);
+}
+function kitInput(c) {
+  const f = c.fields || [];
+  kitOpen(c.title, '', f.map((x, i) => {
+    const lb = esc(x.label || ''), req = x.required ? ' *' : '';
+    if (x.type === 'textarea') return `<div class="kfield"><label>${lb}${req}</label><textarea data-i="${i}" maxlength="${x.max || 400}">${esc(x.default || '')}</textarea></div>`;
+    if (x.type === 'select') return `<div class="kfield"><label>${lb}${req}</label><select data-i="${i}">${(x.options || []).map(o => `<option value="${esc(o.value)}" ${String(o.value) === String(x.default) ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select></div>`;
+    if (x.type === 'number') return `<div class="kfield"><label>${lb}${req}</label><input type="number" data-i="${i}" min="${x.min != null ? x.min : ''}" max="${x.max != null ? x.max : ''}" value="${esc(x.default != null ? x.default : '')}"></div>`;
+    return `<div class="kfield"><label>${lb}${req}</label><input type="text" data-i="${i}" maxlength="${x.max || 100}" value="${esc(x.default || '')}"></div>`;
+  }).join(''), '<button class="btn ghost" id="kc">Annuler</button><button class="btn" id="ko">Valider</button>');
+  const first = $('kb').querySelector('input,textarea,select'); if (first) first.focus();
+  const submit = () => { const out = []; let ok = true; $('kb').querySelectorAll('[data-i]').forEach(e => { const x = f[Number(e.dataset.i)]; let v = e.value; if (x.type === 'number') v = v === '' ? null : Number(v); if (x.required && (v === '' || v == null)) { ok = false; e.style.borderColor = 'var(--bad)'; } out[Number(e.dataset.i)] = v; }); if (ok) kitSend(out); };
+  $('ko').onclick = submit; $('kc').onclick = () => kitSend(null);
+  $('kb').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') submit(); });
+}
+function kitConfirm(c) {
+  const lb = c.labels || {};
+  kitOpen(c.header || '', '', `<div class="kmd">${md(c.content)}</div>`, `${c.cancel ? `<button class="btn ghost" id="kc">${esc(lb.cancel || 'Annuler')}</button>` : ''}<button class="btn" id="ko">${esc(lb.confirm || 'OK')}</button>`);
+  $('ko').onclick = () => kitSend('confirm'); if ($('kc')) $('kc').onclick = () => kitSend('cancel');
+}
+let progTimer = null;
+function progShow(d) { clearInterval(progTimer); $('prog').classList.remove('hidden'); $('pl').textContent = d.label || ''; $('ph').textContent = d.cancel ? 'Appuie sur X pour annuler' : ''; const t0 = Date.now(), tot = d.duration || 3000; $('pb').style.width = '0'; progTimer = setInterval(() => { $('pb').style.width = Math.min(100, (Date.now() - t0) / tot * 100) + '%'; }, 60); }
+function progHide() { clearInterval(progTimer); $('prog').classList.add('hidden'); }
+
 const GAMES = { pins: gamePins, code: gameCode, wires: gameWires, cpr: gameCpr, suture: gameSuture, wrap: gameWrap, timing: gameTiming, hold: gameHold, align: gameAlign };
 window.addEventListener('message', async e => {
   const d = e.data || {};
-  if (d.action === 'close') { $('mg').classList.add('hidden'); if (G) { clearInterval(G.timer); if (G.cleanup) G.cleanup(); G = null; } return; }
+  if (d.action === 'kit') { ({ menu: kitMenu, input: kitInput, confirm: kitConfirm }[d.kind] || (() => {}))(d.cfg || {}); return; }
+  if (d.action === 'progress') return progShow(d);
+  if (d.action === 'progressEnd') return progHide();
+  if (d.action === 'close') { $('kit').classList.add('hidden'); $('mg').classList.add('hidden'); if (G) { clearInterval(G.timer); if (G.cleanup) G.cleanup(); G = null; } return; }
   if (d.action !== 'play') return;
   const f = GAMES[d.game]; if (!f) return post('done', { score: null });
   const score = await f(d.cfg || {});
   post('done', { score });
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && G) G.fin(null); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (G) G.fin(null); else if (!$('kit').classList.contains('hidden')) kitSend(null); } });

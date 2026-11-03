@@ -17,7 +17,7 @@ local function alert(src, title, msg)
 end
 
 local function chance(p) return math.random(100) <= p end
-local function notify(src, kind, txt) TriggerClientEvent('ox_lib:notify', src, { type = kind, description = txt }) end
+local function notify(src, kind, txt) TriggerClientEvent('pickax_notify:notify', src, { type = kind, description = txt }) end
 
 -- ═══════════════ Crochetage ═══════════════
 local function vehicleOf(src, netId, dist)

@@ -40,7 +40,7 @@ Config.PoliceJobs = { 'police', 'sheriff' }
 -- Limites (sécurité)
 Config.Max = { Entities = 400, Points = 60, Fleet = 60, Recipes = 25, Items = 30 }
 
--- Mini-jeu (perçage, piratage...) : 'auto' = ox_lib skillCheck si démarré, 'none' = désactivé
+-- Mini-jeu (perçage, piratage...) : 'auto' = mini-jeu pickax_skillgames si démarré, 'none' = désactivé
 Config.Minigame = 'auto'
 Config.MinigameDifficulty = { 'easy', 'easy', 'medium' }
 

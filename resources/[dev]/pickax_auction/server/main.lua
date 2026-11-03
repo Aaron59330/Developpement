@@ -26,7 +26,7 @@ end
 
 local function notify(identifier, msg, kind)
     local x = ESX.GetPlayerFromIdentifier(identifier)
-    if x then TriggerClientEvent('ox_lib:notify', x.source, { title = 'Hôtel des ventes', description = msg, type = kind or 'inform' }) end
+    if x then TriggerClientEvent('pickax_notify:notify', x.source, { title = 'Hôtel des ventes', description = msg, type = kind or 'inform' }) end
 end
 
 -- Crédite un compte, même hors ligne

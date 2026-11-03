@@ -6,7 +6,7 @@ local Pending, Quota, Skinned, Runs = {}, {}, {}, {}
 local function clamp(v, a, b) return math.max(a, math.min(b, v)) end
 local function have(src, item) return exports.ox_inventory:GetItemCount(src, item) or 0 end
 local function near(src, c, d) return #(GetEntityCoords(GetPlayerPed(src)) - c) <= d end
-local function notify(src, kind, txt) TriggerClientEvent('ox_lib:notify', src, { type = kind, description = txt }) end
+local function notify(src, kind, txt) TriggerClientEvent('pickax_notify:notify', src, { type = kind, description = txt }) end
 
 -- Quota glissant par heure et par activité
 local function quotaOk(src, key, max)

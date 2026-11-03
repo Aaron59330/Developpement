@@ -126,10 +126,11 @@ end
 
 local function minigame()
     if Config.Minigame == 'none' then return true end
-    if GetResourceState('ox_lib') ~= 'started' then return true end
-    local ok, res = pcall(function() return exports.ox_lib:skillCheck(Config.MinigameDifficulty, { 'w', 'a', 's', 'd' }) end)
+    -- mini-jeu du serveur (pickax_skillgames : crochetage à goupilles), plus de skillCheck ox_lib
+    if GetResourceState('pickax_skillgames') ~= 'started' then return true end
+    local ok, score = pcall(function() return exports.pickax_skillgames:Play('pins', { pins = 3, difficulty = 2, seconds = 20, title = 'Mini-jeu' }) end)
     if not ok then return true end
-    return res == true
+    return (tonumber(score) or 0) >= 60
 end
 
 -- o = { seconds, label, anim, minigame, radius } → true si terminé sans interruption

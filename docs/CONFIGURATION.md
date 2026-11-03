@@ -402,3 +402,7 @@ Les commandes sont **désactivées par défaut** (`Config.UseCommands = false` d
 - **Objets** — canne à pêche (pêcher), couteau de chasse (dépecer), crochet, kit de nettoyage, lingettes.
 - **Repères au sol (E)** — magasin de pièces, laboratoire, terminaux, atelier de faux papiers, receleur, acheteurs, postes de cuisine, bureau des permis.
 Une ressource ajoute ses propres entrées au menu contextuel avec `exports.pickax_core:RegisterContextActions(GetCurrentResourceName(), { { id, label, target = 'player' | 'vehicle' | 'ped' | 'self' } })` et répond avec les exports `ContextCan(id, entité)` / `ContextDo(id, entité)`.
+
+### Aucune interface ox_lib
+Toutes les interfaces (menus, formulaires, confirmations, barres de progression, notifications, aide à l'écran) passent par celles du serveur : `pickax_skillgames` fournit les menus / formulaires / confirmations / progression (`ui.lua` remplace les appels `lib.notify`, `lib.progressBar`, `lib.registerContext` + `lib.showContext`, `lib.inputDialog`, `lib.alertDialog`) et `pickax_notify` les notifications. Les mini-jeux des builders utilisent `pickax_skillgames` au lieu du `skillCheck` d'ox_lib et `p_bridge` affiche son aide avec le texte d'aide du serveur (`Config.TextUI = 'pickax'`). ox_lib reste chargé uniquement comme bibliothèque technique (callbacks serveur d'`pickax_auction`, `pickax_bourse`, `pickax_basetools`, `ox_inventory`).
+Pour une nouvelle ressource : `shared_scripts { '@pickax_skillgames/ui.lua', 'config.lua' }` suffit pour garder la syntaxe `lib.*` sans ox_lib.

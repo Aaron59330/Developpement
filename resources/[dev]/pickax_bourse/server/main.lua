@@ -67,7 +67,7 @@ local function tick()
         MySQL.update('REPLACE INTO pickax_bourse_prices (symbol, price, updated) VALUES (?, ?, ?)', { id, prices[id], now() })
         for _, h in ipairs(holders(id)) do
             local x = ESX.GetPlayerFromIdentifier(h.identifier)
-            if x then TriggerClientEvent('ox_lib:notify', x.source, { title = 'Bourse', description = ('%s %s de %.1f %% : %s'):format(s.label, up and 'bondit' or 'chute', swing, up and 'bonne nouvelle !' or 'mauvaise nouvelle…'), type = up and 'success' or 'error' }) end
+            if x then TriggerClientEvent('pickax_notify:notify', x.source, { title = 'Bourse', description = ('%s %s de %.1f %% : %s'):format(s.label, up and 'bondit' or 'chute', swing, up and 'bonne nouvelle !' or 'mauvaise nouvelle…'), type = up and 'success' or 'error' }) end
         end
     end
 end

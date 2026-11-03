@@ -31,7 +31,7 @@ end
 local function isJudge(x) return role(x, C.Judges) end
 local function isPolice(x) return role(x, C.Police) end
 
-local function notify(src, kind, txt) TriggerClientEvent('ox_lib:notify', src, { type = kind, description = txt }) end
+local function notify(src, kind, txt) TriggerClientEvent('pickax_notify:notify', src, { type = kind, description = txt }) end
 
 -- ═══════════════ Mandats ═══════════════
 local function expire() MySQL.update("UPDATE justice_warrants SET status = 'expired' WHERE status = 'active' AND expires_at < ?", { now() }) end
