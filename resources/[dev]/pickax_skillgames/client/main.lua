@@ -23,6 +23,9 @@ local function ask(kind, cfg)
     active = true
     kitProm = promise.new()
     SetNuiFocus(true, true)
+    -- aucun flou ni assombrissement du jeu derrière les formulaires
+    if IsScreenblurFadeRunning() then DisableScreenblurFade() end
+    TriggerScreenblurFadeOut(0)
     SendNUIMessage({ action = 'kit', kind = kind, cfg = cfg })
     local r = Citizen.Await(kitProm)
     kitProm = nil

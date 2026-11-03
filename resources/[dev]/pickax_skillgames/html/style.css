@@ -16,7 +16,7 @@ canvas{display:block;margin:0 auto;border-radius:12px;border:1px solid var(--lin
 .wires{display:flex;justify-content:space-between;gap:150px;padding:6px 40px}.col{display:flex;flex-direction:column;gap:14px}.node{width:90px;height:34px;border-radius:8px;cursor:pointer;border:3px solid transparent;opacity:.95}.node.sel{border-color:#fff}.node.done{opacity:.25;pointer-events:none}
 
 /* Interface commune : menus, formulaires, confirmations, progression */
-#kit{position:fixed;inset:0;background:rgba(5,5,7,.55);display:flex;align-items:center;justify-content:center}
+#kit{position:fixed;inset:0;background:transparent;display:flex;align-items:center;justify-content:center}
 .kbox{width:min(520px,94vw);max-height:86vh;display:flex;flex-direction:column;background:var(--bg);border:1px solid rgba(253,194,125,.45);border-radius:16px;padding:16px;box-shadow:0 30px 80px #000c}
 .khead{margin-bottom:10px}.khead b{font-size:17px;color:var(--a);display:block}.khead small{color:var(--mut)}
 #kb{overflow:auto;min-height:0;padding-right:4px}
