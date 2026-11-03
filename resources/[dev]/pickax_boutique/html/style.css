@@ -307,3 +307,19 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .nav { gap: 5px; } .nav button { padding: 7px 12px; } .nav .ico { width: 26px; height: 26px; } .nav .ico svg, .foot .ico svg { width: 20px; height: 20px; }
 .nav .lb b { font-size: 13px; } .foot { padding-top: 10px; }
 .side { overflow: hidden; }
+
+/* ── Réglage fin « exactement comme le menu animations » : gris translucide en dégradé (plus clair en haut, qui s'estompe vers le bas) ── */
+#root { background: linear-gradient(180deg, rgba(86, 86, 88, .70) 0%, rgba(66, 66, 68, .58) 45%, rgba(50, 50, 52, .38) 100%); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); border: 0; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .05), 0 16px 44px rgba(0, 0, 0, .35); }
+.nav button, .foot button, .idcard, .coins, .xbtn, .sort button { background: linear-gradient(180deg, rgba(128, 128, 131, .62) 0%, rgba(98, 98, 101, .34) 100%) !important; }
+.nav button:hover, .foot button:hover, .xbtn:hover, .sort button:hover { background: linear-gradient(180deg, rgba(150, 150, 154, .70) 0%, rgba(116, 116, 120, .44) 100%) !important; }
+.nav button.on, .sort button.on, .sort button.active { background: var(--acc) !important; }
+.search { background: linear-gradient(180deg, rgba(110, 110, 113, .6), rgba(84, 84, 87, .45)) !important; }
+.card { background: linear-gradient(180deg, rgba(128, 128, 131, .52) 0%, rgba(98, 98, 101, .26) 100%) !important; } .card:hover { background: var(--acc) !important; }
+.coins .c { background: var(--acc) !important; }
+.sheet { background: linear-gradient(180deg, rgba(86, 86, 88, .94), rgba(58, 58, 60, .92)); }
+.btn { background: linear-gradient(180deg, rgba(128, 128, 131, .62), rgba(98, 98, 101, .4)); } .btn.pri { background: var(--acc); }
+.chip { background: linear-gradient(180deg, rgba(128, 128, 131, .62), rgba(98, 98, 101, .4)); }
+.cap { color: rgba(255, 255, 255, .7); }
+.search input::placeholder { color: rgba(255, 255, 255, .6); } .search svg { color: #fff; }
+.card .go svg, .card .go { color: #fff !important; } .idcard small, .idcard span { color: rgba(255, 255, 255, .75); }
+.coins small { color: rgba(255, 255, 255, .75); }
