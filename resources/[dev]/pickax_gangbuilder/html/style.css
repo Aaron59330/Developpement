@@ -301,3 +301,46 @@ kbd { border-color: var(--accent-line); }
 
 /* niveau d'un territoire dans le HUD de capture */
 .zlvl { margin-left: 6px; padding: 1px 7px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--pk-accent, #fdc27d); color: var(--pk-accent, #fdc27d); }
+
+/* ═══ Style pro sombre commun (builders, garage, fourrière, banque…) : plusieurs noirs, couleur du serveur en petits détails ═══ */
+.shell, .gx { background: #101012; border: 1px solid #232326; border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, .8); position: relative; }
+.shell::before, .gx::before { content: ''; position: absolute; top: 0; left: 0; width: 64px; height: 2px; background: var(--accent); z-index: 3; }
+.side { background: #0c0c0e; border-right: 1px solid #1c1c1f; }
+.profile { background: #141417; border: 1px solid #202024; border-radius: 10px; } .profile .avatar { background: #18181b; border-color: #2a2a2e; color: var(--accent); }
+.nav-label { color: #52525b; }
+.nav-item { border-radius: 9px; color: #a1a1aa; } .nav-item:hover { background: #17171a; color: #e4e4e7; }
+.nav-item.active { background: #1a1a1e; border-color: #26262a; color: #fff; box-shadow: inset 3px 0 0 var(--accent); } .nav-item.active svg { color: var(--accent); }
+.main { background: #101012; }
+.head { background: #0c0c0e; border-bottom: 1px solid #1c1c1f; } .head h1 { font-size: 17px; font-weight: 600; } .head p { color: #71717a; }
+.tile { background: #17171a; border: 1px solid #232326; border-radius: 9px; color: #9a9aa3; }
+.card, .gx-card { background: #141417; border: 1px solid #232326; border-radius: 10px; }
+.card-h .t svg, .gx-card h3 svg { color: #9a9aa3; }
+.item, .pt, .tpl, .jobitem { background: #141417; border: 1px solid #202024; border-radius: 9px; }
+.item.click:hover, .pt:hover, .tpl:hover, .jobitem:hover { background: #1a1a1e; border-color: #2a2a2e; }
+.pt.active, .tpl.sel, .jobitem.active { background: #1a1a1e; border-color: #2e2e34; box-shadow: inset 3px 0 0 var(--accent); }
+.seg { background: #0c0c0e; border: 1px solid #232326; border-radius: 9px; } .seg button { border-radius: 7px; color: #a1a1aa; } .seg button.active { background: #1a1a1e; color: #fff; box-shadow: inset 0 -2px 0 var(--accent); }
+button { background: #17171a; border: 1px solid #2a2a2e; border-radius: 8px; color: #d4d4d8; } button:hover { background: #1f1f23; border-color: #34343a; }
+button.primary { background: #1a1a1e; color: #fff; border-color: #2e2e34; box-shadow: inset 4px 0 0 var(--accent); } button.primary:hover { background: #222227; filter: none; } button.primary:disabled { box-shadow: none; }
+button.danger { color: #a1a1aa; } button.danger:hover { color: #f87171; border-color: rgba(248, 113, 113, .4); }
+input, select, textarea { background: #0c0c0e; border: 1px solid #2a2a2e; border-radius: 8px; } input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+.chip { background: #17171a; border: 1px solid #2a2a2e; border-radius: 6px; color: #a1a1aa; } .chip.info { color: var(--accent); }
+.thumb { background: #17171a; border-color: #232326; }
+/* garage / fourrière / banque / essence… */
+.gx-top { background: #0c0c0e; border-bottom: 1px solid #1c1c1f; } .gx-title svg { color: var(--accent); } .gx-title b { font-weight: 600; }
+.gx-search { background: #0c0c0e; border: 1px solid #2a2a2e; border-radius: 8px; } .gx-search:focus-within { border-color: var(--accent); }
+.gx-x kbd, .gx kbd { background: #26262a; color: #d4d4d8; }
+.gx-hero { background: radial-gradient(520px 300px at 55% 62%, rgba(255, 255, 255, .045), transparent 70%), #121215; border: 1px solid #232326; border-radius: 12px; }
+.gx-info small { color: #71717a; } .gx-info h1 { font-weight: 600; }
+.gx-plate { background: #0c0c0e; border-color: #2a2a2e; color: #a1a1aa; }
+.gx-stat i { background: #26262a; } .gx-stat u { background: var(--accent); }
+.gx-ok { color: #86d9a4; }
+.gx-bottom { background: #0c0c0e; border-top: 1px solid #1c1c1f; }
+.gx-tile { background: #141417; border: 1px solid #202024; border-radius: 9px; } .gx-tile:hover { background: #1a1a1e; border-color: #2a2a2e; }
+.gx-tile.on { background: #1a1a1e; border-color: #2e2e34; box-shadow: inset 0 -3px 0 var(--accent); }
+.gx-bal > div { background: #141417; border: 1px solid #232326; border-radius: 10px; } .gx-bal b { font-weight: 600; }
+.gx-tag { background: #17171a; border-color: #2a2a2e; color: #a1a1aa; }
+.gx-disc { background: #17171a; border: 1px solid #2a2a2e; color: var(--accent); }
+.gx-price { font-weight: 600; }
+.gx-bal > div + div { background: #1a1a1e; border-color: #2a2a2e; box-shadow: inset 3px 0 0 var(--accent); }
+.paybtn { background: #141417; border: 1px solid #202024; border-radius: 9px; } .paybtn.on { background: #1a1a1e; border-color: #2e2e34; box-shadow: inset 3px 0 0 var(--accent); color: #fff; }
+.paybtn.on svg { color: var(--accent); }
