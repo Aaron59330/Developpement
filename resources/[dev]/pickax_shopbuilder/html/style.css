@@ -159,7 +159,7 @@ td { padding: 3px 6px; }
 .toast::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .toast.err::before { background: var(--danger); } .toast.ok::before { background: var(--ok); }
 @keyframes tin { from { opacity: 0; transform: translateX(16px); } }
-#confirm { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 98; }
+#confirm { position: fixed; inset: 0; background: rgba(0, 0, 0, .22); display: flex; align-items: center; justify-content: center; z-index: 98; }
 #confirm .box { background: #1b1c22; border: 1px solid var(--line-2); border-radius: 18px; padding: 24px; width: 440px; max-width: 94vw; animation: pop .15s; }
 #confirm .box h2 { font-size: 18px; letter-spacing: -.02em; }
 #confirm .box p { margin: 8px 0 20px; color: var(--muted); line-height: 1.5; }
@@ -329,7 +329,7 @@ button.wide { width: 100%; }
 .bar { height: 6px; border-radius: 6px; background: rgba(255, 255, 255, .08); overflow: hidden; } .bar i { display: block; height: 100%; border-radius: 6px; background: var(--accent); }
 
 /* ── Fenêtre modale : sélecteur de produits ── */
-#modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 97; }
+#modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .22); display: flex; align-items: center; justify-content: center; z-index: 97; }
 .mbox { width: min(760px, 94vw); max-height: 86vh; display: flex; flex-direction: column; background: #1b1c22; border: 1px solid var(--accent-line); border-radius: 18px; overflow: hidden; box-shadow: 0 40px 120px rgba(0, 0, 0, .7); animation: pop .15s; }
 .mbox-h { display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
 .mbox-h .ttl { flex: 1; } .mbox-h h1 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; } .mbox-h p { font-size: 12px; color: var(--muted); margin-top: 2px; }

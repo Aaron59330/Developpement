@@ -100,7 +100,7 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 .it.act .arr { background: rgba(255,255,255,.2); color: var(--act-text); transform: translateX(2px); }
 
 /* ===== Fenêtre de saisie (remplace le clavier natif GTA) ===== */
-#dlgwrap { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at center, rgba(0, 0, 0, .3), rgba(0, 0, 0, .55)); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); zoom: var(--zoom); animation: dlfade .16s ease-out; }
+#dlgwrap { position: fixed; inset: 0; display: grid; place-items: center; background: transparent; zoom: var(--zoom); animation: dlfade .16s ease-out; }
 #dlgwrap.hidden { display: none; }
 #dlg { position: relative; width: min(500px, 92vw); padding: 24px 26px 22px; overflow: hidden; box-shadow: var(--card-shadow), 0 0 0 1px rgba(var(--accent-rgb), .08); animation: dlpop .22s cubic-bezier(.2, .9, .3, 1.1); }
 #dlg::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent) 75%, transparent); opacity: .9; }
@@ -130,7 +130,7 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 @keyframes dlfade { from { opacity: 0 } to { opacity: 1 } }
 
 /* ===== Menu de choix (cartes) ===== */
-#chwrap { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, .45); zoom: var(--zoom); animation: dlfade .14s ease-out; }
+#chwrap { position: fixed; inset: 0; display: grid; place-items: center; background: transparent; zoom: var(--zoom); animation: dlfade .14s ease-out; }
 #chwrap.hidden { display: none; }
 #ch { width: min(520px, 94vw); padding: 22px 22px 16px; animation: pop .16s ease-out; }
 #ch-list { display: flex; flex-direction: column; gap: 8px; }
