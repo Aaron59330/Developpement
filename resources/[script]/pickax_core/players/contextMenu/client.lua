@@ -319,7 +319,7 @@ function Item:Init(menu, title, textColor, disabledTextColor, bgColor, bgHovered
     
     self.position = vector2(0, 0)
     
-    self.height = CTXNUI and 0.036 or 0.032
+    self.height = CTXNUI and 0.030 or 0.032
     self.text = Text(title)
     self.text:SetMoneySegments(title)
     self.rightText = nil
@@ -689,7 +689,7 @@ function Menu.CreateNew(pool)
     self.parent = nil
     self.position = vector2(0, 0)
     self.lowerRight = vector2(0, 0)
-    self.width = CTXNUI and 0.165 or 0.15
+    self.width = CTXNUI and 0.128 or 0.15
     self.hoverTimeout = 250
     self.colors = {
         -- background = Colors.DarkGrey,
@@ -801,7 +801,7 @@ function Menu:IsOverlapped()
     return false
 end
 function Menu:RecalculatePosition(position)
-    local headerH = (CTXNUI and self.parent ~= nil) and 0.03 or 0   -- titre du sous-menu (ex : « Action FDO »)
+    local headerH = (CTXNUI and self.parent ~= nil) and 0.026 or 0   -- titre du sous-menu (ex : « Action FDO »)
     local totalHeight = 0.012 * #self.separators + headerH
     for k, item in pairs(self.items) do
         totalHeight = totalHeight + item.height
@@ -883,7 +883,7 @@ end
 
 function CtxPush(pool)
     local menus = {}
-    local head = ctxHead()
+    local head = nil   -- plus d'en-tête (nom / distance) en haut du menu
     for i = 1, #pool.menus do
         local m = pool.menus[i]
         if m:Visible() then
