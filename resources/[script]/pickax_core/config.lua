@@ -1,13 +1,13 @@
 Config = {
 	-- ══════════ IDENTITÉ DU SERVEUR (appliquée à toutes les interfaces) ══════════
 	-- Après modification : restart pickax_theme puis relance des ressources (ou reconnexion).
-	AccentColor = '#fdc27d',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
+	AccentColor = '#00a4ff',--COULEUR PRINCIPALE de toutes les interfaces (format #RRGGBB)
 	InventoryColor = '',--Couleur de l'inventaire (#RRGGBB) ; laisser vide = même couleur que AccentColor. Ex : '#dc2626' pour un inventaire rouge
 	ServerName = 'Bluebay Roleplay',--Nom complet du serveur (menu pause, identité, textes…)
 	ServerShortName = 'BLUEBAY',--Nom court (HUD, écran de connexion, Discord, menus RageUI…)
 	ServerTagline = 'RP sérieux · Free-Access',--Slogan affiché sous le nom
 	ServerDiscord = 'discord.gg/bluebayrp',--Invitation Discord (sans https://)
-	ServerLogo = 'logo.png',--Logo principal : fichier placé dans pickax_theme/logo/ (HUD, inventaire, pause, identité…) ou lien https://...
+	ServerLogo = 'logo_bluebay.png',--Logo principal : fichier placé dans pickax_theme/logo/ (HUD, inventaire, pause, identité…) ou lien https://...
 	ServerMenuBanner = '',--Bannière du menu F5 (lien https://… d'une image) ; vide = bannière d'origine
 	ServerLoadingBanner = '',--Image de fond de l'écran de chargement (lien https://…) ; vide = fond d'origine (le fond de l'écran de chargement se règle aussi dans Config.Loading.Background)
 	TebexStore = '',--Adresse de ta boutique Tebex (ex : 'https://bluebay.tebex.io'). Le bouton « Acheter des coins » de la boutique en jeu ouvre ce lien. Vide = lien de players/boutique/config.lua

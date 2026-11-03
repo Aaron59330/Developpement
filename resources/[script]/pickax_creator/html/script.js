@@ -161,22 +161,41 @@ function skin(d) {
 /* ─────────── POINT D'APPARITION ─────────── */
 function spawn(d) {
   view = 'spawn'; const spots = d.spots; let sel = 0, q = '';
-  const m = d.map || { minX: -4100, maxX: 4500, minY: -4200, maxY: 8000 };
+  const m = d.map || { minX: -5989, maxX: 7393, minY: -4911, maxY: 8471 };
   const xy = s => [((s.x - m.minX) / (m.maxX - m.minX)) * 100, ((m.maxY - s.y) / (m.maxY - m.minY)) * 100];
   const row = (s, i) => `<div class="sp-row ${i === sel ? 'on' : ''}" data-i="${i}"><div class="sp-th" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}">${s.image ? '' : ic('pin', 18)}</div><div class="sp-tx"><b>${esc(s.label)}</b><small>${esc(s.place || s.desc || '')}</small></div><span class="sp-n">${String(i + 1).padStart(2, '0')}</span></div>`;
   const list = () => spots.map((s, i) => [s, i]).filter(([s]) => !q || (s.label + ' ' + (s.place || '') + ' ' + (s.desc || '')).toLowerCase().includes(q)).map(([s, i]) => row(s, i)).join('') || '<div class="sp-none">Aucun lieu trouvé</div>';
   const detail = () => { const s = spots[sel]; return `<div class="sp-ph" style="${s.image ? `background-image:url('${esc(s.image)}')` : ''}"></div><div class="sp-bd"><b>${esc(s.label)}</b><span>${ic('pin', 12)}${esc(s.place || '')}</span>${s.desc ? `<p>${esc(s.desc)}</p>` : ''}</div>`; };
-  show(`<div id="v-spawn"><div class="map" style="${d.mapImage ? `background-image:url('${esc(d.mapImage)}')` : ''}"></div>
-    ${spots.map((s, i) => { const [x, y] = xy(s); return `<div class="pin ${i === sel ? 'on' : ''}" data-i="${i}" style="left:${x}%;top:${y}%"><i></i><em>${esc(s.label)}</em></div>`; }).join('')}
+  show(`<div id="v-spawn"><div class="mapwrap" id="mw"><div class="mapbox" id="mp"><img class="mapimg" src="${esc(d.mapImage || 'map.jpg')}" alt="" draggable="false">
+    ${spots.map((s, i) => { const [x, y] = xy(s); return `<div class="pin ${i === sel ? 'on' : ''}" data-i="${i}" style="left:${x}%;top:${y}%"><i></i><em>${esc(s.label)}</em></div>`; }).join('')}</div></div>
+    <div class="mapctl"><button id="zi">+</button><button id="zo">−</button><button id="zr" title="Recentrer">${ic('pin', 16)}</button></div>
     <aside class="sp-side"><div class="sp-top"></div>
-      <div class="sp-head"><div class="sp-ic">${ic('pin', 22)}</div><div><h1>Point d'apparition</h1><p>Choisis où tu arrives sur Los Santos</p></div></div>
+      <div class="sp-head"><img class="sp-logo" data-pk-logo alt=""><div><h1>Point d'apparition</h1><p>Choisis où tu arrives sur San Andreas</p></div></div>
       <input class="sp-search" id="sps" placeholder="Rechercher un lieu…" autocomplete="off">
       <div class="sp-list" id="spl">${list()}</div>
       <div class="sp-foot"><button class="sp-go" id="go">${ic('check', 16)}Apparaître ici</button></div></aside>
     <div class="sp-card" id="spc">${detail()}</div></div>`);
+  // carte : zoom molette, glisser pour déplacer, recentrage sur le lieu choisi
+  const wrap = $('#mw'), box = $('#mp');
+  let k = 1, tx = 0, ty = 0, S = 0, drag = null;
+  const apply = () => { box.style.transform = `translate(${tx}px,${ty}px) scale(${k})`; box.style.setProperty('--k', k); };
+  const fit = () => { S = Math.min(innerHeight, innerWidth - 480); box.style.width = box.style.height = S + 'px'; };
+  const home = () => { fit(); k = 1; tx = 460 + (innerWidth - 460 - S) / 2; ty = (innerHeight - S) / 2; apply(); };
+  const focus = (i, zoom) => { const [px, py] = xy(spots[i]); k = zoom || Math.max(k, 2.2); const cx = 460 + (innerWidth - 460) / 2, cy = innerHeight / 2; tx = cx - (px / 100) * S * k; ty = cy - (py / 100) * S * k; box.classList.add('anim'); apply(); setTimeout(() => box.classList.remove('anim'), 450); };
+  home(); focus(sel, 1.6);
+  wrap.onwheel = e => { e.preventDefault(); const nk = Math.max(0.8, Math.min(8, k * (e.deltaY < 0 ? 1.18 : 1 / 1.18))); const f = nk / k; tx = e.clientX - (e.clientX - tx) * f; ty = e.clientY - (e.clientY - ty) * f; k = nk; apply(); };
+  wrap.onmousedown = e => { if (e.target.closest('.pin')) return; drag = { x: e.clientX - tx, y: e.clientY - ty }; wrap.classList.add('grab'); };
+  window.onmousemove = e => { if (!drag) return; tx = e.clientX - drag.x; ty = e.clientY - drag.y; apply(); };
+  window.onmouseup = () => { drag = null; wrap.classList.remove('grab'); };
   const redraw = () => { $('#spl').innerHTML = list(); $('#spc').innerHTML = detail(); root.querySelectorAll('.pin').forEach(p => p.classList.toggle('on', +p.dataset.i === sel)); };
   $('#sps').oninput = e => { q = e.target.value.toLowerCase(); $('#spl').innerHTML = list(); };
-  root.onclick = e => { const t = e.target.closest('[data-i],#go'); if (!t) return; if (t.id === 'go') return post('spawnPick', { index: sel + 1 }); sel = +t.dataset.i; redraw(); const on = root.querySelector('.sp-row.on'); if (on) on.scrollIntoView({ block: 'nearest' }); };
+  root.onclick = e => {
+    const t = e.target.closest('[data-i],#go,#zi,#zo,#zr'); if (!t) return;
+    if (t.id === 'go') return post('spawnPick', { index: sel + 1 });
+    if (t.id === 'zi' || t.id === 'zo') { const nk = Math.max(0.8, Math.min(8, k * (t.id === 'zi' ? 1.4 : 1 / 1.4))); const cx = 460 + (innerWidth - 460) / 2, cy = innerHeight / 2, f = nk / k; tx = cx - (cx - tx) * f; ty = cy - (cy - ty) * f; k = nk; box.classList.add('anim'); apply(); return setTimeout(() => box.classList.remove('anim'), 450); }
+    if (t.id === 'zr') return focus(sel, 1.6);
+    sel = +t.dataset.i; redraw(); focus(sel); const on = root.querySelector('.sp-row.on'); if (on) on.scrollIntoView({ block: 'nearest' });
+  };
 }
 
 /* ─────────── BIENVENUE ─────────── */

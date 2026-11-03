@@ -100,3 +100,17 @@ input[type=range] { -webkit-appearance: none; appearance: none; height: 5px; bor
 .sp-go { width: 100%; height: 48px; border-radius: 9px; background: #1a1a1e; border: 1px solid #2e2e34; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: inset 4px 0 0 var(--pk-accent,#fdc27d); transition: background .12s; } .sp-go:hover { background: #222227; } .sp-go svg { color: var(--pk-accent,#fdc27d); }
 .sp-card { position: absolute; right: 40px; bottom: 40px; width: 340px; background: #101012; border: 1px solid #232326; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, .8); }
 .sp-ph { height: 170px; background: #1d1d21 center/cover; border-bottom: 1px solid #1c1c1f; } .sp-bd { padding: 14px 18px 16px; } .sp-bd b { font-size: 16px; font-weight: 600; display: block; } .sp-bd span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #71717a; margin-top: 5px; } .sp-bd span svg { fill: var(--pk-accent,#fdc27d); stroke: none; width: 12px; height: 12px; } .sp-bd p { font-size: 12.5px; color: #8a8a93; margin-top: 10px; line-height: 1.5; }
+
+/* Vraie carte (image satellite) : zoom / déplacement */
+#v-spawn .map { display: none; }
+.mapwrap { position: absolute; inset: 0; overflow: hidden; background: #0d3a6b; cursor: grab; } .mapwrap.grab { cursor: grabbing; }
+.mapbox { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; } .mapbox.anim { transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+.mapimg { width: 100%; height: 100%; display: block; user-select: none; pointer-events: none; }
+#v-spawn .pin { transform: translate(0, 0) scale(calc(1 / var(--k, 1))); transform-origin: 50% 50%; }
+#v-spawn .pin:hover { transform: scale(calc(1.25 / var(--k, 1))); } #v-spawn .pin.on { transform: scale(calc(1.35 / var(--k, 1))); z-index: 5; }
+.mapwrap::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 160px rgba(0, 0, 0, .55); }
+.mapctl { position: absolute; right: 40px; top: 40px; display: flex; flex-direction: column; gap: 6px; z-index: 6; }
+.mapctl button { width: 42px; height: 42px; border-radius: 9px; background: #101012; border: 1px solid #2a2a2e; color: #e4e4e7; font-size: 20px; font-weight: 600; display: grid; place-items: center; } .mapctl button:hover { background: #1a1a1e; border-color: var(--pk-accent,#fdc27d); } .mapctl button svg { fill: var(--pk-accent,#fdc27d); stroke: none; }
+.sp-side, .sp-card { z-index: 6; }
+
+.sp-logo { height: 46px; width: auto; max-width: 110px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 8px rgba(var(--pk-accent-rgb,0,164,255),.35)); }

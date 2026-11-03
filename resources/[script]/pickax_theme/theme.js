@@ -11,8 +11,8 @@
    Variables CSS : --pk-accent, --pk-accent-rgb, --pk-accent-light, --pk-accent-dark, --pk-logo (url)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-window.PICKAX_ACCENT = '#fdc27d';
-window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'RP sérieux · Free-Access', discord: 'discord.gg/bluebayrp', logo: 'logo.png', invColor: '' };
+window.PICKAX_ACCENT = '#00a4ff';
+window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'RP sérieux · Free-Access', discord: 'discord.gg/bluebayrp', logo: 'logo_bluebay.png', invColor: '' };
 
 /* ─────────────────────────── ne rien modifier sous cette ligne ─────────────────────────── */
 (function () {

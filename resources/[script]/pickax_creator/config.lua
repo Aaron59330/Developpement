@@ -54,8 +54,8 @@ Config.Destinations = {
 }
 
 -- ───────────── Carte du « Point d'apparition » ─────────────
--- html/map.png : image de la carte de Los Santos (non fournie). Les repères sont placés d'après ces bornes du monde.
-Config.Map = { Image = 'map.png', MinX = -4100.0, MaxX = 4500.0, MinY = -4200.0, MaxY = 8000.0 }
+-- html/map.jpg : vraie carte satellite de San Andreas (fournie). Les repères sont placés d'après ces bornes du monde (calées sur l'image) ; remplace map.jpg par ta propre carte en gardant le même cadrage, ou ajuste les bornes.
+Config.Map = { Image = 'map.jpg', MinX = -5989.0, MaxX = 7393.0, MinY = -4911.0, MaxY = 8471.0 }
 
 -- ───────────── Message de bienvenue (après l'arrivée) ─────────────
 -- Highlight : mot mis en couleur dans le titre. Duration en ms (0 = reste jusqu'au clic).
