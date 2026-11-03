@@ -189,7 +189,8 @@ function spawn(d) {
   const fit = () => { S = Math.min(innerHeight, innerWidth - 480); box.style.width = box.style.height = S + 'px'; };
   const home = () => { fit(); k = 1; tx = 460 + (innerWidth - 460 - S) / 2; ty = (innerHeight - S) / 2; apply(); };
   const focus = (i, zoom) => { const [px, py] = xy(spots[i]); k = zoom || Math.max(k, 2.2); const cx = 460 + (innerWidth - 460) / 2, cy = innerHeight / 2; tx = cx - (px / 100) * S * k; ty = cy - (py / 100) * S * k; box.classList.add('anim'); apply(); setTimeout(() => box.classList.remove('anim'), 450); };
-  home(); focus(sel, 1.6);
+  const center = zoom => { k = zoom; const cx = 460 + (innerWidth - 460) / 2, cy = innerHeight / 2; tx = cx - 0.5 * S * k; ty = cy - 0.5 * S * k; apply(); };
+  home(); center(1.5);   // à l'ouverture : centre de la carte (pas le lieu sélectionné)
   wrap.onwheel = e => { e.preventDefault(); const nk = Math.max(0.8, Math.min(8, k * (e.deltaY < 0 ? 1.18 : 1 / 1.18))); const f = nk / k; tx = e.clientX - (e.clientX - tx) * f; ty = e.clientY - (e.clientY - ty) * f; k = nk; apply(); };
   wrap.onmousedown = e => { if (e.target.closest('.pin')) return; drag = { x: e.clientX - tx, y: e.clientY - ty }; wrap.classList.add('grab'); };
   window.onmousemove = e => { if (!drag) return; tx = e.clientX - drag.x; ty = e.clientY - drag.y; apply(); };
@@ -200,7 +201,7 @@ function spawn(d) {
     const t = e.target.closest('[data-i],#go,#zi,#zo,#zr'); if (!t) return;
     if (t.id === 'go') return post('spawnPick', { index: sel + 1 });
     if (t.id === 'zi' || t.id === 'zo') { const nk = Math.max(0.8, Math.min(8, k * (t.id === 'zi' ? 1.4 : 1 / 1.4))); const cx = 460 + (innerWidth - 460) / 2, cy = innerHeight / 2, f = nk / k; tx = cx - (cx - tx) * f; ty = cy - (cy - ty) * f; k = nk; box.classList.add('anim'); apply(); return setTimeout(() => box.classList.remove('anim'), 450); }
-    if (t.id === 'zr') return focus(sel, 1.6);
+    if (t.id === 'zr') { box.classList.add('anim'); center(1.5); return setTimeout(() => box.classList.remove('anim'), 450); }
     sel = +t.dataset.i; redraw(); focus(sel); const on = root.querySelector('.sp-row.on'); if (on) on.scrollIntoView({ block: 'nearest' });
   };
 }
