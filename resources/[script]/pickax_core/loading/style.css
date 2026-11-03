@@ -121,3 +121,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .up li { font-size: 12.5px; color: var(--text-soft); padding-left: 14px; position: relative; line-height: 1.4; }
 .up li::before { content: ''; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 @media (max-width: 900px) { .info { display: none; } }
+
+/* logo du serveur (haut, centré) */
+.ld-logo { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); height: 64px; width: auto; max-width: 260px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0, 0, 0, .6)) drop-shadow(0 0 16px rgba(var(--pk-accent-rgb, 0, 164, 255), .35)); pointer-events: none; }
