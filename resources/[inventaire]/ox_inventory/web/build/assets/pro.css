@@ -155,3 +155,6 @@ body.drag-outfit-off .panel.left .slot:not(.has), body.drag-outfit-off .panel.le
 #ctx .ctx-item.danger:hover { background: rgba(239, 68, 68, .14) !important; border-color: rgba(239, 68, 68, .75) !important; }
 #ctx .ctx-item.danger:hover .ci { background: rgba(239, 68, 68, .28); } #ctx .ctx-item.danger:hover .ci svg { stroke: #ff8a8a; }
 #ctx .ctx-item .arrow { margin-left: auto; }
+
+/* Quantité : juste « x1 », sans pastille, sans contour, sans fond */
+#app .slot .count, #app .slot.hasnum .count, #hotbar .slot .count { background: transparent !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; padding: 0 !important; border-radius: 0 !important; text-shadow: 0 1px 3px rgba(0,0,0,.9) !important; }
