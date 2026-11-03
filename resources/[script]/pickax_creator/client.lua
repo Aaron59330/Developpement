@@ -164,7 +164,7 @@ exports('OpenSkin', function(opts, cb)
             end
         end
         startScene()
-        openView({ a = 'skin', comps = list, opts = { hideClothes = opts.hideClothes == true }, music = musicCfg(), palette = palettes() })
+        openView({ a = 'skin', comps = list, opts = { hideClothes = opts.hideClothes == true }, music = musicCfg(), palette = palettes(), tones = Config.SkinTones })
     end)
 end)
 RegisterNUICallback('skinChange', function(d, cb)

@@ -66,7 +66,7 @@ function identity(d) {
   const S = { first: '', last: '', month: 0, year: 1995, day: 1, height: 175, nat: 0, sex: 'm' };
   const daysIn = () => new Date(S.year, S.month + 1, 0).getDate();
   const draw = () => { show(`<div id="v-identity">
-    <div class="panel left"><div class="ptitle">${ic('pencil')}Enregistrement du Personnage</div><div class="scroll">
+    <div class="panel left"><img class="cr-logo" data-pk-logo alt=""><div class="ptitle">${ic('pencil')}Enregistrement du Personnage</div><div class="scroll">
       <div class="sec"><div class="sec-h">Prénom & Nom<span class="pill gold" data-r="name">Aléatoire</span></div><p class="hint">Écrivez le prénom et le nom de votre personnage. Vous pouvez le générer aléatoirement.</p>
         <div class="row2"><input class="field" id="fn" placeholder="Prénom" maxlength="25" value="${esc(S.first)}"><input class="field" id="ln" placeholder="Nom" maxlength="25" value="${esc(S.last)}"></div></div>${sep}
       <div class="sec"><div class="sec-h">Date de Naissance<span class="pill gold" data-r="dob">Aléatoire</span></div><p class="hint">Sélectionnez la date de naissance de votre personnage.</p>
@@ -103,6 +103,8 @@ function toast(m) { let t = $('#toast'); if (!t) { t = document.createElement('d
 /* ─────────── APPARENCE ─────────── */
 const FATHERS = ['Benjamin', 'Daniel', 'Joshua', 'Noah', 'Andrew', 'Juan', 'Alex', 'Isaac', 'Evan', 'Ethan', 'Vincent', 'Angel', 'Diego', 'Adrian', 'Gabriel', 'Michael', 'Santiago', 'Kevin', 'Louis', 'Samuel', 'Anthony', 'Claude', 'Niko', 'John'];
 const MOTHERS = ['Hannah', 'Aubrey', 'Jasmine', 'Gisele', 'Amelia', 'Isabella', 'Zoe', 'Ava', 'Camila', 'Violet', 'Sophia', 'Evelyn', 'Nicole', 'Ashley', 'Gracie', 'Brianna', 'Natalie', 'Olivia', 'Elizabeth', 'Charlotte', 'Emma', 'Misty'];
+const FACES = ['Benjamin', 'Daniel', 'Joshua', 'Noah', 'Andrew', 'Juan', 'Alex', 'Isaac', 'Evan', 'Ethan', 'Vincent', 'Angel', 'Diego', 'Adrian', 'Gabriel', 'Michael', 'Santiago', 'Kevin', 'Louis', 'Samuel', 'Anthony', 'Hannah', 'Aubrey', 'Jasmine', 'Gisele', 'Amelia', 'Isabella', 'Zoe', 'Ava', 'Camila', 'Violet', 'Sophia', 'Evelyn', 'Nicole', 'Ashley', 'Gracie', 'Brianna', 'Natalie', 'Olivia', 'Elizabeth', 'Charlotte', 'Emma', 'Claude', 'Niko', 'John', 'Misty'];
+const TONES = [{ label: 'Très clair', color: '#f1d3c2', id: 0 }, { label: 'Clair', color: '#e7bfa4', id: 21 }, { label: 'Beige', color: '#d9a982', id: 4 }, { label: 'Hâlé clair', color: '#c8905f', id: 22 }, { label: 'Hâlé', color: '#b67a4a', id: 5 }, { label: 'Doré', color: '#a56a3c', id: 29 }, { label: 'Olive', color: '#94603a', id: 12 }, { label: 'Caramel', color: '#80502f', id: 26 }, { label: 'Brun', color: '#6a3f26', id: 10 }, { label: 'Brun foncé', color: '#55311f', id: 7 }, { label: 'Ébène', color: '#42261a', id: 23 }, { label: 'Noir profond', color: '#2f1b13', id: 24 }];
 const EYES = ['#6f8f28', '#2f8a5a', '#8cc4e8', '#4a86c5', '#d58a3f', '#6b4a3a', '#a68a64', '#7d7f84', '#a9a9ad', '#e46fa0', '#e0aa22', '#7a62d6', '#2b2b2f', '#8a9db5', '#f0c419', '#5fe035', '#6b8a2e', '#3fd0c0', '#a8d4e6', '#2d4fb0', '#d9a722', '#5a3a2b', '#c6c6c9', '#e98a3a', '#7d4b3c', '#cbb890', '#3a6ea5', '#b5446e', '#2e6b4f', '#9a9a3a', '#555a66', '#e8e0cf'];
 const HAIR = Array.from({ length: 64 }, (_, i) => `hsl(${[30, 28, 24, 20, 40, 45, 15, 8, 0, 210, 260, 320, 50, 120, 190, 280][i % 16]} ${[20, 35, 50, 60, 70][i % 5]}% ${[10, 18, 26, 34, 44, 56, 70, 85][Math.floor(i / 8)]}%)`);
 const TRAIT = /^(nose|cheeks|lip_|jaw|chin|neck|eye_squint|eyebrow_(high|forward)|age_|blemishes|complexion|sun_|moles|blush_[12]|face_md|skin_md)/;
@@ -120,7 +122,11 @@ function skin(d) {
   const left = () => {
     if (S.tab === 'apparence') {
       const traits = d.comps.filter(c => TRAIT.test(c.name) && !/md_weight/.test(c.name) && c.max > 0);
-      return `<div class="sec">${head('Visage', 'faces')}<p class="hint">Créez votre personnage selon vos envies.</p><div class="faces2">${faceBig('face', 'Père', FATHERS)}${faceBig('skin', 'Mère', MOTHERS)}</div></div>${sep}
+      const tones = (d.tones && d.tones.length ? d.tones : TONES), curTone = C.skin ? C.skin.value : -1;
+      return `<div class="sec">${head('Visage', 'face')}<p class="hint">Choisis la forme du visage (liste à droite) puis ajuste les traits.</p><div class="faces2 one">${faceBig('face', 'Visage', FACES)}</div></div>${sep}
+        <div class="sec"><div class="sec-h">Couleur de peau<span class="btns"><span class="pill gold" data-tone="rand">Aléatoire</span></span></div><p class="hint">Choisis le teint de ton personnage, indépendamment de son visage.</p>
+          <div class="tones">${tones.map((t, i) => `<button data-tone="${t.id}" class="${curTone === t.id ? 'on' : ''}" title="${esc(t.label)}" style="background:${t.color}"></button>`).join('')}</div>
+          <p class="tone-name">${esc((tones.find(t => t.id === curTone) || { label: 'Teint personnalisé' }).label)}</p></div>${sep}
         ${C.eye_color ? `<div class="sec">${head('Couleur des yeux', 'eye_color')}<p class="hint">Choisissez la couleur des yeux de votre personnage.</p>${sw('eye_color', EYES)}</div>${sep}` : ''}
         ${traits.length ? `<div class="sec">${head('Traits', 'traits')}<p class="hint">Ajustez les caractéristiques faciales de votre personnage.</p>${traits.map(c => slider(c.name)).join('')}</div>` : ''}`;
     }
@@ -132,23 +138,24 @@ function skin(d) {
     const cl = d.comps.filter(c => CLOTH.test(c.name) && c.max >= 0 && (c.max > 0 || (c.min != null && c.min < 0)));
     return `<div class="sec">${head('Vêtements', 'cloth')}<p class="hint">Haut, bas, chaussures et accessoires.</p>${cl.map(c => selr(c.name)).join('') || '<p class="hint">Aucune pièce disponible.</p>'}</div>`;
   };
-  const right = () => { const n = S.her, c = C[n]; if (S.tab !== 'apparence' || !c) return ''; const names = n === 'face' ? FATHERS : MOTHERS; const lo = c.min != null ? c.min : 0;
-    return `<div class="panel right"><div class="sec-h" style="font-size:15px">Hérédité ${n === 'face' ? 1 : 2}<span class="btns"><span class="pill gold" data-rand="${n}">Aléatoire</span><span class="pill dark" data-reset="${n}">${ic('refresh', 12)} Réinitialiser</span></span></div><p class="hint">Sélectionnez un visage parmi les options disponibles.</p>
+  const right = () => { const n = S.her, c = C[n]; if (S.tab !== 'apparence' || !c) return ''; const names = FACES; const lo = c.min != null ? c.min : 0;
+    return `<div class="panel right"><div class="sec-h" style="font-size:15px">Forme du visage<span class="btns"><span class="pill gold" data-rand="${n}">Aléatoire</span><span class="pill dark" data-reset="${n}">${ic('refresh', 12)} Réinitialiser</span></span></div><p class="hint">Sélectionnez un visage parmi les options disponibles.</p>
       <div class="scroll" style="flex:1"><div class="herolist">${Array.from({ length: c.max - lo + 1 }, (_, i) => `<div class="hero ${c.value === lo + i ? 'on' : ''}" data-set="${n}:${lo + i}"><i>${(names[lo + i] || String(lo + i))[0]}</i>${esc(names[lo + i] || ('#' + (lo + i)))}</div>`).join('')}</div>${sep}${slider('face_md_weight')}${slider('skin_md_weight')}<div class="seg2" style="grid-template-columns:1fr;margin-top:8px"><button data-rand="${n}" style="background:rgba(255,255,255,.07)">Aléatoire</button></div></div></div>`; };
   const draw = () => { const sc = $('.scroll') ? $('.scroll').scrollTop : 0; show(`<div id="v-skin"><div class="tabs">${['apparence', 'coiffure'].concat(clothes ? ['vetements'] : []).map(t => `<button data-tab="${t}" class="${S.tab === t ? 'on' : ''}">${{ apparence: 'Apparence', coiffure: 'Coiffure', vetements: 'Vêtements' }[t]}</button>`).join('')}</div>
-    <div class="panel left"><div class="ptitle">${ic('wand')}${{ apparence: 'Apparence', coiffure: 'Coiffure', vetements: 'Vêtements' }[S.tab]}</div><div class="scroll">${left()}</div></div>${right()}
+    <div class="panel left"><img class="cr-logo" data-pk-logo alt=""><div class="ptitle">${ic('wand')}${{ apparence: 'Apparence', coiffure: 'Coiffure', vetements: 'Vêtements' }[S.tab]}</div><div class="scroll">${left()}</div></div>${right()}
     ${Music.html()}<button class="finish" id="fin">${ic('check', 16)}Terminer</button></div>`);
     if ($('.scroll')) $('.scroll').scrollTop = sc; Music.start(); };
   draw();
   const rand = n => { const c = C[n]; if (!c) return; const lo = c.min != null ? c.min : 0; set(n, lo + Math.floor(Math.random() * (c.max - lo + 1))); };
   root.onclick = e => {
-    const t = e.target.closest('[data-tab],[data-set],[data-step],[data-rand],[data-reset],[data-her],#fin'); if (!t) return;
+    const t = e.target.closest('[data-tab],[data-set],[data-step],[data-rand],[data-reset],[data-her],[data-tone],#fin'); if (!t) return;
+    if (t.dataset.tone) { const tl = (d.tones && d.tones.length ? d.tones : TONES); set('skin', t.dataset.tone === 'rand' ? tl[Math.floor(Math.random() * tl.length)].id : +t.dataset.tone); return draw(); }
     if (t.id === 'fin') return post('skinDone');
     if (t.dataset.tab) { S.tab = t.dataset.tab; return draw(); }
     if (t.dataset.her) S.her = t.dataset.her;
     if (t.dataset.set) { const [n, v] = t.dataset.set.split(':'); set(n, +v); }
     if (t.dataset.step) { const [n, v] = t.dataset.step.split(':'); set(n, C[n].value + +v); }
-    if (t.dataset.rand) { const k = t.dataset.rand; if (k === 'faces') { rand('face'); rand('skin'); } else if (k === 'traits') d.comps.filter(c => TRAIT.test(c.name)).forEach(c => rand(c.name)); else if (k === 'hair') d.comps.filter(c => HAIRTAB.test(c.name)).forEach(c => rand(c.name)); else if (k === 'cloth') d.comps.filter(c => CLOTH.test(c.name)).forEach(c => rand(c.name)); else rand(k); }
+    if (t.dataset.rand) { const k = t.dataset.rand; if (k === 'faces' || k === 'face') { rand('face'); } else if (k === 'traits') d.comps.filter(c => TRAIT.test(c.name)).forEach(c => rand(c.name)); else if (k === 'hair') d.comps.filter(c => HAIRTAB.test(c.name)).forEach(c => rand(c.name)); else if (k === 'cloth') d.comps.filter(c => CLOTH.test(c.name)).forEach(c => rand(c.name)); else rand(k); }
     if (t.dataset.reset) { const k = t.dataset.reset; const names = k === 'faces' ? ['face', 'skin'] : k === 'traits' ? d.comps.filter(c => TRAIT.test(c.name)).map(c => c.name) : k === 'hair' ? d.comps.filter(c => HAIRTAB.test(c.name)).map(c => c.name) : k === 'cloth' ? d.comps.filter(c => CLOTH.test(c.name)).map(c => c.name) : [k]; names.forEach(n => set(n, C[n].min != null ? Math.max(0, C[n].min) : 0)); }
     draw();
   };

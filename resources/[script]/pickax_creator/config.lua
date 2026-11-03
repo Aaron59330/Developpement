@@ -69,3 +69,12 @@ Config.Welcome = {
 
 -- Nom affiché dans les écrans (vide = nom du serveur du thème)
 Config.ServerName = ''
+
+-- Couleur de peau (écran Apparence) : { label, color (aperçu), id }. id = visage GTA (0-45) dont la peau est reprise ; la forme du visage reste indépendante.
+-- Valeurs par défaut estimées : vérifie les teintes en jeu et ajuste les id si besoin.
+Config.SkinTones = {
+    { label = 'Très clair', color = '#f1d3c2', id = 0 },  { label = 'Clair', color = '#e7bfa4', id = 21 },     { label = 'Beige', color = '#d9a982', id = 4 },
+    { label = 'Hâlé clair', color = '#c8905f', id = 22 }, { label = 'Hâlé', color = '#b67a4a', id = 5 },        { label = 'Doré', color = '#a56a3c', id = 29 },
+    { label = 'Olive', color = '#94603a', id = 12 },      { label = 'Caramel', color = '#80502f', id = 26 },    { label = 'Brun', color = '#6a3f26', id = 10 },
+    { label = 'Brun foncé', color = '#55311f', id = 7 },  { label = 'Ébène', color = '#42261a', id = 23 },     { label = 'Noir profond', color = '#2f1b13', id = 24 },
+}
