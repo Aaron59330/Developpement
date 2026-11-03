@@ -106,15 +106,16 @@ ButtonContextMenu = {
 }
 
 ConfigContextMenu = {
+    -- Apparence d'origine (gris foncé, survol gris clair, liseré et séparateurs à la couleur du serveur)
     Color = {
-        ColorMenu = {22, 23, 28},            -- gris de base (#16171c)
-        ColorMenuHovered = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},     -- survol : bleu principal #fdc27d
+        ColorMenu = {41, 42, 45},
+        ColorMenuHovered = {131, 131, 131},
         ColorText = {255, 255, 255},
-        ColorTextDisable = {107, 110, 120},
-        ColorBorder = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},         -- liseré bleu #fdc27d
-        ColorSeparator = (PickaxTheme and PickaxTheme.rgb) or {253, 194, 125},
-        BorderAlpha = 190,-- opacité du liseré (0-255)
-        SeparatorAlpha = 90 -- opacité des séparateurs (0-255)
+        ColorTextDisable = {75, 76, 79},
+        ColorBorder = (PickaxTheme and PickaxTheme.rgb) or {0, 168, 255},
+        ColorSeparator = (PickaxTheme and PickaxTheme.rgb) or {0, 168, 255},
+        BorderAlpha = 255,   -- opacité du liseré (0-255)
+        SeparatorAlpha = 255 -- opacité des séparateurs (0-255)
     },
 
     Jobs2 = true,
@@ -136,13 +137,14 @@ ConfigContextMenu = {
     ItemCrocheter = "lockpick",
 
     Menu = {
-        UseNUI = true, -- true = menu dessiné par pickax_ui (icônes, couleur du serveur) ; false = ancien dessin natif
+        UseNUI = false, -- false = dessin natif d'origine ; true = menu dessiné par pickax_ui (icônes, couleur du serveur)
+        HoverBar = false, -- barre d'accent à gauche de la ligne survolée (dessin natif)
         RoundedCorners = true, -- true = bords arrondis ; false = apparence par défaut (ancien dessin natif)
-        CornerRadius = 10, -- Rayon des coins en pixels (si RoundedCorners = true)
+        CornerRadius = 8, -- Rayon des coins en pixels (si RoundedCorners = true)
         OpenMenu = 25,--Touche pour accéder au entité
         OpenMenuBind = 19,--ALT (ouvrir le menu principale)
         ClickInMenu = 24,--Intéraction (clique gauche)
-        ColorAlpha = 232,--Alpha du menu
+        ColorAlpha = 200,--Alpha du menu
         RPActions = true,-- ajoute les interactions RP (serrer la main, câlin, pouls…) sur les joueurs et sur soi
     },
 
