@@ -146,3 +146,5 @@ input[type=range] { height: 4px; }
 .tone-name { margin-top: 10px; font-size: 12px; color: #a1a1aa; text-align: center; font-weight: 500; }
 .face-big.on .im, .hero.on i { background: #202025; color: var(--pk-accent,#fdc27d); }
 .face-big.on .im { border-color: var(--pk-accent,#fdc27d); box-shadow: inset 4px 0 0 var(--pk-accent,#fdc27d); } .face-big.on span { color: #fff; }
+.mapimg { -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent); mask-composite: intersect; }
+.mapwrap { background: #0c3a6e; }
