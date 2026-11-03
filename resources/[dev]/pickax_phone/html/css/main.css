@@ -329,3 +329,7 @@ input[type=range], input[type=checkbox], input[type=radio] { accent-color: var(-
 .pane2 .p2g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px 22px; }
 .pane2 .p2g button { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #fff; }
 .pane2 .p2i { width: 62px; height: 62px; border-radius: 17px; display: grid; place-items: center; box-shadow: 0 6px 16px rgba(0,0,0,.35); } .pane2 .p2g em { font-style: normal; font-size: 12px; opacity: .85; }
+:root{--accent:var(--pk-accent,#00a4ff)!important;--bg2:#232325!important;--bg3:#2e2e30!important;--card:#262628!important;--card2:#323234!important;--glass:rgba(38,38,40,.78)!important;--sep:rgba(120,120,125,.35)!important}
+.wall{background:radial-gradient(ellipse 120% 70% at 50% 15%,#3a3a3d 0%,#232325 55%,#141415 100%)!important;background-image:radial-gradient(ellipse 120% 70% at 50% 15%,#3a3a3d 0%,#232325 55%,#141415 100%)!important}
+.lock .quick button,.lock .quick>*{background:linear-gradient(180deg,#46464a,#2c2c2f)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)!important}
+.lock .notifs .notif{background:linear-gradient(180deg,#3b3b3d,#262628)!important;box-shadow:inset 0 0 0 1px #404043!important}
