@@ -292,6 +292,16 @@ window.addEventListener('message', function (e) {
 });
 
 
+// Curseur par-dessus le menu contextuel
+window.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.a !== 'ctxcur') return;
+  var c = document.getElementById('ctxcur');
+  if (d.x == null || d.y == null) { c.classList.add('hidden'); return; }
+  c.style.transform = 'translate(' + (d.x * window.innerWidth) + 'px,' + (d.y * window.innerHeight) + 'px)';
+  c.classList.remove('hidden');
+});
+
 // ───────────── Menu contextuel ─────────────
 (function () {
   var host = document.getElementById('ctx');

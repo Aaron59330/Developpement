@@ -242,4 +242,5 @@ AddEventHandler('onResourceStop', function(res) if res == GetCurrentResourceName
 -- ───────────── Menu contextuel (clic droit / main levée) : dessiné ici, la logique reste dans pickax_core/players/contextMenu ─────────────
 -- exports.pickax_ui:CtxShow({ { x, y, w, h, title, items = { { y, h, text, right, kind, enabled, hovered, open, checked, sep } } } })   exports.pickax_ui:CtxHide()
 exports('CtxShow', function(menus) SendNUIMessage({ a = 'ctx', menus = menus }) end)
-exports('CtxHide', function() SendNUIMessage({ a = 'ctx', menus = false }) end)
+exports('CtxHide', function() SendNUIMessage({ a = 'ctx', menus = false }) SendNUIMessage({ a = 'ctxcur' }) end)
+exports('CtxCursor', function(x, y) SendNUIMessage({ a = 'ctxcur', x = x, y = y }) end)

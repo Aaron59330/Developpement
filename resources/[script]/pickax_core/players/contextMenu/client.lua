@@ -908,7 +908,27 @@ function CtxPush(pool)
         if #menus > 0 then exports.pickax_ui:CtxShow(menus) else exports.pickax_ui:CtxHide() end
     end
 end
+-- Curseur dessiné PAR-DESSUS le menu (le curseur du jeu passe derrière l'interface) : envoyé seulement quand la souris est sur un menu
+local ctxCurIn, ctxCurX, ctxCurY = false, -1, -1
+function CtxCursor(pool, pos)
+    local inside = false
+    for i = 1, #pool.menus do
+        local m = pool.menus[i]
+        if m:Visible() and m:InBounds(pos) then inside = true break end
+    end
+    if inside then
+        if not ctxCurIn or math.abs(pos.x - ctxCurX) > 0.0006 or math.abs(pos.y - ctxCurY) > 0.0006 then
+            ctxCurIn, ctxCurX, ctxCurY = true, pos.x, pos.y
+            pcall(function() exports.pickax_ui:CtxCursor(pos.x, pos.y) end)
+        end
+    elseif ctxCurIn then
+        ctxCurIn = false
+        pcall(function() exports.pickax_ui:CtxCursor(nil, nil) end)
+    end
+end
+
 function CtxPop()
+    if ctxCurIn then ctxCurIn = false pcall(function() exports.pickax_ui:CtxCursor(nil, nil) end) end
     if ctxLast ~= '' then ctxLast = '' pcall(function() exports.pickax_ui:CtxHide() end) end
 end
 MenuPool = {}
@@ -1008,7 +1028,7 @@ function MenuPool:Process()
                 self.menus[i]:Process(cursorPos)
             end
         end
-        if CTXNUI then CtxPush(self) end
+        if CTXNUI then CtxPush(self) CtxCursor(self, cursorPos) end
         DisableControlAction(0, 1, true)
         DisableControlAction(0, 2, true)
         DisableControlAction(0, self.keys.keyboard.activateItem, true)
