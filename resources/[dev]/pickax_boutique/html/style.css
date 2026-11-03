@@ -323,3 +323,17 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .search input::placeholder { color: rgba(255, 255, 255, .6); } .search svg { color: #fff; }
 .card .go svg, .card .go { color: #fff !important; } .idcard small, .idcard span { color: rgba(255, 255, 255, .75); }
 .coins small { color: rgba(255, 255, 255, .75); }
+
+/* ── Dégradé « vignette » : plus clair au milieu, plus sombre sur les bords (tuiles, boutons, cartes, panneau) ── */
+#root { background: radial-gradient(ellipse 85% 80% at 52% 42%, rgba(104, 104, 107, .72) 0%, rgba(80, 80, 83, .62) 55%, rgba(48, 48, 50, .55) 100%); box-shadow: inset 0 0 90px rgba(0, 0, 0, .32), 0 0 0 1px rgba(255, 255, 255, .05), 0 16px 44px rgba(0, 0, 0, .35); }
+.nav button, .foot button, .idcard, .coins, .xbtn, .sort button, .btn, .chip {
+  background: radial-gradient(ellipse 120% 150% at 50% 50%, rgba(150, 150, 154, .66) 0%, rgba(112, 112, 116, .50) 55%, rgba(66, 66, 69, .55) 100%) !important;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, .38) !important; }
+.nav button:hover, .foot button:hover, .xbtn:hover, .sort button:hover, .btn:hover {
+  background: radial-gradient(ellipse 120% 150% at 50% 50%, rgba(176, 176, 180, .75) 0%, rgba(132, 132, 136, .58) 55%, rgba(80, 80, 84, .6) 100%) !important; }
+.search { background: radial-gradient(ellipse 120% 160% at 50% 50%, rgba(128, 128, 132, .62) 0%, rgba(92, 92, 96, .5) 60%, rgba(58, 58, 61, .55) 100%) !important; box-shadow: inset 0 0 12px rgba(0, 0, 0, .35); }
+.card { background: radial-gradient(ellipse 100% 90% at 50% 40%, rgba(150, 150, 154, .55) 0%, rgba(110, 110, 114, .38) 55%, rgba(62, 62, 65, .5) 100%) !important; box-shadow: inset 0 0 26px rgba(0, 0, 0, .38) !important; }
+.card:hover { background: radial-gradient(ellipse 100% 90% at 50% 40%, color-mix(in srgb, var(--acc) 100%, #fff 12%) 0%, var(--acc) 55%, color-mix(in srgb, var(--acc) 100%, #000 38%) 100%) !important; }
+.nav button.on, .sort button.on, .sort button.active { background: radial-gradient(ellipse 120% 150% at 50% 50%, color-mix(in srgb, var(--acc) 100%, #fff 14%) 0%, var(--acc) 55%, color-mix(in srgb, var(--acc) 100%, #000 40%) 100%) !important; box-shadow: inset 0 0 14px rgba(0, 0, 0, .3) !important; }
+.btn.pri, .coins .c { background: radial-gradient(ellipse 120% 150% at 50% 50%, color-mix(in srgb, var(--acc) 100%, #fff 14%) 0%, var(--acc) 55%, color-mix(in srgb, var(--acc) 100%, #000 40%) 100%) !important; }
+.sheet { background: radial-gradient(ellipse 90% 80% at 50% 40%, rgba(104, 104, 107, .95), rgba(52, 52, 54, .95)); box-shadow: inset 0 0 70px rgba(0, 0, 0, .35); }
