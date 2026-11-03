@@ -454,3 +454,4 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .nav-label, .cap { color: #8d8d92; } .head p, .gx-info small { color: #a9a9ae; }
 #confirm > *, #modal > * { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f, #151516); }
 .gx-search input { background: transparent; box-shadow: none; }
+.profile.logo-only, .brand.logo-only { background: none !important; box-shadow: none !important; border: 0 !important; }

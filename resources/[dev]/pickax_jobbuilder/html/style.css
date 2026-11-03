@@ -699,3 +699,4 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .jm-duty.on { background: linear-gradient(180deg, #2fd470, #17a653); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35); border: 0; color: #fff; }
 .jm-duty.off { background: linear-gradient(180deg, #3b3b3d, #262628); box-shadow: inset 0 0 0 1px #404043; }
 .gx-search input { background: transparent; box-shadow: none; }
+.profile.logo-only, .brand.logo-only { background: none !important; box-shadow: none !important; border: 0 !important; }

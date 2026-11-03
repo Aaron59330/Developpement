@@ -442,3 +442,4 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 .profile.logo-only { display: flex; align-items: center; justify-content: center; padding: 12px; }
 .profile.logo-only .plogo { width: auto; max-width: 150px; height: 34px; object-fit: contain; }
 .profile .pname { display: none; }
+.profile.logo-only, .brand.logo-only { background: none !important; box-shadow: none !important; border: 0 !important; }

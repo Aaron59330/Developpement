@@ -68,3 +68,4 @@ html, body { height: 100%; background: transparent; color: #eef0f4; font: 14px/1
 .bonus { background: linear-gradient(180deg, #3b3b3d, #262628); border: 0; box-shadow: inset 0 0 0 1px #404043; border-radius: 4px; } .bonus.done { box-shadow: inset 0 0 0 1px rgba(74, 222, 128, .6); }
 .boost { background: linear-gradient(180deg, #2f3a44, #1f2830); border: 0; box-shadow: inset 0 0 0 1px rgba(var(--ar), .4); border-radius: 4px; }
 .foot { color: #8d8d92; }
+.cn-logo { background: none !important; box-shadow: none !important; border: 0 !important; padding: 0 !important; }
