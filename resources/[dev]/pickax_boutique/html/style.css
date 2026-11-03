@@ -419,34 +419,3 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .price .pill s.old { font-size: 11px; margin-left: 2px; }
 .price .mini, .price .card .mini { width: 92px; min-width: 92px; padding: 0 6px; gap: 5px; font-size: 11.5px; letter-spacing: .03em; }
 .price .mini svg { width: 16px; height: 16px; }
-
-/* ═══ Redesign visuel (couleurs et style uniquement, mise en page inchangée) : verre sombre premium, filets fins, halos de la couleur du serveur ═══ */
-#root { background: radial-gradient(900px 420px at 12% -8%, color-mix(in srgb, var(--acc) 16%, transparent), transparent 70%), radial-gradient(700px 380px at 100% 110%, rgba(255, 255, 255, .04), transparent 70%), linear-gradient(180deg, #14161b 0%, #0e1013 100%); border: 1px solid rgba(255, 255, 255, .09); border-radius: 14px; box-shadow: 0 30px 90px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .07); }
-.side { background: rgba(255, 255, 255, .02); border-right: 1px solid rgba(255, 255, 255, .06); }
-.cap { color: #6f7685; } .cap::after { background: rgba(255, 255, 255, .07); }
-.nav button, .foot button { background: rgba(255, 255, 255, .035) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07) !important; border-radius: 10px; transition: background .15s, box-shadow .15s; }
-.nav button:hover, .foot button:hover { background: rgba(255, 255, 255, .07) !important; }
-.nav button.on { background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 22%, transparent), rgba(255, 255, 255, .03)) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 55%, transparent), 0 0 22px color-mix(in srgb, var(--acc) 22%, transparent) !important; }
-.nav .lb b { font-weight: 700; letter-spacing: .02em; } .nav .lb small { color: #7d8493; }
-.hero h1 em { color: var(--acc); text-shadow: 0 0 24px color-mix(in srgb, var(--acc) 45%, transparent); } .hero p { color: #8a91a0; letter-spacing: .08em; }
-.coins { background: linear-gradient(180deg, rgba(255, 205, 90, .16), rgba(255, 170, 40, .08)) !important; box-shadow: inset 0 0 0 1px rgba(255, 196, 80, .45) !important; border-radius: 10px; } .coins b { color: #ffd36b; } .coins small { color: #c9b27a; } .coins .c { background: linear-gradient(180deg, #ffd36b, #e0a028) !important; color: #4a3200 !important; }
-.xbtn { background: rgba(255, 255, 255, .05) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09) !important; border-radius: 10px; }
-.search, .sort button { background: rgba(255, 255, 255, .04) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08) !important; border-radius: 10px; }
-.sort button.on, .sort button.active { background: color-mix(in srgb, var(--acc) 22%, transparent) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent) !important; color: #fff; }
-.scroll { background: transparent; box-shadow: none; }
-.card { background: linear-gradient(180deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .02) 100%) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 8px 24px rgba(0, 0, 0, .35) !important; border-radius: 14px; overflow: hidden; }
-.card:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 70%, transparent), 0 0 28px color-mix(in srgb, var(--acc) 26%, transparent), 0 12px 30px rgba(0, 0, 0, .45) !important; background: linear-gradient(180deg, rgba(255, 255, 255, .09) 0%, rgba(255, 255, 255, .03) 100%) !important; }
-.pic { background: radial-gradient(220px 120px at 50% 62%, rgba(255, 255, 255, .13), transparent 70%) !important; }
-.info h3 { font-weight: 700; } .info .meta { color: #7d8493; }
-.pill { background: rgba(255, 196, 80, .10) !important; color: #ffd36b !important; box-shadow: inset 0 0 0 1px rgba(255, 196, 80, .4) !important; border-radius: 9px; text-shadow: none !important; }
-.pill i { background: linear-gradient(180deg, #ffd36b, #e0a028); box-shadow: 0 0 8px rgba(255, 196, 80, .6); }
-.pill.short { background: rgba(255, 100, 90, .12) !important; color: #ff9b92 !important; box-shadow: inset 0 0 0 1px rgba(255, 110, 100, .45) !important; } .pill.short i { background: #ff8a7a; box-shadow: 0 0 8px rgba(255, 110, 100, .6); }
-.price .pill s.old, .pill s.old { color: rgba(255, 211, 107, .5) !important; }
-.mini, .price .mini { background: linear-gradient(180deg, #34d27a, #1aa85a) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 4px 14px rgba(34, 197, 94, .3) !important; border-radius: 9px !important; }
-.tag { background: rgba(0, 0, 0, .55) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15); border-radius: 6px; backdrop-filter: blur(4px); }
-.dtag, .dbadge { background: var(--acc) !important; color: #fff !important; box-shadow: 0 0 14px color-mix(in srgb, var(--acc) 55%, transparent); }
-.sheet { background: linear-gradient(180deg, #181b21, #0f1115); border: 1px solid rgba(255, 255, 255, .1); border-radius: 16px; box-shadow: 0 30px 90px rgba(0, 0, 0, .7); }
-.btn { background: rgba(255, 255, 255, .06) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; border-radius: 10px; } .btn.pri { background: linear-gradient(180deg, #34d27a, #1aa85a) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 18px rgba(34, 197, 94, .3) !important; }
-.chip { background: rgba(255, 255, 255, .06) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09) !important; border-radius: 8px; }
-.toast { background: #14161b; border-left: 3px solid var(--acc); border-radius: 10px; }
-.dbadge { background: transparent !important; box-shadow: none !important; color: var(--acc) !important; font-weight: 800; }
