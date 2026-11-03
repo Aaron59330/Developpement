@@ -482,7 +482,7 @@
     const src = imageOf(it) || XMARK;
     if (el._src !== src) { el._src = src; el._pic.src = src; }
 
-    if (it.count > 1 && inv.type !== 'shop') {
+    if (it.count >= 1 && inv.type !== 'shop') {
       el._count.textContent = `x${it.count.toLocaleString('en-us')}`;
       if (it.name === 'money') el._count.textContent = `${it.count.toLocaleString('en-us')}${state.locale.$ || '$'}`;
     } else el._count.textContent = '';
@@ -1142,15 +1142,21 @@
     const data = state.itemData[item.name] || {};
     const list = document.createElement('div');
     list.className = 'ctx-list';
-    const btn = (label, fn) => {
+    const CI = {
+      use: '<path d="M5 3l14 9-14 9z"/>', give: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>', drop: '<path d="M6 7h12M9 7V4h6v3M8 7l1 13h6l1-13"/>',
+      open: '<path d="M3 9h18v11H3zM8 9V6h8v3"/>', throw: '<path d="M4 20l7-7M13 11l7-7M14 4h6v6"/>', rename: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+      ammo: '<path d="M9 3h6v6l2 2v10H7V11l2-2z"/>', copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>', dot: '<circle cx="12" cy="12" r="3"/>'
+    };
+    const btn = (label, fn, ic, danger) => {
       const b = document.createElement('button');
-      b.type = 'button'; b.className = 'ctx-item'; b.textContent = label;
+      b.type = 'button'; b.className = 'ctx-item' + (danger ? ' danger' : '');
+      b.innerHTML = `<span class="ci"><svg viewBox="0 0 24 24">${CI[ic || 'dot']}</svg></span><span class="cl">${esc(label)}</span>`;
       b.addEventListener('click', e => { e.stopPropagation(); fn(); });
       return b;
     };
     const sub = (label, children) => {
       const b = document.createElement('div');
-      b.className = 'ctx-item'; b.innerHTML = `<span>${esc(label)}</span><span class="arrow">▶</span>`;
+      b.className = 'ctx-item'; b.innerHTML = `<span class="ci"><svg viewBox="0 0 24 24">${CI.dot}</svg></span><span class="cl">${esc(label)}</span><span class="arrow">▶</span>`;
       const inner = document.createElement('div');
       inner.className = 'ctx-list';
       children.forEach(c => inner.appendChild(c));
@@ -1160,14 +1166,14 @@
       return b;
     };
     const isBag = (item.metadata && item.metadata.container) || data.bag;
-    if (isBag) list.appendChild(btn(data.openLabel || L('ui_open_bag', 'Ouvrir le sac'), () => ctxAction(item, { action: 'openBag' })));
-    if (!isBag || !/^(sac_|portefeuille)/.test(item.name)) list.appendChild(btn(isBag ? L('ui_wear', 'Porter') : L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' })));
-    list.appendChild(btn(L('ui_give', 'Donner'), () => ctxAction(item, { action: 'give' })));
-    list.appendChild(btn(L('ui_drop', 'Jeter'), () => ctxAction(item, { action: 'drop' })));
-    if (state.options.throwing) list.appendChild(btn(L('ui_throw', 'Lancer'), () => ctxAction(item, { action: 'throw' })));
-    if (state.options.rename) list.appendChild(btn(L('ui_rename', 'Renommer'), () => ctxAction(item, { action: 'rename' })));
-    if (item.metadata && item.metadata.ammo > 0) list.appendChild(btn(L('ui_remove_ammo', 'Vider le chargeur'), () => ctxAction(item, { action: 'removeAmmo' })));
-    if (item.metadata && item.metadata.serial) list.appendChild(btn(L('ui_copy', 'Copier le numéro de série'), () => ctxAction(item, { action: 'copy', serial: item.metadata.serial })));
+    if (isBag) list.appendChild(btn(data.openLabel || L('ui_open_bag', 'Ouvrir le sac'), () => ctxAction(item, { action: 'openBag' }), 'open'));
+    if (!isBag || !/^(sac_|portefeuille)/.test(item.name)) list.appendChild(btn(isBag ? L('ui_wear', 'Porter') : L('ui_use', 'Utiliser'), () => ctxAction(item, { action: 'use' }), 'use'));
+    list.appendChild(btn(L('ui_give', 'Donner'), () => ctxAction(item, { action: 'give' }), 'give'));
+    list.appendChild(btn(L('ui_drop', 'Jeter'), () => ctxAction(item, { action: 'drop' }), 'drop', true));
+    if (state.options.throwing) list.appendChild(btn(L('ui_throw', 'Lancer'), () => ctxAction(item, { action: 'throw' }), 'throw'));
+    if (state.options.rename) list.appendChild(btn(L('ui_rename', 'Renommer'), () => ctxAction(item, { action: 'rename' }), 'rename'));
+    if (item.metadata && item.metadata.ammo > 0) list.appendChild(btn(L('ui_remove_ammo', 'Vider le chargeur'), () => ctxAction(item, { action: 'removeAmmo' }), 'ammo'));
+    if (item.metadata && item.metadata.serial) list.appendChild(btn(L('ui_copy', 'Copier le numéro de série'), () => ctxAction(item, { action: 'copy', serial: item.metadata.serial }), 'copy'));
     if (item.metadata && item.metadata.components && item.metadata.components.length > 0) {
       list.appendChild(sub(L('ui_removeattachments', 'Retirer des accessoires'), item.metadata.components.map(c =>
         btn((state.itemData[c] && state.itemData[c].label) || c, () => ctxAction(item, { action: 'remove', component: c, slot: item.slot })))));
@@ -1186,6 +1192,11 @@
         else g.buttons.forEach(b => list.appendChild(mk(b)));
       }
     }
+    const head = document.createElement('div');
+    head.className = 'ctx-head';
+    const src = typeof imageOf === 'function' ? imageOf(item) : '';
+    head.innerHTML = `${src ? `<img src="${esc(src)}" alt="">` : ''}<div><b>${esc(item.label || data.label || item.name)}</b><small>${item.count > 0 ? 'x' + item.count.toLocaleString('en-us') : ''}${item.weight ? ` · ${(item.weight / 1000).toFixed(1)} kg` : ''}</small></div>`;
+    list.insertBefore(head, list.firstChild);
     ui.ctx.textContent = '';
     ui.ctx.appendChild(list);
     ui.ctx.style.display = 'block';

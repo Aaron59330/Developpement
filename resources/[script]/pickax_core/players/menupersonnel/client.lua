@@ -31,8 +31,6 @@ local Prefs = {
 		{ key = 'accent', label = 'Couleur principale', desc = 'Barre, détails et accents des menus', noDefault = true, presets = {
 			{ (PickaxTheme and PickaxTheme.hex) or '#fdc27d', 'Couleur du serveur' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' },
 			{ '#f97316', 'Orange' }, { '#ec4899', 'Rose' }, { '#eab308', 'Jaune' }, { '#f4f4f5', 'Blanc' } } },
-		{ key = 'selbg', label = 'Couleur des boutons', desc = 'Couleur du bouton sélectionné', presets = {
-			{ '#fdc27d', 'Bleu' }, { '#ffffff', 'Blanc' }, { '#ef4444', 'Rouge' }, { '#22c55e', 'Vert' }, { '#a855f7', 'Violet' }, { '#eab308', 'Jaune' } } },
 	},
 	BtnRadius = { { 0, 'Carré' }, { 6, 'Léger' }, { 12, 'Arrondi' }, { 18, 'Très arrondi' }, { 24, 'Fort arrondi' }, { 999, 'Rond (pilule)' } },
 }

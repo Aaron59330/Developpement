@@ -133,3 +133,25 @@
 #app #outfit-drop span::after { content: ''; }
 body.drag-outfit-off .panel.left .slot:not(.has), body.drag-outfit-off .panel.left .slot:not(.has):hover { border-color: rgba(var(--pk-accent-rgb, 253, 194, 125), .45) !important; border-style: dashed !important; }
 #app #outfit-drop.worn:hover span { color: #9a9eac !important; }
+
+/* ── Compteur : toujours « xN » (x1 inclus), jamais de pastille vide ── */
+#app .slot .count:empty { display: none !important; }
+
+/* ── Menu contextuel de l'inventaire : en-tête, icônes, contours ── */
+#ctx .ctx-list { min-width: 214px !important; padding: 7px !important; border-radius: 16px !important; background: linear-gradient(160deg, rgba(24, 25, 31, .985), rgba(11, 12, 16, .985)) !important;
+  border: 1px solid rgba(var(--pk-accent-rgb, 253, 194, 125), .45) !important; box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 18px 48px rgba(0, 0, 0, .65), 0 0 28px rgba(var(--pk-accent-rgb, 253, 194, 125), .12) !important; animation: ctxPop .14s ease-out; }
+@keyframes ctxPop { from { opacity: 0; transform: translateY(5px) scale(.97); } to { opacity: 1; transform: none; } }
+#ctx .ctx-head { display: flex; align-items: center; gap: 10px; padding: 7px 8px 10px; margin-bottom: 5px; border-bottom: 1px solid rgba(255, 255, 255, .09); }
+#ctx .ctx-head img { width: 34px; height: 34px; object-fit: contain; padding: 3px; border-radius: 10px; background: rgba(var(--pk-accent-rgb, 253, 194, 125), .12); border: 1px solid rgba(var(--pk-accent-rgb, 253, 194, 125), .4); }
+#ctx .ctx-head b { display: block; font-size: 13px; color: #fff; }
+#ctx .ctx-head small { color: rgba(255, 255, 255, .55); font-size: 11px; font-weight: 600; }
+#ctx .ctx-item { gap: 10px !important; padding: 8px 10px !important; margin: 2px 0; border: 1px solid transparent !important; border-radius: 10px !important; justify-content: flex-start !important; transition: background .1s, border-color .1s; }
+#ctx .ctx-item .ci { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 8px; background: rgba(255, 255, 255, .06); }
+#ctx .ctx-item .ci svg { width: 14px; height: 14px; fill: none; stroke: rgba(255, 255, 255, .8); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#ctx .ctx-item .cl { flex: 1; }
+#ctx .ctx-item:hover, #ctx .ctx-item.open { background: rgba(var(--pk-accent-rgb, 253, 194, 125), .13) !important; border-color: rgba(var(--pk-accent-rgb, 253, 194, 125), .7) !important; color: #fff !important; box-shadow: inset 0 0 0 1px rgba(var(--pk-accent-rgb, 253, 194, 125), .12); }
+#ctx .ctx-item:hover .ci, #ctx .ctx-item.open .ci { background: rgba(var(--pk-accent-rgb, 253, 194, 125), .25); }
+#ctx .ctx-item:hover .ci svg { stroke: var(--pk-accent-light, #fdcb8f); }
+#ctx .ctx-item.danger:hover { background: rgba(239, 68, 68, .14) !important; border-color: rgba(239, 68, 68, .75) !important; }
+#ctx .ctx-item.danger:hover .ci { background: rgba(239, 68, 68, .28); } #ctx .ctx-item.danger:hover .ci svg { stroke: #ff8a8a; }
+#ctx .ctx-item .arrow { margin-left: auto; }
