@@ -150,8 +150,22 @@ function sidebar(cats) {
     <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
-const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>BOUTIQUE</span> <em>${esc(String(title).toUpperCase())}</em>${S.data && S.data.boutiqueId ? `<b class="hcode"><small>CODE</small> #${esc(S.data.boutiqueId)}</b>` : ''}</h1><p>${esc(String(sub).toUpperCase())}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
+const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>BOUTIQUE</span> <em>${esc(String(title).toUpperCase())}</em>${S.data && S.data.boutiqueId ? `<b class="hcode"><small>CODE</small> #${esc(S.data.boutiqueId)}</b>` : ''}</h1><p>${esc(String(sub).toUpperCase())}</p></div></div></div>`;
 
+
+function topbar() {
+  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
+  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : '';
+  return `<header class="tbar"><div class="tb-l">${mark}<h1><span>BOUTIQUE</span> <em>${esc(String(sv.short || sv.name || '').toUpperCase())}</em></h1>${S.data && S.data.boutiqueId ? `<div class="tb-code"><small>CODE</small><b>${esc(S.data.boutiqueId)}</b></div>` : ''}</div>
+    <div class="tb-r">${S.data && S.data.link ? `<button class="gbtn" data-a="link">${ic('link', 16)}Acheter des coins</button>` : ''}${coinsBox()}</div></header>`;
+}
+function offersStrip() {
+  const items = (S.data && S.data.daily) || [], d = dailyD();
+  if (!items.length || S.cat === 'daily') return '';
+  const cards = items.slice(0, 4).map(it => { const k = it._cat, p = effPrice(k, it);
+    return `<div class="of" data-a="open" data-c="${k}" data-i="${it.idx}"><div class="ofp">${picHtml(k, it, '')}</div><div class="ofi"><b>${esc(it.name)}</b><span class="ofx"><i></i>${fmt(p)}${p < it.price ? ` <s>${fmt(it.price)}</s>` : ''}</span></div>${d ? `<em>-${d}%</em>` : ''}</div>`; }).join('');
+  return `<div class="offers"><div class="ofh"><span>${ic('flame', 16)} OFFRES DU JOUR${d ? ` <b>-${d} %</b>` : ''}</span><button data-a="cat" data-id="daily">Voir toute la sélection</button></div><div class="ofl">${cards}</div></div>`;
+}
 function render() {
   if (!S.data) return;
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
@@ -163,14 +177,14 @@ function render() {
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
   else main = S.cat === 'daily' ? viewDaily() : viewShop();
-  $root.innerHTML = sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '');
+  $root.innerHTML = topbar() + sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '');
 }
 
 function viewShop() {
   const c = cat(), items = filtered();
   $root.style.setProperty('--cc', c.color);
   const sorts = [['price', 'Prix croissant'], ['priceDesc', 'Prix décroissant'], ['name', 'Nom A-Z']];
-  return heroBar(c.icon, c.label, c.sub, c.color) +
+  return heroBar(c.icon, c.label, c.sub, c.color) + offersStrip() +
     `<div class="tools"><label class="search">${ic('search', 16)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}"></label>
       <div class="sort">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</div><div class="sp"></div><span class="count">${items.length} article${items.length > 1 ? 's' : ''}</span></div>
       <div class="scroll"><div class="grid">${items.length ? items.map((it, n) => `<div class="card" data-a="open" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(S.cat, it, tagOf(it))}
