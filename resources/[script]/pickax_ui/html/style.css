@@ -287,3 +287,4 @@ h2 + .irow, .ih + .irow, .irow:first-child { border-top: 0; }
 /* Bandeau de description sous le menu personnel : rendu d'origine (fond sombre uni, coins arrondis, trait de couleur en bas) */
 .desc { background: rgba(22, 23, 28, .94); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 .desc::after { height: 2px; background: var(--accent); }
+#wrap[data-style] .desc, #wrap .desc { border-left: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; background: rgba(22, 23, 28, .94); }
