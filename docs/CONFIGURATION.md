@@ -419,3 +419,7 @@ Les ressources `pickax_crime`, `pickax_life`, `pickax_forensics`, `pickax_medica
 ### Niveaux et XP des joueurs (pickax_xp)
 
 Chaque action rapporte de l'XP (achats en magasin selon le prix ou l'objet, véhicule, cuisine, pêche, chasse, courses, réparations, soins, analyses, tâches de métier, mini-jeux, activités illégales, temps de jeu, connexion quotidienne). Tout se règle dans `pickax_xp/config.lua` : courbe des niveaux (`Curve`), XP par action (`Actions`, avec `cooldown` et `dailyCap` anti-abus) et **récompenses par niveau** (`Rewards` : argent liquide, banque, objets, ou simple mention). Écran « Niveau et récompenses » : touche `F4` (`Config.Key`). D'autres scripts peuvent donner de l'XP avec `exports['pickax_xp']:AddXP(src, 'action', { price = 100 })`. Commande admin : `/givexp [id] [quantité]`. Les achats ox_inventory sont captés automatiquement (hook `buyItem`).
+
+### Roue d'actions (pickax_wheel)
+
+Maintiens **TAB** : la roue s'ouvre ; déplace la souris vers une case, **relâche TAB** (ou clic gauche) pour utiliser. Onglets : **Armes** (8 types, molette = autre arme du même type), **Objets** (ton inventaire, 8 par page), **Emotes**, **Tenue** (retirer / remettre chapeau, lunettes, masque, haut…), **Raccourcis**. Clic droit = onglet suivant, Échap = annuler. Tout se règle dans `pickax_wheel/config.lua` (touche, onglets, types d'armes, emotes, pièces de tenue, raccourcis). Les armes et objets utilisent directement ox_inventory (`useSlot`).
