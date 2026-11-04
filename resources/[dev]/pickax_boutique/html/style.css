@@ -496,7 +496,112 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .sheet { background: #24252b !important; }
 .body::-webkit-scrollbar-thumb { background: #3a3b43; }
 
-/* petit bouton « Panel gestion » (staff) en bas à droite */
-.gbtn { position: absolute; right: 22px; bottom: 16px; z-index: 6; height: 32px; padding: 0 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; color: #cfd0d4; background: #26272e; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 4px 14px rgba(0, 0, 0, .4); transition: all .15s; }
-.gbtn svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: color-mix(in srgb, var(--sa) 60%, #fff); }
-.gbtn:hover { color: #fff; box-shadow: inset 0 0 0 1px rgba(var(--sa-rgb), .7), 0 4px 14px rgba(0, 0, 0, .4); }
+/* ═════════ Style « Fortnite » : fenêtre bleu → violet, onglets en haut, cartes colorées, panneau de détail à droite ═════════ */
+:root { --fg1: #ffe36a; --fg2: #ffb52e; }
+#root.fn { display: flex !important; flex-direction: column; width: min(1200px, 96vw) !important; height: min(680px, 92vh) !important; padding: 0 !important; border: 0 !important; border-radius: 14px !important; overflow: hidden; color: #fff;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  background: radial-gradient(ellipse 60% 50% at 15% 0%, rgba(120, 230, 255, .55), transparent 70%), radial-gradient(ellipse 55% 60% at 100% 100%, rgba(255, 80, 200, .5), transparent 70%), radial-gradient(ellipse 40% 40% at 60% 100%, rgba(255, 170, 60, .3), transparent 70%), linear-gradient(160deg, #2a8cf0, #1a55d8 55%, #5a2fd0) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .15) !important; }
+#root.fn::before { display: none !important; }
+#root.fn::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: repeating-linear-gradient(115deg, rgba(255, 255, 255, .035) 0 2px, transparent 2px 38px); }
+#root.fn > * { position: relative; z-index: 1; }
+/* barre du haut */
+#root.fn .fnav { flex: none; display: flex; align-items: center; gap: 6px; padding: 18px 26px 6px; }
+#root.fn .logo { padding: 0 14px 0 0 !important; display: block; } #root.fn .logo img { height: 28px !important; width: auto; max-width: 120px; display: block; margin: 0; } #root.fn .logo b { font-size: 16px; }
+#root.fn .ftabs { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; } #root.fn .ftabs::-webkit-scrollbar { display: none; }
+#root.fn .ft { flex: none; height: 38px; padding: 0 14px; border-radius: 8px; font-weight: 900; font-size: 13px; letter-spacing: .3px; text-transform: uppercase; color: #fff; background: transparent; white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; transition: background .15s; }
+#root.fn .ft:hover { background: rgba(255, 255, 255, .14); }
+#root.fn .ft.on { background: linear-gradient(90deg, var(--fg1), var(--fg2)); color: #3a2200; }
+#root.fn .ft small { font-size: 10.5px; font-weight: 800; background: rgba(10, 20, 90, .55); color: #fff; padding: 2px 6px; border-radius: 5px; } #root.fn .ft.on small { background: rgba(58, 34, 0, .22); color: #3a2200; }
+#root.fn .fchips { display: flex; align-items: center; gap: 6px; flex: none; }
+#root.fn .fi { position: relative; width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; color: #fff; background: transparent; } #root.fn .fi svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+#root.fn .fi:hover { background: rgba(255, 255, 255, .14); } #root.fn .fi.on { background: linear-gradient(90deg, var(--fg1), var(--fg2)); color: #3a2200; } #root.fn .fi.buy { color: #ff9fd0; }
+#root.fn .fb { position: absolute; right: -2px; top: -3px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #ff3d6e; color: #fff; font-size: 10px; font-weight: 900; display: grid; place-items: center; }
+#root.fn .fcode { display: inline-flex; align-items: center; gap: 9px; height: 38px; margin-left: 6px; padding: 0 12px; border-radius: 8px; background: #1b3aa6; border: 2px dashed rgba(255, 255, 255, .55); } #root.fn .fcode small { font-size: 10px; font-weight: 800; letter-spacing: .08em; opacity: .85; } #root.fn .fcode b { font-weight: 900; font-size: 14px; letter-spacing: .06em; color: var(--fg1); user-select: text; }
+#root.fn .fcoins { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 8px; background: linear-gradient(90deg, var(--fg1), var(--fg2)); color: #3a2200; } #root.fn .fcoins b { font-size: 15px; font-weight: 900; } #root.fn .fcoins .cl { height: 18px; max-width: 40px; margin: 0; } #root.fn .fcoins i.cb { color: #3a2200; margin: 0; }
+#root.fn .fbody { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 30px 66px !important; display: block; }
+#root.fn .fbody.shop { overflow: hidden; }
+#root.fn .fbody::-webkit-scrollbar, #root.fn .fgrid::-webkit-scrollbar { width: 6px; } #root.fn .fbody::-webkit-scrollbar-thumb, #root.fn .fgrid::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .3); border-radius: 6px; }
+/* page boutique : liste + panneau */
+#root.fn .fshop { display: flex; gap: 20px; height: 100%; }
+#root.fn .fleft { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#root.fn .ftitle { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 62px; }
+#root.fn .ftitle h3 { font: italic 900 36px/1 'Arial Black', Arial, sans-serif; text-transform: uppercase; text-shadow: 0 3px 0 rgba(120, 30, 160, .55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#root.fn .fright { display: flex; align-items: center; gap: 8px; flex: none; }
+#root.fn .fcd { padding: 8px 14px; border-radius: 6px; background: linear-gradient(90deg, #ff3d8a, #9d2bff); font: italic 800 12.5px Arial; white-space: nowrap; }
+#root.fn .fsearch { display: flex; align-items: center; gap: 8px; width: 170px; height: 34px; padding: 0 11px; border-radius: 8px; background: #2236aa; } #root.fn .fsearch input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: #fff; font: inherit; font-size: 12.5px; user-select: text; } #root.fn .fsearch:focus-within { box-shadow: 0 0 0 2px var(--fg1); }
+#root.fn .sorts { display: inline-flex; gap: 4px; } #root.fn .sorts button { padding: 0 11px; height: 34px; border-radius: 8px; background: #2236aa !important; box-shadow: none !important; color: #fff !important; font-weight: 800; font-size: 12px; } #root.fn .sorts button.on { background: linear-gradient(90deg, var(--fg1), var(--fg2)) !important; color: #3a2200 !important; }
+#root.fn .fgrid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 210px; gap: 14px; align-content: start; padding: 4px 6px 8px 4px; }
+#root.fn .card { --c1: #c98bff; --c2: #7b2bd6; position: relative; padding: 0 !important; min-height: 0 !important; border-radius: 10px !important; display: block; overflow: hidden; border: 0 !important; transform: none; animation: up .35s ease backwards; cursor: pointer;
+  background: linear-gradient(180deg, var(--c1), var(--c2) 72%) !important; box-shadow: 0 6px 14px rgba(0, 20, 90, .3) !important; }
+#root.fn .card:nth-child(6n+2) { --c1: #ffb15c; --c2: #e0561a; } #root.fn .card:nth-child(6n+3) { --c1: #ff8fc4; --c2: #c7227f; } #root.fn .card:nth-child(6n+4) { --c1: #8df08a; --c2: #169a3a; } #root.fn .card:nth-child(6n+5) { --c1: #7be8ff; --c2: #1294d8; } #root.fn .card:nth-child(6n+6) { --c1: #ffe06a; --c2: #e0900a; }
+#root.fn .card::before { display: block !important; content: '' !important; position: absolute !important; left: -10%; right: -10%; top: 42%; width: auto !important; height: 36px !important; transform: none !important; border-radius: 0 !important; background: radial-gradient(ellipse at 30% 50%, rgba(255, 255, 255, .5), transparent 65%), radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, .35), transparent 65%) !important; z-index: 0 !important; pointer-events: none; }
+#root.fn .card:hover { box-shadow: 0 0 0 2px rgba(255, 245, 154, .7), 0 6px 14px rgba(0, 20, 90, .3) !important; }
+#root.fn .card.sel { outline: 3px solid #fff59a; outline-offset: 3px; box-shadow: 0 0 26px rgba(255, 200, 80, .6), 0 6px 14px rgba(0, 20, 90, .3) !important; }
+#root.fn .card .crow { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 3; display: flex; justify-content: space-between; min-height: 0; }
+#root.fn .card .badge { background: #ffe14a; color: #222; font: italic 900 10px Arial; letter-spacing: 0; padding: 3px 7px; border-radius: 3px; } #root.fn .card .badge.o { background: #ff3d6e; color: #fff; }
+#root.fn .card .pic { position: absolute !important; left: 0; right: 0; top: 0; bottom: 56px; z-index: 1; width: auto !important; height: auto !important; margin: 0 !important; background: transparent !important; border-radius: 0 !important; aspect-ratio: auto !important; }
+#root.fn .card .pic img { max-height: none !important; max-width: none !important; position: absolute; left: 3%; top: 22px; width: 94%; height: calc(100% - 22px); object-fit: contain; filter: drop-shadow(0 8px 8px rgba(0, 30, 90, .45)); }
+#root.fn .card .pic svg.art { left: 26%; top: 26px; width: 48%; height: calc(100% - 30px); color: #fff; } #root.fn .card .pic .tag { display: none; }
+#root.fn .card .cinfo { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 2; text-shadow: 0 1px 3px rgba(0, 0, 40, .5); }
+#root.fn .card.sel .cinfo { bottom: 30px; }
+#root.fn .card .nm { display: block; font-size: 15px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#root.fn .card .pr { display: flex; align-items: center; margin-top: 3px; font-weight: 900; font-size: 14px; color: #fff; } #root.fn .card .pr s { color: rgba(255, 255, 255, .7); font-size: 11px; margin-left: 7px; } #root.fn .card .pr .cl { height: 15px; margin-right: 6px; filter: drop-shadow(0 1px 2px rgba(0, 0, 40, .4)); }
+#root.fn .card .cstrip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 6px 8px; text-align: center; background: linear-gradient(90deg, #fff3b0, #ffd04a); color: #5a3300; font: italic 900 10px Arial; }
+#root.fn .empty { color: rgba(255, 255, 255, .8); }
+/* panneau de détail */
+#root.fn .fpanel { flex: none; width: 256px; height: 434px; margin-top: 62px; padding: 10px 20px 14px; border-radius: 12px; background: linear-gradient(180deg, #8a5a8c, #5d2c9c); box-shadow: 0 8px 20px rgba(0, 0, 60, .3); display: flex; flex-direction: column; overflow: hidden; }
+#root.fn .fpanel .fempty { margin: auto; text-align: center; color: rgba(255, 255, 255, .8); }
+#root.fn .fprev { flex: none; height: 78px; position: relative; margin: 0 -8px 2px; } #root.fn .fprev .pic { position: absolute !important; inset: 0; width: auto !important; height: auto !important; margin: 0 !important; background: transparent !important; aspect-ratio: auto !important; } #root.fn .fprev .pic img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 6px rgba(0, 0, 40, .5)); } #root.fn .fprev .pic svg.art { left: 30%; top: 0; width: 40%; height: 100%; color: #fff; } #root.fn .fprev .tag { display: none; }
+#root.fn .fpanel .rar { align-self: flex-start; background: linear-gradient(90deg, #ff9a2e, #ff5a1a); padding: 3px 9px; border-radius: 3px; font: italic 900 10.5px Arial; margin: 4px 0 6px; }
+#root.fn .fpanel h3 { font: italic 900 24px/1.1 'Arial Black', Arial; margin-bottom: 4px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#root.fn .fpanel .fd { font-size: 12.5px; line-height: 1.35; opacity: .9; max-height: 68px; overflow: hidden; } #root.fn .fpanel .fd.none { opacity: .55; font-style: italic; }
+#root.fn .fst { margin-top: 6px; font-size: 13px; overflow: hidden; } #root.fn .fst div { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, .2); } #root.fn .fst span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#root.fn .fpr { display: flex; align-items: center; gap: 8px; margin-top: auto; font: italic 900 30px 'Arial Black', Arial; } #root.fn .fpr .cl { height: 24px; max-width: 54px; } #root.fn .fpr i.cb { background: #fff; color: #1a55d8; width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 13px; margin: 0; } #root.fn .fpr s { font: 600 13px Arial; opacity: .7; }
+#root.fn .fbal { font-size: 12px; font-weight: 700; opacity: .85; margin-top: 2px; } #root.fn .fbal.bad { color: #ffd0d8; opacity: 1; }
+#root.fn .fbuy { margin-top: 8px; padding: 11px; border-radius: 8px; text-align: center; font: 900 16px 'Arial Black', Arial; color: #4a2a00; background: linear-gradient(180deg, #fff7b8, #ffd04a); box-shadow: 0 4px 0 #c98a12; } #root.fn .fbuy:hover { filter: brightness(1.06); } #root.fn .fbuy.off { filter: grayscale(.55) brightness(.9); }
+#root.fn .fadd { margin-top: 8px; padding: 9px; border-radius: 8px; text-align: center; font: 800 12.5px Arial; background: rgba(255, 255, 255, .2); } #root.fn .fadd:hover { background: rgba(255, 255, 255, .3); }
+/* barre de touches + bouton gestion */
+#root.fn .fhint { position: absolute !important; left: 30px; bottom: 18px; z-index: 5; display: flex; gap: 12px; }
+#root.fn .fhint span { display: inline-flex; align-items: center; gap: 9px; padding: 6px 14px 6px 6px; border-radius: 8px; background: #2236aa; font: 800 12.5px 'Arial Black', Arial; letter-spacing: .4px; box-shadow: 0 3px 8px rgba(0, 0, 60, .25); }
+#root.fn .fhint .key { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 8px; border: 2px solid #fff; border-radius: 6px; background: rgba(255, 255, 255, .14); font: 900 12px Arial; font-style: normal; } #root.fn .fhint .key.y { background: linear-gradient(180deg, #fff7b8, #ffd04a); border-color: #fff3a0; color: #4a2a00; }
+.gbtn { position: absolute; right: 24px; bottom: 18px; z-index: 6; height: 32px; padding: 0 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; color: #fff; background: #2236aa; box-shadow: 0 3px 8px rgba(0, 0, 60, .3); transition: all .15s; }
+.gbtn svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; } .gbtn:hover { background: linear-gradient(90deg, var(--fg1), var(--fg2)); color: #3a2200; }
+/* pages secondaires (panier, historique, codes, gestion, roulette) */
+#root.fn .phead { margin: 6px 0 14px; } #root.fn .phead small { color: rgba(255, 255, 255, .7); } #root.fn .phead h1 { font: italic 900 32px/1 'Arial Black', Arial, sans-serif; text-transform: uppercase; text-shadow: 0 3px 0 rgba(120, 30, 160, .55); margin: 6px 0; } #root.fn .phead p { color: rgba(255, 255, 255, .8); }
+#root.fn .scroll { overflow: visible; margin: 0; padding: 0; background: transparent; box-shadow: none; }
+#root.fn .btn, .cfbox .btn { background: rgba(255, 255, 255, .2) !important; box-shadow: none !important; border: 0 !important; border-radius: 8px !important; color: #fff !important; font-weight: 800; } #root.fn .btn:hover, .cfbox .btn:hover { background: rgba(255, 255, 255, .3) !important; }
+#root.fn .btn.pri, .sheet .btn.pri, .cfbox .btn.pri, .wc .pri, .wr-card .pri { background: linear-gradient(180deg, #fff7b8, #ffd04a) !important; color: #4a2a00 !important; box-shadow: 0 4px 0 #c98a12 !important; font-weight: 900; border: 0 !important; }
+#root.fn .btn[disabled] { opacity: .5; box-shadow: none !important; }
+#root.fn .panel, #root.fn .summary, #root.fn .row, #root.fn .wheel-side, #root.fn .paybox { background: rgba(10, 20, 90, .42) !important; border: 0 !important; box-shadow: none !important; border-radius: 12px !important; color: #fff; }
+#root.fn .tbl { background: rgba(10, 20, 90, .35) !important; border: 0 !important; border-radius: 10px; } #root.fn .tbl th { background: rgba(10, 20, 90, .5) !important; color: rgba(255, 255, 255, .8); } #root.fn .tbl td, #root.fn .tbl th { border-bottom-color: rgba(255, 255, 255, .12); }
+#root.fn .promo input, #root.fn .form input, #root.fn .form select, #root.fn .deved textarea, #root.fn .tbl input.amt { background: #1b2f9a !important; border: 0 !important; color: #fff !important; border-radius: 8px !important; }
+#root.fn .promo button { background: linear-gradient(180deg, #fff7b8, #ffd04a) !important; color: #4a2a00 !important; font-weight: 900; border-radius: 8px; }
+#root.fn .sub, #root.fn .rn span, #root.fn .line, #root.fn .tbl small, #root.fn .form label { color: rgba(255, 255, 255, .8); } #root.fn .line.tot { color: #fff; } #root.fn .line.good, #root.fn .pmsg.ok { color: #7dffc0; } #root.fn .warn, #root.fn .pmsg.bad { color: #ffd0d8; }
+#root.fn .refcode { background: rgba(10, 20, 90, .5); border: 2px dashed rgba(255, 255, 255, .55); border-radius: 12px; } #root.fn .refcode span { color: var(--fg1); }
+#root.fn .pill { background: none; box-shadow: none; padding: 0; color: #fff; text-shadow: none; } #root.fn .pill i { background: var(--fg1); box-shadow: none; }
+#root.fn .chip { background: rgba(10, 20, 90, .5) !important; box-shadow: none !important; border-radius: 6px; color: #fff !important; } #root.fn .chip.ok { color: #7dffc0 !important; } #root.fn .chip.off { color: #ffd0d8 !important; }
+#root.fn .mini2 { background: rgba(255, 255, 255, .2); color: #fff; } #root.fn .qty { background: rgba(10, 20, 90, .45); } #root.fn .qty button { background: rgba(255, 255, 255, .2); }
+#root.fn .paybox h2, #root.fn .panel h3 { color: #fff; } #root.fn .panel h3 .ic { color: var(--fg1); }
+#root.fn .payov { background: rgba(5, 10, 40, .8); border-radius: 14px; }
+#root.fn input::placeholder, #root.fn textarea::placeholder { color: rgba(255, 255, 255, .55) !important; }
+/* fenêtre de confirmation / détail */
+#modal { background: rgba(5, 10, 40, .55) !important; }
+.sheet { --c1: #c98bff; --c2: #7b2bd6; background: linear-gradient(160deg, #15308a, #2a1c7a) !important; box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .15) !important; border-radius: 14px !important; color: #fff; }
+.sheet .pic { background: linear-gradient(180deg, var(--c1), var(--c2)) !important; border-radius: 14px 0 0 14px !important; } .sheet .pic img { filter: drop-shadow(0 10px 10px rgba(0, 30, 90, .45)); }
+.sheet .kind { color: var(--fg1) !important; } .sheet h2 { font: italic 900 30px/1.1 'Arial Black', Arial; }
+.sheet .desc { color: rgba(255, 255, 255, .88) !important; }
+.sheet .chip, .sheet .contents { background: rgba(10, 20, 90, .5) !important; box-shadow: none !important; border: 0 !important; color: #fff !important; border-radius: 8px !important; }
+.sheet .pill { background: none !important; box-shadow: none !important; color: #fff !important; text-shadow: none; font-size: 24px; } .sheet .pill i { background: var(--fg1) !important; box-shadow: none; }
+.sheet .total small { color: rgba(255, 255, 255, .7); }
+.sheet .btn { background: rgba(255, 255, 255, .2) !important; box-shadow: none !important; border: 0 !important; border-radius: 8px !important; color: #fff !important; font-weight: 800; }
+.toast { background: #1b3aa6 !important; border: 0 !important; border-left: 4px solid var(--fg1) !important; border-radius: 8px !important; color: #fff; }
+.cfbox { background: linear-gradient(160deg, #15308a, #2a1c7a) !important; border: 0 !important; border-radius: 14px; color: #fff; } .cfbox p { color: rgba(255, 255, 255, .8); }
+.wheel-res .wr-card { background: linear-gradient(160deg, #15308a, #2a1c7a); border: 0; color: #fff; } .wcode { color: var(--fg1); border-color: var(--fg1); }
+#root.fn > .gbtn { position: absolute !important; right: 24px; bottom: 18px; left: auto; width: auto; }
+/* barre du haut sur deux lignes : logo + coins en haut, onglets dessous (tous visibles) */
+#root.fn .fnav { flex-wrap: wrap; row-gap: 6px; padding: 16px 26px 4px; }
+#root.fn .fchips { order: 2; margin-left: auto; }
+#root.fn .ftabs { order: 3; flex: 1 1 100%; overflow: visible; flex-wrap: wrap; }
+#root.fn { height: min(700px, 94vh) !important; }
+#root.fn .fshop { height: 100%; }
