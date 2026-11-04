@@ -632,3 +632,22 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 #root.fn .fpanel .fd { max-height: 36px; line-height: 1.4; margin-bottom: 2px; }
 #root.fn .fpr { margin-top: 0; padding-top: 8px; }
 #root.fn .fedit { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: rgba(10, 20, 90, .45); color: #fff; z-index: 2; } #root.fn .fedit svg { fill: none; stroke: currentColor; stroke-width: 1.8; } #root.fn .fedit:hover { background: rgba(10, 20, 90, .75); }
+
+/* les 3 boutons du panneau : même largeur, texte centré, hiérarchie claire */
+#root.fn .fbtns { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+#root.fn .fbtns button { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 !important; text-align: center; border-radius: 9px; line-height: 1; transition: transform .12s, filter .12s, background .12s; }
+#root.fn .fbtns button:active { transform: translateY(1px); }
+#root.fn .fbtns .fbuy { height: 46px; padding: 0 12px; font: 900 15px 'Arial Black', Arial, sans-serif; letter-spacing: .02em; color: #4a2a00; background: linear-gradient(180deg, #fff7b8 0%, #ffd950 55%, #ffc12e 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 4px 0 #c98a12, 0 8px 14px rgba(0, 0, 40, .25); }
+#root.fn .fbtns .fbuy:hover { filter: brightness(1.06); }
+#root.fn .fbtns .fbuy.off { filter: grayscale(.5) brightness(.92); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 4px 0 #8f7a45; }
+#root.fn .fbtns .fadd { height: 38px; padding: 0 12px; font: 800 12.5px 'Arial Black', Arial, sans-serif; letter-spacing: .03em; color: #fff; background: rgba(255, 255, 255, .22); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55); }
+#root.fn .fbtns .fadd:hover { background: rgba(255, 255, 255, .34); }
+#root.fn .fbtns .fadd svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+#root.fn .fbtns .fedt { height: 30px; padding: 0 10px; font: 700 11.5px Arial, sans-serif; color: rgba(255, 255, 255, .9); background: rgba(10, 20, 90, .4); box-shadow: none; }
+#root.fn .fbtns .fedt:hover { background: rgba(10, 20, 90, .62); color: #fff; }
+#root.fn .fbtns .fedt svg { fill: none; stroke: currentColor; stroke-width: 2; }
+#root.fn .fbtns button:focus, #root.fn .fbtns button:focus-visible { outline: none !important; }
+#root.fn .fpanel { padding-bottom: 14px; }
+#root.fn .fprev { height: 64px; }
+#root.fn .fpr { font-size: 28px; padding-top: 4px; }
+#root.fn .fbal { margin: 4px 0 0; }

@@ -194,13 +194,14 @@ function fpanel(s) {
   if (it.balle) rows.push(['Munitions', it.balle]);
   if (it.vtype) rows.push(['Type', it.vtype === 'boat' ? 'Bateau' : 'Avion']);
   (it.contents || []).slice(0, 5).forEach(x => rows.push([x, '']));
-  return `<aside class="fpanel">${S.data.dev ? `<button class="fedit" data-a="open" data-c="${k}" data-i="${it.idx}" title="Modifier le descriptif">${ic('gear', 14)}</button>` : ''}<div class="fprev">${picHtml(k, it, '')}</div><span class="rar">${esc(String(ct.kind || kindOf(k)).toUpperCase())}</span><h3>${esc(it.name)}</h3>
+  return `<aside class="fpanel"><div class="fprev">${picHtml(k, it, '')}</div><span class="rar">${esc(String(ct.kind || kindOf(k)).toUpperCase())}</span><h3>${esc(it.name)}</h3>
     <p class="fd ${it.desc ? '' : 'none'}">${it.desc ? esc(it.desc) : 'Aucun descriptif pour le moment.'}</p>
     <div class="fst">${rows.map(r => `<div><span>${esc(r[0])}</span>${r[1] !== '' ? `<b>${esc(r[1])}</b>` : ''}</div>`).join('')}</div>
     <div class="fpr">${curLogo()}${fmt(eff)}${eff < it.price ? `<s>${fmt(it.price)}</s>` : ''}</div>
     <div class="fbal ${lack > 0 ? 'bad' : ''}">${lack > 0 ? `Il te manque ${fmt(lack)} coins` : `Solde après achat : ${fmt(S.points - eff)}`}</div>
-    <button class="fbuy ${lack > 0 ? 'off' : ''}" data-a="ask" data-c="${k}" data-i="${it.idx}">ACHETER · ${fmt(eff)}</button>
-    <button class="fadd" data-a="addcart" data-c="${k}" data-i="${it.idx}">+ AJOUTER AU PANIER</button>
+    <div class="fbtns"><button class="fbuy ${lack > 0 ? 'off' : ''}" data-a="ask" data-c="${k}" data-i="${it.idx}">ACHETER · ${fmt(eff)}</button>
+    <button class="fadd" data-a="addcart" data-c="${k}" data-i="${it.idx}">${ic('cart', 14)}<span>AJOUTER AU PANIER</span></button>
+    ${S.data.dev ? `<button class="fedt" data-a="open" data-c="${k}" data-i="${it.idx}">${ic('gear', 13)}<span>Modifier le descriptif</span></button>` : ''}</div>
 </aside>`;
 }
 const sortBar = () => { const sorts = [['price', 'Prix ↑'], ['priceDesc', 'Prix ↓'], ['name', 'A-Z']]; return `<span class="sorts">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</span>`; };
