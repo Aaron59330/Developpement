@@ -271,3 +271,13 @@ html, body, #notifications {
 /* Inventaire ouvert : tout est masqué */
 body.inv-hidden { opacity: 0; transition: opacity .08s linear; }
 body { transition: opacity .12s linear; }
+
+/* ═══ Prompt d'action façon Fortnite : carte sombre, touche carrée à gauche, titre en majuscules, détail dans une bande dessous ═══ */
+.help-prompt { display: block !important; top: auto; bottom: 26%; left: 50%; transform: translateX(-50%); min-width: 300px; max-width: 440px; border-radius: 4px; overflow: hidden; background: rgba(16, 20, 28, .84); box-shadow: 0 6px 22px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .05); text-shadow: none; color: #fff; padding: 0; gap: 0; align-items: initial; }
+.help-prompt .fn-main { display: flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; }
+.help-prompt .fn-key { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 3px; border: 2px solid rgba(255, 255, 255, .85); font: 800 20px/1 Inter, 'Segoe UI', sans-serif; color: #fff; background: rgba(255, 255, 255, .04); }
+.help-prompt .fn-key.long { width: auto; min-width: 40px; padding: 0 8px; font-size: 13px; letter-spacing: .02em; } .help-prompt .fn-key.none { display: none; }
+.help-prompt .fn-title { font: 800 18px/1.15 Inter, 'Segoe UI', sans-serif; letter-spacing: .02em; text-transform: uppercase; }
+.help-prompt .fn-sub { padding: 9px 18px 10px 66px; background: rgba(0, 0, 0, .38); font: 700 12.5px/1.3 Inter, 'Segoe UI', sans-serif; letter-spacing: .03em; text-transform: uppercase; color: #e6e8ee; }
+.help-prompt .fn-main:only-child { padding-right: 22px; }
+.help-prompt .fn-key.none + .fn-title { padding-left: 6px; }

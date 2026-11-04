@@ -409,14 +409,22 @@ function createNotification(data) {
 let helpHideTimer = null;
 function showCenterHelp(data) {
     const el = document.getElementById('helpPrompt');
-    const raw = String(data.message ?? '').replace(/(~INPUT_[A-Z0-9_]+~)(\s*(?:ou|or|\/)\s*)(~INPUT_[A-Z0-9_]+~)/gi, (m, a, sep, b) => (controls[a] && controls[a] === controls[b]) ? a : m);
-    const m = raw.match(/^\s*(?:appuy(?:ez|e|er)|press)\s+(?:sur\s+)?(~INPUT_[A-Z_0-9]+~)\s*(?:pour|to|:|-)\s*(.+)$/is);
-    let keyHtml = '', label = raw;
-    if (m && controls[m[1]] && !/~INPUT_/.test(m[2])) {
-        keyHtml = `<span class="hp-key">${escapeHtml(controls[m[1]])}</span>`;
-        label = m[2].charAt(0).toUpperCase() + m[2].slice(1);
+    let raw = String(data.message ?? '').replace(/(~INPUT_[A-Z0-9_]+~)(\s*(?:ou|or|\/)\s*)(~INPUT_[A-Z0-9_]+~)/gi, (m, a, sep, b) => (controls[a] && controls[a] === controls[b]) ? a : m);
+    raw = raw.replace(/~n~/g, '\n');
+    // 1re ligne = titre de l'action ; lignes suivantes = détail (affiché dans la bande du bas, comme dans Fortnite)
+    const lines = raw.split(/\n+/).map(x => x.trim()).filter(Boolean);
+    let head = lines[0] || '', sub = lines.slice(1).join('  ·  ');
+    let key = '', title = head;
+    let m = head.match(/^(?:appuy(?:ez|e|er)|press)\s+(?:sur\s+)?(~INPUT_[A-Z_0-9]+~|\[[^\]]{1,8}\])\s*(?:pour|to|:|-)?\s*(.+)$/is) || head.match(/^(~INPUT_[A-Z_0-9]+~|\[[^\]]{1,8}\])\s*[:\-]?\s*(.+)$/s);
+    if (m) {
+        const k = m[1];
+        key = /^\[/.test(k) ? k.slice(1, -1) : (controls[k] || '');
+        if (key) title = m[2];
     }
-    const html = `<span class="hp-dot"></span>${keyHtml}<span class="hp-text">${formatGtaText(label)}</span>`;
+    if (!key) { const k2 = head.match(/(~INPUT_[A-Z_0-9]+~)/); if (k2 && controls[k2[1]]) { key = controls[k2[1]]; title = head.replace(k2[1], '').replace(/\s+/g, ' ').trim() || head; } }
+    title = String(title || '').replace(/^pour\s+/i, '');
+    const keyHtml = key ? `<span class="fn-key${key.length > 2 ? ' long' : ''}">${escapeHtml(key)}</span>` : '<span class="fn-key none"></span>';
+    const html = `<div class="fn-main">${keyHtml}<span class="fn-title">${formatGtaText(title)}</span></div>${sub ? `<div class="fn-sub">${formatGtaText(sub)}</div>` : ''}`;
     if (el.dataset.html !== html) { el.innerHTML = html; el.dataset.html = html; }
     el.classList.add('show');
     clearTimeout(helpHideTimer);
