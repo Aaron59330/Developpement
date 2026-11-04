@@ -605,3 +605,30 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 #root.fn .ftabs { order: 3; flex: 1 1 100%; overflow: visible; flex-wrap: wrap; }
 #root.fn { height: min(700px, 94vh) !important; }
 #root.fn .fshop { height: 100%; }
+
+/* panneau de détail : tout centré, espacements réguliers */
+#root.fn .fpanel { padding: 12px 20px 16px; text-align: center; align-items: stretch; }
+#root.fn .fpanel button:focus, #root.fn .fpanel button:focus-visible { outline: none !important; box-shadow: none; }
+#root.fn .fprev { height: 96px; margin: 0 -8px 4px; }
+#root.fn .fpanel .rar { align-self: center; margin: 2px 0 8px; }
+#root.fn .fpanel h3 { font-size: 23px; text-align: center; margin: 0 0 6px; line-height: 1.1; }
+#root.fn .fpanel .fd { text-align: center; max-height: 52px; margin: 0 4px; }
+#root.fn .fst { margin-top: 10px; text-align: left; }
+#root.fn .fst div:first-child { border-top: 1px solid rgba(255, 255, 255, .2); }
+#root.fn .fpr { justify-content: center; margin-top: auto; padding-top: 8px; font-size: 32px; line-height: 1; }
+#root.fn .fpr .cl { height: 20px; max-width: 46px; }
+#root.fn .fpr s { align-self: flex-end; padding-bottom: 4px; }
+#root.fn .fbal { text-align: center; margin: 6px 0 2px; font-size: 12.5px; }
+#root.fn .fbuy { margin-top: 8px; display: flex; align-items: center; justify-content: center; }
+#root.fn .fadd { display: flex; align-items: center; justify-content: center; margin-top: 8px; min-height: 36px; padding: 0 10px; line-height: 1.1; }
+#root.fn .fadd + .fadd { background: rgba(255, 255, 255, .12); font-size: 11.5px; min-height: 30px; }
+#root.fn .fpanel { position: relative; }
+#root.fn .fpanel > * { flex: none; }
+#root.fn .fpanel .fst { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; margin-top: 8px; } #root.fn .fpanel .fst::-webkit-scrollbar { display: none; }
+#root.fn .fst div { padding: 3px 0; }
+#root.fn .fprev { height: 74px; margin-bottom: 2px; }
+#root.fn .fpanel .rar { margin: 2px 0 6px; }
+#root.fn .fpanel h3 { overflow: visible; padding: 2px 0 3px; font-size: 22px; line-height: 1.15; }
+#root.fn .fpanel .fd { max-height: 36px; line-height: 1.4; margin-bottom: 2px; }
+#root.fn .fpr { margin-top: 0; padding-top: 8px; }
+#root.fn .fedit { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: rgba(10, 20, 90, .45); color: #fff; z-index: 2; } #root.fn .fedit svg { fill: none; stroke: currentColor; stroke-width: 1.8; } #root.fn .fedit:hover { background: rgba(10, 20, 90, .75); }
