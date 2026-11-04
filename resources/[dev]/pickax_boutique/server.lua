@@ -558,7 +558,7 @@ ESX.RegisterServerCallback('pickax_boutique:descs', function(src, cb)
         local prizes = wheelPrizes(W)
         if W.Enabled ~= false and #prizes >= 2 then wheel = { left = wheelState(W, xPlayer.identifier).left } end
     end
-    cb({ ok = true, map = map, daily = dailyPayload(), dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil, wheel = wheel })
+    cb({ ok = true, map = map, daily = dailyPayload(), dev = canEditDesc(src), boutiqueId = xPlayer and boutiqueIdOf(xPlayer) or nil, wheel = wheel, pname = xPlayer and nameOf(xPlayer) or nil, psrc = src })
 end)
 
 ESX.RegisterServerCallback('pickax_boutique:saveDesc', function(src, cb, d)
