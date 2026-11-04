@@ -211,6 +211,8 @@ function viewDaily() {
   return `<div class="sh"><div><h3>${esc(c.label)}</h3><p>${esc(c.sub)}</p></div><span class="sorts dayinfo">${ic('clock', 14)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b>${d ? ` · <b class="dbadge">-${d} % sur toute la sélection</b>` : ''}</span></div><div class="grid">${items.map((it, n) => cardHtml(it, it._cat, n)).join('')}</div>`;
 }
 
+// petit bouton « Panel gestion » (staff uniquement) en bas à droite : ouvre la page Gestion
+const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<button class="gbtn" data-a="view" data-v="admin" title="Ouvrir le panel de gestion">${sic('shield', 14)}<span>Panel gestion</span></button>` : '';
 function render() {
   if (!S.data) return;
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
@@ -222,7 +224,7 @@ function render() {
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
   else main = S.cat === 'home' ? viewHome() : (S.cat === 'daily' ? viewDaily() : viewShop());
-  $root.innerHTML = sidebar(cats) + `<section class="main">${topbar()}<div class="body">${main}</div></section>` + (S.paying ? payOverlay() : '');
+  $root.innerHTML = sidebar(cats) + `<section class="main">${topbar()}<div class="body">${main}</div></section>` + (S.paying ? payOverlay() : '') + gestionBtn();
 }
 
 function fmtClock(s) { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; }
