@@ -71,7 +71,7 @@ window.addEventListener('wheel', e => {
     S.sel[s.key] = (cur + dir + s.list.length) % s.list.length; draw();
   } else if (pages() > 1) { S.page = (S.page + dir + pages()) % pages(); S.hover = -1; draw(); }
 }, { passive: true });
-window.addEventListener('keyup', e => { if (S.open && (e.key.toUpperCase() === String(S.key).toUpperCase())) { e.preventDefault(); release(false); } });
+
 window.addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') release(true); if (e.key === 'ArrowRight') setTab(S.t + 1); if (e.key === 'ArrowLeft') setTab(S.t - 1); });
 $r.addEventListener('click', e => { const b = e.target.closest('.tabs button'); if (b) setTab(+b.dataset.i); });
 

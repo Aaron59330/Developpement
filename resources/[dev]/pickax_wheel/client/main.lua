@@ -151,6 +151,7 @@ end
 local function close()
     if not isOpen then return end
     isOpen = false
+    SetNuiFocusKeepInput(false)
     SetNuiFocus(false, false)
     SendNUIMessage({ a = 'close' })
 end
@@ -161,12 +162,14 @@ local function open()
     isOpen = true
     openedAt = GetGameTimer()
     SetNuiFocus(true, true)
+    SetNuiFocusKeepInput(true)   -- le jeu continue de recevoir la touche : le relâchement est détecté, sans clignotement
     SendNUIMessage({ a = 'open', tabs = buildAll(), tab = lastTab, key = C.Key, accent = PickaxTheme and PickaxTheme.hex or nil })
 end
 
-RegisterCommand('+pickax_wheel', open, false)
+RegisterCommand('+pickax_wheel', function() if not isOpen then open() end end, false)
 RegisterCommand('-pickax_wheel', function()
-    if isOpen then SendNUIMessage({ a = 'release' }) end   -- le NUI renvoie 'select' (élément survolé) ou 'cancel'
+    -- ignore le « relâchement » parasite émis quand l'interface prend le focus (c'était la cause des clignotements)
+    if isOpen and GetGameTimer() - openedAt > 250 then SendNUIMessage({ a = 'release' }) end
 end, false)
 RegisterKeyMapping('+pickax_wheel', 'Roue d\'actions (maintenir)', 'keyboard', C.Key or 'CAPSLOCK')
 
@@ -196,7 +199,11 @@ CreateThread(function()
     while true do
         if C.HideNativeWheel then
             HudWeaponWheelIgnoreSelection()
-            if isOpen then HideHudComponentThisFrame(19) HideHudComponentThisFrame(20) HideHudComponentThisFrame(22) end
+            if isOpen then
+                HideHudComponentThisFrame(19) HideHudComponentThisFrame(20) HideHudComponentThisFrame(22)
+                -- la souris sert à viser la roue : pas de caméra, pas de tir, pas de changement d'arme pendant qu'elle est ouverte
+                for _, c in ipairs({ 1, 2, 14, 15, 16, 17, 24, 25, 37, 44, 45, 140, 141, 142, 257, 263, 264 }) do DisableControlAction(0, c, true) end
+            end
             Wait(0)
         else Wait(1000) end
     end
