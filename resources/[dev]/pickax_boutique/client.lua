@@ -34,7 +34,6 @@ local function Open()
         cat.dailyInfo = res.daily
         cat.wheel = res.wheel
         if res.boutiqueId then cat.boutiqueId = res.boutiqueId end
-        cat.pname, cat.psrc = res.pname, res.psrc
         for c in pairs({ vehicle = 1, moto = 1, other = 1, weapon = 1, crate = 1, pack = 1, vip = 1, business = 1 }) do
             for _, it in ipairs(cat[c] or {}) do
                 local txt = res.map[c .. '|' .. tostring(it.model or it.name)]

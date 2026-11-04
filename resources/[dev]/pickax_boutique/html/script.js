@@ -42,7 +42,7 @@ const CATS = [
   { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#fdc27d)' },
   { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#fdc27d)' },
 ];
-const S = { data: null, view: 'shop', cat: 'home', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
+const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
 const saveCart = () => { try { localStorage.setItem('pb_cart', JSON.stringify(S.cart)); } catch (e) { } };
 const rpc = (name, ...args) => post('rpc', { name, args });
@@ -152,87 +152,44 @@ function sidebar(cats) {
 const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
 const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>BOUTIQUE</span> <em>${esc(String(title).toUpperCase())}</em>${S.data && S.data.boutiqueId ? `<b class="hcode"><small>CODE</small> #${esc(S.data.boutiqueId)}</b>` : ''}</h1><p>${esc(String(sub).toUpperCase())}</p></div></div><div class="sp"></div>${coinsBox()}</div>`;
 
-
-/* ═══ Mise en page « vitrine » : barre du haut en pilules, offre vedette, filtres, cartes ═══ */
-const curMark = () => { const sv = window.PICKAX_SERVER || {}; return String(sv.short || sv.name || 'B').trim()[0].toUpperCase(); };
-const allItems = () => { const out = []; ['vehicle', 'moto', 'other', 'weapon', 'crate', 'pack', 'vip', 'business'].forEach(k => ((S.data && S.data[k]) || []).forEach(it => out.push(Object.assign({}, it, { _cat: k })))); return out; };
-const kindOf = k => (CATS.find(c => c.id === k) || {}).kind || '';
-function badgeOf(it, k) {   // « Nouveau » = derniers ajouts de la catégorie, « Recommandé » = offres du jour
-  if (isDaily(k, it.idx)) return 'Recommandé';
-  const max = Math.max(0, ...((S.data[k] || []).map(x => x.idx)));
-  return (S.data[k] || []).length > 3 && it.idx >= max - 1 ? 'Nouveau' : '';
-}
-function featured() {
-  const d = (S.data.daily || [])[0]; if (d) return d;
-  const l = allItems().filter(x => x._cat === 'pack' || x._cat === 'crate' || x._cat === 'vip'); const p = (l.length ? l : allItems()).sort((a, b) => b.price - a.price)[0];
-  return p || null;
-}
-function topbar(cats) {
-  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
-  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : `<span class="fb">${esc(curMark())}</span>`;
-  const home = S.view === 'shop' && S.cat === 'home';
-  const pills = [`<button class="pill ${home ? 'on' : ''}" data-a="cat" data-id="home">Accueil</button>`]
-    .concat(cats.filter(c => c.id !== 'home').map(c => `<button class="pill ${S.view === 'shop' && S.cat === c.id ? 'on' : ''}" data-a="cat" data-id="${c.id}">${esc(c.label)}${c.id === 'daily' && S.dayEnds ? ` <small id="dtimer">${fmtClock(S.dayEnds - Date.now() / 1000).slice(0, 5)}</small>` : ''}</button>`))
-    .concat([`<button class="pill ${S.view === 'cart' ? 'on' : ''}" data-a="view" data-v="cart">Panier <span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span></button>`]).join('');
-  return `<header class="tbar"><div class="tb-brand">${mark}<b>Boutique</b></div><nav class="tb-nav">${pills}</nav><div class="tb-r"><div class="cbox"><i class="cur"></i><b id="pts">${fmt(S.points)}</b></div><button class="pill" data-a="close">◂ Quitter</button></div></header>
-  <div class="subrow"><div class="sr-l"><span class="sr-ic">${ic('grid', 15)}</span><b>${esc(S.view === 'shop' ? (S.cat === 'home' ? 'Boutique' : cat().label) : 'Boutique')}</b><span>${esc(S.view === 'shop' && S.cat !== 'home' ? cat().sub : `Les offres du moment sur ${sv.name || sv.short || 'le serveur'}`)}</span></div>
-    <div class="sr-r">${S.data.wheel ? `<button class="mini-pill ${S.view === 'wheel' ? 'on' : ''}" data-a="view" data-v="wheel">${ic('gift', 14)} Roulette${S.data.wheel.left > 0 ? ' <i class="dot"></i>' : ''}</button>` : ''}<button class="mini-pill ${S.view === 'history' ? 'on' : ''}" data-a="view" data-v="history">${ic('hist', 14)} Historique</button><button class="mini-pill ${S.view === 'codes' ? 'on' : ''}" data-a="view" data-v="codes">${ic('tag', 14)} Codes</button>${S.data.staff ? `<button class="mini-pill ${S.view === 'admin' ? 'on' : ''}" data-a="view" data-v="admin">${ic('shield', 14)} Gestion</button>` : ''}
-      ${S.data.pname ? `<div class="user"><i>${esc(String(S.data.pname).split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())}</i><b>${esc(S.data.pname)}</b><small>· ID ${esc(S.data.boutiqueId || S.data.psrc || '')}</small></div>` : ''}</div></div>`;
-}
-function cardHtml(it, k, n) {
-  const p = effPrice(k, it), lack = S.points < p, b = badgeOf(it, k), d = dailyD() && isDaily(k, it.idx);
-  return `<div class="card" data-a="open" data-c="${k}" data-i="${it.idx}" style="animation-delay:${Math.min(n || 0, 12) * 0.03}s">${picHtml(k, it, '')}${b ? `<span class="tg">${b}</span>` : ''}${d ? `<span class="dtag">-${dailyD()}%</span>` : ''}
-    <div class="info"><div class="ct">${esc(kindOf(k))}${tagOf(it, k) && tagOf(it, k) !== kindOf(k) ? ' · ' + esc(tagOf(it, k)) : ''}</div><h3>${esc(it.name)}</h3><div class="price"><span class="pr"><i class="cur"></i>${fmt(p)}${p < it.price ? ` <s class="old">${fmt(it.price)}</s>` : ''}</span>
-      <span class="addq"><button class="mini" data-a="addcart" data-c="${k}" data-i="${it.idx}" title="Ajouter au panier"></button></span>${lack ? '<span class="buy off">Solde insuffisant</span>' : `<span class="buy">${ic('cart', 15)} Acheter</span>`}</div></div></div>`;
-}
-function chipsRow(cats, extra) {
-  const total = allItems().length;
-  return `<div class="filters"><label class="search">${ic('search', 15)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}"></label>
-    <button class="chip ${S.cat === 'home' ? 'on' : ''}" data-a="cat" data-id="home">Tendances</button>${cats.filter(c => c.id !== 'daily' && c.id !== 'home').map(c => `<button class="chip ${S.cat === c.id ? 'on' : ''}" data-a="cat" data-id="${c.id}">${esc(c.label)} <small>${(S.data[c.id] || []).length}</small></button>`).join('')}<span class="sp"></span>${extra || ''}</div>`;
-}
-function viewHome(cats) {
-  const f = featured(), k = f && (f._cat || 'pack'), q = S.q.trim().toLowerCase();
-  let hero = '';
-  if (f && !q) {
-    const p = effPrice(k, f), has = p < f.price, lack = S.points < p, left = (S.dayEnds ? S.dayEnds - Date.now() / 1000 : 0);
-    hero = `<div class="feat" data-a="open" data-c="${k}" data-i="${f.idx}"><div class="fl"><span class="badge">${isDaily(k, f.idx) ? 'Offre du jour' : 'Offre à la une'}</span><h1>${esc(f.name)}</h1><p>${esc(String(f.desc || metaOf(f, k) || '').slice(0, 120))}</p>
-      <div class="tags">${(f.contents || []).slice(0, 4).map(t => `<span class="tag">${esc(String(t).slice(0, 26))}</span>`).join('')}</div></div>
-      <div class="fimg">${picHtml(k, f, '')}</div>
-      <div class="fr">${S.dayEnds && isDaily(k, f.idx) ? `<span class="timer">Fin de l'offre <b id="ftimer">${fmtClock(left)}</b></span>` : '<span></span>'}<div class="fpr"><div class="price2"><i class="cur"></i>${fmt(p)}${has ? ` <s>${fmt(f.price)}</s><em>-${dailyD()}%</em>` : ''}</div><div class="cta ${lack ? 'off' : ''}">${lack ? 'Solde insuffisant' : ic('cart', 16) + ' Acheter maintenant'}</div></div></div></div>`;
-  }
-  const l = allItems().filter(it => !q || String(it.name).toLowerCase().includes(q)).sort((a, b) => (isDaily(b._cat, b.idx) - isDaily(a._cat, a.idx)) || (a.price - b.price)).slice(0, q ? 40 : 12);
-  return hero + chipsRow(cats, `<span class="sorts">${l.length} article${l.length > 1 ? 's' : ''}</span>`) + `<div class="scroll"><div class="grid">${l.length ? l.map((it, n) => cardHtml(it, it._cat, n)).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div>`;
-}
 function render() {
   if (!S.data) return;
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
-  if (S.cat !== 'home' && !cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
+  if (!cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
   let main;
   if (S.view === 'cart') main = viewCart();
   else if (S.view === 'wheel' && S.data.wheel) main = viewWheel();
   else if (S.view === 'history') main = viewHistory();
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
-  else main = S.cat === 'home' ? viewHome(cats) : (S.cat === 'daily' ? viewDaily() : viewShop());
-  $root.style.setProperty('--curc', "'" + curMark() + "'");
-  $root.innerHTML = topbar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '');
+  else main = S.cat === 'daily' ? viewDaily() : viewShop();
+  $root.innerHTML = sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '');
 }
 
 function viewShop() {
-  const cats = CATS.filter(c => (S.data[c.id] || []).length), items = filtered();
-  $root.style.setProperty('--cc', cat().color);
+  const c = cat(), items = filtered();
+  $root.style.setProperty('--cc', c.color);
   const sorts = [['price', 'Prix croissant'], ['priceDesc', 'Prix décroissant'], ['name', 'Nom A-Z']];
-  const sortHtml = `<span class="sorts">Trier par ${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</span>`;
-  return chipsRow(cats, sortHtml) + `<div class="scroll"><div class="grid">${items.length ? items.map((it, n) => cardHtml(Object.assign({}, it), S.cat, n)).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div>`;
+  return heroBar(c.icon, c.label, c.sub, c.color) +
+    `<div class="tools"><label class="search">${ic('search', 16)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}"></label>
+      <div class="sort">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</div><div class="sp"></div><span class="count">${items.length} article${items.length > 1 ? 's' : ''}</span></div>
+      <div class="scroll"><div class="grid">${items.length ? items.map((it, n) => `<div class="card" data-a="open" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(S.cat, it, tagOf(it))}
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it))}</div><div class="price"><span class="pill ${S.points < it.price ? 'short' : ''}"><i></i>${fmt(it.price)}</span>
+        <span class="addq"><button class="mini" data-a="addcart" data-c="${S.cat}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div>`;
 }
+
 function fmtClock(s) { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; }
 function viewDaily() {
-  const cats = CATS.filter(c => (S.data[c.id] || []).length), items = S.data.daily || [], d = dailyD();
-  $root.style.setProperty('--cc', cat().color);
-  return chipsRow(cats, `<span class="sorts dayinfo">${ic('clock', 14)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b>${d ? ` · <b class="dbadge">-${d} % sur toute la sélection</b>` : ''}</span>`) +
-    `<div class="scroll"><div class="grid">${items.map((it, n) => cardHtml(it, it._cat, n)).join('')}</div></div>`;
+  const c = cat(), items = S.data.daily || [], d = dailyD();
+  $root.style.setProperty('--cc', c.color);
+  return heroBar(c.icon, c.label, c.sub, c.color) +
+    `<div class="tools"><div class="dayinfo">${ic('clock', 16)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b></div><div class="sp"></div>${d ? `<span class="count dbadge">-${d} % sur toute la sélection</span>` : ''}</div>
+    <div class="scroll"><div class="grid">${items.map((it, n) => { const k = it._cat, p = effPrice(k, it);
+      return `<div class="card" data-a="open" data-c="${k}" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(k, it, tagOf(it, k))}${d ? `<span class="dtag">-${d}%</span>` : ''}
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it, k))}</div><div class="price"><span class="pill ${S.points < p ? 'short' : ''}"><i></i>${fmt(p)}${p < it.price ? ` <s class="old">${fmt(it.price)}</s>` : ''}</span>
+        <span class="addq"><button class="mini" data-a="addcart" data-c="${k}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`; }).join('')}</div></div>`;
 }
-setInterval(() => { const l = S.dayEnds ? fmtClock(S.dayEnds - Date.now() / 1000) : ''; ['dcd', 'ftimer'].forEach(id => { const e = document.getElementById(id); if (e && l) e.textContent = l; }); const t = document.getElementById('dtimer'); if (t && l) t.textContent = l.slice(0, 5); }, 1000);
+setInterval(() => { const e = document.getElementById('dcd'); if (e && S.dayEnds) e.textContent = fmtClock(S.dayEnds - Date.now() / 1000); }, 1000);
 
 function viewCart() {
   const lines = cartLines(), sub = subtotal(), fin = finalTotal(), lack = fin - S.points;
@@ -546,7 +503,7 @@ window.addEventListener('message', e => {
   const d = e.data || {};
   if (d.action === 'open') { sfx('open'); applyAccent(d.data.accent); S.data = d.data;
     const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
-    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); S.cat = 'home'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
+    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { sfx('close'); $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points' && S.spinning) { S.pendingPoints = Number(d.points) || 0; }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
