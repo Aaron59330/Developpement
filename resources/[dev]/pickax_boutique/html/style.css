@@ -480,3 +480,18 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .side .nav .it .ico svg { width: 17px; height: 17px; }
 .sc p b { font: inherit; color: #aab; }
 .sc p { white-space: nowrap; }
+
+/* Fonds moins noirs (gris anthracite) */
+#root { background: #1a1b20 !important; }
+.side { background: #202127 !important; border-right-color: rgba(255, 255, 255, .09); }
+.main { background: #1a1b20 !important; }
+.top { background: #1e1f25; border-bottom-color: rgba(255, 255, 255, .09); }
+.chipx, .top .search, .quit { background: #26272e !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; }
+.it .ico { background: #2a2b32 !important; }
+.side .nav .it .ico, .side .sfoot .it .ico { background: #2a2b32 !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; }
+.side .nav .it.on { background: #2a2b32 !important; }
+.sc, .card { background: #24252b !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1) !important; }
+.card:hover { background: #2a2b32 !important; }
+.card .pic { background: radial-gradient(170px 80px at 50% 68%, rgba(255, 255, 255, .1), transparent 70%), #1c1d22 !important; }
+.sheet { background: #24252b !important; }
+.body::-webkit-scrollbar-thumb { background: #3a3b43; }
