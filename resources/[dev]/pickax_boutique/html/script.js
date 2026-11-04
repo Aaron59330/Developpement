@@ -559,13 +559,25 @@ window.addEventListener('message', e => {
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }
   else if (d.action === 'checkoutDone') { sfx('success'); S.paying = Object.assign(S.paying || { n: 0 }, { done: true, failed: d.failed || 0 }); render(); }
 });
+// Échap : ferme la fenêtre de détail, sinon la boutique (keydown + keyup, avec anti-doublon)
+let lastEsc = 0;
+function doEsc() {
+  if ($root.classList.contains('hidden')) return;
+  const now = Date.now(); if (now - lastEsc < 250) return; lastEsc = now;
+  if (S.paying && !S.paying.done) return;
+  if (!$modal.classList.contains('hidden')) closeSheet(); else post('close');
+}
 document.addEventListener('keydown', e => {
   if ($root.classList.contains('hidden')) return;
-  const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
-  if (!typing && S.view === 'shop' && $modal.classList.contains('hidden') && !S.paying) {
-    const sl = selEntry(entries());
-    if (sl && e.key === 'Enter') return sheet(sl.it, true, sl.k);
-    if (sl && e.key === '+') return addToCart(sl.k, sl.it.idx);
-  }
-  if (e.key === 'Escape') { if (S.paying && !S.paying.done) return; if (!$modal.classList.contains('hidden')) closeSheet(); else post('close'); }
-});
+  if (e.key === 'Escape') { e.preventDefault(); return doEsc(); }
+  try {
+    const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
+    if (!typing && S.view === 'shop' && $modal.classList.contains('hidden') && !S.paying) {
+      const sl = selEntry(entries());
+      if (sl && e.key === 'Enter') return sheet(sl.it, true, sl.k);
+      if (sl && e.key === '+') return addToCart(sl.k, sl.it.idx);
+    }
+  } catch (err) { /* un raccourci ne doit jamais bloquer Échap */ }
+}, true);
+document.addEventListener('keyup', e => { if (e.key === 'Escape') doEsc(); }, true);
+window.addEventListener('keydown', e => { if (e.key === 'Escape') doEsc(); }, true);
