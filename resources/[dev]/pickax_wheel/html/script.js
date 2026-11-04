@@ -3,7 +3,7 @@ const $r = document.getElementById('root');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const post = (n, b) => { try { fetch('https://pickax_wheel/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }); } catch (e) {} };
 const IMG = 'https://cfx-nui-ox_inventory/web/images/';
-const R = 175, DEAD = 62, N = 8;   // rayon des cases, zone morte au centre, nombre de cases
+const R = 175, DEAD = 62, N = 8;   // R = rayon des cases ; le cercle transparent est réduit (300 px) dans style.css (.ring)   // rayon des cases, zone morte au centre, nombre de cases
 let S = { tabs: [], t: 0, hover: -1, sel: {}, page: 0, key: 'TAB', open: false };
 
 const imgTag = (name, cls) => `<img ${cls ? `class="${cls}"` : ''} src="${IMG}${esc(name)}.png" alt="" data-n="${esc(name)}" onerror="imgFallback(this)">`;
