@@ -2,7 +2,7 @@
 const $r = document.getElementById('root');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmt = n => Number(n || 0).toLocaleString('fr-FR');
-const post = n => { try { fetch('https://pickax_xp/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) {} };
+const post = n => { try { fetch('https://pickax_xp/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) {} if (n === 'close') { $r.classList.add('hidden'); $r.innerHTML = ''; } };
 function draw(d) {
   const pct = d.nextXp ? Math.max(0, Math.min(100, (d.xp - d.floor) / (d.nextXp - d.floor) * 100)) : 100;
   const next = d.rewards.find(r => !r.got);
@@ -20,5 +20,5 @@ function draw(d) {
   document.getElementById('x').onclick = () => post('close');
 }
 window.addEventListener('message', e => { const m = e.data || {}; if (m.a === 'open') { draw(m.d); $r.classList.remove('hidden'); } else if (m.a === 'close') { $r.classList.add('hidden'); $r.innerHTML = ''; } });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$r.classList.contains('hidden')) post('close'); });
+document.addEventListener('keydown', e => { if ((e.key === 'Escape' || e.key === 'F4' || e.key === 'Backspace') && !$r.classList.contains('hidden')) { e.preventDefault(); post('close'); } });
 $r.addEventListener('mousedown', e => { if (e.target === $r) post('close'); });
