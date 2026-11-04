@@ -168,7 +168,7 @@ RegisterCommand('+pickax_wheel', open, false)
 RegisterCommand('-pickax_wheel', function()
     if isOpen then SendNUIMessage({ a = 'release' }) end   -- le NUI renvoie 'select' (élément survolé) ou 'cancel'
 end, false)
-RegisterKeyMapping('+pickax_wheel', 'Roue d\'actions (maintenir)', 'keyboard', C.Key or 'TAB')
+RegisterKeyMapping('+pickax_wheel', 'Roue d\'actions (maintenir)', 'keyboard', C.Key or 'CAPSLOCK')
 
 RegisterNUICallback('select', function(d, cb)
     cb(1)
@@ -195,7 +195,6 @@ RegisterNUICallback('tab', function(d, cb) cb(1) lastTab = tonumber(d.tabIndex) 
 CreateThread(function()
     while true do
         if C.HideNativeWheel then
-            DisableControlAction(0, 37, true)
             HudWeaponWheelIgnoreSelection()
             if isOpen then HideHudComponentThisFrame(19) HideHudComponentThisFrame(20) HideHudComponentThisFrame(22) end
             Wait(0)

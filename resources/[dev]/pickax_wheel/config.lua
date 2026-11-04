@@ -1,10 +1,10 @@
 Config = {}
 
 -- ═════════════════════════════ GÉNÉRAL ═════════════════════════════
-Config.Key = 'TAB'                       -- maintiens la touche : la roue s'ouvre ; relâche pour utiliser l'élément survolé
+Config.Key = 'CAPSLOCK'                  -- maintiens la touche : la roue s'ouvre ; relâche pour utiliser (TAB est pris par l'inventaire ; change-la ici, ex. 'Z', 'X', 'LMENU')
 Config.Tabs = { 'weapons', 'items', 'emotes', 'outfit', 'shortcuts' }   -- onglets affichés (retire-en pour les masquer)
 Config.OpenMinMs = 120                   -- une pression plus courte que ça ferme la roue sans rien utiliser
-Config.HideNativeWheel = true            -- masque la roue d'armes native de GTA
+Config.HideNativeWheel = true            -- masque la roue d'armes native de GTA (sans toucher à TAB)
 
 -- ═════════════════════════════ ARMES ═════════════════════════════
 -- 8 emplacements autour du cercle (dans le sens des aiguilles d'une montre, le 1er en haut). `groups` = groupes d'armes GTA ; `names` = armes précises (prioritaires).
