@@ -133,8 +133,11 @@ function BB.Blip(coords, b, opts)
         local base = name:gsub('%s+[nN]°%s*%d+%s*$', ''):gsub('%s+#?%d+%s*$', '')
         if base ~= '' then name = base end
     end
+    -- les codes de couleur GTA (~p~, ~s~, ~h~…) ne doivent pas séparer deux blips de même nom : ils sont retirés du nom du blip
+    name = name:gsub('~[%a]~', ''):gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    if name == '' then name = 'Point' end
     -- clé de groupe insensible à la casse et aux espaces multiples (« Garage », « garage », « Garage  »)
-    local norm = name:lower():gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    local norm = name:lower()
     local key = ('PKBLIP_%x'):format(GetHashKey(norm))
     BB._groups = BB._groups or {}
     local g = BB._groups[key]
@@ -142,6 +145,9 @@ function BB.Blip(coords, b, opts)
         g = { blip = blip, sprite = tonumber(b.sprite) or cat.sprite, color = tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color, short = b.shortRange ~= false }
         BB._groups[key] = g
     end
+    g.blips = g.blips or {}
+    g.blips[#g.blips + 1] = blip
+    g.name = name
     SetBlipSprite(blip, g.sprite)
     SetBlipColour(blip, g.color)
     -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
@@ -154,3 +160,18 @@ function BB.Blip(coords, b, opts)
     EndTextCommandSetBlipName(blip)
     return blip
 end
+
+-- Diagnostic : liste les groupes de blips de cette ressource (nom, icône, couleur, nombre de blips vivants).
+-- Commande : <ressource>_blips (ex. pickax_worldbuilder_blips) ; résultat dans la console F8. Deux blips de même nom doivent être dans le même groupe.
+CreateThread(function()
+    RegisterCommand(GetCurrentResourceName() .. '_blips', function()
+        local n = 0
+        print(('^3[%s] groupes de blips (même nom + même icône + même couleur = une seule ligne de légende « Nom 1/N »)^0'):format(GetCurrentResourceName()))
+        for key, g in pairs(BB._groups or {}) do
+            local alive = 0
+            for _, b in ipairs(g.blips or {}) do if DoesBlipExist(b) then alive = alive + 1 end end
+            if alive > 0 then n = n + 1 print(('  « %s » : %d blip(s), icône %s, couleur %s [%s]'):format(tostring(g.name), alive, tostring(g.sprite), tostring(g.color), key)) end
+        end
+        print(('^3%d groupe(s)^0'):format(n))
+    end, false)
+end)
