@@ -651,3 +651,67 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 #root.fn .fprev { height: 64px; }
 #root.fn .fpr { font-size: 28px; padding-top: 4px; }
 #root.fn .fbal { margin: 4px 0 0; }
+
+/* ═════════ Style « charbon » (même mise en page que la version précédente, couleurs charbon + couleur du serveur) ═════════ */
+:root { --tile: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); --tile-h: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); --tline: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .45); --gold: linear-gradient(180deg, #e0a028, #b97a10); --green: linear-gradient(180deg, #2fd470, #17a653); }
+#root.fn { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f 0%, #1e1e20 62%, #151516 100%) !important; box-shadow: 0 24px 60px rgba(0, 0, 0, .7), 0 0 0 1px #3b3b3d, inset 0 0 70px rgba(0, 0, 0, .45) !important; border-radius: 8px !important; }
+#root.fn::after { display: none !important; }
+#root.fn .ft { color: #f2f2f3; border-radius: 4px; }
+#root.fn .ft:hover { background: var(--tile); box-shadow: var(--tline); }
+#root.fn .ft.on { background: var(--tile-h) !important; color: #fff !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--acc), 0 0 14px color-mix(in srgb, var(--acc) 40%, transparent) !important; }
+#root.fn .ft small { background: #1a1a1c; color: #cfcfd3; } #root.fn .ft.on small { background: var(--acc); color: #fff; }
+#root.fn .fi { border-radius: 4px; background: var(--tile); box-shadow: var(--tline); color: #e6e6e8; } #root.fn .fi:hover { background: var(--tile-h); }
+#root.fn .fi.on { background: var(--tile-h) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--acc), 0 0 12px color-mix(in srgb, var(--acc) 40%, transparent) !important; } #root.fn .fi.buy { color: #3fd470; }
+#root.fn .fcode { background: #1a1a1c; border: 1px dashed #55555a; border-radius: 4px; } #root.fn .fcode b { color: #fff; } #root.fn .fcode small { color: #9a9aa0; opacity: 1; }
+#root.fn .fcoins { background: var(--gold); color: #fff; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 0 0 1px #8a5a08; } #root.fn .fcoins i.cb { color: #fff; }
+#root.fn .fb { background: #e8453c; }
+/* titres */
+#root.fn .ftitle h3, #root.fn .phead h1 { text-shadow: none; font-style: italic; }
+#root.fn .fcd { background: var(--tile); box-shadow: var(--tline); border-radius: 4px; color: #fff; } #root.fn .fcd b { color: #ffcc4d; }
+#root.fn .fsearch, #root.fn .sorts button { background: linear-gradient(180deg, #2f2f31, #202022) !important; box-shadow: inset 0 0 0 1px #3d3d40, inset 0 0 10px rgba(0, 0, 0, .35) !important; border-radius: 4px; }
+#root.fn .sorts button.on { background: var(--tile-h) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--acc) !important; }
+#root.fn .fsearch:focus-within { box-shadow: inset 0 0 0 1px var(--acc) !important; }
+/* cartes */
+#root.fn .card { background: linear-gradient(180deg, #343436 0%, #232325 60%, #1b1b1d 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px #3d3d40, 0 3px 8px rgba(0, 0, 0, .5) !important; border-radius: 4px !important; }
+#root.fn .card::before { background: radial-gradient(ellipse 60% 100% at 50% 110%, rgba(255, 255, 255, .07), transparent 70%) !important; top: 30% !important; height: 50% !important; }
+#root.fn .card:hover { background: linear-gradient(180deg, #424245 0%, #2c2c2f 60%, #222225 100%) !important; box-shadow: inset 0 0 0 1px #5a5a5e, 0 3px 8px rgba(0, 0, 0, .5) !important; }
+#root.fn .card.sel { outline: 0; box-shadow: inset 0 0 0 1px var(--acc), 0 0 18px color-mix(in srgb, var(--acc) 45%, transparent), 0 3px 8px rgba(0, 0, 0, .5) !important; }
+#root.fn .card .badge { background: #17171a; color: #c9c9ce; border-radius: 2px; box-shadow: inset 0 0 0 1px #3d3d40; } #root.fn .card .badge.o { background: #e8453c; color: #fff; box-shadow: none; }
+#root.fn .card .pic img { filter: drop-shadow(0 10px 10px rgba(0, 0, 0, .55)); }
+#root.fn .card .pic svg.art { color: var(--acc); }
+#root.fn .card .cinfo { text-shadow: none; }
+#root.fn .card .pr { display: inline-flex; background: var(--gold); padding: 3px 10px 3px 7px; border-radius: 3px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); font-size: 13.5px; width: fit-content; }
+#root.fn .card .pr .cl { height: 14px; } #root.fn .card .pr s { color: rgba(255, 255, 255, .75); }
+#root.fn .card .cstrip { background: var(--green); color: #fff; font-style: normal; font-weight: 800; letter-spacing: .06em; }
+/* panneau */
+#root.fn .fpanel { background: radial-gradient(ellipse 100% 70% at 50% 15%, #333335, #232325 65%, #1b1b1d) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px #3d3d40, 0 6px 16px rgba(0, 0, 0, .5) !important; border-radius: 4px !important; }
+#root.fn .fpanel .rar { background: var(--acc); border-radius: 2px; }
+#root.fn .fst div { border-color: #3d3d40 !important; } #root.fn .fst span { color: #b9b9be; }
+#root.fn .fpr { color: #fff; } #root.fn .fbal { color: #b9b9be; opacity: 1; } #root.fn .fbal.bad { color: #ff8f86; }
+#root.fn .fbtns .fbuy { background: var(--green); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 3px 0 #0f7a3a, 0 6px 12px rgba(0, 0, 0, .35); border-radius: 4px; }
+#root.fn .fbtns .fbuy.off { background: linear-gradient(180deg, #5a5a5e, #3c3c3f); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 3px 0 #28282a; color: #b9b9be; filter: none; }
+#root.fn .fbtns .fadd { background: var(--tile); box-shadow: var(--tline); border-radius: 4px; } #root.fn .fbtns .fadd:hover { background: var(--tile-h); }
+#root.fn .fbtns .fedt { background: #1a1a1c; box-shadow: inset 0 0 0 1px #343436; border-radius: 4px; color: #b9b9be; } #root.fn .fbtns .fedt:hover { background: #26262a; color: #fff; }
+/* barre de touches, gestion */
+#root.fn .fhint span { background: var(--tile); box-shadow: var(--tline); border-radius: 4px; }
+#root.fn .fhint .key { border-color: #cfcfd3; border-radius: 4px; background: #1a1a1c; } #root.fn .fhint .key.y { background: var(--green); border-color: #7be8a0; color: #fff; }
+.gbtn { background: var(--tile); box-shadow: var(--tline); border-radius: 4px; color: #e6e6e8; } .gbtn:hover { background: var(--tile-h); color: #fff; }
+/* pages secondaires, formulaires */
+#root.fn .panel, #root.fn .summary, #root.fn .row, #root.fn .wheel-side, #root.fn .paybox { background: linear-gradient(180deg, #2e2e30, #202022) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px #38383b !important; border-radius: 4px !important; }
+#root.fn .tbl { background: #1d1d1f !important; border-radius: 4px; } #root.fn .tbl th { background: #161617 !important; } #root.fn .tbl td, #root.fn .tbl th { border-bottom-color: #2f2f32; }
+#root.fn .promo input, #root.fn .form input, #root.fn .form select, #root.fn .deved textarea, #root.fn .tbl input.amt { background: #151516 !important; box-shadow: inset 0 0 0 1px #38383b !important; border-radius: 4px !important; }
+#root.fn .promo button, #root.fn .btn.pri { background: var(--green) !important; color: #fff !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 3px 0 #0f7a3a !important; border-radius: 4px !important; }
+#root.fn .btn, .cfbox .btn, .sheet .btn { background: var(--tile) !important; box-shadow: var(--tline) !important; border-radius: 4px !important; } #root.fn .btn:hover, .cfbox .btn:hover, .sheet .btn:hover { background: var(--tile-h) !important; }
+.sheet .btn.pri, .cfbox .btn.pri, .wc .pri, .wr-card .pri { background: var(--green) !important; color: #fff !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 3px 0 #0f7a3a !important; }
+#root.fn .refcode { background: #151516; border: 1px dashed #55555a; border-radius: 4px; } #root.fn .refcode span { color: #fff; }
+#root.fn .chip, .sheet .chip, .sheet .contents { background: #1a1a1c !important; box-shadow: inset 0 0 0 1px #38383b !important; border-radius: 3px !important; }
+#root.fn .pill i, .sheet .pill i { background: #ffcc4d; } #root.fn .panel h3 .ic { color: var(--acc); }
+#root.fn .mini2, #root.fn .qty button { background: var(--tile); box-shadow: var(--tline); } #root.fn .qty { background: #151516; }
+#root.fn .payov { background: rgba(10, 10, 12, .85); }
+/* fenêtres */
+#modal { background: rgba(0, 0, 0, .55) !important; }
+.sheet, .cfbox, .wheel-res .wr-card { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f, #1b1b1d 70%) !important; box-shadow: 0 30px 70px rgba(0, 0, 0, .7), inset 0 0 0 1px #3d3d40 !important; border-radius: 6px !important; }
+.sheet .pic { background: radial-gradient(ellipse 70% 60% at 50% 55%, #3a3a3d, #1c1c1e) !important; border-radius: 6px 0 0 6px !important; }
+.sheet .kind { color: var(--acc) !important; }
+.toast { background: #1e1e20 !important; border-left-color: var(--acc) !important; border-radius: 4px !important; }
+.wcode { color: #ffcc4d; border-color: #ffcc4d; }
