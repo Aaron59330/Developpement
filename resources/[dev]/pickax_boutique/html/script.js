@@ -42,7 +42,7 @@ const CATS = [
   { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#fdc27d)' },
   { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#fdc27d)' },
 ];
-const S = { data: null, view: 'shop', cat: 'home', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
+const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
 const saveCart = () => { try { localStorage.setItem('pb_cart', JSON.stringify(S.cart)); } catch (e) { } };
 const rpc = (name, ...args) => post('rpc', { name, args });
@@ -129,106 +129,83 @@ function addToCart(c, idx) {
 }
 const refreshBadge = () => { const b = document.getElementById('cartBadge'); if (b) { b.textContent = cartCount(); b.style.display = cartCount() ? '' : 'none'; } };
 
-
-/* ───── Icônes de la colonne (style trait fin) ───── */
-const SIC = {
-  dash: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
-  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-  car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
-  moto: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
-  plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
-  gun: '<circle cx="12" cy="12" r="9"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/><circle cx="12" cy="12" r="1.5"/>',
-  box: '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/>',
-  gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
-  crown: '<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/>',
-  brief: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
-  cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
-  hist: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
-  tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
-  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
-  link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
-  coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3H15"/>',
-  pct: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
-  bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
-};
-const sic = (n, s) => `<svg viewBox="0 0 24 24"${s ? ` style="width:${s}px;height:${s}px"` : ''}>${SIC[n] || SIC.box}</svg>`;
 /* ───── navigation ───── */
 // logo + nom du serveur (pickax_core/config.lua → ServerLogo / ServerName / ServerShortName)
-
-const curLogo = () => { const logo = window.PICKAX_LOGO; return logo ? `<img class="cl" src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : `<i class="cb">${esc(String((window.PICKAX_SERVER || {}).short || 'B')[0])}</i>`; };
 function brand() {
-  const logo = window.PICKAX_LOGO, sv = window.PICKAX_SERVER || {};
-  return `<div class="logo">${logo ? `<img src="${esc(logo)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'${esc(sv.name || 'Boutique')}'}))">` : `<b>${esc(sv.name || 'Boutique')}</b>`}</div>`;
+  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
+  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fb',textContent:'${esc((sv.short || 'B')[0])}'}))">` : `<span class="fb">${esc((sv.short || 'B')[0])}</span>`;
+  return `<div class="brand"><div class="mark">${mark}</div><div class="bt"><b>${esc(sv.name || 'Boutique')}</b><span>Boutique officielle</span></div></div>`;
 }
-const fmtClockShort = s => { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}`; };
 function sidebar(cats) {
-  const it = (on, a, d, icon, label, extra) => `<button class="it ${on ? 'on' : ''}" ${a}="${d[0]}" ${d[1] ? `data-${d[1]}` : ''}><span class="ico">${sic(icon, 17)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
-  const home = S.view === 'shop' && S.cat === 'home';
-  const row = x => `<button class="it ${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}"><span class="ico">${sic(SMAP[x.icon] || 'box', 17)}</span><span class="lb">${esc(x.label)}</span>${x.id === 'daily' && S.dayEnds ? `<span class="b l" id="dtimer">${fmtClockShort(S.dayEnds - Date.now() / 1000)}</span>` : ((S.data[x.id] || []).length ? `<span class="b">${(S.data[x.id] || []).length}</span>` : '')}</button>`;
-  const acc = (v, icon, label, extra) => `<button class="it ${S.view === v ? 'on' : ''}" data-a="view" data-v="${v}"><span class="ico">${sic(icon, 17)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
+  const nav = (id, icon, label, extra, color) => `<button class="${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}" style="--cc:${color || 'var(--pk-accent,#fdc27d)'}"><span class="ico">${ic(icon, 19)}</span><span class="lb">${label}</span>${extra || ''}</button>`;
   return `<aside class="side">${brand()}
-    <div class="cap">CATALOGUE</div>
-    <nav class="nav"><button class="it ${home ? 'on' : ''}" data-a="cat" data-id="home"><span class="ico">${sic('dash', 17)}</span><span class="lb">Vue d'ensemble</span></button>${cats.map(row).join('')}</nav>
-    <div class="cap" style="margin-top:12px">MON COMPTE</div>
-    <nav class="nav">${acc('cart', 'cart', 'Panier', `<span class="b l" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`)}${S.data.wheel ? acc('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="b l">1</span>' : '') : ''}${acc('history', 'hist', 'Historique')}${acc('codes', 'tag', 'Codes & parrainage')}${S.data.staff ? acc('admin', 'shield', 'Gestion') : ''}</nav>
-    ${S.data.link ? `<div class="sfoot"><button class="it" data-a="link"><span class="ico">${sic('link', 17)}</span><span class="lb">Acheter des coins</span></button></div>` : ''}</aside>`;
+    <div class="cap">Catégories</div>
+    <nav class="nav">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}" style="--cc:${x.color}"><span class="ico">${ic(x.icon, 19)}</span><span class="lb"><b>${esc(x.label)}</b><small>${(S.data[x.id] || []).length} article${(S.data[x.id] || []).length > 1 ? 's' : ''}</small></span><span class="n">${(S.data[x.id] || []).length}</span></button>`).join('')}
+      <div class="cap" style="margin-top:14px">Mon compte</div>
+      ${nav('cart', 'cart', 'Panier', `<span class="n bd" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`, 'var(--pk-accent,#fdc27d)')}
+      ${S.data.wheel ? nav('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="n bd">1</span>' : '', '#e5a23c') : ''}
+      ${nav('history', 'hist', 'Historique', '', 'var(--pk-accent,#fdc27d)')}
+      ${nav('codes', 'tag', 'Codes & parrainage', '', 'var(--pk-accent,#fdc27d)')}
+      ${S.data.staff ? nav('admin', 'shield', 'Gestion', '', 'var(--pk-accent,#fdc27d)') : ''}</nav>
+    <div class="foot">${S.data.boutiqueId ? `<div class="idcard"><small>Mon code boutique</small><b>#${esc(S.data.boutiqueId)}</b><span>Unique, lié à ton compte</span></div>` : ''}${S.data.link ? `<button data-a="link"><span class="ico">${ic('link', 16)}</span> Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic"><span class="ico">${ic('gear', 16)}</span> Ancien menu</button>` : ''}</div></aside>`;
 }
-const SMAP = { flame: 'flame', car: 'car', moto: 'moto', plane: 'plane', gun: 'gun', box: 'box', gift: 'gift', crown: 'crown', brief: 'brief' };
-function topbar() {
-  const nm = S.data.pname, ini = nm ? String(nm).split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() : '';
-  return `<div class="top"><div class="bc"><span class="chipx">${curLogo()}<b id="pts">${fmt(S.points)}</b><small>coins</small></span>${S.data.boutiqueId ? `<span class="chipx"><small>CODE BOUTIQUE</small><b>#${esc(S.data.boutiqueId)}</b></span>` : ''}</div>
-    <label class="search">${ic('search', 15)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}" autocomplete="off"></label>
-    <div class="user">${nm ? `<span class="dot"></span>${esc(nm)}<i>${esc(ini)}</i>` : ''}<button class="quit" data-a="close" title="Fermer (Échap)">${ic('x', 15)} Quitter</button></div></div>`;
-}
-const heroBar = (icon, title, sub) => `<div class="phead"><div><small>BOUTIQUE</small><h1>${esc(title)}</h1><p>${esc(sub)}</p></div></div>`;
-const kindOf = k => (CATS.find(c => c.id === k) || {}).kind || '';
-const allItems = () => { const out = []; ['vehicle', 'moto', 'other', 'weapon', 'crate', 'pack', 'vip', 'business'].forEach(k => ((S.data && S.data[k]) || []).forEach(it => out.push(Object.assign({}, it, { _cat: k })))); return out; };
-function cardHtml(it, k, n) {
-  const p = effPrice(k, it), lack = S.points < p, d = isDaily(k, it.idx) && dailyD() > 0, tg = tagOf(it, k);
-  return `<div class="card" data-a="open" data-c="${k}" data-i="${it.idx}" style="animation-delay:${Math.min(n || 0, 12) * 0.03}s"><div class="crow"><span class="badge">${esc(String(tg || kindOf(k)).toUpperCase())}</span>${d ? `<span class="badge o">-${dailyD()} %</span>` : ''}</div>
-    ${picHtml(k, it, '')}<b class="nm">${esc(it.name)}</b><p class="ds">${esc(metaOf(it, k) || '')}</p>
-    <div class="cf"><span class="pr">${curLogo()}${fmt(p)}${p < it.price ? `<s>${fmt(it.price)}</s>` : ''}</span><span class="addq"><button class="mini" data-a="addcart" data-c="${k}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 15)}</button></span>${lack ? '<span class="lk off">Solde insuffisant</span>' : '<span class="lk">Acheter →</span>'}</div></div>`;
-}
-const sortBar = () => { const sorts = [['price', 'Prix croissant'], ['priceDesc', 'Prix décroissant'], ['name', 'Nom A-Z']]; return `<span class="sorts">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</span>`; };
-function viewHome() {
-  const q = S.q.trim().toLowerCase(), daily = S.data.daily || [], d = dailyD();
-  const left = S.dayEnds ? Math.max(0, S.dayEnds - Date.now() / 1000) : 0;
-  const hero = q ? '' : `<div class="hero2"><div class="hbox"><small>TA BOUTIQUE</small><h1>Vue d'ensemble.</h1><p>Les offres du moment, tes coins et tes derniers achats${(window.PICKAX_SERVER || {}).name ? ' sur ' + esc(window.PICKAX_SERVER.name) : ''}.</p></div><button class="solid" data-a="view" data-v="cart">${ic('check', 14)} Mon panier</button></div>
-    <div class="stats"><div class="sc"><small>MON SOLDE</small><span class="ic">${sic('coin', 15)}</span><h2 id="pts2">${fmt(S.points)}</h2><p>Coins disponibles</p></div>
-      <div class="sc"><small>OFFRES DU JOUR</small><span class="ic g">${sic('pct', 15)}</span><h2>${daily.length}${d ? ` <span>/ -${d} %</span>` : ''}</h2><p>${S.dayEnds ? `Nouvelle sélection dans <b id="dcd2">${fmtClock(left)}</b>` : 'Aucune offre en cours'}</p></div>
-      <div class="sc"><small>PANIER</small><span class="ic y">${sic('bag', 15)}</span><h2>${cartCount()} <span>article${cartCount() > 1 ? 's' : ''}</span></h2><p>Total : ${fmt(finalTotal())} coins</p></div></div>`;
-  const l = allItems().filter(it => !q || String(it.name).toLowerCase().includes(q) || String(it.model || '').toLowerCase().includes(q)).sort((a, b) => (isDaily(b._cat, b.idx) - isDaily(a._cat, a.idx)) || (a.price - b.price)).slice(0, q ? 60 : 8);
-  return hero + `<div class="sh"><div><h3>${q ? 'Résultats' : 'Articles populaires'}</h3><p>${q ? `${l.length} article${l.length > 1 ? 's' : ''} pour « ${esc(S.q)} »` : 'Les offres du jour d\'abord, puis les plus accessibles.'}</p></div><span>${q ? '' : 'SÉLECTION DU JOUR'}</span></div><div class="grid">${l.length ? l.map((it, n) => cardHtml(it, it._cat, n)).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div>`;
-}
-function viewShop() {
-  const c = cat(), items = filtered();
-  $root.style.setProperty('--cc', c.color);
-  return `<div class="sh"><div><h3>${esc(c.label)}</h3><p>${esc(c.sub)}</p></div>${sortBar()}</div><div class="grid">${items.length ? items.map((it, n) => cardHtml(Object.assign({}, it), S.cat, n)).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div>`;
-}
-function viewDaily() {
-  const c = cat(), items = S.data.daily || [], d = dailyD();
-  $root.style.setProperty('--cc', c.color);
-  return `<div class="sh"><div><h3>${esc(c.label)}</h3><p>${esc(c.sub)}</p></div><span class="sorts dayinfo">${ic('clock', 14)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b>${d ? ` · <b class="dbadge">-${d} % sur toute la sélection</b>` : ''}</span></div><div class="grid">${items.map((it, n) => cardHtml(it, it._cat, n)).join('')}</div>`;
-}
+const coinsBox = () => `<div class="coins"><span class="c">C</span><div><small>Mon solde</small><b id="pts">${fmt(S.points)}</b></div></div><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button>`;
+const heroBar = (icon, title, sub, color) => `<div class="hero"><div class="wm">${ic(icon)}</div><div class="ht"><div class="hi" style="--cc:${color}">${ic(icon, 26)}</div><div><h1><span>BOUTIQUE</span> <em>${esc(String(title).toUpperCase())}</em>${S.data && S.data.boutiqueId ? `<b class="hcode"><small>CODE</small> #${esc(S.data.boutiqueId)}</b>` : ''}</h1><p>${esc(String(sub).toUpperCase())}</p></div></div></div>`;
 
+
+function topbar() {
+  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
+  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : '';
+  return `<header class="tbar"><div class="tb-l">${mark}<h1><span>BOUTIQUE</span> <em>${esc(String(sv.short || sv.name || '').toUpperCase())}</em></h1>${S.data && S.data.boutiqueId ? `<div class="tb-code"><small>CODE</small><b>${esc(S.data.boutiqueId)}</b></div>` : ''}</div>
+    <div class="tb-r">${S.data && S.data.link ? `<button class="gbtn" data-a="link">${ic('link', 16)}Acheter des coins</button>` : ''}${coinsBox()}</div></header>`;
+}
+function offersStrip() {
+  const items = (S.data && S.data.daily) || [], d = dailyD();
+  if (!items.length || S.cat === 'daily') return '';
+  const cards = items.slice(0, 4).map(it => { const k = it._cat, p = effPrice(k, it);
+    return `<div class="of" data-a="open" data-c="${k}" data-i="${it.idx}"><div class="ofp">${picHtml(k, it, '')}</div><div class="ofi"><b>${esc(it.name)}</b><span class="ofx"><i></i>${fmt(p)}${p < it.price ? ` <s>${fmt(it.price)}</s>` : ''}</span></div>${d ? `<em>-${d}%</em>` : ''}</div>`; }).join('');
+  return `<div class="offers"><div class="ofh"><span>${ic('flame', 16)} OFFRES DU JOUR${d ? ` <b>-${d} %</b>` : ''}</span><button data-a="cat" data-id="daily">Voir toute la sélection</button></div><div class="ofl">${cards}</div></div>`;
+}
 // petit bouton « Panel gestion » (staff uniquement) en bas à droite : ouvre la page Gestion
-const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<button class="gbtn" data-a="view" data-v="admin" title="Ouvrir le panel de gestion">${sic('shield', 14)}<span>Panel gestion</span></button>` : '';
+const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<button class="gestbtn" data-a="view" data-v="admin" title="Ouvrir le panel de gestion">${ic('shield', 14)}<span>Panel gestion</span></button>` : '';
 function render() {
   if (!S.data) return;
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
-  if (S.cat !== 'home' && !cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
+  if (!cats.find(c => c.id === S.cat) && cats[0]) S.cat = cats[0].id;
   let main;
   if (S.view === 'cart') main = viewCart();
   else if (S.view === 'wheel' && S.data.wheel) main = viewWheel();
   else if (S.view === 'history') main = viewHistory();
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
-  else main = S.cat === 'home' ? viewHome() : (S.cat === 'daily' ? viewDaily() : viewShop());
-  $root.innerHTML = sidebar(cats) + `<section class="main">${topbar()}<div class="body">${main}</div></section>` + (S.paying ? payOverlay() : '') + gestionBtn();
+  else main = S.cat === 'daily' ? viewDaily() : viewShop();
+  $root.innerHTML = topbar() + sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
+}
+
+function viewShop() {
+  const c = cat(), items = filtered();
+  $root.style.setProperty('--cc', c.color);
+  const sorts = [['price', 'Prix croissant'], ['priceDesc', 'Prix décroissant'], ['name', 'Nom A-Z']];
+  return heroBar(c.icon, c.label, c.sub, c.color) + offersStrip() +
+    `<div class="tools"><label class="search">${ic('search', 16)}<input id="q" placeholder="Rechercher un article…" value="${esc(S.q)}"></label>
+      <div class="sort">${sorts.map(o => `<button class="${S.sort === o[0] ? 'on' : ''}" data-a="sort" data-v="${o[0]}">${o[1]}</button>`).join('')}</div><div class="sp"></div><span class="count">${items.length} article${items.length > 1 ? 's' : ''}</span></div>
+      <div class="scroll"><div class="grid">${items.length ? items.map((it, n) => `<div class="card" data-a="open" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(S.cat, it, tagOf(it))}
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it))}</div><div class="price"><span class="pill ${S.points < it.price ? 'short' : ''}"><i></i>${fmt(it.price)}</span>
+        <span class="addq"><button class="mini" data-a="addcart" data-c="${S.cat}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Aucun article ne correspond à ta recherche.</div>'}</div></div>`;
 }
 
 function fmtClock(s) { s = Math.max(0, Math.floor(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; }
-setInterval(() => { const l = S.dayEnds ? fmtClock(S.dayEnds - Date.now() / 1000) : ''; ['dcd', 'dcd2'].forEach(id => { const e = document.getElementById(id); if (e && l) e.textContent = l; }); const t = document.getElementById('dtimer'); if (t && S.dayEnds) t.textContent = fmtClockShort(S.dayEnds - Date.now() / 1000); }, 1000);
+function viewDaily() {
+  const c = cat(), items = S.data.daily || [], d = dailyD();
+  $root.style.setProperty('--cc', c.color);
+  return heroBar(c.icon, c.label, c.sub, c.color) +
+    `<div class="tools"><div class="dayinfo">${ic('clock', 16)} Nouvelle sélection dans <b id="dcd">${fmtClock(S.dayEnds - Date.now() / 1000)}</b></div><div class="sp"></div>${d ? `<span class="count dbadge">-${d} % sur toute la sélection</span>` : ''}</div>
+    <div class="scroll"><div class="grid">${items.map((it, n) => { const k = it._cat, p = effPrice(k, it);
+      return `<div class="card" data-a="open" data-c="${k}" data-i="${it.idx}" style="animation-delay:${Math.min(n, 12) * 0.03}s">${picHtml(k, it, tagOf(it, k))}${d ? `<span class="dtag">-${d}%</span>` : ''}
+        <div class="info"><h3>${esc(it.name)}</h3><div class="meta">${esc(metaOf(it, k))}</div><div class="price"><span class="pill ${S.points < p ? 'short' : ''}"><i></i>${fmt(p)}${p < it.price ? ` <s class="old">${fmt(it.price)}</s>` : ''}</span>
+        <span class="addq"><button class="mini" data-a="addcart" data-c="${k}" data-i="${it.idx}" title="Ajouter au panier">${ic('cart', 16)}</button></span></div></div></div>`; }).join('')}</div></div>`;
+}
+setInterval(() => { const e = document.getElementById('dcd'); if (e && S.dayEnds) e.textContent = fmtClock(S.dayEnds - Date.now() / 1000); }, 1000);
 
 function viewCart() {
   const lines = cartLines(), sub = subtotal(), fin = finalTotal(), lack = fin - S.points;
@@ -536,14 +513,13 @@ document.addEventListener('click', async e => {
 document.addEventListener('input', e => {
   if (e.target.id !== 'q') return;
   S.q = e.target.value;
-  if (S.q.trim() && S.view !== 'shop') { S.view = 'shop'; S.cat = 'home'; }   // la recherche affiche toujours les résultats
   const keep = e.target.selectionStart; render(); const q = document.getElementById('q'); q.focus(); q.setSelectionRange(keep, keep);
 });
 window.addEventListener('message', e => {
   const d = e.data || {};
   if (d.action === 'open') { sfx('open'); applyAccent(d.data.accent); S.data = d.data;
     const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
-    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); S.cat = 'home'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
+    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { sfx('close'); $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points' && S.spinning) { S.pendingPoints = Number(d.points) || 0; }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
