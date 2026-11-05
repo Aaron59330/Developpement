@@ -1,0 +1,179 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#racine {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.apercu {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 40%, #3b4250 0%, #1b1e24 60%, #0f1114 100%);
+}
+
+@keyframes roue-fondu {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roue-apparition {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.roue-calque {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  font-size: clamp(6px, min(1.3dvh, 1.9vw), 16px);
+  color: #fff;
+  user-select: none;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.25) 70%);
+  animation: roue-fondu 140ms ease-out;
+}
+
+.roue {
+  --taille-roue: 46em;
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  place-items: center;
+  width: var(--taille-roue);
+  aspect-ratio: 1;
+  cursor: pointer;
+  animation: roue-apparition 180ms ease-out;
+}
+
+.roue > * {
+  grid-area: 1 / 1;
+}
+
+.roue-dessin {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.roue-dessin .teinte,
+.roue-dessin .bord,
+.roue-dessin .trait {
+  transition:
+    opacity 200ms,
+    stroke 200ms,
+    stroke-opacity 200ms;
+}
+
+.roue-contenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  transform: translate(calc(var(--fx) * var(--taille-roue)), calc(var(--fy) * var(--taille-roue)));
+  pointer-events: none;
+}
+
+.roue-contenu img {
+  width: 6.6em;
+  height: 4.8em;
+  object-fit: contain;
+  filter: drop-shadow(0 0.15em 0.35em rgba(0, 0, 0, 0.75));
+  opacity: 0.92;
+}
+
+.roue-contenu.vise img {
+  opacity: 1;
+}
+
+.roue-numero {
+  font-size: 2.25em;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.roue-munitions {
+  font-size: 1.05em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0.1em 0.1em 0 rgba(0, 0, 0, 0.7);
+}
+
+.roue-compte {
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0.1em 0.1em 0 rgba(0, 0, 0, 0.7);
+}
+
+.roue-coeur {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  width: 54%;
+  aspect-ratio: 1;
+  padding: 0 2.5em;
+  text-align: center;
+  text-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+.roue-nom {
+  font-size: 1.55em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.roue-categorie {
+  font-size: 0.95em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roue-calque,
+  .roue {
+    animation: none;
+  }
+
+  .roue-dessin .teinte,
+  .roue-dessin .bord,
+  .roue-dessin .trait {
+    transition: none;
+  }
+}

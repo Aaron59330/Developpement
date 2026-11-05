@@ -3,13 +3,13 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_wheel'
-description 'Roue d\'armes (maintiens CAPSLOCK) : 6 emplacements, mains nues incluses — relâche pour sortir l\'arme'
+description 'Roue d\'armes (maintiens CAPSLOCK) : UI GTA VI (React 19) — relâche sur une case pour équiper'
 version '1.0.0'
 
-shared_scripts { '@pickax_theme/theme.lua', 'config.lua' }
+shared_scripts { 'config.lua' }
 client_scripts { 'client/main.lua' }
 
-ui_page 'html/index.html'
-files { 'html/index.html', 'html/style.css', 'html/script.js', 'html/poing.png' }
+ui_page 'web/dist/index.html'
+files { 'web/dist/index.html', 'web/dist/assets/*' }
 
-dependencies { 'pickax_theme', 'ox_inventory' }
+dependencies { 'ox_inventory' }
