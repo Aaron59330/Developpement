@@ -304,7 +304,22 @@ const Placement = {
 let Mod = null;
 const close = () => rpc('close');
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+document.addEventListener('keydown', e => {
+  const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
+  if (typeof Runtime !== 'undefined' && Runtime.kind === 'menu' && Mod === Runtime && !typing && !$root.classList.contains('hidden')) {
+    if (e.key === 'Escape') { if (Runtime.mv.view !== 'main') { Runtime.mv = { view: 'main', sel: 0 }; Runtime.render(); } else close(); return; }
+    if (Runtime.menuKey(e)) { e.preventDefault(); return; }
+  }
+  if (e.key === 'Escape') close();
+});
+document.addEventListener('mouseover', e => {   // souris : la ligne survolée devient la sélection du menu F6
+  const el = e.target.closest && e.target.closest('.jm2-it'); if (!el || typeof Runtime === 'undefined' || Runtime.kind !== 'menu') return;
+  const n = Number(el.dataset.n); if (n === Runtime.mv.sel) return; Runtime.mv.sel = n;
+  const m = Runtime.menuModel(Runtime.data || Runtime.menuData);   // mise à jour sans redessiner (pas de clignotement)
+  $root.querySelectorAll('.jm2-it').forEach(b => b.classList.toggle('on', Number(b.dataset.n) === n));
+  const c = $root.querySelector('.jm2-cnt'); if (c) c.textContent = (n + 1) + '/' + m.flat.length;
+  const dsc = $root.querySelector('.jm2-desc'); if (dsc && m.flat[n] && (m.onDuty || Runtime.mv.view !== 'main')) dsc.textContent = m.flat[n].desc;
+});
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   if (!el) return;
@@ -2650,43 +2665,67 @@ document.addEventListener('input', e => {
 const Runtime = {
   kind: null, data: null, pointId: null, bossTab: 'money',
 
-  open(kind, data, pointId) { if (kind === 'menu') this.menuData = data; this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
+  open(kind, data, pointId) { if (kind === 'menu') { this.menuData = data; this.mv = { view: 'main', sel: 0 }; } this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
   set(r) { this.data = { ...this.data, ...r }; this.render(); },
 
-  /* Menu F6 : carte du métier (statut de service, actions regroupées en tuiles) */
-  renderMenu(d) {
-    $root.classList.add('corner');
+  /* Menu F6 : menu en liste (style menu personnel, charbon) — sections, sous-menus, description, navigation clavier et souris */
+  mv: { view: 'main', sel: 0 },
+  menuModel(d) {
     const GROUPS = [
-      ['Interactions', ['handcuff', 'escort', 'search', 'revive', 'heal', 'invoice', 'serve']],
-      ['Véhicule', ['repair', 'clean', 'vehctl', 'props']],
-      ['Outils & gestion', ['tablet', 'emstablet', 'banktablet', 'emscalls', 'properties', 'dealership', 'government', 'missions', 'smallquests', 'jobannounce']],
+      ['g0', 'Interactions', 'Actions sur le joueur le plus proche', ['handcuff', 'escort', 'search', 'revive', 'heal', 'invoice', 'serve']],
+      ['g1', 'Véhicule', 'Réparer, nettoyer, contrôler le véhicule', ['repair', 'clean', 'vehctl', 'props']],
+      ['g2', 'Outils & gestion', 'Tablettes, missions, annonces et gestion du métier', ['tablet', 'emstablet', 'banktablet', 'emscalls', 'properties', 'dealership', 'government', 'missions', 'smallquests', 'jobannounce']],
     ];
     const onDuty = d.actions.some(a => a.id === 'dutyoff');
     const duty = d.actions.find(a => a.id === 'dutyon' || a.id === 'dutyoff');
     const leave = d.actions.find(a => a.id === 'leavejob');
     const rest = d.actions.filter(a => a !== duty && a !== leave);
-    const used = new Set();
-    const sections = GROUPS.map(([title, ids]) => {
-      const items = rest.filter(a => ids.includes(a.id)); items.forEach(a => used.add(a.id));
-      return items.length ? `<div class="jm-sec"><div class="jm-h">${title}</div><div class="jm-grid">${items.map(a => this.menuTile(a)).join('')}</div></div>` : '';
-    }).join('');
-    const others = rest.filter(a => !used.has(a.id));
-    const body = onDuty
-      ? (sections + (others.length ? `<div class="jm-sec"><div class="jm-h">Autres</div><div class="jm-grid">${others.map(a => this.menuTile(a)).join('')}</div></div>` : '') || '<p class="hint">Aucune action pour ton métier.</p>')
-      : `<div class="jm-lock">${ic('lock', 22)}<b>Hors service</b><small>Prends ton service pour accéder aux actions, aux points et aux véhicules du métier.</small></div>`;
-    $root.innerHTML = `<div class="jm">
-      <div class="jm-head"><div class="jm-disc">${ic(TYPE_ICON[d.type] || 'briefcase', 26)}</div>
-        <div class="jm-ttl"><small>Menu métier</small><h1>${esc(d.jobLabel)}</h1><div class="jm-meta"><span class="jm-grade">${esc(d.grade || 'Employé')}</span><span class="jm-st ${onDuty ? 'on' : ''}"><i></i>${onDuty ? 'En service' : 'Hors service'}</span></div></div>
-        <button class="icon" data-a="close" title="Fermer (Échap)">${ic('x', 16)}</button></div>
-      ${duty ? `<button class="jm-duty ${onDuty ? 'off' : 'on'}" data-a="act" data-id="${duty.id}">${ic(onDuty ? 'logout' : 'check', 17)}<span>${esc(duty.label)}</span></button>` : ''}
-      <div class="jm-body">${body}</div>
-      ${leave ? `<div class="jm-foot"><button class="jm-leave" data-a="act" data-id="leavejob">${ic('logout', 14)} Quitter le métier</button><span>Échap pour fermer</span></div>` : '<div class="jm-foot"><span>Échap pour fermer</span></div>'}
-    </div>`;
+    const used = new Set(), groups = [];
+    GROUPS.forEach(([id, label, desc, ids]) => { const items = rest.filter(x => ids.includes(x.id)); items.forEach(x => used.add(x.id)); if (items.length) groups.push({ id, label, desc, items }); });
+    const others = rest.filter(x => !used.has(x.id)); if (others.length) groups.push({ id: 'g9', label: 'Autres', desc: 'Autres actions du métier', items: others });
+    const act = (x, desc) => ({ kind: 'act', id: x.id, label: x.label, desc: desc || (x.target ? 'Joueur proche requis' : x.label) });
+    let sections = [];
+    if (this.mv.view === 'main') {
+      if (duty) sections.push({ h: 'Service', items: [act(duty, onDuty ? 'Quitter le service : les points et véhicules du métier sont verrouillés' : 'Prendre le service pour accéder aux actions du métier')] });
+      if (onDuty && groups.length) sections.push({ h: 'Actions du métier', items: groups.map(g => ({ kind: 'go', id: g.id, label: g.label, desc: g.desc })) });
+      if (leave) sections.push({ h: 'Métier', items: [act(leave, 'Quitter définitivement ce métier')] });
+    } else {
+      const g = groups.find(x => x.id === this.mv.view);
+      sections.push({ h: '', items: g ? g.items.map(x => act(x)) : [] });
+    }
+    const flat = sections.flatMap(x => x.items);
+    return { onDuty, sections, flat, groups };
   },
-  menuTile(a) {
-    return `<button class="jm-tile" data-a="act" data-id="${a.id}"><span class="jm-ic">${ic(ACTION_ICON[a.id] || 'grid', 19)}</span><span class="jm-tx"><b>${esc(a.label)}</b>${a.target ? '<small>Joueur proche</small>' : ''}</span></button>`;
+  renderMenu(d) {
+    $root.classList.add('corner');
+    const m = this.menuModel(d), sel = Math.max(0, Math.min(this.mv.sel, Math.max(0, m.flat.length - 1)));
+    this.mv.sel = sel;
+    const g = this.mv.view === 'main' ? null : m.groups.find(x => x.id === this.mv.view);
+    const title = g ? g.label : 'Menu Métier';
+    const sub = g ? esc(d.jobLabel) + ' · ' + esc(g.desc) : esc(d.jobLabel) + ' · ' + esc(d.grade || 'Employé') + ' · ' + (m.onDuty ? 'EN SERVICE' : 'HORS SERVICE');
+    let n = -1;
+    const rows = m.sections.map(sec => (sec.h ? `<div class="jm2-sec"><i></i><span>${esc(sec.h)}</span><u></u></div>` : '') + sec.items.map(it => {
+      n++; const cls = n === sel ? ' on' : '';
+      return `<button class="jm2-it${cls}" data-n="${n}" data-a="${it.kind === 'go' ? 'jmgo' : 'act'}" data-id="${esc(it.id)}"><span>${esc(it.label)}</span><span class="jm2-ar">${it.kind === 'go' ? '→→→' : ''}</span></button>`;
+    }).join('')).join('');
+    const cur = m.flat[sel];
+    const desc = !m.onDuty && this.mv.view === 'main' ? 'Prends ton service pour accéder aux actions, aux points et aux véhicules du métier' : (cur ? cur.desc : '');
+    $root.innerHTML = `<div class="jm2"><img class="jm2-ban" src="https://cfx-nui-pickax_ui/html/banner.jpg" alt="" onerror="this.style.display='none'">
+      <div class="jm2-hd"><div><h1>${esc(title)}</h1><small>${sub}</small></div><span class="jm2-cnt">${m.flat.length ? sel + 1 : 0}/${m.flat.length}</span></div>
+      <div class="jm2-body">${rows || '<p class="hint">Aucune action pour le moment.</p>'}</div>
+      <div class="jm2-desc">${esc(desc)}</div>
+      <div class="jm2-keys"><span>↑↓ <em>Naviguer</em></span><span><b>Entrée</b> <em>Valider</em></span><span><b>Retour</b> <em>${this.mv.view === 'main' ? 'Fermer' : 'Précédent'}</em></span></div></div>`;
+    const on = $root.querySelector('.jm2-it.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest' });
   },
-
+  menuKey(e) {   // navigation clavier du menu F6
+    const m = this.menuModel(this.data || this.menuData || { actions: [] });
+    const len = m.flat.length;
+    if (e.key === 'ArrowDown') { this.mv.sel = (this.mv.sel + 1) % Math.max(1, len); this.render(); return true; }
+    if (e.key === 'ArrowUp') { this.mv.sel = (this.mv.sel - 1 + Math.max(1, len)) % Math.max(1, len); this.render(); return true; }
+    if (e.key === 'Enter') { const el = $root.querySelector('.jm2-it.on'); if (el) el.click(); return true; }
+    if (e.key === 'Backspace' || e.key === 'ArrowLeft') { if (this.mv.view !== 'main') { this.mv = { view: 'main', sel: 0 }; this.render(); } else if (e.key === 'Backspace') close(); return true; }
+    return false;
+  },
   render() {
     const d = this.data, k = this.kind;
     window.JBBack = ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl', 'props'].includes(k) ? true : (!!window.JBBackFromMenu && k !== 'menu');
@@ -3034,6 +3073,7 @@ const Runtime = {
         return toast(a === 'propDel' ? 'Prop retiré' : 'Props retirés', 'ok');
       }
       case 'vc': { const r = await rpc('vehctl:set', el.dataset.k, el.dataset.v); if (!ok(r)) return; this.data = r; return this.render(); }
+      case 'jmgo': this.mv = { view: el.dataset.id, sel: 0 }; return this.render();
       case 'leaveJobCancel': return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':

@@ -700,3 +700,22 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .jm-duty.off { background: linear-gradient(180deg, #3b3b3d, #262628); box-shadow: inset 0 0 0 1px #404043; }
 .gx-search input { background: transparent; box-shadow: none; }
 .profile.logo-only, .brand.logo-only { background: none !important; box-shadow: none !important; border: 0 !important; }
+
+/* ═══ Menu F6 (métier) : menu en liste, style charbon (comme le menu personnel) ═══ */
+.jm2 { width: 350px; max-height: calc(100vh - 44px); display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; color: #f2f2f3;
+  background: radial-gradient(ellipse 100% 70% at 50% 14%, #2d2d2f 0%, #1e1e20 62%, #151516 100%); box-shadow: 0 16px 44px rgba(0, 0, 0, .6), 0 0 0 1px #3b3b3d; }
+.jm2-ban { display: block; width: 100%; aspect-ratio: 4 / 1; object-fit: cover; flex: none; }
+.jm2-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; border-bottom: 1px solid #343436; flex: none; }
+.jm2-hd h1 { font-size: 19px; font-weight: 700; letter-spacing: -.01em; } .jm2-hd small { display: block; margin-top: 4px; font-size: 10px; letter-spacing: .13em; color: #9a9aa0; font-weight: 600; text-transform: uppercase; }
+.jm2-cnt { flex: none; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; background: linear-gradient(180deg, #3b3b3d, #262628); box-shadow: inset 0 0 0 1px #404043; }
+.jm2-body { padding: 6px 12px 4px; overflow-y: auto; min-height: 0; }
+.jm2-body::-webkit-scrollbar { width: 6px; } .jm2-body::-webkit-scrollbar-thumb { background: #4a4a4e; border-radius: 6px; }
+.jm2-sec { display: flex; align-items: center; gap: 8px; margin: 12px 2px 7px; font-size: 10px; letter-spacing: .18em; font-weight: 700; color: #8d8d92; text-transform: uppercase; }
+.jm2-sec i { width: 9px; height: 2px; background: var(--accent, #00a4ff); } .jm2-sec u { flex: 1; height: 1px; background: #343436; }
+.jm2-it { position: relative; width: 100%; height: 40px; margin: 3px 0; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; text-align: left; border-radius: 4px; font-size: 14px; font-weight: 600; color: #f2f2f3;
+  background: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .4); }
+.jm2-it.on { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--accent, #00a4ff), 0 2px 5px rgba(0, 0, 0, .4); }
+.jm2-it.on::before { content: ''; position: absolute; left: 0; top: 7px; bottom: 7px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent, #00a4ff); }
+.jm2-ar { font-size: 12px; letter-spacing: -.04em; color: #8d8d92; } .jm2-it.on .jm2-ar { color: #fff; }
+.jm2-desc { margin: 6px 12px 8px; padding: 10px 13px; border-radius: 4px; background: #19191b; box-shadow: inset 0 0 0 1px #2e2e30; border-left: 3px solid var(--accent, #00a4ff); font-size: 12.5px; line-height: 1.35; color: #cfcfd3; min-height: 38px; flex: none; }
+.jm2-keys { display: flex; justify-content: center; gap: 16px; padding: 9px 10px 13px; border-top: 1px solid #343436; font-size: 10.5px; flex: none; } .jm2-keys em { font-style: normal; color: #8d8d92; } .jm2-keys b { font-weight: 800; }
