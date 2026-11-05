@@ -122,22 +122,30 @@ function BB.Blip(coords, b, opts)
     else
         blip = AddBlipForCoord(coords.x + 0.0, coords.y + 0.0, (coords.z or 0.0) + 0.0)
     end
-    SetBlipSprite(blip, tonumber(b.sprite) or cat.sprite)
-    -- icône / couleur : réglage du point (en jeu) → global (Config.GlobalBlip.Color) → défaut de la catégorie
-    SetBlipColour(blip, tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color)
-    -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
-    SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
-    SetBlipDisplay(blip, 4)
-    SetBlipAsShortRange(blip, b.shortRange ~= false)
-    -- Nom : un texte PARTAGÉ par tous les blips de même nom (clé dérivée du nom, enregistrée une fois). Avec un texte propre à chaque blip, GTA affichait une ligne de légende par blip ;
-    -- avec le même texte, deux garages = deux blips sur la carte mais UN seul nom dans la légende.
+    -- Nom : un texte PARTAGÉ par tous les blips de même nom. GTA regroupe alors ces blips en UNE ligne de légende « Garage 1/2 » ;
+    -- les flèches gauche/droite de la carte passent d'un point à l'autre. Le regroupement exige le même nom, le même sprite et la même couleur :
+    -- le premier blip d'un nom fixe l'apparence du groupe, les suivants la reprennent (même si leurs réglages diffèrent).
     local name = tostring((b.label and b.label ~= '') and b.label or opts.label or 'Point')
-    -- les numéros de fin (« Station essence 03 », « Armurerie #2 ») sont retirés : tous les blips du même lieu se regroupent en une ligne de légende « Nom 1/9 »
+    -- les numéros de fin (« Station essence 03 », « Armurerie #2 ») sont retirés : tous les blips du même lieu se regroupent
     do
         local base = name:gsub('%s+[nN]°%s*%d+%s*$', ''):gsub('%s+#?%d+%s*$', '')
         if base ~= '' then name = base end
     end
-    local key = ('PKBLIP_%x'):format(GetHashKey(name))
+    -- clé de groupe insensible à la casse et aux espaces multiples (« Garage », « garage », « Garage  »)
+    local norm = name:lower():gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    local key = ('PKBLIP_%x'):format(GetHashKey(norm))
+    BB._groups = BB._groups or {}
+    local g = BB._groups[key]
+    if not (g and DoesBlipExist(g.blip)) then
+        g = { blip = blip, sprite = tonumber(b.sprite) or cat.sprite, color = tonumber(b.color) or (PickaxTheme and PickaxTheme.blipColor) or cat.color, short = b.shortRange ~= false }
+        BB._groups[key] = g
+    end
+    SetBlipSprite(blip, g.sprite)
+    SetBlipColour(blip, g.color)
+    -- taille : identique pour TOUS les blips (Config.GlobalBlip.Scale du core, 0.5 par défaut)
+    SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
+    SetBlipDisplay(blip, 4)
+    SetBlipAsShortRange(blip, g.short)
     if not BB._names then BB._names = {} end
     if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
     BeginTextCommandSetBlipName(key)
