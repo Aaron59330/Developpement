@@ -1,32 +1,30 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AERO — Panel</title><link rel="stylesheet" href="style.css"></head>
+<title>AERO Panel</title><link rel="icon" href="img/logo.png"><link rel="stylesheet" href="fonts/geist.css"><link rel="stylesheet" href="style.css"></head>
 <body>
 <div class="bg"></div>
 
 <!-- Connexion -->
 <main id="login" class="screen">
-  <section class="card login">
-    <div class="mark"><span>AERO</span><i>IV</i></div>
-    <p class="kick">PANEL D'ADMINISTRATION</p>
-    <label>Adresse e-mail<input id="mail" type="email" autocomplete="username"></label>
-    <label>Mot de passe<input id="pass" type="password" autocomplete="current-password"></label>
-    <button class="btn" id="go">Se connecter</button>
-    <p class="foot">Accès réservé au staff.</p>
+  <section class="box">
+    <img src="img/logo.png" alt="AERO">
+    <h1>Connexion</h1>
+    <p class="muted">Gère ton serveur FiveM depuis ton espace client.</p>
+    <label>E-mail</label><input id="mail" type="email" placeholder="E-mail" autocomplete="email">
+    <label>Mot de passe</label><input id="pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+    <button class="btn p" id="go"><span>Se connecter</span></button>
   </section>
 </main>
 
 <!-- Application -->
-<div id="app" class="screen hidden">
-  <header class="top">
-    <div class="mark small"><span>AERO</span><i>IV</i></div>
-    <div class="status"><b class="dot"></b> Serveur en ligne</div>
-    <div class="user"><span id="who">Admin</span><button class="ghost" id="out">Déconnexion</button></div>
-  </header>
-  <div class="body">
-    <nav class="menu" id="menu"></nav>
-    <section class="view" id="view"></section>
-  </div>
+<div id="app" class="screen hidden layout">
+  <aside class="side">
+    <img class="logo" src="img/logo.png" alt="AERO">
+    <div class="sec">Mon espace</div>
+    <nav id="menu"></nav>
+    <div class="bottom"><a class="nav" href="#" id="out"><span>Déconnexion (Admin)</span></a></div>
+  </aside>
+  <main class="main" id="view"></main>
 </div>
 <script src="app.js"></script>
 </body></html>

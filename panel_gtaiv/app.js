@@ -7,21 +7,20 @@ const $ = id => document.getElementById(id);
 const menu = $('menu'), view = $('view');
 function show(id) {
   const m = MODULES.find(x => x.id === id);
-  [...menu.querySelectorAll('button')].forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  [...menu.querySelectorAll('a')].forEach(b => b.classList.toggle('on', b.dataset.id === id));
   if (!m) {
-    view.innerHTML = `<h1 class="title">Accueil</h1><p class="sub">Panel AERO</p>
-      <section class="card empty"><div class="ico">+</div><h3>Aucun module</h3>
-      <p>Le panel est vide pour l'instant. Les modules s'ajoutent un par un.</p></section>`;
+    view.innerHTML = `<h1>Accueil</h1><section class="card empty"><h2>Aucun module</h2>
+      <p class="muted">Le panel est vide pour l'instant.</p></section>`;
     return;
   }
-  view.innerHTML = `<h1 class="title">${m.label}</h1><p class="sub">${m.sub || ''}</p><div id="mod"></div>`;
+  view.innerHTML = `<h1>${m.label}</h1><div id="mod"></div>`;
   m.render($('mod'));
 }
 function buildMenu() {
-  menu.innerHTML = '<h6>MENU</h6>' + [{ id: 'home', label: 'Accueil' }, ...MODULES].map(m => `<button data-id="${m.id}">${m.label}</button>`).join('');
-  menu.onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.id); };
+  menu.innerHTML = [{ id: 'home', label: 'Accueil' }, ...MODULES].map(m => `<a class="nav" href="#" data-id="${m.id}"><span>${m.label}</span></a>`).join('');
+  menu.onclick = e => { e.preventDefault(); const b = e.target.closest('a'); if (b) show(b.dataset.id); };
 }
 $('go').onclick = () => { $('login').classList.add('hidden'); $('app').classList.remove('hidden'); buildMenu(); show('home'); };
-$('out').onclick = () => { $('app').classList.add('hidden'); $('login').classList.remove('hidden'); };
+$('out').onclick = e => { e.preventDefault(); $('app').classList.add('hidden'); $('login').classList.remove('hidden'); };
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('login').classList.contains('hidden')) $('go').click(); });
 if (location.hash === '#app') $('go').click();
