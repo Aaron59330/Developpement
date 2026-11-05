@@ -38,8 +38,9 @@ exports('ShowContext', function(cfg)
         end
         build(cfg.id, nil)
         local root = menus[cfg.id]
-        ctxMenu = root
-        RageUI.Visible(root, true)
+        local first = (cfg.start and menus[cfg.start]) or root      -- cfg.start : s'ouvre directement sur ce sous-menu (Retour mène au menu parent)
+        ctxMenu = first
+        RageUI.Visible(first, true)
 
         local function draw(id)
             RageUI.IsVisible(menus[id], true, true, true, function()

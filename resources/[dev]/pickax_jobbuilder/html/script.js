@@ -314,7 +314,13 @@ document.addEventListener('mousedown', e => {   // atelier : maintenir ◀ / ▶
 window.addEventListener('mouseup', () => { if (typeof Tuning !== 'undefined') clearInterval(Tuning.holdT); });
 document.addEventListener('keydown', e => {
   const typing0 = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
-  if (e.key === 'Backspace' && !typing0 && !$root.classList.contains('hidden')) {   // Retour : revient au menu précédent quand l'écran propose un bouton « Retour »
+  // Retour : revient au menu précédent (Backspace, même dans un champ s'il est vide ; Échap pour les formulaires ouverts depuis le menu F6)
+  if (!$root.classList.contains('hidden') && typeof Runtime !== 'undefined' && Mod === Runtime && Runtime.rage) {
+    const bk = document.querySelector('[data-a="back"]');
+    const emptyField = typing0 && !(document.activeElement.value || '').length;
+    if (bk && ((e.key === 'Backspace' && (!typing0 || emptyField)) || (e.key === 'Escape' && ['invoiceForm', 'serve', 'jobannounce', 'emscalls', 'vehctl', 'props'].includes(Runtime.kind)))) { bk.click(); e.preventDefault(); return; }
+  }
+  if (e.key === 'Backspace' && !typing0 && !$root.classList.contains('hidden')) {
     const bk = document.querySelector('[data-a="back"]'); if (bk) { bk.click(); e.preventDefault(); return; }
   }
   if (typeof Tuning !== 'undefined' && Mod === Tuning && !typing0 && !$root.classList.contains('hidden')) {   // atelier : raccourcis de vue
@@ -347,7 +353,7 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   if (!el) return;
   if (el.dataset.a === 'close') return close();
-  if (el.dataset.a === 'back' && typeof Runtime !== 'undefined' && Mod === Runtime && Runtime.rage) return rpc('openJobMenu');   // menu F6 en RageUI : retour = on rouvre le menu RageUI
+  if (el.dataset.a === 'back' && typeof Runtime !== 'undefined' && Mod === Runtime && Runtime.rage) return rpc('openJobMenu', Runtime.menuGroup);   // menu F6 en RageUI : retour = on rouvre le menu RageUI
   if (el.dataset.a === 'back') {         // retour au menu métier (F6) : sous-écran du menu, ou panneau ouvert depuis une action
     if (Mod === Runtime && Runtime.menuData && ['invoiceForm', 'serve', 'jobannounce', 'emscalls'].includes(Runtime.kind)) { Runtime.data = Runtime.menuData; Runtime.kind = 'menu'; return Runtime.render(); }
     return rpc('openJobMenu');
@@ -369,7 +375,7 @@ window.addEventListener('message', e => {
     if (d.theme) applyTheme(d.theme);
     applyStyle();
     $root.innerHTML = ''; $root.classList.remove('hidden'); $root.classList.add('corner');
-    Mod = Runtime; Runtime.rage = true; Runtime.menuData = d.data; Runtime.data = d.data; Runtime.kind = 'menu'; window.JBBackFromMenu = true;
+    Mod = Runtime; Runtime.rage = true; Runtime.menuGroup = d.group || null; Runtime.menuData = d.data; Runtime.data = d.data; Runtime.kind = 'menu'; window.JBBackFromMenu = true;
     return Runtime.onA({ dataset: { a: 'act', id: d.id } });
   }
   if (d.action === 'close') { $root.classList.add('hidden', 'x'); $root.classList.remove('tuning', 'x'); $root.innerHTML = ''; Placement.hide(); return; }
@@ -3130,7 +3136,7 @@ const Runtime = {
       }
       case 'vc': { const r = await rpc('vehctl:set', el.dataset.k, el.dataset.v); if (!ok(r)) return; this.data = r; return this.render(); }
       case 'jmgo': this.mv = { view: el.dataset.id, sel: 0 }; return this.render();
-      case 'leaveJobCancel': if (this.rage) return rpc('openJobMenu'); return this.open('menu', this.menuData);
+      case 'leaveJobCancel': if (this.rage) return rpc('openJobMenu', this.menuGroup); return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':
         if (el.dataset.id === 'dutyon' || el.dataset.id === 'dutyoff') { const want = el.dataset.id === 'dutyon'; const r = await rpc('duty:toggle', want); if (!ok(r, want ? 'Service pris : tout ton menu et tes points sont disponibles' : 'Service quitté')) return; return close(); }

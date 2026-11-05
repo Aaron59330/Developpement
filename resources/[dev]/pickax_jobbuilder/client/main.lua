@@ -240,37 +240,37 @@ local function rageEnabled()
     return ok and on == true
 end
 
-local function chooseFromRage(id, menuData)
+local function chooseFromRage(id, menuData, group)
     if NUI_ACTIONS[id] then
         uiOpen = true
         SetNuiFocus(true, true)
-        SendNUIMessage({ action = 'menuAct', id = id, data = menuData, theme = currentAccent({ kind = 'menu' }) })
+        SendNUIMessage({ action = 'menuAct', id = id, data = menuData, group = group, theme = currentAccent({ kind = 'menu' }) })
     else
         menuOrigin = GetGameTimer()
         RunAction(id)
     end
 end
 
-local function openJobMenuRage(actions, jc)
+local function openJobMenuRage(actions, jc, startGroup)
     local onDuty = LocalPlayer.state.jbDuty == true
     local menuData = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions }
     local duty, leave, rest = nil, nil, {}
     for _, a in ipairs(actions) do
         if a.id == 'dutyon' or a.id == 'dutyoff' then duty = a elseif a.id == 'leavejob' then leave = a else rest[#rest + 1] = a end
     end
-    local function item(a, desc)
-        return { title = a.label, description = desc or (a.target and 'Joueur proche requis' or nil), onSelect = function() chooseFromRage(a.id, menuData) end }
+    local function item(a, desc, gid)
+        return { title = a.label, description = desc or (a.target and 'Joueur proche requis' or nil), onSelect = function() chooseFromRage(a.id, menuData, gid) end }
     end
     local used, groups = {}, {}
     for _, g in ipairs(JOB_GROUPS) do
         local items = {}
         for _, a in ipairs(rest) do
-            for _, id in ipairs(g[4]) do if id == a.id then items[#items + 1] = item(a) used[a.id] = true end end
+            for _, id in ipairs(g[4]) do if id == a.id then items[#items + 1] = item(a, nil, g[1]) used[a.id] = true end end
         end
         if #items > 0 then groups[#groups + 1] = { id = g[1], title = g[2], desc = g[3], options = items } end
     end
     local others = {}
-    for _, a in ipairs(rest) do if not used[a.id] then others[#others + 1] = item(a) end end
+    for _, a in ipairs(rest) do if not used[a.id] then others[#others + 1] = item(a, nil, 'g9') end end
     if #others > 0 then groups[#groups + 1] = { id = 'g9', title = 'Autres', desc = 'Autres actions du métier', options = others } end
 
     local grade = (jc.gradeLabel and jc.gradeLabel ~= '') and jc.gradeLabel or 'Employé'
@@ -292,10 +292,10 @@ local function openJobMenuRage(actions, jc)
         main[#main + 1] = item(leave, 'Quitter définitivement ce métier')
     end
     contexts.job_main = { title = 'Menu Métier', subtitle = ((jc.label or '') .. ' · ' .. grade .. ' · ' .. (onDuty and 'en service' or 'hors service') .. ' :'), options = main }
-    exports.pickax_core:ShowContext({ id = 'job_main', contexts = contexts })
+    exports.pickax_core:ShowContext({ id = 'job_main', start = (startGroup and contexts['job_' .. startGroup]) and ('job_' .. startGroup) or nil, contexts = contexts })
 end
 
-local function openJobMenu()
+local function openJobMenu(startGroup)
     local jc = State.jobConfig
     if not jc then
         -- données du métier pas encore reçues (job tout juste créé / attribué) : on les redemande au serveur puis on réessaie une fois
@@ -326,7 +326,7 @@ local function openJobMenu()
         JBNotify('~r~Aucune action disponible pour ton métier.')
         return
     end
-    if rageEnabled() then return openJobMenuRage(actions, jc) end
+    if rageEnabled() then return openJobMenuRage(actions, jc, startGroup) end
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
 
@@ -513,10 +513,10 @@ NuiLocal['garage:spawn'] = function(args, cb)
     end, args[1], args[2])
 end
 
-NuiLocal.openJobMenu = function(_, cb)
+NuiLocal.openJobMenu = function(args, cb)
     CloseUI()
     cb({ ok = true })
-    openJobMenu()
+    openJobMenu(args and args[1])
 end
 
 NuiLocal.doAction = function(args, cb)
