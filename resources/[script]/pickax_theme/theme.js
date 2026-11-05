@@ -16,6 +16,19 @@ window.PICKAX_SERVER = { name: 'Bluebay Roleplay', short: 'BLUEBAY', tagline: 'R
 
 /* ─────────────────────────── ne rien modifier sous cette ligne ─────────────────────────── */
 (function () {
+  // Barre de défilement commune : fine, sombre, arrondie, sans flèches. Spécificité minimale (:where) : toute barre définie par une page reste prioritaire.
+  try {
+    var sc = document.createElement('style'); sc.id = 'pk-scroll';
+    sc.textContent = ':where(*)::-webkit-scrollbar{width:8px;height:8px;background:transparent}'
+      + ':where(*)::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:8px}'
+      + ':where(*)::-webkit-scrollbar-thumb{background:#4a4a4e;border-radius:8px;border:2px solid transparent;background-clip:padding-box}'
+      + ':where(*)::-webkit-scrollbar-thumb:hover{background:#6a6a70;border:2px solid transparent;background-clip:padding-box}'
+      + ':where(*)::-webkit-scrollbar-button{display:none;width:0;height:0}'
+      + ':where(*)::-webkit-scrollbar-corner{background:transparent}';
+    (document.head || document.documentElement).appendChild(sc);
+  } catch (e) { }
+})();
+(function () {
   var KEY = 'pickax_theme_v2';
   var BASE = 'https://cfx-nui-pickax_theme/logo/';
   var def = { accent: window.PICKAX_ACCENT, server: window.PICKAX_SERVER };
