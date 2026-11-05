@@ -391,13 +391,24 @@ const BankPanel = new (class extends PanelBase {
     const fees = [note('Frais de retrait', f.withdraw), d.canDeposit ? note('Frais de dépôt', f.deposit) : '', note('Frais de virement', f.transfer), d.max ? `Max par opération : ${money(d.max)}` : '', d.left >= 0 ? `Retrait restant aujourd'hui : ${money(d.left)}` : ''].filter(Boolean);
     const main = `<div class="gx-hero plain"><div class="gx-ph"><small>${atm ? 'Distributeur' : 'Guichet'}</small><h1>${esc(d.label)}</h1></div>
         <div class="gx-bal"><div><small>${ic('dollar', 15)} Espèces</small><b>${money(d.money)}</b></div><div><small>${ic('card', 15)} Compte bancaire</small><b>${money(d.bank)}</b></div></div>
-        <div class="gx-facts">${(fees.length ? fees : ['Aucun frais']).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div></div>
+        <div class="gx-facts">${(fees.length ? fees : ['Aucun frais']).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>${this.extra()}</div>
       <div class="gx-side">
         ${gxCard('Opération', `<label class="f"><span>Montant</span><input type="number" min="1" data-path="amount" value="${this.amount}"></label>
           <div class="row">${[100, 500, 1000, 5000].map(n => `<button class="sm" data-a="amt" data-v="${n}">${money(n)}</button>`).join('')}<button class="sm" data-a="amt" data-v="bank">Tout le compte</button>${d.canDeposit ? '<button class="sm" data-a="amt" data-v="cash">Toutes les espèces</button>' : ''}</div>`)}
         ${gxCard(null, `<div class="row"><button class="primary grow-i" data-a="withdraw">Retirer</button>${d.canDeposit ? '<button class="primary grow-i" data-a="deposit">Déposer</button>' : ''}</div>`)}
         ${gxCard(ic('users', 16) + ' Virement', `<div class="row"><input type="number" min="1" placeholder="ID du joueur" data-path="target" value="${esc(this.target)}" style="width:140px"><button class="grow-i" data-a="transfer">Virer le montant</button></div>`)}</div>`;
     $root.innerHTML = gxFrame({ icon: atm ? 'card' : 'dollar', title: d.label, sub: atm ? 'Distributeur' : 'Guichet', main });
+  }
+  // contenu sous les soldes : répartition du patrimoine, totaux 30 jours, limite du jour, dernières opérations
+  extra() {
+    const d = this.d, tot = d.totals || {}, hist = d.history || [], sum = (d.money || 0) + (d.bank || 0), pb = sum > 0 ? Math.round((d.bank || 0) / sum * 100) : 0;
+    const L = { deposit: 'Dépôt', withdraw: 'Retrait', transfer: 'Virement' }, sign = { deposit: '+', withdraw: '−', transfer: '−' };
+    const cards = [['Déposé', tot.deposit], ['Retiré', tot.withdraw], ['Viré', tot.transfer]].map(c => `<div class="bk-stat"><small>${c[0]} · 30 jours</small><b>${money(c[1] || 0)}</b></div>`).join('');
+    const lim = d.daily > 0 && d.left >= 0 ? `<div class="bk-lim"><div class="bk-lt"><span>Limite de retrait du jour</span><b>${money(d.daily - d.left)} / ${money(d.daily)}</b></div><div class="bk-bar"><i style="width:${Math.min(100, Math.round((d.daily - d.left) / d.daily * 100))}%"></i></div></div>` : '';
+    const rows = hist.length ? hist.map(h => `<div class="bk-row"><span class="bk-k ${h.action}">${L[h.action] || h.action}</span><span class="bk-d">${esc(h.place || '')}${h.detail ? ' · ' + esc(h.detail) : ''}</span><span class="bk-t">${fmtDate(h.t)}</span><b class="bk-a ${h.action}">${sign[h.action] || ''}${money(h.amount)}</b></div>`).join('') : '<div class="bk-empty">Aucune opération pour le moment.</div>';
+    return `<div class="bk-split"><div class="bk-sh"><span>Répartition du patrimoine</span><b>${money(sum)}</b></div><div class="bk-bar big"><i style="width:${pb}%"></i></div><div class="bk-legend"><span><i class="c1"></i>Compte ${pb} %</span><span><i class="c2"></i>Espèces ${100 - pb} %</span></div></div>
+      <div class="bk-stats">${cards}</div>${lim}
+      <div class="bk-hist"><div class="bk-sh"><span>Dernières opérations</span></div>${rows}</div>`;
   }
   async run(name, ...a) {
     const r = await this.act(name, this.d.eid, this.d.pi, ...a);

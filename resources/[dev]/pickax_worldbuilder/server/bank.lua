@@ -17,7 +17,13 @@ local function snapshot(e, p, xPlayer)
     local s = e.settings
     local left = -1
     if (s.dailyLimit or 0) > 0 then left = math.max(0, s.dailyLimit - WB.counter(('bank:%s:%d'):format(xPlayer.identifier, e.id), 86400).n) end
-    return { ok = true, label = p.label ~= '' and p.label or e.label, kind = p.kind, money = money(xPlayer, 'money'), bank = money(xPlayer, 'bank'),
+    -- historique personnel (dernières opérations bancaires du joueur) + totaux des 30 derniers jours
+    local hist, tot = {}, { deposit = 0, withdraw = 0, transfer = 0 }
+    local okH, rows = pcall(MySQL.query.await, "SELECT action, detail, amount, entity_label, UNIX_TIMESTAMP(created_at) AS t FROM worldbuilder_logs WHERE identifier = ? AND type = 'bank' AND action IN ('deposit','withdraw','transfer') ORDER BY id DESC LIMIT 8", { xPlayer.identifier })
+    if okH and rows then for _, r in ipairs(rows) do hist[#hist + 1] = { action = r.action, detail = r.detail, amount = tonumber(r.amount) or 0, place = r.entity_label, t = tonumber(r.t) or 0 } end end
+    local okT, sums = pcall(MySQL.query.await, "SELECT action, COALESCE(SUM(amount),0) AS s FROM worldbuilder_logs WHERE identifier = ? AND type = 'bank' AND action IN ('deposit','withdraw','transfer') AND created_at > (NOW() - INTERVAL 30 DAY) GROUP BY action", { xPlayer.identifier })
+    if okT and sums then for _, r in ipairs(sums) do tot[r.action] = tonumber(r.s) or 0 end end
+    return { ok = true, history = hist, totals = tot, daily = (s.dailyLimit or 0), label = p.label ~= '' and p.label or e.label, kind = p.kind, money = money(xPlayer, 'money'), bank = money(xPlayer, 'bank'),
         fees = { deposit = s.depositFee or 0, withdraw = s.withdrawFee or 0, transfer = s.transferFee or 0 }, max = s.maxTransaction or 0, left = left,
         canDeposit = p.kind == 'counter' or s.atmDeposit == true }
 end
