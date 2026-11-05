@@ -225,7 +225,7 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 .tile { color: var(--accent); background: rgba(var(--accent-rgb), .08); border-color: rgba(var(--accent-rgb), .3); }
 .eyebrow::before { background: var(--accent); }
 button:hover { border-color: var(--accent-line); background: rgba(var(--accent-rgb), .07); }
-button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: 0 8px 24px -8px var(--accent-glow); }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: none; }
 button.primary:hover { background: var(--accent); border-color: var(--accent); filter: brightness(1.12); }
 button.danger:hover { background: rgba(248, 113, 113, .12); border-color: rgba(248, 113, 113, .5); }
 button.icon { background: rgba(255, 255, 255, .03); }
@@ -264,7 +264,7 @@ kbd { border-color: var(--accent-line); }
 #progress .plabel { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 #progress .plabel b { font-size: 14px; letter-spacing: -.01em; } #progress .plabel small { color: var(--muted); font-size: 11px; }
 #progress .pbar { height: 8px; border-radius: 8px; background: rgba(255, 255, 255, .09); overflow: hidden; }
-#progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--acc); box-shadow: 0 0 14px var(--accent-glow); animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
+#progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--acc); box-shadow: none; animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
 @keyframes pfill { to { width: 100%; } }
 
 :root { --sub: var(--muted); --txt: var(--text); --green: var(--ok); --red: var(--danger); --acc: var(--accent); --acc-rgb: var(--accent-rgb); --cell: rgba(255,255,255,.05); --win: #16171c; --orange: var(--warn); }
@@ -278,7 +278,7 @@ kbd { border-color: var(--accent-line); }
 .lobfoot .st { flex: 1; color: var(--muted); font-size: 13px; } .lobfoot .st b { color: var(--text); }
 .stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .xbar { height: 6px; border-radius: 6px; background: rgba(255,255,255,.09); overflow: hidden; margin: 8px 0 5px; }
-.xbar i { display: block; height: 100%; background: var(--accent); border-radius: 6px; box-shadow: 0 0 12px var(--accent-glow); transition: width .4s; }
+.xbar i { display: block; height: 100%; background: var(--accent); border-radius: 6px; box-shadow: none; transition: width .4s; }
 .xbar.ok i { background: var(--ok); box-shadow: none; }
 .rk { width: 24px; height: 24px; border-radius: 8px; display: inline-grid; place-items: center; font-size: 11.5px; font-weight: 700; background: rgba(255,255,255,.07); flex: none; }
 .rk.p1 { background: #fbbf24; color: #16171c; } .rk.p2 { background: #cfd0d6; color: #16171c; } .rk.p3 { background: #d08a56; color: #16171c; }
@@ -441,7 +441,7 @@ input, select, textarea { background: #0c0c0e; border: 1px solid #2a2a2e; border
 .nav-item, .pt, .tpl, .jobitem, .item, .card, .gx-card, .gx-tile, .paybtn, .jm-tile, button, .seg, .chip, .tile, .profile { background: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .4); border: 0; border-radius: 4px; color: #f2f2f3; }
 .card, .gx-card { background: linear-gradient(180deg, #313133 0%, #212123 60%, #19191b 100%); }
 .nav-item:hover, .pt:hover, .tpl:hover, .jobitem:hover, .item.click:hover, .gx-tile:hover, button:hover, .jm-tile:hover { background: linear-gradient(180deg, #46464a 0%, #2e2e31 55%, #252527 100%); }
-.nav-item.active, .pt.active, .tpl.sel, .jobitem.active, .gx-tile.on, .paybtn.on, .item.vc.on { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--accent), 0 0 14px rgba(var(--accent-rgb), .4); }
+.nav-item.active, .pt.active, .tpl.sel, .jobitem.active, .gx-tile.on, .paybtn.on, .item.vc.on { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18),inset 0 0 0 1px var(--accent); }
 .seg { padding: 3px; } .seg button { box-shadow: none; background: transparent; } .seg button.active { background: linear-gradient(180deg, #4a4a4d, #313134); box-shadow: inset 0 0 0 1px var(--accent); }
 button.primary, .gx-take { background: linear-gradient(180deg, #2fd470, #17a653); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 2px 6px rgba(0, 0, 0, .4); color: #fff; font-weight: 800; }
 button.primary:hover { background: linear-gradient(180deg, #38dc78, #1cb05a); } button.primary:disabled { background: linear-gradient(180deg, #3b3b3d, #262628); box-shadow: inset 0 0 0 1px #404043; }
@@ -450,7 +450,7 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .gx-hero { background: radial-gradient(ellipse at 50% 60%, #38383b, #19191b 72%); border: 0; box-shadow: inset 0 0 0 1px #3d3d40; border-radius: 4px; }
 .gx-search { background: linear-gradient(180deg, #2a2a2c, #1c1c1e); border: 0; box-shadow: inset 0 0 0 1px #3d3d40; border-radius: 4px; }
 .gx-bal > div { background: linear-gradient(180deg, #363638, #202022); border: 0; box-shadow: inset 0 0 0 1px #404043; border-radius: 4px; } .gx-bal > div + div { box-shadow: inset 0 0 0 1px var(--accent); }
-.gx-stat i { background: #17171a; } .gx-stat u { background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), .6); }
+.gx-stat i { background: #17171a; } .gx-stat u { background: var(--accent); box-shadow: none; }
 .nav-label, .cap { color: #8d8d92; } .head p, .gx-info small { color: #a9a9ae; }
 #confirm > *, #modal > * { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f, #151516); }
 .gx-search input { background: transparent; box-shadow: none; }

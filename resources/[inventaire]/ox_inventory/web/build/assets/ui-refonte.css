@@ -21,11 +21,11 @@
 .panel.center .panel-head::after { display: none; }
 .panel-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px; background: linear-gradient(90deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0)); pointer-events: none; }
 .panel-title h2 { letter-spacing: .3px; }
-.hex { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), 0 6px 18px rgba(var(--accent-rgb), .35); }
+.hex { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
 
 /* ---------- Poids ---------- */
 .weight-bar { height: 5px; border-radius: 5px; background: rgba(255, 255, 255, .1); }
-.weight-bar i { border-radius: 5px; background: linear-gradient(90deg, var(--accent-dark), var(--accent-light)); box-shadow: 0 0 10px var(--accent-glow); }
+.weight-bar i { border-radius: 5px; background: linear-gradient(90deg, var(--accent-dark), var(--accent-light)); box-shadow: none; }
 .head-right.w-warn .weight-bar i { background: linear-gradient(90deg, #c2410c, #fb923c); box-shadow: 0 0 10px rgba(251, 146, 60, .5); }
 .head-right.w-full .weight-bar i { background: linear-gradient(90deg, #b91c1c, #f87171); box-shadow: 0 0 10px rgba(248, 113, 113, .55); }
 .head-right.w-full .weight-text { color: #fca5a5; }
@@ -49,13 +49,13 @@
 .slot .label { bottom: 5px; font-size: 9.5px; }
 .slot .dur { height: 4px; background: rgba(0, 0, 0, .5); }
 .slot .dur i { border-radius: 0 4px 4px 0; }
-#drag-ghost { border-radius: var(--r-slot); box-shadow: 0 14px 34px rgba(0, 0, 0, .55), 0 0 22px var(--accent-glow); }
+#drag-ghost { border-radius: var(--r-slot); box-shadow: 0 14px 34px rgba(0, 0, 0, .55); }
 .slot.outfit, .tenue-slot { border-radius: var(--r-slot); }
 
 /* ---------- Filtres (hexagones conservés) ---------- */
 .rail button { transition: background .12s; }
 .rail button:hover { background: rgba(255, 255, 255, .1); }
-.rail button.active { filter: drop-shadow(0 0 8px var(--accent-glow)); }
+.rail button.active { filter: ; }
 
 /* ---------- Quantité ---------- */
 .amount { border-radius: 999px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12); backdrop-filter: none; }

@@ -25,10 +25,18 @@ function SpawnVehicleAt(spawn, model, props, plate)
     SetVehicleOnGroundProperly(veh)
     if props then pcall(function() ESX.Game.SetVehicleProperties(veh, props) end) end
     if plate then SetVehicleNumberPlateText(veh, plate) end
-    SetVehicleEngineOn(veh, false, true, true)
     SetVehicleHasBeenOwnedByPlayer(veh, true)
     SetEntityAsMissionEntity(veh, true, true)
     TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+    -- moteur allumé tout de suite (sans le délai de démarrage de GTA) : on le force dès que le joueur est au volant
+    CreateThread(function()
+        local limit = GetGameTimer() + 2500
+        while GetGameTimer() < limit and DoesEntityExist(veh) do
+            SetVehicleEngineOn(veh, true, true, false)
+            if GetPedInVehicleSeat(veh, -1) == PlayerPedId() then SetVehicleEngineOn(veh, true, true, false) break end
+            Wait(0)
+        end
+    end)
     if props and props.fuelLevel and Config.SetFuel then pcall(Config.SetFuel, veh, props.fuelLevel) end
     if Config.GiveKeys then pcall(Config.GiveKeys, plate or GetVehicleNumberPlateText(veh), veh) end
     return veh

@@ -20,5 +20,5 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .btns.wait { opacity: 0; transform: translateY(6px); pointer-events: none; }
 .btns button { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 16px 0 14px; border-radius: 13px; font: inherit; font-weight: 700; color: var(--text); cursor: pointer; border: 1px solid var(--line); background: rgba(255,255,255,.05); transition: .15s; }
 .btns button:hover { transform: translateY(-2px); background: rgba(255,255,255,.09); }
-.btns #ok { background: var(--acc); border-color: transparent; color: #fff; box-shadow: 0 10px 26px rgba(var(--acc-rgb), .35); } .btns #ok:hover { filter: brightness(1.1); }
+.btns #ok { background: var(--acc); border-color: transparent; color: #fff; box-shadow: none; } .btns #ok:hover { filter: brightness(1.1); }
 .btns kbd { font: 700 10px 'PJS', sans-serif; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.28); color: rgba(255,255,255,.75); letter-spacing: .04em; }

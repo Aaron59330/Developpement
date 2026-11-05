@@ -225,7 +225,7 @@ textarea:focus { border-color: rgba(255, 255, 255, .45); }
 .tile { color: var(--accent); background: rgba(var(--accent-rgb), .08); border-color: rgba(var(--accent-rgb), .3); }
 .eyebrow::before { background: var(--accent); }
 button:hover { border-color: var(--accent-line); background: rgba(var(--accent-rgb), .07); }
-button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: 0 8px 24px -8px var(--accent-glow); }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); box-shadow: none; }
 button.primary:hover { background: var(--accent); border-color: var(--accent); filter: brightness(1.12); }
 button.danger:hover { background: rgba(248, 113, 113, .12); border-color: rgba(248, 113, 113, .5); }
 button.icon { background: rgba(255, 255, 255, .03); }
@@ -391,7 +391,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; backgr
 #progress .plabel { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 #progress .plabel b { font-size: 14px; letter-spacing: -.01em; } #progress .plabel small { color: var(--muted); font-size: 11px; }
 #progress .pbar { height: 8px; border-radius: 8px; background: rgba(255, 255, 255, .09); overflow: hidden; }
-#progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--accent); box-shadow: 0 0 14px var(--accent-glow); animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
+#progress .pbar i { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--accent); box-shadow: none; animation-name: pfill; animation-timing-function: linear; animation-fill-mode: forwards; }
 @keyframes pfill { to { width: 100%; } }
 
 /* Colonne des points : largeur fixe, boutons d'ajout lisibles (pas de débordement) */

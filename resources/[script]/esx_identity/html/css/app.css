@@ -215,7 +215,7 @@ input[type="text"]:focus, select:focus { border-color: var(--accent); box-shadow
 .pb { color: rgba(255,255,255,.45); }
 .field:focus-within .pb { color: var(--accent); transition: color .2s; }
 .radio-toolbar input:checked + label { background: var(--accent); border-color: var(--accent); color: #fff; }
-.submit:hover { background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(var(--accent-rgb),.3); }
+.submit:hover { background: var(--accent); color: #fff; box-shadow: none; }
 .bar i { background: var(--accent); }
 .progress-label b { color: var(--accent); }
 .side-title { color: rgba(var(--accent-rgb),.7); }

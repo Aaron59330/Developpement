@@ -7,7 +7,7 @@ html, body { margin: 0; height: 100%; background: transparent; font-family: Inte
 @keyframes in { from { opacity: 0; transform: translateY(14px) scale(.98); } }
 .bar { height: 4px; background: rgba(255, 255, 255, .07); } .bar i { display: block; height: 100%; background: rgb(var(--accent-rgb)); transition: width .35s; }
 .body { flex: 1; display: grid; grid-template-columns: 220px 1fr; gap: 34px; padding: 38px 42px 18px; align-items: center; }
-.ico { width: 190px; height: 190px; border-radius: 44px; display: grid; place-items: center; font-size: 92px; background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .35); box-shadow: 0 0 60px rgba(var(--accent-rgb), .15); }
+.ico { width: 190px; height: 190px; border-radius: 44px; display: grid; place-items: center; font-size: 92px; background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .35); box-shadow: none; }
 .step { color: rgb(var(--accent-rgb)); font-size: 12px; font-weight: 700; letter-spacing: 2px; }
 h1 { margin: 6px 0 12px; font-size: 30px; line-height: 1.15; }
 p.t { margin: 0; color: #cfd2dc; font-size: 16px; line-height: 1.65; }

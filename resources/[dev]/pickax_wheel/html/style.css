@@ -6,7 +6,7 @@ html, body { height: 100%; background: transparent; color: #f2f2f3; font: 600 13
 @keyframes in { from { opacity: 0; } }
 /* onglets */
 .tabs { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 10px; background: rgba(18, 18, 20, .82); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 8px 24px rgba(0, 0, 0, .45); backdrop-filter: blur(4px); }
-.tabs button { padding: 9px 18px; border: 0; border-radius: 7px; color: #d6d6da; font: 700 12.5px Inter, sans-serif; background: transparent; cursor: pointer; } .tabs button.on { background: var(--a); color: #17110a; box-shadow: 0 0 14px rgba(var(--ar), .45); }
+.tabs button { padding: 9px 18px; border: 0; border-radius: 7px; color: #d6d6da; font: 700 12.5px Inter, sans-serif; background: transparent; cursor: pointer; } .tabs button.on { background: var(--a); color: #17110a; box-shadow: none; }
 /* roue */
 .wheel { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
 .ring { position: absolute; left: -98px; top: -98px; width: 196px; height: 196px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .10); background: radial-gradient(circle, rgba(15, 15, 17, .20) 0%, rgba(15, 15, 17, .05) 70%, transparent 100%); pointer-events: none; }
@@ -17,10 +17,10 @@ html, body { height: 100%; background: transparent; color: #f2f2f3; font: 600 13
 .slot .tl { position: absolute; top: 4px; left: 6px; font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 3px; background: rgba(0, 0, 0, .55); } .slot .tr { position: absolute; top: 4px; right: 6px; font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 3px; background: rgba(0, 0, 0, .55); }
 .slot .ck { position: absolute; top: 3px; right: 5px; font-size: 12px; color: #1b1209; font-weight: 800; }
 .slot.held { background: rgba(var(--ar), .78); box-shadow: 0 0 0 1px rgba(var(--ar), .9); } .slot.held .nm { color: #1b1209; } .slot.held .tl { background: rgba(0, 0, 0, .25); color: #1b1209; }
-.slot.hover { transform: scale(1.1); background: rgba(34, 34, 38, .78); box-shadow: inset 0 0 0 2px var(--a), 0 0 22px rgba(var(--ar), .45); } .slot.held.hover { background: rgba(var(--ar), .92); }
+.slot.hover { transform: scale(1.1); background: rgba(34, 34, 38, .78); box-shadow: inset 0 0 0 2px var(--a); } .slot.held.hover { background: rgba(var(--ar), .92); }
 .slot .glyph { font-size: 26px; font-weight: 800; color: var(--a); } .slot.held .glyph { color: #1b1209; }
 /* centre */
-.core { position: absolute; left: -76px; top: -76px; width: 152px; height: 152px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: radial-gradient(circle at 50% 35%, rgba(34, 34, 38, .95), rgba(14, 14, 16, .96)); box-shadow: 0 0 0 3px var(--a), 0 0 26px rgba(var(--ar), .35), inset 0 0 28px rgba(0, 0, 0, .6); pointer-events: none; }
+.core { position: absolute; left: -76px; top: -76px; width: 152px; height: 152px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: radial-gradient(circle at 50% 35%, rgba(34, 34, 38, .95), rgba(14, 14, 16, .96)); box-shadow: 0 0 0 3px var(--a),inset 0 0 28px rgba(0, 0, 0, .6); pointer-events: none; }
 .core img { width: 70px; height: 46px; object-fit: contain; margin-bottom: 2px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .6)); }
 .core b { display: block; font-size: 15px; font-weight: 800; max-width: 130px; } .core small { display: block; font-size: 11px; color: #b9b9bf; margin-top: 2px; font-weight: 600; }
 .core .glyph { font-size: 34px; font-weight: 800; color: var(--a); line-height: 1; margin-bottom: 4px; }

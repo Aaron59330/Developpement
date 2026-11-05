@@ -83,7 +83,7 @@ button { font-family: inherit; }
 
 .shop-pay { position: absolute; right: 3px; top: 8px; display: none; gap: 6px; }
 .shop-pay button { border: 0; border-radius: 5px; padding: 6px 12px; font-size: 12px; font-weight: 700; background: rgba(255, 255, 255, .08); color: #fff; cursor: pointer; }
-.shop-pay button.active { background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.shop-pay button.active { background: var(--accent); box-shadow: none; }
 .panel.is-shop .shop-pay { display: flex; }
 .panel.is-shop .head-right { display: none; }
 
@@ -105,7 +105,7 @@ button { font-family: inherit; }
   border: var(--slot-border-width) solid var(--slot-border); overflow: hidden; transition: border-color .12s, background .12s, opacity .12s, filter .12s;
 }
 .slot:hover { border-color: rgba(var(--accent-light-rgb), .55); background: rgba(var(--accent-light-rgb), .12); }
-.slot.over { border-color: var(--accent-2); background: rgba(var(--accent-light-rgb), .22); box-shadow: 0 0 14px var(--accent-glow); }
+.slot.over { border-color: var(--accent-2); background: rgba(var(--accent-light-rgb), .22); box-shadow: none; }
 .slot.dragging { opacity: .35; }
 .slot.locked { filter: brightness(.8) grayscale(1); }
 .slot.dim { opacity: .22; }
@@ -160,7 +160,7 @@ button { font-family: inherit; }
 #help-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Glisser-déposer ---------- */
-#drag-ghost { position: fixed; z-index: 1000; pointer-events: none; display: none; width: 73px; height: 73px; border-radius: 6px; background: rgba(var(--accent-dark-rgb), .85); border: 1px solid var(--accent-2); box-shadow: 0 8px 24px rgba(0, 0, 0, .5), 0 0 16px var(--accent-glow); transform-origin: top left; }
+#drag-ghost { position: fixed; z-index: 1000; pointer-events: none; display: none; width: 73px; height: 73px; border-radius: 6px; background: rgba(var(--accent-dark-rgb), .85); border: 1px solid var(--accent-2); box-shadow: 0 8px 24px rgba(0, 0, 0, .5); transform-origin: top left; }
 #drag-ghost img { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; transform: translate(-50%, -50%); object-fit: contain; }
 #drag-ghost span { position: absolute; left: 5px; top: 3px; font-size: 10px; font-weight: 700; }
 
