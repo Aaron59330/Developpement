@@ -21,7 +21,7 @@ function arc(i) {
   const r = RIN + 20, a0 = ang(i) - 22, a1 = ang(i) + 22;
   return `M${f(P(r, a0))} A${r} ${r} 0 0 1 ${f(P(r, a1))}`;
 }
-const fist = (x, y) => `<g transform="translate(${x - 30} ${y - 30})" fill="none" stroke="#f4f5f7" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="14" width="10" height="16" rx="5"/><rect x="17" y="8" width="10" height="20" rx="5"/><rect x="28" y="8" width="10" height="20" rx="5"/><rect x="39" y="14" width="10" height="16" rx="5"/><path d="M6 26v12c0 10 8 16 18 16h10c9 0 15-6 15-14V26M4 30c-3-3-8 0-5 4l6 8"/></g>`;
+const fist = (x, y) => `<image href="poing.png" x="${x - 52}" y="${y - 14}" width="104" height="74" preserveAspectRatio="xMidYMid meet"/>`;
 const cur = (s, i) => { const n = s.list.length; if (!n) return null; const k = Math.min(S.sel[s.id] != null ? S.sel[s.id] : Math.max(0, s.list.findIndex(w => w.held)), n - 1); return Object.assign({ k, n }, s.list[k]); };
 const heldIdx = () => S.slots.findIndex(s => s.held);
 

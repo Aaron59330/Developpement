@@ -10,6 +10,6 @@ shared_scripts { '@pickax_theme/theme.lua', 'config.lua' }
 client_scripts { 'client/main.lua' }
 
 ui_page 'html/index.html'
-files { 'html/index.html', 'html/style.css', 'html/script.js' }
+files { 'html/index.html', 'html/style.css', 'html/script.js', 'html/poing.png' }
 
 dependencies { 'pickax_theme', 'ox_inventory' }
