@@ -445,3 +445,20 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 /* petit bouton « Panel gestion » (staff) en bas à droite */
 .gestbtn { position: absolute; right: 22px; bottom: 14px; z-index: 6; height: 32px; padding: 0 13px; border-radius: 4px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; color: #f2f2f3; background: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .45); }
 .gestbtn svg { color: var(--acc); } .gestbtn:hover { background: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); box-shadow: inset 0 0 0 1px var(--acc), 0 2px 5px rgba(0, 0, 0, .45); }
+
+/* ── Colonne de gauche : plus compacte (toutes les catégories + Mon compte tiennent), défilement visible si besoin ── */
+.side .nav { gap: 5px; padding-right: 4px; }
+.side .nav::-webkit-scrollbar { width: 6px; } .side .nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .28); border-radius: 6px; } .side .nav::-webkit-scrollbar-track { background: rgba(255, 255, 255, .05); border-radius: 6px; }
+.side .nav button { padding: 5px 10px !important; gap: 10px; }
+.side .nav .ico { width: 24px; height: 24px; } .side .nav .ico svg { width: 20px; height: 20px; }
+.side .nav .lb b { font-size: 12.5px; } .side .nav .lb small { font-size: 9.5px; }
+.side .cap { padding-bottom: 6px; } .side .foot { padding-top: 8px; }
+.side .foot button { padding: 6px 12px !important; }
+/* listes déroulantes lisibles (VIP…) */
+.panel select, .promo select { background: #151516; color: #fff; border: 1px solid #38383b; border-radius: 4px; height: 48px; padding: 0 10px; font: inherit; outline: 0; }
+.panel select option { background: #1e1e20; color: #fff; }
+.promo.big input#vd { flex: none; width: 96px; }
+
+/* offres du jour : l'étiquette de remise reste dans la carte, rien ne dépasse */
+.of em { top: 4px; right: 4px; }
+.offers .of { overflow: hidden; } .ofl { padding-top: 2px; }

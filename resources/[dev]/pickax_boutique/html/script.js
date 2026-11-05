@@ -236,7 +236,7 @@ const catLabel = c => (CATS.find(x => x.id === c) || {}).label || '';
 const dur = sec => { sec = Math.max(0, Math.floor(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; };
 function wheelFace(prizes) {
   const n = prizes.length, a = 360 / n, bg = 'conic-gradient(from 0deg,' + prizes.map((p, i) => `${p.color} ${i * a}deg ${(i + 1) * a}deg`).join(',') + ')';
-  const labels = prizes.map((p, i) => `<span class="wl" style="transform:rotate(${(i + 0.5) * a - 90}deg)"><b>${esc(p.label)}</b></span>`).join('');
+  const labels = prizes.map((p, i) => { const r = (i + 0.5) * a - 90, flip = ((r % 360) + 360) % 360 > 90 && ((r % 360) + 360) % 360 < 270; return `<span class="wl" style="transform:rotate(${r}deg)"><b${flip ? ' style="transform:rotate(180deg)"' : ''}>${esc(p.label)}</b></span>`; }).join('');
   const lines = prizes.map((p, i) => `<i class="wline" style="transform:rotate(${i * a - 90}deg)"></i>`).join('');
   return { bg, inner: lines + labels };
 }
@@ -258,7 +258,7 @@ function viewWheel() {
         <p class="sub">${w.left > 0 ? 'Gratuit : clique sur « Tourner ».' : `Prochain tour dans ${dur(w.next)}.`}${w.last ? ` Dernier gain : <b>${esc(w.last.label)}</b>.` : ''}</p></div>
       ${(w.coupons && w.coupons.length) ? `<div class="panel"><h3>${ic('tag', 18)} Mes bons de réduction</h3><div class="wcoupons">${w.coupons.map(c => `<div class="wc"><div><b>-${c.value} % sur la boutique</b><small>Code ${esc(c.code)} · usage unique${c.secs > 0 ? ' · expire dans ' + dur(c.secs) : ''}</small></div><button class="pri" data-a="useCoupon" data-code="${esc(c.code)}">Utiliser</button></div>`).join('')}</div></div>` : ''}
       <div class="panel"><h3>${ic('gift', 18)} Lots à gagner</h3>
-        <div class="wprizes">${w.prizes.map(p => `<div class="wp"><i style="background:${p.color}"></i><span>${esc(p.label)}</span><small>${p.pct}%</small></div>`).join('')}</div></div>
+        <div class="wprizes">${w.prizes.map(p => `<div class="wp"><i style="background:${p.color}"></i><span>${esc(p.label)}</span><small>${p.pct != null ? p.pct + '%' : ''}</small></div>`).join('')}</div></div>
     </div></div></div>` + (res ? `<div class="wheel-res"><div class="wr-card"><div class="wr-ico">${res.kind === 'none' ? '😕' : res.kind === 'discount' ? '🎟️' : '🎉'}</div><h2>${res.kind === 'none' ? 'Pas de chance aujourd\'hui…' : 'Bravo !'}</h2>
       <p>${res.kind === 'none' ? 'Reviens demain pour retenter ta chance.' : res.kind === 'discount' ? `Tu gagnes un bon de <b>-${res.amount} %</b> sur toute la boutique (un seul usage, valable ${res.hours || 48} h).<br><span class="wcode">${esc(res.code || '')}</span>` : `Tu gagnes <b>${esc(res.label)}</b>${res.kind === 'coins' ? ' : ils sont déjà sur ton solde.' : res.kind === 'money' ? ' : l\'argent est dans ta poche.' : ' : regarde dans ton inventaire.'}`}</p>
       ${res.kind === 'discount' && res.code ? `<button class="pri" data-a="useCoupon" data-code="${esc(res.code)}">Utiliser maintenant</button> <button class="sec" data-a="wheelOk">Plus tard</button>` : '<button class="pri" data-a="wheelOk">Super !</button>'}</div></div>` : '');
@@ -526,7 +526,13 @@ window.addEventListener('message', e => {
   else if (d.action === 'checkoutProgress') { S.paying = Object.assign(S.paying || {}, { i: d.i, n: d.n, name: d.name, done: false }); render(); }
   else if (d.action === 'checkoutDone') { sfx('success'); S.paying = Object.assign(S.paying || { n: 0 }, { done: true, failed: d.failed || 0 }); render(); }
 });
-document.addEventListener('keydown', e => {
+// Échap : ferme la fenêtre de détail, sinon la boutique (keydown + keyup, avec anti-doublon)
+let lastEsc = 0;
+function doEsc() {
   if ($root.classList.contains('hidden')) return;
-  if (e.key === 'Escape') { if (S.paying && !S.paying.done) return; if (!$modal.classList.contains('hidden')) closeSheet(); else post('close'); }
-});
+  const now = Date.now(); if (now - lastEsc < 250) return; lastEsc = now;
+  if (S.paying && !S.paying.done) return;
+  if (!$modal.classList.contains('hidden')) closeSheet(); else post('close');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); doEsc(); } }, true);
+document.addEventListener('keyup', e => { if (e.key === 'Escape') doEsc(); }, true);
