@@ -259,6 +259,12 @@ local function openJobMenuRage(actions, jc, startGroup)
         if a.id == 'dutyon' or a.id == 'dutyoff' then duty = a elseif a.id == 'leavejob' then leave = a else rest[#rest + 1] = a end
     end
     local function item(a, desc, gid)
+        if a.id == 'invoice' then   -- Facturer : sous-menu RageUI (Motif, Montant, Envoyer) : Retour revient au menu précédent
+            return { title = a.label, description = 'Le joueur le plus proche recevra la facture', form = {
+                title = 'Facturer', subtitle = 'Le joueur le plus proche recevra la facture :', submitLabel = 'Envoyer la facture', submitDescription = 'Envoie la facture au joueur le plus proche',
+                fields = { { key = 'label', label = 'Motif', type = 'text', max = 60, required = true, default = '' }, { key = 'amount', label = 'Montant', type = 'number', max = 7, min = 1, maxValue = 1000000, suffix = '$', required = true, default = '' } },
+                onSubmit = function(v) menuOrigin = GetGameTimer() RunAction('invoice', v.label, tonumber(v.amount)) end } }
+        end
         return { title = a.label, description = desc or (a.target and 'Joueur proche requis' or nil), onSelect = function() chooseFromRage(a.id, menuData, gid) end }
     end
     local used, groups = {}, {}
