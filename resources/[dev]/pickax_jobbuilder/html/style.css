@@ -735,3 +735,60 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .vw-hint { margin-top: 8px; font-size: 10.5px; color: var(--muted); text-align: center; }
 .vw-grid button { padding: 0 4px 0 16px; text-align: center; }
 .vw-grid button kbd { left: 5px; top: 50%; transform: translateY(-50%); font-size: 9px; }
+
+/* ═══════════ Atelier tuning : design charbon (panneau, onglets, lignes, sélecteurs, pied, barre de vue) ═══════════ */
+:root { --ch-tile: linear-gradient(180deg, #3b3b3d 0%, #262628 55%, #1f1f21 100%); --ch-tile-h: linear-gradient(180deg, #4a4a4d 0%, #313134 55%, #28282a 100%); --ch-line: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 0 0 1px #404043, 0 2px 5px rgba(0, 0, 0, .4); --ch-green: linear-gradient(180deg, #2fd470, #17a653); }
+.tun-panel { width: 460px; border-radius: 10px; border: 0; background: radial-gradient(ellipse 100% 60% at 50% 8%, #2d2d2f 0%, #1e1e20 62%, #151516 100%); box-shadow: 0 24px 70px rgba(0, 0, 0, .65), 0 0 0 1px #3b3b3d; color: #f2f2f3; }
+.tun-head { padding: 18px 20px; background: transparent; border-bottom: 1px solid #343436; overflow: visible; }
+.tun-head::after { display: none; }
+.tun-head h1 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; } .tun-head p { color: #9a9aa0; }
+.tun-head .tile.lg, .tun-head .tile { background: var(--ch-tile); box-shadow: var(--ch-line); border: 0; border-radius: 6px; color: var(--accent); }
+.tun-head .plate { color: #1a1a1c; background: #e9e6d6; border-bottom: 2px solid #b9b49a; border-radius: 3px; }
+.tun-head button.icon { background: var(--ch-tile); box-shadow: var(--ch-line); border: 0; border-radius: 5px; }
+.tun-head button.icon:hover { background: var(--ch-tile-h); }
+.tun-tabs { gap: 6px; padding: 12px 14px 8px; }
+.tun-tabs button { height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; border: 0; border-radius: 5px; background: var(--ch-tile); box-shadow: var(--ch-line); color: #cfcfd3; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; }
+.tun-tabs button:hover { background: var(--ch-tile-h); color: #fff; }
+.tun-tabs button.active { background: var(--ch-tile-h); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--accent), 0 2px 5px rgba(0, 0, 0, .4); }
+.tun-tabs button em { filter: none; transform: none; color: #9a9aa0; } .tun-tabs button.active em { color: var(--accent); transform: none; }
+.tun-body { padding: 6px 14px 14px; }
+.tun-body::-webkit-scrollbar { width: 6px; } .tun-body::-webkit-scrollbar-thumb { background: #4a4a4e; border-radius: 6px; }
+.tun-row { padding: 10px 12px; margin-bottom: 8px; border: 0; border-radius: 6px; background: linear-gradient(180deg, #333335 0%, #232325 60%, #1c1c1e 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px #3a3a3d; align-items: center; }
+.tun-ic { width: 36px; height: 36px; border-radius: 5px; background: #19191b; border: 0; box-shadow: inset 0 0 0 1px #343436; color: var(--accent); }
+.tun-nm b { font-size: 13.5px; color: #f2f2f3; }
+.tun-nm .price { display: inline-block; align-self: flex-start; font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 3px; background: linear-gradient(180deg, #d9a02a, #b47b12); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); }
+.tun-nm small { color: #9a9aa0; }
+.stepper { width: 236px; grid-template-columns: 36px 1fr 36px; gap: 6px; }
+.stepper .icon { height: 40px; width: 36px; border: 0; border-radius: 5px; background: var(--ch-tile); box-shadow: var(--ch-line); }
+.stepper .icon:hover { background: var(--ch-tile-h); border: 0; box-shadow: inset 0 0 0 1px var(--accent), 0 2px 5px rgba(0, 0, 0, .4); }
+.stepper .sv { min-height: 40px; justify-content: center; align-items: center; text-align: center; border: 0; border-radius: 5px; background: #151516; box-shadow: inset 0 0 0 1px #2e2e30, inset 0 0 10px rgba(0, 0, 0, .35); font-size: 12.5px; font-weight: 700; color: #fff; }
+.stepper .sv small { color: #8d8d92; }
+.pips i { background: #3a3a3d; } .pips i.on { background: var(--accent); }
+.tun-grid { grid-template-columns: repeat(auto-fill, 26px); gap: 6px; justify-content: center; }
+.sw { border: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+.sw:hover { transform: none; box-shadow: inset 0 0 0 1px #fff; } .sw.on { border: 0; box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px var(--accent); }
+.neon-grid label, .neon-grid .chk2 { background: var(--ch-tile); box-shadow: var(--ch-line); border-radius: 5px; }
+.sw-tg span { background: #3a3a3d; box-shadow: inset 0 0 0 1px #4a4a4e; } .sw-tg span::after { background: #e9e9ec; }
+.sw-tg input:checked + span { background: #1fb85f; box-shadow: inset 0 0 0 1px #3fd47e; }
+.tun-body .hint { color: #8d8d92; text-align: center; }
+.tun-body button[data-a="revert"] { height: 40px; border: 0; border-radius: 5px; background: var(--ch-tile); box-shadow: var(--ch-line); color: #f2f2f3; font-weight: 700; display: flex; align-items: center; justify-content: center; text-align: center; }
+.tun-body button[data-a="revert"]:hover { background: var(--ch-tile-h); }
+.tun-body .card { background: linear-gradient(180deg, #333335, #1f1f21); box-shadow: inset 0 0 0 1px #3a3a3d; border: 0; border-radius: 6px; }
+.tun-foot { padding: 14px 18px; background: transparent; border-top: 1px solid #343436; }
+.tun-foot b { font-size: 22px; } .tun-foot small { color: #9a9aa0; }
+.tun-foot button.primary { min-width: 150px; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; border: 0; border-radius: 5px; background: var(--ch-green); color: #fff; font-weight: 800; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 3px 0 #0f7a3a; }
+.tun-foot button.primary[disabled] { background: linear-gradient(180deg, #4a4a4d, #343436); color: #8d8d92; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 3px 0 #28282a; opacity: 1; }
+/* barre « Vue du véhicule » */
+.tun-vw { border-radius: 10px; border: 0; background: radial-gradient(ellipse 100% 80% at 50% 10%, #2d2d2f, #1b1b1d 70%); box-shadow: 0 16px 50px rgba(0, 0, 0, .6), 0 0 0 1px #3b3b3d; }
+.vw-t { justify-content: center; color: #9a9aa0; }
+.vw-grid button, .vw-row button { border: 0; border-radius: 5px; background: var(--ch-tile); box-shadow: var(--ch-line); color: #f2f2f3; display: flex; align-items: center; justify-content: center; text-align: center; }
+.vw-grid button:hover, .vw-row button:hover { background: var(--ch-tile-h); }
+.vw-grid button.on, .vw-row button.on { background: var(--ch-tile-h); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 0 0 1px var(--accent), 0 2px 5px rgba(0, 0, 0, .4); }
+.vw-grid button kbd { color: #77777e; }
+.vw-hint { color: #8d8d92; }
+.tun-lbl { flex: 1 1 auto; min-width: 0; } .stepper { flex: none; width: 214px; grid-template-columns: 34px 1fr 34px; }
+.tun-tabs button { font-size: 10px; letter-spacing: 0; padding: 0 1px; }
+.vw-grid button { padding: 0 3px 0 15px; font-size: 11px; }
+.vw-grid button kbd { border: 0; background: none; padding: 0; box-shadow: none; left: 6px; min-width: 0; line-height: 1; }
+.tun-grid { grid-template-columns: repeat(auto-fill, 28px); gap: 6px; justify-content: center; }
+.tun-grid .sw { width: 28px; height: 28px; min-width: 0; min-height: 0; padding: 0; border-radius: 4px; }
