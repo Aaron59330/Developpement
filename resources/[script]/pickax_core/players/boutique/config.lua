@@ -233,7 +233,7 @@ ConfigBoutique = {
                     amount = 10
                 },
                 {
-                    item = "tel",
+                    item = "phone",
                     amount = 1
                 },
                 {
@@ -255,7 +255,7 @@ ConfigBoutique = {
                     amount = 20
                 },
                 {
-                    item = "tel",
+                    item = "phone",
                     amount = 1
                 },
                 {
@@ -280,11 +280,11 @@ ConfigBoutique = {
                     amount = 50
                 },
                 {
-                    item = "tel",
+                    item = "phone",
                     amount = 1
                 },
                 {
-                    item = "pilluleoublie",
+                    item = "piluleoubli",
                     amount = 5
                 },
                 -- {

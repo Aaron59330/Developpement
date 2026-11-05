@@ -329,7 +329,7 @@ AddEventHandler('BanSql:ICheatServer', function(target, reason, time)
 
 		local banid = ESX.GetPlayerFromId(target).boutique_id
 		if targetName then
-			AddBan(source, licenseid, playerip, targetName, sourceName, duration, reason, 1, banid)
+			AddBan(source, licenseid, playerip, targetName, sourceName, (tonumber(time) or 0), reason, 1, banid)
 			DropPlayer(target, ('Vous êtes banni\nRaison : %s\nTemps Restant : Permanent\nAuteur : %s\nBan ID : %s'):format(reason, sourceName, banid))
 		else
 			SendMessage(source, ConfigBan.Locale.invalidid)

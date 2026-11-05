@@ -150,7 +150,6 @@ return {
     ['orange_juice'] = { label = 'Jus d\'orange', weight = 300, stack = true, close = true },
     ['oxygen_mask'] = { label = 'Masque à Oxygène', weight = 600, stack = true, close = true },
     ['pepperspray'] = { label = 'Gazeuse', weight = 1000, stack = true, close = true },
-    ['phone'] = { label = 'Téléphone', weight = 300, stack = true, close = true },
     ['piluleoubli'] = { label = 'GHB', weight = 1000, stack = true, close = true },
     ['police_cuff'] = { label = 'Menottes LSPD', weight = 300, stack = true, close = true },
     ['police_key'] = { label = 'Clefs de Menottes LSPD', weight = 100, stack = true, close = true },

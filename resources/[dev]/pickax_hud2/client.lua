@@ -183,3 +183,22 @@ AddEventHandler('pickax:inventory', function(open)
     if uiFaded then return end
     SendNUIMessage({ action = 'hideUi', value = open == true })
 end)
+
+-- Message staff plein écran (/smsg <id> <message>, envoyé par pickax.lua) : bandeau GTA pendant quelques secondes
+RegisterNetEvent('admin:bscripts:scaleform')
+AddEventHandler('admin:bscripts:scaleform', function(title, msg)
+    PlaySoundFrontend(-1, 'DELETE', 'HUD_DEATHMATCH_SOUNDSET', 1)
+    local sf = RequestScaleformMovie('mp_big_message_freemode')
+    local t = GetGameTimer() + 5000
+    while not HasScaleformMovieLoaded(sf) and GetGameTimer() < t do Wait(10) end
+    if not HasScaleformMovieLoaded(sf) then return end
+    PushScaleformMovieFunction(sf, 'SHOW_SHARD_WASTED_MP_MESSAGE')
+    PushScaleformMovieFunctionParameterString('~r~' .. tostring(title or 'MSG STAFF'))
+    PushScaleformMovieFunctionParameterString(tostring(msg or ''))
+    PopScaleformMovieFunctionVoid()
+    while GetGameTimer() < t do
+        Wait(0)
+        DrawScaleformMovieFullscreen(sf, 255, 255, 255, 255, 0)
+    end
+    SetScaleformMovieAsNoLongerNeeded(sf)
+end)

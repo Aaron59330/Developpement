@@ -20,6 +20,7 @@ end)
 
 local isShowing = false
 RegisterCommand("hidehud", function()
+    if not ConfigHUDGTA.Allow then return end   -- désactivé : la touche W ne doit pas afficher l'argent natif
     if not isShowing then
         isShowing = true
         SetMultiplayerBankCash()
