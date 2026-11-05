@@ -134,7 +134,7 @@ function BB.Blip(coords, b, opts)
         if base ~= '' then name = base end
     end
     -- les codes de couleur GTA (~p~, ~s~, ~h~…) ne doivent pas séparer deux blips de même nom : ils sont retirés du nom du blip
-    name = name:gsub('~[%a]~', ''):gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+    name = name:gsub('~[%w_]+~', ''):gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
     if name == '' then name = 'Point' end
     -- clé de groupe insensible à la casse et aux espaces multiples (« Garage », « garage », « Garage  »)
     local norm = name:lower()
