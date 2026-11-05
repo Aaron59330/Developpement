@@ -9,15 +9,15 @@ Config.HideNativeWheel = true    -- masque la roue d'armes native de GTA
 Config.Colors = {
     hover    = '#19d6c8',        -- arc + halo de l'emplacement survolé (turquoise)
     equipped = '#ff4d8d',        -- arc + halo de l'arme en main (rose)
-    glass    = 'rgba(48,52,58,.55)',
-    border   = 'rgba(255,255,255,.16)',
+    glass    = 'rgba(255,255,255,.11)',
+    border   = 'rgba(255,255,255,.38)',
     text     = '#f4f5f7',
     muted    = '#9a9da5',
 }
 Config.Unarmed = { label = 'MAINS NUES', sub = 'CORPS À CORPS', icon = 'WEAPON_UNARMED' }   -- emplacement « poings »
 
 -- ═════════════════════════════ ARMES ═════════════════════════
--- 6 emplacements autour du cercle (sens horaire, le 1er en haut). `unarmed = true` = les poings.
+-- 6 emplacements autour du cercle (mains nues en bas, puis 1 à 5 dans le sens horaire en partant du bas gauche). `unarmed = true` = les poings.
 -- `groups` = groupes d'armes GTA ; `names` = armes précises (prioritaires). Plusieurs armes du même type : la molette change l'arme affichée.
 Config.WeaponSlots = {
     { id = 'unarmed', unarmed = true },

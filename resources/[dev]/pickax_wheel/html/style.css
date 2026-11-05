@@ -1,17 +1,19 @@
-:root { --hover: #19d6c8; --eq: #ff4d8d; --glass: rgba(48,52,58,.55); --bd: rgba(255,255,255,.16); --tx: #f4f5f7; --mu: #9a9da5; }
+:root { --hover: #19d6c8; --eq: #ff4d8d; --glass: rgba(255,255,255,.11); --bd: rgba(255,255,255,.38); --tx: #f4f5f7; --mu: #9a9da5; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: transparent; overflow: hidden; user-select: none; color: var(--tx); font-family: Inter, 'Segoe UI', system-ui, sans-serif; }
+html, body { height: 100%; background: transparent; overflow: hidden; user-select: none; color: var(--tx); font-family: Poppins, Inter, 'Segoe UI', system-ui, sans-serif; }
 .hidden { display: none !important; }
 #root { position: fixed; inset: 0; display: grid; place-items: center; animation: in .12s ease-out; }
 @keyframes in { from { opacity: 0; transform: scale(.96); } }
 svg { width: min(94vh, 94vw); height: min(94vh, 94vw); overflow: visible; }
 .seg { fill: var(--glass); stroke: var(--bd); stroke-width: 1.5; transition: fill .1s; }
-.slot.hover .seg { fill: rgba(70,76,84,.62); }
-.arc { fill: none; stroke: rgba(255,255,255,.22); stroke-width: 4; stroke-linecap: round; transition: stroke .1s; }
+.wash { fill: none; pointer-events: none; }
+.slot.hover .wash { fill: url(#gh); }
+.slot.held .wash { fill: url(#ge); }
+.arc { fill: none; stroke: rgba(255,255,255,.55); stroke-width: 4; stroke-linecap: round; transition: stroke .1s; }
 .slot.hover .arc { stroke: var(--hover); filter: drop-shadow(0 0 7px var(--hover)); }
 .slot.held .arc { stroke: var(--eq); filter: drop-shadow(0 0 7px var(--eq)); }
 .slot.held.hover .arc { stroke: var(--eq); }
-.num { font: 800 92px Inter, sans-serif; fill: rgba(255,255,255,.2); text-anchor: middle; dominant-baseline: central; }
+.num { font: 700 52px Inter, sans-serif; fill: rgba(255,255,255,.45); text-anchor: middle; dominant-baseline: central; }
 .cnt { font: 700 22px Inter, sans-serif; fill: var(--tx); text-anchor: middle; }
 .cnt .r { fill: var(--mu); }
 .multi { font: 700 15px Inter, sans-serif; fill: var(--mu); text-anchor: middle; }
