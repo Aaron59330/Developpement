@@ -77,7 +77,7 @@ RegisterCommand('-pickax_wheel', function()
     -- ignore le « relâchement » parasite émis quand l'interface prend le focus
     if isOpen and GetGameTimer() - openedAt > 250 then SendNUIMessage({ action = 'valider' }) end
 end, false)
-RegisterKeyMapping('+pickax_wheel', 'Roue d\'armes (maintenir)', 'keyboard', C.Key or 'CAPSLOCK')
+RegisterKeyMapping('+pickax_wheel', 'Roue d\'armes (maintenir)', 'keyboard', C.Key or 'C')
 
 RegisterNUICallback('choisir', function(d, cb)
     cb(1)

@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'pickax_wheel'
-description 'Roue d\'armes (maintiens CAPSLOCK) : UI GTA VI (React 19) — relâche sur une case pour équiper'
+description 'Roue d\'armes (maintiens C) : UI GTA VI (React 19) — relâche sur une case pour équiper'
 version '1.0.0'
 
 shared_scripts { 'config.lua' }

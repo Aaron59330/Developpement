@@ -1,7 +1,7 @@
 Config = {}
 
 -- ═════════════════════════════ GÉNÉRAL ═══════════════════════
-Config.Key = 'CAPSLOCK'          -- maintiens la touche : la roue s'ouvre ; relâche sur une case pour équiper l'arme
+Config.Key = 'C'          -- maintiens la touche : la roue s'ouvre ; relâche sur une case pour équiper l'arme
 Config.OpenMinMs = 120           -- une pression plus courte que ça ferme la roue sans rien utiliser
 Config.HideNativeWheel = true    -- masque la roue d'armes native de GTA
 Config.ImageUrl = 'https://cfx-nui-ox_inventory/web/images/%s.png'   -- image d'une arme (%s = nom de l'objet)
