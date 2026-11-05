@@ -89,6 +89,8 @@ const P = {
   down: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
   link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  refresh: '<path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 12A9 9 0 0 1 18.4 5.6L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
   clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
@@ -304,7 +306,25 @@ const Placement = {
 let Mod = null;
 const close = () => rpc('close');
 
+document.addEventListener('mousedown', e => {   // atelier : maintenir ◀ / ▶ pour tourner autour du véhicule
+  const b = e.target.closest && e.target.closest('[data-hold]'); if (!b || typeof Tuning === 'undefined') return;
+  const dir = Number(b.dataset.hold); clearInterval(Tuning.holdT); rpc('tuning:cam', dir * 14, 0, 0);
+  Tuning.holdT = setInterval(() => rpc('tuning:cam', dir * 14, 0, 0), 50);
+});
+window.addEventListener('mouseup', () => { if (typeof Tuning !== 'undefined') clearInterval(Tuning.holdT); });
 document.addEventListener('keydown', e => {
+  const typing0 = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
+  if (typeof Tuning !== 'undefined' && Mod === Tuning && !typing0 && !$root.classList.contains('hidden')) {   // atelier : raccourcis de vue
+    const VK = ['front34', 'rear34', 'front', 'rear', 'left', 'right', 'top', 'wheels', 'lights', 'plate'];
+    if (/^[0-9]$/.test(e.key)) { const i = e.key === '0' ? 9 : Number(e.key) - 1; Tuning.auto = false; Tuning.goView(VK[i], true); Tuning.render(); e.preventDefault(); return; }
+    if (e.key === 'ArrowLeft') { rpc('tuning:cam', -16, 0, 0); e.preventDefault(); return; }
+    if (e.key === 'ArrowRight') { rpc('tuning:cam', 16, 0, 0); e.preventDefault(); return; }
+    if (e.key === 'ArrowUp') { rpc('tuning:cam', 0, -16, 0); e.preventDefault(); return; }
+    if (e.key === 'ArrowDown') { rpc('tuning:cam', 0, 16, 0); e.preventDefault(); return; }
+    if (e.key === '+' || e.key === '=') { rpc('tuning:cam', 0, 0, -9); e.preventDefault(); return; }
+    if (e.key === '-') { rpc('tuning:cam', 0, 0, 9); e.preventDefault(); return; }
+    if (e.key === ' ') { Tuning.spin = Tuning.spin ? 0 : 1; rpc('tuning:spin', Tuning.spin); Tuning.render(); e.preventDefault(); return; }
+  }
   const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
   if (typeof Runtime !== 'undefined' && Runtime.kind === 'menu' && Mod === Runtime && !typing && !$root.classList.contains('hidden')) {
     if (e.key === 'Escape') { if (Runtime.mv.view !== 'main') { Runtime.mv = { view: 'main', sel: 0 }; Runtime.render(); } else close(); return; }
@@ -2138,10 +2158,14 @@ const TUN_ICON = { modEngine: 'cog', modBrakes: 'brake', modTransmission: 'gear'
 const tunIc = k => `<span class="tun-ic">${tsv(TUN_ICON[k] || 'wrench')}</span>`;
 const colName = id => (GTA_COLORS.find(c => c[0] === id) || [id, 'Couleur ' + id])[1];
 
+const TUN_KEY_VIEW = { modFrontBumper: 'front', modGrille: 'front', modHood: 'front', modTurbo: 'front', modEngine: 'front', modArmor: 'front34', modTransmission: 'front34', modFender: 'left', modRightFender: 'right', modSideSkirt: 'left',
+  modRearBumper: 'rear', modExhaust: 'rear', modSpoilers: 'rear34', modTrunk: 'rear', modRoof: 'roof', modFrontWheels: 'wheels', modBackWheels: 'wheels', wheels: 'wheels', wheelColor: 'wheels', modSmokeEnabled: 'wheels', tyreSmokeColor: 'wheels', modBrakes: 'wheels', modSuspension: 'left',
+  color1: 'left', color2: 'left', pearlescentColor: 'left', modLivery: 'left', livery: 'left', windowTint: 'left', modXenon: 'lights', xenonColor: 'lights', neonEnabled: 'front34', neonColor: 'front34', plateIndex: 'plate', modPlateHolder: 'plate', modVanityPlate: 'plate' };
+const TUN_TAB_VIEW = { perf: 'front', body: 'front34', wheels: 'wheels', paint: 'left', lights: 'lights', sum: 'front34' };
 const Tuning = {
   d: null, cur: null, tab: 'perf', waiting: false, drag: null, last: 0,
 
-  open(d, pid) { this.d = d; this.pid = pid; this.cur = clone(d.state); this.tab = 'perf'; this.waiting = false; this.render(); },
+  open(d, pid) { this.d = d; this.pid = pid; this.cur = clone(d.state); this.tab = 'perf'; this.waiting = false; this.view = 'front34'; this.auto = true; this.spin = 0; this.render(); },
 
   changes() {
     const out = [];
@@ -2169,7 +2193,23 @@ const Tuning = {
 
   priceTag(key) { const P = this.d.prices, mk = (this.d.markup || 100) / 100; const g = TUN_GROUP[key]; const v = g ? P[g] : TUN_LEVELS[key] ? null : P.cosmetic; return v ? `<span class="price">${money(Math.floor(v * mk))}</span>` : ''; },
 
+  /* ── Vue du véhicule : vues prédéfinies, cadrage automatique sur la pièce modifiée ── */
+  view: 'front34', auto: true,
+  goView(v, manual) { this.view = v; if (manual) this.auto = this.auto; rpc('tuning:view', v); const bar = document.getElementById('tun-vw'); if (bar) bar.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === v)); },
+  autoView(key) { if (!this.auto) return; const v = TUN_KEY_VIEW[key]; if (v && v !== this.view) this.goView(v); },
+  viewBar() {
+    const V = [['front34', '3/4 avant'], ['rear34', '3/4 arrière'], ['front', 'Avant'], ['rear', 'Arrière'], ['left', 'Gauche'], ['right', 'Droite'], ['top', 'Dessus'], ['wheels', 'Roues'], ['lights', 'Phares'], ['plate', 'Plaque']];
+    return `<div class="tun-vw" id="tun-vw"><div class="vw-t">${ic('eye', 14)} Vue du véhicule</div>
+      <div class="vw-grid">${V.map(([k, l], i) => `<button data-a="view" data-v="${k}" class="${this.view === k ? 'on' : ''}" title="Touche ${i + 1 === 10 ? 0 : i + 1}"><kbd>${i + 1 === 10 ? 0 : i + 1}</kbd>${l}</button>`).join('')}</div>
+      <div class="vw-row"><button data-hold="-1" title="Tourner à gauche (←)">${ic('left', 16)}</button><button data-hold="1" title="Tourner à droite (→)">${ic('chevron', 16)}</button><span class="sp"></span>
+        <button data-a="zoom" data-d="-1" title="Zoom avant (+)">+</button><button data-a="zoom" data-d="1" title="Zoom arrière (−)">−</button><span class="sp"></span>
+        <button data-a="spin" class="${this.spin ? 'on' : ''}" title="Rotation automatique (Espace)">${ic('refresh', 15)} Rotation</button>
+        <button data-a="autov" class="${this.auto ? 'on' : ''}" title="La caméra se place sur la pièce que tu modifies">${ic('target', 15)} Vue auto</button></div>
+      <div class="vw-hint">Glisser = tourner · Molette = zoom · Flèches = tourner · 1–0 = vues · Espace = rotation</div></div>`;
+  },
+
   async set(key, value, extra) {
+    this.autoView(key);
     this.cur[key] = value;
     (extra || []).forEach(([k, v]) => { this.cur[k] = v; });
     this.render();
@@ -2241,7 +2281,7 @@ const Tuning = {
       <div class="tun-head">${tile('wrench', 'lg')}<div class="ttl"><h1>${esc(d.vehicle.name || 'Véhicule')}</h1><p><span class="plate">${esc(d.vehicle.plate)}</span> ${esc(d.jobLabel)}</p></div><button class="icon" data-a="close" title="Fermer">${ic('x', 16)}</button></div>
       <div class="tun-tabs">${tabs.map(([k, i, l]) => `<button class="${this.tab === k ? 'active' : ''}" data-a="tab" data-v="${k}"><em>${i}</em><span>${l}</span></button>`).join('')}</div>
       <div class="tun-body">${this.waiting ? `<div class="empty">${tile('clock')}<h2>En attente du client…</h2><p>Le client doit accepter et payer la facture à l'écran (60 s).</p></div>` : this.tabBody()}</div>
-      <div class="tun-foot"><div><small>Total</small><b>${money(q.total)}</b><small>${n} modification(s)</small></div><button class="primary" data-a="validate" ${n === 0 || this.waiting ? 'disabled' : ''}>${ic('check', 15)} Valider</button></div></div>`;
+      <div class="tun-foot"><div><small>Total</small><b>${money(q.total)}</b><small>${n} modification(s)</small></div><button class="primary" data-a="validate" ${n === 0 || this.waiting ? 'disabled' : ''}>${ic('check', 15)} Valider</button></div></div>${this.viewBar()}`;
     const v = document.getElementById('tun-view');
     v.onmousedown = e => { this.drag = { x: e.clientX, y: e.clientY }; };
     v.onmousemove = e => { if (!this.drag) return; const now = Date.now(); if (now - this.last < 35) return; this.last = now; rpc('tuning:cam', e.clientX - this.drag.x, e.clientY - this.drag.y, 0); this.drag = { x: e.clientX, y: e.clientY }; };
@@ -2252,7 +2292,11 @@ const Tuning = {
   async onA(el) {
     const a = el.dataset.a, k = el.dataset.k, d = this.d;
     switch (a) {
-      case 'tab': this.tab = el.dataset.v; return this.render();
+      case 'tab': this.tab = el.dataset.v; { const tv = TUN_TAB_VIEW[this.tab]; if (this.auto && tv) this.goView(tv); } return this.render();
+      case 'view': this.auto = false; this.goView(el.dataset.v, true); return this.render();
+      case 'zoom': return void rpc('tuning:cam', 0, 0, Number(el.dataset.d) * 9);
+      case 'spin': this.spin = this.spin ? 0 : 1; rpc('tuning:spin', this.spin); return this.render();
+      case 'autov': this.auto = !this.auto; if (this.auto) { const tv = TUN_TAB_VIEW[this.tab]; if (tv) this.goView(tv); } return this.render();
       case 'step': {
         let list;
         if (k === 'wheels') list = d.vehicle.bike ? [[6, 'Moto']] : WHEEL_TYPES;
@@ -2260,6 +2304,7 @@ const Tuning = {
         else if (k === 'livery') list = Array.from({ length: d.mods.livery.n }, (_, i) => [i, `Livrée ${i + 1}`]);
         else list = this.modList(k);
         const i = Math.max(0, list.findIndex(x => x[0] === this.cur[k])), nx = list[(i + Number(el.dataset.d) + list.length) % list.length][0];
+        this.autoView(k);
         if (k === 'wheels') {           // changer de type de jantes recharge la liste des jantes
           this.cur.wheels = nx; await rpc('tuning:preview', 'wheels', nx); this.cur.modFrontWheels = -1; await rpc('tuning:preview', 'modFrontWheels', -1);
           if (d.vehicle.bike) { this.cur.modBackWheels = -1; await rpc('tuning:preview', 'modBackWheels', -1); }

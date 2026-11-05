@@ -92,25 +92,64 @@ local function findVehicle(coords, radius)
     return best
 end
 
--- ── Caméra orbitale autour du véhicule ──
+-- ── Caméra orbitale autour du véhicule : vues prédéfinies, cadrage sur une pièce, mouvements adoucis ──
+local function wrap180(d) return (d + 180.0) % 360.0 - 180.0 end
+
+-- Vues : angle relatif au véhicule (0 = devant, 90 = côté droit, 180 = derrière, -90 = côté gauche), hauteur (pitch), distance (× distance de base), point visé (repère du véhicule : x droite, y avant, z haut)
+local function viewDef(a, name)
+    local w, l = a.dim.mx.x - a.dim.mn.x, a.dim.mx.y - a.dim.mn.y
+    local V = {
+        front34 = { -40, 16, 1.00, { 0, 0, 0.35 } },
+        rear34  = { 140, 16, 1.00, { 0, 0, 0.35 } },
+        front   = { 0, 9, 0.90, { 0, 0, 0.45 } },
+        rear    = { 180, 9, 0.90, { 0, 0, 0.45 } },
+        left    = { -90, 7, 1.00, { 0, 0, 0.40 } },
+        right   = { 90, 7, 1.00, { 0, 0, 0.40 } },
+        top     = { -90, 68, 1.05, { 0, 0, 0.30 } },
+        wheels  = { -62, 6, 0.46, { a.dim.mn.x * 0.9, a.dim.mx.y * 0.52, 0.32 } },
+        lights  = { -22, 8, 0.52, { 0, a.dim.mx.y * 0.9, 0.55 } },
+        plate   = { 180, 6, 0.38, { 0, a.dim.mn.y + 0.1, 0.5 } },
+        roof    = { -60, 38, 0.85, { 0, 0, 1.0 } },
+    }
+    return V[name] or V.front34
+end
+
+local function setView(a, name)
+    local v = viewDef(a, name)
+    a.tAngle = a.tAngle + wrap180((-GetEntityHeading(a.veh) + v[1]) - a.tAngle)   -- chemin le plus court
+    a.tPitch = v[2]
+    a.tDist = math.max(a.minDist * 0.6, math.min(a.maxDist, a.dist0 * v[3]))
+    a.tFocus = { v[4][1] + 0.0, v[4][2] + 0.0, v[4][3] + 0.0 }
+    a.spin = 0.0
+end
+
 local function startCam(a)
     local model = GetEntityModel(a.veh)
     local mn, mx = GetModelDimensions(model)
-    a.dist = math.max(4.5, (mx.y - mn.y) * 1.5 + 1.5)
-    a.minDist, a.maxDist = a.dist * 0.55, a.dist * 1.8
-    a.angle, a.pitch = GetEntityHeading(a.veh) + 145.0, 14.0
+    a.dim = { mn = mn, mx = mx }
+    a.dist0 = math.max(4.5, (mx.y - mn.y) * 1.5 + 1.5)
+    a.dist = a.dist0
+    a.minDist, a.maxDist = a.dist0 * 0.55, a.dist0 * 1.8
+    a.angle, a.pitch = -GetEntityHeading(a.veh) - 40.0, 16.0
+    a.tAngle, a.tPitch, a.tDist = a.angle, a.pitch, a.dist
+    a.focus, a.tFocus = { 0.0, 0.0, 0.35 }, { 0.0, 0.0, 0.35 }
+    a.spin = 0.0
     a.cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
     SetCamFov(a.cam, 55.0)
     RenderScriptCams(true, true, 700, true, false)
     CreateThread(function()
-        local cx, cy, cz
         while active == a do
-            local c = GetEntityCoords(a.veh)
+            local dt = math.min(GetFrameTime(), 0.05)
+            local k = 1.0 - math.exp(-dt * 7.0)
+            if a.spin ~= 0.0 then a.tAngle = a.tAngle + a.spin * dt * 20.0 end
+            a.angle = a.angle + wrap180(a.tAngle - a.angle) * k
+            a.pitch = a.pitch + (a.tPitch - a.pitch) * k
+            a.dist = a.dist + (a.tDist - a.dist) * k
+            for i = 1, 3 do a.focus[i] = a.focus[i] + (a.tFocus[i] - a.focus[i]) * k end
+            local f = GetOffsetFromEntityInWorldCoords(a.veh, a.focus[1], a.focus[2], a.focus[3])
             local pr, ar = math.rad(a.pitch), math.rad(a.angle)
-            local tx, ty, tz = c.x + math.sin(ar) * a.dist * math.cos(pr), c.y + math.cos(ar) * a.dist * math.cos(pr), c.z + 0.6 + math.sin(pr) * a.dist
-            cx, cy, cz = (cx or tx) + (tx - (cx or tx)) * 0.2, (cy or ty) + (ty - (cy or ty)) * 0.2, (cz or tz) + (tz - (cz or tz)) * 0.2
-            SetCamCoord(a.cam, cx, cy, cz)
-            PointCamAtCoord(a.cam, c.x, c.y, c.z + 0.35)
+            SetCamCoord(a.cam, f.x + math.sin(ar) * a.dist * math.cos(pr), f.y + math.cos(ar) * a.dist * math.cos(pr), f.z + math.sin(pr) * a.dist)
+            PointCamAtCoord(a.cam, f.x, f.y, f.z)
             DisableAllControlActions(0)
             Wait(0)
         end
@@ -172,10 +211,25 @@ end
 NuiLocal['tuning:cam'] = function(args, cb)
     local a = active
     if a then
-        a.angle = a.angle - (tonumber(args[1]) or 0) * 0.45
-        a.pitch = math.max(2.0, math.min(65.0, a.pitch + (tonumber(args[2]) or 0) * 0.3))
-        a.dist = math.max(a.minDist, math.min(a.maxDist, a.dist + (tonumber(args[3]) or 0) * 0.01 * a.dist))
+        a.tAngle = a.tAngle - (tonumber(args[1]) or 0) * 0.45
+        a.tPitch = math.max(2.0, math.min(70.0, a.tPitch + (tonumber(args[2]) or 0) * 0.3))
+        a.tDist = math.max(a.minDist * 0.6, math.min(a.maxDist, a.tDist + (tonumber(args[3]) or 0) * 0.01 * a.tDist))
+        if a.spin ~= 0.0 and ((tonumber(args[1]) or 0) ~= 0) then a.spin = 0.0 end   -- un geste manuel arrête la rotation automatique
     end
+    cb({ ok = true })
+end
+
+-- Vue prédéfinie : front34 / rear34 / front / rear / left / right / top / wheels / lights / plate / roof
+NuiLocal['tuning:view'] = function(args, cb)
+    local a = active
+    if a then setView(a, tostring(args[1] or 'front34')) end
+    cb({ ok = true })
+end
+
+-- Rotation automatique : -1 / 0 / 1 (sens)
+NuiLocal['tuning:spin'] = function(args, cb)
+    local a = active
+    if a then a.spin = (tonumber(args[1]) or 0) + 0.0 end
     cb({ ok = true })
 end
 
