@@ -314,6 +314,9 @@ document.addEventListener('mousedown', e => {   // atelier : maintenir ◀ / ▶
 window.addEventListener('mouseup', () => { if (typeof Tuning !== 'undefined') clearInterval(Tuning.holdT); });
 document.addEventListener('keydown', e => {
   const typing0 = ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
+  if (e.key === 'Backspace' && !typing0 && !$root.classList.contains('hidden')) {   // Retour : revient au menu précédent quand l'écran propose un bouton « Retour »
+    const bk = document.querySelector('[data-a="back"]'); if (bk) { bk.click(); e.preventDefault(); return; }
+  }
   if (typeof Tuning !== 'undefined' && Mod === Tuning && !typing0 && !$root.classList.contains('hidden')) {   // atelier : raccourcis de vue
     const VK = ['front34', 'rear34', 'front', 'rear', 'left', 'right', 'top', 'wheels', 'lights', 'plate'];
     if (/^[0-9]$/.test(e.key)) { const i = e.key === '0' ? 9 : Number(e.key) - 1; Tuning.auto = false; Tuning.goView(VK[i], true); Tuning.render(); e.preventDefault(); return; }

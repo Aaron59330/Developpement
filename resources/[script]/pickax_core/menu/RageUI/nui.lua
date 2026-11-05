@@ -131,9 +131,39 @@ CreateThread(function()
     end
 end)
 
+-- Pile de navigation : « Retour » revient toujours au menu précédent, même quand un script ouvre un menu à la main
+-- (RageUI.Visible(a, false) puis RageUI.Visible(b, true), ou b ouvert alors que a est encore affiché) sans l'avoir créé avec CreateSubMenu.
+-- Le menu ouvert prend alors le précédent comme parent ; un menu ouvert « à neuf » (rien avant) n'a plus de parent.
+local lastClosed, lastClosedAt = nil, 0
+local function isAncestor(a, b)
+    local p = b and b.Parent
+    local guard = 0
+    while p ~= nil and guard < 20 do
+        if p == a then return true end
+        p = p.Parent
+        guard = guard + 1
+    end
+    return false
+end
+
 local _Visible = RageUI.Visible
 function RageUI.Visible(Menu, Value)
     if Value == true and playerIsDead() then return false end
+    if Menu ~= nil and type(Value) == 'boolean' then
+        if Value then
+            local from = RageUI.CurrentMenu
+            if from == nil and lastClosed ~= nil and GetGameTimer() - lastClosedAt < 150 then from = lastClosed end
+            if from ~= nil and from ~= Menu and not isAncestor(Menu, from) and (Menu.Parent == nil or Menu.DynParent) then
+                Menu.Parent = from
+                Menu.DynParent = true
+            elseif from == nil and Menu.DynParent then
+                Menu.Parent = nil
+                Menu.DynParent = nil
+            end
+        else
+            lastClosed, lastClosedAt = Menu, GetGameTimer()
+        end
+    end
     local r = _Visible(Menu, Value)
     if Value == false and shown then closeCheck = true end
     return r
@@ -153,6 +183,7 @@ end)
 
 local _CloseAll = RageUI.CloseAll
 function RageUI.CloseAll()
+    lastClosed = nil
     _CloseAll()
     hide()
 end
