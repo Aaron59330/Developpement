@@ -134,6 +134,7 @@ function BB.Blip(coords, b, opts)
         if base ~= '' then name = base end
     end
     -- les codes de couleur GTA (~p~, ~s~, ~h~…) ne doivent pas séparer deux blips de même nom : ils sont retirés du nom du blip
+    local raw = (name:gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', ''))   -- nom tel que saisi (avec ses codes de couleur éventuels)
     name = name:gsub('~[%w_]+~', ''):gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
     if name == '' then name = 'Point' end
     -- clé de groupe insensible à la casse et aux espaces multiples (« Garage », « garage », « Garage  »)
@@ -154,8 +155,13 @@ function BB.Blip(coords, b, opts)
     SetBlipScale(blip, ((PickaxTheme and PickaxTheme.blipScale) or 0.5) + 0.0)
     SetBlipDisplay(blip, 4)
     SetBlipAsShortRange(blip, g.short)
-    if not BB._names then BB._names = {} end
-    if not BB._names[key] then AddTextEntry(key, name) BB._names[key] = true end
+    -- le texte du groupe garde la couleur : s'il y a un code de couleur dans le nom d'un des blips, tout le groupe l'affiche
+    BB._names = BB._names or {}
+    local hasCode = raw:find('~[%w_]+~') ~= nil
+    if BB._names[key] == nil or (hasCode and BB._names[key] == false) then
+        AddTextEntry(key, hasCode and raw or name)
+        BB._names[key] = hasCode
+    end
     BeginTextCommandSetBlipName(key)
     EndTextCommandSetBlipName(blip)
     return blip
