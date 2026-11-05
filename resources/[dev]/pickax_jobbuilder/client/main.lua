@@ -226,6 +226,75 @@ CreateThread(function()
 end)
 
 -- ─────────────────────────────── Menu métier ───────────────────────────────
+-- Menu métier F6 : même menu RageUI que le menu personnel (F5), géré par pickax_core (players/contextlist). Les actions qui ouvrent une tablette ou un formulaire passent ensuite par le NUI.
+local JOB_GROUPS = {
+    { 'g0', 'Interactions', 'Actions sur le joueur le plus proche', { 'handcuff', 'escort', 'search', 'revive', 'heal', 'invoice', 'serve' } },
+    { 'g1', 'Véhicule', 'Réparer, nettoyer et contrôler le véhicule', { 'repair', 'clean', 'vehctl', 'props' } },
+    { 'g2', 'Outils & gestion', 'Tablettes, missions, annonces et gestion du métier', { 'tablet', 'emstablet', 'banktablet', 'emscalls', 'properties', 'dealership', 'government', 'missions', 'smallquests', 'jobannounce' } },
+}
+local NUI_ACTIONS = { dutyon = true, dutyoff = true, leavejob = true, vehctl = true, invoice = true, tablet = true, emstablet = true, banktablet = true, emscalls = true, jobannounce = true, serve = true }
+
+local function rageEnabled()
+    if GetResourceState('pickax_core') ~= 'started' then return false end
+    local ok, on = pcall(function() return exports.pickax_core:ContextListEnabled() end)
+    return ok and on == true
+end
+
+local function chooseFromRage(id, menuData)
+    if NUI_ACTIONS[id] then
+        uiOpen = true
+        SetNuiFocus(true, true)
+        SendNUIMessage({ action = 'menuAct', id = id, data = menuData, theme = currentAccent({ kind = 'menu' }) })
+    else
+        menuOrigin = GetGameTimer()
+        RunAction(id)
+    end
+end
+
+local function openJobMenuRage(actions, jc)
+    local onDuty = LocalPlayer.state.jbDuty == true
+    local menuData = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions }
+    local duty, leave, rest = nil, nil, {}
+    for _, a in ipairs(actions) do
+        if a.id == 'dutyon' or a.id == 'dutyoff' then duty = a elseif a.id == 'leavejob' then leave = a else rest[#rest + 1] = a end
+    end
+    local function item(a, desc)
+        return { title = a.label, description = desc or (a.target and 'Joueur proche requis' or nil), onSelect = function() chooseFromRage(a.id, menuData) end }
+    end
+    local used, groups = {}, {}
+    for _, g in ipairs(JOB_GROUPS) do
+        local items = {}
+        for _, a in ipairs(rest) do
+            for _, id in ipairs(g[4]) do if id == a.id then items[#items + 1] = item(a) used[a.id] = true end end
+        end
+        if #items > 0 then groups[#groups + 1] = { id = g[1], title = g[2], desc = g[3], options = items } end
+    end
+    local others = {}
+    for _, a in ipairs(rest) do if not used[a.id] then others[#others + 1] = item(a) end end
+    if #others > 0 then groups[#groups + 1] = { id = 'g9', title = 'Autres', desc = 'Autres actions du métier', options = others } end
+
+    local grade = (jc.gradeLabel and jc.gradeLabel ~= '') and jc.gradeLabel or 'Employé'
+    local contexts = {}
+    local main = {}
+    if duty then
+        main[#main + 1] = { separator = true, title = 'Service' }
+        main[#main + 1] = item(duty, onDuty and 'Quitter le service : les points et véhicules du métier sont verrouillés' or 'Prends ton service pour accéder aux actions, aux points et aux véhicules du métier')
+    end
+    if onDuty and #groups > 0 then
+        main[#main + 1] = { separator = true, title = 'Actions du métier' }
+        for _, g in ipairs(groups) do
+            main[#main + 1] = { title = g.title, description = g.desc, menu = 'job_' .. g.id }
+            contexts['job_' .. g.id] = { title = g.title, subtitle = g.desc .. ' :', menu = 'job_main', options = g.options }
+        end
+    end
+    if leave then
+        main[#main + 1] = { separator = true, title = 'Métier' }
+        main[#main + 1] = item(leave, 'Quitter définitivement ce métier')
+    end
+    contexts.job_main = { title = 'Menu Métier', subtitle = ((jc.label or '') .. ' · ' .. grade .. ' · ' .. (onDuty and 'en service' or 'hors service') .. ' :'), options = main }
+    exports.pickax_core:ShowContext({ id = 'job_main', contexts = contexts })
+end
+
 local function openJobMenu()
     local jc = State.jobConfig
     if not jc then
@@ -257,6 +326,7 @@ local function openJobMenu()
         JBNotify('~r~Aucune action disponible pour ton métier.')
         return
     end
+    if rageEnabled() then return openJobMenuRage(actions, jc) end
     OpenUI({ action = 'open', kind = 'menu', data = { type = jc.type, jobLabel = jc.label, grade = jc.gradeLabel or '', actions = actions } })
 end
 
@@ -268,6 +338,10 @@ local function toggleJobMenu(from)
     if uiOpen and not IsNuiFocused() then
         uiOpen = false
         setWalkMenu(false)
+    end
+    if GetResourceState('pickax_core') == 'started' then
+        local okR, running = pcall(function() return exports.pickax_core:ContextRunning() end)
+        if okR and running then pcall(function() exports.pickax_core:CloseContext() end) return end
     end
     if uiOpen then
         if walkMenu then CloseUI() end

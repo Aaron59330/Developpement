@@ -344,6 +344,7 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   if (!el) return;
   if (el.dataset.a === 'close') return close();
+  if (el.dataset.a === 'back' && typeof Runtime !== 'undefined' && Mod === Runtime && Runtime.rage) return rpc('openJobMenu');   // menu F6 en RageUI : retour = on rouvre le menu RageUI
   if (el.dataset.a === 'back') {         // retour au menu métier (F6) : sous-écran du menu, ou panneau ouvert depuis une action
     if (Mod === Runtime && Runtime.menuData && ['invoiceForm', 'serve', 'jobannounce', 'emscalls'].includes(Runtime.kind)) { Runtime.data = Runtime.menuData; Runtime.kind = 'menu'; return Runtime.render(); }
     return rpc('openJobMenu');
@@ -361,6 +362,13 @@ window.addEventListener('message', e => {
   if (d.action === 'death') return showDeath(d);
   if (d.action === 'deathHide') { document.getElementById('death').classList.add('hidden'); return; }
   if (d.action === 'tuningResult') return Tuning.result(d);
+  if (d.action === 'menuAct') {   // action choisie dans le menu RageUI (F6) qui ouvre une tablette / un formulaire : on exécute l'action NUI correspondante
+    if (d.theme) applyTheme(d.theme);
+    applyStyle();
+    $root.innerHTML = ''; $root.classList.remove('hidden'); $root.classList.add('corner');
+    Mod = Runtime; Runtime.rage = true; Runtime.menuData = d.data; Runtime.data = d.data; Runtime.kind = 'menu'; window.JBBackFromMenu = true;
+    return Runtime.onA({ dataset: { a: 'act', id: d.id } });
+  }
   if (d.action === 'close') { $root.classList.add('hidden', 'x'); $root.classList.remove('tuning', 'x'); $root.innerHTML = ''; Placement.hide(); return; }
   if (d.action === 'placementSave') return Placement.save(d.coords);
   if (d.action === 'placementNav') return Placement.nav(d.dir);
@@ -2710,7 +2718,7 @@ document.addEventListener('input', e => {
 const Runtime = {
   kind: null, data: null, pointId: null, bossTab: 'money',
 
-  open(kind, data, pointId) { if (kind === 'menu') { this.menuData = data; this.mv = { view: 'main', sel: 0 }; } this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
+  open(kind, data, pointId) { if (kind === 'menu') { this.menuData = data; this.rage = false; this.mv = { view: 'main', sel: 0 }; } this.kind = kind; this.data = data; this.pointId = pointId; this.bossTab = 'money'; this.q = ''; this.cat = ''; this.render(); },
   set(r) { this.data = { ...this.data, ...r }; this.render(); },
 
   /* Menu F6 : menu en liste (style menu personnel, charbon) — sections, sous-menus, description, navigation clavier et souris */
@@ -3119,7 +3127,7 @@ const Runtime = {
       }
       case 'vc': { const r = await rpc('vehctl:set', el.dataset.k, el.dataset.v); if (!ok(r)) return; this.data = r; return this.render(); }
       case 'jmgo': this.mv = { view: el.dataset.id, sel: 0 }; return this.render();
-      case 'leaveJobCancel': return this.open('menu', this.menuData);
+      case 'leaveJobCancel': if (this.rage) return rpc('openJobMenu'); return this.open('menu', this.menuData);
       case 'leaveJobConfirm': { const r = await rpc('leaveJob'); if (!ok(r, 'Tu as quitté ton métier')) return; return close(); }
       case 'act':
         if (el.dataset.id === 'dutyon' || el.dataset.id === 'dutyoff') { const want = el.dataset.id === 'dutyon'; const r = await rpc('duty:toggle', want); if (!ok(r, want ? 'Service pris : tout ton menu et tes points sont disponibles' : 'Service quitté')) return; return close(); }
