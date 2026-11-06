@@ -70,6 +70,12 @@ function setPath(level, idx) {
   if (idx != null) { S.path.push(idx); addPanel(level + 1); }
   markOn();
 }
+// petit effet lumineux qui suit le curseur (ligne survolée + léger halo sur le panneau)
+addEventListener('mousemove', e => {
+  const p = e.target.closest && e.target.closest('.panel'); if (!p) return;
+  const pr = p.getBoundingClientRect(); p.style.setProperty('--px', (e.clientX - pr.left) + 'px'); p.style.setProperty('--py', (e.clientY - pr.top) + 'px');
+  const r = e.target.closest('.row'); if (r) { const rr = r.getBoundingClientRect(); r.style.setProperty('--mx', (e.clientX - rr.left) + 'px'); r.style.setProperty('--my', (e.clientY - rr.top) + 'px'); }
+});
 addEventListener('mousedown', e => { if (!S.open) return; if (e.button === 2 || !e.target.closest('.panel')) post('close'); });
 addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') post('close'); if (e.key === 'Backspace') { if (S.path.length) setPath(S.path.length - 1, null); else post('close'); } });

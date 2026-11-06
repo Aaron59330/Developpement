@@ -11,5 +11,8 @@ html,body{height:100%;background:transparent;overflow:hidden;user-select:none;fo
 .row .lb{flex:1;overflow:hidden;text-overflow:ellipsis}
 .row .chev,.row .ck{width:14px;height:14px;flex:none;color:rgba(255,255,255,.85)}
 .row .chev svg,.row .ck svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.row:hover,.row.on{background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.05));border-top-color:rgba(255,255,255,.14);border-bottom-color:rgba(255,255,255,.04)}
+.panel::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .18s;background:radial-gradient(200px circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.075),transparent 70%)}
+.panel:hover::before{opacity:1}
+.row{z-index:1}
+.row:hover,.row.on{background:radial-gradient(120px circle at var(--mx,30%) var(--my,50%),rgba(255,255,255,.22),rgba(255,255,255,0) 72%),linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.045));border-top-color:rgba(255,255,255,.16);border-bottom-color:rgba(255,255,255,.04);box-shadow:0 0 14px rgba(255,255,255,.05)}
 .row.dis{opacity:.4;cursor:default}.row.dis:hover{background:none;border-color:transparent}
