@@ -5,7 +5,7 @@ const app = express();
 if (cfg.trustProxy) app.set('trust proxy', 1);
 app.disable('x-powered-by');
 const secureSite = cfg.publicUrl.startsWith('https://');
-app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], fontSrc: ["'self'"], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'self'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
+app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'], imgSrc: ["'self'", 'data:', 'https:', 'http:'], fontSrc: ["'self'", 'https://fonts.gstatic.com'], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'self'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(A.loadUser);

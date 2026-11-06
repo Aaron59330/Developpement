@@ -36,6 +36,8 @@ const table = (cols, rows) => el('div', { class: 'card tw' }, el('table', {}, el
 const copy = t => { navigator.clipboard && navigator.clipboard.writeText(t); toast('Copié', 'ok'); };
 const stPill = s => el('span', { class: 'pill ' + ({ active: 'ok', paid: 'ok', open: 'ok', pending: 'warn', suspended: 'warn', cancelled: 'bad', revoked: 'bad', closed: '' }[s] || '') }, { active: 'active', suspended: 'suspendue', revoked: 'révoquée', pending: 'en attente', paid: 'payée', cancelled: 'annulée', open: 'ouvert', closed: 'fermé' }[s] || s);
 
+const brand = big => el('div', { class: 'brand' + (big ? ' big' : '') }, el('img', { src: 'img/logo.svg', alt: 'AERO' }), el('b', {}, 'AERO ', el('span', {}, 'PANEL')));
+
 // ───────── menu par catégories ─────────
 const MENU = (admin) => [
   { sec: 'Mon espace', items: [['home', 'Accueil'], ['shop', 'Boutique'], ['orders', 'Mes commandes'], ['licenses', 'Mes licences']] },
@@ -56,7 +58,7 @@ function authPage() {
     if (!r.ok) { err.textContent = r.error || 'Erreur'; return; } await boot();
   };
   [email, pass, name].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
-  return el('div', { class: 'authwrap' }, el('section', { class: 'box' }, el('img', { src: 'img/logo.png', alt: 'AERO' }), el('h1', {}, reg ? 'Créer un compte' : 'Connexion'),
+  return el('div', { class: 'authwrap' }, el('section', { class: 'box' }, brand(true), el('h1', {}, reg ? 'Créer un compte' : 'Connexion'),
     el('p', { class: 'muted' }, 'Gère ton serveur FiveM depuis ton espace client.'), reg ? [el('label', {}, 'Pseudo'), name] : null, el('label', {}, 'E-mail'), email, el('label', {}, 'Mot de passe'), pass, err,
     el('button', { class: 'btn p', onclick: submit }, el('span', {}, reg ? 'S’inscrire' : 'Se connecter')),
     el('button', { class: 'link', onclick: () => { state.regMode = !reg; render(); } }, reg ? 'J’ai déjà un compte' : 'Créer un compte')));
@@ -65,7 +67,7 @@ function authPage() {
 // ───────── coque ─────────
 async function shell() {
   const admin = state.user.role === 'admin';
-  const side = el('aside', { class: 'side' }, el('img', { class: 'logo', src: 'img/logo.png', alt: 'AERO' }),
+  const side = el('aside', { class: 'side' }, brand(),
     MENU(admin).map(g => [el('div', { class: 'sec' }, g.sec), el('nav', {}, g.items.map(([id, label]) => el('a', { class: 'nav' + (state.page === id ? ' on' : ''), href: '#/' + id }, el('span', {}, label))))]),
     el('div', { class: 'bottom' }, el('a', { class: 'nav', href: '#', onclick: async e => { e.preventDefault(); await api('POST', '/auth/logout', {}); state.user = null; render(); } }, el('span', {}, 'Déconnexion (' + state.user.username + ')'))));
   const main = el('main', { class: 'main' });
@@ -80,7 +82,7 @@ const PAGES = {
   async home() {
     const [o, l, s] = await Promise.all([api('GET', '/shop/orders'), api('GET', '/me/licenses'), api('GET', '/support/summary')]);
     const lic = l.licenses || [], act = lic.filter(x => x.status === 'active' && (!x.expires_at || x.expires_at * 1000 > Date.now()));
-    return el('div', {}, head('Accueil'), el('div', { class: 'grid' },
+    return el('div', {}, el('section', { class: 'hero' }, el('small', {}, 'TON TABLEAU DE BORD'), el('h1', {}, 'Bonjour ' + state.user.username + '.'), el('span', {}, 'Boutique, commandes, licences et support au même endroit.')), el('div', { class: 'grid' },
       el('div', { class: 'card stat' }, el('b', {}, act.length), el('span', {}, 'Licence(s) active(s)')),
       el('div', { class: 'card stat' }, el('b', {}, (o.orders || []).filter(x => x.status === 'pending').length), el('span', {}, 'Commande(s) en attente')),
       el('div', { class: 'card stat' }, el('b', {}, s.open_tickets ?? 0), el('span', {}, 'Ticket(s) ouvert(s)')),
