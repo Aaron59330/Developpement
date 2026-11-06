@@ -31,6 +31,62 @@ function Providers.aimStyles()
     return out
 end
 
+-- Cible la plus proche (3,5 m) : passant à pied (vente de rue) ou joueur (perquisition)
+local function nearest(wantPlayer)
+    local me = PlayerPedId()
+    local mc = GetEntityCoords(me)
+    local best, bd = nil, 3.5
+    if wantPlayer then
+        for _, pid in ipairs(GetActivePlayers()) do
+            local p = GetPlayerPed(pid)
+            if p ~= me and DoesEntityExist(p) then
+                local d = #(GetEntityCoords(p) - mc)
+                if d < bd then best, bd = p, d end
+            end
+        end
+    else
+        local handle, ped = FindFirstPed()
+        local ok = handle ~= -1
+        while ok do
+            if ped ~= me and not IsPedAPlayer(ped) and not IsPedDeadOrDying(ped, true) and not IsPedInAnyVehicle(ped, false) then
+                local d = #(GetEntityCoords(ped) - mc)
+                if d < bd then best, bd = ped, d end
+            end
+            ok, ped = FindNextPed(handle)
+        end
+        EndFindPed(handle)
+    end
+    return best
+end
+
+-- Vente de rue (pickax_illegalbuilder) : nil = indisponible (le choix est masqué)
+function Providers.streetSell()
+    if GetResourceState('pickax_illegalbuilder') ~= 'started' then return nil end
+    local ok, on = pcall(function() return exports.pickax_illegalbuilder:StreetAvailable() end)
+    if not ok or not on then return nil end
+    local ped = nearest(false)
+    if not ped then return {} end
+    local ok2, items = pcall(function() return exports.pickax_illegalbuilder:StreetItems() end)
+    local out = {}
+    for _, it in ipairs(ok2 and items or {}) do
+        out[#out + 1] = { label = it.label, fn = function() exports.pickax_illegalbuilder:StreetSell(ped, it.item) end }
+    end
+    return out
+end
+
+-- Perquisition (police) : joueur le plus proche
+function Providers.seizure()
+    if GetResourceState('pickax_illegalbuilder') ~= 'started' then return nil end
+    local ok, on = pcall(function() return exports.pickax_illegalbuilder:SeizureAvailable() end)
+    if not ok or not on then return nil end
+    local ped = nearest(true)
+    if not ped then return {} end
+    return {
+        { label = 'Inspecter le suspect', fn = function() exports.pickax_illegalbuilder:Inspect(ped) end },
+        { label = 'Saisir drogue et argent sale', fn = function() exports.pickax_illegalbuilder:Seize(ped) end },
+    }
+end
+
 -- ───────── conversion de la config vers l'arbre envoyé à l'interface ─────────
 local function run(node)
     if node.fn then node.fn()
@@ -44,15 +100,19 @@ local function convert(list)
     local out = {}
     for _, node in ipairs(list) do
         local kids = node.children
+        local hidden = false
         if node.dynamic then
             local f = Providers[node.dynamic]
-            kids = f and f() or {}
-            if #kids == 0 then kids = { { label = node.empty or 'Aucun élément', disabled = true } } end
+            kids = f and f()
+            if kids == nil then hidden = true
+            elseif #kids == 0 then kids = { { label = node.empty or 'Aucun élément', disabled = true } } end
         end
+        if not hidden then
         local o = { label = node.label, icon = node.icon, disabled = node.disabled, checked = node.checked }
         if kids then o.children = convert(kids)
         elseif not node.disabled then actions[#actions + 1] = function() run(node) end o.k = #actions end
         out[#out + 1] = o
+        end
     end
     return out
 end

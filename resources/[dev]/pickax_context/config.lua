@@ -8,10 +8,12 @@ Config.OffsetPx = 70               -- décalage du menu à droite du personnage 
 -- Chaque entrée : label, icon (voir la liste dans html/script.js : phone, book, star, cart, briefcase, users, grid, target, list, tool, help, key, coins, game, car…)
 --   action : command = 'nom' (sans /)  |  event = 'nom' (événement client)  |  serverEvent = 'nom'  |  export = { 'ressource', 'fonction' }
 --   children = { … } : sous-menu (s'ouvre au survol, en cascade)
---   dynamic = 'weaponPlaces' | 'aimStyles' : sous-menu construit en jeu (armes de l'inventaire)
+--   dynamic = 'weaponPlaces' | 'aimStyles' | 'streetSell' | 'seizure' : sous-menu construit en jeu (armes, passant proche, joueur proche) ; masqué si indisponible
 Config.Menu = {
     { label = 'Emplacements des armes', icon = 'grid',   dynamic = 'weaponPlaces', empty = 'Aucune arme dans l\'inventaire' },
     { label = 'Style de visée',         icon = 'target', dynamic = 'aimStyles',    empty = 'Aucune arme avec un style de visée' },
+    { label = 'Vendre de la drogue',    icon = 'coins',  dynamic = 'streetSell',   empty = 'Aucun passant à proximité' },   -- visible seulement si la vente de rue est active
+    { label = 'Perquisition (drogue)',  icon = 'shield', dynamic = 'seizure',      empty = 'Aucun joueur à proximité' },    -- visible seulement pour la police
     { label = 'Mon téléphone',          icon = 'phone',  command = 'phone' },
     { label = 'Mon carnet',             icon = 'book',   command = 'carnet' },
     { label = 'Niveau et récompenses',  icon = 'star',   command = 'pickax_xp_ouvrir' },
