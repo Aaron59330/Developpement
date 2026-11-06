@@ -25,53 +25,57 @@ const P = {
 const ic = (n, cls) => `<svg viewBox="0 0 24 24"><path d="${P[n] || P.grid}"/></svg>`;
 let S = { menu: [], path: [], x: 0, y: 0, open: false };
 
-function panelEl(level) {
-  const items = level === 0 ? S.menu : itemsAt(level);
-  const el = document.createElement('div'); el.className = 'panel'; el.dataset.level = level;
+const ROW = 36, PAD = 5;
+const panels = [];
+function itemsAt(level) { let items = S.menu; for (let i = 0; i < level; i++) items = items[S.path[i]].children; return items; }
+
+function buildPanel(level) {
+  const items = itemsAt(level), el = document.createElement('div');
+  el.className = 'panel'; el.dataset.level = level;
   const hasIcons = items.some(i => i.icon);
   items.forEach((it, idx) => {
     const r = document.createElement('div');
-    r.className = 'row' + (it.disabled ? ' dis' : '') + (S.path[level] === idx ? ' on' : '');
-    r.innerHTML = (hasIcons ? (it.icon ? `<span class="ic">${ic(it.icon)}</span>` : '<span class="noic"></span>') : '<span class="noic"></span>')
+    r.className = 'row' + (it.disabled ? ' dis' : '');
+    r.innerHTML = (hasIcons && it.icon ? `<span class="ic">${ic(it.icon)}</span>` : '<span class="noic"></span>')
       + `<span class="lb">${esc(it.label)}</span>` + (it.children ? `<span class="chev">${ic('chev')}</span>` : it.checked ? `<span class="ck">${ic('check')}</span>` : '');
-    r.addEventListener('mouseenter', () => { if (it.disabled) return; setPath(level, it.children ? idx : null); });
-    r.addEventListener('click', () => { if (it.disabled || it.children) return; post('run', { k: it.k }); });
+    r.addEventListener('mouseenter', () => { if (!it.disabled) setPath(level, it.children ? idx : null); });
+    r.addEventListener('click', () => { if (!it.disabled && !it.children) post('run', { k: it.k }); });
     el.append(r);
   });
   return el;
 }
-function itemsAt(level) { let items = S.menu; for (let i = 0; i < level; i++) items = items[S.path[i]].children; return items; }
 
-function layout() {
-  $r.innerHTML = '';
-  const W = innerWidth, H = innerHeight;
-  let left = S.x * W + S.off, top = S.y * H - 70, prevRight = 0, rowTop = top;
-  for (let L = 0; L <= S.path.length; L++) {
-    if (L > 0 && S.path[L - 1] == null) break;
-    const el = panelEl(L); el.style.visibility = 'hidden'; $r.append(el);
-    const w = el.offsetWidth, h = el.offsetHeight;
-    let x = L === 0 ? left : prevRight + 4, y = L === 0 ? top : rowTop;
-    if (x + w > W - 8) x = Math.max(8, (L === 0 ? left : $r.children[L - 1].offsetLeft) - w - 4);   // pas de place à droite : on ouvre à gauche
-    if (y + h > H - 8) y = Math.max(8, H - 8 - h);
-    if (y < 8) y = 8;
-    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.visibility = 'visible';
-    prevRight = x + w;
-    const sel = S.path[L];
-    rowTop = sel != null ? y + 5 + sel * 36 - 5 : y;
-    if (L === S.path.length) break;
+// Ajoute un panneau sans toucher aux autres (pas de reconstruction : plus de clignotement)
+function addPanel(level) {
+  const el = buildPanel(level); el.style.visibility = 'hidden'; $r.append(el); panels[level] = el;
+  const W = innerWidth, H = innerHeight, w = el.offsetWidth, h = el.offsetHeight;
+  let x, y;
+  if (level === 0) { x = S.x * W + S.off; y = S.y * H - 70; }
+  else {
+    const prev = panels[level - 1];
+    x = prev.offsetLeft + prev.offsetWidth + 4; y = prev.offsetTop + S.path[level - 1] * ROW;
+    if (x + w > W - 8) x = Math.max(8, prev.offsetLeft - w - 4);
   }
+  if (level === 0 && x + w > W - 8) x = Math.max(8, S.x * W - S.off - w);
+  if (y + h > H - 8) y = Math.max(8, H - 8 - h);
+  if (y < 8) y = 8;
+  el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.visibility = 'visible';
 }
+function drawAll() { $r.innerHTML = ''; panels.length = 0; addPanel(0); for (let L = 1; L <= S.path.length; L++) addPanel(L); markOn(); }
+function markOn() { panels.forEach((p, L) => [...p.children].forEach((r, i) => r.classList.toggle('on', S.path[L] === i))); }
 function setPath(level, idx) {
-  const np = S.path.slice(0, level); if (idx != null) np.push(idx);
-  if (JSON.stringify(np) === JSON.stringify(S.path)) return;
-  S.path = np; layout();
+  if ((S.path[level] == null ? null : S.path[level]) === idx && S.path.length === level + (idx == null ? 0 : 1)) return;
+  while (panels.length > level + 1) panels.pop().remove();
+  S.path = S.path.slice(0, level);
+  if (idx != null) { S.path.push(idx); addPanel(level + 1); }
+  markOn();
 }
 addEventListener('mousedown', e => { if (!S.open) return; if (e.button === 2 || !e.target.closest('.panel')) post('close'); });
 addEventListener('contextmenu', e => e.preventDefault());
-addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') post('close'); if (e.key === 'Backspace') { if (S.path.length) { S.path.pop(); layout(); } else post('close'); } });
-addEventListener('resize', () => { if (S.open) layout(); });
+addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') post('close'); if (e.key === 'Backspace') { if (S.path.length) setPath(S.path.length - 1, null); else post('close'); } });
+addEventListener('resize', () => { if (S.open) drawAll(); });
 addEventListener('message', ev => {
   const m = ev.data || {};
-  if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 70, open: true }; $r.classList.remove('hidden'); layout(); }
-  else if (m.a === 'close') { S.open = false; $r.classList.add('hidden'); $r.innerHTML = ''; }
+  if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 70, open: true }; $r.classList.remove('hidden'); drawAll(); }
+  else if (m.a === 'close') { S.open = false; $r.classList.add('hidden'); $r.innerHTML = ''; panels.length = 0; }
 });

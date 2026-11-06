@@ -1,7 +1,7 @@
 Config = {}
 
 Config.Command = 'moi'             -- /moi ouvre le menu
-Config.Key = 'K'                   -- touche par défaut (modifiable par le joueur dans les paramètres FiveM) ; '' = aucune
+Config.Key = 'LMENU'               -- Alt gauche (modifiable par le joueur dans les paramètres FiveM) ; '' = aucune
 Config.OffsetPx = 70               -- décalage du menu à droite du personnage (pixels)
 
 -- ═════════════ LE MENU ═════════════

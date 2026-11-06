@@ -2,8 +2,8 @@
 html,body{height:100%;background:transparent;overflow:hidden;user-select:none;font-family:Poppins,'Segoe UI',system-ui,sans-serif}
 .hidden{display:none!important}
 #root{position:fixed;inset:0}
-.panel{position:absolute;min-width:250px;max-width:420px;padding:5px;background:rgba(8,8,9,.97);border-radius:3px;color:#f2f2f3;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:in .08s ease-out}
-@keyframes in{from{opacity:0;transform:translateX(-4px)}}
+.panel{position:absolute;min-width:250px;max-width:420px;padding:5px;background:rgba(8,8,9,.97);border-radius:3px;color:#f2f2f3;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:in .07s linear}
+@keyframes in{from{opacity:0}}
 .row{display:flex;align-items:center;gap:12px;height:36px;padding:0 12px 0 14px;border-radius:3px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;position:relative;border:1px solid transparent}
 .row .ic{width:18px;height:18px;flex:none;display:grid;place-items:center;color:rgba(255,255,255,.9)}
 .row .ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
