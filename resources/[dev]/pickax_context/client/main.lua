@@ -7,7 +7,8 @@ local aim = { x = 0.5, y = 0.5 }
 local armed = true              -- le survol du personnage rouvre le menu seulement après être sorti de lui
 local openedAt = 0
 local menuSelf = false
-local lastAim = 0
+local moved = false              -- le curseur a bougé depuis l'appui sur la touche
+local selfSince = 0             -- depuis quand le curseur est sur le personnage
 
 local function notify(msg) TriggerEvent('esx:showNotification', msg) end
 
@@ -34,6 +35,19 @@ local function isSelf(ent)
     if ent == ped then return true end
     local veh = GetVehiclePedIsIn(ped, false)
     return veh ~= 0 and ent == veh
+end
+
+-- Curseur sur le personnage, mesuré sur l'écran (silhouette tête-pieds) : marche aussi en noclip / invisible, où le rayon ne touche rien
+local function overSelf(x, y)
+    local ped = PlayerPedId()
+    local c = GetEntityCoords(ped)
+    local ok1, hx, hy = GetScreenCoordFromWorldCoord(c.x, c.y, c.z + 0.9)
+    local ok2, fx, fy = GetScreenCoordFromWorldCoord(c.x, c.y, c.z - 0.95)
+    if not (ok1 and ok2) then return false end
+    local h = math.abs(fy - hy)
+    local halfW = h * 0.30 / GetAspectRatio(false)
+    local cx, cy = (hx + fx) / 2, (hy + fy) / 2
+    return math.abs(x - cx) <= halfW + 0.01 and math.abs(y - cy) <= h / 2 + 0.01
 end
 
 -- ───────── personnage semi-transparent pendant que le menu « Moi » est ouvert ─────────
@@ -85,7 +99,8 @@ end
 local function startCursor()
     if mode ~= 'idle' or IsPauseMenuActive() or IsNuiFocused() then return end
     if IsEntityDead(PlayerPedId()) then return end
-    mode, holdOpen, armed = 'cursor', true, true
+    mode, holdOpen, armed = 'cursor', true, false
+    moved, selfSince = false, 0          -- rien ne s'ouvre tant que le curseur n'a pas bougé et n'est pas posé sur le personnage
     openedAt = GetGameTimer()
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)      -- le clavier reste au jeu : on peut avancer, courir, conduire pendant que le curseur est libre
@@ -96,13 +111,20 @@ end
 CreateThread(function()
     while true do
         if mode == 'cursor' then
-            local ent, coords = rayAt(aim.x, aim.y, 25.0)
-            if ent and isSelf(ent) then
-                if armed then
+            local onMe = false
+            if moved then
+                onMe = overSelf(aim.x, aim.y)
+                if not onMe then local ent = rayAt(aim.x, aim.y, 25.0) onMe = ent ~= nil and isSelf(ent) end
+            end
+            if onMe then
+                if selfSince == 0 then selfSince = GetGameTimer() end
+                -- il faut rester un court instant sur le personnage (évite les ouvertures en passant dessus)
+                if armed and GetGameTimer() - selfSince >= (C.HoverMs or 150) then
                     if openFor(PlayerPedId(), GetEntityCoords(PlayerPedId()), true, aim.x, aim.y) then armed = false end
                 end
             else
-                armed = true
+                selfSince = 0
+                if moved then armed = true end
             end
             Wait(50)
         else Wait(200) end
@@ -141,6 +163,7 @@ RegisterNUICallback('close', function(_, cb) cb(1) stopAll() end)
 RegisterNUICallback('aim', function(d, cb)
     cb(1)
     aim.x, aim.y = tonumber(d and d.x) or 0.5, tonumber(d and d.y) or 0.5
+    if mode == 'cursor' and GetGameTimer() - openedAt > 150 then moved = true end
 end)
 -- clic sur le décor : menu de l'élément cliqué (véhicule, joueur, passant, objet…) ; rien : environnement
 RegisterNUICallback('click', function(d, cb)
