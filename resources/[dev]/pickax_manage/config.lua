@@ -2,7 +2,7 @@ Config = {}
 
 -- ═════════════════════════════ GÉNÉRAL ═══════════════════════
 Config.Command = 'gestion'                      -- commande qui ouvre le menu
-Config.Key = 'F10'                              -- touche par défaut (modifiable par le joueur dans les paramètres FiveM) ; '' = aucune
+Config.Key = 'F9'                               -- touche par défaut (modifiable par le joueur dans les paramètres FiveM) ; '' = aucune
 Config.AdminGroups = { 'admin', 'superadmin', 'owner' }   -- groupes ESX autorisés
 Config.StaffGroups = { 'mod', 'admin', 'superadmin', 'owner' }  -- comptés comme « staff en service »
 Config.Ace = 'pickax.manage'                    -- ou droit ACE
