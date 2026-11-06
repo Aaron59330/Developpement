@@ -2,6 +2,7 @@ Config = {}
 
 Config.Command = 'moi'             -- /moi ouvre le menu
 Config.Key = 'LMENU'               -- Alt gauche (modifiable par le joueur dans les paramètres FiveM) ; '' = aucune
+Config.HoldToShow = true           -- true : le menu reste affiché tant que la touche est maintenue (relâcher = fermer) ; false : appui = ouvrir / fermer
 Config.OffsetPx = 70               -- décalage du menu à droite du personnage (pixels)
 
 -- ═════════════ LE MENU ═════════════

@@ -118,9 +118,12 @@ local function convert(list)
 end
 
 -- ───────── ouverture / fermeture ─────────
+local openedAt = 0
+
 local function close()
     if not open then return end
     open = false
+    SetNuiFocusKeepInput(false)
     SetNuiFocus(false, false)
     SendNUIMessage({ a = 'close' })
 end
@@ -134,12 +137,26 @@ local function openMenu()
     local c = GetEntityCoords(ped)
     local on, x, y = GetScreenCoordFromWorldCoord(c.x, c.y, c.z + 0.3)
     open = true
+    openedAt = GetGameTimer()
     SetNuiFocus(true, true)
-    SendNUIMessage({ a = 'open', menu = tree, x = on and x or 0.5, y = on and y or 0.5, offset = C.OffsetPx })
+    -- le jeu continue de recevoir le clavier : on peut avancer, courir, conduire… pendant que le menu est ouvert
+    SetNuiFocusKeepInput(true)
+    SendNUIMessage({ a = 'open', menu = tree, x = on and x or 0.5, y = on and y or 0.5, offset = C.OffsetPx, hold = C.HoldToShow == true })
 end
 
-RegisterCommand(C.Command, openMenu, false)
-if C.Key and C.Key ~= '' then RegisterKeyMapping(C.Command, 'Menu contextuel (moi)', 'keyboard', C.Key) end
+if C.HoldToShow then
+    -- maintenir la touche : le menu reste affiché ; relâcher la ferme
+    RegisterCommand('+pickax_context', function() if not open then openMenu() end end, false)
+    RegisterCommand('-pickax_context', function()
+        -- ignore le « relâchement » parasite émis quand l'interface prend le focus
+        if open and GetGameTimer() - openedAt > 250 then close() end
+    end, false)
+    if C.Key and C.Key ~= '' then RegisterKeyMapping('+pickax_context', 'Menu contextuel (maintenir)', 'keyboard', C.Key) end
+    RegisterCommand(C.Command, function() if open then close() else openMenu() end end, false)   -- /moi : ouvre / ferme (sans maintenir)
+else
+    RegisterCommand(C.Command, function() if open then close() else openMenu() end end, false)
+    if C.Key and C.Key ~= '' then RegisterKeyMapping(C.Command, 'Menu contextuel (moi)', 'keyboard', C.Key) end
+end
 exports('Open', openMenu)
 exports('Close', close)
 
@@ -151,5 +168,13 @@ RegisterNUICallback('run', function(d, cb)
     if f then CreateThread(function() Wait(60) pcall(f) end) end
 end)
 
-CreateThread(function() while true do if open then DisableControlAction(0, 1, true) DisableControlAction(0, 2, true) DisableControlAction(0, 24, true) DisableControlAction(0, 25, true) Wait(0) else Wait(400) end end end)
-AddEventHandler('onResourceStop', function(r) if r == GetCurrentResourceName() and open then SetNuiFocus(false, false) end end)
+-- La souris sert à viser le menu : pas de caméra, de tir ni de changement d'arme. Les déplacements (ZQSD, course, saut, conduite) restent actifs.
+CreateThread(function()
+    while true do
+        if open then
+            for _, c in ipairs({ 1, 2, 14, 15, 16, 17, 24, 25, 37, 44, 45, 68, 69, 70, 91, 92, 140, 141, 142, 257, 263, 264 }) do DisableControlAction(0, c, true) end
+            Wait(0)
+        else Wait(400) end
+    end
+end)
+AddEventHandler('onResourceStop', function(r) if r == GetCurrentResourceName() and open then SetNuiFocusKeepInput(false) SetNuiFocus(false, false) end end)

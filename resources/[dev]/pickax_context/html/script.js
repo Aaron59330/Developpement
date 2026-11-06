@@ -76,12 +76,13 @@ addEventListener('mousemove', e => {
   const pr = p.getBoundingClientRect(); p.style.setProperty('--px', (e.clientX - pr.left) + 'px'); p.style.setProperty('--py', (e.clientY - pr.top) + 'px');
   const r = e.target.closest('.row'); if (r) { const rr = r.getBoundingClientRect(); r.style.setProperty('--mx', (e.clientX - rr.left) + 'px'); r.style.setProperty('--my', (e.clientY - rr.top) + 'px'); }
 });
-addEventListener('mousedown', e => { if (!S.open) return; if (e.button === 2 || !e.target.closest('.panel')) post('close'); });
+// en mode « maintenir » on ne ferme pas en cliquant à côté (c'est le relâchement de la touche qui ferme)
+addEventListener('mousedown', e => { if (!S.open) return; if (e.button === 2 || (!S.hold && !e.target.closest('.panel'))) post('close'); });
 addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') post('close'); if (e.key === 'Backspace') { if (S.path.length) setPath(S.path.length - 1, null); else post('close'); } });
 addEventListener('resize', () => { if (S.open) drawAll(); });
 addEventListener('message', ev => {
   const m = ev.data || {};
-  if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 70, open: true }; $r.classList.remove('hidden'); drawAll(); }
+  if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 70, hold: m.hold === true, open: true }; $r.classList.remove('hidden'); drawAll(); }
   else if (m.a === 'close') { S.open = false; $r.classList.add('hidden'); $r.innerHTML = ''; panels.length = 0; }
 });
