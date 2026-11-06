@@ -15,7 +15,7 @@ Config.Server = {
     License = 'Licence à vie',
     Logo = '',                                  -- lien https:// ou fichier dans pickax_theme/logo/ ; vide = logo du thème du serveur
 }
-Config.Accent = '#25d99a'                       -- couleur principale du menu (vert menthe). '' = couleur du thème du serveur
+Config.Accent = '#3566a6'                       -- couleur principale du menu (bleu du panel). '' = couleur du thème du serveur
 Config.RefreshSec = 5                           -- actualisation des chiffres en direct
 Config.JournalMax = 60
 
