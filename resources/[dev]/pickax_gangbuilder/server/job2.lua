@@ -171,15 +171,27 @@ function GB.nameConflict(name)
 end
 
 -- Recharge la liste des jobs2 dans es_extended. Retourne true si une fonction / un event spécifique à job2 a été appelé.
+-- Les fonctions d'ES reçues via getSharedObject sont des références de fonction : type() renvoie « table » (appelable), pas « function ».
+local function callable(v)
+    if type(v) == 'function' then return true end
+    local mt = type(v) == 'table' and getmetatable(v) or nil
+    return mt ~= nil and mt.__call ~= nil
+end
+GB.isCallable = callable
+
 local warned = false
 function GB.refreshJob2()
     local called = false
     for _, fn in ipairs(J.RefreshFunctions or {}) do
-        if type(ESX[fn]) == 'function' then
+        if callable(ESX[fn]) then
             local ok, err = pcall(ESX[fn])
             if not ok then print(('^1[gangbuilder] ESX.%s a échoué : %s^0'):format(fn, tostring(err))) end
             if fn:find('2') then called = called or ok end
         end
+    end
+    if not called and GetResourceState('es_extended') == 'started' then   -- repli : export officiel d'es_extended
+        local ok = pcall(function() return exports['es_extended']:refreshJobs2() end)
+        if ok then called = true end
     end
     for _, ev in ipairs(J.RefreshEvents or {}) do TriggerEvent(ev) called = true end
     if type(J.Refresh) == 'function' then

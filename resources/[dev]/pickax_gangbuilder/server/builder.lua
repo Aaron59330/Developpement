@@ -511,7 +511,7 @@ local function runCheck()
 
     -- job2 côté es_extended
     local refresh = {}
-    for _, fn in ipairs(J.RefreshFunctions or {}) do if type(ESX[fn]) == 'function' then refresh[#refresh + 1] = 'ESX.' .. fn end end
+    for _, fn in ipairs(J.RefreshFunctions or {}) do if GB.isCallable(ESX[fn]) then refresh[#refresh + 1] = 'ESX.' .. fn end end
     if #refresh > 0 then ok('rechargement ES disponible : ' .. table.concat(refresh, ', ')) else warn('aucune fonction de rechargement job2 dans ES (' .. table.concat(J.RefreshFunctions or {}, ', ') .. ') : restart nécessaire après création d\'un gang, ou renseigne Config.Job2.Refresh') end
     local first = GetPlayers()[1]
     if first then
