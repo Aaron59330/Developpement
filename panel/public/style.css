@@ -91,3 +91,15 @@ tr:last-child td{border-bottom:0}tbody tr:hover td{background:#171a21}
 .hint{font-size:13px;color:var(--muted);margin-bottom:14px;max-width:640px}
 .vote{min-width:64px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}.side{position:static;height:auto}.main{padding:18px 14px 50px}}
+.drop{display:grid;place-items:center;gap:6px;text-align:center;padding:26px;border:1.5px dashed #3d4052;border-radius:12px;background:#12131b;color:var(--muted);cursor:pointer;transition:border-color .12s,background .12s}
+.drop:hover,.drop.over{border-color:var(--blue);background:rgba(53,102,166,.08);color:#fff}
+.drop img{max-width:140px;max-height:140px;border-radius:8px;object-fit:contain}
+.drop small{color:var(--subtle)}
+.colorrow{display:flex;gap:12px;align-items:center}
+.colorrow input[type=color]{width:52px;height:42px;padding:3px;border-radius:8px;cursor:pointer}
+.colorrow input[type=text]{width:130px;font-family:ui-monospace,Menlo,monospace}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.15);cursor:pointer}
+.prev{display:flex;align-items:center;gap:14px;padding:16px;border-radius:10px;background:#12131b;border:1px solid var(--card-line);margin-top:10px}
+.prev img{width:44px;height:44px;object-fit:contain}
+.prev .pbtn{padding:9px 16px;border-radius:8px;color:#10111a;font-weight:700;font-size:13px}

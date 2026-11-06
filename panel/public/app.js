@@ -40,7 +40,7 @@ const brand = big => el('div', { class: 'brand' + (big ? ' big' : '') }, el('img
 
 // ───────── menu par catégories ─────────
 const MENU = (admin) => [
-  { sec: 'Mon espace', items: [['home', 'Accueil'], ['shop', 'Boutique'], ['orders', 'Mes commandes'], ['licenses', 'Mes licences']] },
+  { sec: 'Mon espace', items: [['home', 'Accueil'], ['shop', 'Boutique'], ['orders', 'Mes commandes'], ['licenses', 'Mes licences'], ['custom', 'Personnalisation']] },
   { sec: 'Aide', items: [['support', 'Aide et support'], ['suggestions', 'Suggestions'], ['patchnotes', 'Patch notes']] },
   { sec: 'Compte', items: [['account', 'Paramètres du compte']] },
   ...(admin ? [{ sec: 'Administration', items: [['a_overview', 'Vue d’ensemble'], ['a_orders', 'Commandes'], ['a_clients', 'Clients'], ['a_licenses', 'Licences'], ['a_plans', 'Offres'], ['a_modules', 'Modules'], ['a_shop', 'Réglages boutique'], ['a_audit', 'Journal']] }] : []),
@@ -107,6 +107,40 @@ const PAGES = {
     const r = await api('GET', '/me/licenses');
     return el('div', {}, head('Mes licences'), table(['Serveur', 'Clé', 'Offre', 'Statut', 'Expire', ''], (r.licenses || []).map(l => el('tr', {}, el('td', {}, l.server_name), el('td', { class: 'mono' }, l.key), el('td', {}, l.plan || '—'), el('td', {}, stPill(l.status)), el('td', {}, l.expires_at ? fmtDay(l.expires_at) : 'À vie'),
       el('td', {}, el('button', { class: 'btn s', onclick: () => copy(l.key) }, 'Copier'))))));
+  },
+  async custom() {
+    const l = await api('GET', '/me/licenses'); const lics = l.licenses || [];
+    if (!lics.length) return el('div', {}, head('Personnalisation'), el('section', { class: 'card empty' }, el('h2', {}, 'Pas encore de licence'), el('p', { class: 'muted' }, 'La personnalisation s’applique à ton serveur : prends d’abord une licence.'), el('a', { class: 'btn p', href: '#/shop' }, el('span', {}, 'Voir la boutique'))));
+    const cur = lics.find(x => String(x.id) === String(state.arg)) || lics[0];
+    const t = (await api('GET', '/theme/' + cur.id)).theme || {};
+    let accent = t.accent || '#fdc27d', pending = null;
+    const prev = el('div', { class: 'prev' }), drop = el('div', { class: 'drop', tabindex: 0 }), file = el('input', { type: 'file', accept: 'image/png,image/jpeg', style: 'display:none' });
+    const hex = el('input', { type: 'text', value: accent, maxlength: 7 }), pick = el('input', { type: 'color', value: accent });
+    const drawPrev = () => { prev.replaceChildren(pending || t.has_logo ? el('img', { src: pending || ('/api/theme/' + cur.id + '/logo?v=' + t.version) }) : null, el('span', { class: 'pbtn', style: 'background:' + accent }, 'Aperçu du bouton')); };
+    const drawDrop = () => { drop.replaceChildren(pending || t.has_logo ? el('img', { src: pending || ('/api/theme/' + cur.id + '/logo?v=' + t.version) }) : null, el('b', {}, pending || t.has_logo ? 'Glisse une autre image pour la remplacer' : 'Glisse ton logo ici'), el('small', {}, '.png ou .jpg · 2 Mo maximum · clique pour choisir un fichier')); };
+    const setColor = c => { if (!/^#[0-9a-fA-F]{6}$/.test(c)) return; accent = c.toLowerCase(); hex.value = accent; pick.value = accent; drawPrev(); };
+    pick.oninput = () => setColor(pick.value); hex.oninput = () => setColor(hex.value);
+    const take = f => {
+      if (!f) return; if (!/^image\/(png|jpeg)$/.test(f.type)) return toast('Image .png ou .jpg uniquement', 'bad'); if (f.size > 2 * 1024 * 1024) return toast('Image trop lourde (2 Mo maximum)', 'bad');
+      const r = new FileReader(); r.onload = () => { pending = r.result; drawDrop(); drawPrev(); }; r.readAsDataURL(f);
+    };
+    drop.onclick = () => file.click(); file.onchange = () => take(file.files[0]);
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); take(e.dataTransfer.files[0]); };
+    const save = async () => {
+      let r = await api('PUT', '/theme/' + cur.id, { accent }); if (!r.ok) return toast(r.error, 'bad');
+      if (pending) { r = await api('POST', `/theme/${cur.id}/logo`, { data: pending }); if (!r.ok) return toast(r.error, 'bad'); }
+      toast('Enregistré : appliqué sur ton serveur d’ici une minute', 'ok'); go('custom', cur.id);
+    };
+    setColor(accent); drawDrop();
+    return el('div', {}, head('Personnalisation', lics.length > 1 ? el('select', { style: 'width:auto', onchange: e => go('custom', e.target.value) }, lics.map(x => el('option', { value: x.id, selected: x.id === cur.id }, x.server_name))) : null),
+      el('p', { class: 'hint' }, 'Couleur principale et logo de ton serveur. Ils s’appliquent à toutes les interfaces en jeu.'),
+      el('div', { class: 'grid', style: 'grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start' },
+        el('div', { class: 'card' }, el('h2', {}, 'Couleur principale'), el('div', { class: 'colorrow', style: 'margin-top:12px' }, pick, hex),
+          el('div', { class: 'swatches' }, ['#fdc27d', '#3566a6', '#00a4ff', '#45d5a0', '#ff747e', '#b388ff', '#ff9f43', '#e84393'].map(c => el('span', { class: 'sw', style: 'background:' + c, title: c, onclick: () => setColor(c) })))),
+        el('div', { class: 'card' }, el('h2', {}, 'Logo principal'), el('div', { style: 'margin-top:12px' }, drop, file),
+          t.has_logo ? el('button', { class: 'btn s d', style: 'margin-top:10px', onclick: async () => { await api('DELETE', `/theme/${cur.id}/logo`); go('custom', cur.id); } }, 'Retirer le logo') : null)),
+      prev, el('button', { class: 'btn p', onclick: save }, el('span', {}, 'Enregistrer')));
   },
   // ── Aide ──
   async support() {
