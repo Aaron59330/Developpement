@@ -69,3 +69,36 @@ Config.Categories = {
         { title = 'Interacts',         desc = 'Pastilles d\'interaction : image, couleur, règles', icon = 'hand' },
     } },
 }
+
+-- ═════════════════════════════ BUILDERS ══════════════════════
+-- group = 'builders' : rangées dans la section « Builders » de la vue d'ensemble. Chaque carte lance la commande du builder (cf. Config.Command de chaque ressource).
+local function builder(id, title, icon, sub, command, extra)
+    local cards = { { title = 'Ouvrir le ' .. title, desc = 'Lance l\'éditeur en jeu (/' .. command .. ')', icon = icon, action = { command = command } } }
+    for _, e in ipairs(extra or {}) do cards[#cards + 1] = e end
+    return { id = id, group = 'builders', title = title, tone = 'white', icon = icon, sub = sub, cards = cards }
+end
+local more = {
+    builder('b_hub',     'Panel des builders', 'layers',   'Tous les builders au même endroit', 'builders'),
+    builder('b_world',   'World Builder',      'globe',    'Monde : zones, PNJ, portes, ascenseurs, quêtes, PVP', 'worldbuilder', {
+        { title = 'Doorlock', desc = 'Verrouiller / déverrouiller la porte proche', icon = 'lock', action = { command = 'wbdoor' } },
+        { title = 'PVP',      desc = 'Zones et événements PVP', icon = 'target', action = { command = 'wbpvp' } },
+    }),
+    builder('b_job',     'Job Builder',        'briefcase', 'Métiers, grades, actions, véhicules, propriétés', 'jobbuilder', {
+        { title = 'Menu métier', desc = 'Actions et facturation (F6)', icon = 'list', action = { command = 'jobmenu' } },
+        { title = 'Décorer',     desc = 'Meubles et déco des propriétés', icon = 'building', action = { command = 'decorer' } },
+    }),
+    builder('b_gang',    'Gang Builder',       'users',    'Gangs, territoires, guerres, tablette', 'gangbuilder', {
+        { title = 'Menu du gang', desc = 'Actions et infos du gang', icon = 'list', action = { command = 'gangmenu' } },
+        { title = 'Tablette',     desc = 'Tablette de gang', icon = 'image', action = { command = 'gangtablet' } },
+    }),
+    builder('b_illegal', 'Illegal Builder',    'skull',    'Drogues, armes, marché noir, contrats', 'illegalbuilder', {
+        { title = 'Marché noir', desc = 'Stocks et prix du marché noir', icon = 'coins', action = { command = 'marchenoir' } },
+        { title = 'Contrats',    desc = 'Contrats de livraison', icon = 'list', action = { command = 'contrat' } },
+    }),
+    builder('b_shop',    'Shop Builder',       'cart',     'Boutiques, catalogues, concessions', 'shopbuilder'),
+    builder('b_event',   'Event Builder',      'calendar', 'Événements du serveur', 'eventbuilder'),
+    builder('b_mini',    'Mini-jeux Builder',  'game',     'Mini-jeux, défis, classements', 'minigames', {
+        { title = 'Profil', desc = 'Niveau, défis, succès, classements', icon = 'user', action = { command = 'mgprofil' } },
+    }),
+}
+for _, c in ipairs(more) do Config.Categories[#Config.Categories + 1] = c end

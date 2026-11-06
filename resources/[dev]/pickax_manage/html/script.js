@@ -3,6 +3,7 @@ const $r = document.getElementById('root');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const post = (n, b) => { try { return fetch('https://pickax_manage/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then(r => r.json()).catch(() => ({})); } catch (e) { return Promise.resolve({}); } };
 const P = {
+  tool: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-3 3-2-2z', cart: 'M3 4h3l2 12h11l2-8H7M9 20h.01M18 20h.01', calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4', game: 'M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-2a4 4 0 0 1 4-4zM8 11v4M6 13h4', layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
   server: 'M3 5h18v6H3zM3 13h18v6H3zM7 8h.01M7 16h.01', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', megaphone: 'M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8',
   refresh: 'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5', shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z', save: 'M5 3h12l4 4v14H3V3zM7 3v6h8V3M7 21v-7h10v7', heart: 'M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z',
   brush: 'M18 3l3 3-9 9-3-3zM9 12c-3 0-4 2-4 4s-1 3-2 4c3 1 8 0 8-4', palette: 'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2H18a3 3 0 0 0 3-3c0-5-4-11-9-11zM7.5 11h.01M10 7.5h.01M15 7.5h.01',
@@ -27,8 +28,9 @@ const toast = t => { const e = document.createElement('div'); e.className = 'toa
 
 function overview() {
   const st = S.d.stats, sv = S.server, pc = st.max ? Math.round(st.players / st.max * 100) : 0, tot = st.res.active + st.res.error + st.res.stopped || 1;
-  const cats = S.cats.map(c => { const t = c.cards.slice(0, 2).map(x => `<span>${esc(x.title)}</span>`).join('') + (c.cards.length > 2 ? `<span>+${c.cards.length - 2}</span>` : '');
-    return `<button class="card cat tone-${c.tone} ${c.wide ? 'c-wide' : 'c-std'}" data-cat="${c.id}"><div><h3>${esc(c.title)}</h3><p>${esc(c.sub || '')}</p></div><div class="tags">${t}</div><span class="ic">${ic(c.icon)}</span></button>`; }).join('');
+  const card = c => { const t = c.cards.slice(0, 2).map(x => `<span>${esc(x.title)}</span>`).join('') + (c.cards.length > 2 ? `<span>+${c.cards.length - 2}</span>` : '');
+    return `<button class="card cat tone-${c.tone} ${c.wide ? 'c-wide' : 'c-std'}" data-cat="${c.id}"><div><h3>${esc(c.title)}</h3><p>${esc(c.sub || '')}</p></div><div class="tags">${t}</div><span class="ic">${ic(c.icon)}</span></button>`; };
+  const cats = S.cats.filter(c => !c.group).map(card).join(''), bld = S.cats.filter(c => c.group === 'builders').map(card).join('');
   const log = S.d.journal.length ? `<div class="log">${S.d.journal.slice(0, 20).map(j => `<div><time>${hm(new Date(j.t * 1000))}</time><b>${esc(j.who)}</b><span>${esc(j.text)}</span></div>`).join('')}</div>` : `<div class="empty">${ic('hist').replace('<svg', '<svg style="width:14px;height:14px;display:block;margin:0 auto 4px"')}Rien d’enregistré depuis l’ouverture.</div>`;
   return `<div class="hd"><div class="grow"><h1>Vue d’ensemble</h1><p>Le serveur en direct, et tous ses réglages</p></div><button class="btn dark" data-refresh>${ic('refresh')} Actualiser</button></div>
   <div class="grid">
@@ -40,6 +42,7 @@ function overview() {
       <div class="leg"><span><b></b>${st.res.active} actives</span><span><b class="e"></b>${st.res.error} erreur</span><span><b class="s"></b>${st.res.stopped} arrêtées</span></div></section>
     <div class="sec"><b>Catégories</b><span>Une famille de réglages par carte</span></div>
     ${cats}
+    ${bld ? `<div class="sec"><b>Builders</b><span>Un builder par carte : un clic ouvre l’éditeur</span></div>${bld}` : ''}
     <section class="card sess"><div class="hdr"><span>Cette session <kbd>${S.d.journal.length}</kbd></span><a data-j>Journal complet →</a></div>${log}</section>
   </div>`;
 }
