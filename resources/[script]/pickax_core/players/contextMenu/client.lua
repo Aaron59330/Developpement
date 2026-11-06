@@ -136,6 +136,24 @@ exports('ContextBuildTarget', function(entity, coords)
     CtxActions = {}
     local okp, errp = pcall(ctxPrepare)
     if not okp then print(('^1[contextMenu] préparation : %s^0'):format(tostring(errp))) end
+    -- En noclip, comme avant : le menu ne propose que la case « No-Clip » (cochée) pour le désactiver
+    if noclip then
+        local it = { label = ButtonContextMenu.NoClipItem or 'No-Clip', checkbox = true, checked = true }
+        it.OnClick = function()
+            CheckboxApuyer = false
+            noclip = false
+            local ped = PlayerPedId()
+            FreezeEntityPosition(ped, false)
+            SetEntityInvincible(ped, false)
+            SetEntityCollision(ped, true, true)
+            SetEntityVisible(ped, true, false)
+            SetEveryoneIgnorePlayer(PlayerId(), false)
+            SetPoliceIgnorePlayer(PlayerId(), false)
+            ESX.ShowNotification(NotificationContextMenu.NoclipOFF)
+        end
+        CtxActions[#CtxActions + 1] = it
+        return { { label = it.label, box = true, checked = true, k = #CtxActions } }
+    end
     if entity and not DoesEntityExist(entity) then entity = nil end
     return buildFor(entity, coords or GetEntityCoords(PlayerPedId()), entity == PlayerPedId() and 'moi' or 'cible')
 end)
