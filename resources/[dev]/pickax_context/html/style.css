@@ -2,7 +2,8 @@
 html,body{height:100%;background:transparent;overflow:hidden;user-select:none;font-family:Poppins,'Segoe UI',system-ui,sans-serif}
 .hidden{display:none!important}
 #root{position:fixed;inset:0}
-.panel{position:absolute;min-width:250px;max-width:420px;padding:5px;background:rgba(8,8,9,.97);border-radius:3px;color:#f2f2f3;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:in .07s linear}
+.panel{position:absolute;min-width:250px;max-width:420px;padding:5px;background:rgba(8,8,9,.97);border-radius:3px;color:#f2f2f3;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:in .07s linear;max-height:calc(100vh - 16px);overflow-y:auto;scrollbar-width:none}
+.panel::-webkit-scrollbar{display:none}
 @keyframes in{from{opacity:0}}
 .row{display:flex;align-items:center;gap:12px;height:36px;padding:0 12px 0 14px;border-radius:3px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;position:relative;border:1px solid transparent}
 .row .ic{width:18px;height:18px;flex:none;display:grid;place-items:center;color:rgba(255,255,255,.9)}
@@ -16,3 +17,9 @@ html,body{height:100%;background:transparent;overflow:hidden;user-select:none;fo
 .row{z-index:1}
 .row:hover,.row.on{background:radial-gradient(120px circle at var(--mx,30%) var(--my,50%),rgba(255,255,255,.22),rgba(255,255,255,0) 72%),linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.045));border-top-color:rgba(255,255,255,.16);border-bottom-color:rgba(255,255,255,.04);box-shadow:0 0 14px rgba(255,255,255,.05)}
 .row.dis{opacity:.4;cursor:default}.row.dis:hover{background:none;border-color:transparent}
+
+.sep{height:1px;margin:4px 8px;background:rgba(255,255,255,.1)}
+.row .rt{font-size:11px;opacity:.75}
+.row .bx{width:15px;height:15px;flex:none;border:1.5px solid rgba(255,255,255,.55);border-radius:3px;display:grid;place-items:center}
+.row .bx svg{width:11px;height:11px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.row .bx.on{background:rgba(255,255,255,.22);border-color:#fff}

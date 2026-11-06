@@ -1,7 +1,20 @@
 'use strict';
 const $r = document.getElementById('root');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const post = (n, b) => { try { fetch('https://pickax_context/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }); } catch (e) {} };
+const post = (n, b) => { try { return fetch('https://pickax_context/' + n, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then(r => r.json()).catch(() => ({})); } catch (e) { return Promise.resolve({}); } };
+// codes couleur GTA (~r~ ~g~ ~b~ ~y~ ~o~ ~p~ ~w~ ~s~ ~n~ …) -> texte coloré
+const COL = { r: '#ff6b6b', g: '#5ee08a', b: '#6db3ff', y: '#ffd95a', o: '#ffa24d', p: '#c792ff', c: '#a8a8a8', m: '#7a7a7a', w: '', s: '' };
+function colorize(t) {
+  let out = '', cur = '', open = false;
+  String(t == null ? '' : t).split(/(~[A-Za-z_0-9]+~)/).forEach(part => {
+    const m = part.match(/^~([A-Za-z_0-9]+)~$/);
+    if (!m) { out += esc(part); return; }
+    const c = m[1];
+    if (c === 'n') { out += ' '; return; }
+    if (c in COL) { if (open) { out += '</span>'; open = false; } if (COL[c]) { out += `<span style="color:${COL[c]}">`; open = true; } }
+  });
+  return out + (open ? '</span>' : '');
+}
 const P = {
   phone: 'M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM11 18h2',
   book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',
@@ -35,11 +48,19 @@ function buildPanel(level) {
   const hasIcons = items.some(i => i.icon);
   items.forEach((it, idx) => {
     const r = document.createElement('div');
+    if (it.sep) { r.className = 'sep'; el.append(r); return; }
     r.className = 'row' + (it.disabled ? ' dis' : '');
-    r.innerHTML = (hasIcons && it.icon ? `<span class="ic">${ic(it.icon)}</span>` : '<span class="noic"></span>')
-      + `<span class="lb">${esc(it.label)}</span>` + (it.children ? `<span class="chev">${ic('chev')}</span>` : it.checked ? `<span class="ck">${ic('check')}</span>` : '');
+    r.innerHTML = (hasIcons ? (it.icon ? `<span class="ic">${ic(it.icon)}</span>` : '<span class="noic"></span>') : '')
+      + (it.box ? `<span class="bx${it.checked ? ' on' : ''}">${it.checked ? ic('check') : ''}</span>` : '')
+      + `<span class="lb">${colorize(it.label)}</span>` + (it.right ? `<span class="rt">${colorize(it.right)}</span>` : '')
+      + (it.children ? `<span class="chev">${ic('chev')}</span>` : (!it.box && it.checked ? `<span class="ck">${ic('check')}</span>` : ''));
     r.addEventListener('mouseenter', () => { if (!it.disabled) setPath(level, it.children ? idx : null); });
-    r.addEventListener('click', () => { if (!it.disabled && !it.children) post('run', { k: it.k }); });
+    r.addEventListener('click', () => {
+      if (it.disabled || it.children || it.k == null) return;
+      post('run', { k: it.k }).then(res => {
+        if (res && typeof res.checked === 'boolean' && it.box) { it.checked = res.checked; const b = r.querySelector('.bx'); if (b) { b.classList.toggle('on', res.checked); b.innerHTML = res.checked ? ic('check') : ''; } }
+      });
+    });
     el.append(r);
   });
   return el;
@@ -53,7 +74,7 @@ function addPanel(level) {
   if (level === 0) { x = S.x * W + S.off; y = S.y * H - 70; }
   else {
     const prev = panels[level - 1];
-    x = prev.offsetLeft + prev.offsetWidth + 4; y = prev.offsetTop + S.path[level - 1] * ROW;
+    x = prev.offsetLeft + prev.offsetWidth + 4; y = prev.offsetTop + prev.children[S.path[level - 1]].offsetTop - PAD;
     if (x + w > W - 8) x = Math.max(8, prev.offsetLeft - w - 4);
   }
   if (level === 0 && x + w > W - 8) x = Math.max(8, S.x * W - S.off - w);

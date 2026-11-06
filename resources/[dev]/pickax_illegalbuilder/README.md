@@ -41,12 +41,12 @@ Groupes ESX `_dev`, `admin`, `superadmin` (`Config.AllowedGroups`) ou permission
 - Cumulable avec la tablette vendeur (section précédente).
 
 ## Vente dans la rue (menu contextuel)
-Le joueur clique sur un **PNJ de la rue** avec le menu contextuel (`/moi`) → **Vendre de la drogue** (passant le plus proche) → choisit l'article (seuls ceux qu'il possède sont proposés).
+Le joueur clique sur un **PNJ de la rue** avec le menu contextuel (pickax_core) → **Vendre de la drogue** → choisit l'article (seuls ceux qu'il possède sont proposés).
 - Tout est décidé **côté serveur** (`server/street.lua`) : interrupteur général (`Config.PedSales`) et `Config.StreetSales.Enabled`, tablette vendeur (`RequireTablet`, item `dealer_tablet`), policiers requis, délai entre deux ventes, limite par heure, **acceptation du PNJ** (`AcceptChance`), quantité (`QtyMin`–`QtyMax`), prix (prix du dealer du catalogue × `PriceFactor`, ou liste `Items` à toi), paiement (`Account`, par défaut argent sale).
 - Le PNJ peut refuser (alerte police possible : `RefuseAlertChance`) ; une vente réussie peut alerter la police (`AlertChance`), paie le racket au propriétaire du territoire, compte pour les affrontements de gang et le carnet.
 - Un même PNJ n'est sollicité qu'une fois. Impossible en véhicule.
 - Tous ces réglages sont modifiables depuis le panel web : *Réglages du serveur → Drogues & labos → Vente dans la rue*.
-- **pickax_context** : le menu `/moi` propose « Vendre de la drogue » (passant le plus proche) dès que la vente de rue est active.
+- **pickax_core** : `players/contextMenu/function.lua` utilise ce système à la place de l'ancienne vente (qui faisait confiance au client) dès que `pickax_illegalbuilder` est démarré ; sans lui, l'ancien comportement reste.
 - Tests : `ROOT=. lua tools/tests/street_test.lua`.
 
 ## Pureté → prix de vente (`Config.Purity`)
@@ -59,11 +59,11 @@ Le joueur vend d'abord ses unités **les plus pures** ; le message de vente affi
 - Tout est réglable dans le panel : *Réglages du serveur → Drogues & labos → Réputation de dealer / Quartiers*. Test : `ROOT=. lua tools/tests/street_test.lua` (26 vérifications).
 
 ## Perquisitions et saisies (police)
-- Un **policier** (`Config.PoliceJobs`) ouvre le menu contextuel (`/moi`) près d'un joueur → **Perquisition (drogue)** : *Inspecter le suspect* (affiche ce qu'il porte d'illégal : drogues du catalogue — récolte, pochons, graines —, objets de `Config.Seizure.Items`, argent sale) ou *Saisir drogue et argent sale*.
+- Un **policier** (`Config.PoliceJobs`) clique sur un joueur avec le menu contextuel → **Perquisition (drogue)** : *Inspecter le suspect* (affiche ce qu'il porte d'illégal : drogues du catalogue — récolte, pochons, graines —, objets de `Config.Seizure.Items`, argent sale) ou *Saisir drogue et argent sale*.
 - Contrôlé côté serveur : métier de police, distance (3 m), délai entre deux saisies. Les objets saisis, **avec leur pureté**, vont dans le **casier de preuves** (`/preuves`, police) ; l'argent sale est retiré et reversé à la **société de police** (`Society`, `SocietyShare`). Le suspect est prévenu.
 - Chaque saisie est enregistrée (table `illegalbuilder_seizures` et journal du builder) ; `/saisies` affiche les dernières.
 - Réglable dans le panel : *Réglages du serveur → Drogues & labos → Perquisitions et saisies (police)*. Tests : `ROOT=. lua tools/tests/seizure_test.lua` (14 vérifications).
-- **pickax_context** : le menu `/moi` ajoute « Perquisition (drogue) » (joueur le plus proche), visible seulement pour la police.
+- **pickax_core** : `players/contextMenu/function.lua` ajoute l'entrée « Perquisition (drogue) » au menu d'un joueur (visible seulement pour la police).
 
 ## Marché noir, contrats de livraison et casier judiciaire
 
