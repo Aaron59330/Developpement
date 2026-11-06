@@ -28,7 +28,6 @@ shared_scripts {
 }
 
 server_scripts {
-    'players/contextMenu/discord_token.lua',   -- token du bot Discord (serveur uniquement)
     '@oxmysql/lib/MySQL.lua',
 
     'config_sv.lua',
@@ -186,7 +185,6 @@ client_scripts {
     -- PLAYERS
     'players/**/client.lua',
     'players/boutique/live_client.lua',
-    'players/contextMenu/function.lua',
 
 
     -- OX INVENTORY
@@ -237,7 +235,6 @@ escrow_ignore {
     'utils/**/config.lua',
     'players/**/config.lua',
     'players/menuemote/animation.lua',
-    'players/contextMenu/function.lua',
 
     'players/wipe/function_sv.lua',
 
