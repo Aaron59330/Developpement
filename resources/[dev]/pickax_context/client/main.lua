@@ -16,7 +16,13 @@ local function openMenu()
     local ped = PlayerPedId()
     -- Les actions (moi, véhicule, joueur, passant, objet…) viennent de pickax_core/players/contextMenu : même logique, conditions et sous-menus qu'avant.
     local ok, tree = pcall(function() return exports.pickax_core:ContextBuild() end)
-    if not ok or type(tree) ~= 'table' or #tree == 0 then return end
+    if not ok or type(tree) ~= 'table' or #tree == 0 then
+        local why = (not ok) and tostring(tree) or 'menu vide'
+        print(('^1[pickax_context] impossible de construire le menu : %s^0'):format(why))
+        if GetResourceState('pickax_core') ~= 'started' then why = 'pickax_core n\'est pas démarré' end
+        TriggerEvent('esx:showNotification', '~r~Menu contextuel indisponible~s~ (' .. why:sub(1, 80) .. ') — voir la console F8')
+        return
+    end
     local c = GetEntityCoords(ped)
     local on, x, y = GetScreenCoordFromWorldCoord(c.x, c.y, c.z + 0.3)
     open = true

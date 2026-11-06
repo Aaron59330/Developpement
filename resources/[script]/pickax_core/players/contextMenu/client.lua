@@ -82,8 +82,9 @@ local function serialize(menu, out)
 end
 
 -- Construit un menu pour une entité (même logique qu'avant) et renvoie ses lignes
-local function buildFor(entity, coords)
-    CreateMenu(vector2(0.0, 0.0), coords or GetEntityCoords(PlayerPedId()), entity)
+local function buildFor(entity, coords, label)
+    local ok, err = pcall(CreateMenu, vector2(0.0, 0.0), coords or GetEntityCoords(PlayerPedId()), entity)
+    if not ok then print(('^1[contextMenu] erreur de construction (%s) : %s^0'):format(tostring(label), tostring(err))) return {} end
     local m = menuPool.menus[1]
     return m and serialize(m, {}) or {}
 end
@@ -99,7 +100,7 @@ end
 exports('ContextBuild', function()
     CtxActions = {}
     local ped = PlayerPedId()
-    local tree = buildFor(ped, GetEntityCoords(ped))
+    local tree = buildFor(ped, GetEntityCoords(ped), 'moi')
     if IsPedDeadOrDying(ped, true) then return tree end
     local ent, coords = aimed()
     local group, nodes
@@ -108,9 +109,9 @@ exports('ContextBuild', function()
         elseif IsEntityAPed(ent) then group = IsPedAPlayer(ent) and 'Joueur visé' or 'Passant visé'
         elseif IsEntityAnObject(ent) then group = 'Objet visé'
         else group = 'Lieu visé' end
-        nodes = buildFor(ent, coords)
+        nodes = buildFor(ent, coords, group)
     elseif coords then
-        group, nodes = 'Environnement', buildFor(nil, coords)   -- rien de visé : météo
+        group, nodes = 'Environnement', buildFor(nil, coords, 'environnement')   -- rien de visé : météo
     end
     if group and nodes and #nodes > 0 then
         tree[#tree + 1] = { sep = true }
