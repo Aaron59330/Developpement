@@ -71,7 +71,7 @@ function addPanel(level) {
   const el = buildPanel(level); el.style.visibility = 'hidden'; $r.append(el); panels[level] = el;
   const W = innerWidth, H = innerHeight, w = el.offsetWidth, h = el.offsetHeight;
   let x, y;
-  if (level === 0) { x = S.x * W + S.off; y = S.y * H - 70; }
+  if (level === 0) { x = S.x * W + S.off; y = S.y * H - 20; }
   else {
     const prev = panels[level - 1];
     x = prev.offsetLeft + prev.offsetWidth + 4; y = prev.offsetTop + prev.children[S.path[level - 1]].offsetTop - PAD;
@@ -97,13 +97,27 @@ addEventListener('mousemove', e => {
   const pr = p.getBoundingClientRect(); p.style.setProperty('--px', (e.clientX - pr.left) + 'px'); p.style.setProperty('--py', (e.clientY - pr.top) + 'px');
   const r = e.target.closest('.row'); if (r) { const rr = r.getBoundingClientRect(); r.style.setProperty('--mx', (e.clientX - rr.left) + 'px'); r.style.setProperty('--my', (e.clientY - rr.top) + 'px'); }
 });
-// en mode « maintenir » on ne ferme pas en cliquant à côté (c'est le relâchement de la touche qui ferme)
-addEventListener('mousedown', e => { if (!S.open) return; if (e.button === 2 || (!S.hold && !e.target.closest('.panel'))) post('close'); });
+// Mode « curseur » (touche maintenue) : la position du curseur est envoyée au jeu pour savoir ce qui est visé
+let lastAim = 0;
+addEventListener('mousemove', e => {
+  if (!S.cursor) return;
+  const t = performance.now(); if (t - lastAim < 35) return; lastAim = t;
+  post('aim', { x: e.clientX / innerWidth, y: e.clientY / innerHeight });
+});
+addEventListener('mousedown', e => {
+  if (e.button === 2) { if (!S.cursor) post('close'); return; }
+  if (e.target.closest && e.target.closest('.panel')) return;
+  if (S.cursor) post('click', { x: e.clientX / innerWidth, y: e.clientY / innerHeight });   // clic sur le décor : menu de l'élément cliqué
+  else if (S.open) post('close');                                                              // /moi : clic à côté = fermer
+});
 addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => { if (!S.open) return; if (e.key === 'Escape') post('close'); if (e.key === 'Backspace') { if (S.path.length) setPath(S.path.length - 1, null); else post('close'); } });
 addEventListener('resize', () => { if (S.open) drawAll(); });
+function clearPanels() { S.open = false; $r.innerHTML = ''; panels.length = 0; }
 addEventListener('message', ev => {
   const m = ev.data || {};
-  if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 70, hold: m.hold === true, open: true }; $r.classList.remove('hidden'); drawAll(); }
-  else if (m.a === 'close') { S.open = false; $r.classList.add('hidden'); $r.innerHTML = ''; panels.length = 0; }
+  if (m.a === 'cursor') { S = { menu: [], path: [], x: 0.5, y: 0.5, off: 14, hold: true, open: false, cursor: true }; $r.classList.remove('hidden'); clearPanels(); }
+  else if (m.a === 'open') { S = { menu: m.menu || [], path: [], x: m.x, y: m.y, off: m.offset || 14, hold: m.hold === true, open: true, cursor: S.cursor === true }; $r.classList.remove('hidden'); drawAll(); }
+  else if (m.a === 'hide') { clearPanels(); }
+  else if (m.a === 'close') { S.cursor = false; clearPanels(); $r.classList.add('hidden'); }
 });

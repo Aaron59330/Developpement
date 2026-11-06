@@ -131,37 +131,13 @@ local function buildFor(entity, coords, label)
     return m and serialize(m, {}) or {}
 end
 
--- Ce que le joueur vise (centre de l'écran, 12 m)
-local function aimed()
-    local ok, hit, coords, _, ent = pcall(ScreenToWorld, vector2(0.5, 0.5), 12.0)
-    if ok and hit then return ent, coords end
-    return nil, nil
-end
-
--- Arbre complet : « Moi » à la racine + un groupe pour la cible visée (véhicule, joueur, passant, objet, lieu) ou la météo
-exports('ContextBuild', function()
+-- Menu d'une cible (soi, véhicule, joueur, passant, objet, lieu ; entity = nil : météo) : mêmes actions et conditions qu'avant
+exports('ContextBuildTarget', function(entity, coords)
     CtxActions = {}
     local okp, errp = pcall(ctxPrepare)
     if not okp then print(('^1[contextMenu] préparation : %s^0'):format(tostring(errp))) end
-    local ped = PlayerPedId()
-    local tree = buildFor(ped, GetEntityCoords(ped), 'moi')
-    if IsPedDeadOrDying(ped, true) then return tree end
-    local ent, coords = aimed()
-    local group, nodes
-    if ent and DoesEntityExist(ent) and ent ~= ped then
-        if IsEntityAVehicle(ent) then group = 'Véhicule visé'
-        elseif IsEntityAPed(ent) then group = IsPedAPlayer(ent) and 'Joueur visé' or 'Passant visé'
-        elseif IsEntityAnObject(ent) then group = 'Objet visé'
-        else group = 'Lieu visé' end
-        nodes = buildFor(ent, coords, group)
-    elseif coords then
-        group, nodes = 'Environnement', buildFor(nil, coords, 'environnement')   -- rien de visé : météo
-    end
-    if group and nodes and #nodes > 0 then
-        tree[#tree + 1] = { sep = true }
-        tree[#tree + 1] = { label = group, children = nodes }
-    end
-    return tree
+    if entity and not DoesEntityExist(entity) then entity = nil end
+    return buildFor(entity, coords or GetEntityCoords(PlayerPedId()), entity == PlayerPedId() and 'moi' or 'cible')
 end)
 
 -- Clic sur une ligne : exécute l'action (comme l'ancien « relâcher sur la ligne »). Renvoie { close = bool, checked = bool|nil }
