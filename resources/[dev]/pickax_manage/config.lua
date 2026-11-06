@@ -69,7 +69,7 @@ Config.Categories = {
         { title = 'Doorlock',          desc = 'Verrouiller / déverrouiller la porte proche', icon = 'lock', action = { command = 'wbdoor' } },
         { title = 'Ascenseurs',        desc = 'Créer des ascenseurs avec le World Builder', icon = 'building', action = { command = 'worldbuilder' } },
     } },
-    { id = 'allsettings', title = 'Tous les réglages', tone = 'light', icon = 'tool', sub = 'Les réglages du serveur, groupe par groupe (modifiés en direct)', cards = {
+    { id = 'allsettings', group = 'tools', title = 'Tous les réglages', tone = 'light', icon = 'tool', sub = 'Les réglages du serveur, groupe par groupe (modifiés en direct)', cards = {
         { title = 'Serveur',          desc = 'Maintenance, annonces, redémarrages, mode de jeu', icon = 'server', action = { settings = { group = 'Serveur' } } },
         { title = 'Monde & PNJ',      desc = 'Population, police, transports', icon = 'globe', action = { settings = { group = 'Monde & PNJ' } } },
         { title = 'Météo & heure',    desc = 'Météo, panne de courant, heure', icon = 'cloud', action = { settings = { group = 'Météo & heure' } } },

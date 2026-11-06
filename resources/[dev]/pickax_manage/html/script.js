@@ -62,7 +62,7 @@ function editor() {
   const secs = []; items.forEach(d => { let s = secs.find(x => x.n === d.section); if (!s) secs.push(s = { n: d.section, l: [] }); s.l.push(d); });
   let quick = '';
   if (v.group === 'Météo & heure' && !v.section) quick = `<section class="card ed"><h3>Raccourcis de l’heure</h3><div class="qk"><button class="btn dark" data-hr="9">Matin · 09:00</button><button class="btn dark" data-hr="12">Midi · 12:00</button><button class="btn dark" data-hr="18">Soir · 18:00</button><button class="btn dark" data-hr="23">Nuit · 23:00</button><button class="btn dark" data-hr="free">Heure normale</button></div></section>`;
-  const rows = d => `<div class="er"><div class="rl"><b>${esc(d.label)}${st.over[d.key] ? ' <span class="md" title="Modifié">●</span>' : ''}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</div><div class="rc ${d.type}">${ctrl(d)}${st.over[d.key] ? `<button class="rs" data-rs="${esc(d.key)}" title="Remettre la valeur d’origine">${ic('refresh')}</button>` : ''}</div></div>`;
+  const rows = d => `<div class="er"><div class="rl"><b>${esc(d.label)}${st.over[d.key] ? ' <span class="md" title="Modifié">●</span>' : ''}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</div><div class="rc ${d.type}">${ctrl(d)}${st.over[d.key] ? `<button class="rs2" data-rs="${esc(d.key)}" title="Remettre la valeur d’origine">${ic('refresh')}</button>` : ''}</div></div>`;
   return bn + quick + (secs.map(s => `<section class="card ed"><h3>${esc(s.n || '')}</h3>${s.l.map(rows).join('')}</section>`).join('') || '<div class="empty">Aucun réglage ici.</div>');
 }
 function journalView() {
@@ -70,24 +70,29 @@ function journalView() {
   return `<div class="banner tone-light"><button class="back" data-back2>${ic('back')} Retour</button><div><h2>Journal</h2><p>Actions du staff depuis le démarrage de la ressource.</p></div><span class="gl">${ic('hist')}</span></div><section class="card ed">${l.length ? l.map(j => `<div class="er"><div class="rl"><b>${esc(j.who)}</b><small>${esc(j.text)}</small></div><div class="rc"><span class="k">${hm(new Date(j.t * 1000))}</span></div></div>`).join('') : '<div class="empty">Rien d’enregistré pour le moment.</div>'}</section>`;
 }
 
+const hmsHtml = s => { const h = pad(Math.floor(s / 3600)), m = pad(Math.floor(s % 3600 / 60)), x = pad(s % 60); return `${h}<em>:</em>${m}<em>:</em><b>${x}</b>`; };
 function overview() {
   const st = S.d.stats, sv = S.server, pc = st.max ? Math.round(st.players / st.max * 100) : 0, tot = st.res.active + st.res.error + st.res.stopped || 1;
-  const card = c => { const t = c.cards.slice(0, 2).map(x => `<span>${esc(x.title)}</span>`).join('') + (c.cards.length > 2 ? `<span>+${c.cards.length - 2}</span>` : '');
-    return `<button class="card cat tone-${c.tone} ${c.wide ? 'c-wide' : 'c-std'}" data-cat="${c.id}"><div><h3>${esc(c.title)}</h3><p>${esc(c.sub || '')}</p></div><div class="tags">${t}</div><span class="ic">${ic(c.icon)}</span></button>`; };
-  const cats = S.cats.filter(c => !c.group).map(card).join(''), bld = S.cats.filter(c => c.group === 'builders').map(card).join('');
-  const log = S.d.journal.length ? `<div class="log">${S.d.journal.slice(0, 20).map(j => `<div><time>${hm(new Date(j.t * 1000))}</time><b>${esc(j.who)}</b><span>${esc(j.text)}</span></div>`).join('')}</div>` : `<div class="empty">${ic('hist').replace('<svg', '<svg style="width:14px;height:14px;display:block;margin:0 auto 4px"')}Rien d’enregistré depuis l’ouverture.</div>`;
-  return `<div class="hd"><div class="grow"><h1>Vue d’ensemble</h1><p>Le serveur en direct, et tous ses réglages</p></div><button class="btn dark" data-refresh>${ic('refresh')} Actualiser</button></div>
+  const card = c => {
+    const body = c.wide ? `<div class="tags">${c.cards.slice(0, 2).map(x => `<span>${esc(x.title)}</span>`).join('')}${c.cards.length > 2 ? `<span>+${c.cards.length - 2}</span>` : ''}</div>`
+      : `<p>${esc(c.cards.slice(0, 4).map(x => x.title).join(', '))}${c.cards.length > 4 ? '…' : ''}</p>`;
+    return `<button class="card cat tone-${c.tone} ${c.wide ? 'c-wide' : 'c-std'}" data-cat="${c.id}"><h3>${esc(c.title)}</h3>${body}<span class="ic">${ic(c.icon)}</span></button>`;
+  };
+  const cats = S.cats.filter(c => !c.group).map(card).join(''), bld = S.cats.filter(c => c.group === 'builders').map(card).join(''), tools = S.cats.filter(c => c.group === 'tools').map(card).join('');
+  const log = S.d.journal.length ? `<div class="log">${S.d.journal.slice(0, 20).map(j => `<div><time>${hm(new Date(j.t * 1000))}</time><b>${esc(j.who)}</b><span>${esc(j.text)}</span></div>`).join('')}</div>` : `<div class="empty">${ic('hist')}Rien d’enregistré depuis l’ouverture.</div>`;
+  return `<div class="hd"><div class="grow"><h1>Vue d’ensemble</h1><p>Le serveur en direct, et tous ses réglages</p></div><button class="btn black" data-refresh>${ic('refresh')} Actualiser</button></div>
   <div class="grid">
     <section class="card hero">${sv.logo ? `<img class="wm" src="${esc(sv.logo)}" alt="">` : ''}<div class="chips"><span class="chip"><i></i>En ligne</span><span class="chip">${esc(sv.version)}</span><span class="chip">${esc(sv.license)}</span></div>
-      <h2>${esc(sv.name)}</h2><p>${esc(sv.subtitle)}</p><div class="row"><button class="btn light" data-cat="look">${ic('palette')} Personnaliser</button><button class="btn dark" data-j>${ic('hist')} Journal</button></div></section>
+      <h2>${esc(sv.name)}</h2><p>${esc(sv.subtitle)}</p><div class="row"><button class="btn white" data-cat="look">${ic('palette')} Personnaliser</button><button class="btn outline" data-j>${ic('hist')} Journal</button></div></section>
     <section class="card pl"><div class="ring" style="--p:${pc}"><span>${pc} %</span></div><div><div class="k">Joueurs</div><div class="v">${st.players} <small>/ ${st.max}</small></div><div class="k">${st.staff} staff en service</div></div></section>
-    <section class="card up"><div class="k">En ligne depuis</div><div class="v" id="up">${hms(st.uptime)}</div><div class="k">Depuis le dernier démarrage</div></section>
+    <section class="card up"><div class="k">En ligne depuis</div><div class="v" id="up">${hmsHtml(st.uptime)}</div><div class="k">Depuis le dernier démarrage</div></section>
     <section class="card rs"><div class="top2"><span class="k">Ressources</span><span class="num">${tot}</span></div><div class="bar"><i style="width:${st.res.active / tot * 100}%"></i><i class="e" style="width:${st.res.error / tot * 100}%"></i></div>
-      <div class="leg"><span><b></b>${st.res.active} actives</span><span><b class="e"></b>${st.res.error} erreur</span><span><b class="s"></b>${st.res.stopped} arrêtées</span></div></section>
+      <div class="leg"><span><b></b><strong>${st.res.active}</strong> actives</span><span><b class="e"></b><strong>${st.res.error}</strong> erreur</span><span><b class="s"></b><strong>${st.res.stopped}</strong> arrêtées</span></div></section>
     <div class="sec"><b>Catégories</b><span>Une famille de réglages par carte</span></div>
     ${cats}
+    <section class="card sess"><div class="hdr"><span>Cette session <em>${S.d.journal.length}</em></span><a data-j>Journal complet →</a></div>${log}</section>
+    ${tools ? `<div class="sec"><b>Réglages complets</b><span>Tous les réglages du serveur, groupe par groupe</span></div>${tools}` : ''}
     ${bld ? `<div class="sec"><b>Builders</b><span>Un builder par carte : un clic ouvre l’éditeur</span></div>${bld}` : ''}
-    <section class="card sess"><div class="hdr"><span>Cette session <kbd>${S.d.journal.length}</kbd></span><a data-j>Journal complet →</a></div>${log}</section>
   </div>`;
 }
 function category(c) {
@@ -103,29 +108,36 @@ function search() {
   const st = S.set && S.set.schema ? S.set.schema.filter(d => (d.label + ' ' + (d.hint || '') + ' ' + d.group + ' ' + (d.section || '')).toLowerCase().includes(q)).slice(0, 15) : [];
   return `<div class="hd"><div class="grow"><h1>Résultats</h1><p>${out.length + st.length} résultat(s) pour « ${esc(S.q)} »</p></div></div><div class="cards">${out.map(([c, x, i]) => `<button class="sub" data-cat="${c.id}" data-card="${i}"><h4>${esc(x.title)}</h4><p>${esc(c.title)} · ${esc(x.desc)}</p><span class="ic">${ic(x.icon)}</span></button>`).join('')}${st.map(d => `<button class="sub" data-sg="${esc(d.group)}" data-ss="${esc(d.section || '')}"><h4>${esc(d.label)}</h4><p>${esc(d.group)} · ${esc(d.section || '')}</p><span class="ic">${ic('tool')}</span></button>`).join('')}</div>`;
 }
+function fit() { const w = document.querySelector('.win'); if (!w) return; const s = Math.min(innerWidth / 1230, innerHeight / 700, 1.6); w.style.transform = `scale(${s})`; }
+addEventListener('resize', fit);
 function draw() {
   if (!S.open) return;
   const c = S.cats.find(x => x.id === S.cat), accent = S.server.accent;
   if (accent) document.documentElement.style.setProperty('--acc', accent);
-  const rail = [['home', null, 'Accueil'], ...S.cats.map(x => [x.icon, x.id, x.title])].map(([i, id, t]) => `<button class="ri ${(id === S.cat) || (!id && !S.cat && !S.q) ? 'on' : ''}" title="${esc(t)}" data-rail="${id || ''}">${ic(i)}</button>`).join('');
+  const wide = S.railWide ? 'wide' : '';
+  const rail = [['grid', null, 'Vue d’ensemble'], ...S.cats.map(x => [x.icon, x.id, x.title])].map(([i, id, t]) => `<button class="ri ${(id === S.cat) || (!id && !S.cat && !S.q) ? 'on' : ''}" title="${esc(t)}" data-rail="${id || ''}">${ic(i)}<span>${esc(t)}</span></button>`).join('');
   const body = S.view ? (S.view.journal ? journalView() : editor()) : S.q.trim() ? search() : c ? category(c) : overview();
-  const oldMain = $r.querySelector('.main'), keep = oldMain ? oldMain.scrollTop : 0;
+  const oldMain = $r.querySelector('.main'), keep = oldMain ? oldMain.scrollTop : 0, oldRail = $r.querySelector('.scroll'), keepR = oldRail ? oldRail.scrollTop : 0;
   const u = S.d.user, now = new Date();
   $r.innerHTML = `<div class="win">
-    <header class="top"><div class="me"><span class="av">${esc((u.name || '?')[0].toUpperCase())}</span><div><b>Bonjour, ${esc(u.name)}</b><small>${esc(u.role)} · ID ${u.id}</small></div></div>
-      <button class="circ" data-home title="Accueil">${ic('home')}</button><button class="circ dim" data-back>${ic('back')}</button><button class="circ dim" data-fwd>${ic('fwd')}</button>
-      <label class="search">${ic('search')}<input id="q" placeholder="Rechercher un réglage, une page…" value="${esc(S.q)}" autocomplete="off"><kbd>Entrée</kbd></label>
-      <span class="clock" id="clk">${hm(now)}</span><button class="circ" data-j title="Journal">${ic('hist')}</button><button class="circ" data-mute title="Sons">${ic('mute')}</button>
-      <button class="btn light" data-close>Fermer <small>Échap</small></button></header>
-    <aside class="rail"><div class="logo">${S.server.logo ? `<img src="${esc(S.server.logo)}" alt="">` : ''}</div>${rail}</aside>
-    <main class="main">${body}</main></div>`;
+    <header class="top"><div class="cap me"><span class="av">${esc((u.name || '?')[0].toUpperCase())}</span><div><b>Bonjour, ${esc(u.name)}</b><small>${esc(u.role)} · ID ${u.id}</small></div></div>
+      <div class="cap nav"><button class="circ white" data-home title="Accueil">${ic('home')}</button><button class="circ ghost" data-back>${ic('back')}</button><button class="circ ghost" data-fwd>${ic('fwd')}</button></div>
+      <label class="cap search">${ic('search')}<input id="q" placeholder="Rechercher un réglage, une page…" value="${esc(S.q)}" autocomplete="off"><kbd>Entrée</kbd></label>
+      <div class="cap clock" id="clk">${hm(now)}</div>
+      <div class="cap tools"><button class="circ" data-j title="Journal">${ic('hist')}</button><button class="circ pink" data-mute title="Sons">${ic('mute')}</button></div>
+      <button class="cap closeb" data-close>Fermer <kbd>Échap</kbd></button></header>
+    <div class="body"><aside class="rail ${wide}"><div class="rtop"><span class="rlogo">${S.server.logo ? `<img src="${esc(S.server.logo)}" alt="">` : ''}</span><b class="rname">${esc(S.server.short || S.server.name || '')}</b><button class="expand" data-expand>${ic(S.railWide ? 'back' : 'fwd')}</button></div><div class="scroll">${rail}</div></aside>
+    <main class="main">${body}</main></div></div>`;
+  fit();
   const nm = $r.querySelector('.main'); if (nm) nm.scrollTop = keep;
+  const nr = $r.querySelector('.scroll'); if (nr) nr.scrollTop = keepR;
   const q = document.getElementById('q'); if (q && S.focusQ) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
 $r.addEventListener('click', e => {
-  const t = e.target.closest('[data-cat],[data-home],[data-rail],[data-card],[data-j],[data-refresh],[data-close],[data-mute],[data-back2],[data-tg],[data-sel],[data-rs],[data-hr],[data-sg]'); if (!t) return;
+  const t = e.target.closest('[data-cat],[data-home],[data-rail],[data-card],[data-j],[data-refresh],[data-close],[data-mute],[data-back2],[data-expand],[data-tg],[data-sel],[data-rs],[data-hr],[data-sg]'); if (!t) return;
   const ds = t.dataset;
   if ('close' in ds) return post('close');
+  if ('expand' in ds) { S.railWide = !S.railWide; return draw(); }
   if ('back2' in ds) { S.view = null; return draw(); }
   if ('sg' in ds) return openSettings({ group: ds.sg, section: ds.ss || null }, ds.ss || ds.sg);
   if ('tg' in ds) return send({ [ds.tg]: !S.set.values[ds.tg] });
@@ -160,6 +172,6 @@ addEventListener('message', ev => {
     $r.classList.remove('hidden'); draw();
     clearInterval(S.timer); clearInterval(S.clock);
     S.timer = setInterval(() => refresh(false), Math.max(2, m.refresh || 5) * 1000);
-    S.clock = setInterval(() => { const c = document.getElementById('clk'); if (c) c.textContent = hm(new Date()); const u = document.getElementById('up'); if (u && S.d) { S.d.stats.uptime++; u.textContent = hms(S.d.stats.uptime); } }, 1000);
+    S.clock = setInterval(() => { const c = document.getElementById('clk'); if (c) c.textContent = hm(new Date()); const u = document.getElementById('up'); if (u && S.d) { S.d.stats.uptime++; u.innerHTML = hmsHtml(S.d.stats.uptime); } }, 1000);
   } else if (m.a === 'close') { S.open = false; clearInterval(S.timer); clearInterval(S.clock); $r.classList.add('hidden'); }
 });

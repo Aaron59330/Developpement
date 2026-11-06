@@ -11,6 +11,6 @@ server_script 'server/main.lua'
 client_script 'client/main.lua'
 
 ui_page 'html/index.html'
-files { 'html/index.html', 'html/style.css', 'html/script.js' }
+files { 'html/index.html', 'html/fonts.css', 'html/style.css', 'html/script.js', 'html/fonts/*' }
 
 dependencies { 'es_extended', 'pickax_theme' }
