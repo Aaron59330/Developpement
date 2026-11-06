@@ -1,0 +1,15 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:transparent;overflow:hidden;user-select:none;font-family:Poppins,'Segoe UI',system-ui,sans-serif}
+.hidden{display:none!important}
+#root{position:fixed;inset:0}
+.panel{position:absolute;min-width:250px;max-width:420px;padding:5px;background:rgba(8,8,9,.97);border-radius:3px;color:#f2f2f3;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:in .08s ease-out}
+@keyframes in{from{opacity:0;transform:translateX(-4px)}}
+.row{display:flex;align-items:center;gap:12px;height:36px;padding:0 12px 0 14px;border-radius:3px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;position:relative;border:1px solid transparent}
+.row .ic{width:18px;height:18px;flex:none;display:grid;place-items:center;color:rgba(255,255,255,.9)}
+.row .ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.row .noic{width:18px;flex:none}
+.row .lb{flex:1;overflow:hidden;text-overflow:ellipsis}
+.row .chev,.row .ck{width:14px;height:14px;flex:none;color:rgba(255,255,255,.85)}
+.row .chev svg,.row .ck svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.row:hover,.row.on{background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.05));border-top-color:rgba(255,255,255,.14);border-bottom-color:rgba(255,255,255,.04)}
+.row.dis{opacity:.4;cursor:default}.row.dis:hover{background:none;border-color:transparent}

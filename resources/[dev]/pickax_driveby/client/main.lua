@@ -111,7 +111,7 @@ RegisterCommand('+pickax_lean', function()
     startLean(ped, seat)
 end, false)
 RegisterCommand('-pickax_lean', function() stopLean(PlayerPedId()) TriggerEvent('pickax_driveby:lean', false) end, false)
-RegisterKeyMapping('+pickax_lean', 'Se pencher par la fenêtre (tirer)', 'keyboard', C.Lean.Key or 'LMENU')
+RegisterKeyMapping('+pickax_lean', 'Se pencher par la fenêtre (tirer)', 'keyboard', C.Lean.Key or 'B')
 
 -- tant qu'on est penché : annule si la situation change (vitesse, arme rangée, sortie du véhicule)
 CreateThread(function()

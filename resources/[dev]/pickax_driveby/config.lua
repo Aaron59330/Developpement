@@ -22,7 +22,7 @@ Config.Rules = {
 -- Maintiens la touche : le joueur se penche à la fenêtre pour tirer (seulement si l'arme, la place et la vitesse sont autorisées).
 Config.Lean = {
     Enabled = true,
-    Key = 'LMENU',                 -- touche par défaut (Alt gauche) ; modifiable par le joueur dans les paramètres FiveM
+    Key = 'B',                     -- touche par défaut (Alt gauche est déjà prise par la radio de pma-voice) ; modifiable par le joueur dans les paramètres FiveM
     Seats = { [-1] = false, [0] = true, [1] = true, [2] = true, [3] = true, [4] = true },   -- le conducteur reste au volant
     MaxSpeedKmh = 140,             -- au-delà, impossible de se pencher (0 = pas de limite)
     -- Animation jouée pendant que le joueur est penché. Une par place (valeur 'default' = toutes les places).
