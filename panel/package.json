@@ -1,0 +1,16 @@
+{
+  "name": "aero-panel",
+  "version": "1.0.0",
+  "description": "Panel web AERO : comptes clients, licences et gestion à distance des serveurs FiveM",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node tools/selftest.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0"
+  }
+}

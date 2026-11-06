@@ -1,0 +1,24 @@
+// Panel AERO : comptes, boutique (offres, commandes), licences, support. Aucun réglage de la base ici.
+const express = require('express'), helmet = require('helmet'), cookieParser = require('cookie-parser'), path = require('path');
+const cfg = require('./lib/config'); const { db, now } = require('./lib/db'); const A = require('./lib/auth');
+const app = express();
+if (cfg.trustProxy) app.set('trust proxy', 1);
+app.disable('x-powered-by');
+const secureSite = cfg.publicUrl.startsWith('https://');
+app.use(helmet({ hsts: secureSite, contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https:', 'http:'], fontSrc: ["'self'"], connectSrc: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'self'"], upgradeInsecureRequests: secureSite ? [] : null } }, crossOriginOpenerPolicy: secureSite ? undefined : false, originAgentCluster: secureSite ? undefined : false }));
+app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
+app.use(A.loadUser);
+app.use(A.csrf);
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/shop', require('./routes/shop'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/me', require('./routes/mine'));
+app.use('/api', (req, res) => res.status(404).json({ ok: false, error: 'Route inconnue' }));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'], maxAge: '5m' }));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.use((err, req, res, next) => { console.error('[panel]', err.message); res.status(err.status || 500).json({ ok: false, error: err.status === 400 ? 'Requête invalide' : 'Erreur serveur' }); });
+setInterval(() => db.prepare('DELETE FROM sessions WHERE expires_at<?').run(now()), 3600 * 1000).unref();
+if (require.main === module) app.listen(cfg.port, () => console.log(`[panel] http://localhost:${cfg.port}`));
+module.exports = app;
