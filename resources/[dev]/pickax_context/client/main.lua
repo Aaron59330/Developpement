@@ -4,11 +4,8 @@ local C = Config
 local mode = 'idle'
 local holdOpen = false          -- ouvert par la touche maintenue (sinon : par /moi)
 local aim = { x = 0.5, y = 0.5 }
-local armed = true              -- le survol du personnage rouvre le menu seulement après être sorti de lui
 local openedAt = 0
 local menuSelf = false
-local moved = false              -- le curseur a bougé depuis l'appui sur la touche
-local selfSince = 0             -- depuis quand le curseur est sur le personnage
 
 local function notify(msg) TriggerEvent('esx:showNotification', msg) end
 
@@ -89,7 +86,6 @@ local function openFor(ent, coords, self_, atX, atY)
         return false
     end
     mode = 'menu'
-    openedAt = GetGameTimer()
     menuSelf = self_ == true
     if menuSelf then ghost(true) end
     SendNUIMessage({ a = 'open', menu = tree, x = atX, y = atY, offset = 14, hold = holdOpen })
@@ -99,37 +95,12 @@ end
 local function startCursor()
     if mode ~= 'idle' or IsPauseMenuActive() or IsNuiFocused() then return end
     if IsEntityDead(PlayerPedId()) then return end
-    mode, holdOpen, armed = 'cursor', true, false
-    moved, selfSince = false, 0          -- rien ne s'ouvre tant que le curseur n'a pas bougé et n'est pas posé sur le personnage
+    mode, holdOpen = 'cursor', true      -- le curseur apparaît ; rien ne s'ouvre sans clic gauche
     openedAt = GetGameTimer()
     SetNuiFocus(true, true)
     SetNuiFocusKeepInput(true)      -- le clavier reste au jeu : on peut avancer, courir, conduire pendant que le curseur est libre
     SendNUIMessage({ a = 'cursor', hold = true })
 end
-
--- Surveille ce qui est sous le curseur : le personnage -> ouvre « Moi »
-CreateThread(function()
-    while true do
-        if mode == 'cursor' then
-            local onMe = false
-            if moved then
-                onMe = overSelf(aim.x, aim.y)
-                if not onMe then local ent = rayAt(aim.x, aim.y, 25.0) onMe = ent ~= nil and isSelf(ent) end
-            end
-            if onMe then
-                if selfSince == 0 then selfSince = GetGameTimer() end
-                -- il faut rester un court instant sur le personnage (évite les ouvertures en passant dessus)
-                if armed and GetGameTimer() - selfSince >= (C.HoverMs or 150) then
-                    if openFor(PlayerPedId(), GetEntityCoords(PlayerPedId()), true, aim.x, aim.y) then armed = false end
-                end
-            else
-                selfSince = 0
-                if moved then armed = true end
-            end
-            Wait(50)
-        else Wait(200) end
-    end
-end)
 
 -- touche maintenue : curseur libre ; relâcher : tout se ferme
 if C.HoldToShow then
@@ -163,17 +134,18 @@ RegisterNUICallback('close', function(_, cb) cb(1) stopAll() end)
 RegisterNUICallback('aim', function(d, cb)
     cb(1)
     aim.x, aim.y = tonumber(d and d.x) or 0.5, tonumber(d and d.y) or 0.5
-    if mode == 'cursor' and GetGameTimer() - openedAt > 150 then moved = true end
 end)
--- clic sur le décor : menu de l'élément cliqué (véhicule, joueur, passant, objet…) ; rien : environnement
+-- Clic gauche (Alt maintenu) : sur son personnage -> menu « Moi » ; sur un véhicule, joueur, passant, objet -> son menu ; un clic hors du menu le referme.
+-- Rien ne s'ouvre sans ce clic : le simple survol n'ouvre jamais le menu.
 RegisterNUICallback('click', function(d, cb)
     cb(1)
-    if mode == 'menu' and holdOpen then hideMenu() end   -- un clic hors du menu le referme (comme avant)
+    if mode == 'menu' and holdOpen then hideMenu() end
     if mode ~= 'cursor' then return end
     local x, y = tonumber(d and d.x) or 0.5, tonumber(d and d.y) or 0.5
     local ent, coords = rayAt(x, y, 25.0)
-    if ent and isSelf(ent) then return end
-    if ent and ent ~= 0 and DoesEntityExist(ent) then openFor(ent, coords, false, x, y)
+    if overSelf(x, y) or (ent and isSelf(ent)) then
+        openFor(PlayerPedId(), GetEntityCoords(PlayerPedId()), true, x, y)
+    elseif ent and ent ~= 0 and DoesEntityExist(ent) then openFor(ent, coords, false, x, y)
     elseif coords then openFor(nil, coords, false, x, y) end
 end)
 RegisterNUICallback('run', function(d, cb)
