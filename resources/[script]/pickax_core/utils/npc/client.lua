@@ -133,9 +133,12 @@ Citizen.CreateThread(function()
 end)
 
 -- Reglages du panel web (pickax_settings > Monde & PNJ) : appliques en direct, sans redemarrage.
+local managed = {}   -- réglages déjà modifiés une fois : on continue de les appliquer même s'ils reviennent à leur valeur par défaut
 local function onSettings(all, ov)
 	if not ov then return end
 	local touched = false
+	for k in pairs(ov) do managed[k] = true end
+	ov = setmetatable({}, { __index = function(_, k) if managed[k] then return all[k] end end })
 	if ov.npc_enabled ~= nil or ov.npc_density ~= nil or ov.traffic_density ~= nil or ov.parked_density ~= nil then
 		ConfigNPC.AllowNPC = all.npc_enabled == true
 		ConfigNPC.pnjdensity = tonumber(all.npc_density) or 0.5

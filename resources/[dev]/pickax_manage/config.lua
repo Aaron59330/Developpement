@@ -22,51 +22,67 @@ Config.JournalMax = 60
 -- ═════════════════════════════ CATÉGORIES ════════════════════
 -- tone : 'mint' (teinte menthe) · 'light' (clair) · 'white' (blanc) · 'vivid' (vert vif)
 -- Chaque carte : title, desc, icon, action = { command = 'nom' } | { event = 'nom' } | { export = { 'ressource', 'fonction' } }
+-- action = { settings = { group = 'Météo & heure', section = 'Météo' } } : ouvre l'éditeur de réglages en direct (pickax_settings) sur ce groupe / cette section.
 -- Sans action, la carte affiche « bientôt disponible » (à brancher au fur et à mesure).
+Config.HiddenKeys = {}   -- clés de réglages à ne jamais montrer dans le menu
 Config.Categories = {
-    { id = 'server', title = 'Serveur', tone = 'mint', wide = true, icon = 'server', sub = 'Journal, annonces, redémarrages, sauvegardes…', cards = {
-        { title = 'Journal',       desc = 'Actions du staff et événements du serveur', icon = 'list' },
-        { title = 'Annonces',      desc = 'Messages à l\'écran, programmation', icon = 'megaphone' },
-        { title = 'Redémarrages',  desc = 'Planifier et annoncer les redémarrages', icon = 'refresh' },
-        { title = 'Whitelist',     desc = 'Identifiants autorisés, message de refus', icon = 'shield' },
-        { title = 'Sauvegardes',   desc = 'Sauvegarder et restaurer les configurations', icon = 'save', action = { command = 'aerotools' } },
-        { title = 'Santé de la base', desc = 'Ressources, tables SQL, objets : score sur 100', icon = 'heart', action = { command = 'aerotools' } },
+    { id = 'server', title = 'Serveur', tone = 'mint', wide = true, icon = 'server', sub = 'Maintenance, annonces, redémarrages, mode de jeu, performance, Discord…', cards = {
+        { title = 'Maintenance',        desc = 'Refuser les nouveaux joueurs, message, identifiants autorisés', icon = 'shield', action = { settings = { group = 'Serveur', section = 'Maintenance' } } },
+        { title = 'Annonces',           desc = 'Messages automatiques à intervalle régulier', icon = 'megaphone', action = { settings = { group = 'Serveur', section = 'Annonces automatiques' } } },
+        { title = 'Redémarrages',       desc = 'Heures de redémarrage programmées', icon = 'refresh', action = { settings = { group = 'Serveur', section = 'Redémarrages programmés' } } },
+        { title = 'Mode de jeu',        desc = 'Facile ou difficile : règle des dizaines de systèmes d\'un coup', icon = 'gauge', action = { settings = { group = 'Serveur', section = 'Mode de jeu' } } },
+        { title = 'Performance',        desc = 'Mode performance des interfaces', icon = 'gauge', action = { settings = { group = 'Performance' } } },
+        { title = 'Alertes Discord',    desc = 'Alertes automatiques et résumé quotidien', icon = 'chat', action = { settings = { group = 'Discord' } } },
+        { title = 'Sauvegardes',        desc = 'Sauvegarder et restaurer les configurations', icon = 'save', action = { command = 'aerotools' } },
+        { title = 'Santé de la base',   desc = 'Ressources, tables SQL, objets : score sur 100', icon = 'heart', action = { command = 'aerotools' } },
     } },
-    { id = 'look', title = 'Apparence', tone = 'light', icon = 'brush', sub = 'Écran de chargement, HUD, compteur, lieu et heure', cards = {
+    { id = 'look', title = 'Apparence', tone = 'light', icon = 'brush', sub = 'Thème, écran de chargement, HUD, boussole, notifications', cards = {
         { title = 'Thème & logo',          desc = 'Couleur principale, nom, logo du serveur', icon = 'palette', action = { command = 'aerotools' } },
         { title = 'Écran de chargement',   desc = 'Messages, musique, liens, équipe', icon = 'image', action = { command = 'aerotools' } },
-        { title = 'HUD',                   desc = 'Barres de vie, faim, soif, position', icon = 'gauge' },
-        { title = 'Compteur',              desc = 'Compteur de vitesse et carburant', icon = 'gauge' },
-        { title = 'Lieu et heure',         desc = 'Affichage de la rue et de l\'heure', icon = 'clock' },
+        { title = 'HUD',                   desc = 'Faim, soif, vie, armure', icon = 'gauge', action = { settings = { group = 'Interface', section = 'HUD (faim, soif, vie)' } } },
+        { title = 'Cartes en haut à droite', desc = 'Serveur, métier, argent', icon = 'list', action = { settings = { group = 'Interface', section = 'Cartes en haut à droite' } } },
+        { title = 'Boussole',              desc = 'Format, nom de la rue, position', icon = 'pin', action = { settings = { group = 'Interface', section = 'Boussole' } } },
+        { title = 'Notifications',         desc = 'Position des notifications', icon = 'megaphone', action = { settings = { group = 'Interface', section = 'Notifications' } } },
     } },
-    { id = 'players', title = 'Joueurs', tone = 'light', icon = 'users', sub = 'Arrivée joueur, scènes de connexion, gameplay, armes', cards = {
-        { title = 'Arrivée joueur',        desc = 'Création de personnage, point d\'apparition', icon = 'user' },
-        { title = 'Scènes de connexion',   desc = 'Décors et caméras à l\'entrée', icon = 'camera' },
-        { title = 'Gameplay',              desc = 'Soif, faim, mort, réanimation', icon = 'heart' },
-        { title = 'Gestion des armes',     desc = 'Roue d\'armes, port d\'armes, munitions', icon = 'target' },
+    { id = 'players', title = 'Joueurs', tone = 'light', icon = 'users', sub = 'Arrivée, gameplay, combat, voix, carnet', cards = {
+        { title = 'Nouveaux joueurs',      desc = 'Argent de départ, comportement à l\'arrivée', icon = 'user', action = { settings = { group = 'Nouveaux joueurs' } } },
+        { title = 'Gameplay & combat',     desc = 'Dégâts, mort, réanimation, armes', icon = 'target', action = { settings = { group = 'Joueurs & combat' } } },
+        { title = 'Voix',                  desc = 'Distances chuchoter, normal, crier', icon = 'music', action = { settings = { group = 'Voix' } } },
+        { title = 'Carnet du joueur',      desc = 'Série de connexion, objectifs, récompenses', icon = 'list', action = { settings = { group = 'Carnet' } } },
     } },
-    { id = 'economy', title = 'Économie', tone = 'light', icon = 'coins', sub = 'Économie globale, surveillance', cards = {
-        { title = 'Économie globale',      desc = 'Événements, inflation, remises', icon = 'coins' },
-        { title = 'Surveillance',          desc = 'Argent total, transactions suspectes', icon = 'eye' },
+    { id = 'economy', title = 'Économie', tone = 'light', icon = 'coins', sub = 'Gains, événements économiques', cards = {
+        { title = 'Gains',                 desc = 'Bonus de week-end et revenus', icon = 'coins', action = { settings = { group = 'Économie' } } },
     } },
-    { id = 'services', title = 'Services & activités', tone = 'white', icon = 'briefcase', sub = 'Légal, illégal, graffitis', cards = {
-        { title = 'Légal',                 desc = 'Métiers, entreprises, boutiques', icon = 'briefcase' },
-        { title = 'Illégal',               desc = 'Gangs, drogues, braquages', icon = 'skull' },
-        { title = 'Graffitis',             desc = 'Zones et styles de graffitis', icon = 'brush' },
+    { id = 'services', title = 'Services & activités', tone = 'white', icon = 'briefcase', sub = 'Gangs, drogues et labos, justice', cards = {
+        { title = 'Gangs',                 desc = 'Territoires, guerres, saisons, QG, convois', icon = 'users', action = { settings = { group = 'Gangs' } } },
+        { title = 'Drogues & labos',       desc = 'Labos, vente, quartiers, prison, marché noir', icon = 'skull', action = { settings = { group = 'Drogues & labos' } } },
     } },
-    { id = 'world', title = 'Monde', tone = 'vivid', icon = 'globe', wide = true, sub = 'Le ciel, le décor et la carte, et ceux qui la peuplent : météo, zones, événements, PNJ, portes, ascenseurs.', cards = {
-        { title = 'Météo & temps',     desc = 'Synchronisation · Zones d\'ambiance · Programmation & règles', icon = 'cloud' },
+    { id = 'world', title = 'Monde', tone = 'vivid', icon = 'globe', wide = true, sub = 'Le ciel, le décor et la carte, et ceux qui la peuplent : météo, heure, PNJ, circulation, police ambiante.', cards = {
+        { title = 'Météo & heure',     desc = 'Météo fixe ou dynamique, panne de courant, heure figée', icon = 'cloud', action = { settings = { group = 'Météo & heure' } } },
+        { title = 'Densité PNJ',       desc = 'Piétons, circulation, véhicules garés', icon = 'users', action = { settings = { group = 'Monde & PNJ', section = 'Population' } } },
+        { title = 'Police & recherche', desc = 'Policiers PNJ, patrouilles, hélicoptères', icon = 'shield', action = { settings = { group = 'Monde & PNJ', section = 'Police et recherche' } } },
+        { title = 'Transports ambiants', desc = 'Bateaux, trains, camions-poubelles PNJ', icon = 'building', action = { settings = { group = 'Monde & PNJ', section = 'Transports ambiants' } } },
+        { title = 'Tout le monde & PNJ', desc = 'Tous les réglages du monde', icon = 'globe', action = { settings = { group = 'Monde & PNJ' } } },
         { title = 'Environnement',     desc = 'Panneaux Vinewood · Enseignes 3D', icon = 'mountain' },
         { title = 'Blips',             desc = 'Blips · Regroupements', icon = 'pin' },
         { title = 'Zones',             desc = 'Zones tracées sur la carte', icon = 'polygon' },
-        { title = 'Activités',         desc = 'Football (terrains, cages, matchs) et cinéma', icon = 'ball' },
-        { title = 'Vie nocturne',      desc = 'Platine DJ des bars, boomboxs et lieux', icon = 'music' },
-        { title = 'Chasse saisonnière', desc = 'Citrouilles d\'Halloween et nounours de Noël', icon = 'ghost' },
-        { title = 'PNJ & dialogues',   desc = 'PNJ posés · Dialogues', icon = 'chat' },
-        { title = 'Population',        desc = 'Population ambiante · Zones de population', icon = 'users' },
-        { title = 'Doorlock',          desc = 'Toutes les portes verrouillées du serveur', icon = 'lock' },
-        { title = 'Ascenseurs',        desc = 'Créer des ascenseurs : poser leurs étages, les nommer', icon = 'building' },
-        { title = 'Interacts',         desc = 'Pastilles d\'interaction : image, couleur, règles', icon = 'hand' },
+        { title = 'Doorlock',          desc = 'Verrouiller / déverrouiller la porte proche', icon = 'lock', action = { command = 'wbdoor' } },
+        { title = 'Ascenseurs',        desc = 'Créer des ascenseurs avec le World Builder', icon = 'building', action = { command = 'worldbuilder' } },
+    } },
+    { id = 'allsettings', title = 'Tous les réglages', tone = 'light', icon = 'tool', sub = 'Les réglages du serveur, groupe par groupe (modifiés en direct)', cards = {
+        { title = 'Serveur',          desc = 'Maintenance, annonces, redémarrages, mode de jeu', icon = 'server', action = { settings = { group = 'Serveur' } } },
+        { title = 'Monde & PNJ',      desc = 'Population, police, transports', icon = 'globe', action = { settings = { group = 'Monde & PNJ' } } },
+        { title = 'Météo & heure',    desc = 'Météo, panne de courant, heure', icon = 'cloud', action = { settings = { group = 'Météo & heure' } } },
+        { title = 'Joueurs & combat', desc = 'Gameplay, dégâts, mort', icon = 'target', action = { settings = { group = 'Joueurs & combat' } } },
+        { title = 'Nouveaux joueurs', desc = 'Arrivée des joueurs', icon = 'user', action = { settings = { group = 'Nouveaux joueurs' } } },
+        { title = 'Interface',        desc = 'HUD, boussole, notifications', icon = 'palette', action = { settings = { group = 'Interface' } } },
+        { title = 'Voix',             desc = 'Distances de la voix', icon = 'music', action = { settings = { group = 'Voix' } } },
+        { title = 'Carnet',           desc = 'Récompenses du carnet', icon = 'list', action = { settings = { group = 'Carnet' } } },
+        { title = 'Économie',         desc = 'Gains et bonus', icon = 'coins', action = { settings = { group = 'Économie' } } },
+        { title = 'Gangs',            desc = '86 réglages : territoires, guerres, saisons…', icon = 'users', action = { settings = { group = 'Gangs' } } },
+        { title = 'Drogues & labos',  desc = '108 réglages : labos, vente, prison, marché noir…', icon = 'skull', action = { settings = { group = 'Drogues & labos' } } },
+        { title = 'Performance',      desc = 'Mode performance', icon = 'gauge', action = { settings = { group = 'Performance' } } },
+        { title = 'Discord',          desc = 'Alertes et résumé quotidien', icon = 'chat', action = { settings = { group = 'Discord' } } },
     } },
 }
 

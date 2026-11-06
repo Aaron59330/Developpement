@@ -20,11 +20,55 @@ const P = {
   mute: 'M11 5L6 9H3v6h3l5 4zM22 9l-6 6M16 9l6 6', back: 'M15 18l-6-6 6-6', fwd: 'M9 18l6-6-6-6', grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', x: 'M18 6L6 18M6 6l12 12'
 };
 const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${P[n] || P.grid}"/></svg>`;
-let S = { open: false, d: null, server: {}, cats: [], cat: null, q: '', timer: null, clock: null, hist: [] };
+let S = { view: null, set: null, open: false, d: null, server: {}, cats: [], cat: null, q: '', timer: null, clock: null, hist: [] };
 const pad = n => String(n).padStart(2, '0');
 const hms = s => `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`;
 const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const toast = t => { const e = document.createElement('div'); e.className = 'toast'; e.textContent = t; document.body.append(e); setTimeout(() => e.remove(), 1800); };
+
+
+// ───────── Éditeur de réglages en direct (pickax_settings) ─────────
+const arr = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+async function loadSettings(force) {
+  if (S.set && !force && !S.set.error) return;
+  S.set = { loading: true }; draw();
+  const d = await post('settings');
+  S.set = d && d.schema ? { schema: d.schema, values: d.values || {}, over: d.over || {} } : { error: (d && d.error) || 'Réglages indisponibles.' };
+  draw();
+}
+function openSettings(target, title) { S.view = { group: target.group, section: target.section || null, title: title || target.section || target.group }; S.q = ''; S.focusQ = false; loadSettings(); draw(); }
+async function send(tbl) {
+  const r = await post('set', { tbl });
+  if (r && r.ok) { Object.assign(S.set.values, r.values); for (const k in tbl) { if (r.over && r.over[k]) S.set.over[k] = true; else delete S.set.over[k]; } toast('Enregistré · appliqué en direct'); }
+  else toast('Échec de l’enregistrement');
+  draw();
+}
+const fmtN = (d, v) => { const st = d.step || 1, dec = String(st).includes('.') ? String(st).split('.')[1].length : 0; return Number(v).toFixed(dec); };
+function ctrl(d) {
+  const val = S.set.values[d.key], k = esc(d.key);
+  if (d.type === 'bool') return `<button class="tg ${val ? 'on' : ''}" data-tg="${k}" aria-label="${esc(d.label)}"><i></i></button>`;
+  if (d.type === 'number') return `<input type="range" data-rg="${k}" min="${d.min ?? 0}" max="${d.max ?? 100}" step="${d.step || 1}" value="${val ?? d.default}"><input class="nm" type="number" data-nm="${k}" min="${d.min ?? 0}" max="${d.max ?? 100}" step="${d.step || 1}" value="${fmtN(d, val ?? d.default)}">`;
+  if (d.type === 'select') return `<div class="chips2">${(d.options || []).map(o => `<button class="ch ${o[0] === val ? 'on' : ''}" data-sel="${k}" data-v="${esc(o[0])}">${esc(o[1])}</button>`).join('')}</div>`;
+  if (d.type === 'text') return `<input class="tx" type="text" data-tx="${k}" value="${esc(val ?? '')}" maxlength="300">`;
+  if (d.type === 'list') return `<textarea class="ls" data-ls="${k}" rows="3" placeholder="Un élément par ligne">${esc(arr(val).join('\n'))}</textarea>`;
+  return '';
+}
+function editor() {
+  const v = S.view, st = S.set;
+  const bn = `<div class="banner tone-light"><button class="back" data-back2>${ic('back')} Retour</button><div><h2>${esc(v.title)}</h2><p>${esc(v.group)}${v.section ? ' · ' + esc(v.section) : ''} — les changements sont enregistrés et appliqués en direct.</p></div><span class="gl">${ic('tool')}</span></div>`;
+  if (!st || st.loading) return bn + '<div class="empty">Chargement des réglages…</div>';
+  if (st.error) return bn + `<div class="empty">${esc(st.error)}</div>`;
+  const items = st.schema.filter(d => d.group === v.group && (!v.section || d.section === v.section));
+  const secs = []; items.forEach(d => { let s = secs.find(x => x.n === d.section); if (!s) secs.push(s = { n: d.section, l: [] }); s.l.push(d); });
+  let quick = '';
+  if (v.group === 'Météo & heure' && !v.section) quick = `<section class="card ed"><h3>Raccourcis de l’heure</h3><div class="qk"><button class="btn dark" data-hr="9">Matin · 09:00</button><button class="btn dark" data-hr="12">Midi · 12:00</button><button class="btn dark" data-hr="18">Soir · 18:00</button><button class="btn dark" data-hr="23">Nuit · 23:00</button><button class="btn dark" data-hr="free">Heure normale</button></div></section>`;
+  const rows = d => `<div class="er"><div class="rl"><b>${esc(d.label)}${st.over[d.key] ? ' <span class="md" title="Modifié">●</span>' : ''}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</div><div class="rc ${d.type}">${ctrl(d)}${st.over[d.key] ? `<button class="rs" data-rs="${esc(d.key)}" title="Remettre la valeur d’origine">${ic('refresh')}</button>` : ''}</div></div>`;
+  return bn + quick + (secs.map(s => `<section class="card ed"><h3>${esc(s.n || '')}</h3>${s.l.map(rows).join('')}</section>`).join('') || '<div class="empty">Aucun réglage ici.</div>');
+}
+function journalView() {
+  const l = S.d.journal;
+  return `<div class="banner tone-light"><button class="back" data-back2>${ic('back')} Retour</button><div><h2>Journal</h2><p>Actions du staff depuis le démarrage de la ressource.</p></div><span class="gl">${ic('hist')}</span></div><section class="card ed">${l.length ? l.map(j => `<div class="er"><div class="rl"><b>${esc(j.who)}</b><small>${esc(j.text)}</small></div><div class="rc"><span class="k">${hm(new Date(j.t * 1000))}</span></div></div>`).join('') : '<div class="empty">Rien d’enregistré pour le moment.</div>'}</section>`;
+}
 
 function overview() {
   const st = S.d.stats, sv = S.server, pc = st.max ? Math.round(st.players / st.max * 100) : 0, tot = st.res.active + st.res.error + st.res.stopped || 1;
@@ -55,14 +99,17 @@ function category(c) {
 function search() {
   const q = S.q.trim().toLowerCase(), out = [];
   S.cats.forEach(c => c.cards.forEach((x, i) => { if ((x.title + ' ' + x.desc + ' ' + c.title).toLowerCase().includes(q)) out.push([c, x, i]); }));
-  return `<div class="hd"><div class="grow"><h1>Résultats</h1><p>${out.length} réglage(s) pour « ${esc(S.q)} »</p></div></div><div class="cards">${out.map(([c, x, i]) => `<button class="sub" data-cat="${c.id}" data-card="${i}"><h4>${esc(x.title)}</h4><p>${esc(c.title)} · ${esc(x.desc)}</p><span class="ic">${ic(x.icon)}</span></button>`).join('')}</div>`;
+  if (!S.set) loadSettings();
+  const st = S.set && S.set.schema ? S.set.schema.filter(d => (d.label + ' ' + (d.hint || '') + ' ' + d.group + ' ' + (d.section || '')).toLowerCase().includes(q)).slice(0, 15) : [];
+  return `<div class="hd"><div class="grow"><h1>Résultats</h1><p>${out.length + st.length} résultat(s) pour « ${esc(S.q)} »</p></div></div><div class="cards">${out.map(([c, x, i]) => `<button class="sub" data-cat="${c.id}" data-card="${i}"><h4>${esc(x.title)}</h4><p>${esc(c.title)} · ${esc(x.desc)}</p><span class="ic">${ic(x.icon)}</span></button>`).join('')}${st.map(d => `<button class="sub" data-sg="${esc(d.group)}" data-ss="${esc(d.section || '')}"><h4>${esc(d.label)}</h4><p>${esc(d.group)} · ${esc(d.section || '')}</p><span class="ic">${ic('tool')}</span></button>`).join('')}</div>`;
 }
 function draw() {
   if (!S.open) return;
   const c = S.cats.find(x => x.id === S.cat), accent = S.server.accent;
   if (accent) document.documentElement.style.setProperty('--acc', accent);
   const rail = [['home', null, 'Accueil'], ...S.cats.map(x => [x.icon, x.id, x.title])].map(([i, id, t]) => `<button class="ri ${(id === S.cat) || (!id && !S.cat && !S.q) ? 'on' : ''}" title="${esc(t)}" data-rail="${id || ''}">${ic(i)}</button>`).join('');
-  const body = S.q.trim() ? search() : c ? category(c) : overview();
+  const body = S.view ? (S.view.journal ? journalView() : editor()) : S.q.trim() ? search() : c ? category(c) : overview();
+  const oldMain = $r.querySelector('.main'), keep = oldMain ? oldMain.scrollTop : 0;
   const u = S.d.user, now = new Date();
   $r.innerHTML = `<div class="win">
     <header class="top"><div class="me"><span class="av">${esc((u.name || '?')[0].toUpperCase())}</span><div><b>Bonjour, ${esc(u.name)}</b><small>${esc(u.role)} · ID ${u.id}</small></div></div>
@@ -72,29 +119,44 @@ function draw() {
       <button class="btn light" data-close>Fermer <small>Échap</small></button></header>
     <aside class="rail"><div class="logo">${S.server.logo ? `<img src="${esc(S.server.logo)}" alt="">` : ''}</div>${rail}</aside>
     <main class="main">${body}</main></div>`;
+  const nm = $r.querySelector('.main'); if (nm) nm.scrollTop = keep;
   const q = document.getElementById('q'); if (q && S.focusQ) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
 $r.addEventListener('click', e => {
-  const t = e.target.closest('[data-cat],[data-home],[data-rail],[data-card],[data-j],[data-refresh],[data-close],[data-mute]'); if (!t) return;
+  const t = e.target.closest('[data-cat],[data-home],[data-rail],[data-card],[data-j],[data-refresh],[data-close],[data-mute],[data-back2],[data-tg],[data-sel],[data-rs],[data-hr],[data-sg]'); if (!t) return;
   const ds = t.dataset;
   if ('close' in ds) return post('close');
+  if ('back2' in ds) { S.view = null; return draw(); }
+  if ('sg' in ds) return openSettings({ group: ds.sg, section: ds.ss || null }, ds.ss || ds.sg);
+  if ('tg' in ds) return send({ [ds.tg]: !S.set.values[ds.tg] });
+  if ('sel' in ds) return send({ [ds.sel]: ds.v });
+  if ('rs' in ds) return send({ [ds.rs]: '__reset' });
+  if ('hr' in ds) return send(ds.hr === 'free' ? { time_frozen: '__reset', time_hour: '__reset' } : { time_frozen: true, time_hour: +ds.hr });
   if ('refresh' in ds) return refresh(true);
   if ('mute' in ds) return toast('Sons : bientôt disponible');
-  if ('j' in ds) return toast('Journal complet : bientôt disponible');
+  if ('j' in ds) { S.view = { journal: true }; return draw(); }
   if ('card' in ds) { const c = S.cats.find(x => x.id === (ds.cat || S.cat)); const card = c && c.cards[+ds.card]; if (!card) return;
+    if (card.action && card.action.settings) { post('action', { title: card.title }); return openSettings(card.action.settings, card.title); }
     if (!card.action) { post('action', { title: card.title }); return toast('« ' + card.title + ' » : bientôt disponible'); }
     return post('action', { title: card.title, action: card.action }); }
-  if ('cat' in ds) { S.cat = ds.cat; S.q = ''; S.focusQ = false; return draw(); }
-  if ('rail' in ds) { S.cat = ds.rail || null; S.q = ''; S.focusQ = false; return draw(); }
-  if ('home' in ds) { S.cat = null; S.q = ''; return draw(); }
+  if ('cat' in ds) { S.view = null; S.cat = ds.cat; S.q = ''; S.focusQ = false; return draw(); }
+  if ('rail' in ds) { S.view = null; S.cat = ds.rail || null; S.q = ''; S.focusQ = false; return draw(); }
+  if ('home' in ds) { S.view = null; S.cat = null; S.q = ''; return draw(); }
+});
+$r.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.rg) { const d = S.set.schema.find(x => x.key === t.dataset.rg), n = t.parentNode.querySelector('.nm'); if (n) n.value = fmtN(d, t.value); } });
+$r.addEventListener('change', e => {
+  const t = e.target, ds = t.dataset || {};
+  if (ds.rg || ds.nm) return send({ [ds.rg || ds.nm]: +t.value });
+  if (ds.tx) return send({ [ds.tx]: t.value });
+  if (ds.ls) return send({ [ds.ls]: t.value.split('\n').map(s => s.trim()).filter(Boolean) });
 });
 $r.addEventListener('input', e => { if (e.target.id === 'q') { S.q = e.target.value; S.focusQ = true; draw(); } });
 addEventListener('keydown', e => { if (S.open && e.key === 'Escape') post('close'); });
-async function refresh(manual) { const d = await post('refresh'); if (d && d.stats && S.open) { S.d.stats = d.stats; S.d.journal = d.journal || []; S.up = d.stats.uptime; if (manual || !S.q) { const f = S.focusQ; draw(); S.focusQ = f; } } }
+async function refresh(manual) { const d = await post('refresh'); if (d && d.stats && S.open) { S.d.stats = d.stats; S.d.journal = d.journal || []; S.up = d.stats.uptime; if ((manual || !S.q) && !S.view) { const f = S.focusQ; draw(); S.focusQ = f; } } }
 addEventListener('message', ev => {
   const m = ev.data || {};
   if (m.a === 'open') {
-    S = Object.assign(S, { open: true, d: m.data, server: m.server || {}, cats: m.cats || [], cat: null, q: '', focusQ: false });
+    S = Object.assign(S, { view: null, set: null, open: true, d: m.data, server: m.server || {}, cats: m.cats || [], cat: null, q: '', focusQ: false });
     $r.classList.remove('hidden'); draw();
     clearInterval(S.timer); clearInterval(S.clock);
     S.timer = setInterval(() => refresh(false), Math.max(2, m.refresh || 5) * 1000);

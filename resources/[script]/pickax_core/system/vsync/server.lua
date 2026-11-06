@@ -360,16 +360,20 @@ end, false)
 
 -- ─────────────── Réglages du panel web (pickax_settings > Météo & heure) ───────────────
 -- Météo dynamique ou fixe, panne de courant, heure figée : appliqués en direct, et au démarrage du serveur.
-local function applyPanelSettings(all, ov)
+local function applyPanelSettings(all, ov, keys)
     if type(all) ~= 'table' or type(ov) ~= 'table' then return end
     local sync = false
-    if ov.weather_dynamic ~= nil or ov.weather_type ~= nil then
+    -- une clé qui vient d'être remise à sa valeur par défaut n'est plus dans « ov » : on la considère quand même comme modifiée
+    local touched = {}
+    for _, k in ipairs(type(keys) == 'table' and keys or {}) do touched[k] = true end
+    local function has(k) return ov[k] ~= nil or touched[k] == true end
+    if has('weather_dynamic') or has('weather_type') then
         DynamicWeather = all.weather_dynamic == true
         if not DynamicWeather and type(all.weather_type) == 'string' then CurrentWeather = all.weather_type end
         sync = true
     end
-    if ov.blackout ~= nil then blackout = all.blackout == true sync = true end
-    if ov.time_frozen ~= nil or ov.time_hour ~= nil then
+    if has('blackout') then blackout = all.blackout == true sync = true end
+    if has('time_frozen') or has('time_hour') then
         if all.time_frozen == true then
             ShiftToMinute(0)
             ShiftToHour(math.floor(tonumber(all.time_hour) or 12))
@@ -384,7 +388,7 @@ local function applyPanelSettings(all, ov)
         TriggerClientEvent('DME:updateTime', -1, baseTime, timeOffset, freezeTime, manualTime)
     end
 end
-AddEventHandler('pickax_settings:changed', function(all, ov) applyPanelSettings(all, ov) end)
+AddEventHandler('pickax_settings:changed', function(all, ov, keys) applyPanelSettings(all, ov, keys) end)
 CreateThread(function()
     Wait(8000)
     if GetResourceState('pickax_settings') ~= 'started' then return end

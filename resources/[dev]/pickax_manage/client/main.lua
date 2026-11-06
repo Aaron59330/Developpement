@@ -31,6 +31,8 @@ RegisterCommand(C.Command, openMenu, false)
 if C.Key and C.Key ~= '' then RegisterKeyMapping(C.Command, 'Gestion du serveur', 'keyboard', C.Key) end
 
 RegisterNUICallback('close', function(_, cb) cb(1) close() end)
+RegisterNUICallback('settings', function(_, cb) ESX.TriggerServerCallback('pickax_manage:settings', function(d) cb(d or {}) end) end)
+RegisterNUICallback('set', function(d, cb) ESX.TriggerServerCallback('pickax_manage:set', function(r) cb(r or {}) end, d and d.tbl or {}) end)
 RegisterNUICallback('refresh', function(_, cb) ESX.TriggerServerCallback('pickax_manage:refresh', function(d) cb(d or {}) end) end)
 RegisterNUICallback('action', function(d, cb)
     cb(1)
