@@ -81,6 +81,48 @@ local function serialize(menu, out)
     return out
 end
 
+-- Préparation à l'ouverture (ce que faisait l'ancien moteur quand on appuyait sur la touche) : droits admin, factures, soldes société / gang
+local function ctxPrepare()
+    ESX.PlayerData = ESX.GetPlayerData()
+    AdminPlayerJoueur = false
+    local billsReady = false
+        for k, v in pairs(ConfigContextMenu.adminGroup) do
+            if ESX.PlayerData.group == v then
+                AdminPlayerJoueur = true
+            end
+        end
+
+        ESX.TriggerServerCallback('ContextMenu:Bill_getBills', function(bills)
+            BillData = bills
+            billsReady = true
+        end)
+        if ESX.PlayerData.job and ESX.PlayerData.job.grade_name == "boss" then
+            ESX.TriggerServerCallback(ConfigContextMenu.Callback.CallBackCheckSocietyMoney, function(money)
+                money = tonumber(money) or 0
+                UpdateSocietyMoneyHUDElement(money)
+                societymoney = money
+            end, ESX.PlayerData.job.name)
+        end
+
+        -- Les organisations créées par gangbuilder ne stockent pas leur solde
+        -- dans esx_society : il est renvoyé par CorePickax:getGangsInfo.
+        local job2 = ESX.PlayerData.job2
+        if job2 and job2.grade_name == "boss" and job2.name and job2.name ~= "unemployed2" then
+            local gangName = job2.name
+            ESX.TriggerServerCallback(ConfigContextMenu.Callback.CallBackCheckGangMoney, function(gangData)
+                local currentJob2 = ESX.PlayerData.job2
+                if currentJob2 and currentJob2.name == gangName then
+                    societymoney2 = gangData and tonumber(gangData.Money) or 0
+                end
+            end, gangName)
+        else
+            societymoney2 = 0
+        end
+    -- les factures arrivent par callback : on attend un court instant pour qu'elles soient dans le menu dès la première ouverture
+    local t = GetGameTimer() + 350
+    while not billsReady and GetGameTimer() < t do Wait(0) end
+end
+
 -- Construit un menu pour une entité (même logique qu'avant) et renvoie ses lignes
 local function buildFor(entity, coords, label)
     local ok, err = pcall(CreateMenu, vector2(0.0, 0.0), coords or GetEntityCoords(PlayerPedId()), entity)
@@ -99,6 +141,8 @@ end
 -- Arbre complet : « Moi » à la racine + un groupe pour la cible visée (véhicule, joueur, passant, objet, lieu) ou la météo
 exports('ContextBuild', function()
     CtxActions = {}
+    local okp, errp = pcall(ctxPrepare)
+    if not okp then print(('^1[contextMenu] préparation : %s^0'):format(tostring(errp))) end
     local ped = PlayerPedId()
     local tree = buildFor(ped, GetEntityCoords(ped), 'moi')
     if IsPedDeadOrDying(ped, true) then return tree end
