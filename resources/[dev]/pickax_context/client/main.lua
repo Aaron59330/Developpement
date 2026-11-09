@@ -160,6 +160,11 @@ CreateThread(function()
     while true do
         if mode ~= 'idle' then
             for _, c in ipairs({ 1, 2, 14, 15, 16, 17, 24, 25, 37, 44, 45, 68, 69, 70, 91, 92, 140, 141, 142, 257, 263, 264 }) do DisableControlAction(0, c, true) end
+            -- Alt relâché = tout se ferme. On lit directement la touche (le navigateur de l'interface peut avaler le « relâchement » d'Alt)
+            if holdOpen and C.HoldControl and GetGameTimer() - openedAt > 300
+                and not IsControlPressed(0, C.HoldControl) and not IsDisabledControlPressed(0, C.HoldControl) then
+                stopAll()
+            end
             Wait(0)
         else Wait(400) end
     end
