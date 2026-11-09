@@ -173,7 +173,7 @@ RegisterNUICallback('act', function(d, cb)
     if a == 'coins' or a == 'history' or a == 'boutique' then boutique()
     elseif a == 'inventory' then
         close()
-        SetTimeout(150, function() pcall(function() exports.pickax_inventory:OpenShop() end) end)
+        SetTimeout(150, function() pcall(function() exports.ox_inventory:openInventory() end) end)
     elseif a == 'locate' then locate(d.plate) end
 end)
 AddEventHandler('onResourceStop', function(r) if r == GetCurrentResourceName() and open then SetNuiFocus(false, false) end end)

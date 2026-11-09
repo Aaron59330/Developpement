@@ -506,9 +506,7 @@ local function wheelAward(src, xPlayer, p, W)
             { code, 'percent', p.amount, p.hours, 'Roulette du jour', 'roulette', xPlayer.identifier })
         return true, nil, code
     elseif p.kind == 'item' and p.item then
-        if GetResourceState('pickax_inventory') == 'started' and exports.pickax_inventory:Deliver(src, p.item, p.amount) then
-            return true     -- rangé dans l'inventaire boutique
-        elseif GetResourceState('ox_inventory') == 'started' then
+        if GetResourceState('ox_inventory') == 'started' then
             if not exports.ox_inventory:CanCarryItem(src, p.item, p.amount) then return false, 'Ton inventaire est plein : fais de la place puis retente ta chance.' end
             if not exports.ox_inventory:AddItem(src, p.item, p.amount) then return false, 'Objet indisponible : préviens le staff.' end
         else

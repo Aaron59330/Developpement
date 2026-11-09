@@ -31,7 +31,7 @@ Config.GangActions = { { label = 'Menu de l\'organisation', icon = 'list', comma
 
 -- ═════════════ BOUTIQUE ═════════════
 -- Rien à régler ici : le catalogue, les prix et les coins viennent de la vraie boutique (pickax_core). « Acheter » lance l'achat de la boutique,
--- « Historique » ouvre la boutique et « Inventaire » ouvre ton inventaire boutique (pickax_inventory).
+-- « Historique » ouvre la boutique et « Inventaire » ouvre ton inventaire (ox_inventory).
 
 -- ═════════════ JOURNAL HORS LIGNE ═════════════
 -- Autres ressources : exports.pickax_dashboard:AddJournal(identifier, 'texte')  (serveur) -> s'affiche dans Paramètres > Historique > Journal hors ligne.
