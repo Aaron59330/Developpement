@@ -84,11 +84,11 @@ function render() {
 <div class="abs logo">${esc(c.brand)}</div>
 <div class="abs who"><b>${esc(d.name)}</b><i>${esc(d.money)} $</i><div class="x" id="cl">${P.x}</div></div>
 <div class="abs bar"><div class="strip"></div>
-  <div class="btn arrow" id="prev" title="Catégorie précédente" style="position:absolute;left:4px;top:4px">${P.left}</div>
-  <div class="btn on" id="c_all" style="position:absolute;left:48px;top:4px;width:88px">${P.grid}Tout</div>
-  ${cats.slice(1).map((k, i) => `<div class="btn" data-cat="${k}" style="position:absolute;left:${144 + i * 52}px;top:4px;width:44px">${P[k]}</div>`).join('')}
-  <div class="btn arrow" id="next" title="Catégorie suivante" style="position:absolute;left:358px;top:4px">${P.right}</div>
-  <div class="search" style="left:418px">${P.search}<input id="q" placeholder="Rechercher un objet" autocomplete="off"></div>
+  <div class="btn arrow" id="prev" title="Catégorie précédente" style="position:absolute;left:0;top:9px">${P.left}</div>
+  <div class="btn on" id="c_all" style="position:absolute;left:42px;top:4px;width:88px">${P.grid}Tout</div>
+  ${cats.slice(1).map((k, i) => `<div class="btn" data-cat="${k}" style="position:absolute;left:${138 + i * 50}px;top:4px;width:40px">${P[k]}</div>`).join('')}
+  <div class="btn arrow" id="next" title="Catégorie suivante" style="position:absolute;left:343px;top:9px">${P.right}</div>
+  <div class="search" style="left:400px">${P.search}<input id="q" placeholder="Rechercher un objet" autocomplete="off"></div>
   ${c.shop ? `<div class="shopbtn" id="shop">${P.box}Inventaire boutique</div>` : ''}</div>
 ${eq('top', 183, 162, 80, 0)}${eq('left', 88, 251, 0, 80)}${eq('right', 436, 251, 0, 80)}
 ${stat(88, 'heart', 'Vie', d.vitals.health)}${stat(232, 'food', 'Faim', d.vitals.hunger)}${stat(374, 'drop', 'Soif', d.vitals.thirst)}
