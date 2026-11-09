@@ -49,11 +49,19 @@ let D = null, filter = 'all', query = '', sel = null, drag = null, tab = 0;
 const CATS = { all: null, food: /water|bread|burger|sandwich|cola|food|drink|eau|pain|barre|candy|chocolat/i, shirt: /tenue|clothes|vest|mask|jacket|hat|gilet|veste/i, target: /^weapon_|ammo|munition|gun|akpixel/i, tool: /radio|phone|tool|kit|repair|talkie|lockpick|key|cle/i };
 
 const hue = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+function imgOf(it) {      // même ordre que ox_inventory : metadata.imageurl > metadata.image > image de l'objet > <nom>.png
+    const base = (D.cfg.img || '').replace('/%s.png', '');
+    if (it.imageurl) return it.imageurl;
+    if (it.image) return `${base}/${it.image}.png`;
+    if (it.defimg) return /^[\w]+:\/\//.test(it.defimg) ? it.defimg : `${base}/${it.defimg}`;
+    return D.cfg.img.replace('%s', encodeURIComponent(it.name));
+}
 function icon(it, cls) {
-    const g = `<div class="gl" style="background:hsl(${hue(it.name)} 40% 34%)">${esc((it.label || it.name).slice(0, 1).toUpperCase())}</div>`;
+    const g = `<div class="gl" style="background:hsl(${hue(it.name)} 40% 34%)">${esc(((it.label || it.name).match(/[A-Za-z0-9À-ÿ]/) || ['?'])[0].toUpperCase())}</div>`;
     if (!IN_GAME || !D.cfg.img) return g;
-    const src = D.cfg.img.replace('%s', encodeURIComponent(it.name));
-    return `<img src="${src}" onerror="this.outerHTML=this.dataset.fb" data-fb='${g.replace(/'/g, '&#39;')}'>`;
+    const def = (D.cfg.img || '').replace('%s', '_default');
+    const fb2 = `<img src="${def}" onerror="this.outerHTML=this.dataset.fb" data-fb='${g.replace(/'/g, '&#39;')}'>`;
+    return `<img src="${imgOf(it)}" onerror="this.outerHTML=this.dataset.fb" data-fb='${fb2.replace(/'/g, '&#39;').replace(/&#39;/g, '&#39;')}'>`;
 }
 const kg = n => (Math.round(n * 100) / 100).toFixed(2).replace('.', ',');
 const matches = it => (!query || (it.label || it.name).toLowerCase().includes(query)) && (!CATS[filter] || CATS[filter].test(it.name + ' ' + it.label));

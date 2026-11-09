@@ -13,7 +13,7 @@ ESX.RegisterServerCallback('pickax_inventory:data', function(src, cb)
             local md = it.metadata or {}
             list[#list + 1] = {
                 slot = it.slot, name = it.name, label = it.label or d.label or it.name, count = it.count or 1,
-                weight = (it.weight or 0) / 1000, durability = md.durability, ammo = md.ammo,
+                weight = (it.weight or 0) / 1000, durability = md.durability, ammo = md.ammo, imageurl = md.imageurl, image = md.image,
             }
         end
     end
@@ -91,7 +91,7 @@ ESX.RegisterServerCallback('pickax_inventory:shop', function(src, cb)
             local d = defs[it.name] or {}
             local label = it.label or d.label or it.name
             list[#list + 1] = { slot = it.slot, name = it.name, label = label, count = it.count or 1, weight = (it.weight or 0) / 1000,
-                durability = (it.metadata or {}).durability, group = group(it.name, label) }
+                durability = (it.metadata or {}).durability, imageurl = (it.metadata or {}).imageurl, image = (it.metadata or {}).image, group = group(it.name, label) }
         end
     end
     cb({ items = list, weight = (inv.weight or 0) / 1000, maxWeight = S.MaxWeight / 1000, slots = S.Slots })

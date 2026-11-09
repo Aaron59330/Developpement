@@ -59,9 +59,22 @@ local function close()
     SendNUIMessage({ a = 'close' })
 end
 
+-- image propre à l'objet défini dans ox_inventory (data/items.lua → client.image) ; sinon <nom>.png
+local function withImages(list)
+    local cache = {}
+    for _, it in ipairs(list or {}) do
+        if cache[it.name] == nil then
+            local ok, def = pcall(function() return exports.ox_inventory:Items(it.name) end)
+            cache[it.name] = (ok and type(def) == 'table' and def.image) or false
+        end
+        if cache[it.name] then it.defimg = cache[it.name] end
+    end
+end
+
 local function gather(cb)
     ESX.TriggerServerCallback('pickax_inventory:data', function(d)
         if not d then return end
+        withImages(d.items)
         d.vitals, d.equipment = vitals(), equipment()
         d.cfg = { brand = C.Brand, shortcuts = C.Shortcuts, cols = C.Columns, rows = C.Rows, warn = C.WarnWeight, recentCount = C.RecentCount,
                   shop = true, img = C.ImagePath }
@@ -82,7 +95,7 @@ local function openInv()
 end
 
 local function sendShop()
-    ESX.TriggerServerCallback('pickax_inventory:shop', function(s) SendNUIMessage({ a = 'shop', shop = s }) end)
+    ESX.TriggerServerCallback('pickax_inventory:shop', function(s) if s then withImages(s.items) end SendNUIMessage({ a = 'shop', shop = s }) end)
 end
 
 RegisterCommand(C.Command, openInv, false)
