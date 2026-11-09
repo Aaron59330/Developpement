@@ -22,7 +22,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .arrow svg{font-size:16px;stroke-width:1.8}
 .arrow:hover{background:#fff}
 .arrow:active{background:#d9d9d9}
-.arrow.off{opacity:.4;pointer-events:none}
+.arrow.off{pointer-events:none}
 .btn{transition:background .15s}
 .search{position:absolute;left:400px;top:0;height:44px;display:flex;align-items:center;gap:10px;color:#cfcfcf;font-size:15.5px}
 .search input{background:none;border:0;outline:0;color:#fff;font:500 15.5px 'Figtree';width:400px}
