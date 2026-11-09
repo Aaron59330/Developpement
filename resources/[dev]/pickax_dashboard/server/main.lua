@@ -13,6 +13,22 @@ CreateThread(function()
     end
 end)
 
+-- journal hors ligne : table + API pour les autres ressources
+CreateThread(function()
+    MySQL.query.await([[CREATE TABLE IF NOT EXISTS pickax_dashboard_journal (
+        id INT AUTO_INCREMENT PRIMARY KEY, identifier VARCHAR(60) NOT NULL, text VARCHAR(300) NOT NULL, seen TINYINT(1) NOT NULL DEFAULT 0,
+        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, KEY idx_id (identifier)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]])
+end)
+-- exports.pickax_dashboard:AddJournal(identifier, 'texte')  ou  TriggerEvent('pickax_dashboard:journal', identifier, 'texte')
+local function addJournal(identifier, text)
+    if not identifier or not text or text == '' then return false end
+    MySQL.insert('INSERT INTO pickax_dashboard_journal (identifier, text) VALUES (?, ?)', { tostring(identifier):sub(1, 60), tostring(text):sub(1, 300) })
+    MySQL.query('DELETE FROM pickax_dashboard_journal WHERE identifier = ? AND id NOT IN (SELECT id FROM (SELECT id FROM pickax_dashboard_journal WHERE identifier = ? ORDER BY id DESC LIMIT 50) t)', { identifier, identifier })
+    return true
+end
+exports('AddJournal', addJournal)
+AddEventHandler('pickax_dashboard:journal', addJournal)
+
 local function fmtTime(min)
     min = tonumber(min) or 0
     local d, h = math.floor(min / 1440), math.floor(min % 1440 / 60)
@@ -63,16 +79,14 @@ local function gather(src)
     -- services disponibles (ressource démarrée)
     d.services = {}
     for _, s in ipairs(C.Services or {}) do if GetResourceState(s.res) == 'started' then d.services[#d.services + 1] = s end end
-    -- boutique
-    local coins = 0
-    local acc = C.Shop.CoinsAccount and x.getAccount and x.getAccount(C.Shop.CoinsAccount)
-    if acc then coins = acc.money or 0 end
-    d.shop = { coins = coins, items = C.Shop.Items or {}, hasBoutique = GetResourceState('pickax_boutique') == 'started' }
+    -- boutique : les coins viennent de pickax_core (le catalogue est lu côté client)
+    local coins = safe(function() return exports.pickax_core:BoutiquePointsOf(src) end, 0)
+    d.shop = { coins = tonumber(coins) or 0, hasBoutique = GetResourceState('pickax_boutique') == 'started' or GetResourceState('pickax_core') == 'started' }
+    -- journal hors ligne (événements arrivés pendant l'absence) et sanctions du staff
+    d.journal = safe(function() return MySQL.query.await('SELECT text, UNIX_TIMESTAMP(created) ts, seen FROM pickax_dashboard_journal WHERE identifier = ? ORDER BY id DESC LIMIT 30', { id }) end, {})
+    MySQL.update('UPDATE pickax_dashboard_journal SET seen = 1 WHERE identifier = ? AND seen = 0', { id })
+    d.sanctions = safe(function() return MySQL.query.await('SELECT reason, staff_name, UNIX_TIMESTAMP(created) ts FROM staff_warns WHERE license = ? ORDER BY id DESC LIMIT 30', { lic }) end, {})
     return d
 end
 
 ESX.RegisterServerCallback('pickax_dashboard:data', function(src, cb) cb(gather(src)) end)
-RegisterNetEvent('pickax_dashboard:buy', function(id)
-    local src = source
-    if C.Shop.BuyServerEvent then TriggerEvent(C.Shop.BuyServerEvent, src, tonumber(id)) end
-end)

@@ -58,6 +58,9 @@ end
 local mine, mineJson = {}, ''
 local weaponByHash = {}   -- [hash arme] = nom, pour les armes de l'inventaire (style de visée)
 
+local hideAll = GetResourceKvpString('wc_hideall') == '1'      -- réglage du joueur (tableau de bord) : aucune arme visible sur son corps
+exports('SetHideAll', function(v) hideAll = v == true SetResourceKvp('wc_hideall', hideAll and '1' or '0') end)
+
 local function refresh()
     local ped = PlayerPedId()
     local hidden = IsEntityDead(ped) or (Config.HideInVehicle and IsPedInAnyVehicle(ped, false)) or IsPlayerSwitchInProgress()
@@ -73,7 +76,7 @@ local function refresh()
                 seen[name] = true
                 weaponByHash[joaat(name)] = name
                 local place = placeOf(name)
-                if place ~= 'hidden' then
+                if place ~= 'hidden' and not hideAll then
                     count[place] = (count[place] or 0) + 1
                     list[#list + 1] = { name = name, place = place, idx = count[place] }
                 end

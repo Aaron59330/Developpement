@@ -213,6 +213,7 @@ addEventListener('message', e => {
     const m = e.data;
     if (m.a === 'open') { D = m.data; filter = 'all'; query = ''; tab = 0; sel = null; view = 'inv'; SHOP = null; render(); }
     else if (m.a === 'update') { D = m.data; if (!drag) render(); }
+    else if (m.a === 'goshop') { view = 'shop'; SHOP = null; render(); }
     else if (m.a === 'shop') { SHOP = m.shop; render(); }
     else if (m.a === 'close') { stage.hidden = true; hideTip(); }
 });

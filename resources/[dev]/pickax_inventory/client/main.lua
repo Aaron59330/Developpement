@@ -102,6 +102,10 @@ end
 RegisterCommand(C.Command, openInv, false)
 if C.Key and C.Key ~= '' then RegisterKeyMapping(C.Command, 'Inventaire', 'keyboard', C.Key) end
 exports('Open', openInv)
+exports('OpenShop', function()
+    openInv()
+    SetTimeout(600, function() if open then SendNUIMessage({ a = 'goshop' }) sendShop() end end)
+end)
 exports('Close', close)
 
 RegisterNUICallback('close', function(_, cb) cb(1) close() end)

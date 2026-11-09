@@ -29,10 +29,10 @@ Config.Services = {
 Config.JobActions  = { { label = 'Menu du métier', icon = 'list', command = 'jobmenu' }, { label = 'Décorer ma propriété', icon = 'building', command = 'decorer' } }
 Config.GangActions = { { label = 'Menu de l\'organisation', icon = 'list', command = 'gangmenu' }, { label = 'Tablette', icon = 'book', command = 'gangtablet' } }
 
--- ═════════════ BOUTIQUE (page « Boutique » du tableau de bord) ═════════════
--- Items : { id, tab ('daily'|'vehicle'|'bundles'|'weapons'|'items'), cat, title, desc, price, image (lien https ou nil), badges = { 'NOUVEAU' }, stats = { {'Dégâts', 35} } }
-Config.Shop = {
-    CoinsAccount = 'coins',           -- compte ESX qui contient les coins du joueur (0 si absent)
-    BuyServerEvent = nil,             -- événement serveur appelé à l'achat : TriggerServerEvent(BuyServerEvent, id)
-    Items = {},
-}
+-- ═════════════ BOUTIQUE ═════════════
+-- Rien à régler ici : le catalogue, les prix et les coins viennent de la vraie boutique (pickax_core). « Acheter » lance l'achat de la boutique,
+-- « Historique » ouvre la boutique et « Inventaire » ouvre ton inventaire boutique (pickax_inventory).
+
+-- ═════════════ JOURNAL HORS LIGNE ═════════════
+-- Autres ressources : exports.pickax_dashboard:AddJournal(identifier, 'texte')  (serveur) -> s'affiche dans Paramètres > Historique > Journal hors ligne.
+-- Les sanctions affichées viennent de la table staff_warns (avertissements du menu staff).
