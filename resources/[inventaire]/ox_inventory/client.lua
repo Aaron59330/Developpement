@@ -944,6 +944,10 @@ local function registerCommands()
             end
         end
 
+        -- inventaire du joueur : interface pickax_inventory (les coffres, coffres de véhicule, sols, boutiques, fouilles gardent l'interface ox)
+        if GetResourceState('pickax_inventory') == 'started' then
+            return exports.pickax_inventory:Open()
+        end
         return client.openInventory()
     end
 })

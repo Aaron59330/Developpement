@@ -1,8 +1,8 @@
 Config = {}
 
 Config.Brand = 'Sensity'            -- texte du logo en haut à gauche
-Config.Command = 'inv'             -- /inv ouvre / ferme l'inventaire
-Config.Key = 'F3'                  -- touche d'ouverture (F2 est déjà prise par ox_inventory) ; '' = aucune
+Config.Command = 'inv'             -- /inv ouvre / ferme l'inventaire (comme la touche d'ox_inventory)
+Config.Key = ''                    -- touche supplémentaire ('' = aucune) : la touche d'inventaire d'ox_inventory (F2 / Tab…) ouvre déjà cette interface
 Config.Shortcuts = 5               -- nombre de raccourcis (emplacements 1 à N d'ox_inventory = touches Num 1…)
 Config.Columns = 7                 -- colonnes de la grille
 Config.Rows = 4                    -- lignes de l'inventaire

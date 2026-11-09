@@ -86,6 +86,7 @@ end
 
 local function openInv()
     if open then close() return end
+    if LocalPlayer.state.invOpen then return end      -- une interface ox (coffre, sol, boutique…) est déjà ouverte
     if IsPauseMenuActive() or IsNuiFocused() or IsEntityDead(PlayerPedId()) then return end
     gather(function(d)
         open = true
@@ -126,3 +127,6 @@ RegisterNUICallback('sort', function(_, cb)
 end)
 RegisterNUICallback('refresh', function(_, cb) cb(1) gather(function(x) SendNUIMessage({ a = 'update', data = x }) end) end)
 AddEventHandler('onResourceStop', function(r) if r == GetCurrentResourceName() then SetNuiFocus(false, false) end end)
+
+-- si ox_inventory ouvre un autre inventaire (coffre, coffre de véhicule, sol, fouille…), on referme celui-ci
+AddEventHandler('pickax:inventory', function(o) if o and open then close() end end)
