@@ -14,12 +14,16 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 /* barre d'outils */
 .bar{left:96px;top:98px;width:1736px;height:44px;display:flex;align-items:center}
 .bar .strip{position:absolute;left:0;right:212px;top:0;bottom:0;background:var(--bg)}
-.btn{position:relative;height:36px;min-width:30px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;cursor:pointer;padding:0 10px;color:#ddd;border:1px solid transparent}
+.btn{position:absolute;height:36px;min-width:30px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;cursor:pointer;padding:0 10px;color:#ddd;border:1px solid transparent}
 .btn svg{font-size:16px}
 .btn:hover{background:rgba(255,255,255,.15)}
 .btn.on{background:var(--g);color:#fff}
-.arrow{background:#f3f3f3;color:#111;width:28px;min-width:28px;height:26px;padding:0}
-.arrow:hover{background:#fff}
+.arrow{width:38px;min-width:38px;height:36px;padding:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#f2f2f2;transition:background .15s,border-color .15s,transform .08s,opacity .15s}
+.arrow svg{font-size:18px;stroke-width:2.2}
+.arrow:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.34)}
+.arrow:active{transform:scale(.92);background:var(--g);border-color:var(--g2)}
+.arrow.off{opacity:.35;pointer-events:none}
+.btn{transition:background .15s}
 .search{position:absolute;left:400px;top:0;height:44px;display:flex;align-items:center;gap:10px;color:#cfcfcf;font-size:15.5px}
 .search input{background:none;border:0;outline:0;color:#fff;font:500 15.5px 'Figtree';width:400px}
 .search input::placeholder{color:#c9c9c9}

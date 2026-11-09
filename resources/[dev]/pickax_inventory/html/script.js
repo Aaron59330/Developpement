@@ -84,11 +84,11 @@ function render() {
 <div class="abs logo">${esc(c.brand)}</div>
 <div class="abs who"><b>${esc(d.name)}</b><i>${esc(d.money)} $</i><div class="x" id="cl">${P.x}</div></div>
 <div class="abs bar"><div class="strip"></div>
-  <div class="btn arrow" style="position:absolute;left:0;top:9px">${P.left}</div>
-  <div class="btn on" id="c_all" style="position:absolute;left:42px;top:4px;height:44px;width:88px;margin:-4px 0 0">${P.grid}Tout</div>
-  ${cats.slice(1).map((k, i) => `<div class="btn" data-cat="${k}" style="position:absolute;left:${138 + i * 50}px;top:4px;width:40px;height:36px;margin-top:0">${P[k]}</div>`).join('')}
-  <div class="btn arrow" style="position:absolute;left:343px;top:9px">${P.right}</div>
-  <div class="search" style="left:400px">${P.search}<input id="q" placeholder="Rechercher un objet" autocomplete="off"></div>
+  <div class="btn arrow" id="prev" title="Catégorie précédente" style="position:absolute;left:4px;top:4px">${P.left}</div>
+  <div class="btn on" id="c_all" style="position:absolute;left:48px;top:4px;width:88px">${P.grid}Tout</div>
+  ${cats.slice(1).map((k, i) => `<div class="btn" data-cat="${k}" style="position:absolute;left:${144 + i * 52}px;top:4px;width:44px">${P[k]}</div>`).join('')}
+  <div class="btn arrow" id="next" title="Catégorie suivante" style="position:absolute;left:358px;top:4px">${P.right}</div>
+  <div class="search" style="left:418px">${P.search}<input id="q" placeholder="Rechercher un objet" autocomplete="off"></div>
   ${c.shop ? `<div class="shopbtn" id="shop">${P.box}Inventaire boutique</div>` : ''}</div>
 ${eq('top', 183, 162, 80, 0)}${eq('left', 88, 251, 0, 80)}${eq('right', 436, 251, 0, 80)}
 ${stat(88, 'heart', 'Vie', d.vitals.health)}${stat(232, 'food', 'Faim', d.vitals.hunger)}${stat(374, 'drop', 'Soif', d.vitals.thirst)}
@@ -141,6 +141,9 @@ function wire() {
     const shop = $('#shop'); if (shop) shop.onclick = () => { view = 'shop'; SHOP = null; render(); post('shop'); };
     const back = $('#back'); if (back) back.onclick = () => { view = 'inv'; render(); };
     const sort = $('#sort'); if (sort) sort.onclick = () => post('sort');
+    const ORD = ['all', 'food', 'shirt', 'target', 'tool'];
+    const step = d => { const i = ORD.indexOf(filter); filter = ORD[Math.max(0, Math.min(ORD.length - 1, i + d))]; markCats(); softFilter(); };
+    $('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);
     markCats();
     stage.querySelectorAll('.sl').forEach(el => {
         const it = itemOf(el);
@@ -156,6 +159,8 @@ function wire() {
 }
 function markCats() {
     $('#c_all').classList.toggle('on', filter === 'all');
+    const ORD = ['all', 'food', 'shirt', 'target', 'tool'], i = ORD.indexOf(filter);
+    $('#prev').classList.toggle('off', i <= 0); $('#next').classList.toggle('off', i >= ORD.length - 1);
     stage.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('on', b.dataset.cat === filter));
 }
 function softFilter() {
