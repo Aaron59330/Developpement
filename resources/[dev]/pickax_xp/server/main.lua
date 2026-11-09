@@ -181,9 +181,9 @@ CreateThread(function()
 end)
 
 -- ───────────── Écran du joueur ─────────────
-ESX.RegisterServerCallback('pickax_xp:info', function(src, cb)
+local function info(src)
     local d = load(src)
-    if not d then return cb({ ok = false }) end
+    if not d then return { ok = false } end
     local lv = levelOf(d.xp)
     local rewards, levels = {}, {}
     for lvl, list in pairs(C.Rewards) do levels[#levels + 1] = lvl end
@@ -200,9 +200,11 @@ ESX.RegisterServerCallback('pickax_xp:info', function(src, cb)
         if (a.xp or 0) > 0 or a.perDollar or a.items then actions[#actions + 1] = { label = a.label, txt = txt, order = a.xp or 99 } end
     end
     table.sort(actions, function(a, b) return a.label < b.label end)
-    cb({ ok = true, level = lv, max = C.MaxLevel, xp = d.xp, floor = xpFor(lv), nextXp = lv >= C.MaxLevel and nil or xpFor(lv + 1), rewards = rewards, actions = actions, log = d.log,
+    return({ ok = true, level = lv, max = C.MaxLevel, xp = d.xp, floor = xpFor(lv), nextXp = lv >= C.MaxLevel and nil or xpFor(lv + 1), rewards = rewards, actions = actions, log = d.log,
          playtime = C.Playtime.Enabled and { every = C.Playtime.EveryMinutes, xp = C.Playtime.XP } or nil, daily = C.DailyLogin.Enabled and C.DailyLogin.XP or nil })
-end)
+end
+exports('Info', info)
+ESX.RegisterServerCallback('pickax_xp:info', function(src, cb) cb(info(src)) end)
 
 -- Commande admin : /givexp [id] [quantité]
 RegisterCommand('givexp', function(src, args)

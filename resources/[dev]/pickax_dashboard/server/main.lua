@@ -32,32 +32,42 @@ local function gather(src)
         lang = C.Lang, name = x.getName and x.getName() or GetPlayerName(src), charId = src, accountId = (joaat(tostring(lic)) & 0x7fffffff) % 100000,
         playtime = fmtTime(safe(function() return MySQL.scalar.await('SELECT minutes FROM pickax_dashboard_playtime WHERE identifier = ?', { id }) end, 0)),
     }
-    -- factures
+    -- factures (liste)
     local B = C.Billing
-    local bills = safe(function() return MySQL.single.await(('SELECT COUNT(*) n, COALESCE(SUM(%s),0) total FROM %s WHERE %s = ?'):format(ident(B.AmountColumn), ident(B.Table), ident(B.IdentifierColumn)), { id }) end, { n = 0, total = 0 })
-    d.bills = { count = tonumber(bills.n) or 0, total = tonumber(bills.total) or 0 }
+    local rows = safe(function() return MySQL.query.await(('SELECT %s label, %s amount FROM %s WHERE %s = ? ORDER BY 2 DESC LIMIT 50'):format(ident(B.LabelColumn), ident(B.AmountColumn), ident(B.Table), ident(B.IdentifierColumn)), { id }) end, {})
+    local total = 0
+    d.bills = { count = #rows, items = {} }
+    for _, r in ipairs(rows) do total = total + (tonumber(r.amount) or 0) d.bills.items[#d.bills.items + 1] = { label = tostring(r.label or 'Facture'), amount = tonumber(r.amount) or 0 } end
+    d.bills.total = total
     -- véhicules
     local V = C.Vehicles
     local cols = V.StoredColumn ~= '' and (', ' .. ident(V.StoredColumn) .. ' stored') or ''
-    local rows = safe(function() return MySQL.query.await(('SELECT plate, vehicle%s FROM %s WHERE %s = ?'):format(cols, ident(V.Table), ident(V.OwnerColumn)), { id }) end, {})
+    local vr = safe(function() return MySQL.query.await(('SELECT plate, vehicle%s FROM %s WHERE %s = ?'):format(cols, ident(V.Table), ident(V.OwnerColumn)), { id }) end, {})
     local out = 0
-    d.vehicles = { count = #rows, items = {} }
-    for _, r in ipairs(rows) do
+    d.vehicles = { count = #vr, items = {} }
+    for _, r in ipairs(vr) do
         local stored = r.stored == nil or tonumber(r.stored) == 1 or r.stored == true
         if not stored then out = out + 1 end
         local ok, v = pcall(json.decode, r.vehicle or '{}')
         d.vehicles.items[#d.vehicles.items + 1] = { plate = r.plate, model = ok and type(v) == 'table' and v.model or nil, state = stored and 'Rangé' or 'Sorti' }
     end
-    d.vehicles.out, d.vehicles.stored = out, #rows - out
-    -- blocs optionnels (fournis par ta config)
-    for k, f in pairs(C.Providers or {}) do
-        if type(f) == 'function' then local ok, r = pcall(f, src, x) if ok and type(r) == 'table' then d[k == 'properties' and 'props' or k] = r end end
-    end
+    d.vehicles.out, d.vehicles.stored = out, #vr - out
+    -- niveau et récompenses (pickax_xp)
+    if GetResourceState('pickax_xp') == 'started' then d.xp = safe(function() return exports.pickax_xp:Info(src) end, nil) end
+    -- carnet (pickax_carnet)
+    if GetResourceState('pickax_carnet') == 'started' then d.carnet = safe(function() return exports.pickax_carnet:Snapshot(src) end, nil) end
+    -- métier et organisation (ESX)
+    local function jobOf(j) if type(j) ~= 'table' then return nil end return { name = j.name, label = j.label or j.name, grade = j.grade, gradeLabel = j.grade_label or j.grade_name or '', salary = tonumber(j.grade_salary) or 0 } end
+    d.job, d.job2 = jobOf(x.job), jobOf(x.job2)
+    d.actions = { job = C.JobActions, gang = C.GangActions }
+    -- services disponibles (ressource démarrée)
+    d.services = {}
+    for _, s in ipairs(C.Services or {}) do if GetResourceState(s.res) == 'started' then d.services[#d.services + 1] = s end end
     -- boutique
     local coins = 0
     local acc = C.Shop.CoinsAccount and x.getAccount and x.getAccount(C.Shop.CoinsAccount)
     if acc then coins = acc.money or 0 end
-    d.shop = { coins = coins, items = C.Shop.Items or {} }
+    d.shop = { coins = coins, items = C.Shop.Items or {}, hasBoutique = GetResourceState('pickax_boutique') == 'started' }
     return d
 end
 

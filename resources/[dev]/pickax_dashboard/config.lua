@@ -6,18 +6,28 @@ Config.Lang = 'Français'
 
 -- ═════════════ DONNÉES DU JOUEUR ═════════════
 -- Déjà branchés : identité, temps de jeu (compté par cette ressource), factures (table `billing` d'ESX), véhicules (table `owned_vehicles`).
-Config.Billing = { Table = 'billing', IdentifierColumn = 'identifier', AmountColumn = 'amount' }
+Config.Billing = { Table = 'billing', IdentifierColumn = 'identifier', AmountColumn = 'amount', LabelColumn = 'label' }
 Config.Vehicles = { Table = 'owned_vehicles', OwnerColumn = 'owner', StoredColumn = 'stored' }   -- StoredColumn : 1 = rangé, 0 = sorti ; '' = ignoré
 
--- Les blocs ci-dessous n'existent pas encore dans la base : ils affichent leur état « vide ». Donne ta propre fonction pour les remplir.
--- Chaque fonction reçoit (source, xPlayer) et renvoie une table (voir html/script.js, objet DEMO, pour le format) ou nil.
-Config.Providers = {
-    quests     = nil,   -- { claim = 0, renew = '11 h 14 min', featured = { {label, courant, max} }, tabs = { daily = {…}, perm = {…}, groups = {…} }, totals = {...}, percent = 24, renewHours = '…' }
-    jobs       = nil,   -- { level = 15, best = { label, level, pct, rank, of, xp, next }, list = {…}, board = {…} }
-    properties = nil,   -- { count = 0 }
-    animals    = nil,   -- { count = 0, max = 5 }
-    services   = nil,   -- { have = 8, total = 29, list = { {'ok'|'no', '#couleur'} }, more = 13 }
+-- Données lues dans tes systèmes : niveau et récompenses (pickax_xp), carnet (pickax_carnet), métier et organisation (ESX job / job2).
+
+-- ═════════════ SERVICES (page « Services » et raccourcis du bas) ═════════════
+-- Un service n'apparaît que si sa ressource est démarrée. command = commande lancée au clic.
+Config.Services = {
+    { res = 'pickax_phone',     label = 'Téléphone',        desc = 'Messages, appels, annonces, réseaux.',               icon = 'phone',   command = 'phone' },
+    { res = 'pickax_minigames', label = 'Mini-jeux',        desc = 'Ton profil : niveau, défis, succès, classements.',    icon = 'game',    command = 'mgprofil' },
+    { res = 'pickax_bourse',    label = 'Bourse',           desc = 'Achète et vends des actions.',                        icon = 'chart',   command = 'bourse' },
+    { res = 'pickax_auction',   label = 'Enchères',         desc = 'Véhicules saisis mis aux enchères.',                  icon = 'gavel',   command = 'encheres' },
+    { res = 'pickax_carplay',   label = 'CarPlay',          desc = 'Musique et navigation dans ton véhicule.',            icon = 'car',     command = 'carplay' },
+    { res = 'pickax_mechanic',  label = 'Mécanique',        desc = 'Diagnostic et réparation du véhicule proche.',        icon = 'tool',    command = 'meca' },
+    { res = 'pickax_medical',   label = 'Examen médical',   desc = 'Examen du patient le plus proche.',                   icon = 'heart',   command = 'ems' },
+    { res = 'pickax_tutorial',  label = 'Tutoriel',         desc = 'Revois le guide du serveur.',                         icon = 'help',    command = 'tutoriel' },
+    { res = 'pickax_keybinds',  label = 'Mes touches',      desc = 'Raccourcis clavier du serveur.',                      icon = 'key',     command = 'touches' },
+    { res = 'pickax_compass',   label = 'Boussole',         desc = 'Réglages de la boussole.',                            icon = 'compass', command = 'boussole' },
 }
+-- Actions de la page « Métier & organisation »
+Config.JobActions  = { { label = 'Menu du métier', icon = 'list', command = 'jobmenu' }, { label = 'Décorer ma propriété', icon = 'building', command = 'decorer' } }
+Config.GangActions = { { label = 'Menu de l\'organisation', icon = 'list', command = 'gangmenu' }, { label = 'Tablette', icon = 'book', command = 'gangtablet' } }
 
 -- ═════════════ BOUTIQUE (page « Boutique » du tableau de bord) ═════════════
 -- Items : { id, tab ('daily'|'vehicle'|'bundles'|'weapons'|'items'), cat, title, desc, price, image (lien https ou nil), badges = { 'NOUVEAU' }, stats = { {'Dégâts', 35} } }
