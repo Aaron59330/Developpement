@@ -115,3 +115,8 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .grp i{font:600 11px 'Figtree';font-style:normal;color:var(--mu);background:rgba(255,255,255,.08);padding:1px 7px;border-radius:9px}
 .grid2{display:grid;gap:6px}
 .sub svg{font-size:13px}
+.btn.cat{background:rgba(0,0,0,.32);border:0;border-left:1px solid rgba(255,255,255,.13);color:#e6e6e6}
+.btn.cat:hover{background:rgba(255,255,255,.12)}
+.btn.cat.on{background:var(--g);border-left-color:var(--g)}
+#c_all{background:var(--g);color:#fff}
+#c_all:not(.on){background:rgba(0,0,0,.32);color:#e6e6e6}

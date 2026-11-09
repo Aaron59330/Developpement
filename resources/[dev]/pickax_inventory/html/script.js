@@ -85,8 +85,8 @@ function render() {
 <div class="abs who"><b>${esc(d.name)}</b><i>${esc(d.money)} $</i><div class="x" id="cl">${P.x}</div></div>
 <div class="abs bar"><div class="strip"></div>
   <div class="btn arrow" id="prev" title="Catégorie précédente" style="position:absolute;left:0;top:9px">${P.left}</div>
-  <div class="btn on" id="c_all" style="position:absolute;left:42px;top:4px;width:88px">${P.grid}Tout</div>
-  ${cats.slice(1).map((k, i) => `<div class="btn" data-cat="${k}" style="position:absolute;left:${138 + i * 50}px;top:4px;width:40px">${P[k]}</div>`).join('')}
+  <div class="btn on" id="c_all" style="position:absolute;left:42px;top:0;width:88px;height:44px">${P.grid}Tout</div>
+  ${cats.slice(1).map((k, i) => `<div class="btn cat" data-cat="${k}" style="position:absolute;left:${130 + i * 50}px;top:0;width:50px;height:44px">${P[k]}</div>`).join('')}
   <div class="btn arrow" id="next" title="Catégorie suivante" style="position:absolute;left:343px;top:9px">${P.right}</div>
   <div class="search" style="left:400px">${P.search}<input id="q" placeholder="Rechercher un objet" autocomplete="off"></div>
   ${c.shop ? `<div class="shopbtn" id="shop">${P.box}Inventaire boutique</div>` : ''}</div>
