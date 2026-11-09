@@ -59,20 +59,30 @@ local function close()
     SendNUIMessage({ a = 'close' })
 end
 
-local function openInv()
-    if open then close() return end
-    if IsPauseMenuActive() or IsNuiFocused() or IsEntityDead(PlayerPedId()) then return end
+local function gather(cb)
     ESX.TriggerServerCallback('pickax_inventory:data', function(d)
         if not d then return end
         d.vitals, d.equipment = vitals(), equipment()
         d.cfg = { brand = C.Brand, shortcuts = C.Shortcuts, cols = C.Columns, rows = C.Rows, warn = C.WarnWeight, recentCount = C.RecentCount,
-                  shop = (C.ShopCommand or '') ~= '', img = C.ImagePath }
+                  shop = true, img = C.ImagePath }
         d.recent = {}
         for _, r in ipairs(recent) do d.recent[#d.recent + 1] = { name = r.name, label = r.label, count = r.count, ago = math.floor((GetGameTimer() - r.t) / 1000) } end
+        cb(d)
+    end)
+end
+
+local function openInv()
+    if open then close() return end
+    if IsPauseMenuActive() or IsNuiFocused() or IsEntityDead(PlayerPedId()) then return end
+    gather(function(d)
         open = true
         SetNuiFocus(true, true)
         SendNUIMessage({ a = 'open', data = d })
     end)
+end
+
+local function sendShop()
+    ESX.TriggerServerCallback('pickax_inventory:shop', function(s) SendNUIMessage({ a = 'shop', shop = s }) end)
 end
 
 RegisterCommand(C.Command, openInv, false)
@@ -89,8 +99,17 @@ RegisterNUICallback('swap', function(d, cb)
     cb(1)
     if d then TriggerServerEvent('pickax_inventory:swap', d.from, d.to) end
 end)
-RegisterNUICallback('shop', function(_, cb)
+RegisterNUICallback('shop', function(_, cb) cb(1) sendShop() end)
+RegisterNUICallback('withdraw', function(d, cb)
     cb(1)
-    if (C.ShopCommand or '') ~= '' then close() ExecuteCommand(C.ShopCommand) end
+    if not d then return end
+    TriggerServerEvent('pickax_inventory:withdraw', d.slot, d.count)
+    SetTimeout(450, function() if open then sendShop() gather(function(x) SendNUIMessage({ a = 'update', data = x }) end) end end)
 end)
+RegisterNUICallback('sort', function(_, cb)
+    cb(1)
+    TriggerServerEvent('pickax_inventory:sort', C.Shortcuts + 1)
+    SetTimeout(900, function() if open then gather(function(x) SendNUIMessage({ a = 'update', data = x }) end) end end)
+end)
+RegisterNUICallback('refresh', function(_, cb) cb(1) gather(function(x) SendNUIMessage({ a = 'update', data = x }) end) end)
 AddEventHandler('onResourceStop', function(r) if r == GetCurrentResourceName() then SetNuiFocus(false, false) end end)

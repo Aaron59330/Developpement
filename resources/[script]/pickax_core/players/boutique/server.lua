@@ -2,6 +2,21 @@ discord_webhook = {
 	url = ConfigBoutique.Webhook
 }
 
+-- Les objets de la boutique vont dans l'inventaire boutique (coffre privé de pickax_inventory, invisible lors d'une fouille) ;
+-- si cette ressource est absente ou refuse, ils vont dans l'inventaire normal.
+function BoutiqueGive(src, item, amount)
+    if GetResourceState('pickax_inventory') == 'started' then
+        local ok, res = pcall(function() return exports.pickax_inventory:Deliver(src, item, amount) end)
+        if ok and res then return true end
+    end
+    return AddItemOnPlayer(src, item, amount)
+end
+local function BoutiqueStashCount(src, item)
+    if GetResourceState('pickax_inventory') ~= 'started' then return 0 end
+    local ok, n = pcall(function() return exports.pickax_inventory:Count(src, item) end)
+    return ok and tonumber(n) or 0
+end
+
 --Mise en cache
 local PlayerCacheBoutique = {} --Registre de la table pour le cache
 local PlayerCacheBoutique2 = {}
@@ -261,10 +276,10 @@ AddEventHandler("CorePickax:Boutique:Add", function(table)
                 if table.Interaction == "weapon" then
                     if tonumber(PriceConfigBoutique.weapon[table.id].price) == tonumber(table.price) then
                         if ConfigBoutique.WeaponItem then
-                            if GetItemOnPlayer(_src, table.model).count >= 1 then
+                            if GetItemOnPlayer(_src, table.model).count >= 1 or BoutiqueStashCount(_src, table.model) >= 1 then
                                 TriggerClientEvent(Config.Trigger.TriggerNotification, _src, (ConfigBoutique.Notification["YouHaveWeapon"]):format(table.Nameweapon))
                             else
-                                AddItemOnPlayer(_src, table.model, 1)
+                                BoutiqueGive(_src, table.model, 1)
                                 BoutiqueFunction.removePointsToPlayer(_src, table.price)
                             end
                         else
@@ -429,11 +444,11 @@ AddEventHandler('ESXCustomBoutique:giveReward', function (t, data, amount, nameC
 	local _source = source
 	local xPlayer = ESX.GetPlayerFromId(_source)
 	if t == "item" then
-		AddItemOnPlayer(_source, data, amount)
+		BoutiqueGive(_source, data, amount)
         TriggerEvent('esx:customDiscordLog', 'Logs boutique', 'Nouvelle caisse ouverte', nil, ConfigSV.Logs["LogsBoutique"], 'ID : '.._source..'\nUtilisateur : '..GetPlayerName(_source)..'\nLicense : '..ESX.GetPlayerFromId(_source).identifier.."\nAchat : "..nameCaisse.name.."\nGains : x"..amount..data.." item\nPrix : "..nameCaisse.price.." coins\nCoins Actuelle : "..PlayerCacheBoutique[ESX.GetPlayerFromId(_source).identifier].points)
 	elseif t == "weapon" then
         if ConfigBoutique.WeaponItem then
-            AddItemOnPlayer(_source, data, 1)
+            BoutiqueGive(_source, data, 1)
             TriggerEvent('esx:customDiscordLog', 'Logs boutique', 'Nouvelle caisse ouverte', nil, ConfigSV.Logs["LogsBoutique"], 'ID : '.._source..'\nUtilisateur : '..GetPlayerName(_source)..'\nLicense : '..ESX.GetPlayerFromId(_source).identifier.."\nAchat : "..nameCaisse.name.."\nGains : "..data.."\nPrix : "..nameCaisse.price.." coins\nCoins Actuelle : "..PlayerCacheBoutique[ESX.GetPlayerFromId(_source).identifier].points)
         else
             if GetWeaponOnPlayer(_source, data) then

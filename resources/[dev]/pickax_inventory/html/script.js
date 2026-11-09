@@ -44,6 +44,7 @@ const P = {
 };
 const EQI = { Tenue: 'shirt', Parachute: 'parachute', Perruque: 'wig', Chapeau: 'hat', Lunettes: 'glasses', Accessoire: 'chain', Haut: 'shirt', Pantalon: 'pants', Chaussures: 'shoe', Masque: 'mask', Boucles: 'gem', Sac: 'bag', Gilet: 'vest', Bracelet: 'gem', Montre: 'watch' };
 
+let view = 'inv', SHOP = null;
 let D = null, filter = 'all', query = '', sel = null, drag = null, tab = 0;
 const CATS = { all: null, food: /water|bread|burger|sandwich|cola|food|drink|eau|pain|barre|candy|chocolat/i, shirt: /tenue|clothes|vest|mask|jacket|hat|gilet|veste/i, target: /^weapon_|ammo|munition|gun|akpixel/i, tool: /radio|phone|tool|kit|repair|talkie|lockpick|key|cle/i };
 
@@ -93,12 +94,12 @@ ${eq('top', 183, 162, 80, 0)}${eq('left', 88, 251, 0, 80)}${eq('right', 436, 251
 ${stat(88, 'heart', 'Vie', d.vitals.health)}${stat(232, 'food', 'Faim', d.vitals.hunger)}${stat(374, 'drop', 'Soif', d.vitals.thirst)}
 <div class="vest">${P.shield}Gilet<div class="sel" style="margin-left:6px">Style <b>${d.vitals.armor ? 12 : 0}</b> / 45 ${P.chev}</div><div class="sel">Variation <b>1</b> / 5 ${P.chev}</div><div class="ok">${P.check}</div></div>
 
-<div class="pn" style="left:520px;top:162px;width:650px;height:${58 + rows * 91 + 3}px">
+${view === 'shop' ? shopHtml() : `<div class="pn" style="left:520px;top:162px;width:650px;height:${58 + rows * 91 + 3}px">
   <div class="ph"><h3>Inventaire</h3><div class="wt"><div class="bar2${pct > .5 ? '' : ' ok'}"><i style="width:${Math.min(100, pct * 100)}%"></i></div><span><b>${kg(d.weight)}</b> / ${d.maxWeight} kg</span><div class="srt" id="sort">${P.sort}</div></div></div>
   <div class="grid" style="top:58px;grid-template-columns:repeat(${cols},85px)" id="g_main">${Array.from({ length: mainCount }, (_, i) => slotHtml(bySlot[hotN + 1 + i], hotN + 1 + i, 'main')).join('')}</div>
 </div>
 ${bag ? `<div class="pn" style="left:520px;top:600px;width:650px;height:244px"><div class="ph"><h3>Sac</h3><div class="wt"><div class="bar2 ok"><i style="width:${bag.weight / bag.max * 100}%"></i></div><span><b>${kg(bag.weight)}</b> / ${bag.max} kg</span><div class="srt">${P.sort}</div></div></div>
-  <div class="grid" style="top:58px;grid-template-columns:repeat(${cols},85px)">${Array.from({ length: cols * 2 }, (_, i) => slotHtml(bag.items[i], 1000 + i, 'bag')).join('')}</div></div>` : ''}
+  <div class="grid" style="top:58px;grid-template-columns:repeat(${cols},85px)">${Array.from({ length: cols * 2 }, (_, i) => slotHtml(bag.items[i], 1000 + i, 'bag')).join('')}</div></div>` : ''}`}
 <div class="pn" style="left:520px;top:856px;width:650px;height:134px">
   <div class="ph" style="height:40px"><h3>Raccourcis</h3><span class="sub">Glissez un objet pour l'assigner</span></div>
   <div class="grid" style="top:40px;left:10px;display:flex;gap:6px;width:640px">${Array.from({ length: hotN }, (_, i) => slotHtml(bySlot[i + 1], i + 1, 'hot', `<span class="key">Num ${i + 1}</span>`)).join('')}</div>
@@ -117,23 +118,40 @@ ${tab === 0 ? `
     wire();
 }
 
+
+function shopHtml() {
+    const c = D.cfg, S = SHOP, items = S ? S.items.filter(matches) : [];
+    const groups = {};
+    items.forEach(it => (groups[it.group] = groups[it.group] || []).push(it));
+    const order = Object.keys(groups).sort((a, b) => a === 'Objets' ? 1 : b === 'Objets' ? -1 : a.localeCompare(b));
+    const pct = S && S.maxWeight ? S.weight / S.maxWeight : 0;
+    const body = !S ? '<div class="empty">Chargement…</div>' : !S.items.length ? '<div class="empty" style="padding:60px 0;text-align:center">Ton inventaire boutique est vide.<br>Les objets achetés ou gagnés à la boutique arriveront ici.</div>'
+        : order.map(g => `<div class="grp"><span>${esc(g)}</span><i>${groups[g].length}</i></div><div class="grid2" style="grid-template-columns:repeat(${c.cols},85px)">${groups[g].map(it => slotHtml(it, it.slot, 'shop')).join('')}</div>`).join('');
+    return `<div class="pn" style="left:520px;top:162px;width:650px;height:682px"><div class="ph"><h3>Inventaire boutique</h3><span class="sub" style="display:flex;align-items:center;gap:6px">${P.lock}Privé : invisible en cas de fouille</span>
+      <div class="wt"><span><b>${S ? kg(S.weight) : '0,00'}</b> / ${S ? kg(S.maxWeight).replace(',00', '') : ''} kg</span><div class="btn" id="back" style="height:32px">${P.left}Retour</div></div></div>
+      <div class="shopbody">${body}</div></div>`;
+}
+
 function wire() {
     $('#cl').onclick = close;
     const q = $('#q'); q.value = query; q.oninput = () => { query = q.value.trim().toLowerCase(); softFilter(); };
     $('#c_all').onclick = () => { filter = 'all'; markCats(); softFilter(); };
     stage.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { filter = filter === b.dataset.cat ? 'all' : b.dataset.cat; markCats(); softFilter(); });
     stage.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = +b.dataset.tab; render(); });
-    const shop = $('#shop'); if (shop) shop.onclick = () => post('shop');
-    $('#sort').onclick = () => { D.items.sort((a, b) => (a.label || '').localeCompare(b.label || '')); /* l'ordre serveur reste maître : tri visuel de la grille */ };
+    const shop = $('#shop'); if (shop) shop.onclick = () => { view = 'shop'; SHOP = null; render(); post('shop'); };
+    const back = $('#back'); if (back) back.onclick = () => { view = 'inv'; render(); };
+    const sort = $('#sort'); if (sort) sort.onclick = () => post('sort');
     markCats();
     stage.querySelectorAll('.sl').forEach(el => {
         const it = itemOf(el);
         el.onmouseenter = e => it && showTip(it, e);
         el.onmousemove = e => it && moveTip(e);
         el.onmouseleave = hideTip;
-        el.ondblclick = () => it && post('use', { slot: it.slot });
+        el.ondblclick = () => { if (!it) return; if (el.dataset.k === 'shop') withdraw(it, it.count); else post('use', { slot: it.slot }); };
+        el.oncontextmenu = e => { e.preventDefault(); if (it && el.dataset.k === 'shop') withdraw(it, 1); };
         el.onclick = () => { if (it) { sel = it; stage.querySelectorAll('.sl.sel').forEach(s => s.classList.remove('sel')); el.classList.add('sel'); } };
-        el.onmousedown = e => { if (e.button === 0 && it) startDrag(it, el, e); };
+        el.onmousedown = e => { if (e.button === 0 && it && el.dataset.k !== 'shop') startDrag(it, el, e); };
+        el.addEventListener('click', e => { if (it && el.dataset.k === 'shop' && e.shiftKey) withdraw(it, it.count); });
     });
 }
 function markCats() {
@@ -143,11 +161,13 @@ function markCats() {
 function softFilter() {
     stage.querySelectorAll('.sl').forEach(el => { const it = itemOf(el); el.classList.toggle('dim', !!it && !matches(it)); });
 }
-function itemOf(el) { const i = +el.dataset.i; if (el.dataset.k === 'bag') return D.bag && D.bag.items[i - 1000]; return D.items.find(x => x.slot === i); }
+function withdraw(it, n) { post('withdraw', { slot: it.slot, count: n }); }
+function itemOf(el) {
+    if (el.dataset.k === 'shop') return SHOP && SHOP.items.find(x => x.slot === +el.dataset.i); const i = +el.dataset.i; if (el.dataset.k === 'bag') return D.bag && D.bag.items[i - 1000]; return D.items.find(x => x.slot === i); }
 
 // ───── infobulle ─────
 let tip = null;
-function showTip(it, e) { hideTip(); tip = document.createElement('div'); tip.className = 'tip'; tip.innerHTML = `<b>${esc(it.label)}</b><em>${it.count > 1 ? '×' + it.count + ' · ' : ''}${kg(it.weight)} kg · double-clic : utiliser</em>`; document.body.appendChild(tip); moveTip(e); }
+function showTip(it, e) { hideTip(); tip = document.createElement('div'); tip.className = 'tip'; tip.innerHTML = `<b>${esc(it.label)}</b><em>${it.count > 1 ? '×' + it.count + ' · ' : ''}${kg(it.weight)} kg · ' + (SHOP && view === 'shop' && it.group ? 'double-clic : récupérer (clic droit : 1)' : 'double-clic : utiliser') + '</em>`; document.body.appendChild(tip); moveTip(e); }
 function moveTip(e) { if (tip) { tip.style.left = e.clientX + 16 + 'px'; tip.style.top = e.clientY + 12 + 'px'; } }
 function hideTip() { if (tip) tip.remove(); tip = null; }
 
@@ -168,7 +188,7 @@ function startDrag(it, el, e) {
             const to = +s.dataset.i, other = D.items.find(x => x.slot === to);
             post('swap', { from: it.slot, to });
             if (other) other.slot = it.slot; it.slot = to;      // aperçu immédiat
-            render();
+            render(); setTimeout(() => post('refresh'), 500);
         }
     };
     addEventListener('mousemove', mv); addEventListener('mouseup', up);
@@ -178,7 +198,9 @@ function close() { stage.hidden = true; hideTip(); post('close'); }
 addEventListener('keydown', e => { if ((e.key === 'Escape' || e.key === 'Tab') && !stage.hidden) { e.preventDefault(); close(); } });
 addEventListener('message', e => {
     const m = e.data;
-    if (m.a === 'open') { D = m.data; filter = 'all'; query = ''; tab = 0; sel = null; render(); }
+    if (m.a === 'open') { D = m.data; filter = 'all'; query = ''; tab = 0; sel = null; view = 'inv'; SHOP = null; render(); }
+    else if (m.a === 'update') { D = m.data; if (!drag) render(); }
+    else if (m.a === 'shop') { SHOP = m.shop; render(); }
     else if (m.a === 'close') { stage.hidden = true; hideTip(); }
 });
 
@@ -202,5 +224,10 @@ if (!IN_GAME) {
         cfg: { brand: 'Sensity', shortcuts: 7, cols: 7, rows: 4, warn: .85, recentCount: 3, shop: true, img: null },
     };
     D.items.forEach(x => { if (x.name === 'weapon_akpixel') x.slot = 1; });
+    SHOP = { weight: 4.2, maxWeight: 500, items: [
+        { slot: 1, name: 'weapon_ak', label: 'AK-47', count: 1, weight: 3300, group: 'Armes' }, { slot: 2, name: 'weapon_pistol', label: 'Pistolet', count: 1, weight: 900, group: 'Armes' },
+        { slot: 3, name: 'crate1', label: 'Caisse rare', count: 3, weight: 0, group: 'Caisses et packs' }, { slot: 4, name: 'pack1', label: 'Pack débutant', count: 1, weight: 0, group: 'Caisses et packs' },
+        { slot: 5, name: 'medikit', label: 'Kit de soin', count: 5, weight: 0, group: 'Consommables' }, { slot: 6, name: 'water', label: 'Eau', count: 12, weight: 0, group: 'Consommables' }, { slot: 7, name: 'goldbar', label: 'Lingot', count: 2, weight: 0, group: 'Objets' }] };
+    if (location.search.includes('shop')) view = 'shop';
     render();
 }
