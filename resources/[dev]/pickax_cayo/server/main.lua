@@ -16,7 +16,7 @@ local function ensureParty(src)
     p = {
         leader = src, phase = 'plan', order = { src },
         members = { [src] = { name = x.getName and x.getName() or GetPlayerName(src), cut = 100, state = 'lobby', bag = 0, loot = {} } },
-        plan = { target = nil, approach = nil, infil = nil, exfil = nil, loadout = nil, difficulty = 'normal', equipment = {} },
+        plan = { target = nil, approach = nil, infil = nil, exfil = nil, loadout = nil, difficulty = 'normal', equipment = {}, elite = false },
         scope = {}, prep = {}, taken = {}, opened = {}, primary = false,
     }
     parties[src], memberOf[src] = p, src
@@ -57,12 +57,12 @@ local function staticCfg()
     local infils, exfils, scope, zones = {}, {}, {}, {}
     for _, i in ipairs(C.Infiltrations) do infils[#infils + 1] = { id = i.id, label = i.label, x = i.coords.x, y = i.coords.y } end
     for _, i in ipairs(C.Exfils) do exfils[#exfils + 1] = { id = i.id, label = i.label, x = i.coords.x, y = i.coords.y } end
-    for _, i in ipairs(C.Scope) do scope[#scope + 1] = { id = i.id, label = i.label } end
+    for _, i in ipairs(C.Scope) do scope[#scope + 1] = { id = i.id, label = i.label, targets = #i.targets } end
     for _, z in ipairs(C.Island.guards) do zones[#zones + 1] = { x = z.coords.x, y = z.coords.y, label = z.label, count = z.count } end
     return {
         targets = C.Targets, loot = C.Loot, approaches = (function() local o = {} for _, a in ipairs(C.Approaches) do o[#o + 1] = { id = a.id, label = a.label, desc = a.desc, skydive = a.skydive } end return o end)(), infils = infils, exfils = exfils, equipment = C.Equipment,
         loadouts = (function() local o = {} for _, l in ipairs(C.Loadouts) do o[#o + 1] = { id = l.id, label = l.label, desc = l.desc } end return o end)(), difficulties = C.Difficulties, scope = scope, fees = C.Fees, hardBonus = C.HardBonus, players = C.Players,
-        launchFee = C.LaunchFee, scopeRequired = C.ScopeRequired, bag = C.BagCapacity, vault = xy(C.Island.vault), zones = zones, title = C.Planning.label,
+        launchFee = C.LaunchFee, scopeRequired = C.ScopeRequired, bag = C.BagCapacity, vault = xy(C.Island.vault), zones = zones, title = C.Planning.label, elite = C.Elite, spots = (function() local o = {} for k, v in pairs(C.Island.targetSpots) do o[k] = { x = v.coords.x, y = v.coords.y } end return o end)(),
     }
 end
 
@@ -84,6 +84,7 @@ RegisterNetEvent('pickax_cayo:set', function(field, value)
     elseif field == 'exfil' and byId(C.Exfils, value) then pl.exfil = value
     elseif field == 'loadout' and byId(C.Loadouts, value) then pl.loadout = value
     elseif field == 'difficulty' and C.Difficulties[value] then pl.difficulty = value
+    elseif field == 'elite' then pl.elite = not pl.elite
     elseif field == 'equipment' and byId(C.Equipment, value) then
         if pl.equipment[value] then pl.equipment[value] = nil p.prep[value] = nil else pl.equipment[value] = true end
     else return end
@@ -174,7 +175,7 @@ RegisterNetEvent('pickax_cayo:prep', function(kind, id)
     local pos = GetEntityCoords(GetPlayerPed(src))
     if kind == 'scope' then
         local s = byId(C.Scope, id)
-        if not s or #(pos - s.coords) > 12.0 then return end
+        if not s or #(pos - C.Planning.coords) > 15.0 then return end     -- le drone se lance depuis le poste de planification
         p.scope[id] = true
     elseif kind == 'equip' then
         local pt = C.PrepPoints[id]
@@ -227,7 +228,11 @@ local function finish(p, reason)
     end
     -- le sac plein vaut la valeur du butin ; un sac partiel vaut sa part
     if p.plan.difficulty == 'hard' then pool = pool * (1 + C.HardBonus) end
-    local net = pool * (1 - (C.Fees.pavel + C.Fees.fence) / 100)
+    local eliteBonus = 0
+    if p.plan.elite and p.primary and #outs > 0 and not p.alerted and not p.anyDead and os.time() - (p.startedAt or 0) <= C.Elite.time then
+        eliteBonus = p.plan.difficulty == 'hard' and C.Elite.bonusHard or C.Elite.bonus
+    end
+    local net = pool * (1 - (C.Fees.pavel + C.Fees.fence) / 100) + eliteBonus
     local lo = byId(C.Loadouts, p.plan.loadout)
     for _, id in ipairs(p.order) do
         local x = ESX.GetPlayerFromId(id)
@@ -238,7 +243,7 @@ local function finish(p, reason)
             pay = math.floor(net * (m.cut > 0 and m.cut or 1) / (cutSum > 0 and cutSum or 1))
             if pay > 0 then x.addAccountMoney(C.PayAccount, pay) end
         end
-        TriggerClientEvent('pickax_cayo:result', id, { success = #outs > 0, pay = pay, pool = math.floor(pool), reason = reason, state = m.state, primary = p.primary })
+        TriggerClientEvent('pickax_cayo:result', id, { success = #outs > 0, pay = pay, pool = math.floor(pool), reason = reason, state = m.state, primary = p.primary, elite = eliteBonus > 0 })
         memberOf[id] = nil
     end
     local leaderX = ESX.GetPlayerFromId(p.leader)
@@ -300,6 +305,7 @@ RegisterNetEvent('pickax_cayo:obstacle', function(id)
     local ob
     for _, o in ipairs(C.Island.obstacles) do if o.id == id then ob = o end end
     if not ob or p.opened[id] or not near(src, ob.coords, 8.0) then return end
+    if ob.requires and not p.opened[ob.requires] then return end
     if ob.need and not p.plan.equipment[ob.need] then return notify(src, '~r~Il te manque le matériel nécessaire.') end
     p.opened[id] = true
     broadcast(p, 'pickax_cayo:opened', id)
@@ -323,7 +329,11 @@ end)
 RegisterNetEvent('pickax_cayo:primary', function()
     local src = source
     local p = member(src)
-    if not p or p.primary or not p.opened.door or not near(src, C.Island.vault, 8.0) then return end
+    if not p or p.primary then return end
+    local sp = C.Island.targetSpots[p.plan.target]
+    if not sp or not near(src, sp.coords, 8.0) then return end
+    if sp.requires and not p.opened[sp.requires] then return end
+    if sp.need and not p.plan.equipment[sp.need] then return notify(src, '~r~Il te manque le matériel nécessaire.') end
     p.primary, p.primaryBy = true, src
     broadcast(p, 'pickax_cayo:primaryTaken', src)
 end)
@@ -344,6 +354,7 @@ AddEventHandler('esx:onPlayerDeath', function()
     local p, m = member(src)
     if not p then return end
     m.state, m.bag, m.loot = 'dead', 0, {}
+    p.anyDead = true
     if p.primary and p.primaryBy == src then p.primary = false p.primaryBy = nil broadcast(p, 'pickax_cayo:primaryLost') end
     TriggerEvent('pickax_cayo:checkEnd', p.leader)
 end)
@@ -368,6 +379,12 @@ RegisterNetEvent('pickax_cayo:alert', function()
     if not p or p.alerted then return end
     p.alerted = true
     broadcast(p, 'pickax_cayo:alerted')
+    if C.PoliceAlert then
+        for _, id in ipairs(GetPlayers()) do
+            local x = ESX.GetPlayerFromId(tonumber(id))
+            if x and x.job and x.job.name == C.PoliceJob then notify(tonumber(id), '~r~Alerte~s~ : l\'alarme de la propriété d\'El Rubio (Cayo Perico) vient de se déclencher.') end
+        end
+    end
 end)
 
 -- une seule machine fait apparaître les gardes d'une zone (la première à s'en approcher)
@@ -386,8 +403,9 @@ RegisterCommand('cayotp', function(src, args)
     if src == 0 or not isStaff(src) then return end
     local name = tostring(args[1] or '')
     local pts = { planning = C.Planning.coords, vault = C.Island.vault, compound = C.Island.obstacles[1].coords }
+    for k, v in pairs(C.Island.targetSpots) do pts['cible_' .. k] = v.coords end
     for _, i in ipairs(C.Infiltrations) do pts[i.id] = vec3(i.coords.x, i.coords.y, i.coords.z) end
-    for _, s in ipairs(C.Scope) do pts['scope_' .. s.id] = s.coords end
+    for _, s in ipairs(C.Scope) do pts['drone_' .. s.id] = vec3(s.view.x, s.view.y, s.view.z) end
     local c = pts[name]
     if not c then
         local keys = {} for k in pairs(pts) do keys[#keys + 1] = k end table.sort(keys)

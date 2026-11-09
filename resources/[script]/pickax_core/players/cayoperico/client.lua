@@ -99,6 +99,9 @@ local requestedIpl = {
     "h4_beach_party"
 }
 
+CayoForceIsland = false      -- pickax_cayo : charge l'île à distance (drone de reconnaissance)
+RegisterNetEvent('pickax_cayo:forceIsland', function(on) CayoForceIsland = on == true end)
+
 Citizen.CreateThread(function()
     local islandLoaded = false
     local islandCoords = vec3(4840.571, -5174.425, 2.0)
@@ -106,7 +109,7 @@ Citizen.CreateThread(function()
     SetZoneEnabled(GetZoneFromNameId("PRLOG"), false)
     while true do
         local PlayerCoords = GetEntityCoords(PlayerPedId(), false)
-        if #(PlayerCoords - islandCoords) < 2000.0 then
+        if #(PlayerCoords - islandCoords) < 2000.0 or CayoForceIsland then
             if not islandLoaded then
                 islandLoaded = true
                 SetIslandHopperEnabled("HeistIsland", true)

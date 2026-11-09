@@ -24,6 +24,8 @@ Config.Fees = { pavel = 2, fence = 10 }         -- % retirés du butin : Pavel (
 Config.ScopeRequired = 2                        -- nombre de reconnaissances obligatoires avant le lancement
 Config.HardBonus = 0.10                         -- +10 % de gains en mode difficile
 Config.InviteSeconds = 30
+Config.Elite = { time = 1200, bonus = 50000, bonusHard = 100000 }   -- Défi Élite : cible prise, aucune alarme, personne à terre, fini en moins de `time` secondes
+Config.PoliceAlert = true                       -- prévient les policiers en service quand l'alarme se déclenche
 
 -- ═════════════ CIBLES PRINCIPALES (valeur en $) ═════════════
 Config.Targets = {
@@ -44,6 +46,7 @@ Config.Loot = {
     coke    = { label = 'Cocaïne',   units = 25, value = 220000 },
     gold    = { label = 'Or',        units = 33, value = 330000 },
     art     = { label = 'Tableaux',  units = 20, value = 190000 },
+    jewel   = { label = 'Bijoux',    units = 12, value = 80000 },   -- vitrines : coupe-verre sinon l'alarme se déclenche
 }
 
 -- ═════════════ APPROCHE (véhicule et point de départ en mer / en l'air) ═════════════
@@ -79,6 +82,11 @@ Config.Equipment = {
     { id = 'cloner',  label = 'Cloneur d\'empreintes', desc = 'Ouvrir la salle de sécurité sans alarme.' },
     { id = 'uniform', label = 'Uniforme de garde',     desc = 'Les gardes mettent plus de temps à vous repérer.' },
     { id = 'silencer',label = 'Silencieux',            desc = 'Les tirs ne déclenchent pas l\'alarme.' },
+    { id = 'glasscutter', label = 'Coupe-verre',       desc = 'Ouvrir les vitrines sans les briser (pas d\'alarme).' },
+    -- Perturbations : affaiblissent la sécurité de l'île
+    { id = 'dis_weapons', group = 'dis', label = 'Perturbation : armes',  desc = 'Les gardes n\'ont que des pistolets.' },
+    { id = 'dis_armor',   group = 'dis', label = 'Perturbation : gilets', desc = 'Gardes sans gilet pare-balles, moins résistants.' },
+    { id = 'dis_air',     group = 'dis', label = 'Perturbation : aérien', desc = 'Aucun hélicoptère de renforts.' },
 }
 
 -- ═════════════ ARMEMENT ═════════════
@@ -96,14 +104,16 @@ Config.Difficulties = {
     hard   = { label = 'Difficile', guards = 1.5, health = 300, accuracy = 45, reinforce = 70 },
 }
 
--- ═════════════ RECONNAISSANCES ET PRÉPARATIFS (sur le continent) ═════════════
--- Reconnaissance : se rendre au point et observer (maintenir E). Préparatif d'équipement : récupérer le matériel au point.
+-- ═════════════ RECONNAISSANCES ET PRÉPARATIFS ═════════════
+-- Reconnaissance : drone lancé depuis la tablette (poste de planification). Survole l'île : vise un repère et appuie sur G pour le marquer.
+-- view : point de départ du drone · targets : repères à marquer (tous requis) · Config.Drone : durée et vitesse
 Config.Scope = {
-    { id = 'airstrip', label = 'Aérodrome',          coords = vec3(1740.0, 3265.0, 41.2) },
-    { id = 'dock',     label = 'Port principal',     coords = vec3(1355.0, -2540.0, 4.1) },
-    { id = 'compound', label = 'Complexe d\'El Rubio', coords = vec3(-2316.0, 3405.0, 29.0) },
+    { id = 'airstrip', label = 'Aérodrome',            view = vec4(4458.0, -4466.0, 70.0, 200.0), targets = { { 'Piste', vec3(4492.0, -4470.0, 4.3) }, { 'Hangar', vec3(4510.0, -4560.0, 4.3) }, { 'Tour de contrôle', vec3(4440.0, -4515.0, 4.3) } } },
+    { id = 'dock',     label = 'Port principal',       view = vec4(5124.0, -5134.0, 70.0, 0.0),   targets = { { 'Quai', vec3(5136.0, -5140.0, 2.0) }, { 'Entrepôts', vec3(5130.0, -5520.0, 12.0) }, { 'Garde du port', vec3(5124.0, -5134.0, 2.0) } } },
+    { id = 'compound', label = 'Complexe d\'El Rubio',  view = vec4(5006.0, -5700.0, 80.0, 180.0), targets = { { 'Villa', vec3(5006.0, -5745.0, 28.8) }, { 'Entrée', vec3(4985.0, -5715.0, 20.0) }, { 'Salle de sécurité', vec3(5003.0, -5746.0, 28.8) } } },
 }
--- Un point de récupération par équipement choisi
+Config.Drone = { seconds = 90, speed = 14.0, boost = 34.0, tagRange = 170.0 }
+-- Un point de récupération par matériel ou perturbation choisi ; des gardes surveillent le lieu (Config.PrepAmbush)
 Config.PrepPoints = {
     grapple  = vec3(1130.0, -3280.0, 5.9),
     cutters  = vec3(1005.0, -2530.0, 28.3),
@@ -111,7 +121,12 @@ Config.PrepPoints = {
     cloner   = vec3(-1170.0, -2020.0, 13.2),
     uniform  = vec3(-1305.0, -2808.0, 13.9),
     silencer = vec3(809.0, -2159.0, 29.6),
+    glasscutter = vec3(-621.0, -228.0, 38.1),
+    dis_weapons = vec3(2459.0, 4975.0, 46.8),
+    dis_armor   = vec3(-1146.0, 4939.0, 222.3),
+    dis_air     = vec3(2125.0, 4789.0, 41.1),
 }
+Config.PrepAmbush = { count = 3, model = 'g_m_y_mexgoon_01', weapon = 'WEAPON_PISTOL', radius = 14.0 }
 Config.PrepSeconds = 6
 
 -- ═════════════ ÎLE : POSITIONS ═════════════
@@ -119,23 +134,43 @@ Config.Island = {
     center = vec3(4840.57, -5174.42, 2.0),
     -- Coffre-fort du complexe : cible principale
     vault = vec3(5006.7, -5754.2, 15.5),
-    -- Portes / obstacles : need = équipement requis (aucun = toujours ouvert)
+    -- Portes / obstacles : need = équipement requis · game = mini-jeu (pickax_skillgames) · seconds = durée si pas de mini-jeu
     obstacles = {
-        { id = 'gate',   label = 'Grillage du complexe', coords = vec3(4985.0, -5715.0, 19.9), need = 'cutters', seconds = 6 },
-        { id = 'wall',   label = 'Mur d\'enceinte',      coords = vec3(5048.0, -5740.0, 20.0),  need = 'grapple', seconds = 5 },
-        { id = 'secure', label = 'Salle de sécurité',    coords = vec3(5003.0, -5746.0, 28.8),  need = 'cloner',  seconds = 8, optional = true },
-        { id = 'door',   label = 'Porte blindée du coffre', coords = vec3(5006.7, -5753.0, 15.5), need = 'torch', seconds = 12 },
+        { id = 'gate',   label = 'Grillage du complexe',    coords = vec3(4985.0, -5715.0, 19.9), need = 'cutters', game = 'timing', difficulty = 2 },
+        { id = 'wall',   label = 'Mur d\'enceinte',         coords = vec3(5048.0, -5740.0, 20.0), need = 'grapple', seconds = 5 },
+        { id = 'secure', label = 'Salle de sécurité',       coords = vec3(5003.0, -5746.0, 28.8), need = 'cloner',  game = 'code', difficulty = 3 },
+        { id = 'cams',   label = 'Système de caméras',      coords = vec3(5001.0, -5748.0, 28.8), need = 'cloner',  game = 'wires', difficulty = 3, requires = 'secure' },
+        { id = 'door',   label = 'Porte blindée du coffre', coords = vec3(5006.7, -5753.0, 15.5), need = 'torch',   game = 'hold', difficulty = 3 },
     },
-    -- Zones de gardes : count de base (multiplié par la difficulté)
+    -- Cible principale : chaque cible a son emplacement dans le complexe
+    -- need / game / requires : comme les obstacles (requires = obstacle à ouvrir d'abord)
+    targetSpots = {
+        tequila = { coords = vec3(5008.0, -5738.0, 28.8), seconds = 4 },
+        ruby    = { coords = vec3(5003.5, -5744.0, 28.8), game = 'pins', difficulty = 3, requires = 'secure' },
+        bonds   = { coords = vec3(5020.0, -5748.0, 28.8), game = 'code', difficulty = 3, requires = 'secure' },
+        diamond = { coords = vec3(5012.0, -5730.0, 28.8), need = 'glasscutter', seconds = 8 },
+        files   = { coords = vec3(4999.0, -5737.0, 28.8), game = 'wires', difficulty = 3 },
+        panther = { coords = vec3(5006.7, -5754.2, 15.5), requires = 'door', seconds = 5 },
+    },
+    -- Caméras : repèrent à vue (portée, angle). Désactivées par « Système de caméras ».
+    cameras = {
+        { coords = vec3(4987.0, -5712.0, 24.0), heading = 200.0, range = 38.0, fov = 80.0 },
+        { coords = vec3(5008.0, -5730.0, 31.5), heading = 180.0, range = 30.0, fov = 90.0 },
+        { coords = vec3(5126.0, -5130.0, 6.0),  heading = 270.0, range = 32.0, fov = 80.0 },
+        { coords = vec3(4466.0, -4468.0, 8.0),  heading = 90.0,  range = 32.0, fov = 80.0 },
+    },
+    -- Zones de gardes : count de base (multiplié par la difficulté) · dogs = chiens · sniper = tireur posté
     guards = {
         { coords = vec3(5006.0, -5745.0, 28.8), radius = 18.0, count = 5, label = 'Villa' },
-        { coords = vec3(4985.0, -5715.0, 20.0), radius = 14.0, count = 3, label = 'Entrée' },
+        { coords = vec3(4985.0, -5715.0, 20.0), radius = 14.0, count = 3, label = 'Entrée', dogs = 2 },
         { coords = vec3(5124.0, -5134.0, 2.0),  radius = 20.0, count = 4, label = 'Port principal' },
-        { coords = vec3(4460.0, -4470.0, 4.3),  radius = 25.0, count = 4, label = 'Aérodrome' },
+        { coords = vec3(4460.0, -4470.0, 4.3),  radius = 25.0, count = 4, label = 'Aérodrome', dogs = 1 },
         { coords = vec3(4886.0, -5176.0, 2.4),  radius = 20.0, count = 3, label = 'Plage' },
         { coords = vec3(5057.0, -5785.0, 1.5),  radius = 15.0, count = 2, label = 'Canal' },
-        { coords = vec3(5130.0, -5520.0, 12.0), radius = 18.0, count = 3, label = 'Entrepôts' },
+        { coords = vec3(5130.0, -5520.0, 12.0), radius = 18.0, count = 3, label = 'Entrepôts', dogs = 1 },
         { coords = vec3(4510.0, -4560.0, 4.3),  radius = 18.0, count = 3, label = 'Hangar' },
+        { coords = vec3(5009.0, -5738.0, 33.0), radius = 2.0,  count = 1, label = 'Toit de la villa', sniper = true },
+        { coords = vec3(4476.0, -4488.0, 10.0), radius = 2.0,  count = 1, label = 'Tour de l\'aérodrome', sniper = true },
     },
     guardModels = { 'g_m_m_cartelguards_01', 'g_m_m_cartelguards_02' },
     guardWeapons = { 'WEAPON_CARBINERIFLE', 'WEAPON_PISTOL', 'WEAPON_SMG' },
@@ -161,6 +196,10 @@ Config.Island = {
         { id = 16, type = 'weed', coords = vec3(5100.0, -5700.0, 5.0) },
         { id = 17, type = 'coke', coords = vec3(4960.0, -5640.0, 9.0) },
         { id = 18, type = 'art',  coords = vec3(5030.0, -5690.0, 20.0) },
+        { id = 19, type = 'jewel', coords = vec3(5010.0, -5733.0, 28.8) },
+        { id = 20, type = 'jewel', coords = vec3(5014.0, -5735.0, 28.8) },
+        { id = 21, type = 'jewel', coords = vec3(5016.0, -5741.0, 28.8) },
+        { id = 22, type = 'jewel', coords = vec3(5001.0, -5741.0, 28.8) },
     },
 }
 Config.LootSeconds = 4

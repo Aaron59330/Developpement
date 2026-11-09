@@ -93,9 +93,17 @@ end)
 RegisterNUICallback('gps', function(d, cb)
     cb(1)
     local pt
-    if d and d.kind == 'scope' then local s = byId(C.Scope, d.id) pt = s and s.coords
-    elseif d and d.kind == 'equip' then pt = C.PrepPoints[d.id] end
+    if d and d.kind == 'equip' then pt = C.PrepPoints[d.id] end
     if pt then SetNewWaypoint(pt.x, pt.y) notify('~g~Itinéraire GPS posé.') end
+end)
+RegisterNUICallback('drone', function(d, cb)
+    cb(1)
+    local sc = d and byId(C.Scope, d.id)
+    if not sc or not State or State.phase ~= 'plan' or not nearPlanning() then return end
+    closeTablet()
+    CreateThread(function()
+        if RunDrone(sc) then TriggerServerEvent('pickax_cayo:prep', 'scope', sc.id) notify('~g~Reconnaissance terminée : ' .. sc.label) else notify('~y~Reconnaissance incomplète : relance le drone.') end
+    end)
 end)
 RegisterNUICallback('launch', function(_, cb)
     ESX.TriggerServerCallback('pickax_cayo:launch', function(ok, err)
@@ -144,10 +152,49 @@ function RefreshPrepBlips()
         BeginTextCommandSetBlipName('STRING') AddTextComponentSubstringPlayerName(label) EndTextCommandDisplayText(b)
         blips[#blips + 1] = b
     end
-    for _, s in ipairs(C.Scope) do if not State.scope[s.id] then add(s.coords, 'Cayo : reconnaissance — ' .. s.label, 143, 5) end end
     for id in pairs(State.plan.equipment or {}) do
         if not State.prep[id] and C.PrepPoints[id] then add(C.PrepPoints[id], 'Cayo : ' .. (byId(C.Equipment, id) or { label = id }).label, 478, 2) end
     end
+end
+
+local ambush = {}          -- [id] = { peds }
+local prepGroup
+local function ambushAlive(id)
+    local a = ambush[id]
+    if not a then return 0 end
+    local n = 0
+    for _, g in ipairs(a) do if DoesEntityExist(g) and not IsEntityDead(g) then n = n + 1 end end
+    return n
+end
+local function spawnAmbush(id, pt)
+    local A = C.PrepAmbush
+    if not A or A.count <= 0 then ambush[id] = {} return end
+    if not prepGroup then
+        local _, g = AddRelationshipGroup('CAYO_PREP')
+        prepGroup = g
+        SetRelationshipBetweenGroups(5, g, joaat('PLAYER')) SetRelationshipBetweenGroups(5, joaat('PLAYER'), g)
+    end
+    local h = joaat(A.model)
+    RequestModel(h) local t = GetGameTimer() + 4000 while not HasModelLoaded(h) and GetGameTimer() < t do Wait(20) end
+    ambush[id] = {}
+    for _ = 1, A.count do
+        local a = math.random() * 6.283
+        local r = 4.0 + math.random() * A.radius
+        local x, y = pt.x + math.cos(a) * r, pt.y + math.sin(a) * r
+        local ok, z = GetGroundZFor_3dCoord(x, y, pt.z + 10.0, false)
+        local g = CreatePed(4, h, x, y, ok and z or pt.z, math.random(0, 359) + 0.0, true, true)
+        SetEntityAsMissionEntity(g, true, true)
+        SetPedRelationshipGroupHash(g, prepGroup)
+        GiveWeaponToPed(g, joaat(A.weapon), 120, false, true)
+        SetPedAccuracy(g, 22) SetPedCombatAttributes(g, 46, true) SetPedFleeAttributes(g, 0, false) SetPedDropsWeaponsWhenDead(g, false)
+        TaskWanderInArea(g, pt.x, pt.y, pt.z, A.radius, 2.0, 5000)
+        ambush[id][#ambush[id] + 1] = g
+    end
+    SetModelAsNoLongerNeeded(h)
+end
+local function clearAmbush(id)
+    for _, g in ipairs(ambush[id] or {}) do if DoesEntityExist(g) then SetEntityAsMissionEntity(g, true, true) DeleteEntity(g) end end
+    ambush[id] = nil
 end
 
 CreateThread(function()
@@ -155,24 +202,32 @@ CreateThread(function()
         local sleep = 700
         if State and State.phase == 'plan' and not InHeist then
             local me = GetEntityCoords(PlayerPedId())
-            local targets = {}
-            for _, s in ipairs(C.Scope) do if not State.scope[s.id] then targets[#targets + 1] = { 'scope', s.id, s.coords, 'Reconnaissance : ' .. s.label, { 'amb@world_human_binoculars@male@enter', 'enter' } } end end
             for id in pairs(State.plan.equipment or {}) do
-                if not State.prep[id] and C.PrepPoints[id] then targets[#targets + 1] = { 'equip', id, C.PrepPoints[id], 'Récupérer : ' .. (byId(C.Equipment, id) or { label = id }).label } end
-            end
-            for _, t in ipairs(targets) do
-                local d = #(me - t[3])
-                if d < 30.0 then
-                    sleep = 0
-                    DrawMarker(1, t[3].x, t[3].y, t[3].z - 1.0, 0, 0, 0, 0, 0, 0, 1.6, 1.6, 0.6, 255, 190, 40, 110, false, false, 2, false, nil, nil, false)
-                    if d < 2.5 then
-                        Draw3D(t[3].x, t[3].y, t[3].z + 0.7, '~g~[E]~s~ (maintenir) ' .. t[4])
-                        if IsControlPressed(0, 38) then
-                            if HoldE(t[4], C.PrepSeconds, t[5]) then TriggerServerEvent('pickax_cayo:prep', t[1], t[2]) notify('~g~Terminé : ' .. t[4]) end
+                local pt = C.PrepPoints[id]
+                if pt and not State.prep[id] then
+                    local d = #(me - pt)
+                    if d < 80.0 and not ambush[id] then spawnAmbush(id, pt) end
+                    if d > 200.0 and ambush[id] then clearAmbush(id) end
+                    if d < 30.0 then
+                        sleep = 0
+                        local label = 'Récupérer : ' .. (byId(C.Equipment, id) or { label = id }).label
+                        DrawMarker(1, pt.x, pt.y, pt.z - 1.0, 0, 0, 0, 0, 0, 0, 1.6, 1.6, 0.6, 255, 190, 40, 110, false, false, 2, false, nil, nil, false)
+                        if d < 2.5 then
+                            if ambushAlive(id) > 0 then
+                                Draw3D(pt.x, pt.y, pt.z + 0.7, '~r~Les gardes surveillent le lieu~s~ : élimine-les d\'abord')
+                            else
+                                Draw3D(pt.x, pt.y, pt.z + 0.7, '~g~[E]~s~ (maintenir) ' .. label)
+                                if IsControlPressed(0, 38) and HoldE(label, C.PrepSeconds, nil) then
+                                    TriggerServerEvent('pickax_cayo:prep', 'equip', id) notify('~g~Terminé : ' .. label)
+                                    SetTimeout(30000, function() clearAmbush(id) end)
+                                end
+                            end
                         end
                     end
-                end
+                elseif ambush[id] and State.prep[id] then SetTimeout(30000, function() clearAmbush(id) end) end
             end
+        else
+            for id in pairs(ambush) do clearAmbush(id) end
         end
         Wait(sleep)
     end

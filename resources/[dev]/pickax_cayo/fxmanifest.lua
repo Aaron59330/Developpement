@@ -8,7 +8,7 @@ version '1.0.0'
 
 shared_script 'config.lua'
 server_script 'server/main.lua'
-client_scripts { 'client/main.lua', 'client/island.lua' }
+client_scripts { 'client/main.lua', 'client/drone.lua', 'client/island.lua' }
 
 ui_page 'html/index.html'
 files { 'html/index.html', 'html/fonts.css', 'html/style.css', 'html/script.js', 'html/fonts/*' }

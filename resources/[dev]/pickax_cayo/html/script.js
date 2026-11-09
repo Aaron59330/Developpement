@@ -27,13 +27,14 @@ function mapSvg() {
   const pt = (o, col, lbl, r = 6, ring) => { const [x, y] = P(o.x, o.y); return `<g>${ring ? `<circle cx="${x}" cy="${y}" r="${r + 7}" fill="${col}" opacity=".22"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="#08131a" stroke-width="2"/>${lbl ? `<text x="${+x + 11}" y="${+y + 4}" fill="#e6eef2" font-size="12" font-family="Figtree" font-weight="600" paint-order="stroke" stroke="#08131a" stroke-width="3">${esc(lbl)}</text>` : ''}</g>`; };
   const pl = ST.plan, inf = byId(CFG.infils, pl.infil), exf = byId(CFG.exfils, pl.exfil);
   const zones = CFG.zones.map(z => { const [x, y] = P(z.x, z.y); return `<circle cx="${x}" cy="${y}" r="${5 + z.count * 2.2}" fill="#e5484d" opacity=".16"/>`; }).join('');
+  const V = (CFG.spots && CFG.spots[pl.target]) || CFG.vault;
   let route = '';
-  if (inf && exf) { const a = P(inf.x, inf.y), b = P(CFG.vault.x, CFG.vault.y), c = P(exf.x, exf.y); route = `<polyline points="${a} ${b} ${c}" fill="none" stroke="#f0b323" stroke-width="2.4" stroke-dasharray="7 6" opacity=".9"/>`; }
+  if (inf && exf) { const a = P(inf.x, inf.y), b = P(V.x, V.y), c = P(exf.x, exf.y); route = `<polyline points="${a} ${b} ${c}" fill="none" stroke="#f0b323" stroke-width="2.4" stroke-dasharray="7 6" opacity=".9"/>`; }
   const sea = '<defs><pattern id="w" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M0 11q5.5-5 11 0t11 0" stroke="#1a4a60" stroke-width="1" fill="none" opacity=".55"/></pattern></defs>';
   return `<svg viewBox="0 0 ${MAP.W} ${MAP.H}" preserveAspectRatio="xMidYMid slice">${sea}<rect width="${MAP.W}" height="${MAP.H}" fill="url(#w)"/><polygon points="${poly}" fill="#27404a" stroke="#5b8a99" stroke-width="2.2" stroke-linejoin="round"/><polygon points="${poly}" fill="#2f5a4a" opacity=".45" transform="translate(7 5) scale(.97)" style="transform-origin:center"/>${zones}${route}
     ${CFG.infils.map(o => pt(o, o.id === pl.infil ? '#3fb950' : '#6e8f9c', o.label, o.id === pl.infil ? 7 : 4, o.id === pl.infil)).join('')}
     ${CFG.exfils.map(o => o.id === pl.exfil ? pt(o, '#29c7b8', 'Extraction : ' + o.label, 7, true) : '').join('')}
-    ${pt(CFG.vault, '#f0b323', pl.target ? byId(CFG.targets, pl.target).label : 'Coffre', 8, true)}</svg>`;
+    ${pt(V, '#f0b323', pl.target ? byId(CFG.targets, pl.target).label : 'Coffre', 8, true)}</svg>`;
 }
 
 // ───────── pages ─────────
@@ -45,6 +46,7 @@ function pageObj() {
   return `<h2>Objectifs du braquage</h2><div class="sub">Choisis la cible principale : elle est dans le coffre-fort du complexe d'El Rubio.</div>
   <div class="sec">Cible principale</div><div class="grid g3">${CFG.targets.map(t => card(pl.target === t.id, t.label, t.desc, `<div class="v">${money(t.value)}</div>`, `data-set="target" data-v="${t.id}"`)).join('')}</div>
   <div class="sec">Butin secondaire (à ramasser sur l'île)</div><div class="grid g4">${Object.entries(CFG.loot).map(([k, l]) => `<div class="card ro"><b>${esc(l.label)}</b><p>Prend ${l.units} / ${CFG.bag} du sac</p><div class="v">${money(l.value)}</div></div>`).join('')}</div>
+  <div class="sec">Défi Élite</div><div class="grid"><div class="card ${pl.elite ? 'on' : ''}" data-set="elite" data-v="1"><div class="ck">${ic('check')}</div><b>Défi Élite</b><p>Prends la cible sans déclencher l'alarme, sans qu'aucun membre ne tombe, en moins de ${Math.round(CFG.elite.time / 60)} minutes.</p><div class="v">+ ${money(pl.difficulty === 'hard' ? CFG.elite.bonusHard : CFG.elite.bonus)}</div></div></div>
   <div class="sec">Difficulté</div><div class="diff">${Object.entries(CFG.difficulties).map(([k, d]) => `<div class="pill ${pl.difficulty === k ? 'on' : ''}" data-set="difficulty" data-v="${k}">${esc(d.label)}<small>${k === 'hard' ? 'Gardes plus nombreux et plus résistants · +' + Math.round(CFG.hardBonus * 100) + ' % de gains' : 'Gardes standards'}</small></div>`).join('')}</div>`;
 }
 function pageApp() {
@@ -58,7 +60,8 @@ function pageEq() {
   const pl = ST.plan;
   return `<h2>Équipement</h2><div class="sub">L'armement est fourni au départ et repris à la fin. Le matériel doit être récupéré avant de partir (onglet Préparatifs).</div>
   <div class="sec">Armement</div><div class="grid g2">${CFG.loadouts.map(l => card(pl.loadout === l.id, l.label, l.desc, '', `data-set="loadout" data-v="${l.id}"`)).join('')}</div>
-  <div class="sec">Matériel</div><div class="grid g3">${CFG.equipment.map(e => card(pl.equipment[e.id], e.label, e.desc, ST.prep[e.id] ? '<div class="v" style="color:#6ee07f">Récupéré</div>' : (pl.equipment[e.id] ? '<div class="v" style="color:#ffb4b6">À récupérer</div>' : ''), `data-set="equipment" data-v="${e.id}"`)).join('')}</div>`;
+  <div class="sec">Matériel</div><div class="grid g3">${CFG.equipment.filter(e => e.group !== 'dis').map(e => card(pl.equipment[e.id], e.label, e.desc, ST.prep[e.id] ? '<div class="v" style="color:#6ee07f">Récupéré</div>' : (pl.equipment[e.id] ? '<div class="v" style="color:#ffb4b6">À récupérer</div>' : ''), `data-set="equipment" data-v="${e.id}"`)).join('')}</div>
+  <div class="sec">Perturbations (affaiblissent la sécurité)</div><div class="grid g3">${CFG.equipment.filter(e => e.group === 'dis').map(e => card(pl.equipment[e.id], e.label, e.desc, ST.prep[e.id] ? '<div class="v" style="color:#6ee07f">Récupéré</div>' : (pl.equipment[e.id] ? '<div class="v" style="color:#ffb4b6">À récupérer</div>' : ''), `data-set="equipment" data-v="${e.id}"`)).join('')}</div>`;
 }
 function pageTeam() {
   const L = isLead();
@@ -70,8 +73,8 @@ function pageTeam() {
 }
 function pagePrep() {
   const pl = ST.plan;
-  const sc = CFG.scope.map(s => `<div class="line"><div class="nm">${esc(s.label)}<small>Observe l'île aux jumelles (maintenir E sur place)</small></div><span class="tag ${ST.scope[s.id] ? 'ok' : ''}">${ST.scope[s.id] ? 'Fait' : 'À faire'}</span><span class="btn" data-gps="scope:${s.id}">${ic('pin')}GPS</span></div>`).join('');
-  const eq = CFG.equipment.filter(e => pl.equipment[e.id]).map(e => `<div class="line"><div class="nm">${esc(e.label)}<small>Récupère le matériel au point indiqué (maintenir E)</small></div><span class="tag ${ST.prep[e.id] ? 'ok' : ''}">${ST.prep[e.id] ? 'Récupéré' : 'À faire'}</span><span class="btn" data-gps="equip:${e.id}">${ic('pin')}GPS</span></div>`).join('');
+  const sc = CFG.scope.map(s => `<div class="line"><div class="nm">${esc(s.label)}<small>Survole l'île au drone et marque ${s.targets} repères (G) — depuis le poste de planification</small></div><span class="tag ${ST.scope[s.id] ? 'ok' : ''}">${ST.scope[s.id] ? 'Fait' : 'À faire'}</span><span class="btn pri" data-drone="${s.id}">${ic('play')}Lancer le drone</span></div>`).join('');
+  const eq = CFG.equipment.filter(e => pl.equipment[e.id]).map(e => `<div class="line"><div class="nm">${esc(e.label)}<small>Récupère-le au point indiqué (des gardes surveillent le lieu)</small></div><span class="tag ${ST.prep[e.id] ? 'ok' : ''}">${ST.prep[e.id] ? 'Récupéré' : 'À faire'}</span><span class="btn" data-gps="equip:${e.id}">${ic('pin')}GPS</span></div>`).join('');
   return `<h2>Préparatifs</h2><div class="sub">À faire sur le continent avant le lancement. Les points apparaissent sur ta carte.</div>
   <div class="sec">Reconnaissances (${Object.keys(ST.scope).length} / ${CFG.scopeRequired} obligatoires)</div>${sc}
   <div class="sec">Matériel</div>${eq || '<div class="empty">Aucun matériel sélectionné (onglet Équipement).</div>'}`;
@@ -111,12 +114,13 @@ function render() {
 
 // ───────── actions ─────────
 stage.addEventListener('click', e => {
-  const t = e.target.closest('[data-tab],[data-set],[data-act],[data-gps],[data-invite]');
+  const t = e.target.closest('[data-tab],[data-set],[data-act],[data-gps],[data-invite],[data-drone]');
   if (!t) return;
   const d = t.dataset;
   if (d.tab) { tab = d.tab; if (tab === 'team') loadNearby(); return render(); }
   if (d.set) return post('set', { field: d.set, value: d.v });
   if (d.invite) return post('invite', { id: +d.invite });
+  if (d.drone) return post('drone', { id: d.drone });
   if (d.gps) { const [kind, id] = d.gps.split(':'); return post('gps', { kind, id }); }
   if (d.act === 'close') return post('close');
   if (d.act === 'leave') { post('leave'); return; }
@@ -139,18 +143,18 @@ if (!IN_GAME) {
   CFG = {
     title: 'Planification — Cayo Perico', launchFee: 25000, scopeRequired: 2, bag: 100, hardBonus: 0.1, fees: { pavel: 2, fence: 10 }, players: { min: 1, max: 4 }, vault: { x: 5006.7, y: -5754.2 },
     targets: [['tequila', 'Tequila Sinsimito', 630000, 'Une bouteille rare dans le bureau d\'El Rubio.'], ['ruby', 'Collier de rubis', 700000, 'Dans le coffre de la salle de sécurité.'], ['bonds', 'Bons au porteur', 770000, 'Une mallette dans le coffre de la villa.'], ['diamond', 'Diamant rose', 1300000, 'Exposé dans la vitrine de la salle de réception.'], ['files', 'Dossiers Madrazo', 1100000, 'Archives compromettantes d\'El Rubio.'], ['panther', 'Statue de la panthère', 1900000, 'La pièce maîtresse de la collection.']].map(([id, label, value, desc]) => ({ id, label, value, desc })),
-    loot: { cash: { label: 'Liquide', units: 18, value: 90000 }, weed: { label: 'Cannabis', units: 25, value: 140000 }, coke: { label: 'Cocaïne', units: 25, value: 220000 }, gold: { label: 'Or', units: 33, value: 330000 }, art: { label: 'Tableaux', units: 20, value: 190000 } },
+    loot: { cash: { label: 'Liquide', units: 18, value: 90000 }, weed: { label: 'Cannabis', units: 25, value: 140000 }, coke: { label: 'Cocaïne', units: 25, value: 220000 }, gold: { label: 'Or', units: 33, value: 330000 }, art: { label: 'Tableaux', units: 20, value: 190000 }, jewel: { label: 'Bijoux', units: 12, value: 80000 } },
     approaches: [['kosatka', 'Kosatka (sous-marin)', 'Insertion discrète à la nage depuis le sous-marin.'], ['longfin', 'Longfin', 'Bateau rapide : accoste sur la plage.'], ['patrol', 'Patrouilleur', 'Bateau armé : arrivée au port principal.'], ['annihilator', 'Annihilator Stealth', 'Hélicoptère furtif : dépose sur les côtes.'], ['alkonost', 'Alkonost', 'Avion : largage en parachute au-dessus de l\'île.'], ['velum', 'Velum', 'Avion léger : largage près de l\'aérodrome.']].map(([id, label, desc]) => ({ id, label, desc })),
     infils: [{ id: 'airstrip', label: 'Aérodrome', x: 4458, y: -4466 }, { id: 'dock', label: 'Port principal', x: 5124, y: -5134 }, { id: 'beach', label: 'Plage', x: 4886, y: -5176 }, { id: 'drain', label: 'Canal d\'évacuation', x: 5057, y: -5785 }],
     exfils: [{ id: 'dock', label: 'Port principal', x: 5136, y: -5140 }, { id: 'airstrip', label: 'Aérodrome', x: 4476, y: -4496 }, { id: 'beach', label: 'Plage', x: 4884, y: -5170 }],
-    equipment: [['grapple', 'Grappin', 'Escalader la clôture et les toits.'], ['cutters', 'Pince coupante', 'Couper les grillages et les portails.'], ['torch', 'Chalumeau', 'Découper la porte blindée du coffre.'], ['cloner', 'Cloneur d\'empreintes', 'Ouvrir la salle de sécurité sans alarme.'], ['uniform', 'Uniforme de garde', 'Les gardes mettent plus de temps à vous repérer.'], ['silencer', 'Silencieux', 'Les tirs ne déclenchent pas l\'alarme.']].map(([id, label, desc]) => ({ id, label, desc })),
+    equipment: [['grapple', 'Grappin', 'Escalader la clôture et les toits.'], ['cutters', 'Pince coupante', 'Couper les grillages et les portails.'], ['torch', 'Chalumeau', 'Découper la porte blindée du coffre.'], ['cloner', 'Cloneur d\'empreintes', 'Ouvrir la salle de sécurité sans alarme.'], ['uniform', 'Uniforme de garde', 'Les gardes mettent plus de temps à vous repérer.'], ['silencer', 'Silencieux', 'Les tirs ne déclenchent pas l\'alarme.'], ['glasscutter', 'Coupe-verre', 'Ouvrir les vitrines sans les briser.']].map(([id, label, desc]) => ({ id, label, desc })).concat([['dis_weapons', 'Perturbation : armes', 'Les gardes n\'ont que des pistolets.'], ['dis_armor', 'Perturbation : gilets', 'Gardes sans gilet pare-balles.'], ['dis_air', 'Perturbation : aérien', 'Aucun hélicoptère de renforts.']].map(([id, label, desc]) => ({ id, label, desc, group: 'dis' }))),
     loadouts: [['aggressor', 'Agresseur', 'Carabine et fusil à pompe : puissance de feu.'], ['conspirator', 'Conspirateur', 'SMG et pistolet : mobile et polyvalent.'], ['crackshot', 'Tireur d\'élite', 'Fusil de précision et pistolet.'], ['saboteur', 'Saboteur', 'Micro-SMG et explosifs légers.']].map(([id, label, desc]) => ({ id, label, desc })),
     difficulties: { normal: { label: 'Normal' }, hard: { label: 'Difficile' } },
-    scope: [{ id: 'airstrip', label: 'Aérodrome' }, { id: 'dock', label: 'Port principal' }, { id: 'compound', label: 'Complexe d\'El Rubio' }],
+    scope: [{ id: 'airstrip', label: 'Aérodrome', targets: 3 }, { id: 'dock', label: 'Port principal', targets: 3 }, { id: 'compound', label: 'Complexe d\'El Rubio', targets: 3 }], elite: { time: 1200, bonus: 50000, bonusHard: 100000 }, spots: { panther: { x: 5006.7, y: -5754.2 }, diamond: { x: 5012, y: -5730 } },
     zones: [{ x: 5006, y: -5745, count: 5 }, { x: 4985, y: -5715, count: 3 }, { x: 5124, y: -5134, count: 4 }, { x: 4460, y: -4470, count: 4 }, { x: 4886, y: -5176, count: 3 }, { x: 5130, y: -5520, count: 3 }, { x: 4510, y: -4560, count: 3 }]
   };
   ST = { me: 1, leader: 1, phase: 'plan', cooldown: 0, members: [{ id: 1, name: 'Maly Pablo', cut: 60, leader: true }, { id: 2, name: 'Jean Dupont', cut: 40 }],
-    plan: { target: 'panther', approach: 'longfin', infil: 'dock', exfil: 'beach', loadout: 'conspirator', difficulty: 'hard', equipment: { grapple: true, cutters: true, torch: true } },
+    plan: { elite: true, target: 'panther', approach: 'longfin', infil: 'dock', exfil: 'beach', loadout: 'conspirator', difficulty: 'hard', equipment: { grapple: true, cutters: true, torch: true } },
     scope: { airstrip: true }, prep: { grapple: true }, missing: ['Reconnaissances : 1 / 2', 'Matériel à récupérer : Pince coupante', 'Matériel à récupérer : Chalumeau'] };
   const q = new URLSearchParams(location.search); tab = q.get('tab') || 'obj';
   nearby = [{ id: 7, name: 'Lucas Martin' }];
