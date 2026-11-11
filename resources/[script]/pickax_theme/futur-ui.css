@@ -74,4 +74,4 @@ html :is(tr, td, th, hr, .sep, .line) { border-color: var(--fx-line) !important;
 html ::-webkit-scrollbar-thumb { background: rgba(var(--fx-rgb), .38) !important; border-radius: 4px; }
 html ::-webkit-scrollbar-track { background: rgba(255,255,255,.03) !important; }
 html #root button:not(.pri):not(.on):not(.go):not(.buy):not(.mini):not(.x):not(.xbtn):not(.close) { border-radius: 10px; }
-html #root :is(.side, .sidebar, aside) > button:last-child:not(.on), html #root .foot button { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; color: #ddd8e6 !important; }
+html #root :is(.side, .sidebar, aside) > button:last-child:not(.on), html #root .foot button:not(.primary):not(.pri):not(.go) { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; color: #ddd8e6 !important; }
