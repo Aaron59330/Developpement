@@ -76,3 +76,6 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 .gx-stat i { background: #17171a; } .gx-stat u { background: var(--accent); box-shadow: none; }
 .nav-label, .cap { color: #8d8d92; } .head p, .gx-info small { color: #a9a9ae; }
 #confirm > *, #modal > * { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f, #151516); }
+
+/* gabarit « gros menu » identique aux builders */
+.shell { width: min(1440px, 96vw); height: min(780px, 92vh); }

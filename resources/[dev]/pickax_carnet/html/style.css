@@ -69,3 +69,13 @@ html, body { height: 100%; background: transparent; color: #eef0f4; font: 14px/1
 .boost { background: linear-gradient(180deg, #2f3a44, #1f2830); border: 0; box-shadow: inset 0 0 0 1px rgba(var(--ar), .4); border-radius: 4px; }
 .foot { color: #8d8d92; }
 .cn-logo { background: none !important; box-shadow: none !important; border: 0 !important; padding: 0 !important; }
+
+/* gabarit « gros menu » identique aux builders */
+.cn { width: min(1440px, 96vw); height: min(780px, 92vh); max-height: none; display: flex; flex-direction: column; overflow: hidden; }
+.cn-body { flex: 1; min-height: 0; overflow: auto; align-content: start; gap: 20px; padding: 22px 26px; }
+.cn-head { padding: 22px 28px; }
+.cn .card { padding: 20px 22px; } .cn .card h2 { font-size: 16px; }
+.cn .foot { padding: 14px 28px; }
+.cn-body { align-items: stretch; align-content: stretch; }
+.cn-col { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+.cn-col > .card:last-child { flex: 1; }
