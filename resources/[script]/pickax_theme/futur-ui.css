@@ -1,0 +1,77 @@
+/* ═════════════ Style « futuriste sombre » pour tous les gros écrans (tablette, verre noir, dégradés magenta) ═════════════
+   Charge APRÈS le style de la page. N'agit que sur l'apparence : couleurs, bordures, ombres, arrondis. Aucune logique.
+   Pour changer la couleur de tous les écrans : modifie --fx-a / --fx-b / --fx-rgb ci-dessous (une seule fois).  */
+:root {
+  --fx-a: #ff4fd8; --fx-b: #9b2ee0; --fx-rgb: 255,79,216; --fx-bg: #08070b; --fx-glass: rgba(255,255,255,.035); --fx-line: rgba(255,255,255,.08);
+}
+/* accent : remplace la couleur d'accent de chaque page (les pages utilisent des noms de variable différents) */
+html:root {
+  --pk-accent: #ff4fd8 !important; --pk-accent-rgb: 255,79,216 !important; --pk-accent-light: #ff8bea !important; --pk-accent-dark: #9b2ee0 !important;
+  --acc: #ff4fd8 !important; --acc-rgb: 255,79,216 !important; --acc2: #9b2ee0 !important; --accent: #ff4fd8 !important; --accent-rgb: 255,79,216 !important;
+  --a: #ff4fd8 !important; --a2: rgba(255,79,216,.16) !important; --ar: 255,79,216 !important; --accl: #ff8bea !important; --accv: #c93ad8 !important;
+  --line: rgba(255,255,255,.08) !important;
+}
+html, body { font-family: 'Sora', 'PJS', 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+
+/* fenêtre principale : cadre de tablette, verre noir, halos magenta */
+html #root > :is(.shell, .win, .cn, .jm2, .panel, .gx, .cp-wrap, .app, .sheet, .wrap, .gb, .eb, .sb, .ib, .tun-view),
+html #root > div:only-child:not(.hidden), html .win, html #win, html #lab {
+  background-image: radial-gradient(900px 420px at 10% -8%, rgba(var(--fx-rgb), .15), transparent 62%), radial-gradient(800px 480px at 105% 112%, rgba(155,46,224,.17), transparent 60%) !important;
+  background-color: var(--fx-bg) !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 24px !important;
+  box-shadow: 0 0 0 8px #0c0b10, 0 0 0 9px rgba(255,255,255,.12), 0 0 0 14px #040306, 0 0 0 15px rgba(255,255,255,.05), 0 50px 130px rgba(0,0,0,.85), 0 0 80px rgba(var(--fx-rgb), .12) !important;
+  overflow: hidden;
+}
+html #root, html #dlg, html #mg { background-color: rgba(3,2,6,.55); }
+
+/* barres latérales / en-têtes / zones de contenu */
+html :is(.side, .sidebar, .nav, .rail, .menu, aside) { background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.008)) !important; border-color: var(--fx-line) !important; }
+html :is(.top, .head, .header, .hd, .tbar, .topbar, header, .titlebar) { border-color: var(--fx-line) !important; background: linear-gradient(180deg, rgba(255,255,255,.035), transparent) !important; }
+html :is(h1, .title, .ttl) { letter-spacing: .04em; }
+
+/* cartes et panneaux en verre */
+html :is(.card, .panel, .box, .tile, .stat, .kpi, .item, .row.card, .block, .group, .sect, .section, .pane, .cell, .tbl, table) {
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.016)) !important; border-color: var(--fx-line) !important; border-radius: 14px;
+}
+html :is(.card, .tile, .item):hover { border-color: rgba(var(--fx-rgb), .55) !important; box-shadow: 0 14px 40px rgba(0,0,0,.5), 0 0 30px rgba(var(--fx-rgb), .16); }
+
+/* onglets / menus : pastilles, actif en dégradé magenta */
+html :is(.tab, .tabs > *, .nav button, .nav a, .menu button, .pill-nav > *, .seg > *, .chip, .tag, .sort button, .filter button) {
+  background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; border-radius: 10px !important; color: #cdc8d8;
+}
+html :is(.tab.on, .tab.active, .tabs > .on, .tabs > .active, .nav button.on, .nav .on, .menu .on, .seg > .on, .chip.on, .sort button.on, .filter button.on, button.on, a.on) {
+  background: linear-gradient(90deg, rgba(var(--fx-rgb), .32), rgba(155,46,224,.2)) !important; border-color: rgba(var(--fx-rgb), .65) !important; color: #fff !important; box-shadow: 0 0 20px rgba(var(--fx-rgb), .2);
+}
+
+/* boutons : principal = dégradé magenta, secondaire = verre */
+html :is(.pri, .primary, .btn.pri, button.pri, .go, .cta, .ok, button.ok, .save, .buy, .validate, .btn-primary, .b-pri) {
+  background: linear-gradient(135deg, var(--fx-a), var(--fx-b)) !important; color: #fff !important; border: 0 !important; border-radius: 11px !important;
+  box-shadow: 0 8px 26px rgba(var(--fx-rgb), .38), inset 0 1px 0 rgba(255,255,255,.28) !important; text-shadow: 0 1px 8px rgba(0,0,0,.35);
+}
+html :is(.pri, .primary, .go, .cta, .buy, .save):hover { filter: brightness(1.12); }
+html :is(.btn, .sec, button.sec, .ghost, .gbtn, .b-sec):not(.pri):not(.primary):not(.on) { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; border-radius: 10px !important; color: #ddd8e6 !important; }
+html :is(.btn, .sec, .ghost, .gbtn):not(.pri):hover { background: rgba(255,255,255,.1) !important; }
+html :is(.xbtn, .close, .x, button.x, .sq) { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; border-radius: 10px !important; }
+html :is(.xbtn, .close, .x):hover { background: rgba(var(--fx-rgb), .25) !important; border-color: var(--fx-a) !important; }
+
+/* champs */
+html :is(input:not([type=range]):not([type=checkbox]):not([type=radio]), select, textarea) { background: rgba(0,0,0,.35) !important; border: 1px solid var(--fx-line) !important; border-radius: 10px !important; color: #fff !important; }
+html :is(input, select, textarea):focus { border-color: var(--fx-a) !important; box-shadow: 0 0 0 3px rgba(var(--fx-rgb), .18) !important; outline: 0; }
+html input[type=range] { accent-color: var(--fx-a); }
+html input[type=checkbox], html input[type=radio] { accent-color: var(--fx-a); }
+
+/* barres de progression / graphiques */
+html :is(.bar > i, .bar > span, .progress > i, .prog > i, .fill, .meter > i, .pb > i, .bar i) { background: linear-gradient(90deg, var(--fx-a), var(--fx-b)) !important; box-shadow: 0 0 14px rgba(var(--fx-rgb), .45); }
+
+/* pastilles de prix / solde / étiquettes d'accent */
+html :is(.pill, .badge, .coins, .price, .bal, .money) { border-color: rgba(var(--fx-rgb), .45); }
+html :is(.badge, .dtag, .count:not(.plain)) { background: linear-gradient(135deg, rgba(var(--fx-rgb), .3), rgba(155,46,224,.28)) !important; color: #fff !important; }
+
+/* fenêtres modales, toasts, tableaux */
+html :is(#modal, .modal, .dialog, .sheet, #confirm > *, .confirm) { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)), #0b0a10 !important; border: 1px solid var(--fx-line) !important; border-radius: 18px !important; box-shadow: 0 40px 100px rgba(0,0,0,.8), 0 0 60px rgba(var(--fx-rgb), .12) !important; }
+html :is(.toast, #toasts > *, #toast) { background: #0d0c12 !important; border: 1px solid rgba(var(--fx-rgb), .5) !important; border-radius: 12px !important; box-shadow: 0 0 26px rgba(var(--fx-rgb), .22) !important; }
+html th { color: #8a8794 !important; letter-spacing: .12em; }
+html :is(tr, td, th, hr, .sep, .line) { border-color: var(--fx-line) !important; }
+html ::-webkit-scrollbar-thumb { background: rgba(var(--fx-rgb), .38) !important; border-radius: 4px; }
+html ::-webkit-scrollbar-track { background: rgba(255,255,255,.03) !important; }
+html #root button:not(.pri):not(.on):not(.go):not(.buy):not(.mini):not(.x):not(.xbtn):not(.close) { border-radius: 10px; }
+html #root :is(.side, .sidebar, aside) > button:last-child:not(.on), html #root .foot button { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; color: #ddd8e6 !important; }
