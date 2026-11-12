@@ -330,8 +330,8 @@ const GaragePanel = new (class extends PanelBase {
   ring(label, sub, val, max = 100) {
     const p = this.pc(val, max);
     return `<div class="gz-task"><div class="gz-tl"><b>${label}</b><small>${sub}</small></div>
-      <div class="gz-ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"/><circle class="fg" cx="18" cy="18" r="15.5" stroke-dasharray="${(p * 0.974).toFixed(1)} 97.4"/></svg><i>${p}</i></div>
-      <div class="gz-tv"><b>${p}</b><small>/100</small></div></div>`;
+      <div class="gz-ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"/><circle class="fg" cx="18" cy="18" r="15.5" stroke-dasharray="${(p * 0.974).toFixed(1)} 97.4"/></svg></div>
+      <div class="gz-tv"><b>${p}</b></div></div>`;
   }
   row(label, value) { return `<div class="gz-line"><span>${label}</span><b>${esc(value)}</b></div>`; }
   heroHtml() {
@@ -342,7 +342,7 @@ const GaragePanel = new (class extends PanelBase {
         <div class="gz-cta"><b>${job ? 'SORTIR UN VÉHICULE' : 'SORTIR LE VÉHICULE'}</b>
           <small>${job ? 'Choisis un véhicule de la flotte de service puis sors-le du garage.' : 'Choisis ton véhicule dans la liste puis sors-le du garage.'}</small>
           ${v ? `<button data-a="take" data-v="${esc(v.key)}">${job ? 'SORTIR' : 'SORTIR DU GARAGE'}${price}</button>` : ''}</div>
-        ${v ? `<div class="gz-lines">${this.row('PLAQUE', v.plate || '—')}${this.row('MARQUE', v.make || '—')}${this.row('MODÈLE', v.model || '—')}${this.row('ESSENCE', this.pc(v.fuel, 100) + ' %')}${this.row('MOTEUR', this.pc(v.engine, 1000) + ' %')}${this.row('CARROSSERIE', this.pc(v.body, 1000) + ' %')}</div>` : ''}
+        ${v ? `<div class="gz-lines">${v.plate ? this.row('PLAQUE', v.plate) : ''}${this.row('STATUT', 'PRÊT À ROULER')}${(job ? (v.price > 0) : d.fee > 0) ? this.row('FRAIS DE SORTIE', money(job ? v.price : d.fee)) : ''}</div>` : ''}
         ${needPay ? `<div class="gz-pay">${payRow(d.payments, this.method)}</div>` : ''}
         <button class="gz-exit" data-a="store" ${d.inVehicle ? '' : 'disabled'}>RANGER LE VÉHICULE${d.inVehicle ? '' : ' (AUCUN À PROXIMITÉ)'}</button></div>`;
     if (!v) return left + `<div class="gz-center"><div class="gz-empty">${emptyState('car', job ? 'Aucun véhicule' : 'Garage vide', job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.')}</div></div><div class="gz-right"></div>`;
@@ -350,7 +350,7 @@ const GaragePanel = new (class extends PanelBase {
       <div class="gz-right"><div class="gz-h">PERFORMANCES</div>
         ${v.perf ? this.ring('VITESSE', 'VITESSE MAXIMALE', v.perf.speed) + this.ring('ACCÉLÉRATION', 'DÉPART ARRÊTÉ', v.perf.accel) + this.ring('FREINAGE', 'DISTANCE D\'ARRÊT', v.perf.brake) + this.ring('ADHÉRENCE', 'TENUE DE ROUTE', v.perf.grip) : '<p class="gx-mute">Modèle non répertorié.</p>'}
         <div class="gz-h" style="margin-top:18px">ÉTAT DU VÉHICULE</div>
-        ${this.ring('ESSENCE', 'RÉSERVOIR', v.fuel, 100)}${this.ring('MOTEUR', 'SANTÉ', v.engine, 1000)}${this.ring('CARROSSERIE', 'SANTÉ', v.body, 1000)}</div>`;
+        ${this.ring('ESSENCE', 'RÉSERVOIR', v.fuel, 100)}${this.ring('MOTEUR', 'ÉTAT MÉCANIQUE', v.engine, 1000)}${this.ring('CARROSSERIE', 'ÉTAT DE LA TÔLE', v.body, 1000)}</div>`;
   }
   tabs(list) {
     const cur = this.cur();
@@ -365,8 +365,7 @@ const GaragePanel = new (class extends PanelBase {
         <div class="gz-tools"><label class="gz-search">${ic('search', 13)}<input data-path="q" value="${esc(this.q)}" placeholder="${ph}" autocomplete="off"></label>
           <button class="gz-close" data-a="close">FERMER <kbd>ESC</kbd></button></div></div>
       <div class="gz-main ${this.cur() ? '' : 'empty'}">${this.heroHtml()}</div>
-      <div class="gz-bottom"><div class="gz-count"><span id="gx-count">${list.length ? Math.min(this.i, list.length - 1) + 1 : 0} / ${this.items.length}</span></div>
-        <div class="gx-rail" id="gx-rail">${this.rail(list)}</div></div></div>`;
+      <div class="gz-bottom"><div class="gx-rail" id="gx-rail">${this.rail(list)}</div></div></div>`;
     this.scrollTo();
   }
   rail(list) {
@@ -381,7 +380,6 @@ const GaragePanel = new (class extends PanelBase {
     if (main) { main.classList.toggle('empty', !this.cur()); main.innerHTML = this.heroHtml(); }
     if (rail) rail.innerHTML = this.rail(list);
     if (tabs) tabs.innerHTML = this.tabs(list);
-    if (cnt) cnt.textContent = `${list.length ? 1 : 0} / ${this.items.length}`;
   }
   move(dx) { const l = this.visible(); if (!l.length) return; this.i = (this.i + dx + l.length) % l.length; this.render(); }
   async onA(el) {
