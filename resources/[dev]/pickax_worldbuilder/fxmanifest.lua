@@ -61,6 +61,8 @@ files {
     'html/style.css',
     'html/atelier.css',
     'html/garage.css',
+    'html/garage-ref.css',
+    'html/fonts/*',
     'html/vehicles/**/*',     -- images des véhicules (html/vehicles/<modèle>.webp) ; à défaut : docs.fivem.net
     'html/atelier.js',
     'html/script.js',

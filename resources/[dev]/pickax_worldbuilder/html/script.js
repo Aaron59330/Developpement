@@ -326,59 +326,64 @@ const GaragePanel = new (class extends PanelBase {
     return `<img class="${cls}" src="vehicles/${esc(v.img)}.webp" data-fb="https://docs.fivem.net/vehicles/${esc(v.img)}.webp" alt="" draggable="false">`;
   }
   bar(label, val, max = 100) { const pc = Math.max(0, Math.min(100, Math.round((Number(val) || 0) / max * 100))); return `<div class="gx-stat"><span>${label}</span><b>${pc}</b><i><u style="width:${pc}%"></u></i></div>`; }
+  pc(val, max = 100) { return Math.max(0, Math.min(100, Math.round((Number(val) || 0) / max * 100))); }
+  ring(label, sub, val, max = 100) {
+    const p = this.pc(val, max);
+    return `<div class="gz-task"><div class="gz-tl"><b>${label}</b><small>${sub}</small></div>
+      <div class="gz-ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.5"/><circle class="fg" cx="18" cy="18" r="15.5" stroke-dasharray="${(p * 0.974).toFixed(1)} 97.4"/></svg><i>${p}</i></div>
+      <div class="gz-tv"><b>${p}</b><small>/100</small></div></div>`;
+  }
+  row(label, value) { return `<div class="gz-line"><span>${label}</span><b>${esc(value)}</b></div>`; }
   heroHtml() {
     const d = this.d, job = d.mode === 'job', v = this.cur();
     const needPay = job ? (v && v.price > 0) : d.fee > 0;
-    const hero = v ? `
-      <div class="gx-hero">
-        <div class="gx-info">
-          <small>${esc(v.make || (job ? 'Flotte de service' : ''))}</small>
-          <h1>${esc(v.name)}</h1>
-          ${v.plate ? `<div class="gx-plate">${esc(v.plate)}</div>` : ''}
-        </div>
-        <div class="gx-car">${this.img(v, 'gx-big')}</div>
-      </div>
-      <div class="gx-side">
-        <div class="gx-card"><div class="gx-ok">${ic('check', 15)} Prêt à rouler</div>
-          <div class="gx-cond">${this.bar('Essence', v.fuel, 100)}${this.bar('Moteur', v.engine, 1000)}${this.bar('Carrosserie', v.body, 1000)}</div></div>
-        <div class="gx-card"><h3>Performances <small>Notes sur 100</small></h3>
-          ${v.perf ? `<div class="gx-perf">${this.bar('Vitesse', v.perf.speed)}${this.bar('Accélération', v.perf.accel)}${this.bar('Freinage', v.perf.brake)}${this.bar('Adhérence', v.perf.grip)}</div>` : '<p class="gx-mute">Modèle non répertorié.</p>'}</div>
-        <div class="gx-card gx-act">${needPay ? payRow(d.payments, this.method) : ''}
-          <button class="primary gx-take" data-a="take" data-v="${esc(v.key)}">Sortir le véhicule${job ? (v.price ? ` · ${money(v.price)}` : '') : (d.fee ? ` · ${money(d.fee)}` : '')}</button>
-          <button class="gx-store" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 15)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>
-      </div>`
-      : `<div class="gx-emptybox">${emptyState('car', job ? 'Aucun véhicule' : 'Garage vide', job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.')}
-          <button class="gx-store" data-a="store" ${d.inVehicle ? '' : 'disabled'}>${ic('logout', 15)} Ranger le véhicule${d.inVehicle ? '' : ' (aucun à proximité)'}</button></div>`;
-    return hero;
+    const price = job ? (v && v.price ? ` · ${money(v.price)}` : '') : (d.fee ? ` · ${money(d.fee)}` : '');
+    const left = `<div class="gz-left">
+        <div class="gz-cta"><b>${job ? 'SORTIR UN VÉHICULE' : 'SORTIR LE VÉHICULE'}</b>
+          <small>${job ? 'Choisis un véhicule de la flotte de service puis sors-le du garage.' : 'Choisis ton véhicule dans la liste puis sors-le du garage.'}</small>
+          ${v ? `<button data-a="take" data-v="${esc(v.key)}">${job ? 'SORTIR' : 'SORTIR DU GARAGE'}${price}</button>` : ''}</div>
+        ${v ? `<div class="gz-lines">${this.row('PLAQUE', v.plate || '—')}${this.row('MARQUE', v.make || '—')}${this.row('MODÈLE', v.model || '—')}${this.row('ESSENCE', this.pc(v.fuel, 100) + ' %')}${this.row('MOTEUR', this.pc(v.engine, 1000) + ' %')}${this.row('CARROSSERIE', this.pc(v.body, 1000) + ' %')}</div>` : ''}
+        ${needPay ? `<div class="gz-pay">${payRow(d.payments, this.method)}</div>` : ''}
+        <button class="gz-exit" data-a="store" ${d.inVehicle ? '' : 'disabled'}>RANGER LE VÉHICULE${d.inVehicle ? '' : ' (AUCUN À PROXIMITÉ)'}</button></div>`;
+    if (!v) return left + `<div class="gz-center"><div class="gz-empty">${emptyState('car', job ? 'Aucun véhicule' : 'Garage vide', job ? 'Aucun véhicule de service disponible pour ton grade.' : 'Aucun véhicule rangé dans ce garage.')}</div></div><div class="gz-right"></div>`;
+    return left + `<div class="gz-center"><div class="gz-name"><small>${esc(v.make || (job ? 'FLOTTE DE SERVICE' : ''))}</small><h1>${esc(v.name)}</h1></div><div class="gz-car">${this.img(v, 'gx-big')}</div></div>
+      <div class="gz-right"><div class="gz-h">PERFORMANCES</div>
+        ${v.perf ? this.ring('VITESSE', 'VITESSE MAXIMALE', v.perf.speed) + this.ring('ACCÉLÉRATION', 'DÉPART ARRÊTÉ', v.perf.accel) + this.ring('FREINAGE', 'DISTANCE D\'ARRÊT', v.perf.brake) + this.ring('ADHÉRENCE', 'TENUE DE ROUTE', v.perf.grip) : '<p class="gx-mute">Modèle non répertorié.</p>'}
+        <div class="gz-h" style="margin-top:18px">ÉTAT DU VÉHICULE</div>
+        ${this.ring('ESSENCE', 'RÉSERVOIR', v.fuel, 100)}${this.ring('MOTEUR', 'SANTÉ', v.engine, 1000)}${this.ring('CARROSSERIE', 'SANTÉ', v.body, 1000)}</div>`;
+  }
+  tabs(list) {
+    const cur = this.cur();
+    return list.slice(0, 14).map((x, i) => `<b class="${cur && x.key === cur.key ? 'on' : ''}" data-a="gsel" data-v="${esc(x.key)}">${i + 1}</b>`).join('');
   }
   render() {
-    const d = this.d, job = d.mode === 'job', list = this.visible(), v = this.cur();
-    const ph = job ? 'Nom, modèle…' : 'Nom, modèle ou plaque…';
-    const hero = this.heroHtml();
-    $root.innerHTML = `<div class="gx">
-      <div class="gx-top"><div class="gx-title">${ic(job ? 'shield' : 'car', 18)}<b>${esc(d.label)}</b><small>${this.items.length} ${job ? 'véhicule(s) de service' : 'au garage'}</small></div>
-        <div class="gx-tools"><label class="gx-search">${ic('search', 14)}<input data-path="q" value="${esc(this.q)}" placeholder="${ph}" autocomplete="off"></label>
-          <button class="gx-x" data-a="close">Fermer <kbd>ESC</kbd></button></div></div>
-      <div class="gx-main ${v ? '' : 'empty'}">${hero}</div>
-      <div class="gx-bottom"><div class="gx-bar"><span id="gx-count">${list.length ? Math.min(this.i, list.length - 1) + 1 : 0} / ${this.items.length}</span>
-        <span class="gx-nav">Parcourir <button data-a="prev" aria-label="Précédent">${ic('chevL', 14)}</button><button data-a="next" aria-label="Suivant">${ic('chevR', 14)}</button></span></div>
+    const d = this.d, job = d.mode === 'job', list = this.visible();
+    const ph = job ? 'NOM, MODÈLE…' : 'NOM, MODÈLE OU PLAQUE…';
+    $root.innerHTML = `<div class="gx gz">
+      <div class="gz-top"><div class="gz-nav"><button data-a="prev" aria-label="Précédent">${ic('chevL', 13)}</button><button data-a="next" aria-label="Suivant">${ic('chevR', 13)}</button><span>${esc(d.label)} · ${this.items.length} ${job ? 'VÉHICULE(S) DE SERVICE' : 'AU GARAGE'}</span></div>
+        <div class="gz-tabs" id="gz-tabs">${this.tabs(list)}</div>
+        <div class="gz-tools"><label class="gz-search">${ic('search', 13)}<input data-path="q" value="${esc(this.q)}" placeholder="${ph}" autocomplete="off"></label>
+          <button class="gz-close" data-a="close">FERMER <kbd>ESC</kbd></button></div></div>
+      <div class="gz-main ${this.cur() ? '' : 'empty'}">${this.heroHtml()}</div>
+      <div class="gz-bottom"><div class="gz-count"><span id="gx-count">${list.length ? Math.min(this.i, list.length - 1) + 1 : 0} / ${this.items.length}</span></div>
         <div class="gx-rail" id="gx-rail">${this.rail(list)}</div></div></div>`;
     this.scrollTo();
   }
   rail(list) {
     const cur = this.cur();
-    return list.map(x => `<div class="gx-tile ${cur && x.key === cur.key ? 'on' : ''}" data-a="gsel" data-v="${esc(x.key)}">${this.img(x, 'gx-thumb')}<b>${esc(x.name)}</b><small>${esc(x.plate || x.make || '')}</small></div>`).join('') || '<div class="gx-mute">Aucun résultat.</div>';
+    return list.map((x, i) => `<div class="gx-tile ${cur && x.key === cur.key ? 'on' : ''}" data-a="gsel" data-v="${esc(x.key)}">${this.img(x, 'gx-thumb')}<b>${esc(x.name)}</b><small>${esc(x.plate || x.make || '')}</small></div>`).join('') || '<div class="gx-mute">Aucun résultat.</div>';
   }
   scrollTo() { const r = document.getElementById('gx-rail'), on = r && r.querySelector('.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
   afterInput(p) {
     if (p !== 'q') return;
     this.i = 0;
-    const list = this.visible(), main = document.querySelector('.gx-main'), rail = document.getElementById('gx-rail'), cnt = document.getElementById('gx-count');
+    const list = this.visible(), main = document.querySelector('.gz-main'), rail = document.getElementById('gx-rail'), cnt = document.getElementById('gx-count'), tabs = document.getElementById('gz-tabs');
     if (main) { main.classList.toggle('empty', !this.cur()); main.innerHTML = this.heroHtml(); }
     if (rail) rail.innerHTML = this.rail(list);
+    if (tabs) tabs.innerHTML = this.tabs(list);
     if (cnt) cnt.textContent = `${list.length ? 1 : 0} / ${this.items.length}`;
   }
-  move(dx) { const l = this.visible(); if (!l.length) return; this.i = (this.i + dx + l.length) % l.length; const q = document.querySelector('.gx-search input'), had = q && document.activeElement === q; this.render(); }
+  move(dx) { const l = this.visible(); if (!l.length) return; this.i = (this.i + dx + l.length) % l.length; this.render(); }
   async onA(el) {
     const a = el.dataset.a;
     if (a === 'pay') { this.method = el.dataset.v; return this.render(); }
