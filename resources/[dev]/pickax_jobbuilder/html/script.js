@@ -510,8 +510,9 @@ const Builder = {
     const draft = this.cur && this.cur.isNew ? this.cur : this.draft;
     const nav = [
       { label: 'Général', items: [{ id: '__home', icon: 'grid', text: 'Accueil' }, { id: '__settings', icon: 'sliders', text: 'Paramètres' }] },
-      { label: 'Jobs', items: [...(draft ? [{ id: '__new', icon: TYPE_ICON[draft.job.type], text: draft.job.label + ' (brouillon)' }] : []),
-        ...this.jobs.map(j => ({ id: j.name, icon: TYPE_ICON[j.type] || 'briefcase', text: j.label, count: j.online ? `${j.online} en ligne` : null }))] },
+      ...(draft ? [{ label: 'Brouillon', items: [{ id: '__new', icon: TYPE_ICON[draft.job.type], text: draft.job.label }] }] : []),
+      ...Object.entries(this.jobs.reduce((m, j) => { (m[j.type] = m[j.type] || []).push(j); return m; }, {})).sort((a, b) => ((this.catalog.jobTypes[a[0]] || {}).label || a[0]).localeCompare((this.catalog.jobTypes[b[0]] || {}).label || b[0]))
+        .map(([t, list]) => ({ label: (this.catalog.jobTypes[t] || {}).label || t, items: list.sort((a, b) => a.label.localeCompare(b.label)).map(j => ({ id: j.name, icon: TYPE_ICON[j.type] || 'briefcase', text: j.label, count: j.online ? `● ${j.online}` : null })) })),
     ];
     const foot = `<button class="primary" data-a="newJob">${ic('plus', 16)} Nouveau job</button><small>Échap pour fermer : ton brouillon reste en mémoire (pratique pour relever des coordonnées).</small>`;
     const profile = { initials: 'JB', title: 'Job Builder', sub: 'Accès développeur' };

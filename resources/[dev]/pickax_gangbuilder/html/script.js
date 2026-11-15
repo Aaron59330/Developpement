@@ -361,19 +361,30 @@ const Builder = {
     const c = document.getElementById('confirm');
     c.innerHTML = `<div class="box" style="width:720px"><h2>Nouveau gang</h2><p>Choisis un modèle : grades, couleur, blip, actions et points suggérés sont pré-remplis, tout reste modifiable.</p>
       <div class="grid4" style="margin-bottom:18px">${Object.entries(types).map(([k, t]) => `<div class="tpl ${k === this.draftType ? 'sel' : ''}" data-type="${k}">${tile(TYPE_ICON[k] || 'flag')}${esc(t.label)}</div>`).join('')}</div>
-      <div class="grid2">${fld('Nom interne (job2)', `<input id="ng-name" placeholder="ex: ballas, vagos" maxlength="${this.catalog.nameMax}">`)}${fld('Label affiché', '<input id="ng-label" placeholder="Ballas" maxlength="50">')}</div>
-      <div class="grid2 mt">${fld('Trésorerie de départ ($)', '<input id="ng-money" type="number" min="0" value="0">')}<p class="hint" style="align-self:end">Le nom est écrit dans <b>jobs2</b> (${this.catalog.nameMax} caractères max : <b>users.job2</b> est un varchar(20)).</p></div>
-      <div class="row" style="margin-top:22px"><span class="spacer"></span><button id="ng-no">Annuler</button><button class="primary" id="ng-yes">Créer le brouillon</button></div></div>`;
+      ${fld('Nom du gang', '<input id="ng-label" placeholder="ex : Ballas, Vagos, Families" maxlength="50" autofocus>')}
+      <details style="margin-top:12px"><summary class="hint" style="cursor:pointer">Avancé : nom interne et trésorerie de départ</summary>
+        <div class="grid2 mt">${fld('Nom interne (job2)', `<input id="ng-name" placeholder="généré à partir du nom" maxlength="${this.catalog.nameMax}">`)}${fld('Trésorerie de départ ($)', '<input id="ng-money" type="number" min="0" value="0">')}</div>
+        <p class="hint">Le nom est écrit dans <b>jobs2</b> (${this.catalog.nameMax} caractères max : <b>users.job2</b> est un varchar(20)).</p></details>
+      <div class="row" style="margin-top:22px"><span class="spacer"></span><button id="ng-no">Annuler</button><button class="primary" id="ng-yes">Créer le gang</button></div></div>`;
     c.classList.remove('hidden');
     const closeDlg = () => { c.classList.add('hidden'); c.innerHTML = ''; };
     document.getElementById('ng-no').onclick = closeDlg;
     c.querySelectorAll('.tpl').forEach(el => el.onclick = () => { this.draftType = el.dataset.type; c.querySelectorAll('.tpl').forEach(t => t.classList.toggle('sel', t === el)); });
     document.getElementById('ng-yes').onclick = () => {
-      const name = document.getElementById('ng-name').value.trim().toLowerCase();
       const label = document.getElementById('ng-label').value.trim();
-      const re = new RegExp(`^[a-z][a-z0-9_]{1,${this.catalog.nameMax - 1}}$`);
-      if (!re.test(name)) return toast(`Nom invalide : minuscules, chiffres, _ (2-${this.catalog.nameMax}), commence par une lettre`, 'err');
-      if (!label) return toast('Label obligatoire', 'err');
+      if (!label) return toast('Donne un nom au gang', 'err');
+      const max = this.catalog.nameMax;
+      let name = document.getElementById('ng-name').value.trim().toLowerCase();
+      if (!name) {
+        name = label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        if (!/^[a-z]/.test(name)) name = 'gang_' + name;
+        name = name.slice(0, max).replace(/_+$/, '');
+        let out = name, i = 2;
+        while (this.gangs.some(g => g.name === out)) { const suf = '_' + i++; out = name.slice(0, max - suf.length) + suf; }
+        name = out;
+      }
+      const re = new RegExp(`^[a-z][a-z0-9_]{1,${max - 1}}$`);
+      if (!re.test(name)) return toast(`Nom interne invalide : minuscules, chiffres, _ (2-${max}), commence par une lettre`, 'err');
       if (this.gangs.some(g => g.name === name)) return toast('Ce gang existe déjà', 'err');
       const money = Math.max(0, Number(document.getElementById('ng-money').value) || 0);
       closeDlg();

@@ -3,11 +3,11 @@
 :root { --eb-a: #2b8cff; --eb-b: #1558b8; --eb-rgb: 43,140,255; --eb-row: rgba(255,255,255,.04); --eb-line: rgba(255,255,255,.07); }
 html:root { --pk-accent: #2b8cff !important; --pk-accent-rgb: 43,140,255 !important; --accent: #2b8cff !important; --accent-rgb: 43,140,255 !important; --acc: #2b8cff !important; --acc-rgb: 43,140,255 !important; --line: rgba(255,255,255,.07) !important; }
 html:root #root > .shell { width: min(1500px, 97vw); height: min(820px, 94vh); background: #09090b !important; background-image: none !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important; box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; font-family: 'PJS', 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
-html:root #root > .shell { display: grid; grid-template-columns: 310px 1fr; }
+html:root #root > .shell { display: grid; grid-template-columns: 310px 1fr; grid-template-rows: auto minmax(0, 1fr); }
 /* barre latérale */
-html .shell > .side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--eb-line) !important; position: relative; overflow: hidden;
+html .shell .side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--eb-line) !important; position: relative; overflow: hidden;
   background: linear-gradient(155deg, #3a8ee8 0%, #1d5aa6 20%, #0f2748 42%, #0d0b10 64%), #0b0b0e !important; }
-html .shell > .side::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
+html .shell .side::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
 html .shell .profile { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 26px 24px 20px; background: transparent !important; border: 0 !important; }
 html .shell .plogo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,.4)); }
 html .shell .pname { font-size: 24px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #fff; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,.35); }
@@ -19,7 +19,7 @@ html .shell .nav-item.active { background: rgba(var(--eb-rgb), .55) !important; 
 html .shell .nav-item .count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4); color: #e8e4ee; font-size: 10.5px; display: grid; place-items: center; letter-spacing: 0; }
 html .shell .side-foot { position: relative; z-index: 1; padding: 14px 20px 18px; color: rgba(255,255,255,.5); font-size: 10.5px; line-height: 1.45; background: transparent !important; border: 0 !important; }
 /* contenu */
-html .shell > .main { background: #0c0c0f !important; min-width: 0; display: flex; flex-direction: column; }
+html .shell .main { background: #0c0c0f !important; min-width: 0; display: flex; flex-direction: column; }
 html .shell .head { display: flex; align-items: center; gap: 16px; padding: 0 26px; height: 74px; flex: none; background: #0b0b0e !important; border-bottom: 1px solid var(--eb-line) !important; }
 html .shell .head .tile { background: rgba(var(--eb-rgb), .16) !important; border: 1px solid rgba(var(--eb-rgb), .45) !important; color: var(--eb-a) !important; border-radius: 6px !important; box-shadow: none !important; }
 html .shell .ttl h1 { font-size: 22px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: #fff !important; background: none !important; -webkit-text-fill-color: #fff; line-height: 1.1; }
@@ -48,12 +48,12 @@ html .shell :is(input, select, textarea):focus { border-color: var(--eb-a) !impo
 html .shell .closeBtn, html .shell .xbtn, html .shell [data-a="close"] { border-radius: 6px; }
 html .shell .logline { color: #a09cae; border-color: var(--eb-line) !important; } html .shell .logline b { color: #fff; }
 html .shell .hint { color: #7d7a88; }
-html:root #root > .shell { gap: 0 !important; padding: 0 !important; grid-template-columns: 310px minmax(0, 1fr) !important; }
-html .shell > .side { width: auto !important; max-width: none !important; }
+html:root #root > .shell { gap: 0 !important; padding: 0 !important; grid-template-columns: 310px minmax(0, 1fr) !important; grid-template-rows: auto minmax(0, 1fr) !important; }
+html .shell .side { width: auto !important; max-width: none !important; }
 html .shell .profile.logo-only .pname, html .shell .profile .pname { display: block !important; }
 html .shell .profile .plogo[style*="hidden"] { display: none; }
 html .shell .nav-item .count:empty { display: none; }
-html .shell > .main { margin: 0 !important; padding: 0 !important; width: auto !important; }
+html .shell .main { margin: 0 !important; padding: 0 !important; width: auto !important; }
 /* variante de barre latérale à boutons (enchères, base…) */
 html .shell .nav > button { display: flex; align-items: center; justify-content: flex-start; gap: 12px; height: 40px; flex: none !important; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-align: left; box-shadow: none !important; width: 100%; }
 html .shell .nav > button:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
@@ -66,3 +66,33 @@ html .shell .nav[data-a] { display: flex; align-items: center; gap: 12px; height
 html .shell .nav[data-a]:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
 html .shell .nav[data-a].on { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; }
 html .shell .nav[data-a] .n { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4) !important; color: #fff !important; display: grid; place-items: center; font-size: 10.5px; letter-spacing: 0; }
+/* menu de gauche : recherche et groupes repliables (bb-nav.js) */
+html .shell .bbs { position: relative; z-index: 1; display: flex; align-items: center; margin: 0 18px 6px; height: 36px; background: rgba(0,0,0,.4); border-radius: 3px; }
+html .shell .bbs input { flex: 1; min-width: 0; height: 36px; background: transparent !important; border: 0 !important; outline: 0; box-shadow: none !important; color: #fff !important; font-size: 12px; letter-spacing: .04em; padding: 0 12px !important; }
+html .shell .bbs input::placeholder { color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; }
+html .shell .bbs button { width: 30px; height: 30px; margin-right: 3px; background: transparent !important; border: 0 !important; color: rgba(255,255,255,.6) !important; font-size: 18px; cursor: pointer; border-radius: 3px !important; }
+html .shell .bbs button:hover { background: rgba(255,255,255,.12) !important; color: #fff !important; }
+html .shell .bbg { display: flex; flex-direction: column; gap: 4px; }
+html .shell .bbg-h { display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 12px 4px 4px; user-select: none; }
+html .shell .bbg-h:hover { color: #fff; }
+html .shell .bbg-c { display: inline-block; width: 10px; transition: transform .15s; font-size: 9px; }
+html .shell .bbg-t { flex: 1; }
+html .shell .bbg-n { min-width: 18px; height: 16px; padding: 0 5px; border-radius: 8px; background: rgba(0,0,0,.4); color: rgba(255,255,255,.75); font-size: 9.5px; display: grid; place-items: center; letter-spacing: 0; }
+html .shell .bbg-b { display: flex; flex-direction: column; gap: 4px; }
+html .shell .bbg-col .bbg-b { display: none; }
+html .shell .bbg-col .bbg-c { transform: rotate(-90deg); }
+html .shell .nav-item { height: 36px; }
+html .shell .nav-item > span.grow, html .shell .nav-item .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* variante avec barre du haut (.n-top) et rangée (.n-row) : builders récents */
+html .shell > .side, html .shell > .main { grid-row: 1 / -1; }
+html .shell > .n-top { grid-column: 1 / -1; grid-row: 1; display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 20px; background: #0b0b0e !important; border-bottom: 1px solid var(--eb-line) !important; }
+html .shell > .n-row { grid-column: 1 / -1; grid-row: 2; display: grid !important; grid-template-columns: 310px minmax(0, 1fr); min-height: 0; min-width: 0; }
+html .shell .n-logo { color: var(--eb-a) !important; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 5px; background: rgba(var(--eb-rgb), .16); border: 1px solid rgba(var(--eb-rgb), .4); }
+html .shell .n-title b { font-size: 15px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #fff; } html .shell .n-title b span { color: var(--eb-a); }
+html .shell .n-title small { display: block; color: #7d7a88; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; margin-top: 1px; }
+html .shell .n-sp { flex: 1; }
+html .shell .n-top .icon { width: 34px; height: 34px; border-radius: 6px; background: rgba(255,255,255,.07) !important; border: 1px solid var(--eb-line) !important; color: #d8d4e0 !important; display: grid; place-items: center; cursor: pointer; }
+html .shell .n-top .icon:hover { background: var(--eb-a) !important; border-color: var(--eb-a) !important; color: #fff !important; }
+html .shell .n-row .profile .pname { display: none !important; }
+html .shell .n-row .head .acts [data-a="close"] { display: none; }
