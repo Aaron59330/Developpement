@@ -11,12 +11,12 @@ html:root {
   --a: #2b8cff !important; --a2: rgba(43,140,255,.16) !important; --ar: 43,140,255 !important; --accl: #6fb1ff !important; --accv: #1f6fd0 !important;
   --line: rgba(255,255,255,.08) !important;
 }
-html, body { font-family: 'Sora', 'PJS', 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+html, body { font-family: 'PJS', 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
 
 /* fenêtre principale : cadre de tablette, verre noir, halos magenta */
 html #root > :is(.shell, .win, .cn, .jm2, .panel, .gx, .cp-wrap, .app, .sheet, .wrap, .gb, .eb, .sb, .ib, .tun-view),
 html #root > div:only-child:not(.hidden), html .win, html #win, html #lab {
-  background-image: radial-gradient(900px 420px at 0% 0%, rgba(var(--fx-rgb), .13), transparent 62%) !important;
+  background-image: none !important;
   background-color: #09090b !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important;
   box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; overflow: hidden;
 }
@@ -24,7 +24,7 @@ html #root, html #dlg, html #mg { background-color: rgba(3,2,6,.55); }
 
 /* barres latérales / en-têtes / zones de contenu */
 html :is(.side, .sidebar, .nav, .rail, .menu, aside) { background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.008)) !important; border-color: var(--fx-line) !important; }
-html :is(.top, .head, .header, .hd, .tbar, .topbar, header, .titlebar) { border-color: var(--fx-line) !important; background: linear-gradient(180deg, rgba(255,255,255,.035), transparent) !important; }
+html :is(.top, .head, .header, .hd, .tbar, .topbar, header, .titlebar) { border-color: var(--fx-line) !important; background: #0b0c10 !important; }
 html :is(h1, .title, .ttl) { letter-spacing: .04em; }
 
 /* cartes et panneaux en verre */
@@ -68,9 +68,20 @@ html :is(.badge, .dtag, .count:not(.plain)) { background: linear-gradient(135deg
 /* fenêtres modales, toasts, tableaux */
 html :is(#modal, .modal, .dialog, .sheet, #confirm > *, .confirm) { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)), #0b0a10 !important; border: 1px solid var(--fx-line) !important; border-radius: 6px !important; box-shadow: 0 40px 100px rgba(0,0,0,.85) !important; }
 html :is(.toast, #toasts > *, #toast) { background: #0d0c12 !important; border: 1px solid rgba(var(--fx-rgb), .5) !important; border-radius: 5px !important; box-shadow: none !important; }
-html th { color: #8a8794 !important; letter-spacing: .12em; }
+html th { color: #8793a6 !important; letter-spacing: .12em; }
 html :is(tr, td, th, hr, .sep, .line) { border-color: var(--fx-line) !important; }
 html ::-webkit-scrollbar-thumb { background: rgba(var(--fx-rgb), .38) !important; border-radius: 4px; }
 html ::-webkit-scrollbar-track { background: rgba(255,255,255,.03) !important; }
 html #root button:not(.pri):not(.on):not(.go):not(.buy):not(.mini):not(.x):not(.xbtn):not(.close) { border-radius: 10px; }
 html #root :is(.side, .sidebar, aside) > button:last-child:not(.on), html #root .foot button:not(.primary):not(.pri):not(.go) { background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; color: #ddd8e6 !important; }
+
+/* titres et fenêtres : même gabarit que les builders */
+html :is(.cn-head h1, .top h1, .head h1, .hd h1, .panel .head h2, .win .top h1) { text-transform: uppercase; letter-spacing: .02em; font-weight: 800; background: none !important; -webkit-text-fill-color: #fff; color: #fff !important; }
+html :is(.cn-head small, .top small, .head p) { color: #7a8699 !important; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+html #root > :is(.cn, .win, .panel, .shell) { width: min(1500px, 97vw); height: min(820px, 94vh); max-height: none; }
+html :is(.card, .panel, .box, .tile, .stat, .kpi) h2 { text-transform: uppercase; letter-spacing: .06em; font-size: 12px; font-weight: 800; }
+
+/* lignes et pastilles : plates comme dans les builders */
+html :is(.goal, .day, .rw, .bonus, .pl) { background: rgba(255,255,255,.035) !important; box-shadow: none !important; border-radius: 3px !important; }
+html :is(.goal.done, .day.done, .rw.got) { background: rgba(63,185,80,.08) !important; }
+html :is(.day.now, .rw.next) { background: rgba(var(--fx-rgb), .2) !important; }

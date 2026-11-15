@@ -1,24 +1,24 @@
 /* ═════════════ Boutique — style « launcher » : noir profond, accent bleu, navigation en haut, panneau de compte en biais ═════════════
    Couleur : --ed-a / --ed-b / --ed-rgb (une seule fois, ici).  Aucune logique : seulement l'apparence. */
 #root.edrp { --ed-a: #2b8cff; --ed-b: #1558b8; --ed-rgb: 43,140,255; --ed-gold: #f2b63c; --ed-row: rgba(255,255,255,.04); --ed-line: rgba(255,255,255,.07);
-  --acc: var(--ed-a); --acc-rgb: var(--ed-rgb); --line: var(--ed-line); --good: #7be0a6; --muted: #7d7a88;
+  --acc: var(--ed-a); --acc-rgb: var(--ed-rgb); --line: var(--ed-line); --good: #7be0a6; --muted: #7a8699;
   width: min(1500px, 97vw) !important; height: min(820px, 94vh) !important; grid-template-columns: 330px 1fr !important; grid-template-rows: 60px minmax(0, 1fr) !important;
   background: #09090b !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important; box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; overflow: hidden; }
 #root.edrp::before, #root.edrp::after { display: none !important; }
 
 /* barre du haut */
-#root.edrp .tn { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; padding: 0 18px; background: #0b0b0e; border-bottom: 1px solid var(--ed-line); position: relative; z-index: 2; }
+#root.edrp .tn { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; padding: 0 18px; background: #0b0c10; border-bottom: 1px solid var(--ed-line); position: relative; z-index: 2; }
 #root.edrp .tn-logo { width: 38px; height: 38px; display: grid; place-items: center; flex: none; } #root.edrp .tn-logo img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(var(--ed-rgb), .5)); }
 #root.edrp .tn-logo .fb { font: 800 22px 'PJS', sans-serif; color: var(--ed-a); }
 #root.edrp .tn-tabs { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,.04); border: 1px solid var(--ed-line); border-radius: 8px; margin: 0 auto; max-width: 100%; overflow-x: auto; scrollbar-width: none; } #root.edrp .tn-tabs::-webkit-scrollbar { display: none; }
-#root.edrp .tn-tabs button { height: 32px; padding: 0 15px; display: flex; align-items: center; gap: 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8e8a9a; white-space: nowrap; transition: .15s; background: transparent; }
+#root.edrp .tn-tabs button { height: 32px; padding: 0 15px; display: flex; align-items: center; gap: 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8793a6; white-space: nowrap; transition: .15s; background: transparent; }
 #root.edrp .tn-tabs button:hover { color: #fff; background: rgba(255,255,255,.06); }
-#root.edrp .tn-tabs button.on { background: linear-gradient(180deg, var(--ed-a), var(--ed-b)); color: #fff; box-shadow: 0 0 22px rgba(var(--ed-rgb), .35); }
+#root.edrp .tn-tabs button.on { background: rgba(var(--ed-rgb), .26); color: #fff; box-shadow: inset 0 -2px 0 var(--ed-a); }
 #root.edrp .tn-r { display: flex; align-items: center; gap: 10px; flex: none; }
 #root.edrp .bal { display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 4px 0 12px; background: rgba(255,255,255,.05); border: 1px solid var(--ed-line); border-radius: 8px; }
 #root.edrp .bal .c { width: 18px; height: 18px; border-radius: 50%; background: var(--ed-gold); color: #3b2800; font: 800 10px 'PJS'; display: grid; place-items: center; }
 #root.edrp .bal b { font-size: 14px; font-weight: 800; letter-spacing: .02em; color: #fff; min-width: 40px; }
-#root.edrp .bal .plus { width: 26px; height: 26px; border-radius: 6px; background: var(--ed-gold); color: #3b2800; font: 800 17px/1 'PJS'; display: grid; place-items: center; cursor: pointer; }
+#root.edrp .bal .plus { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(180deg, var(--ed-a), var(--ed-b)); color: #fff; font: 800 17px/1 'PJS', sans-serif; display: grid; place-items: center; cursor: pointer; }
 #root.edrp .bal .plus:hover { filter: brightness(1.12); }
 #root.edrp .escl { font: 700 10px 'PJS'; letter-spacing: .08em; background: rgba(255,255,255,.1); color: #d8d4e0; padding: 4px 7px; border-radius: 4px; }
 #root.edrp .tn .xbtn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,.07); border: 1px solid var(--ed-line); color: #d8d4e0; display: grid; place-items: center; }
@@ -26,37 +26,37 @@
 
 /* panneau de compte (biais rose) */
 #root.edrp .lp { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--ed-line); position: relative; overflow: hidden;
-  background: linear-gradient(155deg, #3a8ee8 0%, #1d5aa6 22%, #0f2748 44%, #0d0b10 66%), #0b0b0e; }
-#root.edrp .lp::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
+  background: linear-gradient(180deg, rgba(43,140,255,.13) 0%, rgba(43,140,255,.04) 38%, transparent 70%), #0b0c10; }
+#root.edrp .lp::after { display: none; }
 #root.edrp .lp-hero { padding: 30px 26px 24px; position: relative; z-index: 1; }
-#root.edrp .lp-hero small { font-size: 10.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+#root.edrp .lp-hero small { font-size: 10.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #6f7d91; }
 #root.edrp .lp-hero h2 { font: 800 34px/1 'PJS', sans-serif; letter-spacing: -.01em; margin: 8px 0 14px; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,.35); }
-#root.edrp .lp-id { display: inline-flex; gap: 8px; align-items: center; padding: 5px 10px; background: rgba(0,0,0,.3); border-radius: 4px; font-size: 11px; } #root.edrp .lp-id span { color: rgba(255,255,255,.55); letter-spacing: .12em; } #root.edrp .lp-id b { font-weight: 800; }
-#root.edrp .lp-big { margin-top: 26px; display: flex; align-items: baseline; gap: 10px; } #root.edrp .lp-big b { font: 800 64px/1 'PJS', sans-serif; color: #fff; text-shadow: 0 6px 26px rgba(0,0,0,.4); } #root.edrp .lp-big small { color: rgba(255,255,255,.65); letter-spacing: .06em; text-transform: none; font-size: 12.5px; }
+#root.edrp .lp-id { display: inline-flex; gap: 8px; align-items: center; padding: 5px 10px; background: rgba(255,255,255,.06); border-radius: 4px; font-size: 11px; } #root.edrp .lp-id span { color: #6f7d91; letter-spacing: .12em; } #root.edrp .lp-id b { font-weight: 800; }
+#root.edrp .lp-big { margin-top: 26px; display: flex; align-items: baseline; gap: 10px; } #root.edrp .lp-big b { font: 800 64px/1 'PJS', sans-serif; color: #fff; text-shadow: 0 6px 26px rgba(0,0,0,.4); } #root.edrp .lp-big small { color: #7a8699; letter-spacing: .06em; text-transform: none; font-size: 12.5px; }
 #root.edrp .lp-rows { display: flex; flex-direction: column; gap: 4px; padding: 0 18px; position: relative; z-index: 1; margin-top: 8px; }
-#root.edrp .lr { display: flex; align-items: center; gap: 12px; height: 42px; padding: 0 14px; background: rgba(0,0,0,.34); border: 0; border-radius: 3px; color: #cfcbd8; font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; text-align: left; transition: .15s; }
-#root.edrp .lr .ico { color: rgba(255,255,255,.55); display: grid; place-items: center; } #root.edrp .lr .lb { flex: 1; }
+#root.edrp .lr { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 14px; background: rgba(255,255,255,.035); border: 0; border-radius: 3px; color: #c9c6d3; font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; text-align: left; transition: .15s; }
+#root.edrp .lr .ico { color: #6f7d91; display: grid; place-items: center; } #root.edrp .lr .lb { flex: 1; }
 #root.edrp .lr:hover { background: rgba(255,255,255,.1); color: #fff; }
-#root.edrp .lr.on { background: rgba(var(--ed-rgb), .55); color: #fff; box-shadow: inset 3px 0 0 #fff; } #root.edrp .lr.on .ico { color: #fff; }
-#root.edrp .lr .n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--ed-a); color: #fff; font-size: 11px; display: grid; place-items: center; }
-#root.edrp .lr.on .n { background: #fff; color: var(--ed-b); }
+#root.edrp .lr.on { background: rgba(var(--ed-rgb), .26); color: #fff; box-shadow: inset 3px 0 0 var(--ed-a); } #root.edrp .lr.on .ico { color: #fff; }
+#root.edrp .lr .n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(var(--ed-rgb), .22); color: #cfe3ff; font-size: 11px; display: grid; place-items: center; }
+#root.edrp .lr.on .n { background: var(--ed-a); color: #fff; }
 #root.edrp .lp-foot { margin-top: auto; padding: 18px; display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
-#root.edrp .lp-foot button { height: 36px; display: flex; align-items: center; justify-content: center; gap: 9px; background: rgba(0,0,0,.4); border-radius: 3px; color: #d6d2de; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-#root.edrp .lp-foot button:first-child { background: var(--ed-gold); color: #3b2800; } #root.edrp .lp-foot button:hover { filter: brightness(1.15); }
+#root.edrp .lp-foot button { height: 36px; display: flex; align-items: center; justify-content: center; gap: 9px; background: rgba(255,255,255,.05); border-radius: 3px; color: #d6d2de; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+#root.edrp .lp-foot button:first-child { background: linear-gradient(180deg, var(--ed-a), var(--ed-b)); color: #fff; } #root.edrp .lp-foot button:hover { filter: brightness(1.15); }
 
 /* contenu */
-#root.edrp .main { background: #0c0c0f !important; padding: 0 !important; min-width: 0; }
+#root.edrp .main { background: #0c0d11 !important; padding: 0 !important; min-width: 0; }
 #root.edrp .hero { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 22px 26px 6px !important; }
 #root.edrp .hero .wm { display: none; }
 #root.edrp .hero h1, #root.edrp .main h1 { font: 800 26px 'PJS', sans-serif !important; letter-spacing: .02em; text-transform: uppercase; color: #fff !important; background: none !important; -webkit-text-fill-color: #fff; }
-#root.edrp .hero h1 em { color: var(--ed-a) !important; -webkit-text-fill-color: var(--ed-a); font-style: normal; }
+#root.edrp .hero h1 em { color: #fff !important; -webkit-text-fill-color: #fff; font-style: normal; }
 #root.edrp .hero .hi { background: rgba(var(--ed-rgb), .16) !important; color: var(--ed-a) !important; border: 1px solid rgba(var(--ed-rgb), .4) !important; border-radius: 6px !important; box-shadow: none !important; }
-#root.edrp .hero p, #root.edrp .main .sub, #root.edrp .ht p { color: #7d7a88 !important; font-size: 12.5px; }
+#root.edrp .hero p, #root.edrp .main .sub, #root.edrp .ht p { color: #7a8699 !important; font-size: 12.5px; }
 #root.edrp .tools { padding: 8px 26px 14px !important; }
 #root.edrp .search { background: var(--ed-row) !important; border: 1px solid var(--ed-line) !important; border-radius: 5px !important; height: 38px; }
-#root.edrp .sort button { background: var(--ed-row) !important; border: 1px solid var(--ed-line) !important; border-radius: 5px !important; color: #a09cae !important; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; height: 32px; }
+#root.edrp .sort button { background: var(--ed-row) !important; border: 1px solid var(--ed-line) !important; border-radius: 5px !important; color: #8793a6 !important; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; height: 32px; }
 #root.edrp .sort button.on { background: rgba(var(--ed-rgb), .22) !important; border-color: var(--ed-a) !important; color: #fff !important; }
-#root.edrp .count { color: #6b6877 !important; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+#root.edrp .count { color: #6f7d91 !important; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
 #root.edrp .scroll { background: transparent !important; border: 0 !important; padding: 0 20px 20px 26px !important; }
 #root.edrp .grid { grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 12px; }
 #root.edrp .card { background: #111115 !important; border: 1px solid var(--ed-line) !important; border-radius: 5px !important; box-shadow: none !important; transform: none !important; transition: border-color .15s, background .15s; }
@@ -65,7 +65,7 @@
 #root.edrp .pic { background: radial-gradient(ellipse at 50% 80%, rgba(var(--ed-rgb), .2), transparent 70%), #0d0d10 !important; border-radius: 4px 4px 0 0; }
 #root.edrp .pic svg { color: rgba(var(--ed-rgb), .5) !important; filter: none; }
 #root.edrp .info h3 { font-size: 14px; font-weight: 800; letter-spacing: .02em; color: #fff !important; text-transform: uppercase; }
-#root.edrp .info .meta { color: #6b6877 !important; opacity: 1 !important; font-size: 11px; }
+#root.edrp .info .meta { color: #6f7d91 !important; opacity: 1 !important; font-size: 11px; }
 #root.edrp .pill, #root.edrp .price .pill { background: rgba(255,255,255,.05) !important; border: 1px solid var(--ed-line) !important; border-radius: 4px !important; color: #fff !important; box-shadow: none !important; font-weight: 800; }
 #root.edrp .pill i { background: var(--ed-gold) !important; box-shadow: none !important; }
 #root.edrp .mini, #root.edrp .card .mini, #root.edrp .price .mini { background: linear-gradient(180deg, var(--ed-a), var(--ed-b)) !important; border-radius: 4px !important; box-shadow: none !important; color: #fff !important; }
@@ -76,7 +76,7 @@
 #root.edrp .offers .of, #root.edrp .panel, #root.edrp .summary, #root.edrp .paybox, #root.edrp .cfbox, #root.edrp .wheel-page, #root.edrp .wr-card, #root.edrp .idcard { background: #111115 !important; border: 1px solid var(--ed-line) !important; border-radius: 5px !important; box-shadow: none !important; }
 #root.edrp .btn.pri, #root.edrp .go.pri, #root.edrp .wc.pri { background: linear-gradient(180deg, var(--ed-a), var(--ed-b)) !important; border: 0 !important; border-radius: 4px !important; box-shadow: none !important; color: #fff !important; }
 #root.edrp .btn:not(.pri) { background: var(--ed-row) !important; border: 1px solid var(--ed-line) !important; border-radius: 4px !important; color: #d6d2de !important; box-shadow: none !important; }
-#root.edrp .tbl th { color: #6b6877 !important; letter-spacing: .12em; text-transform: uppercase; font-size: 10.5px; } #root.edrp .tbl tr { border-color: var(--ed-line) !important; }
+#root.edrp .tbl th { color: #6f7d91 !important; letter-spacing: .12em; text-transform: uppercase; font-size: 10.5px; } #root.edrp .tbl tr { border-color: var(--ed-line) !important; }
 #modal .sheet { background: #0e0e12 !important; border: 1px solid var(--ed-line) !important; border-radius: 6px !important; box-shadow: 0 40px 100px rgba(0,0,0,.85) !important; }
 #modal .sheet .kind { color: var(--ed-a) !important; letter-spacing: .14em; text-transform: uppercase; }
 #modal .sheet h2 { text-transform: uppercase; letter-spacing: .02em; }
@@ -87,3 +87,6 @@
 #root.edrp .lp-hero, #root.edrp .lp-hero * { text-align: left; }
 #root.edrp .scroll { box-shadow: none !important; outline: 0 !important; }
 #root.edrp .scroll > .grid { background: transparent !important; border: 0 !important; }
+
+/* titre de page : même gabarit que les builders (blanc, majuscules) */
+#root.edrp .hero h1, #root.edrp .main h1 { font-size: 22px !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }

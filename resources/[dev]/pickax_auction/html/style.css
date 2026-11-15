@@ -78,4 +78,4 @@ input, select, textarea { background: linear-gradient(180deg, #2a2a2c, #1c1c1e);
 #confirm > *, #modal > * { background: radial-gradient(ellipse 100% 70% at 50% 18%, #2d2d2f, #151516); }
 
 /* gabarit « gros menu » identique aux builders */
-.shell { width: min(1440px, 96vw); height: min(780px, 92vh); }
+.shell { width: min(1500px, 97vw); height: min(820px, 94vh); }
