@@ -127,7 +127,7 @@ function addToCart(c, idx) {
   if (line) { if (line.qty >= maxQty(c)) return toast('Quantité maximale atteinte pour cet article'); line.qty++; } else S.cart.push({ cat: c, idx: it.idx, qty: 1 });
   saveCart(); toast(`${it.name} ajouté au panier`, 'ok'); refreshBadge();
 }
-const refreshBadge = () => { const b = document.getElementById('cartBadge'); if (b) { b.textContent = cartCount(); b.style.display = cartCount() ? '' : 'none'; } };
+const refreshBadge = () => { const b = document.getElementById('cartBadge'); if (b) { b.textContent = cartCount(); b.style.display = cartCount() ? '' : 'none'; } const n = document.getElementById('cartN'); if (n) n.textContent = cartCount(); };
 
 /* ───── navigation ───── */
 // logo + nom du serveur (pickax_core/config.lua → ServerLogo / ServerName / ServerShortName)
@@ -168,6 +168,31 @@ function offersStrip() {
 }
 // petit bouton « Panel gestion » (staff uniquement) en bas à droite : ouvre la page Gestion
 const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<button class="gestbtn" data-a="view" data-v="admin" title="Ouvrir le panel de gestion">${ic('shield', 14)}<span>Panel gestion</span></button>` : '';
+
+/* ── Mise en page « launcher » : navigation en haut, panneau de compte à gauche, boutique à droite ── */
+function topnav(cats) {
+  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
+  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : `<span class="fb">${esc((sv.short || 'B')[0])}</span>`;
+  return `<header class="tn"><div class="tn-logo">${mark}</div>
+    <nav class="tn-tabs">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}">${ic(x.icon, 14)}<span>${esc(x.label)}</span></button>`).join('')}</nav>
+    <div class="tn-r"><div class="bal"><span class="c">C</span><b id="pts">${fmt(S.points)}</b>${S.data && S.data.link ? `<button class="plus" data-a="link" title="Acheter des coins">+</button>` : ''}</div>
+      <span class="escl">ESC</span><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div></header>`;
+}
+function leftPanel() {
+  const row = (id, icon, label, val, on) => `<button class="lr ${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}"><span class="ico">${ic(icon, 15)}</span><span class="lb">${label}</span>${val || ''}</button>`;
+  const sv = window.PICKAX_SERVER || {};
+  return `<aside class="lp"><div class="lp-hero"><small>${esc(sv.name || 'BOUTIQUE')}</small><h2>MA BOUTIQUE</h2>${S.data.boutiqueId ? `<div class="lp-id"><span>CODE</span><b>#${esc(S.data.boutiqueId)}</b></div>` : ''}
+      <div class="lp-big"><b id="cartN">${cartCount()}</b><small>article${cartCount() > 1 ? 's' : ''} au panier</small></div></div>
+    <nav class="lp-rows">
+      ${row('cart', 'cart', 'Panier', `<span class="n" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`)}
+      ${S.data.wheel ? row('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="n">1</span>' : '') : ''}
+      ${row('history', 'hist', 'Historique')}
+      ${row('codes', 'tag', 'Codes & parrainage')}
+      ${S.data.staff ? row('admin', 'shield', 'Gestion') : ''}
+    </nav>
+    <div class="lp-foot">${S.data.link ? `<button data-a="link">${ic('link', 15)} Acheter des coins</button>` : ''}${S.data.staff ? `<button data-a="classic">${ic('gear', 15)} Ancien menu</button>` : ''}</div></aside>`;
+}
+
 function render() {
   if (!S.data) return;
   const cats = CATS.filter(c => (S.data[c.id] || []).length);
@@ -179,7 +204,8 @@ function render() {
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
   else main = S.cat === 'daily' ? viewDaily() : viewShop();
-  $root.innerHTML = topbar() + sidebar(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
+  $root.classList.add('edrp');
+  $root.innerHTML = topnav(cats) + leftPanel() + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
 }
 
 function viewShop() {
