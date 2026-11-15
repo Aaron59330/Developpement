@@ -6,17 +6,17 @@ html:root #root > .shell { width: min(1500px, 97vw); height: min(820px, 94vh); b
 html:root #root > .shell { display: grid; grid-template-columns: 310px 1fr; grid-template-rows: auto minmax(0, 1fr); }
 /* barre latérale */
 html .shell .side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--eb-line) !important; position: relative; overflow: hidden;
-  background: linear-gradient(155deg, #3a8ee8 0%, #1d5aa6 20%, #0f2748 42%, #0d0b10 64%), #0b0b0e !important; }
-html .shell .side::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
+  background: linear-gradient(180deg, rgba(43,140,255,.13) 0%, rgba(43,140,255,.04) 38%, transparent 70%), #0b0c10 !important; }
+html .shell .side::after { display: none; }
 html .shell .profile { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 26px 24px 20px; background: transparent !important; border: 0 !important; }
 html .shell .plogo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,.4)); }
 html .shell .pname { font-size: 24px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #fff; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,.35); }
 html .shell .nav:not([data-a]) { position: relative; z-index: 1; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 10px; scrollbar-width: none; background: transparent !important; border: 0 !important; display: flex; flex-direction: column; gap: 4px; } html .shell .nav:not([data-a])::-webkit-scrollbar { display: none; }
-html .shell .nav-label { margin: 14px 4px 4px; font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.55); }
-html .shell .nav-item { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: .15s; box-shadow: none !important; }
-html .shell .nav-item svg { color: rgba(255,255,255,.55); } html .shell .nav-item:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
-html .shell .nav-item.active { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; } html .shell .nav-item.active svg { color: #fff; }
-html .shell .nav-item .count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4); color: #e8e4ee; font-size: 10.5px; display: grid; place-items: center; letter-spacing: 0; }
+html .shell .nav-label { margin: 14px 4px 4px; font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #6f7d91; }
+html .shell .nav-item { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px; background: rgba(255,255,255,.035) !important; border: 0 !important; border-radius: 3px !important; color: #c9c6d3 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: .15s; box-shadow: none !important; }
+html .shell .nav-item svg { color: #6f7d91; } html .shell .nav-item:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+html .shell .nav-item.active { background: rgba(var(--eb-rgb), .26) !important; color: #fff !important; box-shadow: inset 3px 0 0 var(--eb-a) !important; } html .shell .nav-item.active svg { color: #fff; }
+html .shell .nav-item .count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(var(--eb-rgb), .22); color: #cfe3ff !important; color: #e8e4ee; font-size: 10.5px; display: grid; place-items: center; letter-spacing: 0; }
 html .shell .side-foot { position: relative; z-index: 1; padding: 14px 20px 18px; color: rgba(255,255,255,.5); font-size: 10.5px; line-height: 1.45; background: transparent !important; border: 0 !important; }
 /* contenu */
 html .shell .main { background: #0c0c0f !important; min-width: 0; display: flex; flex-direction: column; }
@@ -55,19 +55,19 @@ html .shell .profile .plogo[style*="hidden"] { display: none; }
 html .shell .nav-item .count:empty { display: none; }
 html .shell .main { margin: 0 !important; padding: 0 !important; width: auto !important; }
 /* variante de barre latérale à boutons (enchères, base…) */
-html .shell .nav > button { display: flex; align-items: center; justify-content: flex-start; gap: 12px; height: 40px; flex: none !important; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-align: left; box-shadow: none !important; width: 100%; }
+html .shell .nav > button { display: flex; align-items: center; justify-content: flex-start; gap: 12px; height: 40px; flex: none !important; padding: 0 14px; background: rgba(255,255,255,.035) !important; border: 0 !important; border-radius: 3px !important; color: #c9c6d3 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-align: left; box-shadow: none !important; width: 100%; }
 html .shell .nav > button:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
-html .shell .nav > button.on, html .shell .nav > button.active { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; }
+html .shell .nav > button.on, html .shell .nav > button.active { background: rgba(var(--eb-rgb), .26) !important; color: #fff !important; box-shadow: inset 3px 0 0 var(--eb-a) !important; }
 html .shell .nav > button :is(.n, .badge, .count, .bd, em) { margin-left: auto; }
 html .shell .side > button:last-child, html .shell .side-foot button { background: rgba(0,0,0,.4) !important; border: 0 !important; border-radius: 3px !important; color: #d6d2de !important; text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 700; }
 
 /* entrées de menu écrites en <div class="nav" data-a> (enchères…) */
-html .shell .nav[data-a] { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px !important; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; box-shadow: none !important; margin: 0 18px 4px; }
+html .shell .nav[data-a] { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px !important; background: rgba(255,255,255,.035) !important; border: 0 !important; border-radius: 3px !important; color: #c9c6d3 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; box-shadow: none !important; margin: 0 18px 4px; }
 html .shell .nav[data-a]:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
-html .shell .nav[data-a].on { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; }
-html .shell .nav[data-a] .n { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4) !important; color: #fff !important; display: grid; place-items: center; font-size: 10.5px; letter-spacing: 0; }
+html .shell .nav[data-a].on { background: rgba(var(--eb-rgb), .26) !important; color: #fff !important; box-shadow: inset 3px 0 0 var(--eb-a) !important; }
+html .shell .nav[data-a] .n { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(var(--eb-rgb), .22) !important; color: #fff !important; display: grid; place-items: center; font-size: 10.5px; letter-spacing: 0; }
 /* menu de gauche : recherche et groupes repliables (bb-nav.js) */
-html .shell .bbs { position: relative; z-index: 1; display: flex; align-items: center; margin: 0 18px 6px; height: 36px; background: rgba(0,0,0,.4); border-radius: 3px; }
+html .shell .bbs { position: relative; z-index: 1; display: flex; align-items: center; margin: 0 18px 6px; height: 36px; background: rgba(255,255,255,.05); border: 1px solid var(--eb-line); border-radius: 3px; }
 html .shell .bbs input { flex: 1; min-width: 0; height: 36px; background: transparent !important; border: 0 !important; outline: 0; box-shadow: none !important; color: #fff !important; font-size: 12px; letter-spacing: .04em; padding: 0 12px !important; }
 html .shell .bbs input::placeholder { color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; }
 html .shell .bbs button { width: 30px; height: 30px; margin-right: 3px; background: transparent !important; border: 0 !important; color: rgba(255,255,255,.6) !important; font-size: 18px; cursor: pointer; border-radius: 3px !important; }
@@ -77,7 +77,7 @@ html .shell .bbg-h { display: flex; align-items: center; gap: 8px; cursor: point
 html .shell .bbg-h:hover { color: #fff; }
 html .shell .bbg-c { display: inline-block; width: 10px; transition: transform .15s; font-size: 9px; }
 html .shell .bbg-t { flex: 1; }
-html .shell .bbg-n { min-width: 18px; height: 16px; padding: 0 5px; border-radius: 8px; background: rgba(0,0,0,.4); color: rgba(255,255,255,.75); font-size: 9.5px; display: grid; place-items: center; letter-spacing: 0; }
+html .shell .bbg-n { min-width: 18px; height: 16px; padding: 0 5px; border-radius: 8px; background: rgba(255,255,255,.06); color: #8793a6; font-size: 9.5px; display: grid; place-items: center; letter-spacing: 0; }
 html .shell .bbg-b { display: flex; flex-direction: column; gap: 4px; }
 html .shell .bbg-col .bbg-b { display: none; }
 html .shell .bbg-col .bbg-c { transform: rotate(-90deg); }
@@ -96,3 +96,24 @@ html .shell .n-top .icon { width: 34px; height: 34px; border-radius: 6px; backgr
 html .shell .n-top .icon:hover { background: var(--eb-a) !important; border-color: var(--eb-a) !important; color: #fff !important; }
 html .shell .n-row .profile .pname { display: none !important; }
 html .shell .n-row .head .acts [data-a="close"] { display: none; }
+
+/* ═══ finitions communes ═══ */
+html .shell .side-foot { color: #6f7d91; }
+html .shell .side-foot .primary, html .shell .side-foot button { height: 38px; width: 100%; }
+html .shell .main { background: #0c0d11 !important; }
+html .shell .head { background: #0b0c10 !important; }
+html .shell :is(.tag, .pill, .chip) { border-radius: 3px !important; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+html .shell :is(.tag.ok, .tag.good, .ok) { color: #6fe3a1; } html .shell :is(.tag.warn, .warn) { color: #f2b63c; } html .shell :is(.tag.bad, .bad, .danger) { color: #ff7b7b; }
+html .shell .hint, html .shell small { color: #7a8699; }
+html .shell label, html .shell .lbl, html .shell .fld > span, html .shell .eyebrow { color: #8793a6; letter-spacing: .08em; }
+html .shell details > summary { cursor: pointer; color: #8793a6; }
+html .shell :is(input[type=checkbox], input[type=radio]) { accent-color: var(--eb-a); }
+html .shell :is(.sw, .switch, .toggle) { border-radius: 10px !important; }
+html .shell :is(.sw.on, .switch.on, .toggle.on, .sw.active, .toggle.active) { background: var(--eb-a) !important; }
+html .shell table { border-collapse: collapse; } html .shell th { text-align: left; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #6f7d91 !important; font-weight: 700; padding: 10px 12px; border-bottom: 1px solid var(--eb-line); } html .shell td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+html .shell tr:hover td { background: rgba(255,255,255,.02); }
+html .shell .item.click:active { transform: scale(.998); }
+html #confirm .box, html .box { background: #0e0f14 !important; border: 1px solid var(--eb-line) !important; border-radius: 6px !important; box-shadow: 0 40px 100px rgba(0,0,0,.85) !important; }
+html #confirm .box h2 { text-transform: uppercase; letter-spacing: .04em; font-size: 18px; }
+html .tpl { background: rgba(255,255,255,.035) !important; border: 1px solid var(--eb-line) !important; border-radius: 4px !important; box-shadow: none !important; } html .tpl:hover { border-color: rgba(var(--eb-rgb), .6) !important; } html .tpl.sel { background: rgba(var(--eb-rgb), .18) !important; border-color: var(--eb-a) !important; }
+html .toast, html #toasts > * { background: #0e0f14 !important; border: 1px solid rgba(var(--eb-rgb), .5) !important; border-radius: 5px !important; }
