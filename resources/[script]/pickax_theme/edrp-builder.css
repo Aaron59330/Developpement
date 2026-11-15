@@ -1,12 +1,12 @@
-/* ═════════════ Builders — style « launcher » : barre latérale rose en biais, rangées plates, cartes sombres ═════════════
+/* ═════════════ Builders — style « launcher » : barre latérale bleu en biais, rangées plates, cartes sombres ═════════════
    Commun à tous les builders (même gabarit .shell / .side / .main / .head / .body).  Couleur : --eb-a / --eb-b / --eb-rgb. */
-:root { --eb-a: #d4457f; --eb-b: #8e2a62; --eb-rgb: 212,69,127; --eb-row: rgba(255,255,255,.04); --eb-line: rgba(255,255,255,.07); }
-html:root { --pk-accent: #d4457f !important; --pk-accent-rgb: 212,69,127 !important; --accent: #d4457f !important; --accent-rgb: 212,69,127 !important; --acc: #d4457f !important; --acc-rgb: 212,69,127 !important; --line: rgba(255,255,255,.07) !important; }
+:root { --eb-a: #2b8cff; --eb-b: #1558b8; --eb-rgb: 43,140,255; --eb-row: rgba(255,255,255,.04); --eb-line: rgba(255,255,255,.07); }
+html:root { --pk-accent: #2b8cff !important; --pk-accent-rgb: 43,140,255 !important; --accent: #2b8cff !important; --accent-rgb: 43,140,255 !important; --acc: #2b8cff !important; --acc-rgb: 43,140,255 !important; --line: rgba(255,255,255,.07) !important; }
 html:root #root > .shell { width: min(1500px, 97vw); height: min(820px, 94vh); background: #09090b !important; background-image: none !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important; box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; font-family: 'PJS', 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
 html:root #root > .shell { display: grid; grid-template-columns: 310px 1fr; }
 /* barre latérale */
 html .shell > .side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--eb-line) !important; position: relative; overflow: hidden;
-  background: linear-gradient(155deg, #b8386f 0%, #7d2459 20%, #3a1330 42%, #0d0b10 64%), #0b0b0e !important; }
+  background: linear-gradient(155deg, #3a8ee8 0%, #1d5aa6 20%, #0f2748 42%, #0d0b10 64%), #0b0b0e !important; }
 html .shell > .side::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
 html .shell .profile { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 26px 24px 20px; background: transparent !important; border: 0 !important; }
 html .shell .plogo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,.4)); }

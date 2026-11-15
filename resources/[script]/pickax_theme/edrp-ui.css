@@ -1,14 +1,14 @@
-/* ═════════════ Style « launcher » pour tous les gros écrans (noir profond, panneaux plats, accent rose) ═════════════
+/* ═════════════ Style « launcher » pour tous les gros écrans (noir profond, panneaux plats, accent bleu) ═════════════
    Charge APRÈS le style de la page. N'agit que sur l'apparence : couleurs, bordures, ombres, arrondis. Aucune logique.
    Pour changer la couleur de tous les écrans : modifie --fx-a / --fx-b / --fx-rgb ci-dessous (une seule fois).  */
 :root {
-  --fx-a: #d4457f; --fx-b: #8e2a62; --fx-rgb: 212,69,127; --fx-bg: #09090b; --fx-glass: rgba(255,255,255,.035); --fx-line: rgba(255,255,255,.08);
+  --fx-a: #2b8cff; --fx-b: #1558b8; --fx-rgb: 43,140,255; --fx-bg: #09090b; --fx-glass: rgba(255,255,255,.035); --fx-line: rgba(255,255,255,.08);
 }
 /* accent : remplace la couleur d'accent de chaque page (les pages utilisent des noms de variable différents) */
 html:root {
-  --pk-accent: #d4457f !important; --pk-accent-rgb: 212,69,127 !important; --pk-accent-light: #e873a3 !important; --pk-accent-dark: #8e2a62 !important;
-  --acc: #d4457f !important; --acc-rgb: 212,69,127 !important; --acc2: #8e2a62 !important; --accent: #d4457f !important; --accent-rgb: 212,69,127 !important;
-  --a: #d4457f !important; --a2: rgba(212,69,127,.16) !important; --ar: 212,69,127 !important; --accl: #e873a3 !important; --accv: #b83470 !important;
+  --pk-accent: #2b8cff !important; --pk-accent-rgb: 43,140,255 !important; --pk-accent-light: #6fb1ff !important; --pk-accent-dark: #1558b8 !important;
+  --acc: #2b8cff !important; --acc-rgb: 43,140,255 !important; --acc2: #1558b8 !important; --accent: #2b8cff !important; --accent-rgb: 43,140,255 !important;
+  --a: #2b8cff !important; --a2: rgba(43,140,255,.16) !important; --ar: 43,140,255 !important; --accl: #6fb1ff !important; --accv: #1f6fd0 !important;
   --line: rgba(255,255,255,.08) !important;
 }
 html, body { font-family: 'Sora', 'PJS', 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
@@ -38,7 +38,7 @@ html :is(.tab, .tabs > *, .nav button, .nav a, .menu button, .pill-nav > *, .seg
   background: var(--fx-glass) !important; border: 1px solid var(--fx-line) !important; border-radius: 4px !important; color: #cdc8d8; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; font-weight: 700;
 }
 html :is(.tab.on, .tab.active, .tabs > .on, .tabs > .active, .nav button.on, .nav .on, .menu .on, .seg > .on, .chip.on, .sort button.on, .filter button.on, button.on, a.on) {
-  background: linear-gradient(90deg, rgba(var(--fx-rgb), .32), rgba(142,42,98,.2)) !important; border-color: rgba(var(--fx-rgb), .65) !important; color: #fff !important; box-shadow: 0 0 20px rgba(var(--fx-rgb), .2);
+  background: linear-gradient(90deg, rgba(var(--fx-rgb), .32), rgba(21,88,184,.2)) !important; border-color: rgba(var(--fx-rgb), .65) !important; color: #fff !important; box-shadow: 0 0 20px rgba(var(--fx-rgb), .2);
 }
 
 /* boutons : principal = dégradé magenta, secondaire = verre */
@@ -63,7 +63,7 @@ html :is(.bar > i, .bar > span, .progress > i, .prog > i, .fill, .meter > i, .pb
 
 /* pastilles de prix / solde / étiquettes d'accent */
 html :is(.pill, .badge, .coins, .price, .bal, .money) { border-color: rgba(var(--fx-rgb), .45); }
-html :is(.badge, .dtag, .count:not(.plain)) { background: linear-gradient(135deg, rgba(var(--fx-rgb), .3), rgba(142,42,98,.28)) !important; color: #fff !important; }
+html :is(.badge, .dtag, .count:not(.plain)) { background: linear-gradient(135deg, rgba(var(--fx-rgb), .3), rgba(21,88,184,.28)) !important; color: #fff !important; }
 
 /* fenêtres modales, toasts, tableaux */
 html :is(#modal, .modal, .dialog, .sheet, #confirm > *, .confirm) { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)), #0b0a10 !important; border: 1px solid var(--fx-line) !important; border-radius: 6px !important; box-shadow: 0 40px 100px rgba(0,0,0,.85) !important; }

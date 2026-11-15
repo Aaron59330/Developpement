@@ -1,6 +1,6 @@
-/* ═════════════ Boutique — style « launcher » : noir profond, accent rose, navigation en haut, panneau de compte en biais ═════════════
+/* ═════════════ Boutique — style « launcher » : noir profond, accent bleu, navigation en haut, panneau de compte en biais ═════════════
    Couleur : --ed-a / --ed-b / --ed-rgb (une seule fois, ici).  Aucune logique : seulement l'apparence. */
-#root.edrp { --ed-a: #d4457f; --ed-b: #8e2a62; --ed-rgb: 212,69,127; --ed-gold: #f2b63c; --ed-row: rgba(255,255,255,.04); --ed-line: rgba(255,255,255,.07);
+#root.edrp { --ed-a: #2b8cff; --ed-b: #1558b8; --ed-rgb: 43,140,255; --ed-gold: #f2b63c; --ed-row: rgba(255,255,255,.04); --ed-line: rgba(255,255,255,.07);
   --acc: var(--ed-a); --acc-rgb: var(--ed-rgb); --line: var(--ed-line); --good: #7be0a6; --muted: #7d7a88;
   width: min(1500px, 97vw) !important; height: min(820px, 94vh) !important; grid-template-columns: 330px 1fr !important; grid-template-rows: 60px minmax(0, 1fr) !important;
   background: #09090b !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important; box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; overflow: hidden; }
@@ -26,7 +26,7 @@
 
 /* panneau de compte (biais rose) */
 #root.edrp .lp { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--ed-line); position: relative; overflow: hidden;
-  background: linear-gradient(155deg, #b8386f 0%, #7d2459 22%, #3a1330 44%, #0d0b10 66%), #0b0b0e; }
+  background: linear-gradient(155deg, #3a8ee8 0%, #1d5aa6 22%, #0f2748 44%, #0d0b10 66%), #0b0b0e; }
 #root.edrp .lp::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
 #root.edrp .lp-hero { padding: 30px 26px 24px; position: relative; z-index: 1; }
 #root.edrp .lp-hero small { font-size: 10.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.7); }
@@ -80,10 +80,10 @@
 #modal .sheet { background: #0e0e12 !important; border: 1px solid var(--ed-line) !important; border-radius: 6px !important; box-shadow: 0 40px 100px rgba(0,0,0,.85) !important; }
 #modal .sheet .kind { color: var(--ed-a) !important; letter-spacing: .14em; text-transform: uppercase; }
 #modal .sheet h2 { text-transform: uppercase; letter-spacing: .02em; }
-#modal .sheet .btn.pri { background: linear-gradient(180deg, #d4457f, #8e2a62) !important; border: 0 !important; border-radius: 4px !important; box-shadow: none !important; color: #fff !important; }
+#modal .sheet .btn.pri { background: linear-gradient(180deg, #2b8cff, #1558b8) !important; border: 0 !important; border-radius: 4px !important; box-shadow: none !important; color: #fff !important; }
 #modal .sheet .btn:not(.pri) { background: rgba(255,255,255,.05) !important; border: 1px solid rgba(255,255,255,.07) !important; border-radius: 4px !important; box-shadow: none !important; color: #d6d2de !important; }
 #modal .sheet .pill { background: rgba(255,255,255,.05) !important; border: 1px solid rgba(255,255,255,.07) !important; border-radius: 4px !important; color: #fff !important; }
-::-webkit-scrollbar-thumb { background: rgba(var(--ed-rgb, 212,69,127), .35) !important; }
+::-webkit-scrollbar-thumb { background: rgba(var(--ed-rgb, 43,140,255), .35) !important; }
 #root.edrp .lp-hero, #root.edrp .lp-hero * { text-align: left; }
 #root.edrp .scroll { box-shadow: none !important; outline: 0 !important; }
 #root.edrp .scroll > .grid { background: transparent !important; border: 0 !important; }
