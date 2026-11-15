@@ -33,6 +33,11 @@ Crée des jobs **police, EMS, mécano, taxi, agence immobilière, bar, personnal
 - suppression = uniquement les lignes créées par le builder pour ce job ; les joueurs repassent `unemployed`.
 - Les tables `jobs2`, `job2_grades`, `gangbuilder`, `entreprise`, `society` ne sont pas touchées.
 
+## Créer un job police en 3 clics
+`/jobbuilder` → **Nouveau job** → choisis **Police**, tape un nom (ex. « LSPD »), clique **Création rapide**.
+Le job est créé avec ses 5 grades, ses 6 points (garage, retour garage, vestiaire, armurerie, coffre, patron), 4 véhicules de patrouille et une armurerie de base (pistolet, matraque, taser, carabine réservée au grade 2, gilet). Le mode placement démarre : tu te mets à chaque endroit et tu appuies sur **Entrée**, puis tu enregistres. Le nom interne est généré tout seul. Tout reste modifiable ensuite.
+(Équipement de départ : `QUICK_VEHICLES` / `QUICK_ARMORY` en haut de `html/script.js`.)
+
 ## Fonctionnalités
 - **Templates** : police, ems, mecano, taxi, realestate, bar, custom (grades, blip, actions pré-remplis, tout modifiable).
 - **Grades** : ajout / suppression / ordre / salaires, grade « boss ».

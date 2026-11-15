@@ -435,26 +435,56 @@ const Builder = {
     this.render();
   },
 
+  slugify(label) {
+    let n = String(label || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    if (!/^[a-z]/.test(n)) n = 'job_' + n;
+    n = n.slice(0, 20).replace(/_+$/, '');
+    if (n.length < 2) n = 'job_' + Math.floor(Math.random() * 90 + 10);
+    let out = n, i = 2;
+    while (this.jobs.some(j => j.name === out)) { const suf = '_' + i++; out = n.slice(0, 20 - suf.length) + suf; }
+    return out;
+  },
+
   newJobDialog() {
     const types = this.catalog.jobTypes;
     const c = document.getElementById('confirm');
-    c.innerHTML = `<div class="box" style="width:700px"><h2>Nouveau job</h2><p>Choisis un modèle : grades, blip et actions sont pré-remplis, tout reste modifiable.</p>
+    c.innerHTML = `<div class="box" style="width:720px"><h2>Nouveau job</h2><p>1. Choisis un modèle &nbsp;·&nbsp; 2. Donne-lui un nom &nbsp;·&nbsp; 3. Clique sur « Création rapide » : le job est créé avec tous ses points et grades, tu n'as plus qu'à te placer aux bons endroits.</p>
       <div class="grid4" style="margin-bottom:18px">${Object.entries(types).map(([k, t]) => `<div class="tpl ${k === this.draftType ? 'sel' : ''}" data-type="${k}">${tile(TYPE_ICON[k] || 'briefcase')}${esc(t.label)}</div>`).join('')}</div>
-      <div class="grid2">${fld('Nom interne', '<input id="nj-name" placeholder="ex: lspd2, taxi_ls" maxlength="20">')}${fld('Label affiché', '<input id="nj-label" placeholder="Los Santos Police" maxlength="50">')}</div>
-      <div class="row" style="margin-top:22px"><span class="spacer"></span><button id="nj-no">Annuler</button><button class="primary" id="nj-yes">Créer le brouillon</button></div></div>`;
+      ${fld('Nom du job', '<input id="nj-label" placeholder="ex : LSPD, Police de Sandy Shores, Taxi Downtown" maxlength="50" autofocus>')}
+      <details style="margin-top:12px"><summary class="hint" style="cursor:pointer">Avancé : nom interne (sinon généré automatiquement)</summary><div style="margin-top:8px">${fld('Nom interne', '<input id="nj-name" placeholder="généré à partir du nom" maxlength="20">')}</div></details>
+      <div class="row" style="margin-top:22px"><span class="spacer"></span><button id="nj-no">Annuler</button><button id="nj-draft">Brouillon vide</button><button class="primary" id="nj-quick">${ic('plus', 15)} Création rapide</button></div></div>`;
     c.classList.remove('hidden');
     const closeDlg = () => { c.classList.add('hidden'); c.innerHTML = ''; };
     document.getElementById('nj-no').onclick = closeDlg;
     c.querySelectorAll('.tpl').forEach(el => el.onclick = () => { this.draftType = el.dataset.type; c.querySelectorAll('.tpl').forEach(t => t.classList.toggle('sel', t === el)); });
-    document.getElementById('nj-yes').onclick = () => {
-      const name = document.getElementById('nj-name').value.trim().toLowerCase();
+    const read = () => {
       const label = document.getElementById('nj-label').value.trim();
-      if (!/^[a-z][a-z0-9_]{1,19}$/.test(name)) return toast('Nom invalide : minuscules, chiffres, _ (2-20), commence par une lettre', 'err');
-      if (!label) return toast('Label obligatoire', 'err');
-      if (this.jobs.some(j => j.name === name)) return toast('Ce job existe déjà', 'err');
-      closeDlg();
-      this.create(name, label, this.draftType);
+      let name = document.getElementById('nj-name').value.trim().toLowerCase();
+      if (!label) { toast('Donne un nom au job', 'err'); return null; }
+      if (!name) name = this.slugify(label);
+      if (!/^[a-z][a-z0-9_]{1,19}$/.test(name)) { toast('Nom interne invalide : minuscules, chiffres, _ (2-20), commence par une lettre', 'err'); return null; }
+      if (this.jobs.some(j => j.name === name)) { toast('Ce nom interne existe déjà', 'err'); return null; }
+      return { name, label };
     };
+    document.getElementById('nj-draft').onclick = () => { const r = read(); if (!r) return; closeDlg(); this.create(r.name, r.label, this.draftType); };
+    document.getElementById('nj-quick').onclick = () => { const r = read(); if (!r) return; closeDlg(); this.quick(r.name, r.label, this.draftType); };
+  },
+
+  /* Création rapide : le job reçoit TOUS ses points (garage, vestiaire, armurerie, coffre, patron…) avec des réglages utiles, puis le mode placement démarre. */
+  QUICK_VEHICLES: { police: [['police', 'Voiture de patrouille'], ['police2', 'Buffalo'], ['police3', 'Interceptor'], ['policeb', 'Moto de police']], ems: [['ambulance', 'Ambulance']], mecano: [['flatbed', 'Dépanneuse'], ['towtruck', 'Remorqueuse']], taxi: [['taxi', 'Taxi']] },
+  QUICK_ARMORY: { police: [['WEAPON_COMBATPISTOL', 'Pistolet de service', 1, 60, 0], ['WEAPON_NIGHTSTICK', 'Matraque', 1, 0, 0], ['WEAPON_STUNGUN', 'Taser', 1, 0, 0], ['WEAPON_CARBINERIFLE', 'Carabine', 1, 120, 2], ['armour', 'Gilet pare-balles', 1, 0, 0]] },
+  async quick(name, label, type) {
+    this.create(name, label, type);
+    const t = this.catalog.jobTypes[type], c = this.cur;
+    c.points = (t.points || []).map(pt => this.newPoint(pt));
+    c.points.forEach(p => {
+      const veh = this.QUICK_VEHICLES[type], arm = this.QUICK_ARMORY[type];
+      if (p.type === 'garage' && veh && Array.isArray(p.data.vehicles)) p.data.vehicles = veh.map(([model, lb]) => ({ model, label: lb, min_grade: 0, color: null }));
+      if (p.type === 'armory' && arm && Array.isArray(p.data.items)) p.data.items = arm.map(([n, lb, count, ammo, mg]) => ({ name: n, label: lb, count, ammo, min_grade: mg }));
+    });
+    this.tab = 'points'; this.activePoint = 0; this.render();
+    toast(`« ${label} » prêt : place chaque point (Entrée = ma position), puis enregistre.`, 'ok');
+    await Placement.start(this);
   },
 
   create(name, label, type) {
