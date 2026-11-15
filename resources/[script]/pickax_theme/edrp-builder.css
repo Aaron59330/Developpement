@@ -11,7 +11,7 @@ html .shell > .side::after { content: ''; position: absolute; inset: 0; pointer-
 html .shell .profile { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 26px 24px 20px; background: transparent !important; border: 0 !important; }
 html .shell .plogo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,.4)); }
 html .shell .pname { font-size: 24px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #fff; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,.35); }
-html .shell .nav { position: relative; z-index: 1; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 10px; scrollbar-width: none; background: transparent !important; border: 0 !important; display: flex; flex-direction: column; gap: 4px; } html .shell .nav::-webkit-scrollbar { display: none; }
+html .shell .nav:not([data-a]) { position: relative; z-index: 1; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 10px; scrollbar-width: none; background: transparent !important; border: 0 !important; display: flex; flex-direction: column; gap: 4px; } html .shell .nav:not([data-a])::-webkit-scrollbar { display: none; }
 html .shell .nav-label { margin: 14px 4px 4px; font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.55); }
 html .shell .nav-item { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: .15s; box-shadow: none !important; }
 html .shell .nav-item svg { color: rgba(255,255,255,.55); } html .shell .nav-item:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
@@ -54,3 +54,15 @@ html .shell .profile.logo-only .pname, html .shell .profile .pname { display: bl
 html .shell .profile .plogo[style*="hidden"] { display: none; }
 html .shell .nav-item .count:empty { display: none; }
 html .shell > .main { margin: 0 !important; padding: 0 !important; width: auto !important; }
+/* variante de barre latérale à boutons (enchères, base…) */
+html .shell .nav > button { display: flex; align-items: center; justify-content: flex-start; gap: 12px; height: 40px; flex: none !important; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-align: left; box-shadow: none !important; width: 100%; }
+html .shell .nav > button:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+html .shell .nav > button.on, html .shell .nav > button.active { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; }
+html .shell .nav > button :is(.n, .badge, .count, .bd, em) { margin-left: auto; }
+html .shell .side > button:last-child, html .shell .side-foot button { background: rgba(0,0,0,.4) !important; border: 0 !important; border-radius: 3px !important; color: #d6d2de !important; text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 700; }
+
+/* entrées de menu écrites en <div class="nav" data-a> (enchères…) */
+html .shell .nav[data-a] { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px !important; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; box-shadow: none !important; margin: 0 18px 4px; }
+html .shell .nav[data-a]:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+html .shell .nav[data-a].on { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; }
+html .shell .nav[data-a] .n { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4) !important; color: #fff !important; display: grid; place-items: center; font-size: 10.5px; letter-spacing: 0; }
