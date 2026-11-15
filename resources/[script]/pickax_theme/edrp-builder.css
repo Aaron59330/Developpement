@@ -1,0 +1,56 @@
+/* ═════════════ Builders — style « launcher » : barre latérale rose en biais, rangées plates, cartes sombres ═════════════
+   Commun à tous les builders (même gabarit .shell / .side / .main / .head / .body).  Couleur : --eb-a / --eb-b / --eb-rgb. */
+:root { --eb-a: #d4457f; --eb-b: #8e2a62; --eb-rgb: 212,69,127; --eb-row: rgba(255,255,255,.04); --eb-line: rgba(255,255,255,.07); }
+html:root { --pk-accent: #d4457f !important; --pk-accent-rgb: 212,69,127 !important; --accent: #d4457f !important; --accent-rgb: 212,69,127 !important; --acc: #d4457f !important; --acc-rgb: 212,69,127 !important; --line: rgba(255,255,255,.07) !important; }
+html:root #root > .shell { width: min(1500px, 97vw); height: min(820px, 94vh); background: #09090b !important; background-image: none !important; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 6px !important; box-shadow: 0 40px 120px rgba(0,0,0,.85) !important; font-family: 'PJS', 'Plus Jakarta Sans', 'Segoe UI', sans-serif; }
+html:root #root > .shell { display: grid; grid-template-columns: 310px 1fr; }
+/* barre latérale */
+html .shell > .side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--eb-line) !important; position: relative; overflow: hidden;
+  background: linear-gradient(155deg, #b8386f 0%, #7d2459 20%, #3a1330 42%, #0d0b10 64%), #0b0b0e !important; }
+html .shell > .side::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(255,255,255,.07), transparent 38%); }
+html .shell .profile { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 26px 24px 20px; background: transparent !important; border: 0 !important; }
+html .shell .plogo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,.4)); }
+html .shell .pname { font-size: 24px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: #fff; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,.35); }
+html .shell .nav { position: relative; z-index: 1; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 10px; scrollbar-width: none; background: transparent !important; border: 0 !important; display: flex; flex-direction: column; gap: 4px; } html .shell .nav::-webkit-scrollbar { display: none; }
+html .shell .nav-label { margin: 14px 4px 4px; font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+html .shell .nav-item { display: flex; align-items: center; gap: 12px; height: 40px; flex: none; padding: 0 14px; background: rgba(0,0,0,.34) !important; border: 0 !important; border-radius: 3px !important; color: #cfcbd8 !important; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: .15s; box-shadow: none !important; }
+html .shell .nav-item svg { color: rgba(255,255,255,.55); } html .shell .nav-item:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+html .shell .nav-item.active { background: rgba(var(--eb-rgb), .55) !important; color: #fff !important; box-shadow: inset 3px 0 0 #fff !important; } html .shell .nav-item.active svg { color: #fff; }
+html .shell .nav-item .count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.4); color: #e8e4ee; font-size: 10.5px; display: grid; place-items: center; letter-spacing: 0; }
+html .shell .side-foot { position: relative; z-index: 1; padding: 14px 20px 18px; color: rgba(255,255,255,.5); font-size: 10.5px; line-height: 1.45; background: transparent !important; border: 0 !important; }
+/* contenu */
+html .shell > .main { background: #0c0c0f !important; min-width: 0; display: flex; flex-direction: column; }
+html .shell .head { display: flex; align-items: center; gap: 16px; padding: 0 26px; height: 74px; flex: none; background: #0b0b0e !important; border-bottom: 1px solid var(--eb-line) !important; }
+html .shell .head .tile { background: rgba(var(--eb-rgb), .16) !important; border: 1px solid rgba(var(--eb-rgb), .45) !important; color: var(--eb-a) !important; border-radius: 6px !important; box-shadow: none !important; }
+html .shell .ttl h1 { font-size: 22px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: #fff !important; background: none !important; -webkit-text-fill-color: #fff; line-height: 1.1; }
+html .shell .ttl p { color: #7d7a88 !important; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; margin-top: 3px; }
+html .shell .acts { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+html .shell .body { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 26px 26px; }
+html .shell .body::-webkit-scrollbar { width: 5px; } html .shell .body::-webkit-scrollbar-thumb { background: rgba(var(--eb-rgb), .4); border-radius: 3px; }
+/* cartes */
+html .shell :is(.card, .panel, .stat, .item, .box) { background: #111115 !important; border: 1px solid var(--eb-line) !important; border-radius: 5px !important; box-shadow: none !important; }
+html .shell .stat { position: relative; overflow: hidden; } html .shell .stat::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--eb-a), var(--eb-b)); }
+html .shell .stat .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #7d7a88; }
+html .shell .stat .v { font-size: 34px; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+html .shell .stat .s { color: #7d7a88; font-size: 11.5px; }
+html .shell .card-h { border-bottom: 1px solid var(--eb-line) !important; } html .shell .card-h .t { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #fff; } html .shell .card-h .t svg { color: var(--eb-a); }
+html .shell .item { transition: border-color .15s, background .15s; } html .shell .item.click:hover { background: #15151a !important; border-color: rgba(var(--eb-rgb), .6) !important; }
+html .shell .item b { font-size: 13px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: #fff; } html .shell .item small { color: #7d7a88; }
+html .shell .item .tile, html .shell .empty .tile { background: rgba(var(--eb-rgb), .14) !important; border: 1px solid rgba(var(--eb-rgb), .35) !important; color: var(--eb-a) !important; border-radius: 5px !important; box-shadow: none !important; }
+/* boutons, champs */
+html .shell :is(button.primary, .btn.primary, .primary) { background: linear-gradient(180deg, var(--eb-a), var(--eb-b)) !important; border: 0 !important; border-radius: 4px !important; color: #fff !important; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; box-shadow: none !important; }
+html .shell :is(button.primary, .primary):hover { filter: brightness(1.15); }
+html .shell :is(button:not(.primary):not(.nav-item), .btn:not(.primary)) { border-radius: 4px; }
+html .shell :is(.seg > button, .seg button) { background: var(--eb-row) !important; border: 1px solid var(--eb-line) !important; border-radius: 4px !important; color: #a09cae !important; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: .07em; }
+html .shell :is(.seg > button.active, .seg button.active) { background: rgba(var(--eb-rgb), .24) !important; border-color: var(--eb-a) !important; color: #fff !important; }
+html .shell :is(input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea) { background: rgba(255,255,255,.04) !important; border: 1px solid var(--eb-line) !important; border-radius: 4px !important; color: #fff !important; }
+html .shell :is(input, select, textarea):focus { border-color: var(--eb-a) !important; box-shadow: 0 0 0 3px rgba(var(--eb-rgb), .18) !important; }
+html .shell .closeBtn, html .shell .xbtn, html .shell [data-a="close"] { border-radius: 6px; }
+html .shell .logline { color: #a09cae; border-color: var(--eb-line) !important; } html .shell .logline b { color: #fff; }
+html .shell .hint { color: #7d7a88; }
+html:root #root > .shell { gap: 0 !important; padding: 0 !important; grid-template-columns: 310px minmax(0, 1fr) !important; }
+html .shell > .side { width: auto !important; max-width: none !important; }
+html .shell .profile.logo-only .pname, html .shell .profile .pname { display: block !important; }
+html .shell .profile .plogo[style*="hidden"] { display: none; }
+html .shell .nav-item .count:empty { display: none; }
+html .shell > .main { margin: 0 !important; padding: 0 !important; width: auto !important; }
