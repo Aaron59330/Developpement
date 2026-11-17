@@ -8,6 +8,7 @@ local threads, cbs, cmds, notes, alertsSent, handlers = {}, {}, {}, {}, {}, {}
 function CreateThread(f) threads[#threads + 1] = f end
 function Wait() coroutine.yield() end
 function SetTimeout() end
+function GetResourceState() return 'missing' end
 function RegisterCommand(n, f) cmds[n] = f end
 function AddEventHandler(n, f) handlers[n] = f end
 function RegisterNetEvent() end

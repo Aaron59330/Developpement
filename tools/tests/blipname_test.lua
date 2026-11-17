@@ -12,6 +12,14 @@ local cur
 function BeginTextCommandSetBlipName(k) cur = k end
 function EndTextCommandSetBlipName(h) nameKey[h] = cur end
 PickaxTheme = nil
+function CreateThread() end
+function Wait() end
+function GetResourceState() return 'missing' end
+function RegisterNetEvent() end
+function AddEventHandler() end
+function RegisterCommand() end
+function DoesBlipExist(h) return blips[h] ~= nil end
+setmetatable(_G, { __index = function(_, k) if type(k) == 'string' and k:match('^[A-Z][a-z]') and k ~= 'Config' and k ~= 'PickaxTheme' then return function() end end end })   -- natives non utilisées par le test : sans effet
 dofile(ROOT .. '/resources/[dev]/pickax_worldbuilder/client/bb_map.lua')
 local a = BB.Blip({ x = 1, y = 1, z = 0 }, { sprite = 357, label = 'Garage' }, { category = 'garage' })
 local b = BB.Blip({ x = 900, y = 900, z = 0 }, { sprite = 357, label = 'Garage' }, { category = 'garage' })
