@@ -209,6 +209,7 @@ files {
     'loading/index.html',
     'loading/theme.js',
     'loading/style.css',
+    'loading/fonts/*.woff2',
     'loading/index.js',
     'loading/ui.js',
     'loading/loading.json',

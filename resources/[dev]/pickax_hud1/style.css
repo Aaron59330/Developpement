@@ -44,7 +44,7 @@ body {
 
 .hud-icon {
     z-index: 1;
-    font-size: px;
+    font-size: 14px;
     color: white;
 }
 
@@ -194,3 +194,6 @@ body {
 .safezone .sz-txt { display: flex; flex-direction: column; line-height: 1.2; }
 .safezone .sz-txt b { color: #4ade80; font-size: 13px; font-weight: 800; letter-spacing: 0.16em; }
 .safezone .sz-txt span { color: #c6c9d2; font-size: 12px; font-weight: 500; }
+
+/* icônes en SVG intégré (plus de dépendance à un CDN externe) */
+.hud-icon svg.fa { width: 1em; height: 1em; display: block; }

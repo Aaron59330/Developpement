@@ -21,7 +21,9 @@ files({
 	'html/index.html',
 	'html/css/*.css',
 	'html/js/*.js',
-	'html/img/*.png'
+	'html/img/*.png',
+	'html/fonts/*.woff2',
+	'html/fonts/*.woff'
 })
 
 escrow_ignore {

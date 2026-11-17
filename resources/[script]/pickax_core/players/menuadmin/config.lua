@@ -23,7 +23,7 @@ ConfigMenuAdmin = {
     Commande = {
         CommandeName = "menuadmin",
         Desc = "Menu admin",
-        Bind = "F11"
+        Bind = "DELETE"
     },
 
     adminRanks = {
@@ -605,8 +605,8 @@ ConfigMenuAdminNoclip = {
     Commande = {
         CommandeName = "noclip",
         Desc = "Noclip admin",
-        Bind = "F2",
-        openKey = 289--Correspond au F2
+        Bind = "INSERT",
+        openKey = 121--Correspond à INSERT
     },
 
     Texte = {

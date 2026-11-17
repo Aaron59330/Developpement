@@ -31,7 +31,7 @@ ConfigMenuEmote = {
     MenuTitle = "Menu emote",
 
     RagdollEnabled = false,
-    RagdollKeybind = 'u',
+    RagdollKeybind = 'pagedown',
     RagdollAsToggle = true,
 
     ExpressionsEnabled = true,

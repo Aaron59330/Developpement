@@ -1,7 +1,7 @@
 Config = {}
 
 -- ═════════════════════════════ GÉNÉRAL ═════════════════════════════
-Config.Key = 'F4'                 -- touche qui ouvre l'écran « Niveau et récompenses » (modifiable ensuite dans les paramètres FiveM)
+Config.Key = 'HOME'                 -- touche qui ouvre l'écran « Niveau et récompenses » (modifiable ensuite dans les paramètres FiveM)
 Config.MaxLevel = 50
 -- XP cumulée nécessaire pour atteindre le niveau n :  Base × (n − 1) ^ Exponent   (niveau 1 = 0 XP)
 Config.Curve = { Base = 120, Exponent = 1.55 }
