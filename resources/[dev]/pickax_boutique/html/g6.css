@@ -83,3 +83,21 @@ body{background:transparent}
 #root.edrp::before{display:none!important}
 #root.edrp .lp-logo{display:block;width:340px;max-width:100%;height:auto;margin:0 0 10px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
 #root.edrp .lp-big{margin-top:6px!important}
+/* accueil : cartes hautes façon sélection de catégorie */
+#root.edrp .hhead{padding:6px 34px 0!important;text-align:left}#root.edrp .hhead h1{margin:0}#root.edrp .hhead p{margin:4px 0 0;font-size:20px;color:var(--muted);font-weight:600}
+#root.edrp .hrow{display:flex;gap:14px;padding:20px 34px;overflow-x:auto;height:calc(100% - 150px);scrollbar-width:none}
+#root.edrp .hc{flex:0 0 330px;position:relative;overflow:hidden;background:#1a0f26;border:3px solid transparent;cursor:pointer;transition:border-color .12s,transform .12s;animation:hcin .35s both}
+#root.edrp .hc:hover{border-color:#fff;transform:translateY(-4px)}
+#root.edrp .hc .pic{position:absolute!important;inset:0;height:100%!important;border-radius:0!important;background:radial-gradient(ellipse at 50% 60%,rgba(224,103,159,.4),rgba(20,8,30,.9) 80%)!important;display:flex;align-items:center;justify-content:center}
+#root.edrp .hc .pic img{width:130%;max-width:none;height:auto;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+#root.edrp .hc .pic svg{width:46%;height:auto}
+#root.edrp .hc .hl{position:absolute;left:0;right:0;bottom:0;height:78px;padding:10px 20px;background:linear-gradient(90deg,rgba(20,10,35,.92),rgba(20,10,35,.55));text-align:left;display:flex;flex-direction:column;justify-content:center}
+#root.edrp .hc .hl b{font-size:34px;font-weight:700;text-transform:uppercase;line-height:1}#root.edrp .hc .hl small{font-size:18px;color:var(--muted);font-weight:600;text-transform:uppercase}
+#root.edrp .hcount{position:absolute;left:34px;bottom:34px;font-size:26px;color:var(--muted)}#root.edrp .hcount b{color:#fff;font-weight:500}
+@keyframes hcin{from{opacity:0;transform:translateX(30px)}}
+#root.edrp .main{position:relative}
+#root.edrp .hc .pic img{position:static!important;width:92%!important;max-width:100%!important;height:auto!important;max-height:70%;object-fit:contain!important;transform:none!important;margin-bottom:60px}
+#root.edrp .hc .pic svg{width:50%!important;height:auto!important;margin-bottom:60px;color:rgba(255,255,255,.6)!important;stroke:currentColor}
+#root.edrp .hcount{left:34px;bottom:24px}
+#root.edrp .hrow{height:calc(100% - 190px)}
+#root.edrp .hc .pic{left:0!important;top:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;overflow:hidden}

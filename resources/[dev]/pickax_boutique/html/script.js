@@ -42,7 +42,7 @@ const CATS = [
   { id: 'vip', label: 'Vip', sub: 'Bronze, Argent et Or : salaire, coins, coffre et récompenses', icon: 'crown', kind: 'VIP', color: 'var(--pk-accent,#fdc27d)' },
   { id: 'business', label: 'Entreprises', sub: 'Gangs et entreprises clés en main', icon: 'brief', kind: 'Entreprise', color: 'var(--pk-accent,#fdc27d)' },
 ];
-const S = { data: null, view: 'shop', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
+const S = { data: null, view: 'home', cat: 'vehicle', q: '', points: 0, sort: 'price', cart: [], code: '', pct: 0, promoMsg: '', history: null, overview: null, admin: null, paying: null, wheel: null, wheelAngle: 0, spinning: false, wheelResult: null, pendingPoints: null };
 try { S.cart = JSON.parse(localStorage.getItem('pb_cart') || '[]'); } catch (e) { S.cart = []; }
 const saveCart = () => { try { localStorage.setItem('pb_cart', JSON.stringify(S.cart)); } catch (e) { } };
 const rpc = (name, ...args) => post('rpc', { name, args });
@@ -174,7 +174,7 @@ function topnav(cats) {
   const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
   const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : `<span class="fb">${esc((sv.short || 'B')[0])}</span>`;
   return `<header class="tn"><div class="tn-logo">${mark}</div>
-    <nav class="tn-tabs">${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}">${ic(x.icon, 14)}<span>${esc(x.label)}</span></button>`).join('')}</nav>
+    <nav class="tn-tabs"><button class="${S.view === 'home' ? 'on' : ''}" data-a="view" data-v="home"><span>Accueil</span></button>${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}">${ic(x.icon, 14)}<span>${esc(x.label)}</span></button>`).join('')}</nav>
     <div class="tn-r"><div class="bal"><span class="c">C</span><b id="pts">${fmt(S.points)}</b>${S.data && S.data.link ? `<button class="plus" data-a="link" title="Acheter des coins">+</button>` : ''}</div>
       <span class="escl">ESC</span><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div></header>`;
 }
@@ -200,12 +200,19 @@ function render() {
   let main;
   if (S.view === 'cart') main = viewCart();
   else if (S.view === 'wheel' && S.data.wheel) main = viewWheel();
+  else if (S.view === 'home') main = viewHome(cats);
   else if (S.view === 'history') main = viewHistory();
   else if (S.view === 'codes') main = viewCodes();
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
   else main = S.cat === 'daily' ? viewDaily() : viewShop();
   $root.classList.add('edrp');
   $root.innerHTML = topnav(cats) + leftPanel() + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
+}
+
+function viewHome(cats) {
+  const cards = cats.map((x, n) => { const l = S.data[x.id] || [], first = l[0] || (x.id === 'daily' && S.data.daily && S.data.daily[0]) || null, ck = first && first._cat || x.id;
+    return `<div class="hc" data-a="cat" data-id="${x.id}" style="animation-delay:${n * .04}s">${first ? picHtml(ck, first, '') : `<div class="pic">${ic(x.icon, 60)}</div>`}<div class="hl"><b>${esc(x.label)}</b><small>${l.length} article${l.length > 1 ? 's' : ''}</small></div></div>`; }).join('');
+  return `<div class="hhead"><h1>CATÉGORIES</h1><p>CHOISIS UNE CATÉGORIE POUR VOIR LES ARTICLES</p></div><div class="hrow">${cards}</div><div class="hcount"><b>1</b> / ${cats.length}</div>`;
 }
 
 function viewShop() {
@@ -545,7 +552,7 @@ window.addEventListener('message', e => {
   const d = e.data || {};
   if (d.action === 'open') { sfx('open'); applyAccent(d.data.accent); S.data = d.data;
     const di = d.data.dailyInfo; S.dset = {}; S.data.daily = [];
-    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'shop'; S.paying = null; $root.classList.remove('hidden'); render(); }
+    if (di && di.items) { di.items.forEach(x => { const it = ((S.data[x.cat]) || []).find(y => y.idx === Number(x.idx)); if (it) { S.dset[x.cat + ':' + it.idx] = true; S.data.daily.push(Object.assign({}, it, { _cat: x.cat })); } }); S.dayEnds = Date.now() / 1000 + (di.endsIn || 0); if (S.data.daily.length) S.cat = 'daily'; else if (S.cat === 'daily') S.cat = 'vehicle'; } S.points = Number(d.data.points) || 0; S.q = ''; S.view = 'home'; S.paying = null; $root.classList.remove('hidden'); render(); }
   else if (d.action === 'close') { sfx('close'); $root.classList.add('hidden'); closeSheet(); }
   else if (d.action === 'points' && S.spinning) { S.pendingPoints = Number(d.points) || 0; }
   else if (d.action === 'points') { const prev = S.points; S.points = Number(d.points) || 0; const el = document.getElementById('pts'); if (el) countTo(el, S.points); if (prev !== S.points && !$modal.classList.contains('hidden')) closeSheet(); }
