@@ -1,60 +1,15 @@
-/* Builders — style « GTA 6 » : plein écran violet/rose, rangées plates, ligne active blanche, cartes et fenêtres translucides.
-   Se charge APRÈS edrp-builder.css. Couleurs : --g6b-a / --g6b-b / --g6b-pink (ici seulement). Retire la ligne <link> pour revenir au style précédent. */
-@font-face{font-family:'G6';font-weight:500;src:url(fonts/barlow-semi-condensed-latin-500-normal.woff2)}
-@font-face{font-family:'G6';font-weight:600;src:url(fonts/barlow-semi-condensed-latin-600-normal.woff2)}
-@font-face{font-family:'G6';font-weight:700;src:url(fonts/barlow-semi-condensed-latin-700-normal.woff2)}
-html:root{--g6b-a:#a14d8f;--g6b-b:#3d1f55;--g6b-pink:#e0679f;--g6b-dim:rgba(243,233,245,.6);--eb-a:#e0679f;--eb-b:#b84a82;--eb-rgb:224,103,159;--eb-line:rgba(255,255,255,.16);
- --pk-accent:#e0679f!important;--pk-accent-rgb:224,103,159!important;--accent:#e0679f!important;--accent-rgb:224,103,159!important;--acc:#e0679f!important;--acc-rgb:224,103,159!important}
-html:root #root > .shell{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;border:0!important;border-radius:0!important;
- background:radial-gradient(120% 90% at 30% 0%,var(--g6b-a),var(--g6b-b) 75%)!important;box-shadow:none!important;font-family:'G6',sans-serif!important;color:#f3e9f5;grid-template-columns:400px 1fr!important}
-html .shell *,html #modal *,html #confirm *{font-family:'G6',sans-serif!important}
-html .shell .side{background:transparent!important;border:0!important;padding-left:14px}
-html .shell .profile{padding:22px 16px 14px!important}
-html .shell .profile *{text-align:left}
-html .shell .profile b,html .shell .profile h2,html .shell .profile .pname{font-size:30px!important;font-weight:700!important;text-transform:uppercase}
-html .shell .profile small,html .shell .profile span{color:var(--g6b-dim)!important;font-size:18px!important}
-html .shell .nav-label{font-size:18px!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.06em!important;color:var(--g6b-dim)!important;text-align:left;padding:14px 16px 6px!important}
-html .shell .nav-item,html .shell .nav[data-a]{height:56px!important;border-radius:0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--eb-line)!important;color:var(--g6b-dim)!important;font-size:23px!important;font-weight:500!important;letter-spacing:0!important;text-transform:none!important;box-shadow:none!important;text-align:left}
-html .shell .nav-item:hover,html .shell .nav[data-a]:hover{background:rgba(255,255,255,.1)!important;color:#fff!important}
-html .shell .nav-item.on,html .shell .nav-item.active,html .shell .nav[data-a].on,html .shell .nav[data-a].active{background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(255,255,255,.5) 60%,rgba(255,255,255,.62))!important;color:#2a1238!important}
-html .shell .nav-item.on *,html .shell .nav-item.active *{color:#2a1238!important}
-html .shell .side-foot{border:0!important}
-html .shell .main{background:transparent!important}
-html .shell .head{background:transparent!important;border:0!important;padding:22px 30px 6px!important}
-html .shell .head h1,html .shell .head h2{font-size:38px!important;font-weight:700!important;text-transform:uppercase;color:#fff!important;text-align:left}
-html .shell .head p,html .shell .head small,html .shell .sub{color:var(--g6b-dim)!important;font-size:20px!important}
-html .shell .body{background:transparent!important;padding:10px 30px 24px!important}
-html .shell .n-top{background:transparent!important;border:0!important}
-html .shell .n-top *{font-size:21px!important;font-weight:700!important;text-transform:uppercase}
-html .shell .card,html .shell .panel,html .shell .box,html .shell .tile,html .shell .tbl,html .shell .stat{background:rgba(0,0,0,.28)!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-html .shell .card:hover{background:rgba(255,255,255,.14)!important;outline:2px solid #fff;outline-offset:-2px}
-html .shell th{color:var(--g6b-dim)!important;font-size:17px!important;text-transform:uppercase;letter-spacing:.06em}
-html .shell td,html .shell tr{border-color:var(--eb-line)!important;font-size:20px}
-html .shell input,html .shell select,html .shell textarea,html #modal input,html #modal select,html #modal textarea,html #confirm input{background:rgba(0,0,0,.3)!important;border:0!important;border-bottom:2px solid rgba(255,255,255,.25)!important;border-radius:0!important;color:#fff!important;font-size:20px!important;height:auto;min-height:44px}
-html .shell input:focus,html #modal input:focus,html #modal select:focus,html #modal textarea:focus{border-bottom-color:#fff!important;outline:0!important;box-shadow:none!important}
-html .shell button,html #modal button,html #confirm button{border-radius:0!important;box-shadow:none!important;font-size:20px!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.02em}
-html .shell button.pri,html .shell .btn.pri,html #modal .pri,html #confirm .pri,html #modal button[type=submit]{background:#fff!important;color:#2a1238!important;border:0!important}
-html .shell button:not(.pri):not(.nav-item):not(.on),html #modal button:not(.pri),html #confirm button:not(.pri){background:rgba(255,255,255,.12)!important;color:#fff!important;border:0!important}
-html .shell button:not(.pri):hover{background:rgba(255,255,255,.24)!important}
-html .shell .bbg,html .shell .bbg *{border-radius:0!important}
-/* fenêtres (création de grade, dialogues…) */
-html #modal,html #confirm{background:rgba(20,8,32,.55)!important;backdrop-filter:blur(6px)}
-html #modal > *,html #confirm > *{background:linear-gradient(160deg,#6a2f78,#2c1640)!important;border:0!important;border-radius:0!important;box-shadow:0 30px 90px rgba(0,0,0,.6)!important;color:#f3e9f5!important}
-html #modal h1,html #modal h2,html #modal h3,html #confirm h2{font-size:34px!important;font-weight:700!important;text-transform:uppercase;color:#fff!important}
-html #modal label,html #modal small,html #modal p,html #modal .hint{color:var(--g6b-dim)!important;font-size:18px!important}
-html #modal label{font-weight:700!important;text-transform:uppercase;color:#fff!important}
-html ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4)!important}
-/* classes réelles des builders */
-html .box,html .overlay > .box,html #modal .box,html #confirm .box{background:linear-gradient(160deg,#6a2f78,#2c1640)!important;border:0!important;border-radius:0!important;box-shadow:0 30px 90px rgba(0,0,0,.6)!important;color:#f3e9f5!important}
-html .box h2{font-size:36px!important;font-weight:700!important;text-transform:uppercase;color:#fff!important}
-html .box p,html .box small,html .box .eyebrow{color:var(--g6b-dim)!important;font-size:19px!important}
-html .box .tile{background:rgba(0,0,0,.3)!important;border:2px solid transparent!important;border-radius:0!important}
-html .box .tile.on,html .box .tile.sel,html .box .tile:hover{background:rgba(255,255,255,.18)!important;border-color:#fff!important}
-html .shell .stat,html .shell .item{background:rgba(0,0,0,.28)!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-html .shell .item:hover{background:rgba(255,255,255,.16)!important;outline:2px solid #fff;outline-offset:-2px}
-html .shell .item b,html .shell .stat .v{color:#fff!important;font-size:24px!important}
-html .shell .item small,html .shell .eyebrow{color:var(--g6b-dim)!important;font-size:18px!important}
-html .shell .stat .v{font-size:44px!important;font-weight:700!important}
-html .shell .item .tile,html .shell .tile{border-radius:0!important;background:rgba(255,255,255,.12)!important;border:0!important}
-html .shell .n-top{padding:14px 30px 0!important}
-html .shell .nav-item .n,html .shell .nav-item .badge{border-radius:0!important;background:var(--g6b-pink)!important;color:#fff!important}
+/* Builders — fond sombre du style « launcher », seulement les accents (boutons, ligne active, badges, focus) aux couleurs GTA 6.
+   Se charge APRÈS edrp-builder.css. Couleurs : --g6-a (rose) / --g6-b (violet) — ici seulement. */
+html:root{--g6-a:#e0679f;--g6-b:#8a3fb0;--g6-rgb:224,103,159;
+ --eb-a:var(--g6-a);--eb-b:var(--g6-b);--eb-rgb:var(--g6-rgb);
+ --pk-accent:var(--g6-a)!important;--pk-accent-rgb:var(--g6-rgb)!important;--accent:var(--g6-a)!important;--accent-rgb:var(--g6-rgb)!important;--acc:var(--g6-a)!important;--acc-rgb:var(--g6-rgb)!important}
+html .shell button.pri,html .shell .btn.pri,html #modal .pri,html #confirm .pri,html .box .pri{background:linear-gradient(90deg,var(--g6-a),var(--g6-b))!important;color:#fff!important;border:0!important}
+html .shell .nav-item.on,html .shell .nav-item.active,html .shell .nav[data-a].on{background:linear-gradient(90deg,rgba(224,103,159,.34),rgba(138,63,176,.16))!important;box-shadow:inset 3px 0 0 var(--g6-a)!important;color:#fff!important}
+html .shell .nav-item .n,html .shell .nav-item .badge{background:rgba(224,103,159,.25)!important;color:#ffd6e8!important}
+html .shell input:focus,html .shell select:focus,html .shell textarea:focus,html #modal input:focus,html #modal select:focus,html #modal textarea:focus{border-color:var(--g6-a)!important;box-shadow:0 0 0 2px rgba(224,103,159,.25)!important}
+html .box .tile.on,html .box .tile.sel{background:rgba(224,103,159,.2)!important;border-color:var(--g6-a)!important}
+html ::-webkit-scrollbar-thumb{background:rgba(224,103,159,.4)!important}
+html .shell .side{background:linear-gradient(180deg,rgba(224,103,159,.13) 0%,rgba(138,63,176,.04) 38%,transparent 70%),#0b0c10!important}
+html .shell button.primary,html .box button.primary,html #modal button.primary,html #confirm button.primary{background:linear-gradient(90deg,var(--g6-a),var(--g6-b))!important;color:#fff!important;border:0!important;box-shadow:0 6px 22px rgba(224,103,159,.3)!important}
+html .shell .nav-item .n,html .shell .nav-item .badge,html .shell .nav-item .on-badge,html .shell .nav-item [class*=online],html .shell .nav-item .dot{background:rgba(224,103,159,.25)!important;color:#ffd6e8!important}
+html .shell .nav-item .count,html .shell .count:not(.plain){background:rgba(224,103,159,.22)!important;color:#ffd6e8!important;border-color:rgba(224,103,159,.4)!important}
