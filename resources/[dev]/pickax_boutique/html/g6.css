@@ -101,3 +101,12 @@ body{background:transparent}
 #root.edrp .hcount{left:34px;bottom:24px}
 #root.edrp .hrow{height:calc(100% - 190px)}
 #root.edrp .hc .pic{left:0!important;top:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;overflow:hidden}
+/* accueil v2 : plan serré plein cadre, fond coloré par catégorie */
+#root.edrp .hc{--h:320;background:linear-gradient(165deg,hsl(var(--h) 70% 55%),hsl(calc(var(--h) + 30) 60% 18%) 85%)!important}
+#root.edrp .hc:nth-child(2){--h:12}#root.edrp .hc:nth-child(3){--h:200}#root.edrp .hc:nth-child(4){--h:150}#root.edrp .hc:nth-child(5){--h:45}#root.edrp .hc:nth-child(6){--h:280}#root.edrp .hc:nth-child(7){--h:340}#root.edrp .hc:nth-child(8){--h:30}#root.edrp .hc:nth-child(9){--h:230}
+#root.edrp .hc .pic{background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.45),transparent 55%)!important;display:block!important}
+#root.edrp .hc .pic img{position:absolute!important;left:-70%!important;top:14%!important;width:260%!important;max-width:none!important;height:auto!important;max-height:none!important;margin:0!important;object-fit:cover!important;filter:drop-shadow(0 30px 30px rgba(0,0,0,.55))!important;transition:transform .3s!important}
+#root.edrp .hc:hover .pic img{transform:scale(1.08)!important}
+#root.edrp .hc .pic svg{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:70%!important;opacity:.85;margin:0!important}
+#root.edrp .hc .hl{height:96px;background:linear-gradient(0deg,rgba(15,6,25,.95),rgba(15,6,25,.55) 70%,transparent)}
+#root.edrp .hc .hl b{font-size:40px}
