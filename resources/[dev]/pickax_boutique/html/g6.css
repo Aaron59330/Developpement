@@ -1,0 +1,83 @@
+/* Boutique — style « GTA 6 » : plein écran, dégradé violet/rose, onglets blancs, lignes de liste, cartes translucides.
+   Couleurs : --g-a / --g-b / --g-pink (ici seulement). Retire la ligne <link g6.css> dans index.html pour revenir au style précédent. */
+@font-face{font-family:'G6';font-weight:500;src:url(fonts/barlow-semi-condensed-latin-500-normal.woff2)}
+@font-face{font-family:'G6';font-weight:600;src:url(fonts/barlow-semi-condensed-latin-600-normal.woff2)}
+@font-face{font-family:'G6';font-weight:700;src:url(fonts/barlow-semi-condensed-latin-700-normal.woff2)}
+body{background:transparent}
+#root.edrp{--g-a:#a14d8f;--g-b:#3d1f55;--g-pink:#e0679f;--ed-a:#e0679f;--ed-b:#b84a82;--ed-rgb:224,103,159;--ed-gold:#f6c453;--muted:rgba(243,233,245,.55);
+ --ed-row:rgba(255,255,255,.07);--ed-line:rgba(255,255,255,.16);
+ position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;border:0!important;border-radius:0!important;
+ grid-template-columns:420px 1fr!important;grid-template-rows:108px minmax(0,1fr)!important;
+ background:radial-gradient(120% 90% at 30% 0%,var(--g-a),var(--g-b) 75%)!important;box-shadow:none!important;font-family:'G6',sans-serif!important;color:#f3e9f5}
+#root.edrp *{font-family:'G6',sans-serif!important}
+#root.edrp::before{display:block!important;content:"";position:absolute;inset:auto 0 0 0;height:55%;opacity:.14;pointer-events:none;
+ background:radial-gradient(ellipse 5% 60% at 70% 100%,#000 60%,transparent 62%),radial-gradient(ellipse 4% 45% at 82% 100%,#000 60%,transparent 62%),radial-gradient(ellipse 5% 50% at 92% 100%,#000 60%,transparent 62%),radial-gradient(ellipse 16% 13% at 72% 52%,#000 55%,transparent 58%),radial-gradient(ellipse 13% 10% at 84% 58%,#000 55%,transparent 58%),radial-gradient(ellipse 13% 10% at 93% 62%,#000 55%,transparent 58%)}
+/* haut */
+#root.edrp .tn{background:transparent!important;border:0!important;padding:0 34px!important;align-items:flex-end!important;padding-bottom:16px!important;gap:22px}
+#root.edrp .tn-logo{position:absolute;left:34px;top:18px}
+#root.edrp .tn-tabs{background:none!important;border:0!important;padding:0!important;gap:4px!important;margin:0 auto 0 0!important;position:absolute;left:34px;bottom:14px}
+#root.edrp .tn-tabs button{height:40px!important;padding:0 20px!important;border-radius:0!important;background:rgba(255,255,255,.08)!important;color:#f3e9f5!important;font-size:21px!important;font-weight:700!important;letter-spacing:.02em!important;box-shadow:none!important}
+#root.edrp .tn-tabs button svg{display:none}
+#root.edrp .tn-tabs button:hover{background:rgba(255,255,255,.2)!important}
+#root.edrp .tn-tabs button.on{background:#fff!important;color:#2a1238!important}
+#root.edrp .tn-r{position:absolute;right:30px;top:20px}
+#root.edrp .bal{background:rgba(0,0,0,.28)!important;border:0!important;border-radius:0!important;height:42px!important}
+#root.edrp .bal b{font-size:26px!important;font-weight:700}
+#root.edrp .bal .plus{border-radius:0!important;background:#fff!important;color:#2a1238!important}
+#root.edrp .escl{border-radius:0!important;font-size:13px!important}
+#root.edrp .tn .xbtn{border-radius:0!important;height:42px;width:42px;background:rgba(255,255,255,.12)!important;border:0!important}
+/* panneau gauche = liste */
+#root.edrp .lp{background:transparent!important;border:0!important;padding-left:20px}
+#root.edrp .lp-hero{padding:6px 14px 10px!important}
+#root.edrp .lp-hero small{font-size:18px!important;color:var(--muted)!important;letter-spacing:.06em!important}
+#root.edrp .lp-hero h2{font-size:48px!important;font-weight:700!important;margin:0 0 6px!important}
+#root.edrp .lp-id{border-radius:0!important;background:rgba(0,0,0,.25)!important}
+#root.edrp .lp-big{margin-top:12px!important}#root.edrp .lp-big b{font-size:72px!important;font-weight:700!important}#root.edrp .lp-big small{font-size:20px!important;color:var(--muted)!important}
+#root.edrp .lp-rows{padding:0 14px!important;gap:0!important}
+#root.edrp .lr{height:62px!important;border-radius:0!important;background:transparent!important;border-bottom:1px solid var(--ed-line)!important;color:var(--muted)!important;font-size:24px!important;font-weight:500!important;letter-spacing:0!important;text-transform:none!important}
+#root.edrp .lr:hover{background:rgba(255,255,255,.1)!important;color:#fff!important}
+#root.edrp .lr.on{background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(255,255,255,.5) 60%,rgba(255,255,255,.62))!important;color:#2a1238!important;box-shadow:none!important}
+#root.edrp .lr.on .ico{color:#2a1238!important}
+#root.edrp .lr .n{border-radius:0!important;background:var(--g-pink)!important;color:#fff!important;font-size:18px!important}
+#root.edrp .lp-foot{padding:14px!important}
+#root.edrp .lp-foot button{height:52px!important;border-radius:0!important;font-size:21px!important;letter-spacing:.02em!important;text-transform:uppercase;background:rgba(255,255,255,.1)!important;color:#fff!important}
+#root.edrp .lp-foot button:first-child{background:#fff!important;color:#2a1238!important}
+/* contenu */
+#root.edrp .main{background:transparent!important}
+#root.edrp .hero h1,#root.edrp .main h1{font-size:34px!important}
+#root.edrp .hero p,#root.edrp .main .sub,#root.edrp .ht p{font-size:20px!important;color:var(--muted)!important}
+#root.edrp .hero .hi{border-radius:0!important}
+#root.edrp .search,#root.edrp .sort button{border-radius:0!important;background:rgba(0,0,0,.25)!important;border:0!important;height:44px!important;font-size:19px!important}
+#root.edrp .sort button{padding:0 18px;color:var(--muted)!important}
+#root.edrp .sort button.on{background:#fff!important;color:#2a1238!important}
+#root.edrp .count{font-size:19px!important}
+#root.edrp .grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))!important;gap:14px!important}
+#root.edrp .card{background:rgba(0,0,0,.28)!important;border:2px solid transparent!important;border-radius:0!important}
+#root.edrp .card::before{display:none!important}
+#root.edrp .card:hover{background:rgba(255,255,255,.14)!important;border-color:#fff!important}
+#root.edrp .pic{background:radial-gradient(ellipse at 50% 85%,rgba(224,103,159,.35),transparent 70%),rgba(0,0,0,.22)!important;border-radius:0!important}
+#root.edrp .pic svg{color:rgba(255,255,255,.55)!important}
+#root.edrp .info h3{font-size:24px!important;font-weight:700!important;letter-spacing:.01em!important}
+#root.edrp .info .meta{font-size:18px!important;color:var(--muted)!important}
+#root.edrp .pill,#root.edrp .price .pill{background:rgba(0,0,0,.35)!important;border:0!important;border-radius:0!important;font-size:21px!important;font-weight:700!important}
+#root.edrp .mini,#root.edrp .card .mini,#root.edrp .price .mini{background:#fff!important;color:#2a1238!important;border-radius:0!important}
+#root.edrp .card .dtag,#root.edrp .dbadge{background:var(--g-pink)!important;border-radius:0!important;font-size:18px}
+#root.edrp .card .go{border-radius:0!important}#root.edrp .card:hover .go{background:#fff!important;color:#2a1238!important}
+#root.edrp .offers .of,#root.edrp .panel,#root.edrp .summary,#root.edrp .paybox,#root.edrp .cfbox,#root.edrp .wheel-page,#root.edrp .wr-card,#root.edrp .idcard{background:rgba(0,0,0,.28)!important;border:0!important;border-radius:0!important}
+#root.edrp .btn.pri,#root.edrp .go.pri,#root.edrp .wc.pri{background:#fff!important;color:#2a1238!important;border-radius:0!important;font-size:22px!important;font-weight:700!important;text-transform:uppercase}
+#root.edrp .btn:not(.pri){background:rgba(255,255,255,.1)!important;border:0!important;border-radius:0!important;color:#fff!important;font-size:20px!important}
+#root.edrp .tbl th{font-size:17px!important}
+#root.edrp ::-webkit-scrollbar-thumb,::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4)!important}
+#modal .sheet{background:linear-gradient(160deg,#6a2f78,#2c1640)!important;border:0!important;border-radius:0!important;font-family:'G6',sans-serif!important}
+#modal .sheet *{font-family:'G6',sans-serif!important}
+#modal .sheet h2{font-size:38px!important}
+#modal .sheet .kind{color:var(--g-pink,#e0679f)!important;font-size:19px!important}
+#modal .sheet .btn.pri{background:#fff!important;color:#2a1238!important;border-radius:0!important;font-size:22px!important;text-transform:uppercase}
+#modal .sheet .btn:not(.pri){background:rgba(255,255,255,.12)!important;border:0!important;border-radius:0!important;color:#fff!important}
+#modal .sheet .pill{background:rgba(0,0,0,.35)!important;border:0!important;border-radius:0!important}
+#root.edrp .lp::before,#root.edrp .lp::after,#root.edrp .lp-hero::before,#root.edrp .lp-hero::after{display:none!important}
+#root.edrp .info .meta{line-height:1.25!important;margin:2px 0 10px!important;height:auto!important;overflow:visible!important;text-transform:capitalize}
+#root.edrp .tn-logo{display:none}
+#root.edrp::before{grid-area:1/1/-1/-1;z-index:0}
+#root.edrp>*{z-index:1}
+#root.edrp::before{display:none!important}

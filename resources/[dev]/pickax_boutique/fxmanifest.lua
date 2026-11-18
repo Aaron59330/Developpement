@@ -16,6 +16,7 @@ files {
     'html/index.html',
     'html/style.css',
     'html/edrp.css',
+    'html/g6.css',
     'html/script.js', 'html/pk-snd.js',
     'html/fonts/*.woff2',
     'images/**/*',
