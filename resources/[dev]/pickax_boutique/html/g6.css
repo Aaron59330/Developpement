@@ -81,3 +81,5 @@ body{background:transparent}
 #root.edrp::before{grid-area:1/1/-1/-1;z-index:0}
 #root.edrp>*{z-index:1}
 #root.edrp::before{display:none!important}
+#root.edrp .lp-logo{display:block;width:340px;max-width:100%;height:auto;margin:0 0 10px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
+#root.edrp .lp-big{margin-top:6px!important}

@@ -181,7 +181,7 @@ function topnav(cats) {
 function leftPanel() {
   const row = (id, icon, label, val, on) => `<button class="lr ${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}"><span class="ico">${ic(icon, 15)}</span><span class="lb">${label}</span>${val || ''}</button>`;
   const sv = window.PICKAX_SERVER || {};
-  return `<aside class="lp"><div class="lp-hero"><small>${esc(sv.name || 'BOUTIQUE')}</small><h2>MA BOUTIQUE</h2>${S.data.boutiqueId ? `<div class="lp-id"><span>CODE</span><b>#${esc(S.data.boutiqueId)}</b></div>` : ''}
+  return `<aside class="lp"><div class="lp-hero"><img class="lp-logo" src="logo.png" alt="">${S.data.boutiqueId ? `<div class="lp-id"><span>CODE</span><b>#${esc(S.data.boutiqueId)}</b></div>` : ''}
       <div class="lp-big"><b id="cartN">${cartCount()}</b><small>article${cartCount() > 1 ? 's' : ''} au panier</small></div></div>
     <nav class="lp-rows">
       ${row('cart', 'cart', 'Panier', `<span class="n" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`)}
