@@ -60,3 +60,18 @@ html .box .tile{border-radius:12px!important;background:rgba(255,255,255,.08)!im
 html:root #root > .shell{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.18),transparent 62%),radial-gradient(60% 55% at 100% 100%,rgba(120,90,210,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03)),rgba(14,8,22,.42)!important}
 html .box,html #modal > *,html #confirm > *{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05)),rgba(14,8,22,.5)!important;backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important}
 html body #confirm .box,html body #modal .box,html body #confirm > .box,html body #modal > .box{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05)),rgba(14,8,22,.5)!important;backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:18px!important}
+/* ═══ v6 : boutons rangés ═══ */
+html .box .row:has(button){display:flex!important;gap:10px!important;justify-content:flex-end!important;align-items:center;margin-top:26px!important}
+html .box .row button{height:48px!important;min-width:120px;padding:0 22px!important;border-radius:12px!important;font-size:19px!important;font-weight:700!important}
+html .box .row #nj-no,html .box .row button:first-of-type:not(.primary){background:transparent!important;border:1px solid rgba(255,255,255,.22)!important;color:#fff!important}
+html .box .row button.primary{min-width:210px;order:3}
+html .box .row .spacer{flex:1}
+html .shell .side-foot button{height:50px!important;border-radius:12px!important;font-size:20px!important}
+html .shell .head .row button,html .shell .head button{height:44px!important;padding:0 20px!important;border-radius:12px!important;font-size:18px!important}
+html .shell .body .row:has(> button) {gap:10px!important}
+html .shell .body button:not(.nav-item){min-height:40px;padding:0 18px!important;border-radius:10px!important}
+html .box .row button,html .shell .side-foot button{font-size:16px!important;font-weight:600!important;text-shadow:none!important;letter-spacing:.01em!important;text-transform:none!important;font-family:inherit!important}
+html .shell .side-foot button{text-transform:uppercase!important;letter-spacing:.06em!important;font-size:15px!important;font-weight:700!important}
+html .box .row button:not(.primary){background:transparent!important;border:1px solid rgba(255,255,255,.24)!important;color:#fff!important}
+html .box .row button:not(.primary):hover{background:rgba(255,255,255,.1)!important}
+html .box .row button.primary{text-shadow:none!important}
