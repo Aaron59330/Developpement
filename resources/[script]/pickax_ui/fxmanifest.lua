@@ -13,6 +13,7 @@ client_scripts { 'pk_theme.lua', 'client.lua' }
 files {
     'html/index.html',
     'html/style.css',
+    'html/g6.css',
     'html/script.js',
     'html/snd.js',
     'html/banner.jpg',

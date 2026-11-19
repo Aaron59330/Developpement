@@ -1,0 +1,46 @@
+/* Menus (menu personnel, listes, saisie, choix, aide des touches, menu contextuel) — style « GTA 6 » :
+   verre noir translucide, ligne active blanche, détails rose + bleu. Se charge APRÈS style.css.
+   Retire la ligne <link g6.css> dans index.html pour revenir au style précédent. */
+:root{--g6-pink:#e0679f;--g6-blue:#46d0e8;--g6-duo:linear-gradient(135deg,#e0679f,#46d0e8)}
+html #wrap,html #dlgwrap,html #chwrap{--card-bg:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.04)),rgba(14,8,22,.52);--card-border:rgba(255,255,255,.2);--card-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 24px 70px rgba(0,0,0,.45);--r-card:18px;--r-btn:12px;--text-2:rgba(255,255,255,.8);--muted:rgba(243,233,245,.6);--line:rgba(255,255,255,.12);--line-2:rgba(255,255,255,.2)}
+html .card{backdrop-filter:blur(28px) saturate(1.5) brightness(.78);-webkit-backdrop-filter:blur(28px) saturate(1.5) brightness(.78);background:var(--card-bg)!important}
+html #wrap[data-style] .head{padding:6px 10px 10px!important}
+html #wrap[data-style] .ttl h1{font-size:20px!important;font-weight:700;letter-spacing:.06em;color:#fff}
+html #wrap[data-style] .ttl p{font-size:12px!important;letter-spacing:.14em;color:var(--muted)!important}
+html #wrap[data-style] .pill{background:rgba(255,255,255,.1)!important;border-radius:10px!important;padding:4px 10px;font-size:12px;color:#fff}
+html #wrap[data-style] .it{background:rgba(255,255,255,.06)!important;border:1px solid transparent!important;border-radius:12px!important;color:rgba(255,255,255,.88)!important;font-weight:600;font-size:14px;height:42px;margin-bottom:4px}
+html #wrap[data-style] .it .lb{text-align:left}
+html #wrap[data-style] .it.act{background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.3)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+html #wrap[data-style] .it.act::before{display:block!important;content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:linear-gradient(180deg,#e0679f,#46d0e8)}
+html #wrap[data-style] .it .rt{color:var(--muted)!important}html #wrap[data-style] .it.act .rt{color:#fff!important}
+html #wrap[data-style] .sep{font-size:12px!important;letter-spacing:.16em;color:var(--muted)!important;height:34px;padding:12px 10px 0!important;text-transform:uppercase}
+html #wrap[data-style] .sep::before{display:block!important;content:"";width:6px;height:6px;border-radius:50%;background:var(--g6-duo);box-shadow:0 0 8px rgba(224,103,159,.6);margin-right:2px}
+html #wrap[data-style] .sep::after{display:block!important;background:rgba(255,255,255,.12)}
+html #wrap[data-style] .arr{background:rgba(255,255,255,.1);color:#fff;border-radius:8px}
+html #wrap[data-style] .it.act .arr{background:#fff;color:#17171c}
+html #wrap[data-style] .box{border:1.5px solid rgba(255,255,255,.5);border-radius:7px}
+html #wrap[data-style] .box.on{background:var(--g6-duo)!important;border-color:transparent!important}
+html #wrap[data-style] .box.on::after{border-color:#fff!important}
+html #wrap[data-style] .it.act .lst i{color:var(--g6-blue)}
+html #wrap[data-style] .desc{background:rgba(14,8,22,.55)!important;backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);border-left:3px solid var(--g6-pink)!important;border-radius:14px!important}
+html #wrap .desc::after{background:var(--g6-duo)}
+html #wrap[data-style] .keys b{background:rgba(255,255,255,.12);border-radius:6px;padding:2px 6px;color:#fff}
+html .info h2::after{background:var(--g6-duo)}
+html .irow .k{color:var(--muted)}
+/* saisie + choix */
+html #dlg::before{background:var(--g6-duo);opacity:1;height:3px}
+html .dl-ico{background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.2)!important;color:#fff!important;border-radius:14px}
+html #dl-input{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:12px}
+html #dl-input:focus{border-color:var(--g6-blue)!important;box-shadow:0 0 0 3px rgba(70,208,232,.2)!important}
+html .dl-actions button{border-radius:12px!important;background:transparent!important;border:1px solid rgba(255,255,255,.24)!important;color:#fff!important}
+html .dl-actions button.primary{background:#fff!important;color:#17171c!important;border:0!important}
+html .dl-actions button.primary kbd{background:rgba(0,0,0,.12)!important;color:#17171c!important}
+html .ch-item{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:14px!important}
+html .ch-item:hover,html .ch-item.act{background:rgba(255,255,255,.18)!important;border-color:var(--g6-blue)!important;color:#fff!important;box-shadow:0 8px 26px rgba(224,103,159,.18)}
+html .ch-item .ico{background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.18)!important;color:#fff!important}
+/* barre des touches + menu contextuel */
+html #keys{background:rgba(14,8,22,.6)!important;backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2)!important;border-radius:14px!important}
+html #keys kbd{color:#fff!important;background:rgba(255,255,255,.14)!important;border:1px solid rgba(255,255,255,.3)!important;box-shadow:inset 0 -2px 0 var(--g6-pink)!important}
+html #ctx .cm{background:rgba(14,8,22,.6)!important;backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,.2)!important;border-radius:16px!important}
+/* le bandeau doré « AERO BASE » ne va pas avec ce style : masqué */
+html #wrap #banner{display:none!important}
