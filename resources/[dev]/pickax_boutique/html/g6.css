@@ -110,3 +110,24 @@ body{background:transparent}
 #root.edrp .hc .pic svg{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:70%!important;opacity:.85;margin:0!important}
 #root.edrp .hc .hl{height:96px;background:linear-gradient(0deg,rgba(15,6,25,.95),rgba(15,6,25,.55) 70%,transparent)}
 #root.edrp .hc .hl b{font-size:40px}
+/* ═══ v3 : verre semi-transparent, touche de rose épurée (remplace le plein écran violet) ═══ */
+#root.edrp{background:linear-gradient(180deg,rgba(24,10,34,.55),rgba(10,6,18,.72))!important;backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2)}
+#root.edrp .tn-tabs button{background:transparent!important;color:rgba(243,233,245,.7)!important;border-bottom:2px solid transparent!important}
+#root.edrp .tn-tabs button:hover{background:rgba(255,255,255,.08)!important;color:#fff!important}
+#root.edrp .tn-tabs button.on{background:rgba(224,103,159,.18)!important;color:#fff!important;border-bottom-color:var(--g-pink)!important}
+#root.edrp .lr.on{background:linear-gradient(90deg,rgba(224,103,159,.3),rgba(224,103,159,.05))!important;color:#fff!important;box-shadow:inset 3px 0 0 var(--g-pink)!important}
+#root.edrp .lr.on .ico{color:var(--g-pink)!important}
+#root.edrp .lp-foot button:first-child,#root.edrp .btn.pri,#modal .sheet .btn.pri{background:linear-gradient(90deg,#e0679f,#9a4fc0)!important;color:#fff!important}
+#root.edrp .mini,#root.edrp .card .mini,#root.edrp .price .mini{background:rgba(224,103,159,.9)!important;color:#fff!important}
+#root.edrp .sort button.on{background:rgba(224,103,159,.22)!important;color:#fff!important;box-shadow:inset 0 -2px 0 var(--g-pink)}
+#root.edrp .card,#root.edrp .search,#root.edrp .sort button{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:6px!important}
+#root.edrp .card:hover{background:rgba(255,255,255,.1)!important;border-color:rgba(224,103,159,.6)!important}
+#root.edrp .pic{background:radial-gradient(ellipse at 50% 85%,rgba(224,103,159,.22),transparent 70%)!important}
+#root.edrp .pill,#root.edrp .price .pill,#root.edrp .bal{background:rgba(255,255,255,.07)!important;border-radius:4px!important}
+#root.edrp .bal .plus{background:var(--g-pink)!important;color:#fff!important;border-radius:4px!important}
+#root.edrp .hc{background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.12)!important}
+#root.edrp .hc .pic{background:radial-gradient(ellipse at 50% 70%,rgba(224,103,159,.3),transparent 70%)!important}
+#root.edrp .hc:hover{border-color:var(--g-pink)!important}
+#root.edrp .hc .hl{background:linear-gradient(0deg,rgba(12,6,20,.9),transparent)!important}
+#modal .sheet{background:linear-gradient(180deg,rgba(40,18,56,.85),rgba(16,8,26,.92))!important;backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important}
+#modal .sheet .btn:not(.pri){background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important}

@@ -13,3 +13,17 @@ html .shell .side{background:linear-gradient(180deg,rgba(224,103,159,.13) 0%,rgb
 html .shell button.primary,html .box button.primary,html #modal button.primary,html #confirm button.primary{background:linear-gradient(90deg,var(--g6-a),var(--g6-b))!important;color:#fff!important;border:0!important;box-shadow:0 6px 22px rgba(224,103,159,.3)!important}
 html .shell .nav-item .n,html .shell .nav-item .badge,html .shell .nav-item .on-badge,html .shell .nav-item [class*=online],html .shell .nav-item .dot{background:rgba(224,103,159,.25)!important;color:#ffd6e8!important}
 html .shell .nav-item .count,html .shell .count:not(.plain){background:rgba(224,103,159,.22)!important;color:#ffd6e8!important;border-color:rgba(224,103,159,.4)!important}
+/* ═══ Verre GTA 6 : semi-transparent, on voit le jeu derrière, juste une touche de rose ═══ */
+html:root #root > .shell{background:linear-gradient(180deg,rgba(24,10,34,.62),rgba(10,6,18,.74))!important;backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(255,255,255,.12)!important;border-radius:10px!important;box-shadow:0 30px 90px rgba(0,0,0,.45)!important}
+html .shell .side{background:linear-gradient(180deg,rgba(224,103,159,.10),transparent 45%),rgba(255,255,255,.03)!important;border-right:1px solid rgba(255,255,255,.1)!important}
+html .shell .main,html .shell .head,html .shell .n-top{background:transparent!important}
+html .shell .head,html .shell .n-top{border-bottom:1px solid rgba(255,255,255,.1)!important}
+html .shell .stat,html .shell .item,html .shell .card,html .shell .panel,html .shell .box{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:6px!important;box-shadow:none!important}
+html .shell .item:hover,html .shell .card:hover{background:rgba(255,255,255,.1)!important;border-color:rgba(224,103,159,.55)!important}
+html .shell .nav-item,html .shell .nav[data-a]{background:transparent!important;border-radius:4px!important}
+html .shell .nav-item:hover{background:rgba(255,255,255,.07)!important}
+html .shell .nav-item.on,html .shell .nav-item.active{background:linear-gradient(90deg,rgba(224,103,159,.3),rgba(224,103,159,.06))!important;box-shadow:inset 2px 0 0 var(--g6-a)!important}
+html .shell input,html .shell select,html .shell textarea{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:4px!important}
+html .shell button:not(.primary):not(.pri):not(.nav-item){background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important}
+html .box,html #modal > *,html #confirm > *{background:linear-gradient(180deg,rgba(40,18,56,.82),rgba(16,8,26,.9))!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;box-shadow:0 30px 90px rgba(0,0,0,.55)!important}
+html #modal,html #confirm{background:rgba(8,4,14,.35)!important}
