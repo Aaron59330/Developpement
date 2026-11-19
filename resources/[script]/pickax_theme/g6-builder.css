@@ -27,3 +27,21 @@ html .shell input,html .shell select,html .shell textarea{background:rgba(255,25
 html .shell button:not(.primary):not(.pri):not(.nav-item){background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important}
 html .box,html #modal > *,html #confirm > *{background:linear-gradient(180deg,rgba(40,18,56,.82),rgba(16,8,26,.9))!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;box-shadow:0 30px 90px rgba(0,0,0,.55)!important}
 html #modal,html #confirm{background:rgba(8,4,14,.35)!important}
+/* ═══ v4 : moins de rose — verre neutre, blanc pour l'actif, rose seulement en filet ═══ */
+html:root #root > .shell{background:linear-gradient(180deg,rgba(16,16,20,.6),rgba(8,8,11,.76))!important}
+html .shell .side{background:rgba(255,255,255,.035)!important}
+html .box,html #modal > *,html #confirm > *{background:linear-gradient(180deg,rgba(26,26,32,.86),rgba(11,11,14,.92))!important}
+html .shell .nav-item.on,html .shell .nav-item.active{background:rgba(255,255,255,.12)!important;box-shadow:inset 2px 0 0 var(--g6-a)!important;color:#fff!important}
+html .shell button.primary,html .shell button.pri,html .box button.primary,html #modal button.primary,html #confirm button.primary{background:#fff!important;color:#17171c!important;box-shadow:none!important}
+html .shell .stat,html .shell .item,html .shell .card{border-left-color:rgba(255,255,255,.1)!important}
+html .shell .item:hover,html .shell .card:hover{border-color:rgba(255,255,255,.4)!important}
+html .shell .item .tile,html .shell .tile,html .shell .head .tile,html .shell .head [class*=icon]{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.14)!important;color:#fff!important}
+html .shell .item .tile svg,html .shell .head svg{color:#fff!important;stroke:currentColor}
+html .shell .nav-item .count,html .shell .count:not(.plain){background:rgba(255,255,255,.12)!important;color:#fff!important;border-color:transparent!important}
+html .shell .eyebrow::before,html .shell .stat::before{background:var(--g6-a)!important}
+html .box .tile.on,html .box .tile.sel{background:rgba(255,255,255,.14)!important;border-color:#fff!important}
+html ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3)!important}
+html .shell .side-foot button,html .shell .side-foot .primary{background:#fff!important;color:#17171c!important;border:0!important}
+html .shell .stat{border-left:1px solid rgba(255,255,255,.1)!important;box-shadow:none!important}
+html .shell .stat::before,html .shell .stat::after{background:rgba(255,255,255,.35)!important}
+html .box .tile.on,html .box .tile.sel,html .box [class*=tile][class*=on]{border-color:#fff!important;background:rgba(255,255,255,.14)!important}
