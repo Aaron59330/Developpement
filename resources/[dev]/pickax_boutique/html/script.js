@@ -171,7 +171,7 @@ const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<butt
 
 /* ── Mise en page « launcher » : navigation en haut, panneau de compte à gauche, boutique à droite ── */
 function topnav(cats) {
-  return `<header class="tn"><div class="tn-title"><b>BOUT<i>IQUE</i></b><small>${esc((window.PICKAX_SERVER || {}).name || 'Boutique officielle')}</small></div>
+  return `<header class="tn"><div class="tn-title"><b>BOUT<i>IQUE</i></b></div>
     <div class="tn-r"><div class="bal"><span class="c">C</span><b id="pts">${fmt(S.points)}</b>${S.data && S.data.link ? `<button class="plus" data-a="link" title="Acheter des coins">+</button>` : ''}</div>
       <span class="escl">ESC</span><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div></header>`;
 }

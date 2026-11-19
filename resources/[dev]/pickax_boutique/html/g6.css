@@ -198,3 +198,5 @@ body{background:transparent}
 #root.edrp .hrow{height:calc(100% - 150px)}
 #root.edrp .hc{flex-basis:260px}
 #root.edrp{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important}
+#root.edrp .lp-logo{width:120px!important;margin:0 auto 8px!important}
+#root.edrp .lp-hero{padding:14px 22px 4px!important}
