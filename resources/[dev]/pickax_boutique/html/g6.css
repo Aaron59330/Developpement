@@ -200,3 +200,17 @@ body{background:transparent}
 #root.edrp{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important}
 #root.edrp .lp-logo{width:120px!important;margin:0 auto 8px!important}
 #root.edrp .lp-hero{padding:14px 22px 4px!important}
+/* ═══ v8 : petits détails bleu GTA 6 ═══ */
+#root.edrp{--g-blue:#46d0e8}
+#root.edrp .tn-title b i{color:var(--g-blue)}
+#root.edrp .lr.on{box-shadow:inset 3px 0 0 var(--g-blue),inset 0 1px 0 rgba(255,255,255,.2)!important}
+#root.edrp .lr.on .n{background:var(--g-blue)!important;color:#06222a!important}
+#root.edrp .lp-label::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--g-blue);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px var(--g-blue)}
+#root.edrp .sort button.on{box-shadow:inset 0 -2px 0 var(--g-blue)!important}
+#root.edrp .card:hover,#root.edrp .hc:hover{border-color:var(--g-blue)!important;box-shadow:0 0 0 1px var(--g-blue),0 10px 30px rgba(70,208,232,.18)!important}
+#root.edrp .card .dtag,#root.edrp .dbadge{background:var(--g-blue)!important;color:#06222a!important}
+#root.edrp .search:focus-within{border-color:var(--g-blue)!important}
+#root.edrp .hc .hl small,#root.edrp .hcount b{color:var(--g-blue)!important}
+#root.edrp .lp-id b{color:var(--g-blue)}
+#root.edrp ::-webkit-scrollbar-thumb,#root.edrp .scroll::-webkit-scrollbar-thumb{background:rgba(70,208,232,.5)!important}
+#modal .sheet .kind{color:#46d0e8!important}

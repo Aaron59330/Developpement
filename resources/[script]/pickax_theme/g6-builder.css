@@ -75,3 +75,14 @@ html .shell .side-foot button{text-transform:uppercase!important;letter-spacing:
 html .box .row button:not(.primary){background:transparent!important;border:1px solid rgba(255,255,255,.24)!important;color:#fff!important}
 html .box .row button:not(.primary):hover{background:rgba(255,255,255,.1)!important}
 html .box .row button.primary{text-shadow:none!important}
+/* ═══ v8 : petits détails bleu GTA 6 ═══ */
+html:root{--g6-blue:#46d0e8}
+html .shell .nav-item.on,html .shell .nav-item.active{box-shadow:inset 3px 0 0 var(--g6-blue),inset 0 1px 0 rgba(255,255,255,.2)!important}
+html .shell .eyebrow::before,html .shell .stat::before{background:var(--g6-blue)!important}
+html .shell .nav-label::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--g6-blue);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px var(--g6-blue)}
+html .shell input:focus,html .shell select:focus,html .shell textarea:focus,html #modal input:focus,html #modal select:focus,html #modal textarea:focus{border-color:var(--g6-blue)!important;box-shadow:0 0 0 3px rgba(70,208,232,.18)!important}
+html .shell .item:hover,html .shell .card:hover{border-color:var(--g6-blue)!important}
+html .shell .count:not(.plain),html .shell .nav-item .count{color:var(--g6-blue)!important}
+html .box .tile.on,html .box .tile.sel{border-color:var(--g6-blue)!important}
+html .box h2::after{content:"";display:block;width:36px;height:3px;border-radius:2px;background:var(--g6-blue);margin-top:8px}
+html ::-webkit-scrollbar-thumb{background:rgba(70,208,232,.45)!important}
