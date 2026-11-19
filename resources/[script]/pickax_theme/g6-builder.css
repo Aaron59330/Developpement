@@ -45,3 +45,18 @@ html .shell .side-foot button,html .shell .side-foot .primary{background:#fff!im
 html .shell .stat{border-left:1px solid rgba(255,255,255,.1)!important;box-shadow:none!important}
 html .shell .stat::before,html .shell .stat::after{background:rgba(255,255,255,.35)!important}
 html .box .tile.on,html .box .tile.sel,html .box [class*=tile][class*=on]{border-color:#fff!important;background:rgba(255,255,255,.14)!important}
+/* ═══ v5 : vrai verre dépoli — lumière rose douce dans les coins, panneaux clairs et arrondis ═══ */
+html:root #root > .shell{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.20),transparent 62%),radial-gradient(60% 55% at 100% 100%,rgba(120,90,210,.16),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.04))!important;backdrop-filter:blur(30px) saturate(1.5) brightness(.72);-webkit-backdrop-filter:blur(30px) saturate(1.5) brightness(.72);border:1px solid rgba(255,255,255,.2)!important;border-radius:18px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 30px 80px rgba(0,0,0,.4)!important;overflow:hidden}
+html .shell .side{background:rgba(0,0,0,.14)!important;border-right:1px solid rgba(255,255,255,.12)!important}
+html .shell .head,html .shell .n-top{border-bottom:1px solid rgba(255,255,255,.12)!important}
+html .shell .stat,html .shell .item,html .shell .card,html .shell .panel{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:12px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)!important}
+html .shell .item:hover,html .shell .card:hover{background:rgba(255,255,255,.14)!important}
+html .shell .nav-item{border-radius:10px!important}
+html .shell .nav-item.on,html .shell .nav-item.active{background:rgba(255,255,255,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)!important}
+html .shell input,html .shell select,html .shell textarea,html .shell button{border-radius:10px!important}
+html .shell .stat{border-left:1px solid rgba(255,255,255,.14)!important}
+html .box,html #modal > *,html #confirm > *{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.16),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.06))!important;backdrop-filter:blur(34px) saturate(1.5) brightness(.65);-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.65);border:1px solid rgba(255,255,255,.22)!important;border-radius:18px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 30px 80px rgba(0,0,0,.5)!important}
+html .box .tile{border-radius:12px!important;background:rgba(255,255,255,.08)!important}
+html:root #root > .shell{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.18),transparent 62%),radial-gradient(60% 55% at 100% 100%,rgba(120,90,210,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03)),rgba(14,8,22,.42)!important}
+html .box,html #modal > *,html #confirm > *{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05)),rgba(14,8,22,.5)!important;backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important}
+html body #confirm .box,html body #modal .box,html body #confirm > .box,html body #modal > .box{background:radial-gradient(70% 55% at 0% 0%,rgba(224,103,159,.14),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05)),rgba(14,8,22,.5)!important;backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.9)!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:18px!important}
