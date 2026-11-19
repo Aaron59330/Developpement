@@ -491,7 +491,7 @@
     el._num.textContent = it.slot;
     el.classList.toggle('hasnum', el._num.style.display === 'block');
     // poids de la pile (kg) : petit badge en haut à gauche de la case
-    el._wt.textContent = inv.type === 'shop' ? '' : String(Math.round(((it.weight || 0) / 1000) * 10) / 10);
+    el._wt.textContent = (inv.type === 'shop' || !(it.weight > 0)) ? '' : String(Math.round(((it.weight || 0) / 1000) * 100) / 100);
 
     if (inv.type === 'shop' && it.price !== undefined && it.price > 0) {
       el._price.style.display = 'block';
@@ -594,7 +594,7 @@
     }
 
     if (inv.maxWeight) {
-      const p3 = n => String(Math.round(n)).padStart(3, '0');
+      const p3 = n => String(Math.round(n));
       u.weight.innerHTML = `${p3(total / 1000)} kg <small>/ ${p3(inv.maxWeight / 1000)} kg</small>`;
       u.barWrap.style.display = 'block';
       u.bar.style.width = `${Math.min(100, (total / inv.maxWeight) * 100)}%`;
