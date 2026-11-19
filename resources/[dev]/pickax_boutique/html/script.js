@@ -171,19 +171,20 @@ const gestionBtn = () => (S.data && S.data.staff && S.view !== 'admin') ? `<butt
 
 /* ── Mise en page « launcher » : navigation en haut, panneau de compte à gauche, boutique à droite ── */
 function topnav(cats) {
-  const sv = window.PICKAX_SERVER || {}, logo = window.PICKAX_LOGO;
-  const mark = logo ? `<img src="${esc(logo)}" alt="" onerror="this.style.display='none'">` : `<span class="fb">${esc((sv.short || 'B')[0])}</span>`;
-  return `<header class="tn"><div class="tn-logo">${mark}</div>
-    <nav class="tn-tabs"><button class="${S.view === 'home' ? 'on' : ''}" data-a="view" data-v="home"><span>Accueil</span></button>${cats.map(x => `<button class="${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}">${ic(x.icon, 14)}<span>${esc(x.label)}</span></button>`).join('')}</nav>
+  return `<header class="tn"><div class="tn-title"><b>BOUT<i>IQUE</i></b><small>${esc((window.PICKAX_SERVER || {}).name || 'Boutique officielle')}</small></div>
     <div class="tn-r"><div class="bal"><span class="c">C</span><b id="pts">${fmt(S.points)}</b>${S.data && S.data.link ? `<button class="plus" data-a="link" title="Acheter des coins">+</button>` : ''}</div>
       <span class="escl">ESC</span><button class="xbtn" data-a="close" title="Fermer (Échap)">${ic('x')}</button></div></header>`;
 }
-function leftPanel() {
-  const row = (id, icon, label, val, on) => `<button class="lr ${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}"><span class="ico">${ic(icon, 15)}</span><span class="lb">${label}</span>${val || ''}</button>`;
-  const sv = window.PICKAX_SERVER || {};
-  return `<aside class="lp"><div class="lp-hero"><img class="lp-logo" src="logo.png" alt="">${S.data.boutiqueId ? `<div class="lp-id"><span>CODE</span><b>#${esc(S.data.boutiqueId)}</b></div>` : ''}
-      <div class="lp-big"><b id="cartN">${cartCount()}</b><small>article${cartCount() > 1 ? 's' : ''} au panier</small></div></div>
+function leftPanel(cats) {
+  const row = (id, icon, label, val) => `<button class="lr ${S.view === id ? 'on' : ''}" data-a="view" data-v="${id}"><span class="ico">${ic(icon, 16)}</span><span class="lb">${label}</span>${val || ''}</button>`;
+  const crow = x => { const n = (S.data[x.id] || []).length; return `<button class="lr ${S.view === 'shop' && x.id === S.cat ? 'on' : ''}" data-a="cat" data-id="${x.id}"><span class="ico">${ic(x.icon, 16)}</span><span class="lb">${esc(x.label)}</span><span class="n">${n}</span></button>`; };
+  return `<aside class="lp"><div class="lp-hero"><img class="lp-logo" src="logo.png" alt="">${S.data.boutiqueId ? `<div class="lp-id"><span>CODE</span><b>#${esc(S.data.boutiqueId)}</b></div>` : ''}</div>
     <nav class="lp-rows">
+      <div class="lp-label">Général</div>
+      ${row('home', 'box', 'Accueil')}
+      <div class="lp-label">Catégories</div>
+      ${cats.map(crow).join('')}
+      <div class="lp-label">Mon compte</div>
       ${row('cart', 'cart', 'Panier', `<span class="n" id="cartBadge" style="${cartCount() ? '' : 'display:none'}">${cartCount()}</span>`)}
       ${S.data.wheel ? row('wheel', 'gift', 'Roulette du jour', S.data.wheel.left > 0 ? '<span class="n">1</span>' : '') : ''}
       ${row('history', 'hist', 'Historique')}
@@ -206,7 +207,7 @@ function render() {
   else if (S.view === 'admin' && S.data.staff) main = viewAdmin();
   else main = S.cat === 'daily' ? viewDaily() : viewShop();
   $root.classList.add('edrp');
-  $root.innerHTML = topnav(cats) + leftPanel() + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
+  $root.innerHTML = topnav(cats) + leftPanel(cats) + `<section class="main">${main}</section>` + (S.paying ? payOverlay() : '') + gestionBtn();
 }
 
 function viewHome(cats) {
